@@ -1,0 +1,11 @@
+C++0x implemented features for 'g++':
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/auto.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/explicit_override.cpp: Fail
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/foreach.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/lambda.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/noimpl.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/nullptr.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/scoped_enum.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/static_assert.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/strings.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/unordered_map.cpp: Success

@@ -1,0 +1,6 @@
+c : 300 ms
+
+cpp :
+    de base : 350 ms
+    avec les tableaux en static : 320 ms
+    tout en static : 315 ms

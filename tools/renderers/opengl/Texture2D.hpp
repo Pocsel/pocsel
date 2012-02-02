@@ -1,0 +1,47 @@
+#ifndef __TOOLS_RENDERERS_OPENGL_TEXTURE2D_HPP__
+#define __TOOLS_RENDERERS_OPENGL_TEXTURE2D_HPP__
+
+#include <string>
+
+#include "tools/Color.hpp"
+#include "tools/Vector2.hpp"
+
+namespace Tools { namespace Renderers {
+
+    class GLRenderer;
+
+    namespace OpenGL {
+
+    class Texture2D : public ITexture2D
+    {
+    private:
+        GLRenderer& _renderer;
+        GLuint _id;
+        int _bindId;
+        Vector2u _size;
+        bool _hasAlpha;
+
+    public:
+        Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0));
+        Texture2D(GLRenderer& renderer, std::string const& imagePath);
+        virtual ~Texture2D();
+
+        virtual void Bind();
+        virtual void Unbind();
+
+        GLuint GetID() const { return this->_id; }
+        int GetBindID() const { return this->_bindId; }
+
+        virtual Vector2u const& GetSize() const { return this->_size; }
+        virtual bool HasAlpha() const { return this->_hasAlpha; }
+        virtual void SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter);
+
+    private:
+        void _InitDevIL();
+        void _FinishLoading(unsigned int ilID);
+        void _FinishLoading(GLint internalFormat, GLenum format, GLvoid const* data);
+    };
+
+}}}
+
+#endif

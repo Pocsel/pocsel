@@ -1,0 +1,10 @@
+C++0x implemented features for 'cl' (vs2010):
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/auto.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/explicit_override.cpp: Fail
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/foreach.cpp: Fail
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/lambda.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/noimpl.cpp: Fail
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/nullptr.cpp: Fail
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/scoped_enum.cpp: Fail
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/static_assert.cpp: Success
+  - /home/hotgloupi/sandbox/trollcube/tests/c++0x/unordered_map.cpp: Success

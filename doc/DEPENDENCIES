@@ -1,0 +1,8 @@
+cmake
+build-essential
+libboost-all-dev (Boost license - cool)
+libglew1.5-dev (the Modified BSD License, the Mesa 3-D License (MIT License), and the Khronos License (MIT License) - cool enfin pas sur)
+libsqlite3-dev (public domain - super cool)
+libdevil-dev (LGPL - cool)
+libfreetype2-dev (FreeType License, bsd-style - cool)
+libsdl1.2-dev

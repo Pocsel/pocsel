@@ -1,0 +1,90 @@
+
+* updater en qt (avec webkit pour les patchnotes) qui se log en https sur une url qui ne changera jamais
+    desactivable pour redemander un dl de l'updater (devra etre rare)
+
+* prevision botnet
+
+* thread possible dans le client mais totalement non recommande
+
+* bandes noires pour un fov reglable avec + et -
+
+* stackage facile avec ctrl+click ou autre
+
+* emulation java (checkbox pour lagger)
+
+* pas de detection de cheat mais eventuellement un anti flood
+
+* objectifs
+    arbre
+    marcher
+    casser cube
+    spawner item
+    events sur le serveur
+
+* par item, une classe pour le serveur, une classe pour le client
+    l'item du client recoi du serveur des events "generiques" geres differement par item
+    l'item du serveur interagi avec les autres items en generant/recevant des events puis provoque l'envoi d'un event au client
+
+* proposition console:
+    - deux onglets un client, un serveur (un tous + chat général ?)
+    - une seule text box
+    - avec un début de BNF :
+    ---- Règles terminales
+        SP ::= ' ' | '\t'
+        LF ::= '\n' | "\r\n" | '\r'
+        WS ::= SP | LF
+        Apha ::= r[a-zA-Z]
+        Num ::= r[0-9]
+        AlphaNum ::= Alpha | Num
+
+    ---- Langage :
+        Lang ::= CommandLine*
+        CommandLine ::= WS* Command [ [SP* LF] | EOF ]
+        Command ::= ServerCommand | ClientCommand
+
+        ServerCommand ::= '/' Expression
+        ClientCommand ::= Expression
+
+        Expression ::= [ReadVar | WriteVar | CallLuaFunction | LuaExec]
+        ReadVar ::= Var
+        WriteVar ::= Var SP* '=' SP* Value
+
+        # appeler une fonction lua
+        # sans utiliser la notation (), genre
+        # $> /ban carlito12 "no valid adaptor"
+        # carlito12 has been banned (reason: no valid adaptor)
+
+        CallLuaFunction ::= FunctionName [ SP+ Param ]*
+
+        # le reste, c'est du lua
+        LuaExec ::= ! [ ReadVar | WriteVar ] EOF
+
+        Var ::= ClientVar | ServerVar
+        ClientVar ::= "cl" VarName
+        ServerVar ::= "sv" VarName
+        Param ::= VarName | Value
+
+        VarName ::= Alpha AlphaNum*
+        Value ::= Int | Float | String | Char | RawLuaExpression
+        RawLuaExpression ::= "${" Block+ '}'                        # Genre clCurrentTime = ${GetTime()}
+        Block ::= r[^{}] | [ '{' r[^{}]+ | Block '}' ]
+
+    - La complétion !
+    - Binder du C++ ?
+    - une vignette active QWebViewPower2000
+
+
+* Proposition Interaction Lua / La vie
+    - Une classe Environ chargée de :
+        - Sauvegarder toutes les variables, y lire, y écrire
+        - Avec backend sql optionnel
+        - Etre utilisable pour fabriquer des instances d'interpréteurs, genre
+                Environ::PrepareLua(LuaInterpretor&, LuaInterpretorType);
+            avec
+                enum LuaInterpretorType {Admin, Manager, User, Guest};
+        - appeler des callbacks en cas d'évènements (OnChange(), OnNewVar(), ...)
+
+    - Deux classes dérivées client / serveur ?
+    - Une factory d'interpreteurs
+    - l'API exposée au scripts Lua, par type ? dans une conf ?
+

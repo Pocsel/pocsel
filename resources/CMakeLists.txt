@@ -1,0 +1,5 @@
+set(resources_dir "${CMAKE_CURRENT_SOURCE_DIR}")
+set(world_path "${trollcube_server_dir}/worlds/test_world/test_world.tcworld")
+set(cache_dir "${trollcube_client_dir}/cache")
+set(bindings_path "${trollcube_client_dir}/bindings.lua")
+configure_file("resources.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/resources.hpp")
