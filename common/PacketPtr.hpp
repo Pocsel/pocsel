@@ -5,9 +5,9 @@
 
 namespace Common {
 
-class Packet;
+    class Packet;
 
-typedef std::unique_ptr<Packet> PacketPtr;
+    typedef std::unique_ptr<Packet> PacketPtr;
 
 }
 

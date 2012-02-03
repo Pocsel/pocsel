@@ -1,4 +1,4 @@
-#ifndef  __COMMON_RESOURCE_HPP__
+#ifndef __COMMON_RESOURCE_HPP__
 #define __COMMON_RESOURCE_HPP__
 
 #include <cstring>
