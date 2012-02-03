@@ -1,5 +1,5 @@
 
-file(MAKE_DIRECTORY "${trollcube_client_dir}/cache/")
+file(MAKE_DIRECTORY "${pocsel_client_dir}/cache/")
 
 set(ALL_INCLUDES
     ${CMAKE_SOURCE_DIR}
@@ -37,11 +37,11 @@ target_link_libraries(client
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
-set(binds_file "${trollcube_client_dir}/binds.lua")
+set(binds_file "${pocsel_client_dir}/binds.lua")
 
 add_custom_command(
     OUTPUT "${binds_file}"
-    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/bindings.lua" "${trollcube_client_dir}"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/bindings.lua" "${pocsel_client_dir}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/bindings.lua"
 )
 

@@ -3,7 +3,7 @@ file(GLOB_RECURSE sdk_files "sdk/*.py")
 # base plugin
 
 set(plugin_file "base.tcplug")
-set(plugin_dest_dir "${trollcube_server_dir}/plugins/")
+set(plugin_dest_dir "${pocsel_server_dir}/plugins/")
 file(MAKE_DIRECTORY ${plugin_dest_dir})
 set(plugin_dest_file "${plugin_dest_dir}${plugin_file}")
 set(plugin_source_dir "${CMAKE_CURRENT_SOURCE_DIR}/plugins/base/")
@@ -26,7 +26,7 @@ add_custom_target(base_tcplug ALL DEPENDS "${plugin_dest_file}") # "${plugin_cre
 # test_world
 
 set(world_file "test_world.tcworld")
-set(world_dest_dir "${trollcube_server_dir}/worlds/test_world/")
+set(world_dest_dir "${pocsel_server_dir}/worlds/test_world/")
 file(MAKE_DIRECTORY ${world_dest_dir})
 set(world_dest_file "${world_dest_dir}${world_file}")
 set(world_source_dir "${plugin_dest_dir}")

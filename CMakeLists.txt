@@ -63,10 +63,10 @@ include_directories(
     ${ALL_INCLUDES}
 )
 
-set(trollcube_binaries_dir "${CMAKE_BINARY_DIR}/trollcube/binaries")
-set(trollcube_server_dir "${CMAKE_BINARY_DIR}/trollcube/server")
-set(trollcube_client_dir "${CMAKE_BINARY_DIR}/trollcube/client")
-set(EXECUTABLE_OUTPUT_PATH ${trollcube_binaries_dir})
+set(pocsel_binaries_dir "${CMAKE_BINARY_DIR}/pocsel/binaries")
+set(pocsel_server_dir "${CMAKE_BINARY_DIR}/pocsel/server")
+set(pocsel_client_dir "${CMAKE_BINARY_DIR}/pocsel/client")
+set(EXECUTABLE_OUTPUT_PATH ${pocsel_binaries_dir})
 
 macro(enable_pch target)
     list(REMOVE_ITEM ${target}_src precompiled.cpp)
