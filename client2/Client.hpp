@@ -5,11 +5,17 @@
 
 namespace Client {
 
+    class IWindow;
+
     class Client :
         private boost::noncopyable
     {
+        private:
+            IWindow* _window;
+
         public:
             Client(int ac, char** av);
+            ~Client();
             int Run();
     };
 
