@@ -1,11 +1,10 @@
-
-#include "opengl.hpp"
-
 #include <iostream>
 #include <IL/il.h>
 
 #include "tools/renderers/GLRenderer.hpp"
-#include "Texture2D.hpp"
+
+#include "tools/renderers/opengl/opengl.hpp"
+#include "tools/renderers/opengl/Texture2D.hpp"
 
 
 namespace Tools { namespace Renderers { namespace OpenGL {

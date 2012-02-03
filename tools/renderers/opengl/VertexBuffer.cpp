@@ -1,8 +1,7 @@
-
 #include <cassert>
 
-#include "opengl.hpp"
-#include "VertexBuffer.hpp"
+#include "tools/renderers/opengl/opengl.hpp"
+#include "tools/renderers/opengl/VertexBuffer.hpp"
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
@@ -58,7 +57,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 GLCHECK(glVertexPointer(it->nbElements, it->type, this->_stride, it->offset));
                 GLCHECK(glEnableClientState(GL_VERTEX_ARRAY));
                 break;
-            
+
             case VertexAttributeUsage::Normal:
                 GLCHECK(glNormalPointer(it->type, this->_stride, it->offset));
                 GLCHECK(glEnableClientState(GL_NORMAL_ARRAY));
@@ -94,7 +93,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             case VertexAttributeUsage::Position:
                 GLCHECK(glDisableClientState(GL_VERTEX_ARRAY));
                 break;
-            
+
             case VertexAttributeUsage::Normal:
                 GLCHECK(glDisableClientState(GL_NORMAL_ARRAY));
                 break;
