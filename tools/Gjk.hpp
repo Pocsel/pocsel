@@ -3,7 +3,7 @@
 
 #include <boost/thread/tss.hpp>
 
-#include "Vector3.hpp"
+#include "tools/Vector3.hpp"
 
 namespace Tools {
 
@@ -46,7 +46,6 @@ namespace Tools {
         bool _UpdateSimplex(int newIndex);
         Vector3d _ComputeClosestPoint();
         bool _IsSatisfiesRule(int xBits, int yBits);
-
     };
 
 }

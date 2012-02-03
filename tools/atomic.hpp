@@ -25,8 +25,7 @@
 #pragma warning(disable: 4146)
 #endif
 
-namespace std
-{
+namespace std {
 
     static inline void full_fence(void)
     {

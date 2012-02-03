@@ -4,7 +4,7 @@
 #include <cassert>
 #include <functional>
 
-#include "AbstractMessageQueue.hpp"
+#include "tools/AbstractMessageQueue.hpp"
 
 namespace Tools {
 
@@ -163,6 +163,7 @@ namespace Tools {
         {
         }
     };
+
 }
 
 

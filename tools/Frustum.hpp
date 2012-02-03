@@ -1,10 +1,10 @@
 #ifndef __TOOLS_FRUSTUM_HPP__
 #define __TOOLS_FRUSTUM_HPP__
 
-#include "AbstractCollider.hpp"
-#include "Matrix4.hpp"
-#include "Plane.hpp"
-#include "Vector3.hpp"
+#include "tools/AbstractCollider.hpp"
+#include "tools/Matrix4.hpp"
+#include "tools/Plane.hpp"
+#include "tools/Vector3.hpp"
 
 namespace Tools {
 

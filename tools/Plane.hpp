@@ -1,8 +1,8 @@
 #ifndef __TOOLS_PLANE_HPP__
 #define __TOOLS_PLANE_HPP__
 
-#include "AbstractCollider.hpp"
-#include "Vector3.hpp"
+#include "tools/AbstractCollider.hpp"
+#include "tools/Vector3.hpp"
 
 namespace Tools {
 

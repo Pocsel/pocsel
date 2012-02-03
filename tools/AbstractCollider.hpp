@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include "Vector3.hpp"
+#include "tools/Vector3.hpp"
 
 namespace Tools {
 

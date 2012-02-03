@@ -2,8 +2,8 @@
 #define __TOOLS_VECTOR2_HPP__
 
 #include <cmath>
-#include "sqrt.hpp"
-#include "ToString.hpp"
+#include "tools/sqrt.hpp"
+#include "tools/ToString.hpp"
 
 namespace Tools {
 

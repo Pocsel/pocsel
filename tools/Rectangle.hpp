@@ -1,7 +1,7 @@
 #ifndef __TOOLS_RECTANGLE_HPP__
 #define __TOOLS_RECTANGLE_HPP__
 
-#include "Vector2.hpp"
+#include "tools/Vector2.hpp"
 
 namespace Tools {
 

@@ -2,8 +2,8 @@
 #define __TOOLS_MATRIX4_HPP__
 
 #include <cmath>
-#include "sqrt.hpp"
-#include "Vector3.hpp"
+#include "tools/sqrt.hpp"
+#include "tools/Vector3.hpp"
 
 namespace Tools {
 

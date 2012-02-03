@@ -3,7 +3,6 @@
 
 #include <functional>
 #include <queue>
-
 #include <boost/thread.hpp>
 
 namespace Tools {

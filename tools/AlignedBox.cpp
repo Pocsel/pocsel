@@ -1,7 +1,6 @@
-
-#include "AlignedBox.hpp"
-#include "Frustum.hpp"
-#include "Plane.hpp"
+#include "tools/AlignedBox.hpp"
+#include "tools/Frustum.hpp"
+#include "tools/Plane.hpp"
 
 namespace Tools {
 

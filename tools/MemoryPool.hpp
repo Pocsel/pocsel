@@ -3,8 +3,7 @@
 
 #include <list>
 
-namespace Tools
-{
+namespace Tools {
 
     template<class T>
     class MemoryPool

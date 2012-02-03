@@ -1,13 +1,13 @@
 #ifndef __TOOLS_MESSAGEQUEUEMANAGER_HPP__
 #define __TOOLS_MESSAGEQUEUEMANAGER_HPP__
 
-#include "atomic.hpp"
 #include <functional>
 #include <set>
 
 #include <boost/thread.hpp>
 
-#include "AbstractMessageQueue.hpp"
+#include "tools/atomic.hpp"
+#include "tools/AbstractMessageQueue.hpp"
 
 namespace Tools {
 
