@@ -120,7 +120,7 @@ namespace Client {
             {
                 boost::unique_lock<boost::mutex> lock(this->_mutex);
                 auto tuple = this->_outQueue.front();
-                delete std::get<0>(tuple);
+                Tools::Delete(std::get<0>(tuple));
                 cb = std::get<1>(tuple);
                 this->_outQueue.pop();
                 if (this->_outQueue.empty())

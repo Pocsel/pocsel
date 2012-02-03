@@ -2,8 +2,8 @@
 #define __COMMON_POSITION_HPP__
 
 #include "tools/Vector3.hpp"
-#include "constants.hpp"
-#include "BaseChunk.hpp"
+#include "common/constants.hpp"
+#include "common/BaseChunk.hpp"
 
 namespace Common {
 

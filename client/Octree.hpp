@@ -47,7 +47,7 @@ namespace Client {
             ~Octree()
             {
                 //for (unsigned int i = 0 ; i < 16 ; ++i)
-                //    delete this->_roots[i];
+                //    Tools::Delete(this->_roots[i]);
             }
 
             void InsertChunk(ChunkType& chunk)

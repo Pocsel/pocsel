@@ -34,7 +34,7 @@ namespace Client { namespace Gui { namespace Primitives {
     }
     Chunk::MeshIndices::~MeshIndices()
     {
-        delete this->indices;
+        Tools::Delete(this->indices);
     }
     Chunk::MeshIndices& Chunk::MeshIndices::operator =(Chunk::MeshIndices&& obj)
     {
@@ -56,7 +56,7 @@ namespace Client { namespace Gui { namespace Primitives {
     {
         --nbChunks;
         //for (auto it = this->_indices.begin(), ite = this->_indices.end() ; it != ite ; ++it)
-        //    delete *it;
+        //    Tools::Delete(*it);
     }
 
     void Chunk::Refresh(Tools::IRenderer& renderer, World& world)
@@ -331,7 +331,7 @@ namespace Client { namespace Gui { namespace Primitives {
             Chunk::_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 3); // Normales
             Chunk::_vertexBuffer->SetData(Common::ChunkSize3 * sizeof(faceIndices) / sizeof(faceIndices[0]) * 6 *sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);
 
-            delete [] vertices;
+            Tools::DeleteTab(vertices);
         }
 
         {
@@ -403,7 +403,7 @@ namespace Client { namespace Gui { namespace Primitives {
                 (*Chunk::_texBuffers)[type]->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // position
                 (*Chunk::_texBuffers)[type]->SetData(Common::ChunkSize3 * sizeof(coords) / sizeof(coords[0]) * 2 * sizeof(*vertices), vertices, Tools::Renderers::VertexBufferUsage::Static);
             }
-            delete [] vertices;
+            Tools::DeleteTab(vertices);
         }
 
         Chunk::_timer = new Tools::Timer();

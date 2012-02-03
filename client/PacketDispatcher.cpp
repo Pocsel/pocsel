@@ -29,7 +29,7 @@ namespace Client {
         boost::unique_lock<boost::mutex> lock(this->_mutex);
         while (this->_toDispatch.size())
         {
-            delete this->_toDispatch.front();
+            Tools::Delete(this->_toDispatch.front());
             this->_toDispatch.pop();
         }
     }
@@ -74,7 +74,7 @@ namespace Client {
             if (type != Protocol::ServerToClient::Chunk)
                 std::cout << "PACKET >>> " << Tools::ToString(type) << " <<< RECEIVED\n";
             callback->second(*p);
-            delete p;
+            Tools::Delete(p);
         }
     }
 

@@ -4,13 +4,13 @@ file(MAKE_DIRECTORY "${pocsel_client_dir}/cache/")
 file(GLOB_RECURSE client_src "*.[ch]pp")
 
 set(src
-	${client_src}
-	${common_src}
-	${tools_base_src}
-	${tools_database_src}
-	${tools_gui_src}
-	${tools_lua_src}
-	${tools_renderers_src}
+    ${client_src}
+    ${common_src}
+    ${tools_base_src}
+    ${tools_database_src}
+    ${tools_gui_src}
+    ${tools_lua_src}
+    ${tools_renderers_src}
 )
 
 CreateGroups("${src}")
@@ -22,9 +22,9 @@ enable_pch(client)
 target_link_libraries(client
     ${Boost_LIBRARIES} # Utils
     ${CMAKE_THREAD_LIBS_INIT}
-	${SQLITE3_LIBRARIES}
-	${LUA_LIBRARIES}
-	${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} # gui
+    ${SQLITE3_LIBRARIES}
+    ${LUA_LIBRARIES}
+    ${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} # gui
 )
 
 set(binds_file "${pocsel_client_dir}/bindings.lua")
