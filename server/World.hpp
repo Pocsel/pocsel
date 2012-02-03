@@ -34,7 +34,6 @@ namespace Server {
     public:
         World(Tools::Database::IConnectionPool& conn);
         ~World();
-        //size_t Poll();
 
         Map& GetMap(std::string const& name)
         {

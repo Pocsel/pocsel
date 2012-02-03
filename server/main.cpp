@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -49,4 +48,3 @@ int main(int ac, char *av[])
     server = 0;
     return res;
 }
-

@@ -1,14 +1,14 @@
-
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/placeholders.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/bind.hpp>
 
 #include "tools/atomic.hpp"
+
 #include "server/EventManager.hpp"
 
-namespace
-{
+namespace {
+
     struct Event
     {
         boost::asio::deadline_timer timer;
@@ -35,10 +35,11 @@ namespace
         }
     };
     std::atomic<int> Event::count;
+
 }
 
-namespace Server
-{
+namespace Server {
+
     EventManager::EventManager() :
         _ioService(),
         _work(new boost::asio::io_service::work(_ioService))

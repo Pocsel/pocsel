@@ -1,54 +1,56 @@
-
 #include "server/PacketExtractor.hpp"
+
 #include "common/Packet.hpp"
 
-using namespace Server;
+namespace Server {
 
-void PacketExtractor::Login(Common::Packet const& p,
-        Protocol::Version& major,
-        Protocol::Version& minor,
-        std::string& login)
-{
-    p.Read(major);
-    p.Read(minor);
-    p.Read(login);
-}
-
-/**
- * String contenant yalap_a (optimisé)
- */
-void PacketExtractor::Pong(Common::Packet const& p,
-        std::string& str)
-{
-    p.Read(str);
-}
-
-/**
- * (Uint64 chunkId)+
- */
-void PacketExtractor::NeedChunks(Common::Packet const& p,
-        std::list<Chunk::IdType>& Ids)
-{
-    while (p.GetBytesLeft())
+    void PacketExtractor::Login(Common::Packet const& p,
+            Protocol::Version& major,
+            Protocol::Version& minor,
+            std::string& login)
     {
-        static_assert(sizeof(Chunk::IdType) == 8, "faut changer le read64");
-        Ids.push_back(p.Read64());
+        p.Read(major);
+        p.Read(minor);
+        p.Read(login);
     }
-}
 
-/**
- * Uint32 page
- */
-void PacketExtractor::ExtractGetCubeType(Common::Packet const& p, Chunk::CubeType& id)
-{
-    p.Read(id);
-}
+    /**
+     * String contenant yalap_a (optimisé)
+     */
+    void PacketExtractor::Pong(Common::Packet const& p,
+            std::string& str)
+    {
+        p.Read(str);
+    }
 
-void PacketExtractor::ExtractGetResourcesIds(Common::Packet const& p, Uint32& page)
-{
-    p.Read(page);
-}
+    /**
+     * (Uint64 chunkId)+
+     */
+    void PacketExtractor::NeedChunks(Common::Packet const& p,
+            std::list<Chunk::IdType>& Ids)
+    {
+        while (p.GetBytesLeft())
+        {
+            static_assert(sizeof(Chunk::IdType) == 8, "faut changer le read64");
+            Ids.push_back(p.Read64());
+        }
+    }
 
-void PacketExtractor::ExtractGetSpawnPosition(Common::Packet const&)
-{
+    /**
+     * Uint32 page
+     */
+    void PacketExtractor::ExtractGetCubeType(Common::Packet const& p, Chunk::CubeType& id)
+    {
+        p.Read(id);
+    }
+
+    void PacketExtractor::ExtractGetResourcesIds(Common::Packet const& p, Uint32& page)
+    {
+        p.Read(page);
+    }
+
+    void PacketExtractor::ExtractGetSpawnPosition(Common::Packet const&)
+    {
+    }
+
 }
