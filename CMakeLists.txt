@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-project(Trollcube)
+project(Pocsel)
 
 # Changer Debug en Release pour compiler en Release (SANS BLAGUE !!)
 set(CMAKE_BUILD_TYPE Debug)

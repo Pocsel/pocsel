@@ -109,7 +109,7 @@ Settings::Settings(int ac, char* av[]) :
 
     if (vm.count("version"))
     {
-        std::cout << "Trollcube 0.0.1 alpha build 1337 release candidate 42\n";
+        std::cout << "Pocsel 0.0.1 alpha build 1337 release candidate 42\n";
         exit(EXIT_SUCCESS);
     }
 

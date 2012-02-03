@@ -17,7 +17,7 @@ set(plugin_creator "${CMAKE_CURRENT_SOURCE_DIR}/plugin_creator.py")
 
 add_custom_command(
     OUTPUT "${plugin_dest_file}"
-    COMMAND python2 "${plugin_creator}" --fullname "Trollcube official base plugin" --identifier "base" "${plugin_source_dir}" "${plugin_dest_dir}"
+    COMMAND python2 "${plugin_creator}" --fullname "Pocsel official base plugin" --identifier "base" "${plugin_source_dir}" "${plugin_dest_dir}"
     DEPENDS "${plugin_creator}" ${plugin_source_files} ${sdk_files}
 )
 add_custom_target(base_tcplug ALL DEPENDS "${plugin_dest_file}") # "${plugin_creator}" ${plugin_source_files})

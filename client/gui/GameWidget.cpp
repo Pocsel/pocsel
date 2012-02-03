@@ -98,7 +98,7 @@ namespace Client { namespace Gui {
             std::sin(totalTimer.GetElapsedTime() * -0.0001f),
             1
         );
-        font.Render(r, c, "TROLLCUBE. 0123456789ий\"за", true);
+        font.Render(r, c, "POCSEL. 0123456789ий\"за", true);
 
         r.EndDraw();
 
