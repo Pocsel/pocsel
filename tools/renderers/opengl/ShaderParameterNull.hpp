@@ -1,6 +1,7 @@
 #ifndef __TOOLS_RENDERERS_OPENGL_SHADERPARAMETER_HPP__
 #define __TOOLS_RENDERERS_OPENGL_SHADERPARAMETER_HPP__
 
+#include <stdexcept>
 #include <string>
 
 #include "tools/IRenderer.hpp"
@@ -12,7 +13,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     class ShaderParameterNull : public IShaderParameter
     {
     public:
-        virtual std::string const& GetIdentifier() const { return "<null>"; }
+        virtual std::string const& GetIdentifier() const { throw std::runtime_error("Don't call GetIdentifier()."); }
         virtual void Set(bool) {}
         virtual void Set(int) {}
         virtual void Set(float) {}
