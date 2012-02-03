@@ -72,66 +72,6 @@ namespace Tools {
         return this->_corners[num];
     }
 
-    bool Frustum::Intersects(AlignedBox const& box) const
-    {
-        Gjk& gjk = Gjk::GetInstance();
-        gjk.Reset();
-        Vector3d closestPoint(this->_corners[0] - box.GetMin());
-        if (closestPoint.GetMagnitudeSquared() < 1E-05f)
-            closestPoint = this->_corners[0] - box.GetMax();
-        double num = std::numeric_limits<double>::max();
-        while (true)
-        {
-            Vector3d vector(-closestPoint);
-            Vector3d vector2(this->SupportMapping(vector));
-            Vector3d vector3(box.SupportMapping(closestPoint));
-            Vector3d vector4(vector2 - vector3);
-            double num2 = Vector3d::Dot(closestPoint, vector4);
-            if (num2 > 0)
-                return false;
-            gjk.AddSupportPoint(vector4);
-            closestPoint = gjk.GetClosestPoint();
-            double num3 = num;
-            num = closestPoint.GetMagnitudeSquared();
-            if (num3 - num <= 1E-05f * num3)
-                return false;
-            double num4 = 4E-05f * gjk.GetMaxLengthSquared();
-            if (gjk.IsFullSimplex() || num < num4)
-                return true;
-        }
-    }
-
-    bool Frustum::Intersects(Frustum const& frustum) const
-    {
-        Gjk& gjk = Gjk::GetInstance();
-        gjk.Reset();
-        Vector3d closestPoint(this->_corners[0] - frustum._corners[0]);
-        if (closestPoint.GetMagnitudeSquared() < 1E-05f)
-        {
-            closestPoint = this->_corners[0] - frustum._corners[1];
-        }
-        double num = std::numeric_limits<double>::max();
-        while (true)
-        {
-            Vector3d vector(-closestPoint);
-            Vector3d vector2(this->SupportMapping(vector));
-            Vector3d vector3(frustum.SupportMapping(closestPoint));
-            Vector3d vector4(vector2 - vector3);
-            double num2 = Vector3d::Dot(closestPoint, vector4);
-            if (num2 > 0)
-                return false;
-            gjk.AddSupportPoint(vector4);
-            closestPoint = gjk.GetClosestPoint();
-            double num3 = num;
-            num = closestPoint.GetMagnitudeSquared();
-            double num4 = 4E-05f * gjk.GetMaxLengthSquared();
-            if (num3 - num <= 1E-05f * num3)
-                return false;
-            if (gjk.IsFullSimplex() || num < num4)
-                return true;
-        }
-    }
-
     AbstractCollider::IntersectionType Frustum::Contains(Vector3d const& point) const
     {
         for (int i = 0; i < 6; i++)

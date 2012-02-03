@@ -30,9 +30,6 @@ namespace Tools {
 
         Vector3d const* GetCorners() const { return this->_corners; }
 
-        virtual bool Intersects(AlignedBox const& object) const;
-        virtual bool Intersects(Frustum const& object) const;
-
         virtual IntersectionType Contains(Vector3d const& object) const;
         virtual IntersectionType Contains(AlignedBox const& object) const;
         virtual IntersectionType Contains(Frustum const& object) const;

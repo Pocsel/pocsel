@@ -26,11 +26,8 @@ namespace Tools {
 
         bool Intersects(AbstractCollider const& object) const
         {
-            return object.Intersects(*this);
+            return this->Contains(object) != Outside;
         }
-
-        virtual bool Intersects(AlignedBox const& object) const = 0;
-        virtual bool Intersects(Frustum const& object) const = 0;
 
         virtual IntersectionType Contains(AbstractCollider const&) const
         {

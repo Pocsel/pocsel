@@ -26,8 +26,6 @@ namespace Tools {
         void SetMin(Vector3d const& min) { this->_min = min; this->_Update(); }
         void SetMax(Vector3d const& max) { this->_max = max; this->_Update(); }
 
-        virtual bool Intersects(AlignedBox const& object) const;
-        virtual bool Intersects(Frustum const& object) const;
         Plane::IntersectionType Intersects(Plane const& plane) const;
 
         virtual IntersectionType Contains(Vector3d const& object) const;

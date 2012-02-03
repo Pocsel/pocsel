@@ -37,6 +37,12 @@ namespace Tools {
         {
             return a.x*b.x + a.y*b.y + a.z*b.z;
         }
+        template<class Tb, class Tout>
+        static Tout Dot(Vector3<T> const& a, Vector3<Tb> const& b)
+        {
+            return a.x*b.x + a.y*b.y + a.z*b.z;
+        }
+
         static Vector3<T> Cross(Vector3<T> const& a, Vector3<T> const& b)
         {
             Vector3<T> r;
@@ -46,19 +52,11 @@ namespace Tools {
             return r;
         }
 
-        // made by david
-        // à changer ?
-        // pour toute réclamation, dirigez vous vers l
-        static double Dot2(Vector3<double> const& a, Vector3<T> const& b)
-        {
-            return a.x*b.x + a.y*b.y + a.z*b.z;
-        }
-
         Vector3() : x(0), y(0), z(0)
         {
         }
         template<typename Vec2T>
-        Vector3(Vector2<Vec2T> const& vec2, T z = 0) : x(vec2.x), y(vec2.y), z(z)
+        explicit Vector3(Vector2<Vec2T> const& vec2, T z = 0) : x(vec2.x), y(vec2.y), z(z)
         {
         }
         template<typename Vec3T>
@@ -154,11 +152,8 @@ namespace Tools {
         }
     };
 
-    typedef Vector3<float> Vector3f;
-    typedef Vector3<double> Vector3d;
-
     template<typename ValueType, typename VectorType>
-    static Vector3<VectorType> operator *(ValueType value, Vector3<VectorType> const& vector)
+    inline Vector3<VectorType> operator *(ValueType value, Vector3<VectorType> const& vector)
     {
         return Vector3<VectorType>(vector.x * value, vector.y * value, vector.z * value);
     }
@@ -172,6 +167,10 @@ namespace Tools {
         }
     };
 
+    typedef Vector3<int> Vector3i;
+    typedef Vector3<unsigned int> Vector3u;
+    typedef Vector3<float> Vector3f;
+    typedef Vector3<double> Vector3d;
 }
 
 #endif

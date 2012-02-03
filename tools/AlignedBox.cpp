@@ -12,20 +12,6 @@ namespace Tools {
             (v.z >= 0) ? this->_max.z : this->_min.z);
     }
 
-    bool AlignedBox::Intersects(AlignedBox const& box) const
-    {
-        if (this->_max.x < box._min.x || this->_min.x > box._max.x ||
-            this->_max.y < box._min.y || this->_min.y > box._max.y ||
-            this->_max.z < box._min.z || this->_min.z > box._max.z)
-            return false;
-        return true;
-    }
-
-    bool AlignedBox::Intersects(Frustum const& object) const
-    {
-        return object.Intersects(*this);
-    }
-
     Plane::IntersectionType AlignedBox::Intersects(Plane const& plane) const
     {
         Vector3d vector;

@@ -117,7 +117,7 @@ namespace Tools {
     };
 
     template<typename ValueType, typename VectorType>
-    static Vector2<VectorType> operator *(ValueType value, Vector2<VectorType> const& vector)
+    inline Vector2<VectorType> operator *(ValueType value, Vector2<VectorType> const& vector)
     {
         return Vector2<VectorType>(vector.x * value, vector.y * value);
     }
@@ -135,6 +135,7 @@ namespace Tools {
     typedef Tools::Vector2<int> Vector2i;
     typedef Tools::Vector2<unsigned int> Vector2u;
     typedef Tools::Vector2<float> Vector2f;
+    typedef Tools::Vector2<double> Vector2d;
 
 }
 
