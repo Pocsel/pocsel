@@ -1,4 +1,3 @@
-
 file(MAKE_DIRECTORY "${pocsel_client_dir}/cache/")
 
 # Sources
@@ -28,7 +27,7 @@ target_link_libraries(client
 	${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} # gui
 )
 
-set(binds_file "${pocsel_client_dir}/binds.lua")
+set(binds_file "${pocsel_client_dir}/bindings.lua")
 
 add_custom_command(
     OUTPUT "${binds_file}"
@@ -37,4 +36,3 @@ add_custom_command(
 )
 
 add_custom_target(binds ALL DEPENDS "${binds_file}")
-

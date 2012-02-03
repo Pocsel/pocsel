@@ -9,12 +9,7 @@
 SCRIPT="$0"
 SCRIPTDIR=`python -c "import os;print(os.path.abspath(os.path.dirname('$SCRIPT')))"`
 
-if [ -d "$SCRIPTDIR"/gcc/install ]
-then
-        PATH="$SCRIPTDIR/gcc/install/bin":$PATH
-        LD_LIBRARY_PATH="$SCRIPTDIR/gcc/install/lib:$LD_LIBRARY_PATH"
-fi
-
+rm -fvr "$SCRIPTDIR"/build
 mkdir -p "$SCRIPTDIR"/build
 cd "$SCRIPTDIR"/build
 PATH=/usr/lib/ccache:"$PATH" cmake .. || exit 1
@@ -26,4 +21,3 @@ then
 fi
 
 make -j$NB_THREADS
-
