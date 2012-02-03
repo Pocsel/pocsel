@@ -1,11 +1,13 @@
 #include <iostream>
 
-#include "CubeTypeManager.hpp"
-#include "PacketDispatcher.hpp"
-#include "PacketCreator.hpp"
-#include "PacketExtractor.hpp"
-#include "Network.hpp"
+#include "client/CubeTypeManager.hpp"
+#include "client/PacketDispatcher.hpp"
+#include "client/PacketCreator.hpp"
+#include "client/PacketExtractor.hpp"
+#include "client/Network.hpp"
+
 #include "tools/gui/EventManager.hpp"
+
 #include "common/Packet.hpp"
 
 namespace Client {

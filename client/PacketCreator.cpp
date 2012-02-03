@@ -1,5 +1,7 @@
-#include "PacketCreator.hpp"
+#include "client/PacketCreator.hpp"
+
 #include "protocol/protocol.hpp"
+
 #include "common/Packet.hpp"
 
 namespace Client {

@@ -1,11 +1,12 @@
-#include "ResourceManager.hpp"
-#include "CacheDatabaseProxy.hpp"
-#include "ResourceDownloader.hpp"
+#include "client/ResourceManager.hpp"
+#include "client/CacheDatabaseProxy.hpp"
+#include "client/ResourceDownloader.hpp"
+
 #include "tools/IRenderer.hpp"
+
 #include "common/Resource.hpp"
 
-namespace Client
-{
+namespace Client {
 
     ResourceManager::ResourceManager(Tools::Gui::EventManager& eventManager,
             Network& network,

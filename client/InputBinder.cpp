@@ -1,5 +1,6 @@
-
 #include <boost/algorithm/string.hpp>
+
+#include "client/InputBinder.hpp"
 
 #include "tools/gui/EventManager.hpp"
 #include "tools/gui/EventCaster.hpp"
@@ -8,8 +9,6 @@
 #include "tools/gui/events/BindAction.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Bind.hpp"
-
-#include "InputBinder.hpp"
 
 namespace Client {
 

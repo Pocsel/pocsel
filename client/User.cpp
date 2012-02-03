@@ -1,19 +1,17 @@
-
 #include <iostream>
+
+#include "client/User.hpp"
+#include "client/Application.hpp"
+#include "client/Network.hpp"
+#include "client/PacketDispatcher.hpp"
+#include "client/PacketCreator.hpp"
+#include "client/PacketExtractor.hpp"
+#include "client/CacheDatabaseProxy.hpp"
 
 #include "tools/gui/EventManager.hpp"
 #include "common/Packet.hpp"
 
-#include "User.hpp"
-#include "Application.hpp"
-#include "Network.hpp"
-#include "PacketDispatcher.hpp"
-#include "PacketCreator.hpp"
-#include "PacketExtractor.hpp"
-#include "CacheDatabaseProxy.hpp"
-
-namespace Client
-{
+namespace Client {
 
     User::User(Application& app) :
         _app(app),

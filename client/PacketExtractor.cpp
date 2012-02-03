@@ -2,8 +2,9 @@
 #include <stdexcept>
 
 #include "client/PacketExtractor.hpp"
-#include "common/Packet.hpp"
 #include "client/ChunkSerializer.hpp"
+
+#include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/PositionSerializer.hpp"
 
@@ -87,4 +88,5 @@ namespace Client {
     {
         p.Read(pos);
     }
+
 }

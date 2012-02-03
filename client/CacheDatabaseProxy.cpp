@@ -8,13 +8,12 @@
 
 #include "resources/resources.hpp"
 
-#include "Network.hpp"
-#include "PacketCreator.hpp"
-#include "PacketDispatcher.hpp"
-#include "CacheDatabaseProxy.hpp"
+#include "client/Network.hpp"
+#include "client/PacketCreator.hpp"
+#include "client/PacketDispatcher.hpp"
+#include "client/CacheDatabaseProxy.hpp"
 
-namespace Client
-{
+namespace Client {
 
     CacheDatabaseProxy::CacheDatabaseProxy(Network& network, Tools::Gui::EventManager& eventManager) :
         _network(network),

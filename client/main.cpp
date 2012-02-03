@@ -1,7 +1,6 @@
+#include "client/Application.hpp"
 
 #include "tools/gui/Window.hpp"
-
-#include "Application.hpp"
 
 using namespace Client;
 
