@@ -1,13 +1,13 @@
-#ifndef __PROTOCOL_HPP__
-#define __PROTOCOL_HPP__
+#ifndef __PROTOCOL_PROTOCOL_HPP__
+#define __PROTOCOL_PROTOCOL_HPP__
 
 #include "tools/ToString.hpp"
 #include "tools/array_size.hpp"
 #include "tools/enum.hpp"
 #include "tools/ByteArray.hpp"
 
-namespace Protocol
-{
+namespace Protocol {
+
     ENUM Version
     {
         Major = 0,
@@ -119,97 +119,97 @@ namespace Protocol
 
 namespace Tools {
 
-template<> struct ByteArray::Serializer<Protocol::ClientToServer>
-{
-    static void Read(ByteArray const& b, Protocol::ClientToServer& v) // Used by ByteArray::Read<T>(T&)
+    template<> struct ByteArray::Serializer<Protocol::ClientToServer>
     {
-        b.Read((Protocol::ActionType&)v);
-    }
+        static void Read(ByteArray const& b, Protocol::ClientToServer& v) // Used by ByteArray::Read<T>(T&)
+        {
+            b.Read((Protocol::ActionType&)v);
+        }
 
-    static void Write(Protocol::ClientToServer const& v, ByteArray& b) // Used by ByteArray::Write<T>(T const&)
+        static void Write(Protocol::ClientToServer const& v, ByteArray& b) // Used by ByteArray::Write<T>(T const&)
+        {
+            b.Write((Protocol::ActionType)v);
+        }
+    };
+
+    template<> struct ByteArray::Serializer<Protocol::ServerToClient>
     {
-        b.Write((Protocol::ActionType)v);
-    }
-};
+        static void Read(ByteArray const& b, Protocol::ServerToClient& v) // Used by ByteArray::Read<T>(T&)
+        {
+            b.Read((Protocol::ActionType&)v);
+        }
 
-template<> struct ByteArray::Serializer<Protocol::ServerToClient>
-{
-    static void Read(ByteArray const& b, Protocol::ServerToClient& v) // Used by ByteArray::Read<T>(T&)
+        static void Write(Protocol::ServerToClient const& v, ByteArray& b) // Used by ByteArray::Write<T>(T const&)
+        {
+            b.Write((Protocol::ActionType)v);
+        }
+    };
+
+    template<> struct ByteArray::Serializer<Protocol::Version>
     {
-        b.Read((Protocol::ActionType&)v);
-    }
+        static void Read(ByteArray const& b, Protocol::Version& v) // Used by ByteArray::Read<T>(T&)
+        {
+            v = (Protocol::Version) b.Read32();
+        }
 
-    static void Write(Protocol::ServerToClient const& v, ByteArray& b) // Used by ByteArray::Write<T>(T const&)
+        static void Write(Protocol::Version const& v, ByteArray& b) // Used by ByteArray::Write<T>(T const&)
+        {
+            b.Write32((Int32)v);
+        }
+    };
+
+    template<> struct Stringify<Protocol::ClientToServer>
     {
-        b.Write((Protocol::ActionType)v);
-    }
-};
+        static inline std::string MakeString(Protocol::ClientToServer var)
+        {
+            static std::string strings[] = {
+                "Login",
+                "Pong",
+                "NeedChunks",
+                "GetNeededResourceIds",
+                "GetResourceRange",
+                "GetCubeType",
+                "GetSpawnPosition"
+            };
+            static std::string unknown = "Unknown";
 
-template<> struct ByteArray::Serializer<Protocol::Version>
-{
-    static void Read(ByteArray const& b, Protocol::Version& v) // Used by ByteArray::Read<T>(T&)
+            if (((Protocol::ActionType) var) < array_size(strings))
+                return strings[(Protocol::ActionType) var];
+            else
+                return unknown;
+        }
+    };
+
+    template<> struct Stringify<Protocol::ServerToClient>
     {
-        v = (Protocol::Version) b.Read32();
-    }
+        static inline std::string MakeString(Protocol::ServerToClient var)
+        {
+            static std::string strings[] = {
+                "LoggedIn",
+                "Ping",
+                "Chunk",
+                "NeededResourceIds",
+                "ResourceRange",
+                "CubeType",
+                "SpawnPosition"
+            };
+            static std::string unknown = "Unknown";
 
-    static void Write(Protocol::Version const& v, ByteArray& b) // Used by ByteArray::Write<T>(T const&)
+            if ((Protocol::ActionType) var < array_size(strings))
+                return strings[(Protocol::ActionType) var];
+            else
+                return unknown;
+        }
+    };
+
+    template<> struct Stringify<Protocol::Version>
     {
-        b.Write32((Int32)v);
-    }
-};
+        static inline std::string MakeString(Protocol::Version var)
+        {
+            return ToString((int) var);
+        }
+    };
 
-template<> struct Stringify<Protocol::ClientToServer>
-{
-    static inline std::string MakeString(Protocol::ClientToServer var)
-    {
-        static std::string strings[] = {
-            "Login",
-            "Pong",
-            "NeedChunks",
-            "GetNeededResourceIds",
-            "GetResourceRange",
-            "GetCubeType",
-            "GetSpawnPosition"
-        };
-        static std::string unknown = "Unknown";
+}
 
-        if (((Protocol::ActionType) var) < array_size(strings))
-            return strings[(Protocol::ActionType) var];
-        else
-            return unknown;
-    }
-};
-
-template<> struct Stringify<Protocol::ServerToClient>
-{
-    static inline std::string MakeString(Protocol::ServerToClient var)
-    {
-        static std::string strings[] = {
-            "LoggedIn",
-            "Ping",
-            "Chunk",
-            "NeededResourceIds",
-            "ResourceRange",
-            "CubeType",
-            "SpawnPosition"
-        };
-        static std::string unknown = "Unknown";
-
-        if ((Protocol::ActionType) var < array_size(strings))
-            return strings[(Protocol::ActionType) var];
-        else
-            return unknown;
-    }
-};
-
-template<> struct Stringify<Protocol::Version>
-{
-    static inline std::string MakeString(Protocol::Version var)
-    {
-        return ToString((int) var);
-    }
-};
-
-} // !Tools
-
-#endif /* !__PROTOCOL_HPP__ */
+#endif
