@@ -76,7 +76,7 @@ namespace Server {
             ptr->Write(resource.filename);
             ptr->Write(resource.size);
             packetSize -= 2 * sizeof(Uint32) - 2 * sizeof(Uint16);
-            packetSize -= resource.filename.size() - resource.type.size(); // boarg
+            packetSize -= static_cast<Uint32>(resource.filename.size() - resource.type.size()); // boarg
             if (packetSize >= ((Uint16) -1))
                 throw std::runtime_error("overflow");
         }
@@ -105,7 +105,7 @@ namespace Server {
     {
         Common::PacketPtr response(new Common::Packet);
         response->Write(Protocol::ServerToClient::NeededResourceIds);
-        response->Write32(ids.size());
+        response->Write32(static_cast<Uint32>(ids.size()));
         while (offset < ids.size() && offset < 15000)
         {
             response->Write(ids[offset]);

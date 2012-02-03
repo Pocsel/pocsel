@@ -20,8 +20,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         GLCHECK(vShader = glCreateShaderObjectARB(GL_VERTEX_SHADER));
         GLCHECK(fShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER));
 
-        GLint vsLen = vertexShader.length();
-        GLint fsLen = fragmentShader.length();
+        GLint vsLen = static_cast<GLint>(vertexShader.length());
+        GLint fsLen = static_cast<GLint>(fragmentShader.length());
 
         auto temp = vertexShader.c_str();
         GLCHECK(glShaderSourceARB(vShader, 1, &temp, &vsLen));

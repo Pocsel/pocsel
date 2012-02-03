@@ -101,16 +101,16 @@ namespace Tools {
 
     void ByteArray::WriteString(std::string const& val)
     {
-        Uint16 size = val.size();
+        Uint16 size = static_cast<Uint16>(val.size());
         this->Write16(size);
         this->_PrepareWrite(size);
         ::memcpy(this->_data + this->_offset, val.data(), size);
-        this->_offset += val.size();
+        this->_offset += static_cast<Uint16>(val.size());
     }
 
     void ByteArray::WriteData(std::vector<char> const& val)
     {
-        Uint16 size = val.size();
+        Uint16 size = static_cast<Uint16>(val.size());
         this->Write16(size);
         this->_PrepareWrite(size);
         ::memcpy(this->_data + this->_offset, val.data(), size);

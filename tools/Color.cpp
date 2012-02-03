@@ -206,7 +206,7 @@ namespace {
             std::cerr << "Wrong string length " << len << " for " << n << " colors components in \"" << str << "\"." << std::endl;
             return;
         }
-        unsigned int chars_by_colors = len / n;
+        unsigned int chars_by_colors = static_cast<unsigned int>(len / n);
         unsigned int max_val = 1 << (4 * chars_by_colors);
         for (size_t col_idx = 0; col_idx < n; ++col_idx)
         {

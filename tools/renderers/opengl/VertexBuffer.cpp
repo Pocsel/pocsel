@@ -24,7 +24,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         this->_attributes[this->_nbAttrib].offset = reinterpret_cast<GLvoid*>(this->_stride);
         this->_attributes[this->_nbAttrib].nbElements = nbElements;
         this->_attributes[this->_nbAttrib].type = GetTypeFromDataType(type);
-        this->_stride += this->_attributes[this->_nbAttrib].nbElements * DataType::GetSize(type);
+        this->_stride += this->_attributes[this->_nbAttrib].nbElements * static_cast<GLuint>(DataType::GetSize(type));
         this->_nbAttrib++;
     }
 

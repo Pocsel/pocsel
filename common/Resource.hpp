@@ -25,7 +25,7 @@ namespace Common {
                 std::string const& type,
                 std::string const& filename,
                 void const* data,
-                size_t size) :
+                Uint32 size) :
             id(id),
             pluginId(pluginId),
             type(type),

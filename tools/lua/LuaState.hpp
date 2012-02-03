@@ -73,7 +73,7 @@ namespace Tools { namespace Lua {
         void pushnumber(Num val);
         void pushinteger(Int val);
         void pushlightuserdata(void* data);
-        void pushcclosure(Function f, Int upvalues);
+        void pushcclosure(Function f, int upvalues);
         template<typename T> void push(T val);
 
         char const* tostring(Idx idx);

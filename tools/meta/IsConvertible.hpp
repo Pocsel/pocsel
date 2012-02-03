@@ -1,6 +1,10 @@
 #ifndef __TOOLS_META_ISCONVERTIBLE_HPP__
 #define __TOOLS_META_ISCONVERTIBLE_HPP__
 
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#pragma warning(disable: 4800)
+
 namespace Tools { namespace Meta {
 
     template<typename From, typename To> struct IsConvertible
@@ -17,5 +21,7 @@ namespace Tools { namespace Meta {
     };
 
 }}
+
+#pragma warning(pop)
 
 #endif

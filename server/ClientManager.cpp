@@ -65,7 +65,7 @@ namespace Server {
                 this->_game.GetWorld().GetIdentifier(),
                 this->_game.GetWorld().GetFullname(),
                 this->_game.GetWorld().GetVersion(),
-                this->_game.GetWorld().GetCubeTypes().size());
+                static_cast<Common::BaseChunk::CubeType>(this->_game.GetWorld().GetCubeTypes().size()));
         client->SendPacket(std::move(p));
         client->Spawn(this->_game.GetWorld().GetDefaultMap());
     }

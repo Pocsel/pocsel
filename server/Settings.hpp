@@ -5,8 +5,9 @@
 
 namespace Server {
 
-    struct Settings
+    class Settings
     {
+    public:
         std::string worldFile;
         std::string host;
         Uint16      port;

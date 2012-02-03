@@ -60,16 +60,16 @@ Font::Font(std::string const& name, std::size_t fontSize) :
 {
     if (auto error = ::FT_New_Face(ftlibrary.library, name.c_str(), 0, &this->_data->face))
         throw std::runtime_error("FT_New_Face failed (error: " + ToString(error) + ")");
-    ::FT_Set_Char_Size(this->_data->face, fontSize * 64, fontSize * 64, 96, 96);
+    ::FT_Set_Char_Size(this->_data->face, static_cast<FT_F26Dot6>(fontSize * 64), static_cast<FT_F26Dot6>(fontSize * 64), 96, 96);
 }
 
 Font::Font(void const* data, std::size_t dataLength, std::size_t fontSize) :
     _render(&Font::_InitRender),
     _data(new FontData())
 {
-    if (auto error = ::FT_New_Memory_Face(ftlibrary.library, (FT_Byte const*)data, dataLength, 0, &this->_data->face))
+    if (auto error = ::FT_New_Memory_Face(ftlibrary.library, (FT_Byte const*)data, static_cast<FT_Long>(dataLength), 0, &this->_data->face))
         throw std::runtime_error("FT_New_Face failed (error: " + ToString(error) + ")");
-    ::FT_Set_Char_Size(this->_data->face, fontSize * 64, fontSize * 64, 96, 96);
+    ::FT_Set_Char_Size(this->_data->face, static_cast<FT_F26Dot6>(fontSize * 64), static_cast<FT_F26Dot6>(fontSize * 64), 96, 96);
 }
 
 Font::~Font()
@@ -155,8 +155,8 @@ void Font::_InitRender(IRenderer& renderer, Color4f const& color, std::string co
         ::FT_Done_Glyph(glyph);
     }
 
-    int width = 512;
-    int height = NextPowerOfTwo(maxHeight);
+    unsigned int width = 512;
+    unsigned int height = NextPowerOfTwo(maxHeight);
 
     // Fill the bitmap
     std::vector<Uint8> textureData(width * height);

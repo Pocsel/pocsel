@@ -42,7 +42,7 @@ namespace Server {
                 type,
                 filename,
                 data.data,
-                data.size
+                static_cast<Uint32>(data.size)
             );
             std::cout << "Found resource " << id << ": " << filename << ".\n";
         }

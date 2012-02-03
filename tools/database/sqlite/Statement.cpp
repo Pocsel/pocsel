@@ -100,7 +100,7 @@ namespace Tools { namespace Database { namespace Sqlite {
 
     Tools::Database::IStatement& Statement::Bind(Tools::Database::Blob& val)
     {
-        int res = ::sqlite3_bind_blob(this->_stmt, this->_index, val.data, val.size, SQLITE_STATIC);
+        int res = ::sqlite3_bind_blob(this->_stmt, this->_index, val.data, static_cast<int>(val.size), SQLITE_STATIC);
         if (res != SQLITE_OK)
         {
             std::stringstream ss;

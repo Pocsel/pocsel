@@ -96,7 +96,7 @@ namespace Server {
                         this->_offset += this->_toRead;
                         transferredBytes -= this->_toRead;
                         this->_toRead = 0;
-                        packet->SetData((char*)(this->_data + 2), this->_offset - 2);
+                        packet->SetData((char*)(this->_data + 2), static_cast<Uint16>(this->_offset - 2));
                         if (transferredBytes > 0)
                             std::memmove(this->_data, this->_data + this->_offset, transferredBytes);
                         this->_offset = 0;

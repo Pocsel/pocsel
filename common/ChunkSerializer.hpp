@@ -142,7 +142,7 @@ namespace Common {
             {
                 if (types[cubes[i]] == 0xFF)
                 {
-                    types[cubes[i]] = number_of_types;
+                    types[cubes[i]] = static_cast<Uint8>(number_of_types);
                     ttypes[number_of_types++] = cubes[i];
                     if (number_of_types > 16)
                         break;
@@ -156,7 +156,7 @@ namespace Common {
             }
             else if (number_of_types <= 16)
             {
-                p.Write8(number_of_types);
+                p.Write8(static_cast<Uint8>(number_of_types));
                 for (Uint8 i = 0 ; i < number_of_types ; ++i)
                 {
                     static_assert(sizeof(CubeType) == 2, "faut changer le write16");

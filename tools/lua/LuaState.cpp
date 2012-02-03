@@ -178,7 +178,7 @@ APICALL1(void, pushboolean, bool)
 APICALL1(void, pushnumber, Num)
 APICALL1(void, pushinteger, Int)
 APICALL1(void, pushlightuserdata, void*)
-APICALL2(void, pushcclosure, Function, Int)
+APICALL2(void, pushcclosure, Function, int)
 
 APICALL1(char const*, tostring, Idx)
 APICALL1(bool, toboolean, Idx)
