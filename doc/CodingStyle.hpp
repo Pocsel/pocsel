@@ -1,11 +1,11 @@
-#ifndef __TROLLCUBEACTION_TOTO_HPP__
-#define __TROLLCUBEACTION_TOTO_HPP__
+#ifndef __DOC_TOTO_HPP__
+#define __DOC_TOTO_HPP__
 
 #include <string>
 
-#include "Bite.hpp"
+#include "bite.hpp"
 
-namespace TrollcubeAction
+namespace Doc
 {
 
     class Toto
