@@ -27,6 +27,7 @@ find_package(DevIL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(SDL REQUIRED)
 find_package(Lua51 REQUIRED)
+find_package(Sqlite3 REQUIRED)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-std=c++0x) #Enable C++0x mode
