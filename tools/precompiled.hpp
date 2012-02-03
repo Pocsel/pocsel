@@ -40,6 +40,18 @@
 #include <utility>
 #include <vector>
 
+// Boost
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/function.hpp>
+#include <boost/thread.hpp>
+#include <boost/ref.hpp>
+
+// Others
+#include <sqlite3.h>
+
+
 #ifdef WIN32
 // warning this utilisé dans le constructeur
 #pragma warning(disable: 4355)
