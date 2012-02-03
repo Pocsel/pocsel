@@ -1,7 +1,7 @@
 #ifndef __TOOLS_DATABASE_IROW_HPP__
 #define __TOOLS_DATABASE_IROW_HPP__
 
-#include "IValue.hpp"
+#include "tools/database/IValue.hpp"
 
 namespace Tools { namespace Database {
 
