@@ -9,6 +9,7 @@ namespace Client {
         private boost::noncopyable
     {
         public:
+            Client(int ac, char** av);
             int Run();
     };
 

@@ -13,7 +13,7 @@ set(src
 CreateGroups("${src}")
 add_executable(server ${src})
 
-enable_pch(server)
+enable_pch(server src)
 
 target_link_libraries(server
     ${Boost_LIBRARIES}

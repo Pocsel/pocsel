@@ -16,7 +16,7 @@ set(src
 CreateGroups("${src}")
 add_executable(client ${src})
 
-enable_pch(client)
+enable_pch(client src)
 
 #message("-- Link with ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${Boost_LIBRARIES}")
 target_link_libraries(client

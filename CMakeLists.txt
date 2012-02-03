@@ -82,10 +82,10 @@ set(pocsel_server_dir "${CMAKE_BINARY_DIR}/pocsel/server")
 set(pocsel_client_dir "${CMAKE_BINARY_DIR}/pocsel/client")
 set(EXECUTABLE_OUTPUT_PATH ${pocsel_binaries_dir})
 
-macro(enable_pch target)
-    list(REMOVE_ITEM ${target}_src precompiled.cpp)
+macro(enable_pch target target_src)
+    list(REMOVE_ITEM ${target_src} precompiled.cpp)
     set(GCC_PCH_TARGET ${target}_gccPCH_fc)
-    precompiled_header(${target}_src ALL_INCLUDES ${GCC_PCH_TARGET} precompiled ${target})
+    precompiled_header(${target_src} ALL_INCLUDES ${GCC_PCH_TARGET} precompiled ${target})
 
     if(CMAKE_COMPILER_IS_GNUCXX)
         set(CMAKE_CXX_FLAGS "-I ${CMAKE_CURRENT_SOURCE_DIR} --include precompiled.hpp ${CMAKE_CXX_FLAGS}")

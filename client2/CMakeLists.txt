@@ -7,7 +7,7 @@ set(src
 CreateGroups("${src}")
 add_executable(client2 ${src})
 
-enable_pch(client2)
+enable_pch(client2 src)
 
 target_link_libraries(client2
     ${Boost_LIBRARIES}
