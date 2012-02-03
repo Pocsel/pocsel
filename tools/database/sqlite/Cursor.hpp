@@ -5,8 +5,9 @@
 
 #include "tools/database/status.hpp"
 #include "tools/database/ICursor.hpp"
-#include "Statement.hpp"
-#include "Row.hpp"
+
+#include "tools/database/sqlite/Statement.hpp"
+#include "tools/database/sqlite/Row.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {
 
