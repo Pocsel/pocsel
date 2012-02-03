@@ -6,7 +6,7 @@
 
 namespace Tools { namespace Gui {
 
-    WindowImplem::WindowImplem(std::string const& title, size_t width, size_t height) :
+    WindowImplem::WindowImplem(std::string const& title, size_t width, size_t height, bool useShaders) :
         _resizeAtNextFrame(false)
     {
         if (SDL_Init(SDL_INIT_VIDEO))
@@ -23,7 +23,7 @@ namespace Tools { namespace Gui {
         SDL_WM_SetCaption(title.c_str(), 0);
         //SDL_EnableKeyRepeat(130, 35);
         SDL_EnableUNICODE(SDL_ENABLE);
-        this->_renderer = new Renderers::GLRenderer();
+        this->_renderer = new Renderers::GLRenderer(useShaders);
         this->_renderer->Initialise();
     }
 

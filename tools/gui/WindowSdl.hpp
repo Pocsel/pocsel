@@ -19,7 +19,7 @@ namespace Tools { namespace Gui {
         bool _resizeAtNextFrame;
 
     public:
-        WindowImplem(std::string const& title, size_t width, size_t height);
+        WindowImplem(std::string const& title, size_t width, size_t height, bool useShaders);
         virtual ~WindowImplem();
         void Render();
         IRenderer& GetRenderer() { return *this->_renderer; }

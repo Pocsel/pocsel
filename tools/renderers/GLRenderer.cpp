@@ -6,6 +6,7 @@
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/IndexBuffer.hpp"
 #include "tools/renderers/opengl/ShaderProgram.hpp"
+#include "tools/renderers/opengl/ShaderProgramNull.hpp"
 #include "tools/renderers/opengl/Texture2D.hpp"
 #include "tools/renderers/opengl/VertexBuffer.hpp"
 #include "tools/renderers/GLRenderer.hpp"
@@ -23,7 +24,7 @@ namespace Tools { namespace Renderers {
         if (error != GLEW_OK)
             throw std::runtime_error(ToString("glewInit() failed: ") + ToString(glewGetErrorString(error)));
         if (!(GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader))
-            throw std::runtime_error("Shaders not supported!");
+            this->_useShaders = false;
 #ifdef DEBUG
         std::cout << ToString("Glew version: ") + (char const*)glewGetString(GLEW_VERSION) + "\n";
         std::cout << ToString("OpenGL version: ") + (char const*)glGetString(GL_VERSION) + "\n";
@@ -61,7 +62,10 @@ namespace Tools { namespace Renderers {
 
     std::unique_ptr<IShaderProgram> GLRenderer::CreateProgram(std::string const& vertexShader, std::string const& fragmentShader)
     {
-        return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgram(*this, vertexShader, fragmentShader));
+        if (this->_useShaders)
+            return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgram(*this, vertexShader, fragmentShader));
+        else
+            return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramNull(*this));
     }
 
     /*

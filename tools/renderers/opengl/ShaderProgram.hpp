@@ -28,7 +28,7 @@ namespace Tools { namespace Renderers {
             GLuint GetID() const { return this->_id; }
             virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier);
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage);
-            void UpdateParameter(ShaderParameterUsage::Type usage);
+            virtual void UpdateParameter(ShaderParameterUsage::Type usage);
             virtual void Activate();
         };
 

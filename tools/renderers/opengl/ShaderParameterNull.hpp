@@ -1,0 +1,28 @@
+#ifndef __TOOLS_RENDERERS_OPENGL_SHADERPARAMETER_HPP__
+#define __TOOLS_RENDERERS_OPENGL_SHADERPARAMETER_HPP__
+
+#include <string>
+
+#include "tools/IRenderer.hpp"
+
+namespace Tools { namespace Renderers { namespace OpenGL {
+
+    class ShaderProgram;
+
+    class ShaderParameterNull : public IShaderParameter
+    {
+    public:
+        virtual std::string const& GetIdentifier() const { return "<null>"; }
+        virtual void Set(bool) {}
+        virtual void Set(int) {}
+        virtual void Set(float) {}
+        virtual void Set(Color4<float> const&) {}
+        virtual void Set(Vector2<float> const&) {}
+        virtual void Set(Vector3<float> const&) {}
+        virtual void Set(Matrix4<float> const&) {}
+        virtual void Set(ITexture2D&) {}
+    };
+
+}}}
+
+#endif

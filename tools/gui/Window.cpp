@@ -15,9 +15,10 @@ namespace Tools { namespace Gui {
 
 Window::Window(std::string const& title,
                size_t width,
-               size_t height) :
+               size_t height,
+               bool useShaders) :
     _viewport(),
-    _implem(new WindowImplem(title, width, height)),
+    _implem(new WindowImplem(title, width, height, useShaders)),
     _renderer(_implem->GetRenderer()),
     _hasExpose(false),
     _cursorAutoCenter(false),

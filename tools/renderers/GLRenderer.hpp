@@ -34,13 +34,14 @@ namespace Tools { namespace Renderers {
         Matrix4<float> _view;
         Matrix4<float> _projection;
         unsigned int _currentMatrixMode;
+        bool _useShaders;
 
         DrawState _state;
 
-        OpenGL::ShaderProgram* _currentProgram;
+        IShaderProgram* _currentProgram;
 
     public:
-        GLRenderer() : _state(DrawNone), _currentProgram(0) {}
+        GLRenderer(bool useShaders = true) : _useShaders(useShaders), _state(DrawNone), _currentProgram(0) {}
         virtual ~GLRenderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -91,8 +92,8 @@ namespace Tools { namespace Renderers {
         virtual void SetRasterizationMode(RasterizationMode::Type rasterizationMode);
         void SetMatrixMode(unsigned int mode);
 
-        OpenGL::ShaderProgram& GetCurrentProgram() { return *this->_currentProgram; }
-        void SetCurrentProgram(OpenGL::ShaderProgram& program)
+        IShaderProgram& GetCurrentProgram() { return *this->_currentProgram; }
+        void SetCurrentProgram(IShaderProgram& program)
         {
             this->_currentProgram = &program;
             this->_modelViewProjection = this->_model * this->_view * this->_projection;

@@ -220,6 +220,7 @@ namespace Tools {
 
             virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier) = 0;
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage) = 0;
+            virtual void UpdateParameter(ShaderParameterUsage::Type usage) = 0;
             virtual void Activate() = 0;
 
         protected:

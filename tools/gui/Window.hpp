@@ -26,7 +26,8 @@ namespace Tools { namespace Gui {
     public:
         Window(std::string const& title = "",
                size_t width = 640,
-               size_t height = 480);
+               size_t height = 480,
+               bool useShaders = true);
         virtual ~Window();
 
     public: // getter / setter
