@@ -18,8 +18,15 @@ include(FindLua51)
 
 # Packages
 set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
 find_package(Boost COMPONENTS system filesystem thread date_time regex program_options REQUIRED)
 find_package(Threads)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(DevIL REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(SDL REQUIRED)
+find_package(Lua51 REQUIRED)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-std=c++0x) #Enable C++0x mode
@@ -43,25 +50,31 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_CUSTOM_FLAGS
 
 include_directories(. ${CMAKE_CURRENT_BINARY_DIR})
 
-# Mets les includes où il faut quand il y a besoin, j'ai la flemme de faire la liste maintenant (surtout que sous linux, vous avez tout de manière crade au même endroit -_-)
-# ha ok je viens de comprendre  ...
 set(ALL_INCLUDES
-#    ${CMAKE_SOURCE_DIR}
-#    ${CMAKE_CURRENT_SOURCE_DIR}
-#    ${CMAKE_CURRENT_BINARY_DIR}
-    ${OPENGL_INCLUDE_DIR} #gui + precompiled.hpp
-    ${GLEW_INCLUDE_DIR} #gui + precompiled.hpp
-    ${Boost_INCLUDE_DIR} # le plus chiant => boost::noncopyable souvent utilisé
-#    ${IL_INCLUDE_DIR}
-#    ${FREETYPE_INCLUDE_DIRS}
-    ${SQLITE3_INCLUDE_DIR} # sqlite seulement je crois
-#    ${LUA_INCLUDE_DIR}
-#    ${LUABIND_INCLUDE_DIR}
-    ${SDL_INCLUDE_DIR} #gui seulement je crois
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${Boost_INCLUDE_DIR}
+	# gui
+    ${OPENGL_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIR}
+    ${IL_INCLUDE_DIR}
+    ${FREETYPE_INCLUDE_DIRS}
+	${SDL_INCLUDE_DIR}
+
+    ${SQLITE3_INCLUDE_DIR}
+    ${LUA_INCLUDE_DIR}
 )
 include_directories(
     ${ALL_INCLUDES}
 )
+
+file(GLOB_RECURSE common_src "common/*.[ch]pp")
+file(GLOB tools_base_src "tools/*.[ch]pp" "tools/meta/*.[ch]pp")
+file(GLOB tools_database_src "tools/database/*.[ch]pp" "tools/database/sqlite/*.[ch]pp")
+file(GLOB_RECURSE tools_gui_src "tools/gui/*.[ch]pp")
+file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
+file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
 
 set(pocsel_binaries_dir "${CMAKE_BINARY_DIR}/pocsel/binaries")
 set(pocsel_server_dir "${CMAKE_BINARY_DIR}/pocsel/server")
@@ -81,10 +94,8 @@ macro(enable_pch target)
 endmacro()
 
 
-add_subdirectory(tools)
-add_subdirectory(common)
 add_subdirectory(resources)
 add_subdirectory(sdk)
 add_subdirectory(client)
 add_subdirectory(server)
-add_subdirectory(tests)
+#add_subdirectory(tests)
