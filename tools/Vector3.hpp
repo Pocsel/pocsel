@@ -2,10 +2,10 @@
 #define __TOOLS_VECTOR3_HPP__
 
 #include <cmath>
-#include "sqrt.hpp"
-#include "ToString.hpp"
+#include "tools/sqrt.hpp"
+#include "tools/ToString.hpp"
 
-#include "Vector2.hpp"
+#include "tools/Vector2.hpp"
 
 namespace Tools {
 

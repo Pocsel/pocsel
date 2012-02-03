@@ -3,12 +3,12 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "opengl/opengl.hpp"
-#include "opengl/IndexBuffer.hpp"
-#include "opengl/ShaderProgram.hpp"
-#include "opengl/Texture2D.hpp"
-#include "opengl/VertexBuffer.hpp"
-#include "GLRenderer.hpp"
+#include "tools/renderers/opengl/opengl.hpp"
+#include "tools/renderers/opengl/IndexBuffer.hpp"
+#include "tools/renderers/opengl/ShaderProgram.hpp"
+#include "tools/renderers/opengl/Texture2D.hpp"
+#include "tools/renderers/opengl/VertexBuffer.hpp"
+#include "tools/renderers/GLRenderer.hpp"
 
 #ifdef _MSC_VER
 # pragma warning(disable: 4244)
@@ -256,4 +256,4 @@ namespace Tools { namespace Renderers {
         GLCHECK(glMatrixMode(mode));
     }
 
-} }
+}}

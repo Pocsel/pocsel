@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "IValue.hpp"
+#include "tools/database/IValue.hpp"
 
 namespace Tools { namespace Database {
 

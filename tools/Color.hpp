@@ -71,6 +71,7 @@ namespace Tools {
 
     template struct Color3<float>;
     template struct Color4<float>;
+
 }
 
 #endif

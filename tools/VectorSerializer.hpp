@@ -2,8 +2,8 @@
 #define __TOOLS_VECTORSERIALIZER_HPP__
 
 #include "tools/ByteArray.hpp"
-#include "Vector2.hpp"
-#include "Vector3.hpp"
+#include "tools/Vector2.hpp"
+#include "tools/Vector3.hpp"
 
 namespace Tools {
 

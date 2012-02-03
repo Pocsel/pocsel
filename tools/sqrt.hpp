@@ -10,8 +10,8 @@
 # pragma warning(disable: 4244)
 #endif
 
-namespace std
-{
+namespace std {
+
     inline Int8 sqrt(Int8 val)
     {
         return std::sqrt(static_cast<float>(val));

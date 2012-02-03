@@ -1,9 +1,9 @@
 #ifndef __TOOLS_DATABASE_ICURSOR_HPP__
 #define __TOOLS_DATABASE_ICURSOR_HPP__
 
-#include "IRow.hpp"
-#include "IStatement.hpp"
-#include "RowIterator.hpp"
+#include "tools/database/IRow.hpp"
+#include "tools/database/IStatement.hpp"
+#include "tools/database/RowIterator.hpp"
 
 namespace Tools { namespace Database {
 

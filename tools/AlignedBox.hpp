@@ -1,9 +1,9 @@
 #ifndef __TOOLS_ALIGNEDBOX_HPP__
 #define __TOOLS_ALIGNEDBOX_HPP__
 
-#include "AbstractCollider.hpp"
-#include "Vector3.hpp"
-#include "Plane.hpp"
+#include "tools/AbstractCollider.hpp"
+#include "tools/Vector3.hpp"
+#include "tools/Plane.hpp"
 
 namespace Tools {
 

@@ -1,10 +1,10 @@
 
 #include <limits>
 
-#include "AlignedBox.hpp"
-#include "Frustum.hpp"
-#include "Gjk.hpp"
-#include "Ray.hpp"
+#include "tools/AlignedBox.hpp"
+#include "tools/Frustum.hpp"
+#include "tools/Gjk.hpp"
+#include "tools/Ray.hpp"
 
 namespace Tools {
 

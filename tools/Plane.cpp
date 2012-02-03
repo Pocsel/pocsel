@@ -1,9 +1,8 @@
-
-#include "AlignedBox.hpp"
-#include "Frustum.hpp"
-#include "Plane.hpp"
-#include "Ray.hpp"
-#include "Vector3.hpp"
+#include "tools/AlignedBox.hpp"
+#include "tools/Frustum.hpp"
+#include "tools/Plane.hpp"
+#include "tools/Ray.hpp"
+#include "tools/Vector3.hpp"
 
 namespace Tools {
 

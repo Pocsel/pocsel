@@ -1,7 +1,7 @@
 #ifndef __TOOLS_DATABASE_ICONNECTION_HPP__
 #define __TOOLS_DATABASE_ICONNECTION_HPP__
 
-#include "ICursor.hpp"
+#include "tools/database/ICursor.hpp"
 
 namespace Tools { namespace Database {
 

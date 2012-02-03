@@ -1,8 +1,7 @@
-
 #include <cassert>
 
-#include "opengl.hpp"
-#include "IndexBuffer.hpp"
+#include "tools/renderers/opengl/opengl.hpp"
+#include "tools/renderers/opengl/IndexBuffer.hpp"
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 

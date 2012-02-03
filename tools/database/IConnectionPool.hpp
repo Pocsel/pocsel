@@ -1,9 +1,9 @@
-#ifndef  __TOOLS_DATABASE_ICONNECTIONPOOL_HPP__
+#ifndef __TOOLS_DATABASE_ICONNECTIONPOOL_HPP__
 #define __TOOLS_DATABASE_ICONNECTIONPOOL_HPP__
 
 #include <memory>
 
-#include "IConnection.hpp"
+#include "tools/database/IConnection.hpp"
 
 namespace Tools { namespace Database {
 

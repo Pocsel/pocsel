@@ -4,7 +4,8 @@
 #include <sqlite3.h>
 
 #include "tools/database/IRow.hpp"
-#include "Value.hpp"
+
+#include "tools/database/sqlite/Value.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {
 
