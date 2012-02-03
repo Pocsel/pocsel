@@ -109,7 +109,7 @@ namespace Client {
         }
         else
         {
-            delete this->_connectionPool;
+            Tools::Delete(this->_connectionPool);
             this->_connectionPool = 0;
             std::cerr << "CacheDatabaseProxy::Load: Error: \"" << error << "\"." << std::endl;
         }

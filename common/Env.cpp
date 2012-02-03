@@ -15,7 +15,7 @@ Env::~Env()
 {
     auto it = this->_map.begin(), end = this->_map.end();
     for (; it != end; ++it)
-        delete it->second;
+        Tools::Delete(it->second);
     this->_map.clear();
 }
 

@@ -27,7 +27,7 @@ namespace Common {
         CubeType* _cubes;
 
     public:
-        ~BaseChunk() { delete [] this->_cubes; } // XXX destructor is not virtual
+        ~BaseChunk() { Tools::DeleteTab(this->_cubes); } // XXX destructor is not virtual
         BaseChunk(IdType id) :
             id(id), coords(IdToCoords(id)), _cubes(0)
         {
@@ -93,7 +93,7 @@ namespace Common {
 
         inline void SetCubes(std::unique_ptr<CubeType>& cubes)
         {
-            delete [] this->_cubes;
+            Tools::DeleteTab(this->_cubes);
             this->_cubes = cubes.release();
             assert(this->_cubes != 0 && "Ca va pas non ?");
         }

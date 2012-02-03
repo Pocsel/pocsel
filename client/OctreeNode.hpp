@@ -90,8 +90,8 @@ namespace Client {
             ~OctreeNode()
             {
                 //for (unsigned int i = 0 ; i < 8 ; ++i)
-                //    delete this->_childs[i];
-                delete this->_chunk;
+                //    Tools::Delete(this->_childs[i]);
+                Tools::Delete(this->_chunk);
             }
 
             void InsertChunk(ChunkType& chunk)

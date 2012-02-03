@@ -59,7 +59,7 @@ void Packet::_Resize(Uint16 target)
     std::memcpy(this->_data, tmp, this->_allocSize + 2);
 //    std::memset(this->_data + this->_allocSize, 42, target - this->_allocSize);
     this->_allocSize = target;
-    delete [] tmp;
+    Tools::DeleteTab(tmp);
     this->_data = this->_data + 2;
 }
 
