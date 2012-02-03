@@ -24,7 +24,8 @@ bin
 *.def
 *.so
 *~
-build*
+build
+build_*
 *.swp
 *.manifest
 *.pch

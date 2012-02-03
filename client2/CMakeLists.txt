@@ -2,6 +2,8 @@ file(GLOB_RECURSE client_src "*.[ch]pp")
 
 set(src
 	${client_src}
+    ${tools_base_src}
+    ${tools_renderers_src}
 )
 
 CreateGroups("${src}")

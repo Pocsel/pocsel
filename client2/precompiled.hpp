@@ -3,6 +3,7 @@
 
 // GLEW - OBLIGATOIREMENT en premier !
 #include <GL/glew.h>
+#include <SDL/SDL.h>
 
 #include "tools/precompiled.hpp"
 
