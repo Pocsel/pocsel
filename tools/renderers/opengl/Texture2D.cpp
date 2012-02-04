@@ -17,7 +17,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
         _InitDevIL();
 
-        if(format == PixelFormat::Png)
+        if (format == PixelFormat::Png)
         {
             ILuint ilID;
             ilGenImages(1, &ilID);

@@ -98,7 +98,7 @@ void Font::_InitRenderBase(Font& font, IRenderer& renderer, Color4f const& color
         ""
         "void main() {"
         "   vec4 color = texture2D(u_tex, gl_TexCoord[0].st);"
-        "   color = color.rrrr * u_color.rgba;"
+        "   color = color.rrra * u_color.rgba;"
         "   gl_FragColor = color;"
         "}";
 
@@ -159,7 +159,7 @@ void Font::_InitRender(IRenderer& renderer, Color4f const& color, std::string co
     unsigned int height = NextPowerOfTwo(maxHeight);
 
     // Fill the bitmap
-    std::vector<Uint8> textureData(width * height);
+    std::vector<Uint8> textureData(width * height * 2);
 #ifdef DEBUG
     std::memset(textureData.data(), 64, textureData.size());
 #endif
@@ -191,12 +191,12 @@ void Font::_InitRender(IRenderer& renderer, Color4f const& color, std::string co
 
         if (ry + bitmap_glyph->bitmap.rows + 1 > height)
         {
-            int oldHeight = height;
+            auto oldSize = textureData.size();
             while (ry + bitmap_glyph->bitmap.rows + 1 > height)
                 height *= 2;
-            textureData.resize(width * height);
+            textureData.resize(width * height * 2);
 #ifdef DEBUG
-            std::memset(textureData.data() + width*oldHeight, 64, textureData.size() - width*oldHeight);
+            std::memset(textureData.data() + oldSize, 64, textureData.size() - oldSize);
 #endif
         }
         maxHeight = (bitmap_glyph->bitmap.rows > maxHeight ? bitmap_glyph->bitmap.rows : maxHeight);
@@ -209,14 +209,17 @@ void Font::_InitRender(IRenderer& renderer, Color4f const& color, std::string co
 
         for (int y = 0; y < bitmap.rows; ++y)
             for (int x = 0; x < bitmap.width; ++x)
-                textureData[rx + x + 1 + (ry + y + 1) * width] = bitmap.buffer[x + y * bitmap.width];
+            {
+                textureData[(rx + x + 1 + (ry + y + 1) * width) * 2] = bitmap.buffer[x + y * bitmap.width];
+                textureData[(rx + x + 1 + (ry + y + 1) * width) * 2 + 1] = bitmap.buffer[x + y * bitmap.width];
+            }
         rx += bitmap.width + 2;
 
         ::FT_Done_Glyph(glyph);
     }
 
     this->_texture = renderer.CreateTexture2D(
-        Renderers::PixelFormat::Luminance8,
+        Renderers::PixelFormat::Luminance8Alpha8,
         textureData.size(), textureData.data(),
         Vector2u(width, height)
     ).release();

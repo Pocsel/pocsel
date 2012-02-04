@@ -27,7 +27,9 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     inline GLint GetInternalFormatFromPixelFormat(Renderers::PixelFormat::Type format)
     {
-        return (format & 0x00FF00) >> 8;
+        if (format == PixelFormat::Luminance8Alpha8)
+            return GL_LUMINANCE8_ALPHA8;
+        return (format >> 8) & 0x00FF;
     }
 
     inline GLint GetFormatFromPixelFormat(PixelFormat::Type format)
@@ -38,17 +40,20 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         case 2: return GL_RGB;
         case 3: return GL_RGBA;
         case 4: return GL_LUMINANCE;
+        case 6: return GL_LUMINANCE_ALPHA;
         }
         throw std::runtime_error("Bad PixelFormat ?!");
     }
 
     inline GLint GetTypeFromPixelFormat(PixelFormat::Type format)
     {
-        switch ((format & 0xFF0000) >> 16)
+        switch ((format >> 16) & 0xFF)
         {
         case 1: return GL_UNSIGNED_BYTE;
         case 2: return GL_UNSIGNED_INT_8_8_8_8;
-        case 3: return GL_UNSIGNED_SHORT_4_4_4_4;
+        case 3: return GL_FLOAT;
+        case 4: return GL_UNSIGNED_SHORT_4_4_4_4;
+        case 5: return GL_UNSIGNED_BYTE;
         }
         throw std::runtime_error("Bad PixelFormat ?!");
     }
