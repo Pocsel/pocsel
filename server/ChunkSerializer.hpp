@@ -4,13 +4,15 @@
 #include "server/Chunk.hpp"
 
 #include "tools/ByteArray.hpp"
+
 #include "common/ChunkSerializer.hpp"
 
 namespace Tools {
 
     template<> struct ByteArray::Serializer< ::Server::Chunk > :
         public Common::ChunkSerializer< ::Server::Chunk >
-    {};
+    {
+    };
 
 }
 

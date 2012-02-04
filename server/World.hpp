@@ -1,4 +1,4 @@
-#ifndef  __SERVER_WORLD_HPP__
+#ifndef __SERVER_WORLD_HPP__
 #define __SERVER_WORLD_HPP__
 
 #include <map>
@@ -12,7 +12,6 @@
 
 #include "server/ResourceManager.hpp"
 #include "server/Map.hpp"
-
 
 namespace Server {
 

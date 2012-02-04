@@ -11,8 +11,7 @@
 #include "server/SocketPtr.hpp"
 #include "server/ClientPtr.hpp"
 
-namespace Server
-{
+namespace Server {
 
     class Client;
     class Game;

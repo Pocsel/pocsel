@@ -3,11 +3,12 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace Server
-{
+namespace Server {
+
     class Client;
 
     typedef boost::shared_ptr<Client> ClientPtr;
+
 }
 
 #endif

@@ -4,10 +4,11 @@
 #include <memory>
 #include <boost/asio/ip/tcp.hpp>
 
-namespace Server
-{
+namespace Server {
+
     typedef boost::asio::ip::tcp::socket SocketType;
     typedef std::unique_ptr<SocketType> SocketPtr;
+
 }
 
 #endif

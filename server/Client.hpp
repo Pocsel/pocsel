@@ -15,13 +15,11 @@
 #include "server/ClientConnection.hpp"
 #include "server/Player.hpp"
 
-namespace Common
-{
+namespace Common {
     struct Position;
 }
 
-namespace Server
-{
+namespace Server {
 
     struct Chunk;
 

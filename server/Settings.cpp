@@ -6,7 +6,7 @@
 
 #include "common/constants.hpp"
 
-#include "Settings.hpp"
+#include "server/Settings.hpp"
 
 namespace po = boost::program_options;
 

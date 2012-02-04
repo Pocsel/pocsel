@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "Perlin.hpp"
+
 #include "IRand.hpp"
 
 namespace Server { namespace MapGen {

@@ -9,7 +9,8 @@ namespace Server {
 
     CubeTypeLoader::CubeTypeLoader(ResourceManager& resourceManager) :
         _resourceManager(resourceManager)
-    {}
+    {
+    }
 
     bool CubeTypeLoader::Load(Common::CubeType& descr, std::string const& code)
     {

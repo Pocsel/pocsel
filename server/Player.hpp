@@ -19,4 +19,4 @@ namespace Server {
 
 }
 
-#endif /* !__SERVER_PLAYER_HPP__ */
+#endif

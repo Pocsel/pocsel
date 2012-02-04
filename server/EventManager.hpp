@@ -1,12 +1,11 @@
 #ifndef __EVENTMANAGER_HPP__
-# define __EVENTMANAGER_HPP__
+#define __EVENTMANAGER_HPP__
 
-# include <boost/asio/io_service.hpp>
-# include <boost/function.hpp>
-# include <boost/noncopyable.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
 
-namespace Server
-{
+namespace Server {
 
     class EventManager : private boost::noncopyable
     {

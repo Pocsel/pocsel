@@ -7,8 +7,8 @@
 
 #include "server/SocketPtr.hpp"
 
-namespace Server
-{
+namespace Server {
+
     class Game;
     class Settings;
 
