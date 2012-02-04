@@ -163,8 +163,8 @@ void Font::_InitRender(IRenderer& renderer, Color4f const& color, std::string co
 #ifdef DEBUG
     std::memset(textureData.data(), 64, textureData.size());
 #endif
-    int rx = 0;
-    int ry = 0;
+    unsigned int rx = 0;
+    unsigned int ry = 0;
     maxHeight = 0;
     for (int c = Font::startChar; c <= Font::endChar; c++)
     {

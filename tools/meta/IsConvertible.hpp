@@ -1,9 +1,11 @@
 #ifndef __TOOLS_META_ISCONVERTIBLE_HPP__
 #define __TOOLS_META_ISCONVERTIBLE_HPP__
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4800)
+#endif
 
 namespace Tools { namespace Meta {
 
@@ -22,6 +24,8 @@ namespace Tools { namespace Meta {
 
 }}
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #endif
