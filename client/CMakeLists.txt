@@ -24,7 +24,7 @@ target_link_libraries(client
     ${CMAKE_THREAD_LIBS_INIT}
     ${SQLITE3_LIBRARIES}
     ${LUA_LIBRARIES}
-    ${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} # gui
+    ${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} ${CG_LIBRARY} ${CGGL_LIBRARY} # gui
 )
 
 set(binds_file "${pocsel_client_dir}/bindings.lua")

@@ -13,8 +13,6 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 include(${CMAKE_SOURCE_DIR}/cmake/CustomPrecompiledHeader.cmake )
 include(${CMAKE_SOURCE_DIR}/cmake/CreateGroups.cmake)
-#include(${CMAKE_SOURCE_DIR}/cmake/FindLuabind.cmake)
-include(FindLua51)
 
 # Packages
 set(Boost_USE_STATIC_LIBS ON)
@@ -26,6 +24,7 @@ find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(SDL REQUIRED)
+find_package(Cg REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(Sqlite3 REQUIRED)
 
@@ -56,12 +55,13 @@ set(ALL_INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${Boost_INCLUDE_DIR}
-	# gui
+    # gui
     ${OPENGL_INCLUDE_DIR}
     ${GLEW_INCLUDE_DIR}
     ${IL_INCLUDE_DIR}
     ${FREETYPE_INCLUDE_DIRS}
-	${SDL_INCLUDE_DIR}
+    ${SDL_INCLUDE_DIR}
+    ${CG_INCLUDE_DIR}
 
     ${SQLITE3_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}
