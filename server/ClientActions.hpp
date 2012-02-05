@@ -6,8 +6,7 @@
 #include "server/ClientPtr.hpp"
 #include "server/Chunk.hpp"
 
-namespace Server
-{
+namespace Server {
 
     class Client;
     class Game;
