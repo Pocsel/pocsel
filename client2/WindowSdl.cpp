@@ -3,7 +3,7 @@
 
 namespace Client {
 
-    WindowSdl::WindowSdl()
+    WindowSdl::WindowSdl(Client& client)
     {
         if (SDL_Init(SDL_INIT_VIDEO))
             throw std::runtime_error(std::string("SDL_Init(): ") + SDL_GetError());
