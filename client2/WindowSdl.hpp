@@ -11,6 +11,8 @@ namespace Tools {
 
 namespace Client {
 
+    class Client;
+
     class WindowSdl :
         public IWindow
     {
@@ -19,7 +21,7 @@ namespace Client {
             SDL_Surface* _screen;
 
         public:
-            WindowSdl();
+            WindowSdl(Client& client);
             ~WindowSdl();
             virtual void Render();
     };

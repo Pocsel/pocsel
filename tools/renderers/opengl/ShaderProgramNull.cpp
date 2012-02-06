@@ -13,7 +13,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
     }
 
-    std::unique_ptr<IShaderParameter> ShaderProgramNull::GetParameter(std::string const& identifier)
+    std::unique_ptr<IShaderParameter> ShaderProgramNull::GetParameter(std::string const&)
     {
         return std::unique_ptr<IShaderParameter>(new ShaderParameterNull());
     }
