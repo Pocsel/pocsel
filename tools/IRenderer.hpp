@@ -108,6 +108,7 @@ namespace Tools {
             enum Type
             {
                 ModelViewProjectionMatrix,
+                ModelViewMatrix,
                 ModelMatrix,
                 ViewMatrix,
                 ProjectionMatrix
@@ -222,7 +223,8 @@ namespace Tools {
             virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier) = 0;
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage) = 0;
             virtual void UpdateParameter(ShaderParameterUsage::Type usage) = 0;
-            virtual void Activate() = 0;
+            virtual void BeginPass() = 0;
+            virtual bool EndPass() = 0; // Retourne true s'il n'y a plus de pass a faire sinon false.
 
         protected:
             IShaderProgram() {}
@@ -247,7 +249,7 @@ namespace Tools {
         virtual std::unique_ptr<Renderers::IVertexBuffer> CreateVertexBuffer() = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0)) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath) = 0;
-        virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& vertexShader, std::string const& fragmentShader) = 0;
+        virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect) = 0;
 
         // Drawing
         virtual void Clear(int clearFlags) = 0;

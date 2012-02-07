@@ -49,11 +49,16 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         }
     }
 
-    void ShaderProgramNull::Activate()
+    void ShaderProgramNull::BeginPass()
     {
         this->_renderer.SetCurrentProgram(*this);
 
         this->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
+    }
+
+    bool ShaderProgramNull::EndPass()
+    {
+        return false;
     }
 
 }}}

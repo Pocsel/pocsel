@@ -1,6 +1,7 @@
 #ifndef __TOOLS_RENDERERS_GLRENDERER_HPP__
 #define __TOOLS_RENDERERS_GLRENDERER_HPP__
 
+#include "tools/renderers/opengl/opengl.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/Color.hpp"
 #include "tools/Rectangle.hpp"
@@ -35,6 +36,7 @@ namespace Tools { namespace Renderers {
         Matrix4<float> _projection;
         unsigned int _currentMatrixMode;
         bool _useShaders;
+        CGcontext _cgContext;
 
         DrawState _state;
 
@@ -58,7 +60,7 @@ namespace Tools { namespace Renderers {
         virtual std::unique_ptr<IIndexBuffer> CreateIndexBuffer();
         virtual std::unique_ptr<ITexture2D> CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize);
         virtual std::unique_ptr<ITexture2D> CreateTexture2D(std::string const& imagePath);
-        virtual std::unique_ptr<IShaderProgram> CreateProgram(std::string const& vertexShader, std::string const& fragmentShader);
+        virtual std::unique_ptr<IShaderProgram> CreateProgram(std::string const& effect);
 
         // Drawing
         virtual void Clear(int clearFlags);
@@ -98,6 +100,7 @@ namespace Tools { namespace Renderers {
             this->_currentProgram = &program;
             this->_modelViewProjection = this->_model * this->_view * this->_projection;
         }
+        CGcontext GetCgContext() const { return this->_cgContext; }
     };
 
 }}

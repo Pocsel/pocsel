@@ -1,3 +1,4 @@
+#include <fstream>
 #include <stdexcept>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -7,6 +8,7 @@
 
 #include "tools/ToString.hpp"
 
+#include "resources/resources.hpp"
 #include "Font.hpp"
 
 using namespace Tools;
@@ -83,29 +85,15 @@ Font::~Font()
 void Font::_InitRenderBase(Font& font, IRenderer& renderer, Color4f const& color, std::string const& text, bool invert)
 {
     // XXX init shader
-    char const* vShader =
-        "uniform float u_multZ;"
-        ""
-        "void main() {"
-        "   gl_TexCoord[0] = gl_MultiTexCoord0;"
-        "   vec4 pos = gl_Vertex;"
-        "   pos.z *= u_multZ;"
-        "   gl_Position = gl_ModelViewProjectionMatrix * pos;"
-        "}";
-    char const* fShader =
-        "uniform sampler2D u_tex;"
-        "uniform vec4 u_color;"
-        ""
-        "void main() {"
-        "   vec4 color = texture2D(u_tex, gl_TexCoord[0].st);"
-        "   color = color.rrra * u_color.rgba;"
-        "   gl_FragColor = color;"
-        "}";
+    std::ifstream t(RESOURCES_DIR "/Fonts.cgfx");
+    std::string shader((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 
-    Font::_shader = renderer.CreateProgram(vShader, fShader).release();
-    Font::_shaderTexture = Font::_shader->GetParameter("u_tex").release();
-    Font::_shaderColor = Font::_shader->GetParameter("u_color").release();
-    Font::_shaderMultZ = Font::_shader->GetParameter("u_multZ").release();
+
+    Font::_shader = renderer.CreateProgram(shader).release();
+    Font::_shader->SetParameterUsage("modelViewProjectionMatrix", Renderers::ShaderParameterUsage::ModelViewProjectionMatrix);
+    Font::_shaderTexture = Font::_shader->GetParameter("fontTex").release();
+    Font::_shaderColor = Font::_shader->GetParameter("color").release();
+    Font::_shaderMultZ = Font::_shader->GetParameter("multZ").release();
 
     Font::_renderBase = &Font::_RenderBase;
     Font::_renderBase(font, renderer, color, text, invert);
@@ -333,16 +321,24 @@ void Font::_RealRender(IRenderer& renderer, Color4f const& color, std::string co
     this->_texture->Bind();
     this->_vertexBuffer->Bind();
 
-    Font::_shader->Activate();
     Font::_shaderTexture->Set(*this->_texture);
     Font::_shaderColor->Set(color);
     Font::_shaderMultZ->Set(1.0f);
-    renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, indices);
+
+    do
+    {
+        Font::_shader->BeginPass();
+        renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, indices);
+    } while (Font::_shader->EndPass());
     if (invert)
     {
         Font::_shaderMultZ->Set(-1.0f);
         _InvertIndices(indiceValue * 6 / 4, invertedIndices);
-        renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, invertedIndices);
+        do
+        {
+            Font::_shader->BeginPass();
+            renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, invertedIndices);
+        } while (Font::_shader->EndPass());
     }
     this->_vertexBuffer->Unbind();
     this->_texture->Unbind();
@@ -387,11 +383,15 @@ void Font::RenderTextureDebug(IRenderer& renderer)
     this->_texture->Bind();
     quad.Bind();
 
-    Font::_shader->Activate();
     Font::_shaderTexture->Set(*this->_texture);
     Font::_shaderColor->Set(Color4f(1, 1, 1, 1));
     Font::_shaderMultZ->Set(1.0f);
-    renderer.DrawVertexBuffer(0, 4, Renderers::DrawingMode::TrianglesStrip);
+
+    do
+    {
+        Font::_shader->BeginPass();
+        renderer.DrawVertexBuffer(0, 4, Renderers::DrawingMode::TrianglesStrip);
+    } while (Font::_shader->EndPass());
 
     this->_texture->Unbind();
     quad.Unbind();

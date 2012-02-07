@@ -1,5 +1,7 @@
+#include <fstream>
 #include <iostream>
 
+#include "resources/resources.hpp"
 #include "client/gui/primitives/Chunk.hpp"
 #include "client/Chunk.hpp"
 #include "client/World.hpp"
@@ -184,7 +186,12 @@ namespace Client { namespace Gui { namespace Primitives {
             it->indices->Bind();
 
             Chunk::_textureParameter->Set(*texture);
-            renderer.DrawElements(it->indicesCount, Tools::Renderers::DataType::UnsignedInt, 0);
+
+            do
+            {
+                Chunk::_shader->BeginPass();
+                renderer.DrawElements(it->indicesCount, Tools::Renderers::DataType::UnsignedInt, 0);
+            } while (Chunk::_shader->EndPass());
 
             it->indices->Unbind();
             texture->Unbind();
@@ -199,52 +206,14 @@ namespace Client { namespace Gui { namespace Primitives {
         Chunk::_cubeInfos = cubeInfos.release();
 
         {
-            char const* vShader =
-                "uniform float u_timer;"
-//            "varying vec4 v_pos;"
-                "varying float v_depth;"
-                ""
-                "void main() {"
-                "   gl_TexCoord[0] = gl_MultiTexCoord0;"
-//            "   v_pos = gl_ModelViewProjectionMatrix * gl_Vertex;"
-//            "   gl_Position = gl_ModelViewProjectionMatrix * (gl_Vertex + "
-//            "                 vec4(0, 0.01 * (cos(u_timer / 1900.0) + 1.0) * (v_pos.x * v_pos.x + v_pos.z * v_pos.z) * (1.0 + sin(gl_Vertex.y / 1245.0)), 0, 0));"
-//            "   gl_Position = u_mvp * (gl_Vertex + "
-//            "                 vec4(0, 0.01 * (cos(u_timer / 1900.0) + 1.0) * (v_pos.x * v_pos.x + v_pos.z * v_pos.z) * (1.0 + cos(gl_Vertex.y / 1245.0)), 0, 0));"
-//            "   gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y + (gl_Vertex.x * abs(cos(u_timer / 900.0)) + gl_Vertex.z * abs(cos(u_timer / 800.0))) * 0.5, gl_Vertex.z, gl_Vertex.w);"
-                "   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;"
-                "   v_depth = length((gl_ModelViewMatrix * gl_Vertex).xyz);"
-                "}";
-            char const* fShader =
-                "uniform sampler2D u_tex;"
-//            "uniform float u_density = 0.00125;"
-                "uniform float u_timer;"
-                "varying float v_depth;"
-//            "varying vec4 v_pos;"
-                ""
-                "void main() {"
-                "   vec4 c;"
-                "   float u_density = 0.00125;"
+            std::ifstream t(RESOURCES_DIR "/Chunk.cgfx");
+            std::string shader((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 
-//            "   gl_FragColor = vec4(0.4 * (cos(v_pos.x * 0.02 + v_pos.y * 0.007 + 8 * cos(v_pos.y * 0.003)) + sin(v_pos.z * 0.41)),"
-//            "                       sin(v_pos.y * 0.05 + v_pos.x * 0.11 - v_pos.z * 0.07),"
-//            "                       abs(sin(v_pos.z * 0.03 * v_pos.y + abs(cos(1 / (1 + v_pos.x * v_pos.z * 0.001))))),"
-//            "                       1);"
-//            "   vec4 c = vec4(min(abs(cos(12.0 * fract(v_pos.y))),"
-//            "                       abs(cos(12.0 * fract(v_pos.z)))),"
-//            "                       abs(sin(v_pos.y * 0.05 + v_pos.x * 0.11 - v_pos.z * 0.07)),"
-//            "                       abs(sin(v_pos.z * 0.03 * v_pos.y + abs(cos(1.0 / (1.0 + v_pos.x * v_pos.z * 0.001))))),"
-//            "                       1);"
-
-// and in the fragment shader do
-                "   c = texture2D(u_tex, gl_TexCoord[0].st);"// + 0.42 * (1.0 + cos(u_timer / 700.0)));"// * 0.85 + c * 0.15;"
-                "   float f = exp2( -u_density * u_density * v_depth * v_depth * 1.442695);"
-                "   gl_FragColor = mix(vec4(0.8, 0.8, 0.9, 1), c, vec4(f));"
-                "}";
-
-            Chunk::_shader = renderer.CreateProgram(vShader, fShader).release();
-            Chunk::_textureParameter = Chunk::_shader->GetParameter("u_tex").release();
-            Chunk::_timerParameter = Chunk::_shader->GetParameter("u_timer").release();
+            Chunk::_shader = renderer.CreateProgram(shader).release();
+            Chunk::_shader->SetParameterUsage("mvp", Tools::Renderers::ShaderParameterUsage::ModelViewProjectionMatrix);
+            Chunk::_shader->SetParameterUsage("mv", Tools::Renderers::ShaderParameterUsage::ModelViewMatrix);
+            Chunk::_textureParameter = Chunk::_shader->GetParameter("cubeTexture").release();
+            Chunk::_timerParameter = Chunk::_shader->GetParameter("timer").release();
         }
 
         {
@@ -411,7 +380,6 @@ namespace Client { namespace Gui { namespace Primitives {
 
     void Chunk::Bind()
     {
-        Chunk::_shader->Activate();
         Chunk::_timerParameter->Set((float)((double)Chunk::_timer->GetPreciseElapsedTime() / 1000.0));
         Chunk::_vertexBuffer->Bind();
         nbRenderedChunks = 0;

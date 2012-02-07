@@ -1,0 +1,48 @@
+float4x4 mvp : WorldViewProjection;
+float4x4 mv : WorldView;
+float timer;
+
+float3 fogColor = float3(0.8, 0.8, 0.9);
+float fogDensity = 0.00125f*0.00125f;
+
+sampler2D cubeTexture = sampler_state
+{
+   minFilter = Nearest;
+   magFilter = Nearest;
+};
+
+struct VSout
+{
+   float4 position : POSITION;
+   float2 texCoord : TEXCOORD0;
+   float fogExponent : TEXCOORD1;
+};
+
+VSout vs(in float4 position : POSITION, in float4 texCoord : TEXCOORD0)
+{
+   VSout vout;
+   vout.texCoord = texCoord.xy;
+   vout.position = mul(mvp, position);
+   vout.fogExponent = length(mul(mv, position).xyz);
+   vout.fogExponent *= vout.fogExponent * -fogDensity;
+   return vout;
+}
+
+float4 fs(in VSout v) : COLOR
+{
+   float4 c = tex2D(cubeTexture, v.texCoord);
+   
+   float fogFactor = exp2(v.fogExponent * 1.442695);
+   c.rgb = lerp(fogColor, c.rgb, fogFactor);
+   
+   return c;
+}
+
+technique tech
+{
+   pass p0
+   {
+       VertexProgram = compile glslv vs();
+       FragmentProgram = compile glslf fs();
+   }
+}

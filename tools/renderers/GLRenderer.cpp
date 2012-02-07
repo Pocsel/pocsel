@@ -5,7 +5,7 @@
 
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/IndexBuffer.hpp"
-#include "tools/renderers/opengl/ShaderProgram.hpp"
+#include "tools/renderers/opengl/ShaderProgramCg.hpp"
 #include "tools/renderers/opengl/ShaderProgramNull.hpp"
 #include "tools/renderers/opengl/Texture2D.hpp"
 #include "tools/renderers/opengl/VertexBuffer.hpp"
@@ -16,6 +16,13 @@
 #endif
 
 namespace Tools { namespace Renderers {
+
+    namespace {
+        void ErrCallback()
+        {
+            throw std::runtime_error(cgGetErrorString(cgGetError()));
+        }
+    }
 
     void GLRenderer::Initialise()
     {
@@ -33,10 +40,25 @@ namespace Tools { namespace Renderers {
         GLCHECK(glEnable(GL_BLEND));
         GLCHECK(glEnable(GL_ALPHA_TEST));
         GLCHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        if (this->_useShaders)
+        {
+            this->_cgContext = cgCreateContext();
+            CGCHECK(this->_cgContext);
+            cgGLSetDebugMode(CG_FALSE);
+            cgSetParameterSettingMode(this->_cgContext, CG_DEFERRED_PARAMETER_SETTING);
+            cgGLRegisterStates(this->_cgContext);
+            CGCHECK(this->_cgContext);
+            cgGLSetManageTextureParameters(this->_cgContext, CG_TRUE);
+            CGCHECK(this->_cgContext);
+            cgSetErrorCallback(&ErrCallback);
+        }
     }
 
     void GLRenderer::Shutdown()
     {
+        if (this->_useShaders)
+            cgDestroyContext(this->_cgContext);
         std::cout << "a plu d'opengl\n";
     }
 
@@ -60,10 +82,10 @@ namespace Tools { namespace Renderers {
         return std::unique_ptr<ITexture2D>(new OpenGL::Texture2D(*this, imagePath));
     }
 
-    std::unique_ptr<IShaderProgram> GLRenderer::CreateProgram(std::string const& vertexShader, std::string const& fragmentShader)
+    std::unique_ptr<IShaderProgram> GLRenderer::CreateProgram(std::string const& effect)
     {
         if (this->_useShaders)
-            return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgram(*this, vertexShader, fragmentShader));
+            return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramCg(*this, effect));
         else
             return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramNull(*this));
     }
@@ -106,7 +128,6 @@ namespace Tools { namespace Renderers {
     {
         this->_state = DrawNone;
         this->_currentProgram = 0;
-        GLCHECK(glUseProgramObjectARB(0));
     }
 
     void GLRenderer::BeginDraw(IRenderTarget* target)
@@ -125,7 +146,6 @@ namespace Tools { namespace Renderers {
 
         this->_state = DrawNone;
         this->_currentProgram = 0;
-        GLCHECK(glUseProgramObjectARB(0));
     }
 
     void GLRenderer::DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode)
