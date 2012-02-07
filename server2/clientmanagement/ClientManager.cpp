@@ -1,5 +1,8 @@
 #include "server2/clientmanagement/ClientManager.hpp"
 #include "server2/clientmanagement/Client.hpp"
+#include "server2/clientmanagement/ClientActions.hpp"
+
+#include "common/Packet.hpp"
 
 namespace Server { namespace ClientManagement {
 
@@ -33,22 +36,37 @@ namespace Server { namespace ClientManagement {
 
     void ClientManager::_HandleClientError(Uint32 clientId)
     {
-        std::cout << "Removing client: " << clientId << "\n";
-        if (this->_clients.find(clientId) != this->_clients.end())
+        if (this->_clients.find(clientId) == this->_clients.end())
         {
-            this->_clients[clientId]->Shutdown();
-            Tools::Delete(this->_clients[clientId]);
-            this->_clients.erase(clientId);
+            std::cout << "ClientError: Client " << clientId << " not found.\n";
+            return;
         }
-        else
-        {
-            assert(false && "Ce client a deja ete delete");
-        }
+
+        std::cout << "Removing client " << clientId << "\n";
+        this->_clients[clientId]->Shutdown();
+        Tools::Delete(this->_clients[clientId]);
+        this->_clients.erase(clientId);
     }
 
     void ClientManager::_HandlePacket(Uint32 clientId, Common::Packet* packet)
     {
-        std::cout << "PACKET RECEIVED\n";
+        std::unique_ptr<Common::Packet> autoDelete(packet);
+        if (this->_clients.find(clientId) == this->_clients.end())
+        {
+            std::cout << "HandlePacket: Client " << clientId << " not found.\n";
+            return ;
+        }
+
+        Client& client = *this->_clients[clientId];
+        try
+        {
+            ClientActions::HandleAction(*this, client, *packet);
+        }
+        catch (std::exception& e)
+        {
+            std::cout << "HandlePacket: " << e.what() << " (client " << clientId << ")\n";
+            this->_HandleClientError(clientId);
+        }
     }
 
 }}

@@ -29,7 +29,6 @@ namespace Server { namespace Network {
 
     ClientConnection::~ClientConnection()
     {
-        std::cout << "ClientConnection::~ClientConnection()" <<std::endl;
         this->Shutdown();
         Tools::DeleteTab(this->_data);
         Tools::Delete(this->_socket);
@@ -67,7 +66,7 @@ namespace Server { namespace Network {
                     this->_toRead = Common::ArrayToUint16(this->_data + this->_offset);
                     if (this->_toRead > 0)
                     {
-                        std::cout << "About to read " << this->_toRead << " bytes" << std::endl;
+//                        std::cout << "About to read " << this->_toRead << " bytes" << std::endl;
                         if (this->_toRead > this->_size)
                         {
                             this->_size += this->_toRead * 2;
@@ -86,7 +85,7 @@ namespace Server { namespace Network {
                 {
                     if (transferredBytes >= this->_toRead)
                     {
-                        std::cout << "Finalizing packet with " << this->_toRead << " bytes" << std::endl;
+//                        std::cout << "Finalizing packet with " << this->_toRead << " bytes" << std::endl;
                         Common::Packet* packet = new Common::Packet();
                         packets.push_back(std::unique_ptr< Common::Packet >(packet));
                         this->_offset += this->_toRead;
@@ -99,7 +98,7 @@ namespace Server { namespace Network {
                     }
                     else
                     {
-                        std::cout << "Append to packet " << transferredBytes << " bytes" << std::endl;
+//                        std::cout << "Append to packet " << transferredBytes << " bytes" << std::endl;
                         this->_offset += transferredBytes;
                         this->_toRead -= transferredBytes;
                         transferredBytes = 0;
@@ -143,14 +142,9 @@ namespace Server { namespace Network {
     void ClientConnection::_SendPacket(Common::Packet* packet_)
     {
         std::unique_ptr<Common::Packet> packet(packet_);
-        if (!packet)
+        if (!this->_connected || !this->_socket)
         {
-            std::cerr << "Null packet to send !" << std::endl;
-            return;
-        }
-        else if (!this->_connected || !this->_socket)
-        {
-            std::cerr << "Socket already down" << std::endl;
+            std::cerr << "Socket already down (client " << this->_clientId << ")" << std::endl;
             return;
         }
         this->_toSendPackets.push(std::move(packet));
