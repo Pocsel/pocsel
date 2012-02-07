@@ -21,43 +21,81 @@ if (WIN32)
         ${CMAKE_BINARY_DIR}/cg/include
         DOC "The directory where Cg/cg.h resides")
 
-    FIND_LIBRARY(CG_LIBRARY NAMES cg
-        PATHS
-        "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
-        ${CG_ROOT_DIR}/lib
-        ${CMAKE_BINARY_DIR}/cg/lib
-        DOC "The cg library")
-    FIND_LIBRARY(CGGL_LIBRARY NAMES cgGL
-        PATHS
-        "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
-        ${CG_ROOT_DIR}/lib
-        ${CMAKE_BINARY_DIR}/cg/lib
-        DOC "The cg GL library")
-    FIND_LIBRARY(CGDX8_LIBRARY NAMES cgD3D8
-        PATHS
-        "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
-        ${CG_ROOT_DIR}/lib
-        ${CMAKE_BINARY_DIR}/cg/lib
-        DOC "The cg library")
-    FIND_LIBRARY(CGDX9_LIBRARY NAMES cgD3D9
-        PATHS
-        "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
-        ${CG_ROOT_DIR}/lib
-        ${CMAKE_BINARY_DIR}/cg/lib
-        DOC "The cg library")
-    FIND_LIBRARY(CGDX10_LIBRARY NAMES cgD3D10
-        PATHS
-        "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
-        ${CG_ROOT_DIR}/lib
-        ${CMAKE_BINARY_DIR}/cg/lib
-        DOC "The cg library")
-    FIND_LIBRARY(CGDX11_LIBRARY NAMES cgD3D11
-        PATHS
-        "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
-        ${CG_ROOT_DIR}/lib
-        ${CMAKE_BINARY_DIR}/cg/lib
-        DOC "The cg library")
-
+    if (CMAKE_CL_64)
+        FIND_LIBRARY(CG_LIBRARY NAMES cg
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib.x64"
+            ${CG_ROOT_DIR}/lib.x64
+            ${CMAKE_BINARY_DIR}/cg/lib.x64
+            DOC "The cg library")
+        FIND_LIBRARY(CGGL_LIBRARY NAMES cgGL
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib.x64"
+            ${CG_ROOT_DIR}/lib.x64
+            ${CMAKE_BINARY_DIR}/cg/lib.x64
+            DOC "The cg GL library")
+        FIND_LIBRARY(CGDX8_LIBRARY NAMES cgD3D8
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib.x64"
+            ${CG_ROOT_DIR}/lib.x64
+            ${CMAKE_BINARY_DIR}/cg/lib.x64
+            DOC "The cg library")
+        FIND_LIBRARY(CGDX9_LIBRARY NAMES cgD3D9
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib.x64"
+            ${CG_ROOT_DIR}/lib.x64
+            ${CMAKE_BINARY_DIR}/cg/lib.x64
+            DOC "The cg library")
+        FIND_LIBRARY(CGDX10_LIBRARY NAMES cgD3D10
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib.x64"
+            ${CG_ROOT_DIR}/lib.x64
+            ${CMAKE_BINARY_DIR}/cg/lib.x64
+            DOC "The cg library")
+        FIND_LIBRARY(CGDX11_LIBRARY NAMES cgD3D11
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib.x64"
+            ${CG_ROOT_DIR}/lib.x64
+            ${CMAKE_BINARY_DIR}/cg/lib.x64
+            DOC "The cg library")
+    else ()
+        FIND_LIBRARY(CG_LIBRARY NAMES cg
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
+            ${CG_ROOT_DIR}/lib
+            ${CMAKE_BINARY_DIR}/cg/lib
+            DOC "The cg library")
+        FIND_LIBRARY(CGGL_LIBRARY NAMES cgGL
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
+            ${CG_ROOT_DIR}/lib
+            ${CMAKE_BINARY_DIR}/cg/lib
+            DOC "The cg GL library")
+        FIND_LIBRARY(CGDX8_LIBRARY NAMES cgD3D8
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
+            ${CG_ROOT_DIR}/lib
+            ${CMAKE_BINARY_DIR}/cg/lib
+            DOC "The cg library")
+        FIND_LIBRARY(CGDX9_LIBRARY NAMES cgD3D9
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
+            ${CG_ROOT_DIR}/lib
+            ${CMAKE_BINARY_DIR}/cg/lib
+            DOC "The cg library")
+        FIND_LIBRARY(CGDX10_LIBRARY NAMES cgD3D10
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
+            ${CG_ROOT_DIR}/lib
+            ${CMAKE_BINARY_DIR}/cg/lib
+            DOC "The cg library")
+        FIND_LIBRARY(CGDX11_LIBRARY NAMES cgD3D11
+            PATHS
+            "$ENV{PROGRAMFILES}/NVIDIA Corporation/Cg/lib"
+            ${CG_ROOT_DIR}/lib
+            ${CMAKE_BINARY_DIR}/cg/lib
+            DOC "The cg library")
+    endif ()
 else (WIN32)
     FIND_PATH(CG_INCLUDE_DIR Cg/cg.h
         /usr/include
