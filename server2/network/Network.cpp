@@ -50,7 +50,7 @@ namespace Server { namespace Network {
 
     void Network::_ConnectAccept()
     {
-        this->_newConnection = new SocketType(this->_ioService);
+        this->_newConnection = new boost::asio::ip::tcp::socket(this->_ioService);
         this->_acceptor.async_accept(
             *this->_newConnection,
             boost::bind(&Network::_HandleAccept, this, boost::asio::placeholders::error)

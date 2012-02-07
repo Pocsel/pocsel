@@ -1,8 +1,6 @@
 #ifndef __SERVER_SERVER_HPP__
 #define __SERVER_SERVER_HPP__
 
-#include "server2/SocketType.hpp"
-
 namespace Server {
 
     namespace Network {
