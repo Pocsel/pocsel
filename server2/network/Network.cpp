@@ -1,4 +1,5 @@
 #include "server2/network/Network.hpp"
+#include "server2/network/ClientConnection.hpp"
 
 #include "server2/Server.hpp"
 #include "server2/Settings.hpp"
@@ -61,9 +62,10 @@ namespace Server { namespace Network {
     {
         if (!e)
         {
-//            this->_server.GetClientManager().HandleNewClient(this->_newConnection);
-            this->_ConnectAccept();
             std::cout << "New connection.\n";
+            ClientConnection* newClientConnection = new ClientConnection(this->_newConnection, this->_server.GetClientManager());
+            this->_server.GetClientManager().HandleNewClient(newClientConnection);
+            this->_ConnectAccept();
         }
         else
         {

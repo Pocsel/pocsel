@@ -37,6 +37,7 @@ namespace Server {
         int Run();
         void Stop();
         Settings const& GetSettings() const { return *this->_settings; }
+        ClientManagement::ClientManager& GetClientManager() { return *this->_clientManager; }
     };
 
 }
