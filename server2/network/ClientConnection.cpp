@@ -42,16 +42,15 @@ namespace Server { namespace Network {
 
     void ClientConnection::_Shutdown()
     {
-        std::cout << "Shutting down ClientConnection" << std::endl;
         if (this->_socket)
         {
+            std::cout << "Shutting down ClientConnection" << std::endl;
             Tools::Delete(this->_socket);
             this->_socket = 0;
-        }
-        this->_connected = false;
-        if (this->_this)
+            this->_connected = false;
             this->_this.reset();
-        std::cout << "ClientConnection is Down" << std::endl;
+            std::cout << "ClientConnection is Down" << std::endl;
+        }
     }
 
     void ClientConnection::_HandleRead(boost::system::error_code const error,
