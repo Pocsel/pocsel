@@ -1,35 +1,43 @@
 #ifndef __SERVER_SERVER_HPP__
 #define __SERVER_SERVER_HPP__
 
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/noncopyable.hpp>
+namespace Server {
 
-#include "server2/SocketType.hpp"
+    namespace Network {
+
+        class Network;
+
+    }
+
+    namespace ClientManagement {
+
+        class ClientManager;
+
+    }
+
+}
 
 namespace Server {
 
-//    class Game;
     class Settings;
+    //class Game;
 
-    class Server : private boost::noncopyable
+    class Server :
+        private boost::noncopyable
     {
     private:
-        boost::asio::io_service _ioService;
-        boost::asio::ip::tcp::acceptor  _acceptor;
-        std::unique_ptr<SocketType> _newConnection;
         Settings* _settings;
-//        Game* _game;
+        Network::Network* _network;
+        ClientManagement::ClientManager* _clientManager;
+        //Game* _game;
 
     public:
         Server(int ac, char *av[]);
         ~Server();
         int Run();
         void Stop();
-
-    private:
-        void _ConnectAccept();
-        void _HandleAccept(boost::system::error_code const& e);
+        Settings const& GetSettings() const { return *this->_settings; }
+        ClientManagement::ClientManager& GetClientManager() { return *this->_clientManager; }
     };
 
 }
