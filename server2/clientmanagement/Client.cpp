@@ -22,4 +22,9 @@ namespace Server { namespace ClientManagement {
         this->_connection->Shutdown();
     }
 
+    void Client::SendPacket(Common::Packet* packet)
+    {
+        this->_connection->SendPacket(packet);
+    }
+
 }}

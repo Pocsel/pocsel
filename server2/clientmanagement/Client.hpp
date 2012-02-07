@@ -1,15 +1,17 @@
 #ifndef __SERVER_CLIENTMANAGEMENT_CLIENT_HPP__
 #define __SERVER_CLIENTMANAGEMENT_CLIENT_HPP__
 
-namespace Server {
+namespace Common {
 
-    namespace Network {
+    class Packet;
+
+}
+
+namespace Server { namespace Network {
 
         class ClientConnection;
 
-    }
-
-}
+}}
 
 namespace Server { namespace ClientManagement {
 
@@ -26,6 +28,7 @@ namespace Server { namespace ClientManagement {
         ~Client();
 
         void Shutdown();
+        void SendPacket(Common::Packet* packet);
     };
 
 }}

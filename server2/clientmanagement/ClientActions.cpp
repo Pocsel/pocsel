@@ -5,6 +5,8 @@
 
 #include "common/Packet.hpp"
 
+#include "server2/network/PacketExtractor.hpp"
+
 namespace Server { namespace ClientManagement {
 
     void ClientActions::HandleAction(ClientManager& manager, Client& client, Common::Packet& packet)
@@ -41,7 +43,7 @@ namespace Server { namespace ClientManagement {
     {
 //        Protocol::Version major, minor;
 //        std::string login;
-//        PacketExtractor::Login(packet, major, minor, login);
+//        Network::PacketExtractor::Login(packet, major, minor, login);
 //        if (major != Protocol::Version::Major || minor != Protocol::Version::Minor)
 //            throw std::runtime_error(
 //                "Protocol verions mismatch : Server " +
@@ -51,7 +53,7 @@ namespace Server { namespace ClientManagement {
 //            );
 //        if (!login.size())
 //            throw std::runtime_error("Wrong login: cannot be empty");
-//        game.GetClientManager().ClientLogin(client, login);
+//        manager.ClientLogin(client, login);
     }
 
     void ClientActions::_HandlePong(ClientManager& manager, Client& client, Common::Packet& packet)

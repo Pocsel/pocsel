@@ -69,4 +69,16 @@ namespace Server { namespace ClientManagement {
         }
     }
 
+    void ClientManager::_SendPacket(Uint32 clientId, Common::Packet* packet)
+    {
+        std::unique_ptr<Common::Packet> autoDelete(packet);
+        if (this->_clients.find(clientId) == this->_clients.end())
+        {
+            std::cout << "HandlePacket: Client " << clientId << " not found.\n";
+            return ;
+        }
+
+        this->_clients[clientId]->SendPacket(packet);
+    }
+
 }}
