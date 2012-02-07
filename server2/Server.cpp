@@ -50,6 +50,7 @@ namespace Server {
     {
         std::cout << "Running server2" << std::endl;
 //        return this->_game->Run();
+        return 0;
     }
 
     void Server::Stop()
