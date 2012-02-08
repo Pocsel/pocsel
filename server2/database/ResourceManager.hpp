@@ -42,6 +42,9 @@ namespace Server { namespace Database {
         Common::Resource const& GetResource(Uint32 id) const { return *this->_resources[id]; }
 
         std::vector<Uint32> GetNeededResourceIds(Uint32 fromVersion) const;
+
+        // Réservé à la construction des merdes de base, et au thread clientManagement
+        Tools::Database::IConnectionPool& GetConnectionPool() { return *this->_connectionPool; }
     };
 
 }}
