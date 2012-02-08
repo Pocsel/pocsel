@@ -30,6 +30,8 @@ target_link_libraries(client
 
 set(binds_file "${pocsel_client_dir}/bindings.lua")
 
+SetProgramInfo(client)
+
 add_custom_command(
     OUTPUT "${binds_file}"
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/bindings.lua" "${pocsel_client_dir}"

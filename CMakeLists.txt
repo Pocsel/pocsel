@@ -11,8 +11,10 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # Modules supplémentaires
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-include(${CMAKE_SOURCE_DIR}/cmake/CustomPrecompiledHeader.cmake )
-include(${CMAKE_SOURCE_DIR}/cmake/CreateGroups.cmake)
+include(CustomPrecompiledHeader)
+include(CreateGroups)
+include(GetGitRevision)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 # Packages
 set(Boost_USE_STATIC_LIBS ON)
@@ -95,6 +97,11 @@ macro(enable_pch target target_src)
     endif()
 endmacro()
 
+macro(SetProgramInfo target)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    set(program_name "${target}")
+    configure_file("../ProgramInfo.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/ProgramInfo.hpp")
+endmacro()
 
 add_subdirectory(resources)
 add_subdirectory(sdk)

@@ -4,6 +4,7 @@ set(src
     ${client_src}
     ${common_src}
     ${tools_base_src}
+    ${tools_logger_src}
     ${tools_renderers_src}
 )
 
@@ -19,3 +20,5 @@ target_link_libraries(client2
     ${LUA_LIBRARIES}
     ${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} ${CG_LIBRARY} ${CGGL_LIBRARY}
 )
+
+SetProgramInfo(client2)

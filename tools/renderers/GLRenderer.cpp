@@ -10,6 +10,7 @@
 #include "tools/renderers/opengl/Texture2D.hpp"
 #include "tools/renderers/opengl/VertexBuffer.hpp"
 #include "tools/renderers/GLRenderer.hpp"
+#include "tools/logger/Logger.hpp"
 
 #ifdef _MSC_VER
 # pragma warning(disable: 4244)
@@ -27,7 +28,7 @@ namespace Tools { namespace Renderers {
             if (error == CG_NO_ERROR)
                 return;
             if (error == CG_COMPILER_ERROR)
-                std::cerr << ToString("ERROR: Cg compiler:\n") + cgGetLastListing(_cgGlobalContext) + "\n";
+                Tools::error << "Cg compiler:\n" << cgGetLastListing(_cgGlobalContext) << "\n";
             throw std::runtime_error(
                 "An internal Cg call failed (Code: "
                 + ToString(error) + "): "
@@ -43,10 +44,9 @@ namespace Tools { namespace Renderers {
             throw std::runtime_error(ToString("glewInit() failed: ") + ToString(glewGetErrorString(error)));
         if (!(GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader))
             this->_useShaders = false;
-#ifdef DEBUG
-        std::cout << ToString("Glew version: ") + (char const*)glewGetString(GLEW_VERSION) + "\n";
-        std::cout << ToString("OpenGL version: ") + (char const*)glGetString(GL_VERSION) + "\n";
-#endif
+
+        Tools::log << "Glew version: " << (char const*)glewGetString(GLEW_VERSION) << "\n";
+        Tools::log << "OpenGL version: " << (char const*)glGetString(GL_VERSION) << "\n";
 
         GLCHECK(glEnable(GL_BLEND));
         GLCHECK(glEnable(GL_ALPHA_TEST));
@@ -73,7 +73,6 @@ namespace Tools { namespace Renderers {
             cgDestroyContext(this->_cgContext);
             _cgGlobalContext = 0;
         }
-        std::cout << "a plu d'opengl\n";
     }
 
     std::unique_ptr<IVertexBuffer> GLRenderer::CreateVertexBuffer()
