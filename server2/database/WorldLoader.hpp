@@ -7,9 +7,15 @@ namespace Common {
 
 }
 
-namespace Server { namespace Game{
+namespace Server { namespace Game {
 
     class World;
+
+    namespace Map {
+
+        class Conf;
+
+    }
 
 }}
 
@@ -23,8 +29,15 @@ namespace Server { namespace Database {
         static void Load(Game::World& world, ResourceManager& manager);
 
     private:
-        static void _LoadCubeType(Common::CubeType& descr, std::string const& code, ResourceManager const& manager);
-        //static void _LoadMap();
+        static void _LoadCubeType(Common::CubeType& descr,
+                                  std::string const& code,
+                                  ResourceManager const& manager);
+        static void _LoadMapConf(Game::Map::Conf& conf,
+                                 std::string const& name,
+                                 std::string const& code,
+                                 Game::World const& world);
+        static Common::CubeType const* _GetCubeTypeByName(std::string const& name,
+                                                          Game::World const& world);
     };
 
 }}

@@ -7,6 +7,9 @@
 
 #include "server2/game/World.hpp"
 
+#include "server2/game/map/Conf.hpp"
+#include "server2/game/map/Map.hpp"
+
 namespace Server { namespace Database {
 
     void WorldLoader::Load(Game::World& world, ResourceManager& manager)
@@ -47,14 +50,20 @@ namespace Server { namespace Database {
         }
 
         // Maps
-//        curs.Execute("SELECT name, lua FROM map");
-//        while (curs.HasData())
-//        {
-//            auto& row = curs.FetchOne();
-//            this->_LoadMap(row[0].GetString(), row[1].GetString());
-//        }
-//        if (this->_defaultMap == 0)
-//            throw std::runtime_error("Cannot find default map");
+        curs.Execute("SELECT name, lua FROM map");
+        while (curs.HasData())
+        {
+            auto& row = curs.FetchOne();
+            Game::Map::Conf conf;
+            WorldLoader::_LoadMapConf(conf, row[0].GetString(), row[1].GetString(), world);
+            conf.cubeTypes = &world._cubeTypes;
+            world._maps[conf.name] = new Game::Map::Map(conf);
+            if (conf.is_default) {
+                world._defaultMap = world._maps[conf.name];
+            }
+        }
+        if (world._defaultMap == 0)
+            throw std::runtime_error("Cannot find default map");
     }
 
     void WorldLoader::_LoadCubeType(Common::CubeType& descr, std::string const& code, ResourceManager const& manager)
@@ -73,16 +82,16 @@ namespace Server { namespace Database {
             descr.solid = lua["solid"];
             descr.transparent = lua["transparent"];
 
-            std::cout << "name" << descr.name << " " << descr.id << "\n";
-            std::cout << "textures.top" << descr.textures.top << "\n";
-            std::cout << "textures.left" << descr.textures.left << "\n";
-            std::cout << "textures.front" << descr.textures.front << "\n";
-            std::cout << "textures.right" << descr.textures.right << "\n";
-            std::cout << "textures.back" << descr.textures.back << "\n";
-            std::cout << "textures.bottom" << descr.textures.bottom << "\n";
+            std::cout << "name: " << descr.name << " " << descr.id << "\n";
+            std::cout << "textures.top: " << descr.textures.top << "\n";
+            std::cout << "textures.left: " << descr.textures.left << "\n";
+            std::cout << "textures.front: " << descr.textures.front << "\n";
+            std::cout << "textures.right: " << descr.textures.right << "\n";
+            std::cout << "textures.back: " << descr.textures.back << "\n";
+            std::cout << "textures.bottom: " << descr.textures.bottom << "\n";
 
-            std::cout << "solid" << descr.solid << "\n";
-            std::cout << "transparent" << descr.transparent << "\n";
+            std::cout << "solid: " << descr.solid << "\n";
+            std::cout << "transparent: " << descr.transparent << "\n";
 
             std::cout << "\n";
         }
@@ -93,7 +102,10 @@ namespace Server { namespace Database {
         }
     }
 
-/*    void World::_LoadMap(std::string const& name, std::string const& code)
+    void WorldLoader::_LoadMapConf(Game::Map::Conf& conf,
+                                   std::string const& name,
+                                   std::string const& code,
+                                   Game::World const& world)
     {
         // TODO rajouter des verifications au niveau de la lecture du lua
         // genre:
@@ -101,7 +113,6 @@ namespace Server { namespace Database {
         // est-ce que ca va pas faire un throw ?
         // est-ce que l'utilisateur sait coder ?
 
-        MapConf conf;
         conf.name = name;
 
 
@@ -145,7 +156,7 @@ namespace Server { namespace Database {
     //        assert(conf.cubes.find(name) == conf.cubes.end());
 
             auto& cube = conf.cubes[name];
-            cube.type = this->_GetCubeTypeByName(name);
+            cube.type = WorldLoader::_GetCubeTypeByName(name, world);
             if (cube.type == 0)
             {
                 if (name != "void")
@@ -162,7 +173,7 @@ namespace Server { namespace Database {
             // Parcours des ValidationBlocConf
             for (auto it = cf.begin(), ite = cf.end(); it != ite; ++it)
             {
-                MapConf::ValidationBlocConf validation_bloc;
+                Game::Map::Conf::ValidationBlocConf validation_bloc;
 
                 validation_bloc.cube_type = cube.type;
                 validation_bloc.priority = (*it)["priority"].as<int>();
@@ -172,7 +183,7 @@ namespace Server { namespace Database {
                 // Parcours des ValidatorConf
                 for (auto it2 = validators.begin(), ite2 = validators.end(); it2 != ite2; ++it2)
                 {
-                    MapConf::ValidatorConf validator;
+                    Game::Map::Conf::ValidatorConf validator;
                     validator.equation = (*it2)["equation"].as<std::string>();
                     validator.validator = (*it2)["validator"].as<std::string>();
                     for (auto it3 = (*it2).begin(), ite3 = (*it2).end(); it3 != ite3; ++it3)
@@ -188,25 +199,19 @@ namespace Server { namespace Database {
             }
 
         }
-            // XXX fait un assert dans la lecture du lua, c'est ptet pas une bonne idée
-    //        assert(cube.type != 0);
-        conf.cubeTypes = &this->_cubeTypes;
-        this->_maps[name] = new Map(conf);
-        if (conf.is_default) {
-            this->_defaultMap = this->_maps[name];
-        }
     }
 
-    Common::CubeType* World::_GetCubeTypeByName(std::string const& name)
+    Common::CubeType const* WorldLoader::_GetCubeTypeByName(std::string const& name,
+                                                            Game::World const& world)
     {
-        auto it = this->_cubeTypes.begin(),
-             end = this->_cubeTypes.end();
+        auto it = world._cubeTypes.begin(),
+             end = world._cubeTypes.end();
         for (; it != end; ++it)
         {
             if ((*it).name == name)
                 return &(*it);
         }
         return 0;
-    }*/
+    }
 
 }}

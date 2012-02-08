@@ -24,5 +24,12 @@ namespace Server { namespace Game{
     {
     }
 
+    Map::Map* World::GetMap(std::string const& name)
+    {
+        if (this->_maps.find(name) == this->_maps.end())
+            return 0;
+        return this->_maps[name];
+    }
+
 }}
 

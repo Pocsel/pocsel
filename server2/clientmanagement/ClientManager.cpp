@@ -127,12 +127,14 @@ namespace Server { namespace ClientManagement {
 
         client.SetLogin(login2);
         client.SendPacket(Network::PacketCreator::LoggedIn(true,
-                "",
-                this->_server.GetGame().GetWorld().GetIdentifier(),
-                this->_server.GetGame().GetWorld().GetFullname(),
-                this->_server.GetGame().GetWorld().GetVersion(),
-                static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
+                          "",
+                          this->_server.GetGame().GetWorld().GetIdentifier(),
+                          this->_server.GetGame().GetWorld().GetFullname(),
+                          this->_server.GetGame().GetWorld().GetVersion(),
+                          static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
                          );
+
+        std::cout << "Client logged in: " << login2 << "\n";
 
 //        client.Spawn(this->_game.GetWorld().GetDefaultMap());
         // TODO
