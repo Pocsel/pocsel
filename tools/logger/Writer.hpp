@@ -28,6 +28,12 @@ namespace Tools { namespace Logger {
                 this->_stream << ToString(value);
             }
 
+            Buffer(Buffer&& buffer)
+                : _writer(buffer._writer)
+            {
+                this->_stream = std::move(buffer._stream);
+            }
+
             ~Buffer()
             {
                 this->_writer.Write(this->_stream.str());
