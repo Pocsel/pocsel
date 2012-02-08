@@ -2,9 +2,14 @@
 #include "server2/clientmanagement/Client.hpp"
 #include "server2/clientmanagement/ClientActions.hpp"
 
-#include "server2/network/PacketCreator.hpp"
-
 #include "common/Packet.hpp"
+
+#include "server2/Server.hpp"
+
+#include "server2/game/Game.hpp"
+#include "server2/game/World.hpp"
+
+#include "server2/network/PacketCreator.hpp"
 
 namespace Server { namespace ClientManagement {
 
@@ -121,12 +126,12 @@ namespace Server { namespace ClientManagement {
         }
 
         client.SetLogin(login2);
-        client.SendPacket(Network::PacketCreator::LoggedIn(true/*,
+        client.SendPacket(Network::PacketCreator::LoggedIn(true,
                 "",
-                this->_game.GetWorld().GetIdentifier(),
-                this->_game.GetWorld().GetFullname(),
-                this->_game.GetWorld().GetVersion(),
-                static_cast<Common::BaseChunk::CubeType>(this->_game.GetWorld().GetCubeTypes().size())*/)
+                this->_server.GetGame().GetWorld().GetIdentifier(),
+                this->_server.GetGame().GetWorld().GetFullname(),
+                this->_server.GetGame().GetWorld().GetVersion(),
+                static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
                          );
 
 //        client.Spawn(this->_game.GetWorld().GetDefaultMap());
