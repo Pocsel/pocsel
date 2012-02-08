@@ -15,10 +15,10 @@ void sigint(int)
     if (server2 != 0)
         server2->Stop();
 }
-void sigpipe(int)
-{
-    std::cerr << "Broken pipe catched !" << std::endl;
-}
+//void sigpipe(int)
+//{
+//    std::cerr << "Broken pipe catched !" << std::endl;
+//}
 #else
 BOOL WINAPI ConsoleControlHandler(DWORD control)
 {
@@ -36,7 +36,7 @@ int main(int ac, char *av[])
 {
 #ifndef WIN32
     (void) ::signal(SIGINT, sigint);
-    (void) ::signal(SIGPIPE, sigpipe);
+//    (void) ::signal(SIGPIPE, sigpipe);
 #else
     SetConsoleCtrlHandler(ConsoleControlHandler, true);
 #endif

@@ -11,7 +11,8 @@ namespace Server { namespace Game {
 
     class World;
 
-    class Game
+    class Game :
+        private boost::noncopyable
     {
     private:
         Server& _server;

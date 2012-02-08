@@ -7,7 +7,8 @@ namespace Server { namespace Game { namespace Map {
 
     struct Conf;
 
-    class Map
+    class Map :
+        private boost::noncopyable
     {
     private:
         Conf _conf;
