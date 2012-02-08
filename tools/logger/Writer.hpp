@@ -31,7 +31,15 @@ namespace Tools { namespace Logger {
             Buffer(Buffer&& buffer)
                 : _writer(buffer._writer)
             {
-                this->_stream = std::move(buffer._stream);
+                this->_stream << buffer._stream.str();
+                buffer._stream.clear();
+            }
+
+            Buffer(Buffer& buffer)
+                : _writer(buffer._writer)
+            {
+                this->_stream << buffer._stream.str();
+                buffer._stream.clear();
             }
 
             ~Buffer()

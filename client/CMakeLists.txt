@@ -11,6 +11,7 @@ set(src
     ${tools_gui_src}
     ${tools_lua_src}
     ${tools_renderers_src}
+    ${tools_logger_src}
 )
 
 CreateGroups("${src}")

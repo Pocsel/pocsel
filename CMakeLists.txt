@@ -76,6 +76,7 @@ file(GLOB tools_database_src "tools/database/*.[ch]pp" "tools/database/sqlite/*.
 file(GLOB_RECURSE tools_gui_src "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
 file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
+file(GLOB_RECURSE tools_logger_src "tools/logger/*.[ch]pp")
 
 set(pocsel_binaries_dir "${CMAKE_BINARY_DIR}/pocsel/binaries")
 set(pocsel_server_dir "${CMAKE_BINARY_DIR}/pocsel/server")
