@@ -13,14 +13,14 @@
 
 namespace Server { namespace Network {
 
-    std::unique_ptr<Common::Packet> PacketCreator::LoggedIn(bool success,
-                                                            std::string const& reason /* = "" */,
-                                                            std::string const& worldIdentifier /* = "" */,
-                                                            std::string const& worldName /* = "" */,
-                                                            Uint32 worldVersion /* = 0 */,
-                                                            Chunk::CubeType nbCubeTypes /* = 0 */)
+    Common::Packet* PacketCreator::LoggedIn(bool success,
+                                            std::string const& reason /* = "" */,
+                                            std::string const& worldIdentifier /* = "" */,
+                                            std::string const& worldName /* = "" */,
+                                            Uint32 worldVersion /* = 0 */,
+                                            Chunk::CubeType nbCubeTypes /* = 0 */)
     {
-        std::unique_ptr<Common::Packet> p(new Common::Packet);
+        Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::LoggedIn);
         p->WriteBool(success);
         p->Write(Protocol::Version::Major);
@@ -40,26 +40,26 @@ namespace Server { namespace Network {
         return p;
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::Ping()
+    Common::Packet* PacketCreator::Ping()
     {
-        std::unique_ptr<Common::Packet> p(new Common::Packet);
+        Common::Packet* p(new Common::Packet);
         p->Write((Protocol::ActionType)Protocol::ServerToClient::Ping);
         p->Write64(2134); // timestamp agréé par le commité du temps
         return p;
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::Chunk(Server::Chunk const& chunk)
+    Common::Packet* PacketCreator::Chunk(::Server::Chunk const& chunk)
     {
-        std::unique_ptr<Common::Packet> p(new Common::Packet);
+        Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::Chunk);
         p->Write(chunk);
         return p;
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::NeededResourceIds(std::vector<Uint32>& ids,
-                                                                     Uint32& offset)
+    Common::Packet* PacketCreator::NeededResourceIds(std::vector<Uint32>& ids,
+                                                     Uint32& offset)
     {
-        std::unique_ptr<Common::Packet> response(new Common::Packet);
+        Common::Packet* response(new Common::Packet);
         response->Write(Protocol::ServerToClient::NeededResourceIds);
         response->Write32(static_cast<Uint32>(ids.size()));
         while (offset < ids.size() && offset < 15000)
@@ -70,15 +70,16 @@ namespace Server { namespace Network {
         return response;
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::ResourceRange(Common::Resource const& resource,
-                                                                 Uint32 offset)
+    Common::Packet* PacketCreator::ResourceRange(Common::Resource const& resource,
+                                                 Uint32 offset)
     {
         std::unique_ptr<Common::Packet> ptr(new Common::Packet());
         ptr->Write(Protocol::ServerToClient::ResourceRange);
         ptr->Write32(resource.id);
         ptr->Write32(offset);
-        std::cout << "PacketCreator::ResourceRangePacket(): Sending resource " << resource.id << ": "
-                  << "offset = " << offset << " size = " << resource.size << ".\n";
+        std::cout << "PacketCreator::ResourceRangePacket(): Sending resource " << resource.id <<
+                     ": offset = " << offset <<
+                     " size = " << resource.size << ".\n";
         // XXX si packet change on est dans la merde !
         Uint32 packetSize = ((Uint16) -1) - sizeof(Protocol::ActionType) - 2 * sizeof(Uint32);
         if (offset == 0)
@@ -99,23 +100,23 @@ namespace Server { namespace Network {
         if (toSendSize > resource.size - offset) // WARNING: this form prevents overflow
             throw std::runtime_error("Invalid range offset");
         ptr->WriteRawData(
-            ((char const*) resource.data) + offset,
-            toSendSize
-        );
-        return ptr;
+                          ((char const*) resource.data) + offset,
+                          toSendSize
+                         );
+        return ptr.release();
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::CubeType(Common::CubeType const& cubeType)
+    Common::Packet* PacketCreator::CubeType(Common::CubeType const& cubeType)
     {
-        std::unique_ptr<Common::Packet> response(new Common::Packet);
+        Common::Packet* response(new Common::Packet);
         response->Write(Protocol::ServerToClient::CubeType);
         response->Write(cubeType);
         return response;
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::SpawnPosition(Common::Position const& pos)
+    Common::Packet* PacketCreator::SpawnPosition(Common::Position const& pos)
     {
-        std::unique_ptr<Common::Packet> ptr(new Common::Packet);
+        Common::Packet* ptr(new Common::Packet);
         ptr->Write(Protocol::ServerToClient::SpawnPosition);
         ptr->Write(pos);
         return ptr;

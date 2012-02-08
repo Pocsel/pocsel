@@ -22,6 +22,7 @@ namespace Server { namespace ClientManagement {
         Uint32 const id;
     private:
         boost::shared_ptr<Network::ClientConnection> _connection;
+        std::string _login;
 
     public:
         Client(Uint32 id, Network::ClientConnection* connection);
@@ -29,6 +30,9 @@ namespace Server { namespace ClientManagement {
 
         void Shutdown();
         void SendPacket(Common::Packet* packet);
+
+        void SetLogin(std::string const& login);
+        std::string const& GetLogin() const { return this->_login; }
     };
 
 }}

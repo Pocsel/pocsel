@@ -1,10 +1,12 @@
 #include "server2/clientmanagement/ClientActions.hpp"
 #include "server2/clientmanagement/ClientManager.hpp"
+#include "server2/clientmanagement/Client.hpp"
 
 #include "protocol/protocol.hpp"
 
 #include "common/Packet.hpp"
 
+#include "server2/network/PacketCreator.hpp"
 #include "server2/network/PacketExtractor.hpp"
 
 namespace Server { namespace ClientManagement {
@@ -41,19 +43,26 @@ namespace Server { namespace ClientManagement {
 
     void ClientActions::_HandleLogin(ClientManager& manager, Client& client, Common::Packet& packet)
     {
-//        Protocol::Version major, minor;
-//        std::string login;
-//        Network::PacketExtractor::Login(packet, major, minor, login);
-//        if (major != Protocol::Version::Major || minor != Protocol::Version::Minor)
-//            throw std::runtime_error(
-//                "Protocol verions mismatch : Server " +
-//                Tools::ToString(Protocol::Version::Major) + "." + Tools::ToString(Protocol::Version::Minor)
-//                + " != Client " +
-//                Tools::ToString(major) + "." + Tools::ToString(minor)
-//            );
-//        if (!login.size())
-//            throw std::runtime_error("Wrong login: cannot be empty");
-//        manager.ClientLogin(client, login);
+        Protocol::Version major, minor;
+        std::string login;
+        Network::PacketExtractor::Login(packet, major, minor, login);
+        if (major != Protocol::Version::Major || minor != Protocol::Version::Minor)
+        {
+            client.SendPacket(Network::PacketCreator::LoggedIn(false,
+                "Protocol verions mismatch : Server " + Tools::ToString(Protocol::Version::Major) +
+                "." + Tools::ToString(Protocol::Version::Minor) +
+                " != Client " + Tools::ToString(major) +
+                "." + Tools::ToString(minor)));
+            return;
+        }
+
+        if (!login.size())
+        {
+            client.SendPacket(Network::PacketCreator::LoggedIn(false,
+                "Wrong login: cannot be empty"));
+            return;
+        }
+        manager.ClientLogin(client, login);
     }
 
     void ClientActions::_HandlePong(ClientManager& manager, Client& client, Common::Packet& packet)

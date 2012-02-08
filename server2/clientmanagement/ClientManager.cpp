@@ -2,6 +2,8 @@
 #include "server2/clientmanagement/Client.hpp"
 #include "server2/clientmanagement/ClientActions.hpp"
 
+#include "server2/network/PacketCreator.hpp"
+
 #include "common/Packet.hpp"
 
 namespace Server { namespace ClientManagement {
@@ -19,6 +21,16 @@ namespace Server { namespace ClientManagement {
             delete it->second;
     }
 
+    void ClientManager::Start()
+    {
+        this->_Start();
+    }
+
+    void ClientManager::Stop()
+    {
+        this->_Stop();
+    }
+
     Uint32 ClientManager::_GetNextId()
     {
         if (this->_nextId == 0)
@@ -28,10 +40,16 @@ namespace Server { namespace ClientManagement {
 
     void ClientManager::_HandleNewClient(Network::ClientConnection* clientConnection)
     {
-        Client* newClient = new Client(this->_GetNextId(), clientConnection);
-        this->_clients[newClient->id] = newClient;
+        Uint32 id = this->_GetNextId();
+        while (this->_clients.find(id) != this->_clients.end())
+        {
+            std::cout << "Client id " << id << " already taken.\n";
+            id = this->_GetNextId();
+        }
+        Client* newClient = new Client(id, clientConnection);
+        this->_clients[id] = newClient;
 
-        std::cout << "New client: " << newClient->id << "\n";
+        std::cout << "New client: " << id << "\n";
     }
 
     void ClientManager::_HandleClientError(Uint32 clientId)
@@ -81,4 +99,39 @@ namespace Server { namespace ClientManagement {
         this->_clients[clientId]->SendPacket(packet);
     }
 
+    void ClientManager::ClientLogin(Client& client, std::string const& login)
+    {
+        if (client.GetLogin() != "")
+        {
+            Common::Packet* packet = Network::PacketCreator::LoggedIn(false, "Already logged in");
+            client.SendPacket(packet);
+            return;
+        }
+
+        std::string login2 = login;
+
+        for (auto it = this->_clients.begin(), ite = this->_clients.end(); it != ite; ++it)
+        {
+            if ((*it).second->GetLogin() == login2)
+            {
+                login2 += "_";
+                it = this->_clients.begin();
+                if ((*it).second->GetLogin() == login2)
+                    login2 += "_";
+            }
+        }
+
+        client.SetLogin(login2);
+        Common::Packet* p = Network::PacketCreator::LoggedIn(true/*,
+                "",
+                this->_game.GetWorld().GetIdentifier(),
+                this->_game.GetWorld().GetFullname(),
+                this->_game.GetWorld().GetVersion(),
+                static_cast<Common::BaseChunk::CubeType>(this->_game.GetWorld().GetCubeTypes().size())*/);
+        client.SendPacket(p);
+
+//        client.Spawn(this->_game.GetWorld().GetDefaultMap());
+        // TODO
+        // spawn = créer le player, le foutre dans la game etc .. ?
+    }
 }}

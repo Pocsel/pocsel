@@ -19,26 +19,26 @@ namespace Server { namespace Network {
     class PacketCreator
     {
     public:
-        static std::unique_ptr<Common::Packet> LoggedIn(bool success,
-                                                        std::string const& reason = "",
-                                                        std::string const& worldIdentifier = "",
-                                                        std::string const& worldName = "",
-                                                        Uint32 worldVersion = 0,
-                                                        Chunk::CubeType nbCubeTypes = 0);
+        static Common::Packet* LoggedIn(bool success,
+                                        std::string const& reason = "",
+                                        std::string const& worldIdentifier = "",
+                                        std::string const& worldName = "",
+                                        Uint32 worldVersion = 0,
+                                        Chunk::CubeType nbCubeTypes = 0);
 
-        static std::unique_ptr<Common::Packet> Ping();
+        static Common::Packet* Ping();
 
-        static std::unique_ptr<Common::Packet> Chunk(Server::Chunk const& chunk);
+        static Common::Packet* Chunk(::Server::Chunk const& chunk);
 
-        static std::unique_ptr<Common::Packet> NeededResourceIds(std::vector<Uint32>& ids,
-                                                                 Uint32& offset);
+        static Common::Packet* NeededResourceIds(std::vector<Uint32>& ids,
+                                                 Uint32& offset);
 
-        static std::unique_ptr<Common::Packet> ResourceRange(Common::Resource const& resource,
-                                                             Uint32 offset);
+        static Common::Packet* ResourceRange(Common::Resource const& resource,
+                                             Uint32 offset);
 
-        static std::unique_ptr<Common::Packet> CubeType(Common::CubeType const& cubeType);
+        static Common::Packet* CubeType(Common::CubeType const& cubeType);
 
-        static std::unique_ptr<Common::Packet> SpawnPosition(Common::Position const& pos);
+        static Common::Packet* SpawnPosition(Common::Position const& pos);
     };
 
 }}
