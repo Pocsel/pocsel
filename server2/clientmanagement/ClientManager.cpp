@@ -18,7 +18,7 @@ namespace Server { namespace ClientManagement {
     ClientManager::~ClientManager()
     {
         for (auto it = this->_clients.begin(), ite = this->_clients.end(); it != ite; ++it)
-            delete it->second;
+            Tools::Delete(it->second);
     }
 
     void ClientManager::Start()
@@ -103,8 +103,7 @@ namespace Server { namespace ClientManagement {
     {
         if (client.GetLogin() != "")
         {
-            Common::Packet* packet = Network::PacketCreator::LoggedIn(false, "Already logged in");
-            client.SendPacket(packet);
+            client.SendPacket(Network::PacketCreator::LoggedIn(false, "Already logged in"));
             return;
         }
 
@@ -122,13 +121,13 @@ namespace Server { namespace ClientManagement {
         }
 
         client.SetLogin(login2);
-        Common::Packet* p = Network::PacketCreator::LoggedIn(true/*,
+        client.SendPacket(Network::PacketCreator::LoggedIn(true/*,
                 "",
                 this->_game.GetWorld().GetIdentifier(),
                 this->_game.GetWorld().GetFullname(),
                 this->_game.GetWorld().GetVersion(),
-                static_cast<Common::BaseChunk::CubeType>(this->_game.GetWorld().GetCubeTypes().size())*/);
-        client.SendPacket(p);
+                static_cast<Common::BaseChunk::CubeType>(this->_game.GetWorld().GetCubeTypes().size())*/)
+                         );
 
 //        client.Spawn(this->_game.GetWorld().GetDefaultMap());
         // TODO
