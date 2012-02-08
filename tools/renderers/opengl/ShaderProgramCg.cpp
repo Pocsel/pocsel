@@ -20,17 +20,31 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         _pass(0)
     {
         this->_effect = cgCreateEffect(this->_ctx, effect.c_str(), 0);
-        CGCHECK(this->_ctx);
         this->_technique = cgGetFirstTechnique(this->_effect);
         while (this->_technique && cgValidateTechnique(this->_technique) == CG_FALSE)
             this->_technique = cgGetNextTechnique(this->_technique);
         if (this->_technique == 0)
             throw std::runtime_error("Shaders: No valid technique");
+        this->_mvp = cgGetEffectParameterBySemantic(this->_effect, "WorldViewProjection");
+        this->_mv = cgGetEffectParameterBySemantic(this->_effect, "WorldView");
+        this->_model = cgGetEffectParameterBySemantic(this->_effect, "World");
+        this->_view = cgGetEffectParameterBySemantic(this->_effect, "View");
+        this->_projection = cgGetEffectParameterBySemantic(this->_effect, "Projection");
     }
 
     ShaderProgramCg::~ShaderProgramCg()
     {
         cgDestroyEffect(this->_effect);
+        if (this->_mvp)
+            cgDestroyParameter(this->_mvp);
+        if (this->_mv)
+            cgDestroyParameter(this->_mv);
+        if (this->_model)
+            cgDestroyParameter(this->_model);
+        if (this->_view)
+            cgDestroyParameter(this->_view);
+        if (this->_projection)
+            cgDestroyParameter(this->_projection);
     }
 
     std::unique_ptr<IShaderParameter> ShaderProgramCg::GetParameter(std::string const& identifier)
@@ -44,27 +58,22 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         {
         case ShaderParameterUsage::ModelViewProjectionMatrix:
             this->_mvp = cgGetNamedEffectParameter(this->_effect, identifier.c_str());
-            CGCHECK(this->_ctx);
             break;
 
         case ShaderParameterUsage::ModelViewMatrix:
             this->_mv = cgGetNamedEffectParameter(this->_effect, identifier.c_str());
-            CGCHECK(this->_ctx);
             break;
 
         case ShaderParameterUsage::ModelMatrix:
             this->_model = cgGetNamedEffectParameter(this->_effect, identifier.c_str());
-            CGCHECK(this->_ctx);
             break;
 
         case ShaderParameterUsage::ViewMatrix:
             this->_view = cgGetNamedEffectParameter(this->_effect, identifier.c_str());
-            CGCHECK(this->_ctx);
             break;
 
         case ShaderParameterUsage::ProjectionMatrix:
             this->_projection = cgGetNamedEffectParameter(this->_effect, identifier.c_str());
-            CGCHECK(this->_ctx);
             break;
 
         default:

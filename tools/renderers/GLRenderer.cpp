@@ -18,9 +18,20 @@
 namespace Tools { namespace Renderers {
 
     namespace {
+        CGcontext _cgGlobalContext = 0;
+        int _cgGlobalNbReferences = 0;
+
         void ErrCallback()
         {
-            throw std::runtime_error(cgGetErrorString(cgGetError()));
+            auto error = cgGetError();
+            if (error == CG_NO_ERROR)
+                return;
+            if (error == CG_COMPILER_ERROR)
+                std::cerr << ToString("ERROR: Cg compiler:\n") + cgGetLastListing(_cgGlobalContext) + "\n";
+            throw std::runtime_error(
+                "An internal Cg call failed (Code: "
+                + ToString(error) + "): "
+                + cgGetErrorString(cgGetError()));
         }
     }
 
@@ -43,22 +54,25 @@ namespace Tools { namespace Renderers {
 
         if (this->_useShaders)
         {
-            this->_cgContext = cgCreateContext();
-            CGCHECK(this->_cgContext);
+            if (_cgGlobalContext == 0)
+                _cgGlobalContext = cgCreateContext();
+            this->_cgContext = _cgGlobalContext;
+            ++_cgGlobalNbReferences;
+            cgSetErrorCallback(&ErrCallback);
             cgGLSetDebugMode(CG_FALSE);
             cgSetParameterSettingMode(this->_cgContext, CG_DEFERRED_PARAMETER_SETTING);
             cgGLRegisterStates(this->_cgContext);
-            CGCHECK(this->_cgContext);
             cgGLSetManageTextureParameters(this->_cgContext, CG_TRUE);
-            CGCHECK(this->_cgContext);
-            cgSetErrorCallback(&ErrCallback);
         }
     }
 
     void GLRenderer::Shutdown()
     {
-        if (this->_useShaders)
+        if (this->_useShaders && --_cgGlobalNbReferences == 0)
+        {
             cgDestroyContext(this->_cgContext);
+            _cgGlobalContext = 0;
+        }
         std::cout << "a plu d'opengl\n";
     }
 
