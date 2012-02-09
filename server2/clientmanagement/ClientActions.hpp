@@ -15,16 +15,16 @@ namespace Server { namespace ClientManagement {
     class ClientActions
     {
     public:
-        static void HandleAction(ClientManager& manager, Client& client, Common::Packet& packet);
+        static void HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet);
 
     private:
-        static void _HandleLogin(ClientManager& manager, Client& client, Common::Packet& packet);
-        static void _HandlePong(ClientManager& manager, Client& client, Common::Packet& packet);
-        static void _HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet& packet);
-        static void _HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet& packet);
-        static void _HandleGetResourceRange(ClientManager& manager, Client& client, Common::Packet& packet);
-        static void _HandleGetCubeType(ClientManager& manager, Client& client, Common::Packet& packet);
-        static void _HandleGetSpawnPosition(ClientManager& manager, Client& client, Common::Packet& packet);
+        static void _HandleLogin(ClientManager& manager, Client& client, Common::Packet const& packet);
+        static void _HandlePong(ClientManager& manager, Client& client, Common::Packet const& packet);
+        static void _HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet const& packet);
+        static void _HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet const& packet);
+        static void _HandleGetResourceRange(ClientManager& manager, Client& client, Common::Packet const& packet);
+        static void _HandleGetCubeType(ClientManager& manager, Client& client, Common::Packet const& packet);
+        static void _HandleGetSpawnPosition(ClientManager& manager, Client& client, Common::Packet const& packet);
     };
 
 }}

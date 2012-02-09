@@ -49,8 +49,11 @@ namespace Server {
         int Run();
         void Stop();
         Settings const& GetSettings() const { return *this->_settings; }
+        Database::ResourceManager const& GetResourceManager() const { return *this->_resourceManager; }
         Database::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
+        ClientManagement::ClientManager const& GetClientManager() const { return *this->_clientManager; }
         ClientManagement::ClientManager& GetClientManager() { return *this->_clientManager; }
+        Game::Game const& GetGame() const { return *this->_game; }
         Game::Game& GetGame() { return *this->_game; }
     };
 

@@ -22,6 +22,7 @@ namespace Server { namespace Game {
         Game(Server& server);
         ~Game();
 
+        World const& GetWorld() const { return *this->_world; }
         World& GetWorld() { return *this->_world; }
     };
 

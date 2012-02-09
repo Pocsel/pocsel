@@ -36,6 +36,53 @@ namespace Server { namespace ClientManagement {
         this->_Stop();
     }
 
+    Database::ResourceManager const& ClientManager::GetResourceManager() const
+    {
+        return this->_server.GetResourceManager();
+    }
+
+    Game::Game const& ClientManager::GetGame() const
+    {
+        return this->_server.GetGame();
+    }
+
+    void ClientManager::ClientLogin(Client& client, std::string const& login)
+    {
+        if (client.GetLogin() != "")
+        {
+            client.SendPacket(Network::PacketCreator::LoggedIn(false, "Already logged in"));
+            return;
+        }
+
+        std::string login2 = login;
+
+        for (auto it = this->_clients.begin(), ite = this->_clients.end(); it != ite; ++it)
+        {
+            if ((*it).second->GetLogin() == login2)
+            {
+                login2 += "_";
+                it = this->_clients.begin();
+                if ((*it).second->GetLogin() == login2)
+                    login2 += "_";
+            }
+        }
+
+        client.SetLogin(login2);
+        client.SendPacket(Network::PacketCreator::LoggedIn(true,
+                          "",
+                          this->_server.GetGame().GetWorld().GetIdentifier(),
+                          this->_server.GetGame().GetWorld().GetFullname(),
+                          this->_server.GetGame().GetWorld().GetVersion(),
+                          static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
+                         );
+
+        Tools::log << "Client logged in: " << login2 << "\n";
+
+//        client.Spawn(this->_game.GetWorld().GetDefaultMap());
+        // TODO
+        // spawn = créer le player, le foutre dans la game etc .. ?
+    }
+
     Uint32 ClientManager::_GetNextId()
     {
         if (this->_nextId == 0)
@@ -104,40 +151,4 @@ namespace Server { namespace ClientManagement {
         this->_clients[clientId]->SendPacket(packet);
     }
 
-    void ClientManager::ClientLogin(Client& client, std::string const& login)
-    {
-        if (client.GetLogin() != "")
-        {
-            client.SendPacket(Network::PacketCreator::LoggedIn(false, "Already logged in"));
-            return;
-        }
-
-        std::string login2 = login;
-
-        for (auto it = this->_clients.begin(), ite = this->_clients.end(); it != ite; ++it)
-        {
-            if ((*it).second->GetLogin() == login2)
-            {
-                login2 += "_";
-                it = this->_clients.begin();
-                if ((*it).second->GetLogin() == login2)
-                    login2 += "_";
-            }
-        }
-
-        client.SetLogin(login2);
-        client.SendPacket(Network::PacketCreator::LoggedIn(true,
-                          "",
-                          this->_server.GetGame().GetWorld().GetIdentifier(),
-                          this->_server.GetGame().GetWorld().GetFullname(),
-                          this->_server.GetGame().GetWorld().GetVersion(),
-                          static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
-                         );
-
-        Tools::log << "Client logged in: " << login2 << "\n";
-
-//        client.Spawn(this->_game.GetWorld().GetDefaultMap());
-        // TODO
-        // spawn = créer le player, le foutre dans la game etc .. ?
-    }
 }}

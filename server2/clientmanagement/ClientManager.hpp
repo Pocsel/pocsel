@@ -13,6 +13,18 @@ namespace Server {
 
     class Server;
 
+    namespace Database {
+
+        class ResourceManager;
+
+    }
+
+    namespace Game {
+
+        class Game;
+
+    }
+
     namespace Network {
 
         class ClientConnection;
@@ -36,10 +48,11 @@ namespace Server { namespace ClientManagement {
     public:
         ClientManager(Server& server);
         ~ClientManager();
+
+        // A appeler d'un autre thread
         void Start();
         void Stop();
 
-        // A appeler d'un autre thread
         void HandleNewClient(Network::ClientConnection* clientConnection)
         {
             this->_PushMessage(std::bind(&ClientManager::_HandleNewClient, this, clientConnection));
@@ -58,6 +71,8 @@ namespace Server { namespace ClientManagement {
         }
 
         // A appeler du thread clientmanagement
+        Database::ResourceManager const& GetResourceManager() const;
+        Game::Game const& GetGame() const;
         void ClientLogin(Client& client, std::string const& login);
 
     private:

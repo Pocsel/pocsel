@@ -14,7 +14,7 @@ namespace Server { namespace Network {
 
     class PacketExtractor
     {
-        public:
+    public:
         static void Login(Common::Packet const& p,
                           Protocol::Version& major,
                           Protocol::Version& minor,
@@ -26,14 +26,14 @@ namespace Server { namespace Network {
         static void NeedChunks(Common::Packet const& p,
                                std::list<Chunk::IdType>& Ids);
 
-        static void GetNeededResourceIds(Common::Packet const&,
-                                         Uint32& page);
+        static void GetNeededResourceIds(Common::Packet const& p,
+                                         Uint32& version);
 
-        static void GetResourceRange(Common::Packet const&,
+        static void GetResourceRange(Common::Packet const& p,
                                      Uint32& resourceId,
                                      Uint32& offset);
 
-        static void GetCubeType(Common::Packet const&,
+        static void GetCubeType(Common::Packet const& p,
                                 Chunk::CubeType& id);
 
         static void GetSpawnPosition(Common::Packet const& p);

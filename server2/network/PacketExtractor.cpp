@@ -5,9 +5,9 @@
 namespace Server { namespace Network {
 
     void PacketExtractor::Login(Common::Packet const& p,
-            Protocol::Version& major,
-            Protocol::Version& minor,
-            std::string& login)
+                                Protocol::Version& major,
+                                Protocol::Version& minor,
+                                std::string& login)
     {
         p.Read(major);
         p.Read(minor);
@@ -15,13 +15,13 @@ namespace Server { namespace Network {
     }
 
     void PacketExtractor::Pong(Common::Packet const& p,
-            std::string& str)
+                               std::string& str)
     {
         p.Read(str);
     }
 
     void PacketExtractor::NeedChunks(Common::Packet const& p,
-            std::list<Chunk::IdType>& ids)
+                                     std::list<Chunk::IdType>& ids)
     {
         while (p.GetBytesLeft())
         {
@@ -30,9 +30,17 @@ namespace Server { namespace Network {
         }
     }
 
-    void PacketExtractor::GetNeededResourceIds(Common::Packet const& p, Uint32& page)
+    void PacketExtractor::GetNeededResourceIds(Common::Packet const& p, Uint32& version)
     {
-        p.Read(page);
+        p.Read(version);
+    }
+
+    void PacketExtractor::GetResourceRange(Common::Packet const& p,
+                                           Uint32& resourceId,
+                                           Uint32& offset)
+    {
+        p.Read(resourceId);
+        p.Read(offset);
     }
 
     void PacketExtractor::GetCubeType(Common::Packet const& p, Chunk::CubeType& id)
