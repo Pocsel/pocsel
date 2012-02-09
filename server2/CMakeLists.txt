@@ -7,6 +7,7 @@ set(src
     ${common_src}
     ${tools_base_src}
     ${tools_database_src}
+    ${tools_logger_src}
     ${tools_lua_src}
 )
 
@@ -21,3 +22,5 @@ target_link_libraries(server2
     ${LUA_LIBRARIES}
     ${SQLITE3_LIBRARIES}
 )
+
+SetProgramInfo(server2)
