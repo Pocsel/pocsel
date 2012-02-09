@@ -51,7 +51,6 @@
 // Others
 #include <sqlite3.h>
 
-
 #ifdef WIN32
 // warning this utilisé dans le constructeur
 #pragma warning(disable: 4355)
