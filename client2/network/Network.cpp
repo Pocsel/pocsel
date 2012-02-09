@@ -2,6 +2,7 @@
 
 #include "client2/network/Network.hpp"
 #include "client2/Client.hpp"
+#include "tools/logger/Logger.hpp"
 #include "tools/ToString.hpp"
 #include "common/Packet.hpp"
 
@@ -27,7 +28,7 @@ namespace Client { namespace Network {
         }
         if (error)
         {
-            std::cerr << "Network::Network: Connection to " << host << ":" << port << " failed." << std::endl;
+            Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed." << Tools::endl;
             throw std::runtime_error("connection failed");
         }
         this->_host = host;
@@ -69,7 +70,7 @@ namespace Client { namespace Network {
     {
         if (!this->_isConnected)
         {
-            std::cerr << "Network::SendPacket: Sending packet with no open socket." << std::endl;
+            Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
             return;
         }
         bool sendNext = false;
@@ -95,10 +96,10 @@ namespace Client { namespace Network {
         }
         catch (std::exception& e)
         {
-            std::cerr << "Network::_Disconnect: Exception on socket shutdown: \"" << e.what() << "\"." << std::endl;
+            Tools::error << "Network::_Disconnect: Exception on socket shutdown: \"" << e.what() << "\".\n";
             return;
         }
-        std::cout << "Network::_Disconnect: Socket disconnected." << std::endl;
+        Tools::log << "Network::_Disconnect: Socket disconnected.\n";
     }
 
     void Network::_SendNext()
@@ -117,7 +118,7 @@ namespace Client { namespace Network {
     {
         if (error)
         {
-            std::cerr << "Network::_HandleWrite: Write error: \"" << error.message() << "\"." << std::endl;
+            Tools::error << "Network::_HandleWrite: Write error: \"" << error.message() << "\".\n";
             this->_Disconnect();
         }
         else
@@ -146,7 +147,7 @@ namespace Client { namespace Network {
     {
         if (error)
         {
-            std::cerr << "Network::_HandleReceivePacketSize: Read error: \"" << error.message() << "\"." << std::endl;
+            Tools::error << "Network::_HandleReceivePacketSize: Read error: \"" << error.message() << "\".\n";
             this->_Disconnect();
         }
         else
@@ -163,7 +164,7 @@ namespace Client { namespace Network {
     {
         if (error)
         {
-            std::cerr << "Network::_HandleReceivePacketContent: Read error \"" << error.message() << "\"." << std::endl;
+            Tools::error << "Network::_HandleReceivePacketContent: Read error \"" << error.message() << "\".\n";
             this->_Disconnect();
         }
         else
