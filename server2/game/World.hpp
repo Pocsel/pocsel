@@ -29,7 +29,7 @@ namespace Server { namespace Game {
     private:
         Server& _server;
         std::unordered_map<std::string, Map::Map*> _maps;
-        mutable Map::Map* _defaultMap;
+        mutable Map::Map* _defaultMap; // TODO retirer mutable
         std::vector<Common::CubeType> _cubeTypes;
         std::string _identifier;
         std::string _fullname;
@@ -40,7 +40,7 @@ namespace Server { namespace Game {
         ~World();
 
         Map::Map* GetMap(std::string const& name);
-        Map::Map* GetDefaultMap() const { return this->_defaultMap; }
+        Map::Map* GetDefaultMap() const { return this->_defaultMap; } // TODO retirer const
 
         void Start();
         void Stop();

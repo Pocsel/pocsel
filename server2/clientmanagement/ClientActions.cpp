@@ -87,6 +87,7 @@ namespace Server { namespace ClientManagement {
         Game::Map::Map::ChunkCallback callback = std::bind(&ClientManager::SendChunk, &manager, client.id, std::placeholders::_1);
         for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
         {
+            // TODO utiliser la bonne map
             manager.GetGame().GetWorld().GetDefaultMap()->GetChunk(*it, callback);
             //client.GetPlayer().GetMap().GetChunk(*it, callback);
         }
