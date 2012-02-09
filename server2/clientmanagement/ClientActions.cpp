@@ -114,7 +114,7 @@ namespace Server { namespace ClientManagement {
         Database::ResourceManager const& resourceManager = manager.GetResourceManager();
         if (!resourceManager.HasResource(id))
             throw std::runtime_error("Invalid resource id: " + Tools::ToString(id));
-        auto& resource = resourceManager.GetResource(id);
+        Common::Resource const& resource = resourceManager.GetResource(id);
         client.SendPacket(Network::PacketCreator::ResourceRange(resource, offset));
     }
 
