@@ -9,6 +9,7 @@ namespace Server { namespace Game{
     World::World(Server& server) :
         _server(server)
     {
+        Tools::debug << "World::World()\n";
         try
         {
             Database::WorldLoader::Load(*this, server.GetResourceManager());
@@ -22,6 +23,7 @@ namespace Server { namespace Game{
 
     World::~World()
     {
+        Tools::debug << "World::~World()\n";
     }
 
     Map::Map* World::GetMap(std::string const& name)

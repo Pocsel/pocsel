@@ -9,16 +9,18 @@
 namespace Server {
 
     Server::Server(int ac, char* av[]) :
-        _settings(new Settings(ac, av)),
-        _network(new Network::Network(*this)),
-        _resourceManager(new Database::ResourceManager(*this)),
-        _clientManager(new ClientManagement::ClientManager(*this)),
-        _game(new Game::Game(*this))
+        _settings(new Settings(ac, av))
     {
+        Tools::debug << "Server::Server()\n";
+        this->_network = new Network::Network(*this);
+        this->_resourceManager = new Database::ResourceManager(*this);
+        this->_clientManager = new ClientManagement::ClientManager(*this);
+        this->_game = new Game::Game(*this);
     }
 
     Server::~Server()
     {
+        Tools::debug << "Server::~Server()\n";
         Tools::Delete(this->_game);
         Tools::Delete(this->_clientManager);
         Tools::Delete(this->_resourceManager);
@@ -28,7 +30,7 @@ namespace Server {
 
     int Server::Run()
     {
-        Tools::debug << "Running server2\n";
+        Tools::debug << "Server::Run()\n";
 
         this->_clientManager->Start();
         //this->_game->Start();
@@ -39,7 +41,7 @@ namespace Server {
 
     void Server::Stop()
     {
-        Tools::debug << "Stopping server2\n";
+        Tools::debug << "Server::Stop()\n";
 
 //        this->_game->Stop();
         this->_clientManager->Stop();

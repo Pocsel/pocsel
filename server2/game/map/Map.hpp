@@ -3,11 +3,14 @@
 
 #include "server2/game/map/Conf.hpp"
 
+#include "tools/SimpleMessageQueue.hpp"
+
 namespace Server { namespace Game { namespace Map {
 
     struct Conf;
 
     class Map :
+        public Tools::SimpleMessageQueue,
         private boost::noncopyable
     {
     private:
@@ -16,6 +19,9 @@ namespace Server { namespace Game { namespace Map {
     public:
         Map(Conf const& conf);
         ~Map();
+
+        void Start();
+        void Stop();
     };
 
 }}}

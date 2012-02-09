@@ -18,21 +18,25 @@ namespace Server { namespace ClientManagement {
         _server(server),
         _nextId(1)
     {
+        Tools::debug << "ClientManager::ClientManager()\n";
     }
 
     ClientManager::~ClientManager()
     {
+        Tools::debug << "ClientManager::~ClientManager()\n";
         for (auto it = this->_clients.begin(), ite = this->_clients.end(); it != ite; ++it)
             Tools::Delete(it->second);
     }
 
     void ClientManager::Start()
     {
+        Tools::debug << "ClientManager::Start()\n";
         this->_Start();
     }
 
     void ClientManager::Stop()
     {
+        Tools::debug << "ClientManager::Stop()\n";
         this->_Stop();
     }
 

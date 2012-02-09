@@ -31,7 +31,8 @@ namespace Tools {
         void _Start()
         {
             assert(!this->_isRunning && "SimpleMessageQueue is already running");
-            std::cout << "Starting SimpleMessageQueue with " << this->_nbThreads << " threads. (" << this << ")\n";
+            std::cout << "Starting SimpleMessageQueue with " << this->_nbThreads <<
+                " thread" << (this->_nbThreads > 1 ? "s" : "") << ". (" << this << ")\n";
             _threads.resize(this->_nbThreads);
             _isRunning = true;
             for (unsigned int i = 0; i < this->_nbThreads; ++i)
