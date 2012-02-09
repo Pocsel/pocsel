@@ -1,7 +1,6 @@
 macro(CreateGroups src)
 
     if (MSVC)
-        message("${src}")
         foreach (pathSourceFile ${src})
 
             get_filename_component (pathSourceGroup ${pathSourceFile} PATH)

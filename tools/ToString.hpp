@@ -73,7 +73,7 @@ namespace Tools {
     };
 
     // the function
-    template<typename T> static inline std::string ToString(T val)
+    template<typename T> inline std::string ToString(T val)
     {
         return Stringify<T>::MakeString(val);
     }

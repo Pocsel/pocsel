@@ -11,6 +11,9 @@
 # include <GL/glxew.h>
 #endif
 
+#include <Cg/cg.h>
+#include <Cg/cgGL.h>
+
 #ifdef DEBUG
 // In debug mode, perform a test on every OpenGL call
 #define GLCHECK(Func) ((Func), Tools::Renderers::OpenGL::GLCheckError(__FILE__, __LINE__, __FUNCTION__))
@@ -112,7 +115,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     }
 
     void GLCheckError(std::string const& file, unsigned int line, char const* function);
-
+    void CGCheckError(CGcontext ctx, std::string const& file, unsigned int line, char const* function);
 }}}
 
 #endif

@@ -5,17 +5,36 @@
 
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/IndexBuffer.hpp"
-#include "tools/renderers/opengl/ShaderProgram.hpp"
+#include "tools/renderers/opengl/ShaderProgramCg.hpp"
 #include "tools/renderers/opengl/ShaderProgramNull.hpp"
 #include "tools/renderers/opengl/Texture2D.hpp"
 #include "tools/renderers/opengl/VertexBuffer.hpp"
 #include "tools/renderers/GLRenderer.hpp"
+#include "tools/logger/Logger.hpp"
 
 #ifdef _MSC_VER
 # pragma warning(disable: 4244)
 #endif
 
 namespace Tools { namespace Renderers {
+
+    namespace {
+        CGcontext _cgGlobalContext = 0;
+        int _cgGlobalNbReferences = 0;
+
+        void ErrCallback()
+        {
+            auto error = cgGetError();
+            if (error == CG_NO_ERROR)
+                return;
+            if (error == CG_COMPILER_ERROR)
+                Tools::error << "Cg compiler:\n" << cgGetLastListing(_cgGlobalContext) << "\n";
+            throw std::runtime_error(
+                "An internal Cg call failed (Code: "
+                + ToString(error) + "): "
+                + cgGetErrorString(cgGetError()));
+        }
+    }
 
     void GLRenderer::Initialise()
     {
@@ -25,19 +44,35 @@ namespace Tools { namespace Renderers {
             throw std::runtime_error(ToString("glewInit() failed: ") + ToString(glewGetErrorString(error)));
         if (!(GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader))
             this->_useShaders = false;
-#ifdef DEBUG
-        std::cout << ToString("Glew version: ") + (char const*)glewGetString(GLEW_VERSION) + "\n";
-        std::cout << ToString("OpenGL version: ") + (char const*)glGetString(GL_VERSION) + "\n";
-#endif
+
+        Tools::log << "Glew version: " << (char const*)glewGetString(GLEW_VERSION) << "\n";
+        Tools::log << "OpenGL version: " << (char const*)glGetString(GL_VERSION) << "\n";
 
         GLCHECK(glEnable(GL_BLEND));
         GLCHECK(glEnable(GL_ALPHA_TEST));
         GLCHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        if (this->_useShaders)
+        {
+            if (_cgGlobalContext == 0)
+                _cgGlobalContext = cgCreateContext();
+            this->_cgContext = _cgGlobalContext;
+            ++_cgGlobalNbReferences;
+            cgSetErrorCallback(&ErrCallback);
+            cgGLSetDebugMode(CG_FALSE);
+            cgSetParameterSettingMode(this->_cgContext, CG_DEFERRED_PARAMETER_SETTING);
+            cgGLRegisterStates(this->_cgContext);
+            cgGLSetManageTextureParameters(this->_cgContext, CG_TRUE);
+        }
     }
 
     void GLRenderer::Shutdown()
     {
-        std::cout << "a plu d'opengl\n";
+        if (this->_useShaders && --_cgGlobalNbReferences == 0)
+        {
+            cgDestroyContext(this->_cgContext);
+            _cgGlobalContext = 0;
+        }
     }
 
     std::unique_ptr<IVertexBuffer> GLRenderer::CreateVertexBuffer()
@@ -60,10 +95,10 @@ namespace Tools { namespace Renderers {
         return std::unique_ptr<ITexture2D>(new OpenGL::Texture2D(*this, imagePath));
     }
 
-    std::unique_ptr<IShaderProgram> GLRenderer::CreateProgram(std::string const& vertexShader, std::string const& fragmentShader)
+    std::unique_ptr<IShaderProgram> GLRenderer::CreateProgram(std::string const& effect)
     {
         if (this->_useShaders)
-            return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgram(*this, vertexShader, fragmentShader));
+            return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramCg(*this, effect));
         else
             return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramNull(*this));
     }
@@ -106,7 +141,6 @@ namespace Tools { namespace Renderers {
     {
         this->_state = DrawNone;
         this->_currentProgram = 0;
-        GLCHECK(glUseProgramObjectARB(0));
     }
 
     void GLRenderer::BeginDraw(IRenderTarget* target)
@@ -125,7 +159,6 @@ namespace Tools { namespace Renderers {
 
         this->_state = DrawNone;
         this->_currentProgram = 0;
-        GLCHECK(glUseProgramObjectARB(0));
     }
 
     void GLRenderer::DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode)

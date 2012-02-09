@@ -36,7 +36,10 @@ namespace Server { namespace ClientManagement {
     public:
         ClientManager(Server& server);
         ~ClientManager();
+        void Start();
+        void Stop();
 
+        // A appeler d'un autre thread
         void HandleNewClient(Network::ClientConnection* clientConnection)
         {
             this->_PushMessage(std::bind(&ClientManager::_HandleNewClient, this, clientConnection));
@@ -49,14 +52,20 @@ namespace Server { namespace ClientManagement {
         {
             this->_PushMessage(std::bind(&ClientManager::_HandlePacket, this, clientId, packet));
         }
+        void SendPacket(Uint32 clientId, Common::Packet* packet)
+        {
+            this->_PushMessage(std::bind(&ClientManager::_SendPacket, this, clientId, packet));
+        }
 
-        void Start() { this->_Start(); }
-        void Stop() { this->_Stop(); }
+        // A appeler du thread clientmanagement
+        void ClientLogin(Client& client, std::string const& login);
+
     private:
         Uint32 _GetNextId();
         void _HandleNewClient(Network::ClientConnection* clientConnection);
         void _HandleClientError(Uint32 clientId);
         void _HandlePacket(Uint32 clientId, Common::Packet* packet);
+        void _SendPacket(Uint32 clientId, Common::Packet* packet);
     };
 
 }}

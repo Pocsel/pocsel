@@ -12,13 +12,23 @@ static Server::Server* server2;
 # include <signal.h>
 void sigint(int)
 {
-    extern Server::Server* server2;
     if (server2 != 0)
         server2->Stop();
 }
-void sigpipe(int)
+//void sigpipe(int)
+//{
+//    std::cerr << "Broken pipe catched !" << std::endl;
+//}
+#else
+BOOL WINAPI ConsoleControlHandler(DWORD control)
 {
-    std::cerr << "Broken pipe catched !" << std::endl;
+    if (control == CTRL_C_EVENT || control == CTRL_BREAK_EVENT || control == CTRL_CLOSE_EVENT || control == CTRL_SHUTDOWN_EVENT)
+    {
+        if (server2 != 0)
+            server2->Stop();
+        return true;
+    }
+    return false;
 }
 #endif
 
@@ -26,7 +36,9 @@ int main(int ac, char *av[])
 {
 #ifndef WIN32
     (void) ::signal(SIGINT, sigint);
-    (void) ::signal(SIGPIPE, sigpipe);
+//    (void) ::signal(SIGPIPE, sigpipe);
+#else
+    SetConsoleCtrlHandler(ConsoleControlHandler, true);
 #endif
 
     server2 = new Server::Server(ac, av);

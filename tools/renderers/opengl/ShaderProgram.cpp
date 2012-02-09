@@ -142,7 +142,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         }
     }
 
-    void ShaderProgram::Activate()
+    void ShaderProgram::BeginPass()
     {
         this->_renderer.SetCurrentProgram(*this);
         GLCHECK(glUseProgramObjectARB(this->_id));
@@ -155,6 +155,12 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         if (this->_viewId != -1)
             this->UpdateParameter(ShaderParameterUsage::ViewMatrix);
         this->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
+    }
+
+    bool ShaderProgram::EndPass()
+    {
+        GLCHECK(glUseProgramObjectARB(0));
+        return false;
     }
 
 }}}

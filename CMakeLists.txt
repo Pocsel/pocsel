@@ -11,8 +11,10 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # Modules supplémentaires
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-include(${CMAKE_SOURCE_DIR}/cmake/CustomPrecompiledHeader.cmake )
-include(${CMAKE_SOURCE_DIR}/cmake/CreateGroups.cmake)
+include(CustomPrecompiledHeader)
+include(CreateGroups)
+include(GetGitRevision)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 # Packages
 set(Boost_USE_STATIC_LIBS ON)
@@ -76,6 +78,7 @@ file(GLOB tools_database_src "tools/database/*.[ch]pp" "tools/database/sqlite/*.
 file(GLOB_RECURSE tools_gui_src "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
 file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
+file(GLOB_RECURSE tools_logger_src "tools/logger/*.[ch]pp")
 
 set(pocsel_binaries_dir "${CMAKE_BINARY_DIR}/pocsel/binaries")
 set(pocsel_server_dir "${CMAKE_BINARY_DIR}/pocsel/server")
@@ -94,6 +97,11 @@ macro(enable_pch target target_src)
     endif()
 endmacro()
 
+macro(SetProgramInfo target)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    set(program_name "${target}")
+    configure_file("../ProgramInfo.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/ProgramInfo.hpp")
+endmacro()
 
 add_subdirectory(resources)
 add_subdirectory(sdk)

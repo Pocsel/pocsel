@@ -1,0 +1,8 @@
+#ifndef __PROGRAMINFO_HPP__
+#define __PROGRAMINFO_HPP__
+
+#define PROJECT_NAME "@CMAKE_PROJECT_NAME@"
+#define PROGRAM_NAME "@program_name@"
+#define GIT_VERSION "@GIT_SHA1@"
+
+#endif

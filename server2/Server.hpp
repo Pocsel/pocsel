@@ -9,9 +9,21 @@ namespace Server {
 
     }
 
+    namespace Database {
+
+        class ResourceManager;
+
+    }
+
     namespace ClientManagement {
 
         class ClientManager;
+
+    }
+
+    namespace Game {
+
+        class Game;
 
     }
 
@@ -20,7 +32,6 @@ namespace Server {
 namespace Server {
 
     class Settings;
-    //class Game;
 
     class Server :
         private boost::noncopyable
@@ -28,8 +39,9 @@ namespace Server {
     private:
         Settings* _settings;
         Network::Network* _network;
+        Database::ResourceManager* _resourceManager;
         ClientManagement::ClientManager* _clientManager;
-        //Game* _game;
+        Game::Game* _game;
 
     public:
         Server(int ac, char *av[]);
@@ -37,7 +49,9 @@ namespace Server {
         int Run();
         void Stop();
         Settings const& GetSettings() const { return *this->_settings; }
+        Database::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
         ClientManagement::ClientManager& GetClientManager() { return *this->_clientManager; }
+        Game::Game& GetGame() { return *this->_game; }
     };
 
 }

@@ -1,6 +1,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "client/InputBinder.hpp"
+#include "tools/logger/Logger.hpp"
 
 #include "tools/gui/EventManager.hpp"
 #include "tools/gui/EventCaster.hpp"
@@ -35,7 +36,7 @@ namespace Client {
         typedef bool (InputBinder::*MethodType)(std::string const&, std::string const&);
         try
         {
-            std::cout << "Loading bind file \"" << path << "\"." << std::endl;
+            Tools::log << "Loading bind file \"" << path << "\"." << Tools::endl;
             Tools::Lua::Interpreter i;
             i.Bind("bind",
                    static_cast<MethodType>(&InputBinder::Bind), this, std::placeholders::_1, std::placeholders::_2

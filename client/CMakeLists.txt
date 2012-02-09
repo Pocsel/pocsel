@@ -11,6 +11,7 @@ set(src
     ${tools_gui_src}
     ${tools_lua_src}
     ${tools_renderers_src}
+    ${tools_logger_src}
 )
 
 CreateGroups("${src}")
@@ -28,6 +29,8 @@ target_link_libraries(client
 )
 
 set(binds_file "${pocsel_client_dir}/bindings.lua")
+
+SetProgramInfo(client)
 
 add_custom_command(
     OUTPUT "${binds_file}"

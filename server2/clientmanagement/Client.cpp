@@ -6,7 +6,8 @@ namespace Server { namespace ClientManagement {
 
     Client::Client(Uint32 id, Network::ClientConnection* connection) :
         id(id),
-        _connection(connection)
+        _connection(connection),
+        _login("")
     {
         this->_connection->SetClientId(id);
         this->_connection->ConnectRead();
@@ -20,6 +21,17 @@ namespace Server { namespace ClientManagement {
     void Client::Shutdown()
     {
         this->_connection->Shutdown();
+    }
+
+    void Client::SendPacket(Common::Packet* packet)
+    {
+        this->_connection->SendPacket(packet);
+    }
+
+    void Client::SetLogin(std::string const& login)
+    {
+        assert(login.size() > 0 && "login is empty");
+        this->_login = login;
     }
 
 }}

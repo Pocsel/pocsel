@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "tools/renderers/opengl/opengl.hpp"
+#include "tools/renderers/GLRenderer.hpp"
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
@@ -69,12 +70,11 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         }
         }
 
-        // Log the error
-        std::cerr << "An internal OpenGL call failed in "
-                    << file.substr(file.find_last_of("\\/") + 1) << " (" << line << ", " << function << ") : "
-                    << error << " (code: " << errorCode << ")" << ", " << desc
-                    << std::endl;
-        exit(4124); // DEBUG
+        throw std::runtime_error(
+                    std::string("An internal OpenGL call failed in ")
+                    + file.substr(file.find_last_of("\\/") + 1) + " (" + ToString(line) + ", " + function + ") : "
+                    + error + " (code: " + ToString(errorCode) + ")" + ", " + desc
+                    + "\n");
     }
 
 }}}
