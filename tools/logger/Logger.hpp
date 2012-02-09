@@ -21,6 +21,7 @@ namespace Tools { namespace Logger {
         NullWriter(TLog& log, std::string const&) : _parent(log) {}
 
     public:
+        void WriteFile(std::string const&) {}
         void Write(std::string const&) {}
         void WriteLine(std::string const&) {}
 
@@ -40,6 +41,7 @@ namespace Tools { namespace Logger {
         NullWriter(std::ostream&, std::string const&) {}
 
     public:
+        void WriteFile(std::string const&) {}
         void Write(std::string const&) {}
         void WriteLine(std::string const&) {}
         template<class T> NullWriter& operator <<(T) { return *this; }
