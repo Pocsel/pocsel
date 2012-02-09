@@ -28,7 +28,7 @@ namespace Server {
 
     int Server::Run()
     {
-        std::cout << "Running server2" << std::endl;
+        Tools::debug << "Running server2\n";
 
         this->_clientManager->Start();
         //this->_game->Start();
@@ -39,7 +39,7 @@ namespace Server {
 
     void Server::Stop()
     {
-        std::cout << "Stopping server2" << std::endl;
+        Tools::debug << "Stopping server2\n";
 
 //        this->_game->Stop();
         this->_clientManager->Stop();

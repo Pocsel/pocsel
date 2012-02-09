@@ -77,7 +77,7 @@ namespace Server { namespace Network {
         ptr->Write(Protocol::ServerToClient::ResourceRange);
         ptr->Write32(resource.id);
         ptr->Write32(offset);
-        std::cout << "PacketCreator::ResourceRangePacket(): Sending resource " << resource.id <<
+        Tools::debug << "PacketCreator::ResourceRange(): " << resource.id <<
                      ": offset = " << offset <<
                      " size = " << resource.size << ".\n";
         // XXX si packet change on est dans la merde !

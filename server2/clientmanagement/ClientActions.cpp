@@ -73,14 +73,13 @@ namespace Server { namespace ClientManagement {
     {
 //        std::list<Chunk::IdType> ids;
 //        PacketExtractor::NeedChunks(packet, ids);
-//        std::cout << "Need Chunks:";
+//        Tools::debug << "Need Chunks:\n";
 //        Map::RequestCallback callback = std::bind(&Client::SendChunk, client, std::placeholders::_1);
 //        for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
 //        {
-//            std::cout << ' ' << *it;
+//            Tools::debug << *it << "\n";
 //            client->GetPlayer().GetMap().GetChunk(*it, callback);
 //        }
-//        std::cout << std::endl;
     }
 
     void ClientActions::_HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet& packet)
@@ -92,7 +91,7 @@ namespace Server { namespace ClientManagement {
 //        Uint32 offset = 0;
 //        do
 //        {
-//            std::cout << "ClientActions::_HandleGetNeededResourceIds: " << ids.size() << std::endl;
+//            Tools::debug << "ClientActions::_HandleGetNeededResourceIds: " << ids.size() << std::endl;
 //            client->SendPacket(PacketCreator::NeededResourceIdsPacket(ids, offset));
 //        } while (offset < ids.size());
     }
@@ -123,8 +122,6 @@ namespace Server { namespace ClientManagement {
 
     void ClientActions::_HandleGetSpawnPosition(ClientManager& manager, Client& client, Common::Packet&)
     {
-//        std::cout << "_HandleGetSpawnPosition\n";
-//
 //        game.GetWorld().GetDefaultMap().GetSpawnPosition(
 //                std::bind(&Client::SpawnPosition, client, std::placeholders::_1)
 //                );

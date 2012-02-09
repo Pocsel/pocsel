@@ -1,8 +1,5 @@
-#include <iostream>
 #include <iomanip>
 #include <boost/program_options.hpp>
-
-#include "tools/ToString.hpp"
 
 #include "common/constants.hpp"
 
@@ -55,7 +52,7 @@ namespace {
 
         if (port == 0)
         {
-            std::cerr << "Wrong port given (0), set to " << Common::DefaultPort << "\n";
+            Tools::log << "Wrong port given (0), set to " << Common::DefaultPort << "\n";
             port = Common::DefaultPort;
         }
     }
@@ -87,8 +84,8 @@ namespace Server {
         }
         catch (std::exception& ex)
         {
-            std::cerr << "Arguments error (try -h for help): " << ex.what() << std::endl;
-            exit(EXIT_FAILURE);
+            Tools::error << "Arguments error (try -h for help): " << ex.what() << "\n";
+            throw;
         }
 
         this->worldFile = vm["world"].as<std::string>();
@@ -97,14 +94,14 @@ namespace Server {
 
         if (vm.count("help"))
         {
-            std::cout << "Usage: " << (ac > 0 ? av[0] : "server2") << " [address] [OPTIONS]\n\n";
-            std::cout << options << std::endl;
+            Tools::log << "Usage: " << (ac > 0 ? av[0] : "server2") << " [address] [OPTIONS]\n\n";
+            Tools::log << options << "\n";
             exit(EXIT_SUCCESS);
         }
 
         if (vm.count("version"))
         {
-            std::cout << "Pocsel 0x00000001\n";
+            Tools::log << "Pocsel 0x00000001\n";
             exit(EXIT_SUCCESS);
         }
     }

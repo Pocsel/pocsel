@@ -15,7 +15,7 @@ namespace Server { namespace Game{
         }
         catch (std::exception& e)
         {
-            std::cout << "Could not load world: " << e.what() << "\n";
+            Tools::error << "Could not load world: " << e.what() << "\n";
             throw;
         }
     }
@@ -32,4 +32,3 @@ namespace Server { namespace Game{
     }
 
 }}
-

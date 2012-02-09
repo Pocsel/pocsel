@@ -10,6 +10,8 @@
 #include "server2/game/map/Conf.hpp"
 #include "server2/game/map/Map.hpp"
 
+#include "server2/Logger.hpp"
+
 namespace Server { namespace Database {
 
     void WorldLoader::Load(Game::World& world, ResourceManager& manager)
@@ -36,17 +38,14 @@ namespace Server { namespace Database {
             auto& row = curs.FetchOne();
             Uint32 id = row[0].GetUint64();
             std::string name = row[2].GetString();
-            std::cout << "Load cube type id: " << id <<
-                         ", plugin_id: " << row[1].GetUint64() <<
-                         ", name: " << row[2].GetString() << std::endl;
+            Log::load << "Load cube type id: " << id <<
+                          ", plugin_id: " << row[1].GetUint64() <<
+                          ", name: " << row[2].GetString() << "\n";
             if (world._cubeTypes.size() < id)
                 world._cubeTypes.resize(id);
             world._cubeTypes[id - 1].id = id;
             world._cubeTypes[id - 1].name = name;
             WorldLoader::_LoadCubeType(world._cubeTypes[id - 1], row[3].GetString(), manager);
-
-            std::cout << "Loaded:" << world._cubeTypes[id-1].solid << "," <<
-                world._cubeTypes[id-1].transparent<<"\n";
         }
 
         // Maps
@@ -82,22 +81,22 @@ namespace Server { namespace Database {
             descr.solid = lua["solid"];
             descr.transparent = lua["transparent"];
 
-            std::cout << "name: " << descr.name << " " << descr.id << "\n";
-            std::cout << "textures.top: " << descr.textures.top << "\n";
-            std::cout << "textures.left: " << descr.textures.left << "\n";
-            std::cout << "textures.front: " << descr.textures.front << "\n";
-            std::cout << "textures.right: " << descr.textures.right << "\n";
-            std::cout << "textures.back: " << descr.textures.back << "\n";
-            std::cout << "textures.bottom: " << descr.textures.bottom << "\n";
+            Log::load << "name: " << descr.name << " " << descr.id << "\n";
+            Log::load << "textures.top: " << descr.textures.top << "\n";
+            Log::load << "textures.left: " << descr.textures.left << "\n";
+            Log::load << "textures.front: " << descr.textures.front << "\n";
+            Log::load << "textures.right: " << descr.textures.right << "\n";
+            Log::load << "textures.back: " << descr.textures.back << "\n";
+            Log::load << "textures.bottom: " << descr.textures.bottom << "\n";
 
-            std::cout << "solid: " << descr.solid << "\n";
-            std::cout << "transparent: " << descr.transparent << "\n";
+            Log::load << "solid: " << descr.solid << "\n";
+            Log::load << "transparent: " << descr.transparent << "\n";
 
-            std::cout << "\n";
+            Log::load << "\n";
         }
         catch (std::exception& e)
         {
-            std::cerr << "CubeTypeLoader::Load: " << e.what() << "." << std::endl;
+            Tools::error << "CubeTypeLoader::Load: " << e.what() << ".\n";
             throw;
         }
     }
@@ -116,14 +115,14 @@ namespace Server { namespace Database {
         conf.name = name;
 
 
-        std::cout << "Load lua code '" << code << "'\n";
+        Log::load << "Load lua code:\n'''\n" << code << "\n'''\n";
         Tools::Lua::Interpreter lua(code);
         auto fullname = lua["fullname"],
              is_default = lua["is_default"],
              cubes = lua["cubes"],
              equations = lua["equations"];
 
-        lua.DumpStack();
+        lua.DumpStack(Log::load);
         conf.fullname = fullname.as<std::string>();
         conf.is_default = is_default.as<bool>();
 
@@ -131,7 +130,7 @@ namespace Server { namespace Database {
         {
             auto eq = it.value();
             auto& eq_conf = conf.equations[it.key()];
-            std::cout << "Loading equation " << it.key() << std::endl;
+            Log::load << "Loading equation " << it.key() << "\n";
             eq_conf.function_name = eq["function_name"].as<std::string>();
             for (auto it = eq.begin(), end = eq.end(); it != end; ++it)
             {
@@ -143,11 +142,12 @@ namespace Server { namespace Database {
         {
             auto cf = it.value();
             auto name = it.key().as<std::string>();
-            std::cout << "Loading cube " << it.key() << std::endl;
+            Log::load << "Loading cube " << it.key() << "\n";
 
             if (conf.cubes.find(name) != conf.cubes.end())
             {
-                std::cout << "WARNING: cube '" << name <<
+                Log::load <<
+                    "WARNING: cube '" << name <<
                     "' already defined, only one definition will be used.\n";
                 continue;
             }
@@ -161,7 +161,7 @@ namespace Server { namespace Database {
             {
                 if (name != "void")
                 {
-                    std::cout << "WARNING: cube '" << name <<
+                    Log::load << "WARNING: cube '" << name <<
                         "' is not recognized. It will be ignored." <<
                         "If you want to define empty cubes, name it 'void'\n";
     //                continue;

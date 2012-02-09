@@ -51,24 +51,24 @@ namespace Tools { namespace Logger {
     public:
         typedef TWriter Writer;
 
-        explicit _Logger(std::string const& file = "")
+        explicit _Logger(std::string const& file)
             : TWriter(file)
         {
         }
 
-        _Logger(std::ostream& outStream, std::string const& file = "")
+        _Logger(std::ostream& outStream, std::string const& file)
             : TWriter(outStream, file)
         {
         }
 
         template<class TLog>
-        _Logger(TLog& parent, std::string const& file = "")
+        _Logger(TLog& parent, std::string const& file)
             : TWriter(parent, file)
         {
         }
 
         template<class TLog>
-        _Logger(TLog& parent, std::ostream& outStream, std::string const& file = "")
+        _Logger(TLog& parent, std::ostream& outStream, std::string const& file)
             : TWriter(parent, outStream, file)
         {
         }

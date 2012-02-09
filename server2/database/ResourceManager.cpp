@@ -8,6 +8,7 @@
 
 #include "server2/Server.hpp"
 #include "server2/Settings.hpp"
+#include "server2/Logger.hpp"
 
 namespace Server { namespace Database {
 
@@ -24,7 +25,7 @@ namespace Server { namespace Database {
         this->_resources.resize(nbResources);
         curs.Execute("SELECT id, plugin_id, version, type, filename, data FROM resource");
         if (!curs.HasData())
-            std::cerr << "No resource found on the server !\n";
+            Tools::error << "No resource found on the server !\n";
         while (curs.HasData())
         {
             auto& row = curs.FetchOne();
@@ -43,7 +44,7 @@ namespace Server { namespace Database {
                 data.data,
                 static_cast<Uint32>(data.size)
             );
-            std::cout << "Found resource " << id << ": " << filename << ".\n";
+            Log::load << "Found resource " << id << ": " << filename << ".\n";
             this->_ids[filename] = id;
             this->_idsByVersion[version].push_back(id);
         }

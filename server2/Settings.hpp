@@ -1,7 +1,5 @@
-#ifndef  __SERVER_SETTINGS_HPP__
-# define __SERVER_SETTINGS_HPP__
-
-# include <string>
+#ifndef __SERVER_SETTINGS_HPP__
+#define __SERVER_SETTINGS_HPP__
 
 namespace Server {
 
@@ -10,16 +8,12 @@ namespace Server {
     public:
         std::string worldFile;
         std::string host;
-        Uint16      port;
+        Uint16 port;
 
+    public:
         Settings(int ac, char* av[]);
-
-        //static void PrintUsage(char const* progName);
-        //static void PrintHelp();
     };
 
 }
 
 #endif
-
-

@@ -48,24 +48,24 @@ namespace Server { namespace ClientManagement {
         Uint32 id = this->_GetNextId();
         while (this->_clients.find(id) != this->_clients.end())
         {
-            std::cout << "Client id " << id << " already taken.\n";
+            Tools::log << "Client id " << id << " already taken.\n";
             id = this->_GetNextId();
         }
         Client* newClient = new Client(id, clientConnection);
         this->_clients[id] = newClient;
 
-        std::cout << "New client: " << id << "\n";
+        Tools::log << "New client: " << id << "\n";
     }
 
     void ClientManager::_HandleClientError(Uint32 clientId)
     {
         if (this->_clients.find(clientId) == this->_clients.end())
         {
-            std::cout << "ClientError: Client " << clientId << " not found.\n";
+            Tools::error << "ClientError: Client " << clientId << " not found.\n";
             return;
         }
 
-        std::cout << "Removing client " << clientId << "\n";
+        Tools::log << "Removing client " << clientId << "\n";
         this->_clients[clientId]->Shutdown();
         Tools::Delete(this->_clients[clientId]);
         this->_clients.erase(clientId);
@@ -76,7 +76,7 @@ namespace Server { namespace ClientManagement {
         std::unique_ptr<Common::Packet> autoDelete(packet);
         if (this->_clients.find(clientId) == this->_clients.end())
         {
-            std::cout << "HandlePacket: Client " << clientId << " not found.\n";
+            Tools::error << "HandlePacket: Client " << clientId << " not found.\n";
             return ;
         }
 
@@ -87,7 +87,7 @@ namespace Server { namespace ClientManagement {
         }
         catch (std::exception& e)
         {
-            std::cout << "HandlePacket: " << e.what() << " (client " << clientId << ")\n";
+            Tools::log << "HandlePacket: " << e.what() << " (client " << clientId << ")\n";
             this->_HandleClientError(clientId);
         }
     }
@@ -97,7 +97,7 @@ namespace Server { namespace ClientManagement {
         std::unique_ptr<Common::Packet> autoDelete(packet);
         if (this->_clients.find(clientId) == this->_clients.end())
         {
-            std::cout << "HandlePacket: Client " << clientId << " not found.\n";
+            Tools::error << "SendPacket: Client " << clientId << " not found.\n";
             return ;
         }
 
@@ -134,7 +134,7 @@ namespace Server { namespace ClientManagement {
                           static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
                          );
 
-        std::cout << "Client logged in: " << login2 << "\n";
+        Tools::log << "Client logged in: " << login2 << "\n";
 
 //        client.Spawn(this->_game.GetWorld().GetDefaultMap());
         // TODO

@@ -16,7 +16,6 @@ namespace Server { namespace Game { namespace Map {
     public:
         Map(Conf const& conf);
         ~Map();
-
     };
 
 }}}

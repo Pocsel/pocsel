@@ -54,21 +54,3 @@ Object Interpreter::operator [] (std::string const& key)
 {
     return (*this)[key.c_str()];
 }
-
-
-void Interpreter::DumpStack()
-{
-    std::cout << "------------------------------- Dump stack\n";
-    int top = api.gettop();
-    for (int i = 1; i <= top; i++)
-    {
-        std::cout << i << ": " << api.typestring(i) << ": ";
-        if (api.isnumber(i)) std::cout << api.tonumber(i);
-        else if (api.isstring(i)) std::cout << api.tostring(i);
-        else if (api.isboolean(i)) std::cout << (api.toboolean(i) ? "true" : "false");
-        else std::cout << api.topointer(i);
-        std::cout << '\n';
-    }
-    std::cout << "------------------------------- top = " << top << "\n";
-}
-

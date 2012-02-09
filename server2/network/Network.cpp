@@ -30,14 +30,14 @@ namespace Server { namespace Network {
             this->_acceptor.bind(endpoint);
             this->_acceptor.listen();
             this->_ConnectAccept();
-            std::cout <<
+            Tools::log <<
                 "Listening on " << endpoint.address().to_string()
                 << ":" << settings.port <<
                 "\n";
         }
         catch (std::exception& e)
         {
-            std::cerr <<
+            Tools::error <<
                 "Cannot bind to '" << settings.host <<
                 ":" << settings.port <<
                 "': " << e.what() <<
@@ -62,26 +62,26 @@ namespace Server { namespace Network {
     {
         if (!e)
         {
-            std::cout << "New connection.\n";
+            Tools::log << "New connection.\n";
             ClientConnection* newClientConnection = new ClientConnection(this->_newConnection, this->_server.GetClientManager());
             this->_server.GetClientManager().HandleNewClient(newClientConnection);
             this->_ConnectAccept();
         }
         else
         {
-            std::cerr << "New connection has error !?" << std::endl;
+            Tools::error << "New connection has error.\n";
         }
     }
 
     void Network::Run()
     {
-        std::cout << "Network::Run()\n";
+        Tools::debug << "Network::Run()\n";
         this->_ioService.run();
     }
 
     void Network::Stop()
     {
-        std::cout << "Network::Stop()\n";
+        Tools::debug << "Network::Stop()\n";
         this->_ioService.stop();
     }
 

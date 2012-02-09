@@ -33,7 +33,6 @@ namespace Tools { namespace Lua {
         void Load(std::string const& code);
         void Exec(std::string const& code);
         void ExecFile(std::string const& path);
-        void DumpStack();
         /////////////////////////////////////////////////////////////////////
         // Object Bind(Func, Args...)
         template<typename Func>
@@ -77,6 +76,25 @@ namespace Tools { namespace Lua {
         template<typename Func, typename T1, typename T2, typename T3, typename T4>
             Object Bind(std::string const& str, Func func, T1 t1, T2 t2, T3 t3, T4 t4)
             { return Bind<Func, T1, T2, T3, T4>(str.c_str(), func, t1, t2, t3, t4); }
+
+        template<typename TLogger>
+            void DumpStack(TLogger& logger)
+            {
+                logger << "------------------------------- Dump stack\n";
+                int top = api.gettop();
+                for (int i = 1; i <= top; i++)
+                {
+                    logger << i << ": " << api.typestring(i) << ": ";
+                    if (api.isnumber(i)) logger << api.tonumber(i);
+                    else if (api.isstring(i)) logger << api.tostring(i);
+                    else if (api.isboolean(i)) logger << (api.toboolean(i) ? "true" : "false");
+                    else logger << api.topointer(i);
+                    logger << '\n';
+                }
+                logger << "------------------------------- top = " << top << "\n";
+            }
+
+        void DumpStack() { this->DumpStack(std::cout); }
 
     private:
         template<typename Sig, typename Func>

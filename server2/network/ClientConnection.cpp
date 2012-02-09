@@ -43,12 +43,12 @@ namespace Server { namespace Network {
     {
         if (this->_socket)
         {
-            std::cout << "Shutting down ClientConnection" << std::endl;
+            Tools::debug << "Shutting down ClientConnection\n";
             Tools::Delete(this->_socket);
             this->_socket = 0;
             this->_connected = false;
             this->_this.reset();
-            std::cout << "ClientConnection is Down" << std::endl;
+            Tools::debug << "ClientConnection is Down\n";
         }
     }
 
@@ -66,7 +66,6 @@ namespace Server { namespace Network {
                     this->_toRead = Common::ArrayToUint16(this->_data + this->_offset);
                     if (this->_toRead > 0)
                     {
-//                        std::cout << "About to read " << this->_toRead << " bytes" << std::endl;
                         if (this->_toRead > this->_size)
                         {
                             this->_size += this->_toRead * 2;
@@ -77,7 +76,7 @@ namespace Server { namespace Network {
                         }
                     }
                     else
-                        std::cerr << "Null size packet" << std::endl;
+                        Tools::log << "Null sized packet received.\n";
                     transferredBytes -= 2;
                     this->_offset += 2;
                 }
@@ -85,7 +84,6 @@ namespace Server { namespace Network {
                 {
                     if (transferredBytes >= this->_toRead)
                     {
-//                        std::cout << "Finalizing packet with " << this->_toRead << " bytes" << std::endl;
                         Common::Packet* packet = new Common::Packet();
                         packets.push_back(std::unique_ptr< Common::Packet >(packet));
                         this->_offset += this->_toRead;
@@ -98,7 +96,6 @@ namespace Server { namespace Network {
                     }
                     else
                     {
-//                        std::cout << "Append to packet " << transferredBytes << " bytes" << std::endl;
                         this->_offset += transferredBytes;
                         this->_toRead -= transferredBytes;
                         transferredBytes = 0;
@@ -110,7 +107,7 @@ namespace Server { namespace Network {
         }
         else
         {
-            std::cerr << "ClientConnection _HandleRead error: " << error << ": " << error.message() << std::endl;
+            Tools::log << "ClientConnection error: " << error << ": " << error.message() << "(client " << this->_clientId << ")\n";
             if (this->_connected)
                 this->_clientManager.HandleClientError(this->_clientId);
             this->_connected = false;
@@ -144,7 +141,7 @@ namespace Server { namespace Network {
         std::unique_ptr<Common::Packet> packet(packet_);
         if (!this->_connected || !this->_socket)
         {
-            std::cerr << "Socket already down (client " << this->_clientId << ")" << std::endl;
+            Tools::debug << "Socket already down (client " << this->_clientId << ")\n";
             return;
         }
         this->_toSendPackets.push(std::move(packet));
@@ -163,7 +160,7 @@ namespace Server { namespace Network {
         }
         else
         {
-            std::cerr << "ClientConnection _HandleWrite error: " << error << ": " << error.message() << std::endl;
+            Tools::log << "ClientConnection error: " << error << ": " << error.message() << "(client " << this->_clientId << ")\n";
             if (this->_connected)
                 this->_clientManager.HandleClientError(this->_clientId);
             this->_connected = false;
