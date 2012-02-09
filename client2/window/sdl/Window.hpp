@@ -1,19 +1,20 @@
-#ifndef __CLIENT_WINDOWSDL_HPP__
-#define __CLIENT_WINDOWSDL_HPP__
+#ifndef __CLIENT_WINDOW_SDL_WINDOW_HPP__
+#define __CLIENT_WINDOW_SDL_WINDOW_HPP__
 
 #include <SDL/SDL.h>
 
-#include "client2/IWindow.hpp"
+#include "client2/window/IWindow.hpp"
 
 namespace Tools {
     class IRenderer;
 }
-
 namespace Client {
-
     class Client;
+}
 
-    class WindowSdl :
+namespace Client { namespace Window { namespace Sdl {
+
+    class Window :
         public IWindow
     {
         private:
@@ -21,11 +22,11 @@ namespace Client {
             SDL_Surface* _screen;
 
         public:
-            WindowSdl(Client& client);
-            ~WindowSdl();
+            Window(Client& client);
+            ~Window();
             virtual void Render();
     };
 
-}
+}}}
 
 #endif

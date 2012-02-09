@@ -1,9 +1,11 @@
-#include "client2/WindowSdl.hpp"
+#include "client2/window/sdl/Window.hpp"
+#include "client2/window/sdl/InputManager.hpp"
 #include "tools/renderers/GLRenderer.hpp"
 
-namespace Client {
+namespace Client { namespace Window { namespace Sdl {
 
-    WindowSdl::WindowSdl(Client& client)
+    Window::Window(Client& client) :
+        IWindow(new InputManager(client))
     {
         if (SDL_Init(SDL_INIT_VIDEO))
             throw std::runtime_error(std::string("SDL_Init(): ") + SDL_GetError());
@@ -20,15 +22,15 @@ namespace Client {
         this->_renderer->Initialise();
     }
 
-    WindowSdl::~WindowSdl()
+    Window::~Window()
     {
         SDL_Quit();
         Tools::Delete(this->_renderer);
     }
 
-    void WindowSdl::Render()
+    void Window::Render()
     {
         SDL_GL_SwapBuffers();
     }
 
-}
+}}}

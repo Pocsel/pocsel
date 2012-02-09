@@ -24,7 +24,7 @@ macro(precompiled_header sources includes target_name header_name project_name)
     # We don't do this on Macs since GCC there goes haywire
     # when you try to generate a PCH with two "-arch" flags
     elseif(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE)
-        message("GCC PCH hook")
+        #message("GCC PCH hook")
         # Get the compiler flags for this build type
         string(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" flags_for_build_name)
         set(compile_flags ${${flags_for_build_name}})

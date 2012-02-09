@@ -4,28 +4,35 @@
 #include <boost/noncopyable.hpp>
 
 namespace Client {
+    namespace Network {
+        class Network;
+    }
+    namespace Window {
+        class IWindow;
+    }
+}
+
+namespace Client {
 
     class Settings;
-    class IWindow;
-    class Network;
 
     class Client :
         private boost::noncopyable
     {
-        private:
-            Settings* _settings;
-            IWindow* _window;
-            Network* _network;
-            bool _running;
+    private:
+        Settings* _settings;
+        Window::IWindow* _window;
+        Network::Network* _network;
+        bool _running;
 
-        public:
-            Client(int ac, char** av);
-            ~Client();
-            int Run();
-            Settings& GetSettings();
-            IWindow& GetWindow();
-            Network& GetNetwork();
-            void Quit();
+    public:
+        Client(int ac, char** av);
+        ~Client();
+        int Run();
+        Settings& GetSettings();
+        Window::IWindow& GetWindow();
+        Network::Network& GetNetwork();
+        void Quit();
     };
 
 }

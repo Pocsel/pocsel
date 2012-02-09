@@ -1,11 +1,11 @@
 #include <iostream>
 
-#include "client2/Network.hpp"
+#include "client2/network/Network.hpp"
 #include "client2/Client.hpp"
 #include "tools/ToString.hpp"
 #include "common/Packet.hpp"
 
-namespace Client {
+namespace Client { namespace Network {
 
     Network::Network(Client& client) :
         _socket(_ioService), _sending(false), _isConnected(false)
@@ -175,4 +175,4 @@ namespace Client {
         }
     }
 
-}
+}}

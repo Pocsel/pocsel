@@ -1,5 +1,5 @@
-#ifndef __CLIENT_NETWORK_HPP__
-#define __CLIENT_NETWORK_HPP__
+#ifndef __CLIENT_NETWORK_NETWORK_HPP__
+#define __CLIENT_NETWORK_NETWORK_HPP__
 
 #include <queue>
 #include <boost/noncopyable.hpp>
@@ -9,10 +9,11 @@
 namespace Common {
     class Packet;
 }
-
 namespace Client {
-
     class Client;
+}
+
+namespace Client { namespace Network {
 
     class Network :
         private boost::noncopyable
@@ -49,6 +50,6 @@ namespace Client {
         void _HandleReceivePacketContent(const boost::system::error_code& error);
     };
 
-}
+}}
 
 #endif
