@@ -9,6 +9,8 @@
 #include "server2/game/Game.hpp"
 #include "server2/game/World.hpp"
 
+#include "server2/game/map/Map.hpp"
+
 #include "server2/database/ResourceManager.hpp"
 
 #include "server2/network/PacketCreator.hpp"
@@ -79,15 +81,15 @@ namespace Server { namespace ClientManagement {
     void ClientActions::_HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet const& packet)
     {
         Tools::debug << "_HandleNeedChunks (client " << client.id << ")\n";
-//        std::list<Chunk::IdType> ids;
-//        PacketExtractor::NeedChunks(packet, ids);
-//        Tools::debug << "Need Chunks:\n";
-//        Map::RequestCallback callback = std::bind(&Client::SendChunk, client, std::placeholders::_1);
-//        for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
-//        {
-//            Tools::debug << *it << "\n";
-//            client->GetPlayer().GetMap().GetChunk(*it, callback);
-//        }
+        std::list<Chunk::IdType> ids;
+        Network::PacketExtractor::NeedChunks(packet, ids);
+
+        Game::Map::Map::ChunkCallback callback = std::bind(&ClientManager::SendChunk, &manager, client.id, std::placeholders::_1);
+        for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
+        {
+            manager.GetGame().GetWorld().GetDefaultMap()->GetChunk(*it, callback);
+            //client.GetPlayer().GetMap().GetChunk(*it, callback);
+        }
     }
 
     void ClientActions::_HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet const& packet)

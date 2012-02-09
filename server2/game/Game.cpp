@@ -16,4 +16,16 @@ namespace Server { namespace Game {
         Tools::Delete(this->_world);
     }
 
+    void Game::Start()
+    {
+        Tools::debug << "Game::Start()\n";
+        this->_world->Start();
+    }
+
+    void Game::Stop()
+    {
+        Tools::debug << "Game::Stop()\n";
+        this->_world->Stop();
+    }
+
 }}

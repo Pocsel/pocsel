@@ -145,14 +145,25 @@ namespace Server { namespace ClientManagement {
 
     void ClientManager::_SendPacket(Uint32 clientId, Common::Packet* packet)
     {
-        std::unique_ptr<Common::Packet> autoDelete(packet);
         if (this->_clients.find(clientId) == this->_clients.end())
         {
             Tools::error << "SendPacket: Client " << clientId << " not found.\n";
+            Tools::Delete(packet);
             return ;
         }
 
         this->_clients[clientId]->SendPacket(packet);
+    }
+
+    void ClientManager::_SendChunk(Uint32 clientId, Chunk const& chunk)
+    {
+        if (this->_clients.find(clientId) == this->_clients.end())
+        {
+            Tools::error << "SendChunk: Client " << clientId << " not found.\n";
+            return ;
+        }
+
+        this->_clients[clientId]->SendPacket(Network::PacketCreator::Chunk(chunk));
     }
 
 }}

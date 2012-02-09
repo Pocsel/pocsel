@@ -4,6 +4,8 @@
 
 #include "server2/database/WorldLoader.hpp"
 
+#include "server2/game/map/Map.hpp"
+
 namespace Server { namespace Game{
 
     World::World(Server& server) :
@@ -24,6 +26,9 @@ namespace Server { namespace Game{
     World::~World()
     {
         Tools::debug << "World::~World()\n";
+
+        for (auto it = this->_maps.begin(), ite = this->_maps.end(); it != ite; ++it)
+            Tools::Delete(it->second);
     }
 
     Map::Map* World::GetMap(std::string const& name)
@@ -31,6 +36,20 @@ namespace Server { namespace Game{
         if (this->_maps.find(name) == this->_maps.end())
             return 0;
         return this->_maps[name];
+    }
+
+    void World::Start()
+    {
+        Tools::debug << "World::Start()\n";
+        for (auto it = this->_maps.begin(), ite = this->_maps.end(); it != ite; ++it)
+            it->second->Start();
+    }
+
+    void World::Stop()
+    {
+        Tools::debug << "World::Stop()\n";
+        for (auto it = this->_maps.begin(), ite = this->_maps.end(); it != ite; ++it)
+            it->second->Stop();
     }
 
 }}

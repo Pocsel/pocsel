@@ -33,7 +33,7 @@ namespace Server {
         Tools::debug << "Server::Run()\n";
 
         this->_clientManager->Start();
-        //this->_game->Start();
+        this->_game->Start();
         this->_network->Run();
 
         return 0;
@@ -43,9 +43,9 @@ namespace Server {
     {
         Tools::debug << "Server::Stop()\n";
 
-//        this->_game->Stop();
-        this->_clientManager->Stop();
         this->_network->Stop();
+        this->_game->Stop();
+        this->_clientManager->Stop();
     }
 
 }

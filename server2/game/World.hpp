@@ -29,7 +29,7 @@ namespace Server { namespace Game {
     private:
         Server& _server;
         std::unordered_map<std::string, Map::Map*> _maps;
-        Map::Map* _defaultMap;
+        mutable Map::Map* _defaultMap;
         std::vector<Common::CubeType> _cubeTypes;
         std::string _identifier;
         std::string _fullname;
@@ -40,7 +40,10 @@ namespace Server { namespace Game {
         ~World();
 
         Map::Map* GetMap(std::string const& name);
-        Map::Map* GetDefaultMap() { return this->_defaultMap; }
+        Map::Map* GetDefaultMap() const { return this->_defaultMap; }
+
+        void Start();
+        void Stop();
 
         // Appelable d'un autre thread, que des trucs const qui ne peuvent pas disparaitre
         std::vector<Common::CubeType> const& GetCubeTypes() const { return this->_cubeTypes; }
