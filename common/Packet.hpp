@@ -1,12 +1,6 @@
 #ifndef __COMMON_PACKET_HPP__
 #define __COMMON_PACKET_HPP__
 
-#include <cstring>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <memory>
-
 #include "tools/ByteArray.hpp"
 
 namespace Common {

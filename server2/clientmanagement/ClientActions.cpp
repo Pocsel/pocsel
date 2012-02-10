@@ -39,12 +39,14 @@ namespace Server { namespace ClientManagement {
         static_assert((int) Protocol::ClientToServer::GetCubeType == 5, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetSpawnPosition == 6, "wrong callback index");
 
-        static_assert(sizeof(Protocol::ActionType) == 1, "faut changer le packet.Read8()");
-        Protocol::ActionType action = packet.Read8();
+        Protocol::ActionType action;
+        packet.Read(action);
 
         if (action >= (sizeof(actions) / sizeof(*actions)))
             throw std::runtime_error("Unknown action: " + Tools::ToString<Uint32>(action));
+
         assert(actions[action] && "Action not coded yet");
+
         actions[action](manager, client, packet);
     }
 

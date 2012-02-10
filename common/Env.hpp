@@ -1,12 +1,6 @@
 #ifndef __COMMON_ENV_HPP__
 #define __COMMON_ENV_HPP__
 
-#include <unordered_map>
-#include <string>
-#include <list>
-#include <boost/noncopyable.hpp>
-#include <boost/function.hpp>
-
 #include "tools/ToString.hpp"
 
 namespace Common {

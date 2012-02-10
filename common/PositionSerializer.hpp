@@ -1,8 +1,6 @@
 #ifndef __COMMON_POSITIONSERIALIZER_HPP__
 #define __COMMON_POSITIONSERIALIZER_HPP__
 
-#include <memory>
-
 #include "tools/ByteArray.hpp"
 #include "tools/VectorSerializer.hpp"
 

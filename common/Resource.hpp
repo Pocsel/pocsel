@@ -1,11 +1,6 @@
 #ifndef __COMMON_RESOURCE_HPP__
 #define __COMMON_RESOURCE_HPP__
 
-#include <cstring>
-#include <memory>
-
-#include <boost/noncopyable.hpp>
-
 namespace Common {
 
     class Resource : private boost::noncopyable
