@@ -7,13 +7,13 @@
 namespace Client { namespace Window { namespace Sdl {
 
     Window::Window(Client& client) :
-        ::Client::Window::Window(new InputManager(client, new InputBinder))
+        ::Client::Window::Window(new InputManager(client, new InputBinder)), _size(800, 600), _targetSize(0)
     {
         if (SDL_Init(SDL_INIT_VIDEO))
             throw std::runtime_error(std::string("SDL_Init(): ") + SDL_GetError());
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
-        if (!(this->_screen = SDL_SetVideoMode(800, 600, 0, SDL_RESIZABLE | SDL_OPENGL)))
+        if (!(this->_screen = SDL_SetVideoMode(this->_size.w, this->_size.h, 0, SDL_RESIZABLE | SDL_OPENGL)))
         {
             SDL_Quit();
             throw std::runtime_error(std::string("SDL_SetVideoMode(): ") + SDL_GetError());
@@ -37,7 +37,34 @@ namespace Client { namespace Window { namespace Sdl {
 
     void Window::Render()
     {
+        if (this->_targetSize.w && this->_targetSize.h)
+        {
+            if (!(this->_screen = SDL_SetVideoMode(this->_targetSize.w, this->_targetSize.h, 0, SDL_RESIZABLE | SDL_OPENGL)))
+            {
+                SDL_Quit();
+                throw std::runtime_error(SDL_GetError());
+            }
+            this->_size = this->_targetSize;
+            this->_targetSize.w = 0;
+            this->_targetSize.h = 0;
+        }
         SDL_GL_SwapBuffers();
+    }
+
+    void Window::Resize(Tools::Vector2u const& size)
+    {
+        this->_targetSize = size;
+    }
+
+    void Window::Resize(unsigned int w, unsigned int h)
+    {
+        this->_targetSize.w = w;
+        this->_targetSize.h = h;
+    }
+
+    Tools::Vector2u const& Window::GetSize() const
+    {
+        return this->_size;
     }
 
 }}}

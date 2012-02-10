@@ -1,7 +1,8 @@
-#ifndef __CLIENT_WINDOW_IINPUTMANAGER_HPP__
-#define __CLIENT_WINDOW_IINPUTMANAGER_HPP__
+#ifndef __CLIENT_WINDOW_INPUTMANAGER_HPP__
+#define __CLIENT_WINDOW_INPUTMANAGER_HPP__
 
 #include "client2/window/InputBinder.hpp"
+#include "tools/Vector2.hpp"
 
 namespace Client {
     class Client;
@@ -14,6 +15,13 @@ namespace Client { namespace Window {
     {
     private:
         InputBinder* _inputBinder;
+        std::queue<std::pair<InputBinder::Action, InputType::InputType>> _actionQueue;
+        std::map<std::string, std::list<std::function<void(void)>>> _stringPressBinds;
+        std::map<std::string, std::list<std::function<void(void)>>> _stringHoldBinds;
+        std::map<std::string, std::list<std::function<void(void)>>> _stringReleaseBinds;
+        std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _pressBinds;
+        std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _holdBinds;
+        std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _releaseBinds;
     protected:
         Client& _client;
 
@@ -21,10 +29,16 @@ namespace Client { namespace Window {
         InputManager(Client& client, InputBinder* inputBinder);
         virtual ~InputManager();
         virtual void ProcessEvents() = 0;
+        void DispatchActions();
         InputBinder& GetInputBinder();
-        void TriggerAction(InputBinder::Action const& action);
-        void TriggerAction(std::string const& action);
-        void TriggerAction(BindAction::BindAction action);
+        void Bind(std::string const& action, InputType::InputType type, std::function<void(void)> const& func);
+        void Bind(BindAction::BindAction action, InputType::InputType type, std::function<void(void)> const& func);
+        void TriggerAction(InputBinder::Action const& action, InputType::InputType type);
+        void TriggerAction(std::string const& action, InputType::InputType type);
+        void TriggerAction(BindAction::BindAction action, InputType::InputType type);
+        virtual Tools::Vector2i const& GetMousePos() const = 0;
+        virtual void WarpMouse(Tools::Vector2i const& pos) = 0;
+        virtual void WarpMouse(int x, int y) = 0;
     };
 
 }}

@@ -1,8 +1,6 @@
 #ifndef __CLIENT_WINDOW_INPUTBINDER_HPP__
 #define __CLIENT_WINDOW_INPUTBINDER_HPP__
 
-#include <boost/noncopyable.hpp>
-
 #include "client2/window/Inputs.hpp"
 #include "client2/BindAction.hpp"
 

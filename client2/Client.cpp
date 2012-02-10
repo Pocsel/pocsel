@@ -38,6 +38,7 @@ namespace Client {
 
             this->_packetDispatcher->ProcessAllPackets(this->_network->ProcessInPackets());
             this->_window->GetInputManager().ProcessEvents();
+            this->_window->GetInputManager().DispatchActions();
             this->_window->Render();
 
             int timeLeft = 1000 / this->_settings.fps - frameTimer.GetElapsedTime();
