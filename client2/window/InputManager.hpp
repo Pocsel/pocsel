@@ -15,7 +15,7 @@ namespace Client { namespace Window {
     {
     private:
         InputBinder* _inputBinder;
-        std::queue<std::pair<InputBinder::Action, InputType::InputType>> _actionQueue;
+        std::queue<std::pair<InputBinder::Action, BindAction::Type>> _actionQueue;
         std::map<std::string, std::list<std::function<void(void)>>> _stringPressBinds;
         std::map<std::string, std::list<std::function<void(void)>>> _stringHoldBinds;
         std::map<std::string, std::list<std::function<void(void)>>> _stringReleaseBinds;
@@ -31,11 +31,11 @@ namespace Client { namespace Window {
         virtual void ProcessEvents() = 0;
         void DispatchActions();
         InputBinder& GetInputBinder();
-        void Bind(std::string const& action, InputType::InputType type, std::function<void(void)> const& func);
-        void Bind(BindAction::BindAction action, InputType::InputType type, std::function<void(void)> const& func);
-        void TriggerAction(InputBinder::Action const& action, InputType::InputType type);
-        void TriggerAction(std::string const& action, InputType::InputType type);
-        void TriggerAction(BindAction::BindAction action, InputType::InputType type);
+        void Bind(std::string const& action, BindAction::Type type, std::function<void(void)> const& func);
+        void Bind(BindAction::BindAction action, BindAction::Type type, std::function<void(void)> const& func);
+        void TriggerAction(InputBinder::Action const& action, BindAction::Type type);
+        void TriggerAction(std::string const& action, BindAction::Type type);
+        void TriggerAction(BindAction::BindAction action, BindAction::Type type);
         virtual Tools::Vector2i const& GetMousePos() const = 0;
         virtual void WarpMouse(Tools::Vector2i const& pos) = 0;
         virtual void WarpMouse(int x, int y) = 0;

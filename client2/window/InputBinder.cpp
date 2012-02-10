@@ -17,6 +17,8 @@ namespace Client { namespace Window {
 
     void InputBinder::_PopulateActions()
     {
+        this->_actions["quit"] = BindAction::Quit;
+        this->_actions["menu"] = BindAction::Menu;
         this->_actions["forward"] = BindAction::Forward;
         this->_actions["backward"] = BindAction::Backward;
         this->_actions["left"] = BindAction::Left;
@@ -39,7 +41,9 @@ namespace Client { namespace Window {
 
     void InputBinder::_StringToAction(std::string const& str, Action& action) const
     {
-        auto it = this->_actions.find(str);
+        std::string lowerStr = str;
+        boost::to_lower(lowerStr);
+        auto it = this->_actions.find(lowerStr);
         if (it != this->_actions.end())
         {
             action.action = it->second;

@@ -1,23 +1,30 @@
 #ifndef __CLIENT_BINDACTION_HPP__
 #define __CLIENT_BINDACTION_HPP__
 
-namespace Client {
+namespace Client { namespace BindAction {
 
-    namespace BindAction {
-        enum BindAction
-        {
-            None,
-            Forward,
-            Backward,
-            Left,
-            Right,
-            Jump,
-            Fire,
-            SecondaryFire,
-            Use,
-        };
-    }
+    enum Type
+    {
+        Pressed,
+        Held,
+        Released,
+    };
 
-}
+    enum BindAction
+    {
+        None,
+        Quit,
+        Menu,
+        Forward,
+        Backward,
+        Left,
+        Right,
+        Jump,
+        Fire,
+        SecondaryFire,
+        Use,
+    };
+
+}}
 
 #endif

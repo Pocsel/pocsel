@@ -35,28 +35,28 @@ namespace Client { namespace Window {
             if (a.first.string.empty())
                 switch (a.second)
                 {
-                    case InputType::Pressed:
-                        CallFunctions(this->_pressBinds, a.first.action);
-                        break;
-                    case InputType::Held:
-                        CallFunctions(this->_holdBinds, a.first.action);
-                        break;
-                    case InputType::Released:
-                        CallFunctions(this->_releaseBinds, a.first.action);
-                        break;
+                case BindAction::Pressed:
+                    CallFunctions(this->_pressBinds, a.first.action);
+                    break;
+                case BindAction::Held:
+                    CallFunctions(this->_holdBinds, a.first.action);
+                    break;
+                case BindAction::Released:
+                    CallFunctions(this->_releaseBinds, a.first.action);
+                    break;
                 }
             else
                 switch (a.second)
                 {
-                    case InputType::Pressed:
-                        CallFunctions(this->_stringPressBinds, a.first.string);
-                        break;
-                    case InputType::Held:
-                        CallFunctions(this->_stringHoldBinds, a.first.string);
-                        break;
-                    case InputType::Released:
-                        CallFunctions(this->_stringReleaseBinds, a.first.string);
-                        break;
+                case BindAction::Pressed:
+                    CallFunctions(this->_stringPressBinds, a.first.string);
+                    break;
+                case BindAction::Held:
+                    CallFunctions(this->_stringHoldBinds, a.first.string);
+                    break;
+                case BindAction::Released:
+                    CallFunctions(this->_stringReleaseBinds, a.first.string);
+                    break;
                 }
             this->_actionQueue.pop();
         }
@@ -67,51 +67,51 @@ namespace Client { namespace Window {
         return *this->_inputBinder;
     }
 
-    void InputManager::Bind(std::string const& action, InputType::InputType type, std::function<void(void)> const& func)
+    void InputManager::Bind(std::string const& action, BindAction::Type type, std::function<void(void)> const& func)
     {
         switch (type)
         {
-            case InputType::Pressed:
-                this->_stringPressBinds[action].push_back(func);
-                break;
-            case InputType::Held:
-                this->_stringHoldBinds[action].push_back(func);
-                break;
-            case InputType::Released:
-                this->_stringReleaseBinds[action].push_back(func);
-                break;
+        case BindAction::Pressed:
+            this->_stringPressBinds[action].push_back(func);
+            break;
+        case BindAction::Held:
+            this->_stringHoldBinds[action].push_back(func);
+            break;
+        case BindAction::Released:
+            this->_stringReleaseBinds[action].push_back(func);
+            break;
         }
     }
 
-    void InputManager::Bind(BindAction::BindAction action, InputType::InputType type, std::function<void(void)> const& func)
+    void InputManager::Bind(BindAction::BindAction action, BindAction::Type type, std::function<void(void)> const& func)
     {
         switch (type)
         {
-            case InputType::Pressed:
-                this->_pressBinds[action].push_back(func);
-                break;
-            case InputType::Held:
-                this->_holdBinds[action].push_back(func);
-                break;
-            case InputType::Released:
-                this->_releaseBinds[action].push_back(func);
-                break;
+        case BindAction::Pressed:
+            this->_pressBinds[action].push_back(func);
+            break;
+        case BindAction::Held:
+            this->_holdBinds[action].push_back(func);
+            break;
+        case BindAction::Released:
+            this->_releaseBinds[action].push_back(func);
+            break;
         }
     }
 
-    void InputManager::TriggerAction(InputBinder::Action const& action, InputType::InputType type)
+    void InputManager::TriggerAction(InputBinder::Action const& action, BindAction::Type type)
     {
         this->_actionQueue.push(std::make_pair(action, type));
     }
 
-    void InputManager::TriggerAction(std::string const& action, InputType::InputType type)
+    void InputManager::TriggerAction(std::string const& action, BindAction::Type type)
     {
         InputBinder::Action a;
         a.string = action;
         this->TriggerAction(a, type);
     }
 
-    void InputManager::TriggerAction(BindAction::BindAction action, InputType::InputType type)
+    void InputManager::TriggerAction(BindAction::BindAction action, BindAction::Type type)
     {
         InputBinder::Action a;
         a.action = action;

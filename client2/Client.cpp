@@ -17,6 +17,9 @@ namespace Client {
     {
         this->_window = new Window::Sdl::Window(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
+
+        this->_window->GetInputManager().GetInputBinder().Bind("eScApE", "quiT");
+        this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
     }
 
     Client::~Client()
@@ -51,6 +54,8 @@ namespace Client {
                 break;
             case Disconnected:
                 break;
+            default:
+                ;
             }
 
             this->_window->Render();
