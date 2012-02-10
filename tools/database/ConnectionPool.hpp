@@ -14,7 +14,8 @@ namespace Tools { namespace Database {
     public:
         ConnectionPool(std::string const& str) :
             _connectString(str)
-        {}
+        {
+        }
 
         virtual IConnectionPool::ConnectionPtr GetConnection()
         {

@@ -16,9 +16,9 @@ namespace Tools { namespace Database { namespace Sqlite {
         this->_column_count = res;
         if (this->_column_count != 0)
         {
-            this->_values = (Tools::Database::IValue**) ::calloc(this->_column_count, sizeof(Value*));
+            this->_values = static_cast<Tools::Database::IValue**>(::calloc(this->_column_count, sizeof(Value*)));
             if (this->_values == 0)
-                throw std::runtime_error("Bad alloc !");
+                throw std::runtime_error("Bad alloc!");
         }
     }
 

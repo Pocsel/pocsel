@@ -12,7 +12,9 @@ namespace Tools { namespace Database {
 
     public:
         virtual std::shared_ptr<IConnection> GetConnection() = 0;
-        virtual ~IConnectionPool() {}
+        virtual ~IConnectionPool()
+        {
+        }
     };
 
 }}

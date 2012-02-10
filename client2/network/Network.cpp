@@ -37,7 +37,7 @@ namespace Client { namespace Network {
         this->_host = host;
         this->_port = port;
         this->_isConnected = true;
-        this->_thread = new boost::thread(std::bind(&Network::Run, this));
+        this->_thread = new boost::thread(std::bind(&Network::_Run, this));
     }
 
     Network::~Network()
@@ -62,7 +62,7 @@ namespace Client { namespace Network {
         return this->_port;
     }
 
-    void Network::Run()
+    void Network::_Run()
     {
         this->_ReceivePacketSize();
         this->_ioService.run();

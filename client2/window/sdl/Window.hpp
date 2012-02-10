@@ -3,7 +3,7 @@
 
 #include <SDL/SDL.h>
 
-#include "client2/window/IWindow.hpp"
+#include "client2/window/Window.hpp"
 
 namespace Tools {
     class IRenderer;
@@ -15,7 +15,7 @@ namespace Client {
 namespace Client { namespace Window { namespace Sdl {
 
     class Window :
-        public IWindow
+        public ::Client::Window::Window
     {
         private:
             Tools::IRenderer* _renderer;
@@ -25,6 +25,7 @@ namespace Client { namespace Window { namespace Sdl {
             Window(Client& client);
             ~Window();
             virtual void Render();
+            virtual Tools::IRenderer& GetRenderer();
     };
 
 }}}

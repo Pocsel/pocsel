@@ -12,7 +12,9 @@ namespace Tools { namespace Database {
         virtual ICursor& GetCursor() = 0;
         virtual void Commit() = 0;
         virtual bool HasTable(std::string const& table) = 0;
-        virtual ~IConnection() {}
+        virtual ~IConnection()
+        {
+        }
     };
 
 }}

@@ -34,7 +34,7 @@ namespace Tools { namespace Database { namespace Sqlite {
 
     static inline void Close(Tools::Database::IConnection* conn)
     {
-        assert(dynamic_cast<Connection*>(conn) != 0 && "Wrong connection type given !");
+        assert(dynamic_cast<Connection*>(conn) != 0 && "Wrong connection type given!");
         delete conn;
     }
 

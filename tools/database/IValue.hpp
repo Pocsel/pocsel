@@ -8,8 +8,14 @@ namespace Tools { namespace Database {
         size_t const size;
         void const* data;
 
-        Blob(void const* d, size_t s) : size(s), data(d) {}
-        Blob(Blob const& b) : size(b.size), data(b.data) {}
+        Blob(void const* d, size_t s) :
+            size(s), data(d)
+        {
+        }
+        Blob(Blob const& b) :
+            size(b.size), data(b.data)
+        {
+        }
     private:
         Blob& operator =(Blob const& b);
     };
@@ -25,7 +31,9 @@ namespace Tools { namespace Database {
         virtual std::string GetString() = 0;
         virtual bool GetBool() = 0;
         virtual Blob GetBlob() = 0;
-        virtual ~IValue() {}
+        virtual ~IValue()
+        {
+        }
     };
 
 }}

@@ -37,7 +37,6 @@ namespace Client { namespace Network {
         Network(Client& client);
         ~Network();
         void Connect(std::string const& host, std::string const& port);
-        void Run();
         void Stop();
         void SendPacket(std::unique_ptr<Common::Packet> packet);
         std::list<Common::Packet*> ProcessInPackets();
@@ -45,6 +44,7 @@ namespace Client { namespace Network {
         std::string const& GetPort() const;
         bool IsConnected() const;
     private:
+        void _Run();
         void _Disconnect();
         void _SendNext();
         void _HandleWrite(boost::system::error_code const& error);

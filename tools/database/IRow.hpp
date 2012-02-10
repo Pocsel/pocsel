@@ -9,7 +9,9 @@ namespace Tools { namespace Database {
     {
     public:
         virtual IValue& operator[](unsigned int column) = 0;
-        virtual ~IRow() {}
+        virtual ~IRow()
+        {
+        }
     };
 
 }}

@@ -18,7 +18,9 @@ namespace Tools { namespace Database {
         virtual RowIterator FetchAll() = 0;
         virtual bool HasData() = 0;
         virtual Uint64 LastRowId() = 0;
-        virtual ~ICursor() {}
+        virtual ~ICursor()
+        {
+        }
     };
 
 }}

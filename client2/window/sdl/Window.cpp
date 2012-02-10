@@ -1,11 +1,13 @@
 #include "client2/window/sdl/Window.hpp"
 #include "client2/window/sdl/InputManager.hpp"
+#include "client2/window/sdl/InputBinder.hpp"
 #include "tools/renderers/GLRenderer.hpp"
+#include "ProgramInfo.hpp"
 
 namespace Client { namespace Window { namespace Sdl {
 
     Window::Window(Client& client) :
-        IWindow(new InputManager(client))
+        ::Client::Window::Window(new InputManager(client, new InputBinder))
     {
         if (SDL_Init(SDL_INIT_VIDEO))
             throw std::runtime_error(std::string("SDL_Init(): ") + SDL_GetError());
@@ -16,7 +18,7 @@ namespace Client { namespace Window { namespace Sdl {
             SDL_Quit();
             throw std::runtime_error(std::string("SDL_SetVideoMode(): ") + SDL_GetError());
         }
-        SDL_WM_SetCaption("Pocsel", 0);
+        SDL_WM_SetCaption(PROJECT_NAME, 0);
         SDL_EnableUNICODE(SDL_ENABLE);
         this->_renderer = new Tools::Renderers::GLRenderer();
         this->_renderer->Initialise();
@@ -26,6 +28,11 @@ namespace Client { namespace Window { namespace Sdl {
     {
         SDL_Quit();
         Tools::Delete(this->_renderer);
+    }
+
+    Tools::IRenderer& Window::GetRenderer()
+    {
+        return *this->_renderer;
     }
 
     void Window::Render()

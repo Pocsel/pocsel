@@ -11,7 +11,7 @@ namespace Client {
         class PacketDispatcher;
     }
     namespace Window {
-        class IWindow;
+        class Window;
     }
 }
 
@@ -22,7 +22,7 @@ namespace Client {
     {
     private:
         Settings _settings;
-        Window::IWindow* _window;
+        Window::Window* _window;
         Network::Network* _network;
         Network::PacketDispatcher* _packetDispatcher;
         bool _running;
@@ -32,7 +32,7 @@ namespace Client {
         ~Client();
         int Run();
         Settings& GetSettings();
-        Window::IWindow& GetWindow();
+        Window::Window& GetWindow();
         Network::Network& GetNetwork();
         void Quit();
     };
