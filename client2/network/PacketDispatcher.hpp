@@ -25,6 +25,8 @@ namespace Client { namespace Network {
 
     private:
         void _ProcessPacket(Common::Packet& packet);
+        void _HandleLogin(Common::Packet& p);
+        void _HandleNeededResourceIds(Common::Packet& p);
     };
 
 }}

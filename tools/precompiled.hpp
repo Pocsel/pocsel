@@ -50,6 +50,7 @@
 #include <boost/function.hpp>
 #include <boost/thread.hpp>
 #include <boost/ref.hpp>
+#include "tools/filesystem.hpp"
 
 // Others
 #include <sqlite3.h>

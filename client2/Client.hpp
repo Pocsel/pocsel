@@ -53,7 +53,7 @@ namespace Client {
         Settings& GetSettings() { return this->_settings; }
         Window::Window& GetWindow() { return *this->_window; }
         Network::Network& GetNetwork() { return this->_network; }
-        Game::CubeTypeManager& GetCubeTypeManager() { return this->_game->GetCubeTypeManager(); }
+        Game::Game& GetGame() { return *this->_game; }
         State GetState() const { return this->_state; }
     };
 

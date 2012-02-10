@@ -36,24 +36,24 @@ namespace Client { namespace Network {
     //    return p;
     //}
 
-    //std::unique_ptr<Common::Packet> PacketCreator::GetNeededResourceIds(Uint32 cacheVersion)
-    //{
-    //    std::unique_ptr<Common::Packet> p(new Common::Packet());
-    //    p->Write(Protocol::ClientToServer::GetNeededResourceIds);
+    std::unique_ptr<Common::Packet> PacketCreator::GetNeededResourceIds(Uint32 cacheVersion)
+    {
+        std::unique_ptr<Common::Packet> p(new Common::Packet());
+        p->Write(Protocol::ClientToServer::GetNeededResourceIds);
 
-    //    p->Write(cacheVersion);
-    //    return p;
-    //}
+        p->Write(cacheVersion);
+        return p;
+    }
 
-    //std::unique_ptr<Common::Packet> PacketCreator::GetResourceRange(Uint32 resourceId, Uint32 offset)
-    //{
-    //    std::unique_ptr<Common::Packet> p(new Common::Packet());
-    //    p->Write(Protocol::ClientToServer::GetResourceRange);
+    std::unique_ptr<Common::Packet> PacketCreator::GetResourceRange(Uint32 resourceId, Uint32 offset)
+    {
+        std::unique_ptr<Common::Packet> p(new Common::Packet());
+        p->Write(Protocol::ClientToServer::GetResourceRange);
 
-    //    p->Write(resourceId);
-    //    p->Write(offset);
-    //    return p;
-    //}
+        p->Write(resourceId);
+        p->Write(offset);
+        return p;
+    }
 
     std::unique_ptr<Common::Packet> PacketCreator::GetCubeType(Common::BaseChunk::CubeType id)
     {

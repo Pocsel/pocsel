@@ -13,7 +13,7 @@ namespace Common {
     struct Position;
 }
 
-namespace Client {
+namespace Client { namespace Network {
 
     class PacketExtractor
     {
@@ -28,23 +28,21 @@ namespace Client {
                 Uint32& worldVersion,
                 Common::BaseChunk::CubeType& nbCubeTypes);
         static Uint64 ExtractPing(Common::Packet const& p);
-        //static void ExtractNeededResourceIds(Common::Packet const& p,
-        //        Uint32& nbResourceIds,
-        //        std::list<Uint32>& ids);
-        //static char const* ExtractResourceRange(Common::Packet const& p,
-        //        Uint32& id,
-        //        Uint32& offset,
-        //        Uint32& pluginId,
-        //        std::string& type,
-        //        std::string& filename,
-        //        Uint32& totalSize,
-        //        Uint32& dataSize);
+        static void ExtractNeededResourceIds(Common::Packet const& p, Uint32& nbResourceIds, std::list<Uint32>& ids);
+        static char const* ExtractResourceRange(Common::Packet const& p,
+                Uint32& id,
+                Uint32& offset,
+                Uint32& pluginId,
+                std::string& type,
+                std::string& filename,
+                Uint32& totalSize,
+                Uint32& dataSize);
         //static std::unique_ptr<Chunk> ExtractChunk(Common::Packet const& p);
         static std::unique_ptr<Common::CubeType> ExtractCubeType(Common::Packet const& p);
 
         //static void ExtractSpawnPosition(Common::Packet const& p, Common::Position& pos);
     };
 
-}
+}}
 
 #endif

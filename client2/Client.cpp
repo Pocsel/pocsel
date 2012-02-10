@@ -76,7 +76,7 @@ namespace Client {
         if (this->_state != Connecting)
             throw std::runtime_error("Bad client state");
         this->_state = LoadingResources;
-        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes);
+        this->_game = new Game::Game(*this, this->_network.GetHost(), worldIdentifier, worldName, worldVersion, nbCubeTypes);
     }
 
     void Client::Disconnect(std::string const& reason)

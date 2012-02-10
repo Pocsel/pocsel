@@ -1,3 +1,4 @@
+#include "client2/precompiled.hpp"
 #include "client2/network/Network.hpp"
 #include "client2/Client.hpp"
 #include "tools/logger/Logger.hpp"
@@ -177,7 +178,7 @@ namespace Client { namespace Network {
         else
         {
             auto p = new Common::Packet();
-            p->SetData(this->_dataBuffer.data(), this->_dataBuffer.size());
+            p->SetData(this->_dataBuffer.data(), (Uint16)this->_dataBuffer.size());
             {
                 boost::unique_lock<boost::mutex> lock(this->_inMutex);
                 this->_inQueue.push_back(p);
