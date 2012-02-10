@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "client2/network/Network.hpp"
 #include "client2/Client.hpp"
 #include "tools/logger/Logger.hpp"

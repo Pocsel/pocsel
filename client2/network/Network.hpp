@@ -1,11 +1,6 @@
 #ifndef __CLIENT_NETWORK_NETWORK_HPP__
 #define __CLIENT_NETWORK_NETWORK_HPP__
 
-#include <list>
-#include <boost/noncopyable.hpp>
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
-
 namespace Common {
     class Packet;
 }

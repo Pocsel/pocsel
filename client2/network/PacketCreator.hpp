@@ -1,9 +1,6 @@
 #ifndef __CLIENT_NETWORK_PACKETCREATOR_HPP__
 #define __CLIENT_NETWORK_PACKETCREATOR_HPP__
 
-#include <string>
-#include <deque>
-
 //#include "client2/Chunk.hpp"
 #include "common/Packet.hpp"
 

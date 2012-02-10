@@ -1,8 +1,6 @@
 #ifndef __CLIENT_CLIENT_HPP__
 #define __CLIENT_CLIENT_HPP__
 
-#include <boost/noncopyable.hpp>
-
 #include "client2/Settings.hpp"
 
 namespace Client {
