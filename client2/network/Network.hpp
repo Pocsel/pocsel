@@ -32,9 +32,9 @@ namespace Client { namespace Network {
         void Stop();
         void SendPacket(std::unique_ptr<Common::Packet> packet);
         std::list<Common::Packet*> ProcessInPackets();
-        std::string const& GetHost() const;
-        std::string const& GetPort() const;
-        bool IsConnected() const;
+        std::string const& GetHost() const { return this->_host; }
+        std::string const& GetPort() const { return this->_port; }
+        bool IsConnected() const { return this->_isConnected; }
     private:
         void _Run();
         void _Disconnect();

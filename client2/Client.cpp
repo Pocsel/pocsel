@@ -13,7 +13,7 @@ namespace Client {
 
     Client::Client(int ac, char** av)
         : _settings(ac, av),
-        _running(true)
+        _state(Connecting)
     {
         this->_window = new Window::Sdl::Window(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
@@ -30,12 +30,28 @@ namespace Client {
         Tools::Timer frameTimer;
         this->_network.Connect(this->_settings.host, this->_settings.port);
         this->_network.SendPacket(Network::PacketCreator::Login("yalap_a"));
-        while (this->_running)
+        while (this->_state)
         {
             frameTimer.Reset();
 
-            this->_packetDispatcher->ProcessAllPackets(this->_network.ProcessInPackets());
+            if (this->_network.IsConnected())
+                this->_packetDispatcher->ProcessAllPackets(this->_network.ProcessInPackets());
+            else if (this->_state != Client::Disconnected)
+                this->Disconnect("Unknown reason");
             this->_window->GetInputManager().ProcessEvents();
+
+            switch (this->_state)
+            {
+            case Connecting:
+            case LoadingResources:
+            case LoadingChunks:
+                break;
+            case Running:
+                break;
+            case Disconnected:
+                break;
+            }
+
             this->_window->Render();
 
             int timeLeft = 1000 / this->_settings.fps - frameTimer.GetElapsedTime();
@@ -46,23 +62,20 @@ namespace Client {
         return boost::exit_success;
     }
 
-    Network::Network& Client::GetNetwork()
+    void Client::Login(std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes)
     {
-        return this->_network;
+        this->_state = LoadingResources;
+
     }
 
-    Settings& Client::GetSettings()
+    void Client::Disconnect(std::string const& reason)
     {
-        return this->_settings;
-    }
-
-    Window::Window& Client::GetWindow()
-    {
-        return *this->_window;
+        this->_network.Stop();
+        this->_state = Disconnected;
     }
 
     void Client::Quit()
     {
-        this->_running = false;
+        this->_state = Quitting;
     }
 }

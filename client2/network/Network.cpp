@@ -45,21 +45,6 @@ namespace Client { namespace Network {
         Tools::Delete(this->_thread);
     }
 
-    bool Network::IsConnected() const
-    {
-        return this->_isConnected;
-    }
-
-    std::string const& Network::GetHost() const
-    {
-        return this->_host;
-    }
-
-    std::string const& Network::GetPort() const
-    {
-        return this->_port;
-    }
-
     void Network::_Run()
     {
         this->_ReceivePacketSize();
