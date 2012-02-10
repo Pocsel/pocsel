@@ -1,12 +1,7 @@
 #ifndef __COMMON_BASECHUNK_HPP__
 #define __COMMON_BASECHUNK_HPP__
 
-#include <cassert>
-#include <cstring>
-#include <memory>
-
 #include "common/constants.hpp"
-#include "tools/enum.hpp"
 #include "tools/Vector3.hpp"
 
 namespace Common {

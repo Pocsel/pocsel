@@ -21,6 +21,7 @@
 #endif
 
 // Stl
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>

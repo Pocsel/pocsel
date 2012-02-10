@@ -218,56 +218,6 @@ namespace Common {
         static void Read(Tools::ByteArray const&, ChunkType&); // Used by ByteArray::Read<T>(T&), but not usable
     };
 
-} // !Common
-
-
-
-/*
-namespace Common {
-
-template<typename ChunkType>
-struct ChunkSerializer
-{
-    typedef typename ChunkType::CubeType CubeType;
-
-    static std::unique_ptr<ChunkType> Read(Tools::ByteArray const& p)
-    {
-        std::unique_ptr<ChunkType> chunkPtr(new ChunkType(p.Read64()));
-        Uint8 flags = p.Read8();
-        if (flags == 0) // empty chunk
-            return chunkPtr;
-        std::unique_ptr<CubeType> cubesPtr(new CubeType[Common::ChunkSize3]);
-        CubeType* cubes = cubesPtr.get();
-        for (unsigned int i = 0; i < Common::ChunkSize3; ++i)
-        {
-            static_assert(sizeof(CubeType) == 2, "faut changer le read16");
-            cubes[i] = p.Read16();
-        }
-        chunkPtr->SetCubes(cubesPtr);
-        return chunkPtr;
-    }
-
-    static void Write(ChunkType const& chunk, Tools::ByteArray& p)
-    {
-        p.Write64(chunk.id);
-        if (chunk.IsEmpty())
-        {
-            p.Write8(0);
-            return;
-        }
-        p.Write8(1);
-        CubeType const* cubes = chunk.GetCubes();
-        for (unsigned int i = 0; i < Common::ChunkSize3; ++i)
-        {
-            static_assert(sizeof(CubeType) == 2, "faut changer le write16");
-            p.Write16(cubes[i]);
-        }
-    }
-
-private:
-    static void Read(Tools::ByteArray const&, ChunkType&); // Used by ByteArray::Read<T>(T&)
-};
-
-}*/
+}
 
 #endif

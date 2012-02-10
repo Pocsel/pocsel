@@ -3,6 +3,8 @@
 
 #include "tools/SimpleMessageQueue.hpp"
 
+#include "server2/Chunk.hpp"
+
 namespace Common {
 
     class Packet;
@@ -12,6 +14,7 @@ namespace Common {
 namespace Server {
 
     class Server;
+    class Chunk;
 
     namespace Database {
 
@@ -69,6 +72,10 @@ namespace Server { namespace ClientManagement {
         {
             this->_PushMessage(std::bind(&ClientManager::_SendPacket, this, clientId, packet));
         }
+        void SendChunk(Uint32 clientId, Chunk const& chunk)
+        {
+            this->_PushMessage(boost::bind(&ClientManager::_SendChunk, this, clientId, std::cref(chunk)));
+        }
 
         // A appeler du thread clientmanagement
         Database::ResourceManager const& GetResourceManager() const;
@@ -81,6 +88,7 @@ namespace Server { namespace ClientManagement {
         void _HandleClientError(Uint32 clientId);
         void _HandlePacket(Uint32 clientId, Common::Packet* packet);
         void _SendPacket(Uint32 clientId, Common::Packet* packet);
+        void _SendChunk(Uint32 clientId, Chunk const& chunk);
     };
 
 }}

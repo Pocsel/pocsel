@@ -15,6 +15,7 @@ namespace Server { namespace Network {
         _acceptor(this->_ioService),
         _newConnection()
     {
+        Tools::debug << "Network::Network()\n";
         Settings const& settings = server.GetSettings();
         try
         {
@@ -47,6 +48,7 @@ namespace Server { namespace Network {
 
     Network::~Network()
     {
+        Tools::debug << "Network::~Network()\n";
     }
 
     void Network::_ConnectAccept()

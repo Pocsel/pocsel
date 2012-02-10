@@ -1,9 +1,3 @@
-#include <stdexcept>
-#include <cassert>
-#include <cstring>
-#include <iomanip>
-#include <iostream>
-
 #include "common/Packet.hpp"
 
 namespace Common {

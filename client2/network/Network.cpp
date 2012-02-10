@@ -8,8 +8,11 @@
 
 namespace Client { namespace Network {
 
-    Network::Network(Client& client) :
-        _socket(_ioService), _sending(false), _isConnected(false)
+    Network::Network(Client& client)
+        : _socket(_ioService),
+        _thread(0),
+        _sending(false),
+        _isConnected(false)
     {
         this->_sizeBuffer.resize(2);
     }
@@ -28,16 +31,20 @@ namespace Client { namespace Network {
         }
         if (error)
         {
-            Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed." << Tools::endl;
+            Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed.\n";
             throw std::runtime_error("connection failed");
         }
         this->_host = host;
         this->_port = port;
         this->_isConnected = true;
+        this->_thread = new boost::thread(std::bind(&Network::_Run, this));
     }
 
     Network::~Network()
     {
+        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { delete p; });
+        std::for_each(this->_inQueue.begin(), this->_inQueue.end(), [](Common::Packet* p) { delete p; });
+        Tools::Delete(this->_thread);
     }
 
     bool Network::IsConnected() const
@@ -55,7 +62,7 @@ namespace Client { namespace Network {
         return this->_port;
     }
 
-    void Network::Run()
+    void Network::_Run()
     {
         this->_ReceivePacketSize();
         this->_ioService.run();
@@ -63,7 +70,17 @@ namespace Client { namespace Network {
 
     void Network::Stop()
     {
+        this->_Disconnect();
         this->_ioService.stop();
+        this->_thread->join();
+
+        // Pas de leak dans le cas où on refait un connect
+        delete this->_thread;
+        this->_thread = 0;
+        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { delete p; });
+        std::for_each(this->_inQueue.begin(), this->_inQueue.end(), [](Common::Packet* p) { delete p; });
+        this->_outQueue.clear();
+        this->_inQueue.clear();
     }
 
     void Network::SendPacket(std::unique_ptr<Common::Packet> packet)
@@ -75,8 +92,8 @@ namespace Client { namespace Network {
         }
         bool sendNext = false;
         {
-            boost::unique_lock<boost::mutex> lock(this->_mutex);
-            this->_outQueue.push(packet.release());
+            boost::unique_lock<boost::mutex> lock(this->_outMutex);
+            this->_outQueue.push_back(packet.release());
             if (!this->_sending)
             {
                 this->_sending = true;
@@ -87,10 +104,17 @@ namespace Client { namespace Network {
             this->_SendNext();
     }
 
+    std::list<Common::Packet*> Network::ProcessInPackets()
+    {
+        boost::unique_lock<boost::mutex> lock(this->_inMutex);
+        return std::move(this->_inQueue);
+    }
+
     void Network::_Disconnect()
     {
         try
         {
+            this->_isConnected = false;
             this->_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
             this->_socket.close();
         }
@@ -99,7 +123,6 @@ namespace Client { namespace Network {
             Tools::error << "Network::_Disconnect: Exception on socket shutdown: \"" << e.what() << "\".\n";
             return;
         }
-        this->_isConnected = false;
         Tools::log << "Network::_Disconnect: Socket disconnected.\n";
     }
 
@@ -107,7 +130,7 @@ namespace Client { namespace Network {
     {
         Common::Packet* p;
         {
-            boost::unique_lock<boost::mutex> lock(this->_mutex);
+            boost::unique_lock<boost::mutex> lock(this->_outMutex);
             p = this->_outQueue.front();
         }
         std::vector<boost::asio::const_buffer> buffers;
@@ -126,9 +149,9 @@ namespace Client { namespace Network {
         {
             bool sendNext = false;
             {
-                boost::unique_lock<boost::mutex> lock(this->_mutex);
+                boost::unique_lock<boost::mutex> lock(this->_outMutex);
                 Tools::Delete(this->_outQueue.front());
-                this->_outQueue.pop();
+                this->_outQueue.pop_front();
                 if (this->_outQueue.empty())
                     this->_sending = false;
                 else
@@ -170,9 +193,12 @@ namespace Client { namespace Network {
         }
         else
         {
-            auto p = new Common::Packet;
-            p->SetData(&this->_dataBuffer[0], this->_dataBuffer.size());
-            // TODO process packet
+            auto p = new Common::Packet();
+            p->SetData(this->_dataBuffer.data(), this->_dataBuffer.size());
+            {
+                boost::unique_lock<boost::mutex> lock(this->_inMutex);
+                this->_inQueue.push_back(p);
+            }
             this->_ReceivePacketSize();
         }
     }

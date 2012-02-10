@@ -1,8 +1,6 @@
 #ifndef __COMMON_CUBETYPESERIALIZER_HPP__
 #define __COMMON_CUBETYPESERIALIZER_HPP__
 
-#include <memory>
-
 #include "tools/ByteArray.hpp"
 
 #include "common/CubeType.hpp"
