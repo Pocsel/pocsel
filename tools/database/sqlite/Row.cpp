@@ -1,9 +1,3 @@
-#include <stdlib.h>
-#include <cassert>
-#include <map>
-#include <stdexcept>
-#include <sstream>
-
 #include "tools/database/DatabaseError.hpp"
 
 #include "tools/database/sqlite/Value.hpp"

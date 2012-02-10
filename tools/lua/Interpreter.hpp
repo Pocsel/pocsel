@@ -1,12 +1,8 @@
 #ifndef __TOOLS_LUA_INTERPRETER_HPP__
 #define __TOOLS_LUA_INTERPRETER_HPP__
 
-#include <boost/noncopyable.hpp>
-#include <string>
-#include <list>
-
-#include "LuaState.hpp"
-#include "Object.hpp"
+#include "tools/lua/LuaState.hpp"
+#include "tools/lua/Object.hpp"
 
 namespace Tools { namespace Lua {
 

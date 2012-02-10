@@ -2,8 +2,6 @@
 #define __TOOLS_GUI_WINDOWWINDOWS_HPP__
 
 #ifdef _WIN32
-#include <functional>
-#include <map>
 
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/IRenderer.hpp"

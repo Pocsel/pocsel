@@ -1,8 +1,6 @@
 #ifndef __TOOLS_DATABASE_SQLITE_ROW_HPP__
 #define __TOOLS_DATABASE_SQLITE_ROW_HPP__
 
-#include <sqlite3.h>
-
 #include "tools/database/IRow.hpp"
 
 #include "tools/database/sqlite/Value.hpp"

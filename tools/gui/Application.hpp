@@ -1,10 +1,8 @@
 #ifndef __TOOLS_GUI_APPLICATION_HPP__
 #define __TOOLS_GUI_APPLICATION_HPP__
 
-#include <boost/noncopyable.hpp>
-
-#include "EventManager.hpp"
-#include "Settings.hpp"
+#include "tools/gui/EventManager.hpp"
+#include "tools/gui/Settings.hpp"
 
 namespace Tools { namespace Gui {
 

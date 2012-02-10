@@ -1,13 +1,7 @@
 #ifndef __TOOLS_LOGGER_WRITER_HPP__
 #define __TOOLS_LOGGER_WRITER_HPP__
 
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
-
 #include "tools/logger/Token.hpp"
-#include "tools/ToString.hpp"
 
 namespace Tools { namespace Logger {
 
@@ -110,7 +104,7 @@ namespace Tools { namespace Logger {
         }
 
         Writer(TLog& parent, std::ostream& stream, std::string const& file)
-            : _parent(parent), 
+            : _parent(parent),
             _output(&stream),
             _fileOutput(new std::ofstream(file.c_str()))
         {
@@ -207,6 +201,7 @@ namespace Tools { namespace Logger {
             return Buffer<Writer<void>>(*this, value);
         }
     };
+
 }}
 
 #endif

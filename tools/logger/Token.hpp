@@ -1,11 +1,6 @@
 #ifndef __TOOLS_LOGGER_TOKEN_HPP__
 #define __TOOLS_LOGGER_TOKEN_HPP__
 
-#include <functional>
-#include <iostream>
-#include <sstream>
-#include <string>
-
 namespace Tools {
 
     namespace Logger {

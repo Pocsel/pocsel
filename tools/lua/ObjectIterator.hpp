@@ -1,9 +1,7 @@
 #ifndef __TOOLS_LUA_OBJECTITERATOR_HPP__
 #define __TOOLS_LUA_OBJECTITERATOR_HPP__
 
-#include <utility>
-
-#include "StackRefPtr.hpp"
+#include "tools/lua/StackRefPtr.hpp"
 
 namespace Tools { namespace Lua {
 

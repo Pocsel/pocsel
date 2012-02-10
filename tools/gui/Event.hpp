@@ -10,4 +10,4 @@ namespace Tools { namespace Gui {
 
 }}
 
-#endif /* !__EVENT_HPP__ */
+#endif

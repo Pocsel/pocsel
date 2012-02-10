@@ -1,13 +1,7 @@
 #ifndef __TOOLS_GUI_STYLESHEET_HPP__
 #define __TOOLS_GUI_STYLESHEET_HPP__
 
-#include <list>
-#include <string>
-#include <unordered_map>
-
 #include "tools/Color.hpp"
-
-#include "Font.hpp"
 
 namespace Tools { namespace Gui {
 
@@ -69,7 +63,7 @@ namespace std {
         }
     };
 
-} // !std
+}
 
 namespace Tools { namespace Gui {
 

@@ -1,8 +1,6 @@
 #ifndef __TOOLS_META_SIGNATURE_HPP__
 #define __TOOLS_META_SIGNATURE_HPP__
 
-#include <functional>
-
 #include "tools/meta/TypeList.hpp"
 
 namespace Tools { namespace Meta {

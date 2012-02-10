@@ -1,11 +1,8 @@
 #ifndef __TOOLS_LUA_STACKREF_HPP__
 #define __TOOLS_LUA_STACKREF_HPP__
 
-#include <string>
-#include <unordered_map>
-
-#include "Object.hpp"
-#include "StackRefPtr.hpp"
+#include "tools/lua/Object.hpp"
+#include "tools/lua/StackRefPtr.hpp"
 
 namespace Tools { namespace Lua {
 

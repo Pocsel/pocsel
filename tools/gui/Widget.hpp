@@ -1,20 +1,19 @@
 #ifndef __TOOLS_GUI_WIDGET_HPP__
 #define __TOOLS_GUI_WIDGET_HPP__
 
-#include <string>
-
-#include <boost/noncopyable.hpp>
-
-#include "tools/IRenderer.hpp"
 #include "tools/Rectangle.hpp"
-#include "tools/Vector2.hpp"
 
-#include "events/all_forward.hpp"
+#include "tools/gui/events/all_forward.hpp"
 
-#include "ComputedStyles.hpp"
-#include "Event.hpp"
-#include "SizePolicy.hpp"
-#include "Stylesheet.hpp"
+#include "tools/gui/ComputedStyles.hpp"
+#include "tools/gui/Event.hpp"
+#include "tools/gui/SizePolicy.hpp"
+#include "tools/gui/Stylesheet.hpp"
+
+namespace Tools {
+    class IRenderer;
+    template<typename T> class Vector2;
+}
 
 namespace Tools { namespace Gui {
 

@@ -1,14 +1,12 @@
 #ifndef __TOOLS_GUI_VIEWPORT_HPP__
 #define __TOOLS_GUI_VIEWPORT_HPP__
 
-#include <string>
-
 #include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
 
-#include "events/all_forward.hpp"
+#include "tools/gui/events/all_forward.hpp"
 
-#include "Container.hpp"
+#include "tools/gui/Container.hpp"
 
 
 namespace Tools { namespace Gui {

@@ -1,6 +1,3 @@
-#include <cassert>
-#include <sstream>
-
 #include "tools/database/DatabaseError.hpp"
 
 #include "tools/database/sqlite/Statement.hpp"

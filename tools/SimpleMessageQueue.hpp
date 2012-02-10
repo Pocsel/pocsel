@@ -1,10 +1,6 @@
 #ifndef __TOOLS_SIMPLEMESSAGEQUEUE_HPP__
 #define __TOOLS_SIMPLEMESSAGEQUEUE_HPP__
 
-#include <boost/thread.hpp>
-
-#include "tools/atomic.hpp"
-
 namespace Tools {
 
     class SimpleMessageQueue

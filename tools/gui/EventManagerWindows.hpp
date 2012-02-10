@@ -1,7 +1,7 @@
 #ifndef __TOOLS_GUI_EVENTMANAGERWINDOWS_HPP__
 #define __TOOLS_GUI_EVENTMANAGERWINDOWS_HPP__
 
-#include "WindowWindows.hpp"
+#include "tools/gui/WindowWindows.hpp"
 
 namespace Tools { namespace Gui {
 

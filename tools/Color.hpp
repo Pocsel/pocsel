@@ -1,8 +1,6 @@
 #ifndef __TOOLS_COLOR_HPP__
 #define __TOOLS_COLOR_HPP__
 
-#include <string>
-
 namespace Tools {
 
     template<typename T> struct Color3;

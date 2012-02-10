@@ -1,9 +1,6 @@
 #ifndef __TOOLS_DATABASE_SQLITE_VALUE_HPP__
 #define __TOOLS_DATABASE_SQLITE_VALUE_HPP__
 
-#include <stdexcept>
-#include <sqlite3.h>
-
 #include "tools/database/IValue.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {

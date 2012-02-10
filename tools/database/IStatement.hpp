@@ -1,8 +1,6 @@
 #ifndef __TOOLS_DATABASE_ISTATEMENT_HPP__
 #define __TOOLS_DATABASE_ISTATEMENT_HPP__
 
-#include <string>
-
 #include "tools/database/IValue.hpp"
 
 namespace Tools { namespace Database {

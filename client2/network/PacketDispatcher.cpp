@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "common/Packet.hpp"
 #include "client2/network/Network.hpp"
 #include "client2/network/PacketCreator.hpp"

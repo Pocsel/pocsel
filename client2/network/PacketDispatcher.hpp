@@ -1,9 +1,6 @@
 #ifndef __CLIENT_NETWORK_PACKETDISPATCHER_HPP__
 #define __CLIENT_NETWORK_PACKETDISPATCHER_HPP__
 
-#include <list>
-#include <vector>
-
 #include "protocol/protocol.hpp"
 
 namespace Common {

@@ -1,8 +1,6 @@
 #ifndef __TOOLS_DATABASE_IVALUE_HPP__
 #define __TOOLS_DATABASE_IVALUE_HPP__
 
-#include <string>
-
 namespace Tools { namespace Database {
 
     struct Blob

@@ -1,8 +1,6 @@
 #ifndef __TOOLS_OPENGL_HPP__
 #define __TOOLS_OPENGL_HPP__
 
-#include <stdexcept>
-
 #ifdef _WIN32
 # include <GL/glew.h>
 # include <GL/wglew.h>
@@ -21,8 +19,6 @@
 // Else, we don't add any overhead
 #define GLCHECK(Func) (Func)
 #endif
-
-#include <string>
 
 #include "tools/IRenderer.hpp"
 
@@ -116,6 +112,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     void GLCheckError(std::string const& file, unsigned int line, char const* function);
     void CGCheckError(CGcontext ctx, std::string const& file, unsigned int line, char const* function);
+
 }}}
 
 #endif

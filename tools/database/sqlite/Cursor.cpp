@@ -1,6 +1,3 @@
-#include <sstream>
-#include <cassert>
-
 #include "tools/database/DatabaseError.hpp"
 #include "tools/database/RowIterator.hpp"
 

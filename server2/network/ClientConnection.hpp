@@ -1,7 +1,6 @@
 #ifndef __SERVER_NETWORK_CLIENTCONNECTION_HPP__
 #define __SERVER_NETWORK_CLIENTCONNECTION_HPP__
 
-#include <queue>
 #include <boost/enable_shared_from_this.hpp>
 
 namespace Common {

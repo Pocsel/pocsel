@@ -1,14 +1,6 @@
 #ifndef __TOOLS_LUA_LUASTATE_HPP__
 #define __TOOLS_LUA_LUASTATE_HPP__
 
-#ifdef DEBUG
-# include <set>
-#endif
-
-#include <cstddef>
-
-#include <boost/noncopyable.hpp>
-
 #include "tools/meta/RemoveQualifiers.hpp"
 #include "tools/meta/RemoveReference.hpp"
 
@@ -98,4 +90,5 @@ namespace Tools { namespace Lua {
     };
 
 }}
+
 #endif

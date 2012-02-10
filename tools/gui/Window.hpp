@@ -1,12 +1,10 @@
 #ifndef __TOOLS_GUI_WINDOW_HPP__
 #define __TOOLS_GUI_WINDOW_HPP__
 
-#include <string>
-
 #include "tools/IRenderer.hpp"
 
-#include "EventManager.hpp"
-#include "Viewport.hpp"
+#include "tools/gui/EventManager.hpp"
+#include "tools/gui/Viewport.hpp"
 
 namespace Tools { namespace Gui {
 

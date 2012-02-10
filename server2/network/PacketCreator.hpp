@@ -1,8 +1,6 @@
 #ifndef __SERVER_NETWORK_PACKETCREATOR_HPP__
 #define __SERVER_NETWORK_PACKETCREATOR_HPP__
 
-#include <string>
-
 #include "server2/Chunk.hpp"
 
 namespace Common{

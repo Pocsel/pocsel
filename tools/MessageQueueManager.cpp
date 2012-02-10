@@ -1,8 +1,3 @@
-#include <iostream>
-#include <stdexcept>
-
-#include <stdlib.h>
-
 #include "tools/MessageQueueManager.hpp"
 
 

@@ -1,7 +1,7 @@
 #ifndef  __TOOLS_GUI_WINDOWIMPLEM_HPP__
 #define __TOOLS_GUI_WINDOWIMPLEM_HPP__
 
-#include "WindowSdl.hpp"
+#include "tools/gui/WindowSdl.hpp"
 
 //# ifdef __linux__
 //#  include "WindowLinux.hpp"

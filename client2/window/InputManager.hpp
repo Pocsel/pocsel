@@ -1,8 +1,6 @@
 #ifndef __CLIENT_WINDOW_IINPUTMANAGER_HPP__
 #define __CLIENT_WINDOW_IINPUTMANAGER_HPP__
 
-#include <boost/noncopyable.hpp>
-
 #include "client2/window/InputBinder.hpp"
 
 namespace Client {

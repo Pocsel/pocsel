@@ -1,4 +1,3 @@
-#include <iostream>
 #include <IL/il.h>
 
 #include "tools/renderers/GLRenderer.hpp"

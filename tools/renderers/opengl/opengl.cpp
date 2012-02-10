@@ -1,6 +1,3 @@
-#include <stdexcept>
-#include <iostream>
-
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/GLRenderer.hpp"
 

@@ -1,22 +1,21 @@
-
-#include <iostream>
-
-#include "Application.hpp"
-#include "Event.hpp"
-#include "events/Quit.hpp"
+#include "tools/gui/Application.hpp"
+#include "tools/gui/Event.hpp"
 #include "tools/gui/Window.hpp"
 
-using namespace Tools::Gui;
+#include "tools/gui/events/Quit.hpp"
 
-Application::Application(Window& window) :
-    _mainWindow(window),
-    _eventManager(window.GetEventManager())
-{
-}
+namespace Tools { namespace Gui {
 
-void Application::Stop()
-{
-    std::cout << "Application::Stop()\n";
-    this->_eventManager.Notify<Events::Quit>("on-quit");
-}
+    Application::Application(Window& window) :
+        _mainWindow(window),
+        _eventManager(window.GetEventManager())
+    {
+    }
 
+    void Application::Stop()
+    {
+        std::cout << "Application::Stop()\n";
+        this->_eventManager.Notify<Events::Quit>("on-quit");
+    }
+
+}}

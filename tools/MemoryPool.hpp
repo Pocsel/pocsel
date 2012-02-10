@@ -1,8 +1,6 @@
 #ifndef __TOOLS_MEMORYPOOL_HPP__
 #define __TOOLS_MEMORYPOOL_HPP__
 
-#include <list>
-
 namespace Tools {
 
     template<class T>

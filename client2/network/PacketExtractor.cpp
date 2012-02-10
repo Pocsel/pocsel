@@ -1,6 +1,3 @@
-#include <iostream>
-#include <stdexcept>
-
 #include "client2/network/PacketExtractor.hpp"
 //#include "client2/ChunkSerializer.hpp"
 

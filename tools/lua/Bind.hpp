@@ -5,9 +5,9 @@
 #include "tools/meta/RemoveReference.hpp"
 #include "tools/meta/RemoveQualifiers.hpp"
 
-#include "Interpreter.hpp"
-#include "LuaState.hpp"
-#include "StackRef.hpp"
+#include "tools/lua/Interpreter.hpp"
+#include "tools/lua/LuaState.hpp"
+#include "tools/lua/StackRef.hpp"
 
 namespace Tools { namespace Lua {
 

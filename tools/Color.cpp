@@ -1,7 +1,3 @@
-#include <iostream>
-#include <stdexcept>
-#include <unordered_map>
-#include <cassert>
 #include <boost/algorithm/string.hpp>
 
 #include "tools/Color.hpp"
