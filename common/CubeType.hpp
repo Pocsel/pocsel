@@ -1,8 +1,6 @@
 #ifndef __COMMON_CUBETYPE_HPP__
 #define __COMMON_CUBETYPE_HPP__
 
-#include <string>
-
 #include "common/BaseChunk.hpp"
 
 namespace Common {
