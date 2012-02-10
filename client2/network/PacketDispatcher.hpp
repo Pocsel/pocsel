@@ -19,7 +19,7 @@ namespace Client { namespace Network {
         private boost::noncopyable
     {
     private:
-        std::function<void(Common::Packet&)> _dispatcher[Protocol::ServerToClient::NbPacketTypeServer];
+        std::function<void(Common::Packet&)> _dispatcher[(int)Protocol::ServerToClient::NbPacketTypeServer];
         Client& _client;
 
     public:
