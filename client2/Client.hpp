@@ -3,6 +3,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "client2/Settings.hpp"
+
 namespace Client {
     namespace Network {
         class Network;
@@ -14,13 +16,11 @@ namespace Client {
 
 namespace Client {
 
-    class Settings;
-
     class Client :
         private boost::noncopyable
     {
     private:
-        Settings* _settings;
+        Settings _settings;
         Window::IWindow* _window;
         Network::Network* _network;
         bool _running;
