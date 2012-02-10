@@ -30,6 +30,7 @@ namespace Client { namespace Resources {
 
             void AskResources(Uint32 nbResources, std::list<Uint32>& neededResources);
             void HandleResourceRange(Common::Packet& p);
+            float GetLoadingProgression() const { return this->_nbDownloadedResources / (float)this->_nbNeededResources; }
 
         private:
             void _RequestNextResource();
