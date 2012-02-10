@@ -68,9 +68,9 @@ namespace Server {
         this->SendPacket(std::move(p));
     }
 
-    void Client::SpawnPosition(Common::Position const& pos)
+    void Client::TeleportPlayer(Common::Position const& pos)
     {
-        Common::PacketPtr p(PacketCreator::SpawnPosition(pos));
+        Common::PacketPtr p(PacketCreator::TeleportPlayer(pos));
         this->SendPacket(std::move(p));
     }
 

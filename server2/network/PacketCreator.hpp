@@ -36,7 +36,7 @@ namespace Server { namespace Network {
 
         static Common::Packet* CubeType(Common::CubeType const& cubeType);
 
-        static Common::Packet* SpawnPosition(Common::Position const& pos);
+        static Common::Packet* TeleportPlayer(Common::Position const& pos);
     };
 
 }}

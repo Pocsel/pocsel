@@ -114,10 +114,10 @@ namespace Server { namespace Network {
         return response;
     }
 
-    Common::Packet* PacketCreator::SpawnPosition(Common::Position const& pos)
+    Common::Packet* PacketCreator::TeleportPlayer(Common::Position const& pos)
     {
         Common::Packet* ptr(new Common::Packet);
-        ptr->Write(Protocol::ServerToClient::SpawnPosition);
+        ptr->Write(Protocol::ServerToClient::TeleportPlayer);
         ptr->Write(pos);
         return ptr;
     }
