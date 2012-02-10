@@ -4,6 +4,8 @@
 #include "client2/window/sdl/Window.hpp"
 #include "client2/window/IInputManager.hpp"
 #include "client2/network/Network.hpp"
+#include "client2/network/PacketCreator.hpp"
+#include "client2/network/PacketDispatcher.hpp"
 
 #include "tools/Timer.hpp"
 
@@ -15,10 +17,12 @@ namespace Client {
     {
         this->_window = new Window::Sdl::Window(*this);
         this->_network = new Network::Network(*this);
+        this->_packetDispatcher = new Network::PacketDispatcher(*this);
     }
 
     Client::~Client()
     {
+        Tools::Delete(this->_packetDispatcher);
         Tools::Delete(this->_network);
         Tools::Delete(this->_window);
     }
@@ -27,11 +31,12 @@ namespace Client {
     {
         Tools::Timer frameTimer;
         this->_network->Connect(this->_settings.host, this->_settings.port);
+        this->_network->SendPacket(Network::PacketCreator::Login("yalap_a"));
         while (this->_running)
         {
             frameTimer.Reset();
 
-            auto const& packets = this->_network->ProcessInPackets();
+            this->_packetDispatcher->ProcessAllPackets(this->_network->ProcessInPackets());
             this->_window->GetInputManager().ProcessEvents();
             this->_window->Render();
 
