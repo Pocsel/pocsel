@@ -40,11 +40,12 @@ namespace Server { namespace Network {
         return p;
     }
 
-    Common::Packet* PacketCreator::Ping()
+    Common::Packet* PacketCreator::Ping(Uint64 timestamp)
     {
         Common::Packet* p(new Common::Packet);
         p->Write((Protocol::ActionType)Protocol::ServerToClient::Ping);
-        p->Write64(2134); // timestamp agréé par le commité du temps
+
+        p->Write(timestamp); // timestamp agréé par le commité du temps
         return p;
     }
 

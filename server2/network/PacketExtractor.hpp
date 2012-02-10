@@ -21,10 +21,10 @@ namespace Server { namespace Network {
                           std::string& login);
 
         static void Pong(Common::Packet const& p,
-                         std::string& str);
+                         Uint64& timestamp);
 
         static void NeedChunks(Common::Packet const& p,
-                               std::list<Chunk::IdType>& Ids);
+                               std::vector<Chunk::IdType>& ids);
 
         static void GetNeededResourceIds(Common::Packet const& p,
                                          Uint32& version);
@@ -36,7 +36,11 @@ namespace Server { namespace Network {
         static void GetCubeType(Common::Packet const& p,
                                 Chunk::CubeType& id);
 
-        static void GetSpawnPosition(Common::Packet const& p);
+        static void Settings(Common::Packet const& p,
+                             Uint32& viewDistance,
+                             std::string& playerName);
+
+        static void TeleportOk(Common::Packet const& p);
     };
 
 }}

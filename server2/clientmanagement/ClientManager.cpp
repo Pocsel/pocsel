@@ -159,11 +159,23 @@ namespace Server { namespace ClientManagement {
     {
         if (this->_clients.find(clientId) == this->_clients.end())
         {
-            Tools::error << "SendChunk: Client " << clientId << " not found.\n";
             return ;
         }
 
         this->_clients[clientId]->SendPacket(Network::PacketCreator::Chunk(chunk));
+    }
+
+    void ClientManager::_ClientTeleport(Uint32 clientId, Common::Position const& position)
+    {
+        if (this->_clients.find(clientId) == this->_clients.end())
+        {
+            Tools::error << "ClientTeleport: Client " << clientId << " not found.\n";
+            return ;
+        }
+
+        this->_clients[clientId]->SendPacket(Network::PacketCreator::TeleportPlayer(position));
+
+        // TODO passer le client en mode teleport (il n'existe plus dans le monde)
     }
 
 }}
