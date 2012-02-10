@@ -9,27 +9,21 @@ namespace Client {
 
 namespace Client { namespace Window {
 
+    class InputBinder;
+
     class IInputManager :
         private boost::noncopyable
     {
-    public:
-        enum Type
-        {
-            Pressed,
-            Held,
-            Released,
-            All,
-        };
-
+    private:
+        InputBinder* _inputBinder;
     protected:
         Client& _client;
 
     public:
-        IInputManager(Client& client);
+        IInputManager(Client& client, InputBinder* inputBinder);
         virtual ~IInputManager();
         virtual void ProcessEvents() = 0;
-        void Bind(std::string const& action, Type type, std::function<void(void)> const& callback);
-        void Action(std::string const& action, Type type);
+        InputBinder& GetInputBinder();
     };
 
 }}

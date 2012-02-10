@@ -12,9 +12,19 @@ namespace Tools { namespace Database {
         std::string _msg;
 
     public:
-        DatabaseError(std::string const& msg) : _msg(msg) {}
-        virtual const char* what() const throw() { return this->_msg.c_str(); }
-        virtual ~DatabaseError() throw() {}
+        DatabaseError(std::string const& msg) :
+            _msg(msg)
+        {
+        }
+
+        virtual const char* what() const throw()
+        {
+            return this->_msg.c_str();
+        }
+
+        virtual ~DatabaseError() throw()
+        {
+        }
     };
 
 }}

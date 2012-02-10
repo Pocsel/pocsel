@@ -20,7 +20,9 @@ namespace Tools { namespace Database {
         virtual IStatement& Bind(std::string const& s) = 0;
         virtual IStatement& Bind(const char* s) = 0;
         virtual IStatement& Bind(Blob& val) = 0;
-        virtual ~IStatement() {}
+        virtual ~IStatement()
+        {
+        }
     };
 
 }}

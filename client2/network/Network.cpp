@@ -99,6 +99,7 @@ namespace Client { namespace Network {
             Tools::error << "Network::_Disconnect: Exception on socket shutdown: \"" << e.what() << "\".\n";
             return;
         }
+        this->_isConnected = false;
         Tools::log << "Network::_Disconnect: Socket disconnected.\n";
     }
 
@@ -171,7 +172,7 @@ namespace Client { namespace Network {
         {
             auto p = new Common::Packet;
             p->SetData(&this->_dataBuffer[0], this->_dataBuffer.size());
-            // XXX process packet
+            // TODO process packet
             this->_ReceivePacketSize();
         }
     }

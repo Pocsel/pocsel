@@ -50,7 +50,7 @@ namespace Tools { namespace Database { namespace Sqlite {
 
     Tools::Database::IStatement* Cursor::Prepare(char const* req)
     {
-        assert(req != 0 && "Given request is null !");
+        assert(req != 0 && "Given request is null!");
         ::sqlite3_stmt* stmt;
         int res = ::sqlite3_prepare_v2(
             this->_db,     // Database handle
