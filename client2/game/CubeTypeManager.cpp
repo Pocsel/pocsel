@@ -19,13 +19,13 @@ namespace Client { namespace Game {
     void CubeTypeManager::AddCubeType(std::unique_ptr<Common::CubeType> type)
     {
         Tools::debug
-            << "CubeType: " << type->name << " (" << type->id << ")\n"
-            << type->textures.top << "\n"
-            << type->textures.left << "\n"
-            << type->textures.front << "\n"
-            << type->textures.right << "\n"
-            << type->textures.back << "\n"
-            << type->textures.bottom << "\n";
+            << "CubeType: " << type->name << " (id: " << type->id << ", textures: "
+            << type->textures.top << " "
+            << type->textures.left << " "
+            << type->textures.front << " "
+            << type->textures.right << " "
+            << type->textures.back << " "
+            << type->textures.bottom << ")\n";
         this->_cubeTypes.push_back(Common::CubeType(*type));
         this->_AskOneType();
     }
