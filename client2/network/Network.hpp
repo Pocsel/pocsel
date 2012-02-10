@@ -4,9 +4,6 @@
 namespace Common {
     class Packet;
 }
-namespace Client {
-    class Client;
-}
 
 namespace Client { namespace Network {
 
@@ -29,15 +26,15 @@ namespace Client { namespace Network {
         bool _isConnected;
 
     public:
-        Network(Client& client);
+        Network();
         ~Network();
         void Connect(std::string const& host, std::string const& port);
         void Stop();
         void SendPacket(std::unique_ptr<Common::Packet> packet);
         std::list<Common::Packet*> ProcessInPackets();
-        std::string const& GetHost() const;
-        std::string const& GetPort() const;
-        bool IsConnected() const;
+        std::string const& GetHost() const { return this->_host; }
+        std::string const& GetPort() const { return this->_port; }
+        bool IsConnected() const { return this->_isConnected; }
     private:
         void _Run();
         void _Disconnect();

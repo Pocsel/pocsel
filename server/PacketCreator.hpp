@@ -28,7 +28,7 @@ namespace Server {
         static Common::PacketPtr ResourceRangePacket(Common::Resource const& resource, Uint32 offset);
         static Common::PacketPtr CubeTypePacket(Common::CubeType const& cubeType);
         static Common::PacketPtr NeededResourceIdsPacket(std::vector<Uint32>& ids, Uint32& offset);
-        static Common::PacketPtr SpawnPosition(Common::Position const& pos);
+        static Common::PacketPtr TeleportPlayer(Common::Position const& pos);
     };
 
 }

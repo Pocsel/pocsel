@@ -10,17 +10,35 @@ namespace Client { namespace Network {
     PacketDispatcher::PacketDispatcher(Client& client)
         : _client(client)
     {
-        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::LoggedIn] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented LoggedIn\n"; };
-        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Ping] =
-            [this](Common::Packet&)
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::LoggedIn] =
+            [this](Common::Packet& p)
             {
-                this->_client.GetNetwork().SendPacket(PacketCreator::Pong());
+                bool status;
+                Protocol::Version major, minor;
+                std::string reason, worldId, worldName;
+                Uint32 worldVersion;
+                Common::BaseChunk::CubeType nbCubeTypes;
+                PacketExtractor::ExtractLogin(p, status, major, minor, reason, worldId, worldName, worldVersion, nbCubeTypes);
+
+                Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << major << "." << minor << "\n";
+                if (status)
+                {
+                    Tools::debug << "World: " << worldName << "(" << worldId << " version: " << worldVersion << ")\n";
+                    this->_client.Login(worldId, worldName, worldVersion, nbCubeTypes);
+                }
+                else
+                    this->_client.Disconnect(reason);
+            };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Ping] =
+            [this](Common::Packet& p)
+            {
+                this->_client.GetNetwork().SendPacket(PacketCreator::Pong(PacketExtractor::ExtractPing(p)));
             };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Chunk] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented Chunk\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::NeededResourceIds] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented NeededResourceIds\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::ResourceRange] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented ResourceRange\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::CubeType] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented CubeType\n"; };
-        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::SpawnPosition] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented SpawnPosition\n"; };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::TeleportPlayer] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented SpawnPosition\n"; };
     }
 
     void PacketDispatcher::ProcessAllPackets(std::list<Common::Packet*>&& packets)

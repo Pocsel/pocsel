@@ -33,10 +33,9 @@ namespace Client {
         }
     }
 
-    void PacketExtractor::ExtractPing(Common::Packet const& p,
-            Uint64& timestamp)
+    Uint64 PacketExtractor::ExtractPing(Common::Packet const& p)
     {
-        p.Read(timestamp);
+        return p.Read64();
     }
 
     //void PacketExtractor::ExtractNeededResourceIds(Common::Packet const& p,

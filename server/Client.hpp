@@ -72,7 +72,7 @@ namespace Server {
             this->_player = new Player(map);
         }
 
-        void SpawnPosition(Common::Position const& pos);
+        void TeleportPlayer(Common::Position const& pos);
     };
 
 }

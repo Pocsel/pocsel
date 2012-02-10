@@ -24,7 +24,7 @@ namespace Server { namespace Network {
                                         Uint32 worldVersion = 0,
                                         Chunk::CubeType nbCubeTypes = 0);
 
-        static Common::Packet* Ping();
+        static Common::Packet* Ping(Uint64 timestamp);
 
         static Common::Packet* Chunk(::Server::Chunk const& chunk);
 
@@ -36,7 +36,7 @@ namespace Server { namespace Network {
 
         static Common::Packet* CubeType(Common::CubeType const& cubeType);
 
-        static Common::Packet* SpawnPosition(Common::Position const& pos);
+        static Common::Packet* TeleportPlayer(Common::Position const& pos);
     };
 
 }}

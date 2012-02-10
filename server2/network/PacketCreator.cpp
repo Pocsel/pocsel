@@ -40,11 +40,12 @@ namespace Server { namespace Network {
         return p;
     }
 
-    Common::Packet* PacketCreator::Ping()
+    Common::Packet* PacketCreator::Ping(Uint64 timestamp)
     {
         Common::Packet* p(new Common::Packet);
         p->Write((Protocol::ActionType)Protocol::ServerToClient::Ping);
-        p->Write64(2134); // timestamp agréé par le commité du temps
+
+        p->Write(timestamp); // timestamp agréé par le commité du temps
         return p;
     }
 
@@ -114,10 +115,10 @@ namespace Server { namespace Network {
         return response;
     }
 
-    Common::Packet* PacketCreator::SpawnPosition(Common::Position const& pos)
+    Common::Packet* PacketCreator::TeleportPlayer(Common::Position const& pos)
     {
         Common::Packet* ptr(new Common::Packet);
-        ptr->Write(Protocol::ServerToClient::SpawnPosition);
+        ptr->Write(Protocol::ServerToClient::TeleportPlayer);
         ptr->Write(pos);
         return ptr;
     }

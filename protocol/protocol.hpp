@@ -23,7 +23,7 @@ namespace Protocol {
         Login = 0,
 
         /**
-         * String contenant yalap_a (optimisé)
+         * Uint64 timestamp du packet ping
          */
         Pong,
 
@@ -49,9 +49,21 @@ namespace Protocol {
         GetCubeType,
 
         /**
+         * OBSOLETE
          * void
          */
         GetSpawnPosition,
+
+        /**
+         * Uint32 view distance
+         * String player name
+         */
+        Settings,
+
+        /**
+         * Rien
+         */
+        TeleportOk,
 
         NbPacketTypeClient, // pour les tableaux
     };
@@ -108,7 +120,7 @@ namespace Protocol {
         /**
          * Position pos
          */
-        SpawnPosition,
+        TeleportPlayer,
 
         NbPacketTypeServer, // pour les tableaux
     };

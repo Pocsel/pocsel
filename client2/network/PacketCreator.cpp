@@ -17,12 +17,12 @@ namespace Client { namespace Network {
         return p;
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::Pong()
+    std::unique_ptr<Common::Packet> PacketCreator::Pong(Uint64 timestamp)
     {
         std::unique_ptr<Common::Packet> p(new Common::Packet());
         p->Write(Protocol::ClientToServer::Pong);
 
-        p->Write(std::string("yalap_a"));
+        p->Write(timestamp);
         return p;
     }
 
@@ -55,14 +55,14 @@ namespace Client { namespace Network {
     //    return p;
     //}
 
-    //std::unique_ptr<Common::Packet> PacketCreator::GetCubeType(Chunk::CubeType id)
-    //{
-    //    std::unique_ptr<Common::Packet> p(new Common::Packet());
-    //    p->Write(Protocol::ClientToServer::GetCubeType);
+    std::unique_ptr<Common::Packet> PacketCreator::GetCubeType(Common::BaseChunk::CubeType id)
+    {
+        std::unique_ptr<Common::Packet> p(new Common::Packet());
+        p->Write(Protocol::ClientToServer::GetCubeType);
 
-    //    p->Write(id);
-    //    return p;
-    //}
+        p->Write(id);
+        return p;
+    }
 
     //std::unique_ptr<Common::Packet> PacketCreator::GetSpawnPosition()
     //{

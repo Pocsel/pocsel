@@ -27,8 +27,7 @@ namespace Client {
                 std::string& worldName,
                 Uint32& worldVersion,
                 Common::BaseChunk::CubeType& nbCubeTypes);
-        static void ExtractPing(Common::Packet const& p,
-                Uint64& timestamp);
+        static Uint64 ExtractPing(Common::Packet const& p);
         //static void ExtractNeededResourceIds(Common::Packet const& p,
         //        Uint32& nbResourceIds,
         //        std::list<Uint32>& ids);

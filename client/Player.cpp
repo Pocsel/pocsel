@@ -12,7 +12,7 @@ namespace Client {
         _eventManager(eventManager)
     {
         packetDispatcher.Register(
-            Protocol::ServerToClient::SpawnPosition,
+            Protocol::ServerToClient::TeleportPlayer,
             std::bind(&Player::_HandleSpawnPosition, this, std::placeholders::_1)
         );
 

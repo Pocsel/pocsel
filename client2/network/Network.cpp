@@ -6,7 +6,7 @@
 
 namespace Client { namespace Network {
 
-    Network::Network(Client& client)
+    Network::Network()
         : _socket(_ioService),
         _thread(0),
         _sending(false),
@@ -43,21 +43,6 @@ namespace Client { namespace Network {
         std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { delete p; });
         std::for_each(this->_inQueue.begin(), this->_inQueue.end(), [](Common::Packet* p) { delete p; });
         Tools::Delete(this->_thread);
-    }
-
-    bool Network::IsConnected() const
-    {
-        return this->_isConnected;
-    }
-
-    std::string const& Network::GetHost() const
-    {
-        return this->_host;
-    }
-
-    std::string const& Network::GetPort() const
-    {
-        return this->_port;
     }
 
     void Network::_Run()

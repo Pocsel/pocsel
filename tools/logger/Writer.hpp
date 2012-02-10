@@ -118,6 +118,7 @@ namespace Tools { namespace Logger {
     public:
         void WriteFile(std::string const& data)
         {
+            this->_parent.WriteFile(data);
             if (this->_fileOutput)
                 *this->_fileOutput << data << std::flush;
         }
