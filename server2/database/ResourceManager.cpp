@@ -70,7 +70,7 @@ namespace Server { namespace Database {
         std::vector<Uint32> ids;
         for (auto mit = this->_idsByVersion.begin(), mite = this->_idsByVersion.end(); mit != mite; ++mit)
         {
-            if (mit->first >= fromVersion)
+            if (mit->first > fromVersion)
             {
                 for (auto it = mit->second.begin(), ite = mit->second.end(); it != ite; ++it)
                     ids.push_back(*it);
