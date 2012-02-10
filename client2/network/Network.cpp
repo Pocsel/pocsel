@@ -70,7 +70,7 @@ namespace Client { namespace Network {
 
     void Network::Stop()
     {
-        this->_isConnected = false;
+        this->_Disconnect();
         this->_ioService.stop();
         this->_thread->join();
 
@@ -114,6 +114,7 @@ namespace Client { namespace Network {
     {
         try
         {
+            this->_isConnected = false;
             this->_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
             this->_socket.close();
         }
