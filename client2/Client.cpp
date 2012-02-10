@@ -16,27 +16,25 @@ namespace Client {
         _running(true)
     {
         this->_window = new Window::Sdl::Window(*this);
-        this->_network = new Network::Network(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
     }
 
     Client::~Client()
     {
         Tools::Delete(this->_packetDispatcher);
-        Tools::Delete(this->_network);
         Tools::Delete(this->_window);
     }
 
     int Client::Run()
     {
         Tools::Timer frameTimer;
-        this->_network->Connect(this->_settings.host, this->_settings.port);
-        this->_network->SendPacket(Network::PacketCreator::Login("yalap_a"));
+        this->_network.Connect(this->_settings.host, this->_settings.port);
+        this->_network.SendPacket(Network::PacketCreator::Login("yalap_a"));
         while (this->_running)
         {
             frameTimer.Reset();
 
-            this->_packetDispatcher->ProcessAllPackets(this->_network->ProcessInPackets());
+            this->_packetDispatcher->ProcessAllPackets(this->_network.ProcessInPackets());
             this->_window->GetInputManager().ProcessEvents();
             this->_window->Render();
 
@@ -44,13 +42,13 @@ namespace Client {
             if (timeLeft > 2)
                 frameTimer.Sleep(timeLeft);
         }
-        this->_network->Stop();
+        this->_network.Stop();
         return boost::exit_success;
     }
 
     Network::Network& Client::GetNetwork()
     {
-        return *this->_network;
+        return this->_network;
     }
 
     Settings& Client::GetSettings()

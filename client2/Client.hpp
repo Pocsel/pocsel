@@ -2,10 +2,10 @@
 #define __CLIENT_CLIENT_HPP__
 
 #include "client2/Settings.hpp"
+#include "client2/network/Network.hpp"
 
 namespace Client {
     namespace Network {
-        class Network;
         class PacketDispatcher;
     }
     namespace Window {
@@ -21,7 +21,7 @@ namespace Client {
     private:
         Settings _settings;
         Window::Window* _window;
-        Network::Network* _network;
+        Network::Network _network;
         Network::PacketDispatcher* _packetDispatcher;
         bool _running;
 

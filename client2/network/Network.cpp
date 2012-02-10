@@ -6,7 +6,7 @@
 
 namespace Client { namespace Network {
 
-    Network::Network(Client& client)
+    Network::Network()
         : _socket(_ioService),
         _thread(0),
         _sending(false),

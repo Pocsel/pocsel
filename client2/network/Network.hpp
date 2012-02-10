@@ -4,9 +4,6 @@
 namespace Common {
     class Packet;
 }
-namespace Client {
-    class Client;
-}
 
 namespace Client { namespace Network {
 
@@ -29,7 +26,7 @@ namespace Client { namespace Network {
         bool _isConnected;
 
     public:
-        Network(Client& client);
+        Network();
         ~Network();
         void Connect(std::string const& host, std::string const& port);
         void Stop();
