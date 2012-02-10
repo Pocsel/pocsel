@@ -20,7 +20,7 @@ namespace Client { namespace Network {
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::NeededResourceIds] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented NeededResourceIds\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::ResourceRange] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented ResourceRange\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::CubeType] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented CubeType\n"; };
-        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::SpawnPosition] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented SpawnPosition\n"; };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::TeleportPlayer] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented SpawnPosition\n"; };
     }
 
     void PacketDispatcher::ProcessAllPackets(std::list<Common::Packet*>&& packets)

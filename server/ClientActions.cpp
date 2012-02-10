@@ -127,7 +127,7 @@ namespace Server {
         std::cout << "_HandleGetSpawnPosition\n";
 
         game.GetWorld().GetDefaultMap().GetSpawnPosition(
-                std::bind(&Client::SpawnPosition, client, std::placeholders::_1)
+                std::bind(&Client::TeleportPlayer, client, std::placeholders::_1)
                 );
     }
 
