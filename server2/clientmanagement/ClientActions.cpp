@@ -28,7 +28,9 @@ namespace Server { namespace ClientManagement {
             &ClientActions::_HandleGetNeededResourceIds,
             &ClientActions::_HandleGetResourceRange,
             &ClientActions::_HandleGetCubeType,
-            &ClientActions::_HandleGetSpawnPosition,
+            &ClientActions::_OBSOLETE, // TODO rm
+            &ClientActions::_HandleSettings,
+            &ClientActions::_HandleTeleportOk,
         };
 
         static_assert((int) Protocol::ClientToServer::Login == 0, "wrong callback index");
@@ -37,7 +39,9 @@ namespace Server { namespace ClientManagement {
         static_assert((int) Protocol::ClientToServer::GetNeededResourceIds == 3, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetResourceRange == 4, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetCubeType == 5, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::GetSpawnPosition == 6, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::GetSpawnPosition == 6, "wrong callback index"); // TODO OBSOLETE
+        static_assert((int) Protocol::ClientToServer::Settings == 7, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::TeleportOk == 8, "wrong callback index");
 
         Protocol::ActionType action;
         packet.Read(action);
@@ -136,12 +140,32 @@ namespace Server { namespace ClientManagement {
         client.SendPacket(Network::PacketCreator::CubeType(world.GetCubeType(id)));
     }
 
-    void ClientActions::_HandleGetSpawnPosition(ClientManager& manager, Client& client, Common::Packet const&)
+    // TODO rm OBSOLETE
+    void ClientActions::_OBSOLETE(ClientManager&, Client& client, Common::Packet const&)
     {
-        Tools::debug << "_HandleGetSpawnPosition (client " << client.id << ")\n";
-//        game.GetWorld().GetDefaultMap().GetSpawnPosition(
-//                std::bind(&Client::SpawnPosition, client, std::placeholders::_1)
-//                );
+        Tools::debug << "_OBSOLETE (client " << client.id << ")\n";
+    }
+
+    void ClientActions::_HandleSettings(ClientManager& manager, Client& client, Common::Packet const& packet)
+    {
+        Tools::debug << "_HandleSettings (client " << client.id << ")\n";
+
+        Uint32 viewDistance;
+        std::string playerName;
+
+        Network::PacketExtractor::Settings(packet, viewDistance, playerName);
+
+        // TODO client->SetSettings(viewDistance, playerName);
+
+        manager.GetGame().GetWorld().GetDefaultMap()->GetSpawnPosition(
+                std::bind(&ClientManager::ClientTeleport, &manager, client.id, std::placeholders::_1)
+                );
+    }
+
+    void ClientActions::_HandleTeleportOk(ClientManager& manager, Client& client, Common::Packet const& packet)
+    {
+        Tools::debug << "_HandleTeleportOk (client " << client.id << ")\n";
+
     }
 
 }}
