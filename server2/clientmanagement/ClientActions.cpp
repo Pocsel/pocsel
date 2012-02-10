@@ -83,7 +83,7 @@ namespace Server { namespace ClientManagement {
     void ClientActions::_HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet const& packet)
     {
         Tools::debug << "_HandleNeedChunks (client " << client.id << ")\n";
-        std::list<Chunk::IdType> ids;
+        std::vector<Chunk::IdType> ids;
         Network::PacketExtractor::NeedChunks(packet, ids);
 
         Game::Map::Map::ChunkCallback callback = std::bind(&ClientManager::SendChunk, &manager, client.id, std::placeholders::_1);

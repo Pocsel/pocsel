@@ -24,7 +24,7 @@ namespace Server { namespace Network {
                                         Uint32 worldVersion = 0,
                                         Chunk::CubeType nbCubeTypes = 0);
 
-        static Common::Packet* Ping();
+        static Common::Packet* Ping(Uint64 timestamp);
 
         static Common::Packet* Chunk(::Server::Chunk const& chunk);
 

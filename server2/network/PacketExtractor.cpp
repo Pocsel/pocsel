@@ -15,18 +15,25 @@ namespace Server { namespace Network {
     }
 
     void PacketExtractor::Pong(Common::Packet const& p,
-                               std::string& str)
+                               Uint64& timestamp)
     {
-        p.Read(str);
+        p.Read(timestamp);
     }
 
     void PacketExtractor::NeedChunks(Common::Packet const& p,
-                                     std::list<Chunk::IdType>& ids)
+                                     std::vector<Chunk::IdType>& ids)
     {
-        while (p.GetBytesLeft())
+        unsigned int size = p.GetBytesLeft() / sizeof(Chunk::IdType);
+
+        ids.resize(size);
+
+        Chunk::IdType* id = &ids[0];
+
+        while (size)
         {
-            static_assert(sizeof(Chunk::IdType) == 8, "faut changer le read64");
-            ids.push_back(p.Read64());
+            p.Read(*id);
+            ++id;
+            --size;
         }
     }
 
@@ -48,7 +55,15 @@ namespace Server { namespace Network {
         p.Read(id);
     }
 
-    void PacketExtractor::GetSpawnPosition(Common::Packet const&)
+    void PacketExtractor::Settings(Common::Packet const& p,
+                                   Uint32& viewDistance,
+                                   std::string& playerName)
+    {
+        p.Read(viewDistance);
+        p.Read(playerName);
+    }
+
+    void PacketExtractor::TeleportOk(Common::Packet const&)
     {
     }
 
