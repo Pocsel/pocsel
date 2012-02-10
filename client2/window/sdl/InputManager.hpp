@@ -41,8 +41,8 @@ namespace Client { namespace Window { namespace Sdl {
         virtual void WarpMouse(int x, int y);
     private:
         char _UnicodeToAscii(Uint16 unicode) const;
-        void _TriggerBind(KeyHeld const& k, InputType::InputType type);
-        void _TriggerBind(ButtonHeld const& b, InputType::InputType type);
+        void _TriggerBind(KeyHeld const& k, BindAction::Type type);
+        void _TriggerBind(ButtonHeld const& b, BindAction::Type type);
     };
 
 }}}

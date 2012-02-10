@@ -40,7 +40,7 @@ namespace Client {
         //        Uint32& totalSize,
         //        Uint32& dataSize);
         //static std::unique_ptr<Chunk> ExtractChunk(Common::Packet const& p);
-        //static std::unique_ptr<Common::CubeType> ExtractCubeType(Common::Packet const& p);
+        static std::unique_ptr<Common::CubeType> ExtractCubeType(Common::Packet const& p);
 
         //static void ExtractSpawnPosition(Common::Packet const& p, Common::Position& pos);
     };

@@ -3,15 +3,6 @@
 
 namespace Client { namespace Window {
 
-    namespace InputType {
-        enum InputType
-        {
-            Pressed,
-            Held,
-            Released,
-        };
-    }
-
     namespace Button {
         enum Button
         {

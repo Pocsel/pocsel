@@ -3,9 +3,13 @@
 
 #include "common/BaseChunk.hpp"
 #include "client2/Settings.hpp"
+#include "client2/game/Game.hpp"
 #include "client2/network/Network.hpp"
 
 namespace Client {
+    namespace Game {
+        class CubeTypeManager;
+    }
     namespace Network {
         class PacketDispatcher;
     }
@@ -36,6 +40,7 @@ namespace Client {
         Network::Network _network;
         Network::PacketDispatcher* _packetDispatcher;
         State _state;
+        Game::Game* _game;
 
     public:
         Client(int ac, char** av);
@@ -48,6 +53,7 @@ namespace Client {
         Settings& GetSettings() { return this->_settings; }
         Window::Window& GetWindow() { return *this->_window; }
         Network::Network& GetNetwork() { return this->_network; }
+        Game::CubeTypeManager& GetCubeTypeManager() { return this->_game->GetCubeTypeManager(); }
         State GetState() const { return this->_state; }
     };
 

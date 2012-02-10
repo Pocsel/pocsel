@@ -17,72 +17,74 @@ namespace Client { namespace Window { namespace Sdl {
         while (SDL_PollEvent(&e))
             switch (e.type)
             {
-                case SDL_MOUSEMOTION:
-                    this->_mousePos.x = e.motion.x;
-                    this->_mousePos.y = e.motion.y;
-                    break;
-                case SDL_KEYDOWN:
+            case SDL_MOUSEMOTION:
+                this->_mousePos.x = e.motion.x;
+                this->_mousePos.y = e.motion.y;
+                break;
+            case SDL_KEYDOWN:
+                {
+                    KeyHeld k;
+                    k.ascii = this->_UnicodeToAscii(e.key.keysym.unicode);
+                    k.unicode = e.key.keysym.unicode;
+                    k.specialKey = this->_inputBinder.SdlKeysymToSpecialKey(e.key.keysym.sym);
+                    this->_TriggerBind(k, BindAction::Pressed);
+                    this->_keysHeld[e.key.keysym.sym] = k;
+                }
+                break;
+            case SDL_KEYUP:
+                {
+                    auto it = this->_keysHeld.find(e.key.keysym.sym);
+                    if (it != this->_keysHeld.end())
                     {
-                        KeyHeld k;
-                        k.ascii = this->_UnicodeToAscii(e.key.keysym.unicode);
-                        k.unicode = e.key.keysym.unicode;
-                        k.specialKey = this->_inputBinder.SdlKeysymToSpecialKey(e.key.keysym.sym);
-                        this->_TriggerBind(k, InputType::Pressed);
-                        this->_keysHeld[e.key.keysym.sym] = k;
+                        this->_TriggerBind(it->second, BindAction::Released);
+                        this->_keysHeld.erase(it);
                     }
-                    break;
-                case SDL_KEYUP:
+                    else
+                        Tools::debug << "InputManager: Key up " << e.key.keysym.sym << " with no key down.\n";
+                }
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                {
+                    ButtonHeld b;
+                    b.button = this->_inputBinder.SdlButtonToButton(e.button.button);
+                    this->_TriggerBind(b, BindAction::Pressed);
+                    this->_buttonsHeld[e.button.button] = b;
+                }
+                break;
+            case SDL_MOUSEBUTTONUP:
+                {
+                    auto it = this->_buttonsHeld.find(e.button.button);
+                    if (it != this->_buttonsHeld.end())
                     {
-                        auto it = this->_keysHeld.find(e.key.keysym.sym);
-                        if (it != this->_keysHeld.end())
-                        {
-                            this->_TriggerBind(it->second, InputType::Released);
-                            this->_keysHeld.erase(it);
-                        }
-                        else
-                            Tools::debug << "InputManager: Key up " << e.key.keysym.sym << " with no key down.\n";
+                        this->_TriggerBind(it->second, BindAction::Released);
+                        this->_buttonsHeld.erase(it);
                     }
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    {
-                        ButtonHeld b;
-                        b.button = this->_inputBinder.SdlButtonToButton(e.button.button);
-                        this->_TriggerBind(b, InputType::Pressed);
-                        this->_buttonsHeld[e.button.button] = b;
-                    }
-                    break;
-                case SDL_MOUSEBUTTONUP:
-                    {
-                        auto it = this->_buttonsHeld.find(e.button.button);
-                        if (it != this->_buttonsHeld.end())
-                        {
-                            this->_TriggerBind(it->second, InputType::Released);
-                            this->_buttonsHeld.erase(it);
-                        }
-                        else
-                            Tools::debug << "InputManager: Button up " << e.button.button << " with no button down.\n";
-                    }
-                    break;
-                case SDL_VIDEORESIZE:
-                    this->_client.GetWindow().Resize(e.resize.w, e.resize.h);
-                    break;
-                case SDL_QUIT:
-                    this->_client.Quit();
-                    break;
+                    else
+                        Tools::debug << "InputManager: Button up " << e.button.button << " with no button down.\n";
+                }
+                break;
+            case SDL_VIDEORESIZE:
+                this->_client.GetWindow().Resize(e.resize.w, e.resize.h);
+                break;
+            case SDL_QUIT:
+                this->_client.Quit();
+                break;
+            default:
+                ;
             }
         // repeat keys
         {
             auto it = this->_keysHeld.begin();
             auto itEnd = this->_keysHeld.end();
             for (; it != itEnd; ++it)
-                this->_TriggerBind(it->second, InputType::Held);
+                this->_TriggerBind(it->second, BindAction::Held);
         }
         // repeat buttons
         {
             auto it = this->_buttonsHeld.begin();
             auto itEnd = this->_buttonsHeld.end();
             for (; it != itEnd; ++it)
-                this->_TriggerBind(it->second, InputType::Held);
+                this->_TriggerBind(it->second, BindAction::Held);
         }
     }
 
@@ -110,11 +112,18 @@ namespace Client { namespace Window { namespace Sdl {
         return 0;
     }
 
-    void InputManager::_TriggerBind(KeyHeld const& k, InputType::InputType type)
+    void InputManager::_TriggerBind(KeyHeld const& k, BindAction::Type type)
     {
+        InputBinder::Action a;
+        if (k.ascii && this->_inputBinder.GetAsciiAction(k.ascii, a))
+            this->TriggerAction(a, type);
+        else if (this->_inputBinder.GetSpecialKeyAction(k.specialKey, a))
+            this->TriggerAction(a, type);
+        else if (k.unicode && this->_inputBinder.GetUnicodeAction(k.unicode, a))
+            this->TriggerAction(a, type);
     }
 
-    void InputManager::_TriggerBind(ButtonHeld const& b, InputType::InputType type)
+    void InputManager::_TriggerBind(ButtonHeld const& b, BindAction::Type type)
     {
         InputBinder::Action a;
         if (this->_inputBinder.GetButtonAction(b.button, a))
