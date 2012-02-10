@@ -1,7 +1,10 @@
 #include <iostream>
 
 #include "common/Packet.hpp"
+#include "client2/network/Network.hpp"
+#include "client2/network/PacketCreator.hpp"
 #include "client2/network/PacketDispatcher.hpp"
+#include "client2/network/PacketExtractor.hpp"
 #include "client2/Client.hpp"
 
 namespace Client { namespace Network {
@@ -10,7 +13,11 @@ namespace Client { namespace Network {
         : _client(client)
     {
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::LoggedIn] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented LoggedIn\n"; };
-        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Ping] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented Ping\n"; };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Ping] =
+            [this](Common::Packet&)
+            {
+                this->_client.GetNetwork().SendPacket(PacketCreator::Pong());
+            };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Chunk] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented Chunk\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::NeededResourceIds] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented NeededResourceIds\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::ResourceRange] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented ResourceRange\n"; };

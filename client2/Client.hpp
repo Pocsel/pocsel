@@ -8,6 +8,7 @@
 namespace Client {
     namespace Network {
         class Network;
+        class PacketDispatcher;
     }
     namespace Window {
         class IWindow;
@@ -23,6 +24,7 @@ namespace Client {
         Settings _settings;
         Window::IWindow* _window;
         Network::Network* _network;
+        Network::PacketDispatcher* _packetDispatcher;
         bool _running;
 
     public:
