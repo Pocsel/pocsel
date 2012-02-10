@@ -49,6 +49,7 @@ namespace Server { namespace Network {
     Network::~Network()
     {
         Tools::debug << "Network::~Network()\n";
+        Tools::Delete(this->_newConnection);
     }
 
     void Network::_ConnectAccept()

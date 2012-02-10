@@ -43,9 +43,9 @@ namespace Server {
     {
         Tools::debug << "Server::Stop()\n";
 
-        this->_network->Stop();
-        this->_game->Stop();
         this->_clientManager->Stop();
+        this->_game->Stop();
+        this->_network->Stop();
     }
 
 }
