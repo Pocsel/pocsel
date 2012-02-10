@@ -14,7 +14,7 @@ namespace Common {
 namespace Server {
 
     class Server;
-    class Chunk;
+    struct Chunk;
 
     namespace Database {
 
