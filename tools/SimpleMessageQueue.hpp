@@ -38,15 +38,29 @@ namespace Tools {
         {
             if (!this->_isRunning)
                 return;
-            std::cout << "Stopping SimpleMessageQueue (" << this << ").\n";
 
             this->_isRunning = false;
+
+            std::cout << "Stopping SimpleMessageQueue (" << this << ").\n";
+
             this->_condition.notify_all();
 
-            for (unsigned int i = 0; i < this->_threads.size(); ++i)
+            for (unsigned int i = 1; i < this->_threads.size() + 1; ++i)
             {
-                this->_threads[i]->join();
-                Tools::Delete(this->_threads[i]);
+                if (this->_threads[i - 1] != 0)
+                {
+                    for (unsigned int j = 0 ; j < this->_threads.size(); ++j)
+                    {
+                        if (this->_threads[j] != 0 &&
+                            this->_threads[j]->timed_join(boost::posix_time::milliseconds(50)))
+                        {
+                            Tools::Delete(this->_threads[j]);
+                            this->_threads[j] = 0;
+                        }
+                    }
+                    this->_condition.notify_all();
+                    i = 0;
+                }
             }
             this->_threads.clear();
             std::cout << "SimpleMessageQueue stopped (" << this << ").\n";

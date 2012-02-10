@@ -16,19 +16,6 @@ namespace Server { namespace ClientManagement {
     {
     public:
         static void HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet);
-
-    private:
-        static void _HandleLogin(ClientManager& manager, Client& client, Common::Packet const& packet);
-        static void _HandlePong(ClientManager& manager, Client& client, Common::Packet const& packet);
-        static void _HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet const& packet);
-        static void _HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet const& packet);
-        static void _HandleGetResourceRange(ClientManager& manager, Client& client, Common::Packet const& packet);
-        static void _HandleGetCubeType(ClientManager& manager, Client& client, Common::Packet const& packet);
-        static void _HandleSettings(ClientManager& manager, Client& client, Common::Packet const& packet);
-        static void _HandleTeleportOk(ClientManager& manager, Client& client, Common::Packet const& packet);
-
-
-        static void _OBSOLETE(ClientManager&, Client& client, Common::Packet const&); // TODO rm
     };
 
 }}

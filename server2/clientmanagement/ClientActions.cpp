@@ -18,19 +18,139 @@
 
 namespace Server { namespace ClientManagement {
 
+    namespace ClientActionsNS { namespace {
+
+        void _HandleLogin(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandleLogin (client " << client.id << ")\n";
+            Protocol::Version major, minor;
+            std::string login;
+            Network::PacketExtractor::Login(packet, major, minor, login);
+            if (major != Protocol::Version::Major || minor != Protocol::Version::Minor)
+            {
+                client.SendPacket(Network::PacketCreator::LoggedIn(false,
+                    "Protocol verions mismatch : Server " + Tools::ToString(Protocol::Version::Major) +
+                    "." + Tools::ToString(Protocol::Version::Minor) +
+                    " != Client " + Tools::ToString(major) +
+                    "." + Tools::ToString(minor)));
+                return;
+            }
+
+            if (!login.size())
+            {
+                client.SendPacket(Network::PacketCreator::LoggedIn(false,
+                    "Wrong login: cannot be empty"));
+                return;
+            }
+            manager.ClientLogin(client, login);
+        }
+
+        void _HandlePong(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandlePong (client " << client.id << ")\n";
+        }
+
+        void _HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandleNeedChunks (client " << client.id << ")\n";
+            std::vector<Chunk::IdType> ids;
+            Network::PacketExtractor::NeedChunks(packet, ids);
+
+            Game::Map::Map::ChunkCallback callback = std::bind(&ClientManager::SendChunk, &manager, client.id, std::placeholders::_1);
+            for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
+            {
+                // TODO utiliser la bonne map
+                manager.GetGame().GetWorld().GetDefaultMap()->GetChunk(*it, callback);
+                //client.GetPlayer().GetMap().GetChunk(*it, callback);
+            }
+        }
+
+        void _HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandleGetNeededResourceIds (client " << client.id << ")\n";
+            Uint32 version;
+            Network::PacketExtractor::GetNeededResourceIds(packet, version);
+
+            std::vector<Uint32> ids(manager.GetResourceManager().GetNeededResourceIds(version));
+            Uint32 offset = 0;
+            do
+            {
+                Tools::debug << "ClientActions::_HandleGetNeededResourceIds: " << ids.size() << "\n";
+                client.SendPacket(Network::PacketCreator::NeededResourceIds(ids, offset));
+            } while (offset < ids.size());
+        }
+
+        void _HandleGetResourceRange(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandleGetResourceRange (client " << client.id << ")\n";
+            Uint32 id, offset;
+            Network::PacketExtractor::GetResourceRange(packet, id, offset);
+
+            Database::ResourceManager const& resourceManager = manager.GetResourceManager();
+            if (!resourceManager.HasResource(id))
+                throw std::runtime_error("Invalid resource id: " + Tools::ToString(id));
+            Common::Resource const& resource = resourceManager.GetResource(id);
+            client.SendPacket(Network::PacketCreator::ResourceRange(resource, offset));
+        }
+
+        void _HandleGetCubeType(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandleGetCubeType (client " << client.id << ")\n";
+            Chunk::CubeType id;
+            Network::PacketExtractor::GetCubeType(packet, id);
+
+            Game::World const& world = manager.GetGame().GetWorld();
+
+            if (!world.HasCubeType(id))
+                throw std::runtime_error("Invalid cube description id: " + Tools::ToString(id));
+            client.SendPacket(Network::PacketCreator::CubeType(world.GetCubeType(id)));
+        }
+
+        // TODO rm OBSOLETE
+        void _OBSOLETE(ClientManager&, Client& client, Common::Packet const&)
+        {
+            Tools::debug << "_OBSOLETE (client " << client.id << ")\n";
+        }
+
+        void _HandleSettings(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandleSettings (client " << client.id << ")\n";
+
+            Uint32 viewDistance;
+            std::string playerName;
+
+            Network::PacketExtractor::Settings(packet, viewDistance, playerName);
+
+            // TODO client->SetSettings(viewDistance, playerName);
+
+            manager.GetGame().GetWorld().GetDefaultMap()->GetSpawnPosition(
+                    std::bind(&ClientManager::ClientTeleport, &manager, client.id, std::placeholders::_1)
+                    );
+        }
+
+        void _HandleTeleportOk(ClientManager& manager, Client& client, Common::Packet const&)
+        {
+            Tools::debug << "_HandleTeleportOk (client " << client.id << ")\n";
+
+            // TODO fin de cycle teleportation pour le client
+
+        }
+
+    }}
+
     void ClientActions::HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
     {
         typedef void (*ActionCallback)(ClientManager&, Client&, Common::Packet const&);
         static ActionCallback actions[(int) Protocol::ClientToServer::NbPacketTypeClient] = {
-            &ClientActions::_HandleLogin,
-            &ClientActions::_HandlePong,
-            &ClientActions::_HandleNeedChunks,
-            &ClientActions::_HandleGetNeededResourceIds,
-            &ClientActions::_HandleGetResourceRange,
-            &ClientActions::_HandleGetCubeType,
-            &ClientActions::_OBSOLETE, // TODO rm
-            &ClientActions::_HandleSettings,
-            &ClientActions::_HandleTeleportOk,
+            &ClientActionsNS::_HandleLogin,
+            &ClientActionsNS::_HandlePong,
+            &ClientActionsNS::_HandleNeedChunks,
+            &ClientActionsNS::_HandleGetNeededResourceIds,
+            &ClientActionsNS::_HandleGetResourceRange,
+            &ClientActionsNS::_HandleGetCubeType,
+            &ClientActionsNS::_OBSOLETE, // TODO rm
+            &ClientActionsNS::_HandleSettings,
+            &ClientActionsNS::_HandleTeleportOk,
         };
 
         static_assert((int) Protocol::ClientToServer::Login == 0, "wrong callback index");
@@ -52,120 +172,6 @@ namespace Server { namespace ClientManagement {
         assert(actions[action] && "Action not coded yet");
 
         actions[action](manager, client, packet);
-    }
-
-    void ClientActions::_HandleLogin(ClientManager& manager, Client& client, Common::Packet const& packet)
-    {
-        Tools::debug << "_HandleLogin (client " << client.id << ")\n";
-        Protocol::Version major, minor;
-        std::string login;
-        Network::PacketExtractor::Login(packet, major, minor, login);
-        if (major != Protocol::Version::Major || minor != Protocol::Version::Minor)
-        {
-            client.SendPacket(Network::PacketCreator::LoggedIn(false,
-                "Protocol verions mismatch : Server " + Tools::ToString(Protocol::Version::Major) +
-                "." + Tools::ToString(Protocol::Version::Minor) +
-                " != Client " + Tools::ToString(major) +
-                "." + Tools::ToString(minor)));
-            return;
-        }
-
-        if (!login.size())
-        {
-            client.SendPacket(Network::PacketCreator::LoggedIn(false,
-                "Wrong login: cannot be empty"));
-            return;
-        }
-        manager.ClientLogin(client, login);
-    }
-
-    void ClientActions::_HandlePong(ClientManager& manager, Client& client, Common::Packet const& packet)
-    {
-        Tools::debug << "_HandlePong (client " << client.id << ")\n";
-    }
-
-    void ClientActions::_HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet const& packet)
-    {
-        Tools::debug << "_HandleNeedChunks (client " << client.id << ")\n";
-        std::vector<Chunk::IdType> ids;
-        Network::PacketExtractor::NeedChunks(packet, ids);
-
-        Game::Map::Map::ChunkCallback callback = std::bind(&ClientManager::SendChunk, &manager, client.id, std::placeholders::_1);
-        for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
-        {
-            // TODO utiliser la bonne map
-            manager.GetGame().GetWorld().GetDefaultMap()->GetChunk(*it, callback);
-            //client.GetPlayer().GetMap().GetChunk(*it, callback);
-        }
-    }
-
-    void ClientActions::_HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet const& packet)
-    {
-        Tools::debug << "_HandleGetNeededResourceIds (client " << client.id << ")\n";
-        Uint32 version;
-        Network::PacketExtractor::GetNeededResourceIds(packet, version);
-
-        std::vector<Uint32> ids(manager.GetResourceManager().GetNeededResourceIds(version));
-        Uint32 offset = 0;
-        do
-        {
-            Tools::debug << "ClientActions::_HandleGetNeededResourceIds: " << ids.size() << "\n";
-            client.SendPacket(Network::PacketCreator::NeededResourceIds(ids, offset));
-        } while (offset < ids.size());
-    }
-
-    void ClientActions::_HandleGetResourceRange(ClientManager& manager, Client& client, Common::Packet const& packet)
-    {
-        Tools::debug << "_HandleGetResourceRange (client " << client.id << ")\n";
-        Uint32 id, offset;
-        Network::PacketExtractor::GetResourceRange(packet, id, offset);
-
-        Database::ResourceManager const& resourceManager = manager.GetResourceManager();
-        if (!resourceManager.HasResource(id))
-            throw std::runtime_error("Invalid resource id: " + Tools::ToString(id));
-        Common::Resource const& resource = resourceManager.GetResource(id);
-        client.SendPacket(Network::PacketCreator::ResourceRange(resource, offset));
-    }
-
-    void ClientActions::_HandleGetCubeType(ClientManager& manager, Client& client, Common::Packet const& packet)
-    {
-        Tools::debug << "_HandleGetCubeType (client " << client.id << ")\n";
-        Chunk::CubeType id;
-        Network::PacketExtractor::GetCubeType(packet, id);
-
-        Game::World const& world = manager.GetGame().GetWorld();
-
-        if (!world.HasCubeType(id))
-            throw std::runtime_error("Invalid cube description id: " + Tools::ToString(id));
-        client.SendPacket(Network::PacketCreator::CubeType(world.GetCubeType(id)));
-    }
-
-    // TODO rm OBSOLETE
-    void ClientActions::_OBSOLETE(ClientManager&, Client& client, Common::Packet const&)
-    {
-        Tools::debug << "_OBSOLETE (client " << client.id << ")\n";
-    }
-
-    void ClientActions::_HandleSettings(ClientManager& manager, Client& client, Common::Packet const& packet)
-    {
-        Tools::debug << "_HandleSettings (client " << client.id << ")\n";
-
-        Uint32 viewDistance;
-        std::string playerName;
-
-        Network::PacketExtractor::Settings(packet, viewDistance, playerName);
-
-        // TODO client->SetSettings(viewDistance, playerName);
-
-        manager.GetGame().GetWorld().GetDefaultMap()->GetSpawnPosition(
-                std::bind(&ClientManager::ClientTeleport, &manager, client.id, std::placeholders::_1)
-                );
-    }
-
-    void ClientActions::_HandleTeleportOk(ClientManager& manager, Client& client, Common::Packet const& packet)
-    {
-        Tools::debug << "_HandleTeleportOk (client " << client.id << ")\n";
-
     }
 
 }}
