@@ -3,6 +3,7 @@
 #include "client2/network/PacketCreator.hpp"
 #include "client2/network/PacketDispatcher.hpp"
 #include "client2/network/PacketExtractor.hpp"
+#include "client2/game/CubeTypeManager.hpp"
 #include "client2/Client.hpp"
 
 namespace Client { namespace Network {
@@ -37,7 +38,11 @@ namespace Client { namespace Network {
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Chunk] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented Chunk\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::NeededResourceIds] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented NeededResourceIds\n"; };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::ResourceRange] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented ResourceRange\n"; };
-        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::CubeType] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented CubeType\n"; };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::CubeType] =
+            [this](Common::Packet& p)
+            {
+                this->_client.GetCubeTypeManager().AddCubeType(PacketExtractor::ExtractCubeType(p));
+            };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::TeleportPlayer] = [](Common::Packet&) { Tools::debug << "PacketDispatcher: Not implemented SpawnPosition\n"; };
     }
 

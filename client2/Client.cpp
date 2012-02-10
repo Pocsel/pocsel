@@ -1,6 +1,7 @@
 #include <boost/cstdlib.hpp>
 
 #include "client2/Client.hpp"
+#include "client2/game/Game.hpp"
 #include "client2/window/sdl/Window.hpp"
 #include "client2/window/InputManager.hpp"
 #include "client2/network/Network.hpp"
@@ -13,7 +14,8 @@ namespace Client {
 
     Client::Client(int ac, char** av)
         : _settings(ac, av),
-        _state(Connecting)
+        _state(Connecting),
+        _game(0)
     {
         this->_window = new Window::Sdl::Window(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
@@ -24,6 +26,7 @@ namespace Client {
 
     Client::~Client()
     {
+        Tools::Delete(this->_game);
         Tools::Delete(this->_packetDispatcher);
         Tools::Delete(this->_window);
     }
@@ -70,8 +73,10 @@ namespace Client {
 
     void Client::Login(std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes)
     {
+        if (this->_state != Connecting)
+            throw std::runtime_error("Bad client state");
         this->_state = LoadingResources;
-
+        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes);
     }
 
     void Client::Disconnect(std::string const& reason)

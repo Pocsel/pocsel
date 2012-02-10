@@ -75,10 +75,10 @@ namespace Client {
     //    return p.Read<Chunk>();
     //}
 
-    //std::unique_ptr<Common::CubeType> PacketExtractor::ExtractCubeType(Common::Packet const& p)
-    //{
-    //    return p.Read<Common::CubeType>();
-    //}
+    std::unique_ptr<Common::CubeType> PacketExtractor::ExtractCubeType(Common::Packet const& p)
+    {
+        return p.Read<Common::CubeType>();
+    }
 
     //void PacketExtractor::ExtractSpawnPosition(Common::Packet const& p, Common::Position& pos)
     //{
