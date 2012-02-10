@@ -13,7 +13,7 @@ namespace Server { namespace Game {
 
     namespace Map {
 
-        class Conf;
+        struct Conf;
 
     }
 
