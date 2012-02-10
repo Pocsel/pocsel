@@ -3,15 +3,15 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "client2/window/InputBinder.hpp"
+
 namespace Client {
     class Client;
 }
 
 namespace Client { namespace Window {
 
-    class InputBinder;
-
-    class IInputManager :
+    class InputManager :
         private boost::noncopyable
     {
     private:
@@ -20,10 +20,13 @@ namespace Client { namespace Window {
         Client& _client;
 
     public:
-        IInputManager(Client& client, InputBinder* inputBinder);
-        virtual ~IInputManager();
+        InputManager(Client& client, InputBinder* inputBinder);
+        virtual ~InputManager();
         virtual void ProcessEvents() = 0;
         InputBinder& GetInputBinder();
+        void TriggerAction(InputBinder::Action const& action);
+        void TriggerAction(std::string const& action);
+        void TriggerAction(BindAction::BindAction action);
     };
 
 }}

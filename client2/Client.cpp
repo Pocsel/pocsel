@@ -2,7 +2,7 @@
 
 #include "client2/Client.hpp"
 #include "client2/window/sdl/Window.hpp"
-#include "client2/window/IInputManager.hpp"
+#include "client2/window/InputManager.hpp"
 #include "client2/network/Network.hpp"
 #include "client2/network/PacketCreator.hpp"
 #include "client2/network/PacketDispatcher.hpp"
@@ -58,7 +58,7 @@ namespace Client {
         return this->_settings;
     }
 
-    Window::IWindow& Client::GetWindow()
+    Window::Window& Client::GetWindow()
     {
         return *this->_window;
     }

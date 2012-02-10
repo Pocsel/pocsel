@@ -1,16 +1,17 @@
 #include "client2/window/sdl/InputManager.hpp"
 #include "client2/window/sdl/InputBinder.hpp"
+#include "client2/Client.hpp"
 
 namespace Client { namespace Window { namespace Sdl {
 
     InputManager::InputManager(Client& client, InputBinder* inputBinder) :
-        IInputManager(client, inputBinder), _inputBinder(*inputBinder)
+        ::Client::Window::InputManager(client, inputBinder), _inputBinder(*inputBinder)
     {
     }
 
     void InputManager::ProcessEvents()
     {
-        Action action;
+        InputBinder::Action action;
         SDL_Event e;
         while (SDL_PollEvent(&e))
         {
@@ -27,14 +28,16 @@ namespace Client { namespace Window { namespace Sdl {
                     this->_keysHeld[e.key.keysym.sym] = k;
                     break;
                 case SDL_KEYUP:
-                    auto it = this->_keysHeld.find(e.key.keysym.sym);
-                    if (it != this->_keysHeld.end())
                     {
-                        this->_TriggerBind(it->second, InputType::Released);
-                        this->_keysHeld.erase(it);
+                        auto it = this->_keysHeld.find(e.key.keysym.sym);
+                        if (it != this->_keysHeld.end())
+                        {
+                            this->_TriggerBind(it->second, InputType::Released);
+                            this->_keysHeld.erase(it);
+                        }
+                        else
+                            Tools::debug << "InputManager: Key up " << e.key.keysym.sym << " with no key down.\n";
                     }
-                    else
-                        Tools::debug << "InputManager: Key up " << e.key.keysym.sym << " with no key down.\n";
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     ButtonHeld b;
@@ -45,11 +48,15 @@ namespace Client { namespace Window { namespace Sdl {
                     this->_buttonsHeld[e.button.button] = b;
                     break;
                 case SDL_MOUSEBUTTONUP:
-                    auto it = this->_buttonsHeld.find(e.key.keysym.sym);
-                    if (it != this->_buttonsHeld.end())
                     {
-                        this->_TriggerBind(it->second, InputType::Released);
-                        this->_buttonsHeld.erase(it);
+                        auto it = this->_buttonsHeld.find(e.button.button);
+                        if (it != this->_buttonsHeld.end())
+                        {
+                            this->_TriggerBind(it->second, InputType::Released);
+                            this->_buttonsHeld.erase(it);
+                        }
+                        else
+                            Tools::debug << "InputManager: Button up " << e.button.button << " with no button down.\n";
                     }
                     break;
                 case SDL_VIDEORESIZE:
@@ -63,7 +70,6 @@ namespace Client { namespace Window { namespace Sdl {
         }
         // repeat keys
         {
-            this->_keysHeld.unique();
             auto it = this->_keysHeld.begin();
             auto itEnd = this->_keysHeld.end();
             for (; it != itEnd; ++it)
@@ -71,13 +77,11 @@ namespace Client { namespace Window { namespace Sdl {
         }
         // repeat buttons
         {
-            this->_buttonsHeld.unique();
             auto it = this->_buttonsHeld.begin();
             auto itEnd = this->_buttonsHeld.end();
             for (; it != itEnd; ++it)
                 this->_TriggerBind(it->second, InputType::Held);
         }
-        return 0;
     }
 
     char InputManager::_UnicodeToAscii(Uint16 unicode) const

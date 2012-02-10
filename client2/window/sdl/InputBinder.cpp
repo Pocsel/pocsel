@@ -18,7 +18,7 @@ namespace Client { namespace Window { namespace Sdl {
         return this->GetButtonAction(this->SdlButtonToButton(button), action);
     }
 
-    SpecialKey::SpecialKey SdlKeysymToSpecialKey(SDLKey keysym) const
+    SpecialKey::SpecialKey InputBinder::SdlKeysymToSpecialKey(SDLKey keysym) const
     {
         auto it = this->_specialKeys.find(keysym);
         if (it != this->_specialKeys.end())
@@ -26,7 +26,7 @@ namespace Client { namespace Window { namespace Sdl {
         return SpecialKey::None;
     }
 
-    Button::Button SdlButtonToButton(int button) const
+    Button::Button InputBinder::SdlButtonToButton(int button) const
     {
         auto it = this->_buttons.find(button);
         if (it != this->_buttons.end())

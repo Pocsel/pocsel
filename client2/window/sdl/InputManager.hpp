@@ -1,7 +1,7 @@
 #ifndef __CLIENT_WINDOW_SDL_INPUTMANAGER_HPP__
 #define __CLIENT_WINDOW_SDL_INPUTMANAGER_HPP__
 
-#include "client2/window/IInputManager.hpp"
+#include "client2/window/InputManager.hpp"
 
 namespace Client {
     class Client;
@@ -12,7 +12,7 @@ namespace Client { namespace Window { namespace Sdl {
     class InputBinder;
 
     class InputManager :
-        public IInputManager
+        public ::Client::Window::InputManager
     {
     private:
         struct KeyHeld
@@ -34,7 +34,7 @@ namespace Client { namespace Window { namespace Sdl {
         std::map<int, ButtonHeld> _buttonsHeld;
 
     public:
-        InputManager(Client& client);
+        InputManager(Client& client, InputBinder* inputBinder);
         virtual void ProcessEvents();
     private:
         char _UnicodeToAscii(Uint16 unicode) const;

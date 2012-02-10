@@ -1,4 +1,4 @@
-#include "client2/Network/PacketCreator.hpp"
+#include "client2/network/PacketCreator.hpp"
 
 #include "protocol/protocol.hpp"
 

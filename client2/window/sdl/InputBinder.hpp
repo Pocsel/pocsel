@@ -6,7 +6,7 @@
 namespace Client { namespace Window { namespace Sdl {
 
     class InputBinder :
-        public Window::InputBinder
+        public ::Client::Window::InputBinder
     {
         private:
             std::map<SDLKey, SpecialKey::SpecialKey> _specialKeys;
@@ -14,10 +14,10 @@ namespace Client { namespace Window { namespace Sdl {
 
         public:
             InputBinder();
-            bool GetSdlSpecialKeyAction(SDLKey specialKey, Action& action);
-            bool GetSdlButtonAction(int button, Action& action);
+            bool GetSdlKeysymAction(SDLKey keysym, Action& action) const;
+            bool GetSdlButtonAction(int button, Action& action) const;
             SpecialKey::SpecialKey SdlKeysymToSpecialKey(SDLKey keysym) const;
-            Button::Button SdlButtonToButton(SDLKey keysym) const;
+            Button::Button SdlButtonToButton(int button) const;
         private:
             void _PopulateSpecialKeys();
             void _PopulateButtons();
