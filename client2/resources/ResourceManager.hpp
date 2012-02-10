@@ -40,6 +40,7 @@ namespace Client { namespace Resources {
 
             CacheDatabaseProxy& GetDatabase() { return this->_database; }
             ResourceDownloader& GetDownloader() { return this->_downloader; }
+            float GetLoadingProgression() const { return this->_downloader.GetLoadingProgression(); }
 
         private:
             void _InitErrorTexture();

@@ -50,7 +50,16 @@ namespace Client {
             switch (this->_state)
             {
             case Connecting:
+                break;
             case LoadingResources:
+                if (this->_game->GetLoadingProgression() == 1.0f)
+                {
+                    Tools::debug << "LoadingChunks...\n";
+                    this->_state = LoadingChunks;
+                    // TODO:
+                    //this->_network.SendPacket(Network::PacketCreator::Settings());
+                }
+                break;
             case LoadingChunks:
                 break;
             case Running:
