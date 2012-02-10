@@ -1,8 +1,6 @@
 #ifndef __TOOLS_DATABASE_SQLITE_CURSOR_HPP__
 #define __TOOLS_DATABASE_SQLITE_CURSOR_HPP__
 
-#include <sqlite3.h>
-
 #include "tools/database/status.hpp"
 #include "tools/database/ICursor.hpp"
 

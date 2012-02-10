@@ -1,4 +1,3 @@
-
 #include "tools/Gjk.hpp"
 
 namespace Tools {

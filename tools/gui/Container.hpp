@@ -1,11 +1,7 @@
 #ifndef __TOOLS_GUI_CONTAINER_HPP__
 #define __TOOLS_GUI_CONTAINER_HPP__
 
-#include <vector>
-#include <memory>
-#include <string>
-
-#include "Widget.hpp"
+#include "tools/gui/Widget.hpp"
 
 namespace Tools { namespace Gui {
 

@@ -1,10 +1,6 @@
 #ifndef __TOOLS_GUI_FONT_HPP__
 #define __TOOLS_GUI_FONT_HPP__
 
-#include <functional>
-#include <string>
-#include <vector>
-
 #include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/Vector2.hpp"

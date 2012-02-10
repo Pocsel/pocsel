@@ -1,14 +1,10 @@
 #ifndef __TOOLS_LUA_OBJECT_HPP__
 #define __TOOLS_LUA_OBJECT_HPP__
 
-#include <functional>
-#include <iosfwd>
-#include <string>
-
-#include "LuaState.hpp"
-#include "ObjectIterator.hpp"
-#include "StackRefPtr.hpp"
-#include "Exception.hpp"
+#include "tools/lua/LuaState.hpp"
+#include "tools/lua/ObjectIterator.hpp"
+#include "tools/lua/StackRefPtr.hpp"
+#include "tools/lua/Exception.hpp"
 
 namespace Tools { namespace Lua {
 

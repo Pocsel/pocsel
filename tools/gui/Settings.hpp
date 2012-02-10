@@ -1,10 +1,6 @@
 #ifndef __TOOLS_GUI_SETTINGS_HPP__
 #define __TOOLS_GUI_SETTINGS_HPP__
 
-#include <stdexcept>
-#include <string>
-#include <unordered_map>
-
 namespace Tools { namespace Gui {
 
     class Settings

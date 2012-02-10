@@ -1,8 +1,6 @@
 #ifndef __TOOLS_LUA_STACKREFPTR_HPP__
 #define __TOOLS_LUA_STACKREFPTR_HPP__
 
-#include <memory>
-
 namespace Tools { namespace Lua {
 
     struct StackRef;

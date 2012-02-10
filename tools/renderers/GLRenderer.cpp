@@ -1,8 +1,3 @@
-#include <cassert>
-#include <cstring>
-#include <iostream>
-#include <stdexcept>
-
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/IndexBuffer.hpp"
 #include "tools/renderers/opengl/ShaderProgramCg.hpp"

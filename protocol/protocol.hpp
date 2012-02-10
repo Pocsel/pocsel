@@ -1,7 +1,6 @@
 #ifndef __PROTOCOL_PROTOCOL_HPP__
 #define __PROTOCOL_PROTOCOL_HPP__
 
-#include "tools/ToString.hpp"
 #include "tools/array_size.hpp"
 #include "tools/enum.hpp"
 #include "tools/ByteArray.hpp"

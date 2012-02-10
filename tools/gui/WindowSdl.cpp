@@ -1,7 +1,5 @@
-#include <iostream>
-#include <stdexcept>
+#include "tools/gui/WindowSdl.hpp"
 
-#include "WindowSdl.hpp"
 #include "tools/renderers/GLRenderer.hpp"
 
 namespace Tools { namespace Gui {

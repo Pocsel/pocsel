@@ -1,9 +1,6 @@
 #ifndef __TOOLS_MESSAGEQUEUE_HPP__
 #define __TOOLS_MESSAGEQUEUE_HPP__
 
-#include <cassert>
-#include <functional>
-
 #include "tools/AbstractMessageQueue.hpp"
 
 namespace Tools {

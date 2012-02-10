@@ -1,8 +1,6 @@
 #ifndef __COMMON_ENV_HPP__
 #define __COMMON_ENV_HPP__
 
-#include "tools/ToString.hpp"
-
 namespace Common {
 
     class Env : boost::noncopyable

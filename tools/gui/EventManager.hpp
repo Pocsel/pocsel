@@ -1,16 +1,7 @@
 #ifndef __TOOLS_GUI_EVENTMANAGER_HPP__
 #define __TOOLS_GUI_EVENTMANAGER_HPP__
 
-#include <functional>
-#include <list>
-#include <string>
-#include <unordered_map>
-#include <memory>
-
-#include <boost/noncopyable.hpp>
-#include <boost/thread.hpp>
-
-#include "Event.hpp"
+#include "tools/gui/Event.hpp"
 
 namespace Tools { namespace Gui {
 

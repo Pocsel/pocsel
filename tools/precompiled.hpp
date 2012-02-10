@@ -26,12 +26,14 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <fstream>
 #include <functional>
 #include <iomanip>
 #include <iostream>
 #include <list>
 #include <map>
 #include <memory>
+#include <queue>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -51,6 +53,10 @@
 
 // Others
 #include <sqlite3.h>
+
+#include "tools/types.hpp"
+#include "tools/Delete.hpp"
+#include "tools/ToString.hpp"
 
 #ifdef WIN32
 // warning this utilisé dans le constructeur

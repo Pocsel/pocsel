@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "tools/renderers/GLRenderer.hpp"
 
 #include "tools/renderers/opengl/opengl.hpp"

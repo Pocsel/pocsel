@@ -1,6 +1,3 @@
-
-#include <limits>
-
 #include "tools/AlignedBox.hpp"
 #include "tools/Frustum.hpp"
 #include "tools/Gjk.hpp"

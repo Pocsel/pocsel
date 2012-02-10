@@ -1,8 +1,8 @@
 #ifndef __TOOLS_LUA_SETTERS_HPP__
 #define __TOOLS_LUA_SETTERS_HPP__
 
-#include "StackRefPtr.hpp"
-#include "StackRef.hpp"
+#include "tools/lua/StackRefPtr.hpp"
+#include "tools/lua/StackRef.hpp"
 
 namespace Tools { namespace Lua {
 

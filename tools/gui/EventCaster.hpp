@@ -1,7 +1,6 @@
 #ifndef __TOOLS_GUI_EVENTCASTER_HPP__
 #define __TOOLS_GUI_EVENTCASTER_HPP__
 
-#include <functional>
 #include "tools/gui/Event.hpp"
 
 namespace Tools { namespace Gui {

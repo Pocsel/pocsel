@@ -1,8 +1,6 @@
 #ifndef __TOOLS_GUI_COMPUTEDSTYLES_HPP__
 #define __TOOLS_GUI_COMPUTEDSTYLES_HPP__
 
-#include <boost/noncopyable.hpp>
-
 #include "tools/Color.hpp"
 
 namespace Tools { namespace Gui {

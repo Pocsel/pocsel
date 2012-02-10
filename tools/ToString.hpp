@@ -3,9 +3,6 @@
 
 #define HAS_TOSTRING
 
-#include <string>
-#include <sstream>
-
 namespace Tools {
 
     template<typename T> struct Stringify

@@ -1,8 +1,6 @@
 #ifndef __TOOLS_RENDERERS_OPENGL_SHADERPARAMETER_HPP__
 #define __TOOLS_RENDERERS_OPENGL_SHADERPARAMETER_HPP__
 
-#include <string>
-
 #include "tools/IRenderer.hpp"
 
 namespace Tools { namespace Renderers { namespace OpenGL {

@@ -1,7 +1,6 @@
 #ifndef __TOOLS_MATRIX4_HPP__
 #define __TOOLS_MATRIX4_HPP__
 
-#include <cmath>
 #include "tools/sqrt.hpp"
 #include "tools/Vector3.hpp"
 

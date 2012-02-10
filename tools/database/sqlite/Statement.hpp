@@ -1,8 +1,6 @@
 #ifndef __TOOLS_DATABASE_SQLITE_STATEMENT_HPP__
 #define __TOOLS_DATABASE_SQLITE_STATEMENT_HPP__
 
-#include <sqlite3.h>
-
 #include "tools/database/DatabaseError.hpp"
 #include "tools/database/IStatement.hpp"
 #include "tools/database/status.hpp"

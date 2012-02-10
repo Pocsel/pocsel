@@ -35,7 +35,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 endif ()
 
 if (UNIX)
-    set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -Winvalid-pch --include tools/types.hpp --include tools/Delete.hpp")
+    set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -Winvalid-pch")
     set(CMAKE_CXX_CUSTOM_FLAGS_DEBUG "-g -DDEBUG -UNDEBUG")
     set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -DNDEBUG -UDEBUG -march=native -mtune=native")
 else (UNIX)

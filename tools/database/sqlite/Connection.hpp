@@ -1,10 +1,6 @@
 #ifndef __TOOLS_DATABASE_SQLITE_CONNECTION_HPP__
 #define __TOOLS_DATABASE_SQLITE_CONNECTION_HPP__
 
-#include <list>
-#include <cassert>
-#include <sqlite3.h>
-
 #include "tools/database/IConnection.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {

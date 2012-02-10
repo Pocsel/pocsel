@@ -1,12 +1,6 @@
 #ifndef __TOOLS_BYTEARRAY_HPP__
 #define __TOOLS_BYTEARRAY_HPP__
 
-#include <cstring>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <memory>
-
 namespace Tools {
 
     class ByteArray

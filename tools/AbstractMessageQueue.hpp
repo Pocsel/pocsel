@@ -1,10 +1,6 @@
 #ifndef __TOOLS_ABSTRACTMESSAGEQUEUE_HPP__
 #define __TOOLS_ABSTRACTMESSAGEQUEUE_HPP__
 
-#include <functional>
-#include <queue>
-#include <boost/thread.hpp>
-
 namespace Tools {
 
     class MessageQueueManager;

@@ -1,8 +1,6 @@
 #ifndef __TOOLS_GUI_WIDGETFACTORY_HPP__
 #define __TOOLS_GUI_WIDGETFACTORY_HPP__
 
-#include <memory>
-
 namespace Tools { namespace Gui {
 
     struct WidgetFactory

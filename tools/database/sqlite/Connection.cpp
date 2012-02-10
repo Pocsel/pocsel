@@ -1,5 +1,3 @@
-#include <sqlite3.h>
-
 #include "tools/database/DatabaseError.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 #include "tools/database/sqlite/Cursor.hpp"

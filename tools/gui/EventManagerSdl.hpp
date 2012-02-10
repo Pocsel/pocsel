@@ -1,9 +1,6 @@
 #ifndef __TOOLS_GUI_EVENTMANAGERSDL_HPP__
 #define __TOOLS_GUI_EVENTMANAGERSDL_HPP__
 
-#include <string>
-#include <list>
-
 #include "events/Key.hpp"
 #include "events/MouseButton.hpp"
 

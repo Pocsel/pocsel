@@ -1,11 +1,6 @@
 #ifndef __TOOLS_LOGGER_LOGGER_HPP__
 #define __TOOLS_LOGGER_LOGGER_HPP__
 
-#include <functional>
-#include <iostream>
-#include <sstream>
-#include <string>
-
 #include "tools/logger/Token.hpp"
 #include "tools/logger/Writer.hpp"
 

@@ -1,8 +1,6 @@
 #ifndef __TOOLS_ABSTRACTCOLLIDER_HPP__
 #define __TOOLS_ABSTRACTCOLLIDER_HPP__
 
-#include <stdexcept>
-
 #include "tools/Vector3.hpp"
 
 namespace Tools {

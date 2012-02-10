@@ -1,9 +1,9 @@
 #include <SDL/SDL.h>
 
-#include "events/all.hpp"
-#include "EventManagerSdl.hpp"
-#include "Window.hpp"
-#include "WindowSdl.hpp"
+#include "tools/gui/events/all.hpp"
+#include "tools/gui/EventManagerSdl.hpp"
+#include "tools/gui/Window.hpp"
+#include "tools/gui/WindowSdl.hpp"
 
 namespace Tools { namespace Gui {
 

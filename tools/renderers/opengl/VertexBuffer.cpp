@@ -1,5 +1,3 @@
-#include <cassert>
-
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/VertexBuffer.hpp"
 

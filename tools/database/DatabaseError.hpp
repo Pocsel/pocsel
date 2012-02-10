@@ -1,9 +1,6 @@
 #ifndef __TOOLS_DATABASE_DATABASEERROR_HPP__
 #define __TOOLS_DATABASE_DATABASEERROR_HPP__
 
-#include <string>
-#include <stdexcept>
-
 namespace Tools { namespace Database {
 
     class DatabaseError : public std::exception
