@@ -4,7 +4,9 @@ set(src
     ${client_src}
     ${common_src}
     ${tools_base_src}
+    ${tools_database_src}
     ${tools_logger_src}
+    ${tools_lua_src}
     ${tools_renderers_src}
 )
 
