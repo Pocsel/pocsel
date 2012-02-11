@@ -15,12 +15,6 @@ namespace Server { namespace ClientManagement {
 
     Client::~Client()
     {
-        this->_connection.reset();
-    }
-
-    void Client::Shutdown()
-    {
-        this->_connection->Shutdown();
     }
 
     void Client::SendPacket(Common::Packet* packet)

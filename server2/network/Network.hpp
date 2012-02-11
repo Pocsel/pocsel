@@ -1,9 +1,6 @@
 #ifndef __SERVER_NETWORK_NETWORK_HPP__
 #define __SERVER_NETWORK_NETWORK_HPP__
 
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
 namespace Server {
 
     class Server;

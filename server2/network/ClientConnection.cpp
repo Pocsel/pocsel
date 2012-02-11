@@ -29,7 +29,6 @@ namespace Server { namespace Network {
 
     ClientConnection::~ClientConnection()
     {
-        this->Shutdown();
         Tools::DeleteTab(this->_data);
         Tools::Delete(this->_socket);
     }
@@ -44,11 +43,19 @@ namespace Server { namespace Network {
         if (this->_socket)
         {
             Tools::debug << "Shutting down ClientConnection\n";
-            Tools::Delete(this->_socket);
-            this->_socket = 0;
+            this->_socket->close();
             this->_connected = false;
-            this->_this.reset();
             Tools::debug << "ClientConnection is Down\n";
+        }
+    }
+
+    void ClientConnection::_HandleError(boost::system::error_code const& error)
+    {
+        Tools::log << "ClientConnection error: " << error << ": " << error.message() << "(client " << this->_clientId << ")\n";
+        if (this->_connected)
+        {
+            this->_Shutdown();
+            this->_clientManager.HandleClientError(this->_clientId);
         }
     }
 
@@ -107,10 +114,7 @@ namespace Server { namespace Network {
         }
         else
         {
-            Tools::log << "ClientConnection error: " << error << ": " << error.message() << "(client " << this->_clientId << ")\n";
-            if (this->_connected)
-                this->_clientManager.HandleClientError(this->_clientId);
-            this->_connected = false;
+            this->_HandleError(error);
             return;
         }
 
@@ -120,8 +124,6 @@ namespace Server { namespace Network {
 
     void ClientConnection::_ConnectRead()
     {
-        if (!this->_this)
-            this->_this = this->shared_from_this();
         if (!this->_connected || !this->_socket)
             return;
         boost::asio::async_read(
@@ -160,16 +162,13 @@ namespace Server { namespace Network {
         }
         else
         {
-            Tools::log << "ClientConnection error: " << error << ": " << error.message() << "(client " << this->_clientId << ")\n";
-            if (this->_connected)
-                this->_clientManager.HandleClientError(this->_clientId);
-            this->_connected = false;
+            this->_HandleError(error);
         }
     }
 
     void ClientConnection::_ConnectWrite()
     {
-        assert(this->_clientId != 0);
+        assert(this->_clientId != 0 && "need un clientId");
         if (!this->_connected || !this->_socket)
             return;
 

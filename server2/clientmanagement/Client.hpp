@@ -24,7 +24,6 @@ namespace Server { namespace ClientManagement {
         Client(Uint32 id, Network::ClientConnection* connection);
         ~Client();
 
-        void Shutdown();
         void SendPacket(Common::Packet* packet);
 
         void SetLogin(std::string const& login);

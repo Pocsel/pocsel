@@ -159,7 +159,7 @@ namespace Server { namespace ClientManagement {
         static_assert((int) Protocol::ClientToServer::GetNeededResourceIds == 3, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetResourceRange == 4, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetCubeType == 5, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::GetSpawnPosition == 6, "wrong callback index"); // TODO OBSOLETE
+        static_assert((int) Protocol::ClientToServer::GetSpawnPosition == 6, "wrong callback index"); // TODO rm OBSOLETE
         static_assert((int) Protocol::ClientToServer::Settings == 7, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::TeleportOk == 8, "wrong callback index");
 
@@ -169,7 +169,10 @@ namespace Server { namespace ClientManagement {
         if (action >= (sizeof(actions) / sizeof(*actions)))
             throw std::runtime_error("Unknown action: " + Tools::ToString<Uint32>(action));
 
-        assert(actions[action] && "Action not coded yet");
+#ifdef DEBUG
+        if (actions[action] == 0)
+            Tools::error << "Action not coded yet!\n";
+#endif
 
         actions[action](manager, client, packet);
     }

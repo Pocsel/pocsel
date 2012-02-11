@@ -116,10 +116,10 @@ namespace Server { namespace ClientManagement {
             return;
         }
 
-        Tools::log << "Removing client " << clientId << "\n";
-        this->_clients[clientId]->Shutdown();
+        Tools::debug << "Removing client " << clientId << "\n";
         Tools::Delete(this->_clients[clientId]);
         this->_clients.erase(clientId);
+        Tools::debug << "Removing client " << clientId << " done\n";
     }
 
     void ClientManager::_HandlePacket(Uint32 clientId, Common::Packet* packet)

@@ -2,7 +2,7 @@
 
 #include "server2/Server.hpp"
 
-static Server::Server* server2;
+static Server::Server* server2 = 0;
 
 #ifndef _WIN32
 # include <signal.h>

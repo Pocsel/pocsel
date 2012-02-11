@@ -6,7 +6,6 @@
 
 #include "server2/clientmanagement/ClientManager.hpp"
 
-
 namespace Server { namespace Network {
 
     Network::Network(Server& server) :
@@ -43,6 +42,7 @@ namespace Server { namespace Network {
                 ":" << settings.port <<
                 "': " << e.what() <<
                 "\n";
+            throw;
         }
     }
 

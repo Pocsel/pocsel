@@ -15,12 +15,13 @@
 namespace Server { namespace Game { namespace Map { namespace Gen {
 
     ChunkGenerator::ChunkGenerator(Conf const& conf) :
-        Tools::SimpleMessageQueue(8)
+        Tools::SimpleMessageQueue(boost::thread::hardware_concurrency() + 1)
     {
         Tools::debug << "ChunkGenerator::ChunkGenerator()\n";
-        Log::load << conf.name << "\n";
-        Log::load << conf.fullname << "\n";
-        Log::load << conf.is_default << "\n";
+        Log::load << "Loading chunk generator:\n" <<
+                     "name: " << conf.name << "\n" <<
+                     "fullname: " << conf.fullname << "\n" <<
+                     "is_default: " << conf.is_default << "\n";
 
         std::map<std::string, Chunk::CubeType> typeIds;
 
