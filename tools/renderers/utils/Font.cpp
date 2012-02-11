@@ -52,6 +52,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         if (auto error = ::FT_New_Face(ftlibrary.library, name.c_str(), 0, &this->_data->face))
             throw std::runtime_error("FT_New_Face failed (error: " + ToString(error) + ")");
         ::FT_Set_Char_Size(this->_data->face, static_cast<FT_F26Dot6>(fontSize * 64), static_cast<FT_F26Dot6>(fontSize * 64), 96, 96);
+        this->_InitTextures();
     }
 
     Font::Font(IRenderer& renderer, void const* data, std::size_t dataLength, std::size_t fontSize)
@@ -62,6 +63,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         if (auto error = ::FT_New_Memory_Face(ftlibrary.library, (FT_Byte const*)data, static_cast<FT_Long>(dataLength), 0, &this->_data->face))
             throw std::runtime_error("FT_New_Face failed (error: " + ToString(error) + ")");
         ::FT_Set_Char_Size(this->_data->face, static_cast<FT_F26Dot6>(fontSize * 64), static_cast<FT_F26Dot6>(fontSize * 64), 96, 96);
+        this->_InitTextures();
     }
 
     Font::~Font()
