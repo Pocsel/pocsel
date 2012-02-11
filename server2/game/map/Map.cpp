@@ -7,9 +7,9 @@
 
 namespace Server { namespace Game { namespace Map {
 
-    Map::Map(Conf const& conf) :
-        Tools::SimpleMessageQueue(1),
+    Map::Map(Conf const& conf, Tools::SimpleMessageQueue& gameMessageQueue) :
         _conf(conf),
+        _messageQueue(gameMessageQueue),
         _spawnPosition(0)
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
@@ -28,14 +28,12 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Start() -- " << this->_conf.name << "\n";
         this->_gen->Start();
-        this->_Start();
     }
 
     void Map::Stop()
     {
         Tools::debug << "Map::Stop() -- " << this->_conf.name << "\n";
         this->_gen->Stop();
-        this->_Stop();
     }
 
     void Map::_GetChunk(Chunk::IdType id, ChunkCallback response)

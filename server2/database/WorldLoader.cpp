@@ -56,7 +56,7 @@ namespace Server { namespace Database {
             Game::Map::Conf conf;
             WorldLoader::_LoadMapConf(conf, row[0].GetString(), row[1].GetString(), world);
             conf.cubeTypes = &world._cubeTypes;
-            world._maps[conf.name] = new Game::Map::Map(conf);
+            world._maps[conf.name] = new Game::Map::Map(conf, world._messageQueue);
             if (conf.is_default) {
                 world._defaultMap = world._maps[conf.name];
             }

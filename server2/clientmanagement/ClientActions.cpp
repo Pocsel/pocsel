@@ -9,8 +9,6 @@
 #include "server2/game/Game.hpp"
 #include "server2/game/World.hpp"
 
-#include "server2/game/map/Map.hpp"
-
 #include "server2/database/ResourceManager.hpp"
 
 #include "server2/network/PacketCreator.hpp"
@@ -56,13 +54,7 @@ namespace Server { namespace ClientManagement {
             std::vector<Chunk::IdType> ids;
             Network::PacketExtractor::NeedChunks(packet, ids);
 
-            Game::Map::Map::ChunkCallback callback = std::bind(&ClientManager::SendChunk, &manager, client.id, std::placeholders::_1);
-            for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
-            {
-                // TODO utiliser la bonne map
-                manager.GetGame().GetWorld().GetDefaultMap()->GetChunk(*it, callback);
-                //client.GetPlayer().GetMap().GetChunk(*it, callback);
-            }
+            manager.ClientNeedChunks(client, ids);
         }
 
         void _HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet const& packet)
@@ -121,11 +113,8 @@ namespace Server { namespace ClientManagement {
 
             Network::PacketExtractor::Settings(packet, viewDistance, playerName);
 
-            // TODO client->SetSettings(viewDistance, playerName);
-
-            manager.GetGame().GetWorld().GetDefaultMap()->GetSpawnPosition(
-                    std::bind(&ClientManager::ClientTeleport, &manager, client.id, std::placeholders::_1)
-                    );
+            // TODO add viewDistance, playerName
+            manager.ClientSpawn(client);
         }
 
         void _HandleTeleportOk(ClientManager& manager, Client& client, Common::Packet const&)

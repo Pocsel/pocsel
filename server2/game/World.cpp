@@ -8,8 +8,9 @@
 
 namespace Server { namespace Game{
 
-    World::World(Server& server) :
-        _server(server)
+    World::World(Server& server, Tools::SimpleMessageQueue& gameMessageQueue) :
+        _server(server),
+        _messageQueue(gameMessageQueue)
     {
         Tools::debug << "World::World()\n";
         try
