@@ -22,7 +22,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
 namespace Server { namespace Game { namespace Map {
 
     class Map :
-        public Tools::SimpleMessageQueue,
         private boost::noncopyable
     {
     public:
@@ -31,6 +30,7 @@ namespace Server { namespace Game { namespace Map {
 
     private:
         Conf _conf;
+        Tools::SimpleMessageQueue& _messageQueue;
 
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
         Gen::ChunkGenerator* _gen;
@@ -39,26 +39,30 @@ namespace Server { namespace Game { namespace Map {
         Common::Position* _spawnPosition;
 
     public:
-        Map(Conf const& conf);
+        Map(Conf const& conf, Tools::SimpleMessageQueue& gameMessageQueue);
         ~Map();
 
         void Start();
         void Stop();
 
-        void GetChunk(Chunk::IdType id, ChunkCallback response)
-        {
-            this->_PushMessage(std::bind(&Map::_GetChunk, this, id, response));
-        }
-
+        // threadsafe
         void HandleNewChunk(Chunk* chunk)
         {
-            this->_PushMessage(std::bind(&Map::_HandleNewChunk, this, chunk));
+            this->_messageQueue.PushMessage(std::bind(&Map::_HandleNewChunk, this, chunk));
         }
 
         void GetSpawnPosition(SpawnCallback response)
         {
-            this->_PushMessage(std::bind(&Map::_GetSpawnPosition, this, response));
+            this->_messageQueue.PushMessage(std::bind(&Map::_GetSpawnPosition, this, response));
         }
+
+        // Uniquement pour le thread Game
+        void GetChunk(Chunk::IdType id, ChunkCallback response)
+        {
+            this->_GetChunk(id, response);
+//            this->_messageQueue.PushMessage(std::bind(&Map::_GetChunk, this, id, response));
+        }
+
 
     private:
         void _GetChunk(Chunk::IdType id, ChunkCallback response);

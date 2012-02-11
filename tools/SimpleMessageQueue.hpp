@@ -15,6 +15,28 @@ namespace Tools {
         std::vector<boost::thread*> _threads;
         unsigned int _nbThreads;
 
+    public:
+        SimpleMessageQueue(unsigned int nbThreads) :
+            _isRunning(false),
+            _nbThreads(nbThreads)
+        {
+        }
+        // XXX destructeur non virtual, on aura jamais de pointeur sur cette merde
+        ~SimpleMessageQueue()
+        {
+        }
+        void PushMessage(Message message)
+        {
+            this->_PushMessage(message);
+        }
+        void Start()
+        {
+            this->_Start();
+        }
+        void Stop()
+        {
+            this->_Stop();
+        }
     protected:
         void _PushMessage(Message message)
         {
@@ -64,15 +86,6 @@ namespace Tools {
             }
             this->_threads.clear();
             Tools::debug << "SimpleMessageQueue stopped (" << this << ").\n";
-        }
-        SimpleMessageQueue(unsigned int nbThreads) :
-            _isRunning(false),
-            _nbThreads(nbThreads)
-        {
-        }
-        // XXX destructeur non virtual, on aura jamais de pointeur sur cette merde
-        ~SimpleMessageQueue()
-        {
         }
 
     private:

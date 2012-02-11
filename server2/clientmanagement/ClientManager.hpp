@@ -86,6 +86,8 @@ namespace Server { namespace ClientManagement {
         Database::ResourceManager const& GetResourceManager() const;
         Game::Game const& GetGame() const;
         void ClientLogin(Client& client, std::string const& login);
+        void ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids);
+        void ClientSpawn(Client& client);
 
     private:
         Uint32 _GetNextId();

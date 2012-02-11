@@ -3,6 +3,8 @@
 
 #include "common/CubeType.hpp"
 
+#include "tools/SimpleMessageQueue.hpp"
+
 namespace Server {
 
     class Server;
@@ -28,6 +30,7 @@ namespace Server { namespace Game {
     {
     private:
         Server& _server;
+        Tools::SimpleMessageQueue& _messageQueue;
         std::unordered_map<std::string, Map::Map*> _maps;
         mutable Map::Map* _defaultMap; // TODO retirer mutable
         std::vector<Common::CubeType> _cubeTypes;
@@ -36,7 +39,7 @@ namespace Server { namespace Game {
         Uint32 _version;
 
     public:
-        World(Server& server);
+        World(Server& server, Tools::SimpleMessageQueue& gameMessageQueue);
         ~World();
 
         Map::Map* GetMap(std::string const& name);
