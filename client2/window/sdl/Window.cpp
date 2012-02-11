@@ -53,13 +53,13 @@ namespace Client { namespace Window { namespace Sdl {
 
     void Window::Resize(Tools::Vector2u const& size)
     {
+        this->_OnResize(size);
         this->_targetSize = size;
     }
 
     void Window::Resize(unsigned int w, unsigned int h)
     {
-        this->_targetSize.w = w;
-        this->_targetSize.h = h;
+        this->Resize(Tools::Vector2u(w, h));
     }
 
     Tools::Vector2u const& Window::GetSize() const
