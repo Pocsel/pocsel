@@ -22,7 +22,6 @@ namespace Common {
         CubeType* _cubes;
 
     public:
-        ~BaseChunk() { Tools::DeleteTab(this->_cubes); } // XXX destructor is not virtual
         BaseChunk(IdType id) :
             id(id), coords(IdToCoords(id)), _cubes(0)
         {
@@ -43,6 +42,11 @@ namespace Common {
     //        assert(this->coords.x < (1 << 21) && this->coords.x > -(1 << 21) - 1);
     //        assert(this->coords.y < (1 << 19) && this->coords.y > -(1 << 19) - 1);
     //        assert(this->coords.z < (1 << 21) && this->coords.z > -(1 << 21) - 1);
+        }
+
+        ~BaseChunk() // XXX destructor is not virtual
+        {
+            Tools::DeleteTab(this->_cubes);
         }
 
         inline bool IsEmpty() const

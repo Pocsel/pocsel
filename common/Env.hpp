@@ -3,7 +3,8 @@
 
 namespace Common {
 
-    class Env : boost::noncopyable
+    class Env :
+        boost::noncopyable
     {
     public:
         struct Variable;
@@ -70,7 +71,7 @@ namespace Common {
 namespace Tools {
 
     template<>
-    struct Stringify< Common::Env::Variable::Type >
+    struct Stringify<Common::Env::Variable::Type>
     {
         static inline std::string MakeString(Common::Env::Variable::Type type)
         {

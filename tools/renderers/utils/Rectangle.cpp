@@ -21,7 +21,7 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void Rectangle::Render()
     {
-        float vertices[] = 
+        float vertices[] =
         {
             this->_point1.x, this->_point1.y, this->_point1.z,
             this->_point1Color.r, this->_point1Color.g, this->_point1Color.b, this->_point1Color.a,

@@ -30,8 +30,8 @@ namespace {
 
 namespace Client {
 
-    Client::Client(int ac, char** av)
-        : _settings(ac, av),
+    Client::Client(int ac, char** av) :
+        _settings(ac, av),
         _state(Connecting),
         _game(0)
     {

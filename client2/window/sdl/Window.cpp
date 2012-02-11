@@ -45,6 +45,7 @@ namespace Client { namespace Window { namespace Sdl {
                 throw std::runtime_error(SDL_GetError());
             }
             this->_size = this->_targetSize;
+            this->_OnResize(this->_size);
             this->_targetSize.w = 0;
             this->_targetSize.h = 0;
         }
@@ -53,7 +54,6 @@ namespace Client { namespace Window { namespace Sdl {
 
     void Window::Resize(Tools::Vector2u const& size)
     {
-        this->_OnResize(size);
         this->_targetSize = size;
     }
 

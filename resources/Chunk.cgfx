@@ -34,10 +34,10 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float4 tex
 float4 fs(in VSout v) : COLOR
 {
    float4 c = tex2D(cubeTexture, v.texCoord);
-   
+
    float fogFactor = exp2(v.fogExponent * 1.442695);
    c.rgb = v.lightIntensity * lerp(fogColor, c.rgb, fogFactor);
-   
+
    return c;
 }
 

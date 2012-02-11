@@ -22,11 +22,14 @@ namespace Common {
         bool solid;
         bool transparent;
 
-        CubeType() {}
+        CubeType()
+        {
+        }
         CubeType(BaseChunk::CubeType id, std::string const& name) :
             id(id),
             name(name)
-        {}
+        {
+        }
 
         // j'ai perdu du temps à cause de ces 2 chiasses useless !
         // ça avait l'air de servir a rien, alors j'ai commenté ! (david)
