@@ -46,10 +46,11 @@
 // Boost
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <boost/noncopyable.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
-#include <boost/thread.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/ref.hpp>
+#include <boost/thread.hpp>
 #include "tools/filesystem.hpp"
 
 // Others
