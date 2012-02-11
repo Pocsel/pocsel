@@ -10,6 +10,24 @@
 
 #include "tools/Timer.hpp"
 
+// XXX EXAMPLE à virer
+#include "resources/resources.hpp"
+#include "tools/renderers/utils/Font.hpp"
+#include "tools/renderers/utils/Image.hpp"
+#include "tools/renderers/utils/Rectangle.hpp"
+namespace T {
+    using Tools::Renderers::Utils::Font;
+    using Tools::Renderers::Utils::Image;
+    using Tools::Renderers::Utils::Rectangle;
+}
+
+namespace {
+    T::Font* font;
+    T::Image* image;
+    T::Rectangle* rectangle;
+}
+// XXX FIN EXAMPLE à virer
+
 namespace Client {
 
     Client::Client(int ac, char** av)
@@ -22,6 +40,20 @@ namespace Client {
 
         this->_window->GetInputManager().GetInputBinder().Bind("eScApE", "quiT");
         this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
+
+        // XXX EXAMPLE à virer
+        font = new T::Font(this->_window->GetRenderer(), RESOURCES_DIR "/DejaVuSerif-Italic.ttf", 10);
+        image = new T::Image(this->_window->GetRenderer(), RESOURCES_DIR "/default-painterly-pack/pack.png");
+        rectangle = new T::Rectangle(this->_window->GetRenderer(), Tools::Vector3f(0, 0, 0), Tools::Vector3f(1, 0, 0), Tools::Vector3f(1, 1, 0), Tools::Vector3f(0, 1, 0));
+        this->_window->GetRenderer().SetClearColor(Tools::Color4f(0.5f, 0.5f, 0.5f, 1));
+        this->_window->RegisterCallback(
+            [this](Tools::Vector2u const& s)
+            {
+                this->_window->GetRenderer().SetScreenSize(s);
+                this->_window->GetRenderer().SetViewport(Tools::Rectangle(Tools::Vector2i(0), s));
+            });
+        this->_window->Resize(this->_window->GetSize());
+        // XXX FIN EXAMPLE à virer
     }
 
     Client::~Client()
@@ -69,6 +101,22 @@ namespace Client {
             default:
                 ;
             }
+
+            // XXX EXAMPLE à virer
+            this->_window->GetRenderer().Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+            this->_window->GetRenderer().BeginDraw2D();
+            this->_window->GetRenderer().SetModelMatrix(Tools::Matrix4<float>::identity);
+            font->Render("Coucou !");
+            this->_window->GetRenderer().SetModelMatrix(Tools::Matrix4<float>::CreateScale(20, 20, 1) * Tools::Matrix4<float>::CreateTranslation(0, 20, 0));
+            rectangle->Render();
+            // Attention à l'ordre des multiplications !
+            this->_window->GetRenderer().SetModelMatrix(
+                Tools::Matrix4<float>::CreateYawPitchRollRotation(0, 0, 0.05f)
+                * Tools::Matrix4<float>::CreateScale(200, 200, 1)
+                * Tools::Matrix4<float>::CreateTranslation(260, 260, 0));
+            image->Render();
+            this->_window->GetRenderer().EndDraw2D();
+            // XXX FIN EXAMPLE à virer
 
             this->_window->Render();
 
