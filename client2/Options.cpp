@@ -3,7 +3,7 @@
 
 #include "client2/Options.hpp"
 #include "ProgramInfo.hpp"
-#include "common/ConfigurationDirectory.hpp"
+#include "common/ConfDir.hpp"
 
 namespace Client {
 
@@ -11,11 +11,16 @@ namespace Client {
     {
         boost::program_options::options_description options("Options");
         options.add_options()
-            ("host", boost::program_options::value<std::string>()->default_value("localhost"), "Address of a " PROJECT_NAME " server")
-            ("port", boost::program_options::value<std::string>()->default_value("8173"), "Port of the " PROJECT_NAME " server")
-            ("confdir,c", boost::program_options::value<std::string>()->default_value(boost::filesystem::path(Common::ConfigurationDirectory::Get() / "client").native()), "Path to the client configuration directory")
-            ("version,v", "Show version and exit")
-            ("help,h", "Show this help message and exit");
+            ("host", boost::program_options::value<std::string>()->default_value("localhost"),
+             "Address of a " PROJECT_NAME " server")
+            ("port", boost::program_options::value<std::string>()->default_value("8173"),
+             "Port of the " PROJECT_NAME " server")
+            ("confdir,c", boost::program_options::value<std::string>()->default_value(Common::ConfDir::Client().native()),
+             "Path to the client configuration directory")
+            ("version,v",
+             "Show version and exit")
+            ("help,h",
+             "Show this help message and exit");
 
         boost::program_options::positional_options_description positional;
         positional.add("host", 1).add("port", 2);
