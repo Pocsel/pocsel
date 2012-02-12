@@ -15,7 +15,7 @@ namespace Client {
              "Address of a " PROJECT_NAME " server")
             ("port", boost::program_options::value<std::string>()->default_value("8173"),
              "Port of the " PROJECT_NAME " server")
-            ("confdir,c", boost::program_options::value<std::string>()->default_value(Common::ConfDir::Client().native()),
+            ("confdir,c", boost::program_options::value<std::string>()->default_value(Common::ConfDir::Client().string()),
              "Path to the client configuration directory")
             ("version,v",
              "Show version and exit")
