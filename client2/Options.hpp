@@ -8,7 +8,7 @@ namespace Client {
         public:
             std::string port;
             std::string host;
-            std::string confdir;
+            boost::filesystem::path confdir;
 
         public:
             Options(int ac, char** av);

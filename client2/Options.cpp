@@ -3,6 +3,7 @@
 
 #include "client2/Options.hpp"
 #include "ProgramInfo.hpp"
+#include "common/ConfigurationDirectory.hpp"
 
 namespace Client {
 
@@ -12,7 +13,7 @@ namespace Client {
         options.add_options()
             ("host", boost::program_options::value<std::string>()->default_value("localhost"), "Address of a " PROJECT_NAME " server")
             ("port", boost::program_options::value<std::string>()->default_value("8173"), "Port of the " PROJECT_NAME " server")
-            ("confdir,c", boost::program_options::value<std::string>()->default_value("bite"), "Path to the client configuration directory")
+            ("confdir,c", boost::program_options::value<std::string>()->default_value(boost::filesystem::path(Common::ConfigurationDirectory::Get() / "client").native()), "Path to the client configuration directory")
             ("version,v", "Show version and exit")
             ("help,h", "Show this help message and exit");
 
@@ -31,31 +32,23 @@ namespace Client {
             exit(boost::exit_failure);
         }
 
-//        this->worldFile = vm["world"].as<std::string>();
-//        if (vm.count("host"))
-//            ParseAddress(vm["host"].as<std::string>().c_str(), this->host, this->port);
-
-        if (vm.count("host"))
-        {
-            Tools::log << "SJKDFJKSDKF " << vm["host"].as<std::string>() << Tools::endl;
-        }
-        if (vm.count("port"))
-        {
-            Tools::log << "SJKDFJKSDKF234 " << vm["port"].as<std::string>() << Tools::endl;
-        }
-
         if (vm.count("help"))
         {
-            Tools::log << "Usage: " << (ac > 0 && av[0] ? av[0] : PROGRAM_NAME) << " [host [port]] [-c CONFDIR] [-v] [-h]\n\n";
+            Tools::log << "Usage: " << (ac > 0 && av[0] ? av[0] : PROGRAM_NAME) << " [host [port]] [-c CONFDIR]\n\n";
             Tools::log << options;
             exit(boost::exit_success);
         }
 
         if (vm.count("version"))
         {
-            Tools::log << PROJECT_NAME << " ~ " << PROGRAM_NAME << " version " << GIT_VERSION << Tools::endl;
+            Tools::log << PROJECT_NAME << " - " << PROGRAM_NAME << " - Version " << GIT_VERSION << Tools::endl;
             exit(boost::exit_success);
         }
+
+        this->host = vm["host"].as<std::string>();
+        this->port = vm["port"].as<std::string>();
+        this->confdir = vm["confdir"].as<std::string>();
+        Tools::debug << "Configuration directory: " << this->confdir << Tools::endl;
     }
 
 }
