@@ -25,6 +25,7 @@ namespace {
     T::Font* font;
     T::Image* image;
     T::Rectangle* rectangle;
+    Tools::Timer totalTimer;
 }
 // XXX FIN EXAMPLE à virer
 
@@ -103,17 +104,20 @@ namespace Client {
             }
 
             // XXX EXAMPLE à virer
-            this->_window->GetRenderer().Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+            //this->_window->GetRenderer().Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
             this->_window->GetRenderer().BeginDraw2D();
             this->_window->GetRenderer().SetModelMatrix(Tools::Matrix4<float>::identity);
-            font->Render("Coucou !");
+            font->Render("Coucou !", Tools::Color4f(1, 1, 1, 1));
             this->_window->GetRenderer().SetModelMatrix(Tools::Matrix4<float>::CreateScale(20, 20, 1) * Tools::Matrix4<float>::CreateTranslation(0, 20, 0));
             rectangle->Render();
             // Attention à l'ordre des multiplications !
+            auto tmp = std::sin(0.0005f * totalTimer.GetElapsedTime()) * 20 + 200,
+                tmp2 = std::cos(0.001f * totalTimer.GetElapsedTime()) * 50,
+                tmp3 = std::sin(0.001f * totalTimer.GetElapsedTime()) * 50;
             this->_window->GetRenderer().SetModelMatrix(
-                Tools::Matrix4<float>::CreateYawPitchRollRotation(0, 0, 0.05f)
-                * Tools::Matrix4<float>::CreateScale(200, 200, 1)
-                * Tools::Matrix4<float>::CreateTranslation(260, 260, 0));
+                Tools::Matrix4<float>::CreateYawPitchRollRotation(0, 0, std::sin(0.001f * totalTimer.GetElapsedTime()) * 0.05f)
+                * Tools::Matrix4<float>::CreateScale(tmp, tmp, 1)
+                * Tools::Matrix4<float>::CreateTranslation(280 + tmp2, 280 + tmp3, 0));
             image->Render();
             this->_window->GetRenderer().EndDraw2D();
             // XXX FIN EXAMPLE à virer
@@ -140,6 +144,7 @@ namespace Client {
     {
         this->_network.Stop();
         this->_state = Disconnected;
+        delete this->_game;
     }
 
     void Client::Quit()
