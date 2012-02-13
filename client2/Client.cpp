@@ -1,6 +1,7 @@
 #include <boost/cstdlib.hpp>
 
 #include "client2/Client.hpp"
+#include "client2/Settings.hpp"
 #include "client2/game/Game.hpp"
 #include "client2/window/sdl/Window.hpp"
 #include "client2/window/InputManager.hpp"
@@ -31,8 +32,8 @@ namespace {
 
 namespace Client {
 
-    Client::Client(int ac, char** av) :
-        _settings(ac, av),
+    Client::Client(Settings&& settings) :
+        _settings(settings),
         _state(Connecting),
         _game(0)
     {
