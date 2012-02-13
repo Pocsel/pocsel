@@ -119,7 +119,7 @@ namespace Server { namespace Network {
         }
 
         for (auto it = packets.begin(), ite = packets.end(); it != ite; ++it)
-            this->_packetCallback(std::move(*it));
+            this->_packetCallback(*it);
     }
 
     void ClientConnection::_ConnectRead()
