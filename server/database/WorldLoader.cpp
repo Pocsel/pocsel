@@ -1,16 +1,16 @@
-#include "server2/database/WorldLoader.hpp"
-#include "server2/database/ResourceManager.hpp"
+#include "server/database/WorldLoader.hpp"
+#include "server/database/ResourceManager.hpp"
 
 #include "tools/database/IConnectionPool.hpp"
 
 #include "tools/lua/Interpreter.hpp"
 
-#include "server2/game/World.hpp"
+#include "server/game/World.hpp"
 
-#include "server2/game/map/Conf.hpp"
-#include "server2/game/map/Map.hpp"
+#include "server/game/map/Conf.hpp"
+#include "server/game/map/Map.hpp"
 
-#include "server2/Logger.hpp"
+#include "server/Logger.hpp"
 
 namespace Server { namespace Database {
 

@@ -1,9 +1,9 @@
 
 # Sources
-file(GLOB_RECURSE server2_src "*.[ch]pp")
+file(GLOB_RECURSE server_src "*.[ch]pp")
 
 set(src
-    ${server2_src}
+    ${server_src}
     ${common_src}
     ${tools_base_src}
     ${tools_database_src}
@@ -12,15 +12,15 @@ set(src
 )
 
 CreateGroups("${src}")
-add_executable(server2 ${src})
+add_executable(server ${src})
 
-enable_pch(server2 src)
+enable_pch(server src)
 
-target_link_libraries(server2
+target_link_libraries(server
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}
     ${SQLITE3_LIBRARIES}
 )
 
-SetProgramInfo(server2)
+SetProgramInfo(server)

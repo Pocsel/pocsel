@@ -1,9 +1,9 @@
 #ifndef __SERVER_GAME_MAP_GEN_EQUATIONS_EQUATIONS_HPP__
 #define __SERVER_GAME_MAP_GEN_EQUATIONS_EQUATIONS_HPP__
 
-#include "server2/game/map/gen/equations/EquationPerlin2.hpp"
-#include "server2/game/map/gen/equations/EquationPerlin3.hpp"
-#include "server2/game/map/gen/equations/None.hpp"
+#include "server/game/map/gen/equations/EquationPerlin2.hpp"
+#include "server/game/map/gen/equations/EquationPerlin3.hpp"
+#include "server/game/map/gen/equations/None.hpp"
 #include "tools/CaseInsensitive.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen {

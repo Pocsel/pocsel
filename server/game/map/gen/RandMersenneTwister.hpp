@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_MAP_GEN_RANDMERSENNETWISTER_HPP__
 #define __SERVER_GAME_MAP_GEN_RANDMERSENNETWISTER_HPP__
 
-#include "server2/game/map/gen/IRand.hpp"
+#include "server/game/map/gen/IRand.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen {
 

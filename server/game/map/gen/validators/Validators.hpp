@@ -1,20 +1,20 @@
 #ifndef __SERVER_GAME_MAP_GEN_VALIDATORS_VALIDATORS_HPP__
 #define __SERVER_GAME_MAP_GEN_VALIDATORS_VALIDATORS_HPP__
 
-#include "server2/game/map/gen/validators/EqSuperiorTo.hpp"
-#include "server2/game/map/gen/validators/EqInferiorTo.hpp"
+#include "server/game/map/gen/validators/EqSuperiorTo.hpp"
+#include "server/game/map/gen/validators/EqInferiorTo.hpp"
 
-#include "server2/game/map/gen/validators/YSuperiorTo.hpp"
-#include "server2/game/map/gen/validators/YInferiorTo.hpp"
+#include "server/game/map/gen/validators/YSuperiorTo.hpp"
+#include "server/game/map/gen/validators/YInferiorTo.hpp"
 
-#include "server2/game/map/gen/validators/YInferiorToEq.hpp"
-#include "server2/game/map/gen/validators/EqInferiorToY.hpp"
+#include "server/game/map/gen/validators/YInferiorToEq.hpp"
+#include "server/game/map/gen/validators/EqInferiorToY.hpp"
 
-#include "server2/game/map/gen/validators/AYInferiorToEq.hpp"
-#include "server2/game/map/gen/validators/AYPlusBInferiorToEq.hpp"
+#include "server/game/map/gen/validators/AYInferiorToEq.hpp"
+#include "server/game/map/gen/validators/AYPlusBInferiorToEq.hpp"
 
-#include "server2/game/map/gen/validators/AYSuperiorToEq.hpp"
-#include "server2/game/map/gen/validators/AYPlusBSuperiorToEq.hpp"
+#include "server/game/map/gen/validators/AYSuperiorToEq.hpp"
+#include "server/game/map/gen/validators/AYPlusBSuperiorToEq.hpp"
 
 #include "tools/CaseInsensitive.hpp"
 

@@ -1,5 +1,5 @@
-#include "server2/game/map/gen/Perlin.hpp"
-#include "server2/game/map/gen/IRand.hpp"
+#include "server/game/map/gen/Perlin.hpp"
+#include "server/game/map/gen/IRand.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen {
 

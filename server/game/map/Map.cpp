@@ -1,9 +1,9 @@
-#include "server2/game/map/Map.hpp"
+#include "server/game/map/Map.hpp"
 
 #include "common/CubeType.hpp"
 #include "common/Position.hpp"
 
-#include "server2/game/map/gen/ChunkGenerator.hpp"
+#include "server/game/map/gen/ChunkGenerator.hpp"
 
 namespace Server { namespace Game { namespace Map {
 

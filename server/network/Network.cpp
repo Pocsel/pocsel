@@ -1,10 +1,10 @@
-#include "server2/network/Network.hpp"
-#include "server2/network/ClientConnection.hpp"
+#include "server/network/Network.hpp"
+#include "server/network/ClientConnection.hpp"
 
-#include "server2/Server.hpp"
-#include "server2/Settings.hpp"
+#include "server/Server.hpp"
+#include "server/Settings.hpp"
 
-#include "server2/clientmanagement/ClientManager.hpp"
+#include "server/clientmanagement/ClientManager.hpp"
 
 namespace Server { namespace Network {
 

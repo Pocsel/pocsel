@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_MAP_GEN_EQUATIONS_EQUATIONPERLIN2_HPP__
 #define __SERVER_GAME_MAP_GEN_EQUATIONS_EQUATIONPERLIN2_HPP__
 
-#include "server2/game/map/gen/IEquation.hpp"
+#include "server/game/map/gen/IEquation.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen { namespace Equations {
 

@@ -1,4 +1,4 @@
-#include "server2/database/ResourceManager.hpp"
+#include "server/database/ResourceManager.hpp"
 
 #include "common/Packet.hpp"
 #include "common/Resource.hpp"
@@ -7,9 +7,9 @@
 
 #include "tools/database/sqlite/Connection.hpp"
 
-#include "server2/Server.hpp"
-#include "server2/Settings.hpp"
-#include "server2/Logger.hpp"
+#include "server/Server.hpp"
+#include "server/Settings.hpp"
+#include "server/Logger.hpp"
 
 namespace Server { namespace Database {
 

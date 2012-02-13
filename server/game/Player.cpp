@@ -1,5 +1,5 @@
-#include "server2/game/Player.hpp"
-#include "server2/game/Game.hpp"
+#include "server/game/Player.hpp"
+#include "server/game/Game.hpp"
 
 namespace Server { namespace Game {
 

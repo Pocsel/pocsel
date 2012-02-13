@@ -1,10 +1,10 @@
-#include "server2/Server.hpp"
-#include "server2/Settings.hpp"
+#include "server/Server.hpp"
+#include "server/Settings.hpp"
 
-#include "server2/network/Network.hpp"
-#include "server2/database/ResourceManager.hpp"
-#include "server2/clientmanagement/ClientManager.hpp"
-#include "server2/game/Game.hpp"
+#include "server/network/Network.hpp"
+#include "server/database/ResourceManager.hpp"
+#include "server/clientmanagement/ClientManager.hpp"
+#include "server/game/Game.hpp"
 
 namespace Server {
 

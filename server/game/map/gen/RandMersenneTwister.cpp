@@ -1,4 +1,4 @@
-#include "server2/game/map/gen/RandMersenneTwister.hpp"
+#include "server/game/map/gen/RandMersenneTwister.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen {
 

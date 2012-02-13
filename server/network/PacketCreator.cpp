@@ -8,8 +8,8 @@
 #include "common/CubeTypeSerializer.hpp"
 #include "common/PositionSerializer.hpp"
 
-#include "server2/network/PacketCreator.hpp"
-#include "server2/network/ChunkSerializer.hpp"
+#include "server/network/PacketCreator.hpp"
+#include "server/network/ChunkSerializer.hpp"
 
 namespace Server { namespace Network {
 

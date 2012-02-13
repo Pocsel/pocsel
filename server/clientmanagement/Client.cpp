@@ -1,8 +1,8 @@
-#include "server2/clientmanagement/Client.hpp"
+#include "server/clientmanagement/Client.hpp"
 
 #include "common/Packet.hpp"
 
-#include "server2/network/ClientConnection.hpp"
+#include "server/network/ClientConnection.hpp"
 
 namespace Server { namespace ClientManagement {
 

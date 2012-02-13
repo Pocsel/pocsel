@@ -1,7 +1,7 @@
 #ifndef __SERVER_NETWORK_CHUNKSERIALIZER_HPP__
 #define __SERVER_NETWORK_CHUNKSERIALIZER_HPP__
 
-#include "server2/Chunk.hpp"
+#include "server/Chunk.hpp"
 
 #include "tools/ByteArray.hpp"
 

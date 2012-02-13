@@ -1,10 +1,10 @@
-#include "server2/game/World.hpp"
+#include "server/game/World.hpp"
 
-#include "server2/Server.hpp"
+#include "server/Server.hpp"
 
-#include "server2/database/WorldLoader.hpp"
+#include "server/database/WorldLoader.hpp"
 
-#include "server2/game/map/Map.hpp"
+#include "server/game/map/Map.hpp"
 
 namespace Server { namespace Game{
 

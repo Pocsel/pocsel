@@ -1,7 +1,7 @@
 #ifndef __SERVER_NETWORK_PACKETEXTRACTOR_HPP__
 #define __SERVER_NETWORK_PACKETEXTRACTOR_HPP__
 
-#include "server2/Chunk.hpp"
+#include "server/Chunk.hpp"
 #include "protocol/protocol.hpp"
 
 namespace Common {

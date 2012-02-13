@@ -1,12 +1,12 @@
-#include "server2/game/Game.hpp"
-#include "server2/game/Player.hpp"
-#include "server2/game/World.hpp"
+#include "server/game/Game.hpp"
+#include "server/game/Player.hpp"
+#include "server/game/World.hpp"
 
-#include "server2/Server.hpp"
+#include "server/Server.hpp"
 
-#include "server2/clientmanagement/ClientManager.hpp"
+#include "server/clientmanagement/ClientManager.hpp"
 
-#include "server2/game/map/Map.hpp"
+#include "server/game/map/Map.hpp"
 
 namespace Server { namespace Game {
 

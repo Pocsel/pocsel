@@ -1,5 +1,5 @@
-#include "server2/game/map/gen/CubeSpawnInfo.hpp"
-#include "server2/game/map/gen/IValidator.hpp"
+#include "server/game/map/gen/CubeSpawnInfo.hpp"
+#include "server/game/map/gen/IValidator.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen {
 

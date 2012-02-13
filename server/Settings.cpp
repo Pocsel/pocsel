@@ -3,7 +3,7 @@
 
 #include "common/constants.hpp"
 
-#include "server2/Settings.hpp"
+#include "server/Settings.hpp"
 
 namespace po = boost::program_options;
 
@@ -94,7 +94,7 @@ namespace Server {
 
         if (vm.count("help"))
         {
-            Tools::log << "Usage: " << (ac > 0 ? av[0] : "server2") << " [address] [OPTIONS]\n\n";
+            Tools::log << "Usage: " << (ac > 0 ? av[0] : "server") << " [address] [OPTIONS]\n\n";
             Tools::log << options << "\n";
             exit(EXIT_SUCCESS);
         }

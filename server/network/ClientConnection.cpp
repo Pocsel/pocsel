@@ -1,6 +1,6 @@
-#include "server2/network/ClientConnection.hpp"
+#include "server/network/ClientConnection.hpp"
 
-#include "server2/clientmanagement/ClientManager.hpp"
+#include "server/clientmanagement/ClientManager.hpp"
 
 #include "common/Packet.hpp"
 

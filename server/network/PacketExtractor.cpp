@@ -1,4 +1,4 @@
-#include "server2/network/PacketExtractor.hpp"
+#include "server/network/PacketExtractor.hpp"
 
 #include "common/Packet.hpp"
 

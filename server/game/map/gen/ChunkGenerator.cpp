@@ -1,16 +1,16 @@
-#include "server2/game/map/gen/ChunkGenerator.hpp"
-#include "server2/game/map/gen/CubeSpawnInfo.hpp"
-#include "server2/game/map/gen/Perlin.hpp"
-#include "server2/game/map/gen/RandMersenneTwister.hpp"
+#include "server/game/map/gen/ChunkGenerator.hpp"
+#include "server/game/map/gen/CubeSpawnInfo.hpp"
+#include "server/game/map/gen/Perlin.hpp"
+#include "server/game/map/gen/RandMersenneTwister.hpp"
 
 #include "common/CubeType.hpp"
 
-#include "server2/Logger.hpp"
+#include "server/Logger.hpp"
 
-#include "server2/game/map/Conf.hpp"
+#include "server/game/map/Conf.hpp"
 
-#include "server2/game/map/gen/equations/Equations.hpp"
-#include "server2/game/map/gen/validators/Validators.hpp"
+#include "server/game/map/gen/equations/Equations.hpp"
+#include "server/game/map/gen/validators/Validators.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen {
 

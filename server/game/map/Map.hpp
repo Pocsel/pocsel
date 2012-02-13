@@ -1,11 +1,11 @@
 #ifndef __SERVER_GAME_MAP_MAP_HPP__
 #define __SERVER_GAME_MAP_MAP_HPP__
 
-#include "server2/game/map/Conf.hpp"
+#include "server/game/map/Conf.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
 
-#include "server2/Chunk.hpp"
+#include "server/Chunk.hpp"
 
 namespace Common {
 

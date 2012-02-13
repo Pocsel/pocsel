@@ -4,7 +4,7 @@
 #include "common/Packet.hpp"
 #include "tools/SimpleMessageQueue.hpp"
 
-#include "server2/Chunk.hpp"
+#include "server/Chunk.hpp"
 
 namespace Common {
 

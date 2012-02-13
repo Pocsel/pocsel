@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_MAP_GEN_VALIDATORS_AYPLUSBINFERIORTOEQ_HPP__
 #define __SERVER_GAME_MAP_GEN_VALIDATORS_AYPLUSBINFERIORTOEQ_HPP__
 
-#include "server2/game/map/gen/IValidator.hpp"
+#include "server/game/map/gen/IValidator.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen { namespace Validators {
 

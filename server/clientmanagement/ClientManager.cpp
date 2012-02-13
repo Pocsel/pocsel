@@ -1,16 +1,16 @@
-#include "server2/clientmanagement/ClientManager.hpp"
-#include "server2/clientmanagement/Client.hpp"
-#include "server2/clientmanagement/ClientActions.hpp"
+#include "server/clientmanagement/ClientManager.hpp"
+#include "server/clientmanagement/Client.hpp"
+#include "server/clientmanagement/ClientActions.hpp"
 
 #include "common/Packet.hpp"
 
-#include "server2/Server.hpp"
+#include "server/Server.hpp"
 
-#include "server2/game/Game.hpp"
-#include "server2/game/World.hpp"
+#include "server/game/Game.hpp"
+#include "server/game/World.hpp"
 
-#include "server2/network/ClientConnection.hpp"
-#include "server2/network/PacketCreator.hpp"
+#include "server/network/ClientConnection.hpp"
+#include "server/network/PacketCreator.hpp"
 
 namespace Server { namespace ClientManagement {
 
