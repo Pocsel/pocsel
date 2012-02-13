@@ -5,22 +5,13 @@ namespace Server { namespace Game {
 
     Player::Player(Game& game, Uint32 id) :
         id(id),
-        _game(game)
+        _game(game),
+        _currentMap(0)
     {
     }
 
     Player::~Player()
     {
-    }
-
-    void Player::SetCurrentMap(Map::Map* map)
-    {
-        this->_currentMap = map;
-    }
-
-    Map::Map* Player::GetCurrentMap()
-    {
-        return this->_currentMap;
     }
 
     void Player::Teleport(Common::Position const& position)
