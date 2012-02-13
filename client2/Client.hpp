@@ -47,7 +47,7 @@ namespace Client {
         Game::Game* _game;
 
     public:
-        Client(Settings&& settings);
+        Client(Settings& settings);
         ~Client();
         int Run();
         void Login(std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);
