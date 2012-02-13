@@ -37,6 +37,7 @@ namespace Client { namespace Window { namespace Sdl {
 
     void Window::Render()
     {
+        SDL_GL_SwapBuffers();
         if (this->_targetSize.w && this->_targetSize.h)
         {
             if (!(this->_screen = SDL_SetVideoMode(this->_targetSize.w, this->_targetSize.h, 0, SDL_RESIZABLE | SDL_OPENGL)))
@@ -49,7 +50,6 @@ namespace Client { namespace Window { namespace Sdl {
             this->_targetSize.w = 0;
             this->_targetSize.h = 0;
         }
-        SDL_GL_SwapBuffers();
     }
 
     void Window::Resize(Tools::Vector2u const& size)
