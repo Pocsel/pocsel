@@ -14,6 +14,8 @@ namespace Common { namespace ConfDir {
 #else // en release
 # ifdef _WIN32
         // Windows: %appdata%
+        path = getenv("APPDATA");
+        path /= PROJECT_NAME;
 # else
         // Linux: $HOME
         char const* home;
