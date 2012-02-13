@@ -1,6 +1,6 @@
 #ifndef __COMMON_DEVCONFDIR_HPP__
 #define __COMMON_DEVCONFDIR_HPP__
 
-#define DEV_CONF_DIR "@pocsel_base_dir@"
+#define DEV_CONF_DIR "@dev_conf_dir@"
 
 #endif

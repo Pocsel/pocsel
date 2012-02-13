@@ -22,9 +22,8 @@ namespace Common { namespace ConfDir {
             path = home;
         else if ((home = getenv("HOMEDRIVE")) && (home2 = getenv("HOMEPATH")))
             path = boost::filesystem::path(home) / home2;
-        path / "." PROJECT_NAME;
+        path /= "." PROJECT_NAME;
 # endif
-        boost::filesystem::create_directory(path);
 #endif
         return path;
     }

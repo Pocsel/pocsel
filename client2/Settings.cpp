@@ -54,7 +54,7 @@ namespace Client {
         this->host = vm["host"].as<std::string>();
         this->port = vm["port"].as<std::string>();
         this->confdir = vm["confdir"].as<std::string>();
-        Tools::debug << "Configuration directory: " << this->confdir.string() << Tools::endl;
+        Tools::log << "Configuration directory: " << this->confdir.string() << Tools::endl;
     }
 
 }
