@@ -1,9 +1,8 @@
-#include "client2/Options.hpp"
+#include "client2/Settings.hpp"
 #include "client2/Client.hpp"
 
 int main(int ac, char** av)
 {
-    Client::Options(ac, av);
-    Client::Client client(ac, av);
+    Client::Client client(Client::Settings(ac, av));
     return client.Run();
 }

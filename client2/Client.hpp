@@ -2,11 +2,11 @@
 #define __CLIENT_CLIENT_HPP__
 
 #include "common/BaseChunk.hpp"
-#include "client2/Settings.hpp"
 #include "client2/game/Game.hpp"
 #include "client2/network/Network.hpp"
 
 namespace Client {
+    class Settings;
     namespace Game {
         class CubeTypeManager;
     }
@@ -35,7 +35,7 @@ namespace Client {
         };
 
     private:
-        Settings _settings;
+        Settings& _settings;
         Window::Window* _window;
         Network::Network _network;
         Network::PacketDispatcher* _packetDispatcher;
@@ -43,7 +43,7 @@ namespace Client {
         Game::Game* _game;
 
     public:
-        Client(int ac, char** av);
+        Client(Settings&& settings);
         ~Client();
         int Run();
         void Login(std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);
