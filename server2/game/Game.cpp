@@ -50,7 +50,7 @@ namespace Server { namespace Game {
 
         newPlayer->SetCurrentMap(this->_world->GetDefaultMap());
 
-        this->_world->GetDefaultMap()->GetSpawnPosition(
+        this->_world->GetDefaultMap().GetSpawnPosition(
             std::bind(&Game::PlayerTeleport, this, clientId, std::placeholders::_1)
             );
     }
@@ -69,15 +69,20 @@ namespace Server { namespace Game {
     {
         static std::unordered_map<Uint32, Uint32> __;
 
-        this->_world->GetDefaultMap()->GetChunk(id, callback);
+        this->_world->GetDefaultMap().GetChunk(id, callback);
         return;
-        // TODO virer les 2 lignes au dessus, qui sont pour le vieux protocole
+        // TODO OBSOLETE virer les 2 lignes au dessus, qui sont pour le vieux protocole
 
         auto it = this->_players.find(clientId);
         if (it == this->_players.end())
             return;
         Player* player = it->second;
-        player->GetCurrentMap()->GetChunk(id, callback);
+        if (!player->HasMap())
+        {
+            // kick player ?
+            return;
+        }
+        player->GetCurrentMap().GetChunk(id, callback);
     }
 
 }}

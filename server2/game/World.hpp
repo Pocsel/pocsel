@@ -32,7 +32,7 @@ namespace Server { namespace Game {
         Server& _server;
         Tools::SimpleMessageQueue& _messageQueue;
         std::unordered_map<std::string, Map::Map*> _maps;
-        mutable Map::Map* _defaultMap; // TODO retirer mutable
+        Map::Map* _defaultMap;
         std::vector<Common::CubeType> _cubeTypes;
         std::string _identifier;
         std::string _fullname;
@@ -42,8 +42,9 @@ namespace Server { namespace Game {
         World(Server& server, Tools::SimpleMessageQueue& gameMessageQueue);
         ~World();
 
-        Map::Map* GetMap(std::string const& name);
-        Map::Map* GetDefaultMap() const { return this->_defaultMap; } // TODO retirer const
+        bool HasMap(std::string const& name) { return this->_maps.find(name) != this->_maps.end(); }
+        Map::Map& GetMap(std::string const& name) { assert(this->_maps.find(name) == this->_maps.end()); return *this->_maps[name]; }
+        Map::Map& GetDefaultMap() const { return *this->_defaultMap; }
 
         void Start();
         void Stop();

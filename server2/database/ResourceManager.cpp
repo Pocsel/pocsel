@@ -1,5 +1,6 @@
 #include "server2/database/ResourceManager.hpp"
 
+#include "common/Packet.hpp"
 #include "common/Resource.hpp"
 
 #include "tools/database/ConnectionPool.hpp"

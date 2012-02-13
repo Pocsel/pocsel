@@ -32,13 +32,6 @@ namespace Server { namespace Game{
             Tools::Delete(it->second);
     }
 
-    Map::Map* World::GetMap(std::string const& name)
-    {
-        if (this->_maps.find(name) == this->_maps.end())
-            return 0;
-        return this->_maps[name];
-    }
-
     void World::Start()
     {
         Tools::debug << "World::Start()\n";
