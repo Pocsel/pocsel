@@ -1,13 +1,6 @@
-
-# cmake -DCMAKE_CXX_COMPILER=clang++
-#
-
 cmake_minimum_required(VERSION 2.8)
 
 project(Pocsel)
-
-# Changer Debug en Release pour compiler en Release (SANS BLAGUE !!)
-set(CMAKE_BUILD_TYPE Debug)
 
 # Modules supplémentaires
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -80,9 +73,10 @@ file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
 file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
 file(GLOB_RECURSE tools_logger_src "tools/logger/*.[ch]pp")
 
-set(pocsel_binaries_dir "${CMAKE_BINARY_DIR}/pocsel/binaries")
-set(pocsel_server_dir "${CMAKE_BINARY_DIR}/pocsel/server")
-set(pocsel_client_dir "${CMAKE_BINARY_DIR}/pocsel/client")
+set(pocsel_base_dir "${CMAKE_BINARY_DIR}/pocsel")
+set(pocsel_binaries_dir "${pocsel_base_dir}/binaries")
+set(pocsel_server_dir "${pocsel_base_dir}/server")
+set(pocsel_client_dir "${pocsel_base_dir}/client")
 set(EXECUTABLE_OUTPUT_PATH ${pocsel_binaries_dir})
 
 macro(enable_pch target target_src)
@@ -102,6 +96,8 @@ macro(SetProgramInfo target)
     set(program_name "${target}")
     configure_file("../ProgramInfo.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/ProgramInfo.hpp")
 endmacro()
+
+configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
 add_subdirectory(resources)
 add_subdirectory(sdk)

@@ -39,6 +39,7 @@ namespace Tools { namespace Logger {
         void WriteFile(std::string const&) {}
         void Write(std::string const&) {}
         void WriteLine(std::string const&) {}
+        NullWriter& operator <<(Token&) { return *this; }
         template<class T> NullWriter& operator <<(T) { return *this; }
     };
 
