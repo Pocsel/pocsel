@@ -1,11 +1,7 @@
 #ifndef __SERVER_NETWORK_CLIENTCONNECTION_HPP__
 #define __SERVER_NETWORK_CLIENTCONNECTION_HPP__
 
-namespace Common {
-
-    class Packet;
-
-}
+#include "common/Packet.hpp"
 
 namespace Server { namespace ClientManagement {
 
@@ -21,7 +17,7 @@ namespace Server { namespace Network {
     {
     public:
         typedef std::function<void(void)> ErrorCallback;
-        typedef std::function<void(std::unique_ptr<Common::Packet>)> PacketCallback;
+        typedef std::function<void(std::unique_ptr<Common::Packet>&)> PacketCallback;
 
     private:
         static const unsigned int _bufferSize = 8192;

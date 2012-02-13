@@ -66,7 +66,7 @@ namespace Server { namespace ClientManagement {
         {
             this->_PushMessage(std::bind(&ClientManager::_HandleClientError, this, clientId));
         }
-        void HandlePacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet)
+        void HandlePacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
         {
             this->_PushMessage(std::bind(&ClientManager::_HandlePacket, this, clientId, packet.release()));
         }
