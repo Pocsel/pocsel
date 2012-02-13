@@ -20,6 +20,11 @@ namespace Tools { namespace Logger {
         void Write(std::string const&) {}
         void WriteLine(std::string const&) {}
 
+        NullWriter& operator <<(Token const& t)
+        {
+            this->_parent << t;
+            return *this;
+        }
         template<class T>
         NullWriter& operator <<(T d)
         {
@@ -39,6 +44,7 @@ namespace Tools { namespace Logger {
         void WriteFile(std::string const&) {}
         void Write(std::string const&) {}
         void WriteLine(std::string const&) {}
+        NullWriter& operator <<(Token const&) { return *this; }
         template<class T> NullWriter& operator <<(T) { return *this; }
     };
 

@@ -1,6 +1,7 @@
 #ifndef __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 #define __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 
+#include "common/Packet.hpp"
 #include "tools/SimpleMessageQueue.hpp"
 
 #include "server2/Chunk.hpp"
