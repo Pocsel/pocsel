@@ -32,7 +32,7 @@ namespace {
 
 namespace Client {
 
-    Client::Client(Settings&& settings) :
+    Client::Client(Settings& settings) :
         _settings(settings),
         _state(Connecting),
         _game(0)

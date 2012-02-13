@@ -3,6 +3,7 @@
 
 int main(int ac, char** av)
 {
-    Client::Client client(Client::Settings(ac, av));
+    auto settings = Client::Settings(ac, av);
+    Client::Client client(settings);
     return client.Run();
 }
