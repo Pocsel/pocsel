@@ -18,25 +18,26 @@ namespace Server { namespace Game {
     class Game;
 
     class Player :
-        public std::enable_shared_from_this<Player>,
+//        public std::enable_shared_from_this<Player>,
         private boost::noncopyable
     {
     public:
-        typedef std::function<void(Common::Position const&)> TeleportCallback;
+//        typedef std::function<void(Common::Position const&)> TeleportCallback;
 
     public:
         Uint32 const id;
     private:
         Game& _game;
         Map::Map* _currentMap;
-        TeleportCallback _teleportCallback;
+//        TeleportCallback _teleportCallback;
 
     public:
         Player(Game& game, Uint32 id);
         ~Player();
 
-        void SetCurrentMap(Map::Map* map);
-        Map::Map* GetCurrentMap();
+        void SetCurrentMap(Map::Map& map) { this->_currentMap = &map; }
+        bool HasMap() const { return this->_currentMap; }
+        Map::Map& GetCurrentMap() { assert(this->_currentMap); return *this->_currentMap; }
         void Teleport(Common::Position const& position);
     };
 
