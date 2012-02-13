@@ -13,7 +13,7 @@
 
 namespace Server { namespace Network {
 
-    Common::Packet* PacketCreator::LoggedIn(bool success,
+    std::unique_ptr<Common::Packet> PacketCreator::LoggedIn(bool success,
                                             std::string const& reason /* = "" */,
                                             std::string const& worldIdentifier /* = "" */,
                                             std::string const& worldName /* = "" */,
@@ -37,27 +37,27 @@ namespace Server { namespace Network {
             assert(reason.size() > 0 && "Need a reason !");
             p->WriteString(reason);
         }
-        return p;
+        return std::unique_ptr<Common::Packet>(p);
     }
 
-    Common::Packet* PacketCreator::Ping(Uint64 timestamp)
+    std::unique_ptr<Common::Packet> PacketCreator::Ping(Uint64 timestamp)
     {
         Common::Packet* p(new Common::Packet);
         p->Write((Protocol::ActionType)Protocol::ServerToClient::Ping);
 
         p->Write(timestamp); // timestamp agréé par le commité du temps
-        return p;
+        return std::unique_ptr<Common::Packet>(p);
     }
 
-    Common::Packet* PacketCreator::Chunk(::Server::Chunk const& chunk)
+    std::unique_ptr<Common::Packet> PacketCreator::Chunk(::Server::Chunk const& chunk)
     {
         Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::Chunk);
         p->Write(chunk);
-        return p;
+        return std::unique_ptr<Common::Packet>(p);
     }
 
-    Common::Packet* PacketCreator::NeededResourceIds(std::vector<Uint32>& ids,
+    std::unique_ptr<Common::Packet> PacketCreator::NeededResourceIds(std::vector<Uint32>& ids,
                                                      Uint32& offset)
     {
         Common::Packet* response(new Common::Packet);
@@ -68,10 +68,10 @@ namespace Server { namespace Network {
             response->Write(ids[offset]);
             ++offset;
         }
-        return response;
+        return std::unique_ptr<Common::Packet>(response);
     }
 
-    Common::Packet* PacketCreator::ResourceRange(Common::Resource const& resource,
+    std::unique_ptr<Common::Packet> PacketCreator::ResourceRange(Common::Resource const& resource,
                                                  Uint32 offset)
     {
         std::unique_ptr<Common::Packet> ptr(new Common::Packet());
@@ -104,23 +104,23 @@ namespace Server { namespace Network {
                           ((char const*) resource.data) + offset,
                           toSendSize
                          );
-        return ptr.release();
+        return ptr;
     }
 
-    Common::Packet* PacketCreator::CubeType(Common::CubeType const& cubeType)
+    std::unique_ptr<Common::Packet> PacketCreator::CubeType(Common::CubeType const& cubeType)
     {
         Common::Packet* response(new Common::Packet);
         response->Write(Protocol::ServerToClient::CubeType);
         response->Write(cubeType);
-        return response;
+        return std::unique_ptr<Common::Packet>(response);
     }
 
-    Common::Packet* PacketCreator::TeleportPlayer(Common::Position const& pos)
+    std::unique_ptr<Common::Packet> PacketCreator::TeleportPlayer(Common::Position const& pos)
     {
         Common::Packet* ptr(new Common::Packet);
         ptr->Write(Protocol::ServerToClient::TeleportPlayer);
         ptr->Write(pos);
-        return ptr;
+        return std::unique_ptr<Common::Packet>(ptr);
     }
 
 }}
