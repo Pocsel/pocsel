@@ -19,10 +19,13 @@ namespace Server { namespace Network {
         public boost::enable_shared_from_this<ClientConnection>,
         private boost::noncopyable
     {
+    public:
+        typedef std::function<void(void)> ErrorCallback;
+        typedef std::function<void(std::unique_ptr<Common::Packet>)> PacketCallback;
+
     private:
         static const unsigned int _bufferSize = 8192;
 
-        ClientManagement::ClientManager& _clientManager;
         boost::asio::io_service& _ioService;
         boost::asio::ip::tcp::socket* _socket;
         Uint8* _data;
@@ -32,15 +35,16 @@ namespace Server { namespace Network {
         std::queue<std::unique_ptr<Common::Packet>> _toSendPackets;
         bool _connected;
         bool _writeConnected;
-        Uint32 _clientId;
+        ErrorCallback _errorCallback;
+        PacketCallback _packetCallback;
 
     public:
-        ClientConnection(boost::asio::ip::tcp::socket* socket, ClientManagement::ClientManager& clientManager);
+        ClientConnection(boost::asio::ip::tcp::socket* socket);
         ~ClientConnection();
-        void SetClientId(Uint32 id);
-        void SendPacket(Common::Packet* packet)
+        void SetCallbacks(ErrorCallback errorCallback, PacketCallback packetCallback);
+        void SendPacket(std::unique_ptr<Common::Packet> packet)
         {
-            this->_ioService.dispatch(std::bind(&ClientConnection::_SendPacket, this->shared_from_this(), packet));
+            this->_ioService.dispatch(std::bind(&ClientConnection::_SendPacket, this->shared_from_this(), packet.release()));
         }
         void Shutdown()
         {

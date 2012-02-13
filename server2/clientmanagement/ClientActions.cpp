@@ -26,18 +26,18 @@ namespace Server { namespace ClientManagement {
             Network::PacketExtractor::Login(packet, major, minor, login);
             if (major != Protocol::Version::Major || minor != Protocol::Version::Minor)
             {
-                client.SendPacket(Network::PacketCreator::LoggedIn(false,
+                client.SendPacket(std::move(Network::PacketCreator::LoggedIn(false,
                     "Protocol verions mismatch : Server " + Tools::ToString(Protocol::Version::Major) +
                     "." + Tools::ToString(Protocol::Version::Minor) +
                     " != Client " + Tools::ToString(major) +
-                    "." + Tools::ToString(minor)));
+                    "." + Tools::ToString(minor))));
                 return;
             }
 
             if (!login.size())
             {
-                client.SendPacket(Network::PacketCreator::LoggedIn(false,
-                    "Wrong login: cannot be empty"));
+                client.SendPacket(std::move(Network::PacketCreator::LoggedIn(false,
+                    "Wrong login: cannot be empty")));
                 return;
             }
             manager.ClientLogin(client, login);
@@ -68,7 +68,7 @@ namespace Server { namespace ClientManagement {
             do
             {
                 Tools::debug << "ClientActions::_HandleGetNeededResourceIds: " << ids.size() << "\n";
-                client.SendPacket(Network::PacketCreator::NeededResourceIds(ids, offset));
+                client.SendPacket(std::move(Network::PacketCreator::NeededResourceIds(ids, offset)));
             } while (offset < ids.size());
         }
 
@@ -82,7 +82,7 @@ namespace Server { namespace ClientManagement {
             if (!resourceManager.HasResource(id))
                 throw std::runtime_error("Invalid resource id: " + Tools::ToString(id));
             Common::Resource const& resource = resourceManager.GetResource(id);
-            client.SendPacket(Network::PacketCreator::ResourceRange(resource, offset));
+            client.SendPacket(std::move(Network::PacketCreator::ResourceRange(resource, offset)));
         }
 
         void _HandleGetCubeType(ClientManager& manager, Client& client, Common::Packet const& packet)
@@ -95,7 +95,7 @@ namespace Server { namespace ClientManagement {
 
             if (!world.HasCubeType(id))
                 throw std::runtime_error("Invalid cube description id: " + Tools::ToString(id));
-            client.SendPacket(Network::PacketCreator::CubeType(world.GetCubeType(id)));
+            client.SendPacket(std::move(Network::PacketCreator::CubeType(world.GetCubeType(id))));
         }
 
         // TODO rm OBSOLETE

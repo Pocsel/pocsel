@@ -17,26 +17,26 @@ namespace Server { namespace Network {
     class PacketCreator
     {
     public:
-        static Common::Packet* LoggedIn(bool success,
+        static std::unique_ptr<Common::Packet> LoggedIn(bool success,
                                         std::string const& reason = "",
                                         std::string const& worldIdentifier = "",
                                         std::string const& worldName = "",
                                         Uint32 worldVersion = 0,
                                         Chunk::CubeType nbCubeTypes = 0);
 
-        static Common::Packet* Ping(Uint64 timestamp);
+        static std::unique_ptr<Common::Packet> Ping(Uint64 timestamp);
 
-        static Common::Packet* Chunk(::Server::Chunk const& chunk);
+        static std::unique_ptr<Common::Packet> Chunk(::Server::Chunk const& chunk);
 
-        static Common::Packet* NeededResourceIds(std::vector<Uint32>& ids,
+        static std::unique_ptr<Common::Packet> NeededResourceIds(std::vector<Uint32>& ids,
                                                  Uint32& offset);
 
-        static Common::Packet* ResourceRange(Common::Resource const& resource,
+        static std::unique_ptr<Common::Packet> ResourceRange(Common::Resource const& resource,
                                              Uint32 offset);
 
-        static Common::Packet* CubeType(Common::CubeType const& cubeType);
+        static std::unique_ptr<Common::Packet> CubeType(Common::CubeType const& cubeType);
 
-        static Common::Packet* TeleportPlayer(Common::Position const& pos);
+        static std::unique_ptr<Common::Packet> TeleportPlayer(Common::Position const& pos);
     };
 
 }}

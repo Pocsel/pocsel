@@ -9,6 +9,7 @@
 #include "server2/game/Game.hpp"
 #include "server2/game/World.hpp"
 
+#include "server2/network/ClientConnection.hpp"
 #include "server2/network/PacketCreator.hpp"
 
 namespace Server { namespace ClientManagement {
@@ -54,7 +55,7 @@ namespace Server { namespace ClientManagement {
     {
         if (client.GetLogin() != "")
         {
-            client.SendPacket(Network::PacketCreator::LoggedIn(false, "Already logged in"));
+            client.SendPacket(std::move(Network::PacketCreator::LoggedIn(false, "Already logged in")));
             return;
         }
 
@@ -72,17 +73,17 @@ namespace Server { namespace ClientManagement {
         }
 
         client.SetLogin(login2);
-        client.SendPacket(Network::PacketCreator::LoggedIn(true,
-                          "",
-                          this->_server.GetGame().GetWorld().GetIdentifier(),
-                          this->_server.GetGame().GetWorld().GetFullname(),
-                          this->_server.GetGame().GetWorld().GetVersion(),
-                          static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
-                         );
+        client.SendPacket(std::move(Network::PacketCreator::LoggedIn(true,
+            "",
+            this->_server.GetGame().GetWorld().GetIdentifier(),
+            this->_server.GetGame().GetWorld().GetFullname(),
+            this->_server.GetGame().GetWorld().GetVersion(),
+            static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
+            ));
 
         Tools::log << "Client logged in: " << login2 << "\n";
 
-//        client.Spawn(this->_game.GetWorld().GetDefaultMap());
+        //        client.Spawn(this->_game.GetWorld().GetDefaultMap());
         // TODO
         // spawn = créer le player, le foutre dans la game etc .. ?
     }
@@ -109,7 +110,7 @@ namespace Server { namespace ClientManagement {
         return this->_nextId++;
     }
 
-    void ClientManager::_HandleNewClient(Network::ClientConnection* clientConnection)
+    void ClientManager::_HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection)
     {
         Uint32 id = this->_GetNextId();
         while (this->_clients.find(id) != this->_clients.end())
@@ -117,7 +118,12 @@ namespace Server { namespace ClientManagement {
             Tools::log << "Client id " << id << " already taken.\n";
             id = this->_GetNextId();
         }
+        clientConnection->SetCallbacks(std::bind(&ClientManager::HandleClientError, this, id),
+                                       std::bind(&ClientManager::HandlePacket, this, id, std::placeholders::_1)
+                                      );
+
         Client* newClient = new Client(id, clientConnection);
+
         this->_clients[id] = newClient;
 
         Tools::log << "New client: " << id << "\n";
@@ -167,7 +173,7 @@ namespace Server { namespace ClientManagement {
             return ;
         }
 
-        this->_clients[clientId]->SendPacket(packet);
+        this->_clients[clientId]->SendPacket(std::unique_ptr<Common::Packet>(packet));
     }
 
     void ClientManager::_SendChunk(Uint32 clientId, Chunk const& chunk)
@@ -177,7 +183,7 @@ namespace Server { namespace ClientManagement {
             return ;
         }
 
-        this->_clients[clientId]->SendPacket(Network::PacketCreator::Chunk(chunk));
+        this->_clients[clientId]->SendPacket(std::move(Network::PacketCreator::Chunk(chunk)));
     }
 
     void ClientManager::_ClientTeleport(Uint32 clientId, Common::Position const& position)
@@ -188,7 +194,7 @@ namespace Server { namespace ClientManagement {
             return ;
         }
 
-        this->_clients[clientId]->SendPacket(Network::PacketCreator::TeleportPlayer(position));
+        this->_clients[clientId]->SendPacket(std::move(Network::PacketCreator::TeleportPlayer(position)));
 
         // TODO passer le client en mode teleport (il n'existe plus dans le monde)
     }

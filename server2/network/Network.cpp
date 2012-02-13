@@ -8,11 +8,12 @@
 
 namespace Server { namespace Network {
 
-    Network::Network(Server& server) :
+    Network::Network(Server& server, NewConnectionHandler newConnectionHandler) :
         _server(server),
+        _newConnectionHandler(newConnectionHandler),
         _ioService(),
         _acceptor(this->_ioService),
-        _newConnection()
+        _newConnection(0)
     {
         Tools::debug << "Network::Network()\n";
         Settings const& settings = server.GetSettings();
@@ -66,14 +67,16 @@ namespace Server { namespace Network {
         if (!e)
         {
             Tools::log << "New connection.\n";
-            ClientConnection* newClientConnection = new ClientConnection(this->_newConnection, this->_server.GetClientManager());
-            this->_server.GetClientManager().HandleNewClient(newClientConnection);
-            this->_ConnectAccept();
+            boost::shared_ptr<ClientConnection> newClientConnection(new ClientConnection(this->_newConnection));
+            this->_newConnectionHandler(newClientConnection);
         }
         else
         {
             Tools::error << "New connection has error.\n";
+            Tools::Delete(this->_newConnection);
         }
+
+        this->_ConnectAccept();
     }
 
     void Network::Run()

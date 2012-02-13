@@ -11,9 +11,7 @@
 
 namespace Server { namespace Network {
 
-    ClientConnection::ClientConnection(boost::asio::ip::tcp::socket* socket,
-                                       ClientManagement::ClientManager& clientManager) :
-        _clientManager(clientManager),
+    ClientConnection::ClientConnection(boost::asio::ip::tcp::socket* socket) :
         _ioService(socket->get_io_service()),
         _socket(std::move(socket)),
         _data(new Uint8[_bufferSize]),
@@ -22,7 +20,8 @@ namespace Server { namespace Network {
         _toRead(0),
         _connected(true),
         _writeConnected(false),
-        _clientId(0)
+        _errorCallback(0),
+        _packetCallback(0)
     {
         assert(this->_socket);
     }
@@ -33,9 +32,10 @@ namespace Server { namespace Network {
         Tools::Delete(this->_socket);
     }
 
-    void ClientConnection::SetClientId(Uint32 id)
+    void ClientConnection::SetCallbacks(ErrorCallback errorCallback, PacketCallback packetCallback)
     {
-        this->_clientId = id;
+        this->_errorCallback = errorCallback;
+        this->_packetCallback = packetCallback;
     }
 
     void ClientConnection::_Shutdown()
@@ -51,11 +51,11 @@ namespace Server { namespace Network {
 
     void ClientConnection::_HandleError(boost::system::error_code const& error)
     {
-        Tools::log << "ClientConnection error: " << error << ": " << error.message() << "(client " << this->_clientId << ")\n";
+        Tools::log << "ClientConnection error: " << error << ": " << error.message() << "\n";
         if (this->_connected)
         {
             this->_Shutdown();
-            this->_clientManager.HandleClientError(this->_clientId);
+            this->_errorCallback();
         }
     }
 
@@ -119,7 +119,7 @@ namespace Server { namespace Network {
         }
 
         for (auto it = packets.begin(), ite = packets.end(); it != ite; ++it)
-            this->_clientManager.HandlePacket(this->_clientId, it->release());
+            this->_packetCallback(std::move(*it));
     }
 
     void ClientConnection::_ConnectRead()
@@ -143,7 +143,7 @@ namespace Server { namespace Network {
         std::unique_ptr<Common::Packet> packet(packet_);
         if (!this->_connected || !this->_socket)
         {
-            Tools::debug << "Socket already down (client " << this->_clientId << ")\n";
+            Tools::debug << "Socket already down (client " << "\n";
             return;
         }
         this->_toSendPackets.push(std::move(packet));
@@ -168,7 +168,8 @@ namespace Server { namespace Network {
 
     void ClientConnection::_ConnectWrite()
     {
-        assert(this->_clientId != 0 && "need un clientId");
+        assert(this->_errorCallback != 0 && "need une ErrorCallback");
+        assert(this->_packetCallback != 0 && "need une PacketCallback");
         if (!this->_connected || !this->_socket)
             return;
 
