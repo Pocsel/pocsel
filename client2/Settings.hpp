@@ -3,12 +3,16 @@
 
 namespace Client {
 
-    struct Settings
+    class Settings
     {
-        Settings(int ac, char** av);
-        unsigned int fps;
-        std::string host;
+    public:
         std::string port;
+        std::string host;
+        boost::filesystem::path confdir;
+        int fps;
+
+    public:
+        Settings(int ac, char** av);
     };
 
 }

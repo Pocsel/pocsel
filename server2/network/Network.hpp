@@ -15,14 +15,18 @@ namespace Server { namespace Network {
     class Network :
         private boost::noncopyable
     {
+    public:
+        typedef std::function<void(boost::shared_ptr<ClientConnection>)> NewConnectionHandler;
+
     private:
         Server& _server;
+        NewConnectionHandler _newConnectionHandler;
         boost::asio::io_service _ioService;
         boost::asio::ip::tcp::acceptor _acceptor;
         boost::asio::ip::tcp::socket* _newConnection;
 
     public:
-        Network(Server& server);
+        Network(Server& server, NewConnectionHandler newConnectionHandler);
         ~Network();
 
         void Run();

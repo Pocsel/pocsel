@@ -57,7 +57,7 @@ namespace Server { namespace ClientManagement {
         void Start();
         void Stop();
 
-        void HandleNewClient(Network::ClientConnection* clientConnection)
+        void HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection)
         {
             this->_PushMessage(std::bind(&ClientManager::_HandleNewClient, this, clientConnection));
         }
@@ -65,13 +65,13 @@ namespace Server { namespace ClientManagement {
         {
             this->_PushMessage(std::bind(&ClientManager::_HandleClientError, this, clientId));
         }
-        void HandlePacket(Uint32 clientId, Common::Packet* packet)
+        void HandlePacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet)
         {
-            this->_PushMessage(std::bind(&ClientManager::_HandlePacket, this, clientId, packet));
+            this->_PushMessage(std::bind(&ClientManager::_HandlePacket, this, clientId, packet.release()));
         }
-        void SendPacket(Uint32 clientId, Common::Packet* packet)
+        void SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet)
         {
-            this->_PushMessage(std::bind(&ClientManager::_SendPacket, this, clientId, packet));
+            this->_PushMessage(std::bind(&ClientManager::_SendPacket, this, clientId, packet.release()));
         }
         void SendChunk(Uint32 clientId, Chunk const& chunk)
         {
@@ -91,7 +91,7 @@ namespace Server { namespace ClientManagement {
 
     private:
         Uint32 _GetNextId();
-        void _HandleNewClient(Network::ClientConnection* clientConnection);
+        void _HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection);
         void _HandleClientError(Uint32 clientId);
         void _HandlePacket(Uint32 clientId, Common::Packet* packet);
         void _SendPacket(Uint32 clientId, Common::Packet* packet);

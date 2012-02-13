@@ -2,11 +2,15 @@
 #define __SERVER_CLIENTMANAGEMENT_CLIENT_HPP__
 
 namespace Common {
+
     class Packet;
+
 }
 
 namespace Server { namespace Network {
+
         class ClientConnection;
+
 }}
 
 namespace Server { namespace ClientManagement {
@@ -21,10 +25,10 @@ namespace Server { namespace ClientManagement {
         std::string _login;
 
     public:
-        Client(Uint32 id, Network::ClientConnection* connection);
+        Client(Uint32 id, boost::shared_ptr<Network::ClientConnection> connection);
         ~Client();
 
-        void SendPacket(Common::Packet* packet);
+        void SendPacket(std::unique_ptr<Common::Packet> packet);
 
         void SetLogin(std::string const& login);
         std::string const& GetLogin() const { return this->_login; }
