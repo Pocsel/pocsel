@@ -1,6 +1,7 @@
 #include "common/constants.hpp"
 
 #include "server/Server.hpp"
+#include "server/Settings.hpp"
 
 static Server::Server* server = 0;
 
@@ -24,7 +25,7 @@ BOOL WINAPI ConsoleControlHandler(DWORD control)
 }
 #endif
 
-int main(int ac, char *av[])
+int main(int ac, char **av)
 {
 #ifndef WIN32
     (void) ::signal(SIGINT, sigint);
@@ -32,7 +33,8 @@ int main(int ac, char *av[])
     SetConsoleCtrlHandler(ConsoleControlHandler, true);
 #endif
 
-    server = new Server::Server(ac, av);
+    Server::Settings settings(ac, av);
+    server = new Server::Server(settings);
     int res;
     try
     {
