@@ -7,8 +7,10 @@
 
 namespace Client {
 
-    Settings::Settings(int ac, char** av)
-        : fps(60)
+    Settings::Settings(int ac, char** av) :
+        fps(60),
+        chunkCacheDistance(5),
+        nickname("Player")
     {
         boost::program_options::options_description options("Options");
         options.add_options()
