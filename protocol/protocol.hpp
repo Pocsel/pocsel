@@ -118,6 +118,7 @@ namespace Protocol {
         CubeType,
 
         /**
+         * String Map
          * Position pos
          */
         TeleportPlayer,
