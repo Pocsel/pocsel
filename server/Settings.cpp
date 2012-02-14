@@ -15,7 +15,7 @@ namespace Server {
              "Path to a " PROJECT_NAME " world file")
             ("port,p", boost::program_options::value<std::string>()->default_value("8173"),
              "On which port to listen")
-            ("host", boost::program_options::value<std::string>()->default_value("0"),
+            ("host", boost::program_options::value<std::string>()->default_value("0.0.0.0"),
              "On which address to bind")
             ("version,v",
              "Show version and exit")

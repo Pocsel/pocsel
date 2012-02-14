@@ -107,12 +107,14 @@ namespace Client {
                     Tools::debug << "LoadingChunks...\n";
                     this->_state = LoadingChunks;
                     // TODO:
-                    //this->_network.SendPacket(Network::PacketCreator::Settings());
+                    this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
                 }
                 break;
             case LoadingChunks:
                 break;
             case Running:
+                this->_game->Update();
+                this->_game->Render();
                 break;
             case Disconnected:
                 break;
