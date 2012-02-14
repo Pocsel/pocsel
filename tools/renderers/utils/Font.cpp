@@ -48,7 +48,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         : _renderer(renderer),
         _data(new FontData())
     {
-        Font::_InitShaders(renderer);
         if (auto error = ::FT_New_Face(ftlibrary.library, name.c_str(), 0, &this->_data->face))
             throw std::runtime_error("FT_New_Face failed (error: " + ToString(error) + ")");
         ::FT_Set_Char_Size(this->_data->face, static_cast<FT_F26Dot6>(fontSize * 64), static_cast<FT_F26Dot6>(fontSize * 64), 96, 96);
@@ -59,7 +58,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         : _renderer(renderer),
         _data(new FontData())
     {
-        Font::_InitShaders(renderer);
         if (auto error = ::FT_New_Memory_Face(ftlibrary.library, (FT_Byte const*)data, static_cast<FT_Long>(dataLength), 0, &this->_data->face))
             throw std::runtime_error("FT_New_Face failed (error: " + ToString(error) + ")");
         ::FT_Set_Char_Size(this->_data->face, static_cast<FT_F26Dot6>(fontSize * 64), static_cast<FT_F26Dot6>(fontSize * 64), 96, 96);
@@ -198,7 +196,7 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     }
 
-    void Font::Render(std::string const& text, Color4f const& color, bool invert)
+    void Font::Render(IShaderParameter& textureParameter, std::string const& text, bool invert)
     {
         float* vertices = new float[text.length() * 5 * 4];
         unsigned short* indices = new unsigned short[text.length() * 6];
@@ -279,24 +277,14 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_texture->Bind();
         this->_vertexBuffer->Bind();
 
-        Font::_shaderTexture->Set(*this->_texture);
-        Font::_shaderColor->Set(color);
-        Font::_shaderMultZ->Set(1.0f);
+        textureParameter.Set(*this->_texture);
 
-        do
-        {
-            Font::_shader->BeginPass();
-            this->_renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, indices);
-        } while (Font::_shader->EndPass());
+        this->_renderer.UpdateCurrentParameters();
+        this->_renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, indices);
         if (invert)
         {
-            Font::_shaderMultZ->Set(-1.0f);
             _InvertIndices(indiceValue * 6 / 4, invertedIndices);
-            do
-            {
-                Font::_shader->BeginPass();
-                this->_renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, invertedIndices);
-            } while (Font::_shader->EndPass());
+            this->_renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, invertedIndices);
         }
         this->_vertexBuffer->Unbind();
         this->_texture->Unbind();
@@ -304,78 +292,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         delete [] vertices;
         delete [] indices;
         delete [] invertedIndices;
-    }
-
-#ifdef DEBUG
-
-    namespace {
-        Renderers::IVertexBuffer& _CreateVB(IRenderer& renderer)
-        {
-            auto vb = renderer.CreateVertexBuffer().release();
-            float vertices[4 * 5];
-            int i = 0;
-            //              X                  Y                  Z                  U                  V
-            vertices[i++] = 1; vertices[i++] = 0; vertices[i++] = 0.001f; vertices[i++] = 1; vertices[i++] = 0;
-            vertices[i++] = 0; vertices[i++] = 0; vertices[i++] = 0.001f; vertices[i++] = 0; vertices[i++] = 0;
-            vertices[i++] = 1; vertices[i++] = 1; vertices[i++] = 0.001f; vertices[i++] = 1; vertices[i++] = 1;
-            vertices[i++] = 0; vertices[i++] = 1; vertices[i++] = 0.001f; vertices[i++] = 0; vertices[i++] = 1;
-            i = 0;
-            vb->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Position, 3);
-            vb->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::TexCoord, 2);
-            vb->SetData(4 * 5 * sizeof(float), vertices, Renderers::VertexBufferUsage::Dynamic);
-            return *vb;
-        }
-    }
-
-    void Font::RenderTextureDebug()
-    {
-        if (!this->_texture)
-            return;
-        static auto& quad = _CreateVB(this->_renderer);
-
-        Vector2f size((float)this->_texture->GetSize().x, (float)this->_texture->GetSize().y);
-        quad.SetSubData(0*sizeof(float),  sizeof(float), &size.x);
-        quad.SetSubData(10*sizeof(float), 2*sizeof(float), size.coords);
-        quad.SetSubData(16*sizeof(float), sizeof(float), &size.y);
-
-        this->_texture->Bind();
-        quad.Bind();
-
-        Font::_shaderTexture->Set(*this->_texture);
-        Font::_shaderColor->Set(Color4f(1, 1, 1, 1));
-        Font::_shaderMultZ->Set(1.0f);
-
-        do
-        {
-            Font::_shader->BeginPass();
-            this->_renderer.DrawVertexBuffer(0, 4, Renderers::DrawingMode::TrianglesStrip);
-        } while (Font::_shader->EndPass());
-
-        this->_texture->Unbind();
-        quad.Unbind();
-    }
-
-#endif
-
-    // Static part
-    Renderers::IShaderProgram* Font::_shader = 0;
-    Renderers::IShaderParameter* Font::_shaderTexture = 0;
-    Renderers::IShaderParameter* Font::_shaderColor = 0;
-    Renderers::IShaderParameter* Font::_shaderMultZ = 0;
-
-    void Font::_InitShaders(IRenderer& renderer)
-    {
-        if (Font::_shader != 0)
-            return;
-        // TODO: trouver un moyen de gérer ce type de resources (utile avant une connexion à une partie donc pas de ResourceManager)
-        // TODO: Faire une seconde classe ou gérer le shader dans la font pour la possibilité d'avoir un shader différent par font
-        std::ifstream t(RESOURCES_DIR "/Fonts.cgfx");
-        std::string shader((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-
-        Font::_shader = renderer.CreateProgram(shader).release();
-        Font::_shaderTexture = Font::_shader->GetParameter("fontTex").release();
-        Font::_shaderColor = Font::_shader->GetParameter("color").release();
-        Font::_shaderMultZ = Font::_shader->GetParameter("multZ").release();
     }
 
 }}}

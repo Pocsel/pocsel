@@ -20,6 +20,7 @@ namespace Tools { namespace Renderers {
             virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier);
             virtual void SetParameterUsage(std::string const&, ShaderParameterUsage::Type) {}
             virtual void UpdateParameter(ShaderParameterUsage::Type usage);
+            virtual void UpdateCurrentPass() {}
             virtual void BeginPass();
             virtual bool EndPass();
         };
