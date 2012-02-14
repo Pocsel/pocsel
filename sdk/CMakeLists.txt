@@ -23,8 +23,9 @@ MakePlugin(base_plugin "base.tcplug" "Pocsel base plugin" "base" "${CMAKE_CURREN
 # ---------
 
 set(plugin_installer "${CMAKE_CURRENT_SOURCE_DIR}/plugin_installer.py")
-set(world_file "dev.tcworld")
-set(world_dest_dir "${dev_conf_dir}/server")
+set(world_file "default_world.tcworld")
+set(world_dest_dir "${dev_conf_dir}/server/default_world")
+file(MAKE_DIRECTORY ${world_dest_dir})
 set(world_dest_file "${world_dest_dir}/${world_file}")
 set(world_source_dir ${plugins_dest_dir})
 file(GLOB_RECURSE world_source_files "${world_source_dir}/*")

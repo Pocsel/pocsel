@@ -6,12 +6,13 @@ namespace Server {
     class Settings
     {
     public:
-        std::string worldFile;
+        boost::filesystem::path worldFile;
+        boost::filesystem::path worldDir;
         std::string host;
-        Uint16 port;
+        std::string port;
 
     public:
-        Settings(int ac, char* av[]);
+        Settings(int ac, char** av);
     };
 
 }

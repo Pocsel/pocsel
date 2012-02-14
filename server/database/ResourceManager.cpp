@@ -16,7 +16,7 @@ namespace Server { namespace Database {
     ResourceManager::ResourceManager(Server& server) :
         _server(server)
     {
-        this->_connectionPool = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(server.GetSettings().worldFile);
+        this->_connectionPool = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(server.GetSettings().worldFile.string());
 
         auto conn = this->_connectionPool->GetConnection();
         auto& curs = conn->GetCursor();
