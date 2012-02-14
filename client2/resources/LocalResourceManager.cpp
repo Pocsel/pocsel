@@ -41,14 +41,14 @@ namespace Client { namespace Resources {
         {
             try
             {
-                auto fontPath = (this->_client.GetSettings().confdir / "fonts" / path).string();
+                auto fontPath = (this->_client.GetSettings().confDir / "fonts" / path).string();
                 auto font = new Tools::Renderers::Utils::Font(this->_renderer, fontPath, size);
                 this->_fonts[fontId] = font;
                 return *font;
             }
             catch (std::exception& ex)
             {
-                Tools::error << "Can't load shader \"" << path << "\", details: " << ex.what() << "\n";
+                Tools::error << "Can't load font \"" << path << "\", details: " << ex.what() << "\n";
                 throw;
             }
         }
@@ -64,7 +64,7 @@ namespace Client { namespace Resources {
             Tools::Renderers::ITexture2D* texture = 0;
             try
             {
-                texture = this->_renderer.CreateTexture2D((this->_client.GetSettings().confdir / "textures" / path).string()).release();
+                texture = this->_renderer.CreateTexture2D((this->_client.GetSettings().confDir / "textures" / path).string()).release();
             }
             catch (std::exception& ex)
             {
@@ -85,7 +85,7 @@ namespace Client { namespace Resources {
         {
             try
             {
-                std::ifstream tmp((this->_client.GetSettings().confdir / "shaders" / path).string());
+                std::ifstream tmp((this->_client.GetSettings().confDir / "shaders" / path).string());
                 std::string shaderString((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
                 auto shader = this->_renderer.CreateProgram(shaderString).release();
                 this->_shaders[path] = shader;

@@ -11,19 +11,22 @@
 #include "client2/resources/ResourceDownloader.hpp"
 #include "client2/resources/ResourceManager.hpp"
 
+#include "common/constants.hpp"
+
 namespace Client { namespace Resources {
 
-    CacheDatabaseProxy::CacheDatabaseProxy(std::string const& host,
+    CacheDatabaseProxy::CacheDatabaseProxy(boost::filesystem::path const& cacheDir,
+                                           std::string const& host,
                                            std::string const& worldIdentifier,
                                            std::string const& worldName,
-                                           Uint32 worldVersion)
-        : _worldVersion(0),
+                                           Uint32 worldVersion) :
+        _worldVersion(0),
         _connectionPool(0),
         _cacheVersion(0)
     {
         this->_worldVersion = worldVersion;
         this->_worldName = worldName;
-        std::string cacheFile = CACHE_DIR "/" + host + "-" + worldIdentifier + ".tccache";
+        std::string cacheFile = (cacheDir / (host + "-" + worldIdentifier + "." + Common::CacheFileExt)).string();
         this->_CheckCacheFile(cacheFile);
 
         this->_connectionPool = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(cacheFile);
@@ -89,7 +92,7 @@ namespace Client { namespace Resources {
     {
         if (!this->_connectionPool)
         {
-            std::cerr << "CacheDatabaseProxy::AddResource: Adding resource to an unloaded cache." << std::endl;
+            Tools::error << "CacheDatabaseProxy::AddResource: Adding resource to an unloaded cache.\n";
             return;
         }
         auto conn = this->_connectionPool->GetConnection();

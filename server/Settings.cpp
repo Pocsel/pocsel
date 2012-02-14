@@ -4,6 +4,7 @@
 #include "server/Settings.hpp"
 #include "ProgramInfo.hpp"
 #include "common/ConfDir.hpp"
+#include "common/constants.hpp"
 
 namespace Server {
 
@@ -11,7 +12,7 @@ namespace Server {
     {
         boost::program_options::options_description options("Options");
         options.add_options()
-            ("world,w", boost::program_options::value<std::string>()->default_value(Common::ConfDir::Server().string() + "/default_world/default_world.tcworld"),
+            ("world,w", boost::program_options::value<std::string>()->default_value(Common::ConfDir::Server().string() + "/default_world/default_world." + Common::WorldFileExt),
              "Path to a " PROJECT_NAME " world file")
             ("port,p", boost::program_options::value<std::string>()->default_value("8173"),
              "On which port to listen")

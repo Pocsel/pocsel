@@ -7,6 +7,7 @@
 #include "client2/resources/ResourceDownloader.hpp"
 #include "client2/resources/ResourceManager.hpp"
 #include "client2/window/Window.hpp"
+#include "client2/Settings.hpp"
 
 #include "tools/IRenderer.hpp"
 
@@ -14,8 +15,8 @@
 
 namespace Client { namespace Resources {
 
-    ResourceManager::ResourceManager(Client& client, std::string const& host, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion)
-        : _database(host, worldIdentifier, worldName, worldVersion),
+    ResourceManager::ResourceManager(Client& client, std::string const& host, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion) :
+        _database(client.GetSettings().cacheDir, host, worldIdentifier, worldName, worldVersion),
         _downloader(_database, client.GetNetwork()),
         _renderer(client.GetWindow().GetRenderer())
     {
