@@ -77,7 +77,7 @@ set(pocsel_base_dir "${CMAKE_BINARY_DIR}/pocsel")
 set(pocsel_binaries_dir "${pocsel_base_dir}/binaries")
 set(pocsel_server_dir "${pocsel_base_dir}/server")
 set(pocsel_client_dir "${pocsel_base_dir}/client")
-set(EXECUTABLE_OUTPUT_PATH ${pocsel_binaries_dir})
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
 macro(enable_pch target target_src)
     list(REMOVE_ITEM ${target_src} precompiled.cpp)

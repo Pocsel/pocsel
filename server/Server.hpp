@@ -2,31 +2,18 @@
 #define __SERVER_SERVER_HPP__
 
 namespace Server {
-
     namespace Network {
-
         class Network;
-
     }
-
     namespace Database {
-
         class ResourceManager;
-
     }
-
     namespace ClientManagement {
-
         class ClientManager;
-
     }
-
     namespace Game {
-
         class Game;
-
     }
-
 }
 
 namespace Server {
@@ -37,18 +24,18 @@ namespace Server {
         private boost::noncopyable
     {
     private:
-        Settings* _settings;
+        Settings& _settings;
         Network::Network* _network;
         Database::ResourceManager* _resourceManager;
         ClientManagement::ClientManager* _clientManager;
         Game::Game* _game;
 
     public:
-        Server(int ac, char *av[]);
+        Server(Settings& settings);
         ~Server();
         int Run();
         void Stop();
-        Settings const& GetSettings() const { return *this->_settings; }
+        Settings const& GetSettings() const { return this->_settings; }
         Database::ResourceManager const& GetResourceManager() const { return *this->_resourceManager; }
         Database::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
         ClientManagement::ClientManager const& GetClientManager() const { return *this->_clientManager; }
