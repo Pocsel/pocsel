@@ -208,10 +208,14 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         double xx, yy, zz;
         Chunk* nuChunk = new Chunk(coords);
 
-        double* results = new double [this->_equations.size()];
-        bool* results_done = new bool [this->_equations.size()];
-        for (unsigned int i = 0 ; i < this->_equations.size() ; ++i)
-            results_done[i] = false;
+        double* results = new double[this->_equations.size() * Common::ChunkSize3];
+
+        xx = (double)((int)coords.x - (1 << 21));
+        zz = (double)((int)coords.z - (1 << 21));
+        yy = (double)((int)coords.y - (1 << 19));
+
+        for (unsigned int i = 0; i < this->_equations.size(); ++i)
+            this->_equations[i]->Calc(xx, yy, zz, results + (i * Common::ChunkSize3));
 
         for (x = 0 ; x < Common::ChunkSize ; ++x)
         {
@@ -219,25 +223,26 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
             for (z = 0 ; z < Common::ChunkSize ; ++z)
             {
                 zz = (double)((int)coords.z - (1 << 21)) + (double)z / Common::ChunkSize;
-
                 for (y = 0 ; y < Common::ChunkSize ; ++y)
                 {
                     yy = (double)((int)coords.y - (1 << 19)) + (double)y / Common::ChunkSize;
-
                     for (auto it = this->_cubes.begin(),
-                            ite = this->_cubes.end() ; it != ite ; ++it)
+                         ite = this->_cubes.end() ; it != ite ; ++it)
                     {
-
                         auto const& validations = (*it)->GetValidations();
                         bool check = true;
                         for (auto vit = validations.begin(), vite = validations.end(); vit != vite; ++vit)
                         {
-                            if (!results_done[vit->equationIndex])
-                            {
-                                results_done[vit->equationIndex] = true;
-                                results[vit->equationIndex] = this->_equations[vit->equationIndex]->Calc(xx, yy, zz);
-                            }
-                            if (!vit->validator->Check(xx, yy, zz, results[vit->equationIndex]))
+//                            if (!results_done[vit->equationIndex])
+//                            {
+//                                results_done[vit->equationIndex] = true;
+//                                results[vit->equationIndex] = this->_equations[vit->equationIndex]->Calc(xx, yy, zz);
+//                            }
+
+                            if (!vit->validator->Check(xx, yy, zz, results[vit->equationIndex * Common::ChunkSize3 +
+                                                                           x * Common::ChunkSize2 +
+                                                                           z * Common::ChunkSize +
+                                                                           y]))
                             {
                                 check = false;
                                 break;
@@ -251,16 +256,16 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
                     }
 
                     // reinit tout si il faut, sinon juste les 3D
-                    for (unsigned int i = 0 ; i < this->_equations.size() ; ++i)
-                    {
-                        if (y == Common::ChunkSize - 1 || !this->_equations[i]->Is2D())
-                            results_done[i] = false;
-                    }
+//                    for (unsigned int i = 0 ; i < this->_equations.size() ; ++i)
+//                    {
+//                        if (y == Common::ChunkSize - 1 || !this->_equations[i]->Is2D())
+//                            results_done[i] = false;
+//                    }
                 }
             }
         }
 
-        Tools::DeleteTab(results_done);
+//        Tools::DeleteTab(results_done);
         Tools::DeleteTab(results);
 
         callback(nuChunk);

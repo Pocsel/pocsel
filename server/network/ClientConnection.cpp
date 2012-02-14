@@ -143,7 +143,7 @@ namespace Server { namespace Network {
         std::unique_ptr<Common::Packet> packet(packet_);
         if (!this->_connected || !this->_socket)
         {
-            Tools::debug << "Socket already down (client " << "\n";
+            Tools::debug << "Socket already down\n";
             return;
         }
         this->_toSendPackets.push(std::move(packet));

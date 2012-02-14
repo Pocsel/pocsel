@@ -18,6 +18,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         double alpha;
         double beta;
         double n;
+        int ip;
+        int ipp;
 
     public:
         explicit EquationPerlin2(Perlin const& perlin, std::map<std::string, double> const& vals) :
@@ -29,7 +31,9 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             mul(123.5545),
             alpha(1.7),
             beta(2.0),
-            n(8)
+            n(8),
+            ip(0),
+            ipp(0)
         {
             if (vals.find("xn") != vals.end())
                 xn = vals.find("xn")->second;
@@ -47,22 +51,128 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 beta = vals.find("beta")->second;
             if (vals.find("n") != vals.end())
                 n = vals.find("n")->second;
+            if (vals.find("ip") != vals.end())
+            {
+                ip = vals.find("ip")->second + 0.1;
+                if (ip < 0)
+                    ip = 0;
+            }
+            if (vals.find("ipp") != vals.end())
+            {
+                ipp = vals.find("ipp")->second + 0.1;
+                if (ipp < 0)
+                    ipp = 0;
+            }
         }
 
-        virtual double Calc(double x, double, double z) const
+        //        virtual double Calc(double x, double, double z) const
+        //        {
+        //            return _perlin.Noise2D(x * xn + xa,
+        //                                   z * zn + za,
+        //                                   alpha,
+        //                                   beta,
+        //                                   n) * mul;
+        //        }
+        //
+        //        virtual bool Is2D() const
+        //        {
+        //            return true;
+        //        }
+        //
+        //        virtual bool ByChunkCalculation() const
+        //        {
+        //            return true;
+        //        }
+
+        virtual void Calc(double x, double, double z, double* res) const
         {
-            return _perlin.Noise2D(x * xn + xa,
-                                   z * zn + za,
-                                   alpha,
-                                   beta,
-                                   n) * mul;
-        }
+            unsigned int ix, iz, iy;
+            double xx, zz, p;
 
-        virtual bool Is2D() const
-        {
-            return true;
-        }
+            if (ipp == 0)
+            {
+                for (ix = 0; ix < Common::ChunkSize; ++ix)
+                {
+                    xx = x + (double)ix / Common::ChunkSize;
+                    for (iz = 0; iz < Common::ChunkSize; ++iz)
+                    {
+                        zz = z + (double)iz / Common::ChunkSize;
+                        p = _perlin.Noise2D(xx * xn + xa,
+                                            zz * zn + za,
+                                            alpha,
+                                            beta,
+                                            n) * mul;
 
+                        for (iy = 0; iy < Common::ChunkSize; ++iy)
+                            *res++ = p;
+                    }
+                }
+                return;
+            }
+
+            for (ix = ipp / 2; ix < Common::ChunkSize; ix += 1 + ipp)
+            {
+                xx = x + (double)ix / Common::ChunkSize;
+                for (iz = ipp / 2; iz < Common::ChunkSize; iz += 1 + ipp)
+                {
+                    zz = z + (double)iz / Common::ChunkSize;
+                    p = _perlin.Noise2D(xx * xn + xa,
+                                        zz * zn + za,
+                                        alpha,
+                                        beta,
+                                        n) * mul;
+                    res[ix * Common::ChunkSize2 + iz * Common::ChunkSize] = p;
+                }
+            }
+
+            // INTERPOLATION
+
+            int x0, x1, xc;
+            int z0, z1, zc;
+            int ipp1 = ipp + 1;
+
+#define SET_0_1_C(ix, x0, x1, xc) \
+            do { \
+                if ((int)ix % ipp1 == ipp / 2) \
+                { \
+                    x0 = ix; \
+                    if (ix + ipp1 >= Common::ChunkSize) \
+                    x1 = ix; \
+                    else \
+                    x1 = ix + ipp1; \
+                    xc = x0; \
+                } \
+                else \
+                { \
+                    if ((int)ix % ipp1 < ipp1 / 2) \
+                    xc = x1; \
+                    else \
+                    xc = x0; \
+                } \
+            } while (0);
+
+            x0 = ipp / 2;
+            x1 = ipp / 2;
+            for (ix = 0; ix < Common::ChunkSize; ++ix)
+            {
+                SET_0_1_C(ix, x0, x1, xc);
+
+                z0 = ipp / 2;
+                z1 = ipp / 2;
+                for (iz = 0; iz < Common::ChunkSize; ++iz)
+                {
+                    SET_0_1_C(iz, z0, z1, zc);
+
+                    p = res[(xc) * Common::ChunkSize2 +
+                        (zc) * Common::ChunkSize];
+
+                    for (iy = 0; iy < Common::ChunkSize; ++iy)
+                        res[ix * Common::ChunkSize2 + iz * Common::ChunkSize + iy] = p;
+                }
+            }
+
+        }
+#undef SET_0_1_C
     };
 
 }}}}}

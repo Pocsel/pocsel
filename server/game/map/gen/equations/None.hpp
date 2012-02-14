@@ -13,14 +13,25 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         {
         }
 
-        virtual double Calc(double, double, double) const
-        {
-            return 0;
-        }
+//        virtual double Calc(double, double, double) const
+//        {
+//            return 0;
+//        }
+//
+//        virtual bool Is2D() const
+//        {
+//            return true;
+//        }
+//
+//        virtual bool ByChunkCalculation() const
+//        {
+//            return true;
+//        }
 
-        virtual bool Is2D() const
+        virtual void Calc(double, double, double, double* res) const
         {
-            return true;
+            for (unsigned int i = 0; i < Common::ChunkSize3; ++i)
+                *res++ = 0.0;
         }
     };
 

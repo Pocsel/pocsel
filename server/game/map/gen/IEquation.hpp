@@ -6,8 +6,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
     class IEquation
     {
     public:
-        virtual double Calc(double x, double y, double z) const = 0;
-        virtual bool Is2D() const = 0;
+//        virtual double Calc(double x, double y, double z) const = 0;
+//        virtual bool Is2D() const = 0;
+//        virtual bool ByChunkCalculation() const = 0;
+        virtual void Calc(double x, double y, double z, double* res) const = 0;
     };
 
 }}}}

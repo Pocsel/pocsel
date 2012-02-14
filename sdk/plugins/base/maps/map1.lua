@@ -13,7 +13,9 @@ equations = {
         mul = 123.5545,
         alpha = 1.7,
         beta = 2.0,
-        n = 8
+        n = 8,
+        ip = 0,
+        ipp = 7
     },
     perlin3_caves = {
         function_name = "perlin3",
@@ -26,7 +28,9 @@ equations = {
         mul = 1.0,
         alpha = 2.0,
         beta = 2.0,
-        n = 1
+        n = 1,
+        ip = 0,
+        ipp = 7
     },
     perlin3_iron = {
         function_name = "perlin3",
@@ -39,7 +43,9 @@ equations = {
         mul = 1.0,
         alpha = 2.0,
         beta = 2.0,
-        n = 1
+        n = 1,
+        ip = 0,
+        ipp = 7
     },
     none = {
         function_name = "none"
