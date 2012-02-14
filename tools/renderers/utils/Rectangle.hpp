@@ -8,15 +8,13 @@ namespace Tools { namespace Renderers { namespace Utils {
     class Rectangle
     {
     private:
-        static IVertexBuffer* _vertexBuffer;
-        static IShaderProgram* _shader;
-
         IRenderer& _renderer;
+        std::unique_ptr<IVertexBuffer> _vertexBuffer;
         Vector3<float> _point1, _point2, _point3, _point4;
         Color4f _point1Color, _point2Color, _point3Color, _point4Color;
 
     public:
-        Rectangle(IRenderer& renderer, Vector3<float> const& pt1, Vector3<float> const& pt2, Vector3<float> const& pt3, Vector3<float> const& pt4);
+        Rectangle(IRenderer& renderer);
         void Render();
 
         Vector3<float> const& GetPosition1() const { return this->_point1; }
@@ -34,17 +32,19 @@ namespace Tools { namespace Renderers { namespace Utils {
             this->_point2 = p2;
             this->_point3 = p3;
             this->_point4 = p4;
+            this->_RefreshVertexBuffer();
         }
-        void SetColor(Color4f const& c1, Color4f const& c2, Color4f const& c3, Color4f const& c4)
+        void SetColor(Color4f const& lt, Color4f const& rt, Color4f const& rb, Color4f const& lb)
         {
-            this->_point1Color = c1;
-            this->_point2Color = c2;
-            this->_point3Color = c3;
-            this->_point4Color = c4;
+            this->_point1Color = lt;
+            this->_point2Color = rt;
+            this->_point3Color = rb;
+            this->_point4Color = lb;
+            this->_RefreshVertexBuffer();
         }
         void SetColor(Color4f const& color) { this->SetColor(color, color, color, color); }
     private:
-        static void _InitRender(IRenderer& renderer);
+        void _RefreshVertexBuffer();
     };
 
 }}}

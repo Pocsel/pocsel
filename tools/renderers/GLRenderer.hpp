@@ -69,6 +69,7 @@ namespace Tools { namespace Renderers {
         virtual void BeginDraw(IRenderTarget* target);
         virtual void EndDraw();
 
+        virtual void UpdateCurrentParameters();
         virtual void DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode = DrawingMode::Triangles);
         virtual void DrawVertexBuffer(Uint32 offset, Uint32 count, DrawingMode::Type mode = DrawingMode::Triangles);
 

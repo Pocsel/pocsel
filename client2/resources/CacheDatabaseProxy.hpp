@@ -27,7 +27,8 @@ namespace Client { namespace Resources {
             Uint32 _cacheVersion;
 
         public:
-            CacheDatabaseProxy(std::string const& host,
+            CacheDatabaseProxy(boost::filesystem::path const& cacheDir,
+                               std::string const& host,
                                std::string const& worldIdentifier,
                                std::string const& worldName,
                                Uint32 worldVersion);

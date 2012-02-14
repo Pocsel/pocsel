@@ -1,6 +1,8 @@
 #include <boost/algorithm/string.hpp>
 
 #include "client2/window/InputBinder.hpp"
+#include "tools/lua/Interpreter.hpp"
+#include "tools/lua/Bind.hpp"
 
 namespace Client { namespace Window {
 
@@ -102,7 +104,19 @@ namespace Client { namespace Window {
 
     bool InputBinder::LoadFile(std::string const& path)
     {
-        return false;
+        try
+        {
+            Tools::Lua::Interpreter i;
+            i.Bind("bind", &InputBinder::Bind, this, std::placeholders::_1, std::placeholders::_2);
+            i.ExecFile(path);
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "Failed to load bindings file \"" << path << "\": " << e.what() << Tools::endl;
+            return false;
+        }
+        Tools::debug << "Bindings file \"" << path << "\" successfully loaded.\n";
+        return true;
     }
 
     bool InputBinder::Bind(std::string const& input, std::string const& action)

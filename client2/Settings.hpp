@@ -6,13 +6,22 @@ namespace Client {
     class Settings
     {
     public:
+        // CLI options
         std::string port;
         std::string host;
-        boost::filesystem::path confdir;
-        int fps;
+        boost::filesystem::path confDir;
+        boost::filesystem::path bindingsFile;
+        boost::filesystem::path settingsFile;
+        boost::filesystem::path cacheDir;
+        // settings.lua
+        unsigned int fps;
+        unsigned int chunkCacheDistance;
+        std::string nickname;
 
     public:
         Settings(int ac, char** av);
+    private:
+        void _ReadSettings();
     };
 
 }

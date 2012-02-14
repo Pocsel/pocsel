@@ -1,3 +1,5 @@
+#include "tools/precompiled.hpp"
+
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/IndexBuffer.hpp"
 #include "tools/renderers/opengl/ShaderProgramCg.hpp"
@@ -154,6 +156,12 @@ namespace Tools { namespace Renderers {
 
         this->_state = DrawNone;
         this->_currentProgram = 0;
+    }
+
+    void GLRenderer::UpdateCurrentParameters()
+    {
+        if (this->_currentProgram != 0)
+            this->_currentProgram->UpdateCurrentPass();
     }
 
     void GLRenderer::DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode)

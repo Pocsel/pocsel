@@ -26,6 +26,7 @@ bin
 *~
 build
 build_*
+!sdk/build
 *.swp
 *.manifest
 *.pch

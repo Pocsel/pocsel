@@ -8,8 +8,8 @@
 
 namespace Server {
 
-    Server::Server(int ac, char* av[]) :
-        _settings(new Settings(ac, av))
+    Server::Server(Settings& settings) :
+        _settings(settings)
     {
         Tools::debug << "Server::Server()\n";
         this->_resourceManager = new Database::ResourceManager(*this);
@@ -28,7 +28,6 @@ namespace Server {
         Tools::Delete(this->_clientManager);
         Tools::Delete(this->_resourceManager);
         Tools::Delete(this->_network);
-        Tools::Delete(this->_settings);
     }
 
     int Server::Run()

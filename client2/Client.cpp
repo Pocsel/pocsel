@@ -3,6 +3,7 @@
 #include "client2/Client.hpp"
 #include "client2/Settings.hpp"
 #include "client2/game/Game.hpp"
+#include "client2/resources/LocalResourceManager.hpp"
 #include "client2/window/sdl/Window.hpp"
 #include "client2/window/InputManager.hpp"
 #include "client2/network/Network.hpp"
@@ -25,7 +26,14 @@ namespace T {
 namespace {
     T::Font* font;
     T::Image* image;
+    Tools::Renderers::ITexture2D* texture;
     T::Rectangle* rectangle;
+    Tools::Renderers::IShaderProgram* fontEffect;
+    Tools::Renderers::IShaderParameter* fontColor;
+    Tools::Renderers::IShaderParameter* fontTexture;
+    Tools::Renderers::IShaderProgram* imgEffect;
+    Tools::Renderers::IShaderParameter* imgTexture;
+    Tools::Renderers::IShaderProgram* rectEffect;
     Tools::Timer totalTimer;
 }
 // XXX FIN EXAMPLE à virer
@@ -38,15 +46,24 @@ namespace Client {
         _game(0)
     {
         this->_window = new Window::Sdl::Window(*this);
+        this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
 
-        this->_window->GetInputManager().GetInputBinder().Bind("eScApE", "quiT");
-        this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
+        //this->_window->GetInputManager().GetInputBinder().Bind("eScApE", "quiT");
+        //this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
+        this->_window->GetInputManager().GetInputBinder().LoadFile(this->_settings.bindingsFile.string());
 
         // XXX EXAMPLE à virer
-        font = new T::Font(this->_window->GetRenderer(), RESOURCES_DIR "/DejaVuSerif-Italic.ttf", 10);
-        image = new T::Image(this->_window->GetRenderer(), RESOURCES_DIR "/default-painterly-pack/pack.png");
-        rectangle = new T::Rectangle(this->_window->GetRenderer(), Tools::Vector3f(0, 0, 0), Tools::Vector3f(1, 0, 0), Tools::Vector3f(1, 1, 0), Tools::Vector3f(0, 1, 0));
+        font = &this->_resourceManager->GetFont("DejaVuSerif-Italic.ttf", 16);
+        image = new T::Image(this->_window->GetRenderer());
+        texture = &this->_resourceManager->GetTexture2D("test.png");
+        rectangle = new T::Rectangle(this->_window->GetRenderer());
+        fontEffect = &this->_resourceManager->GetShader("Fonts.cgfx");
+        fontColor = fontEffect->GetParameter("color").release();
+        fontTexture = fontEffect->GetParameter("fontTex").release();
+        imgEffect = &this->_resourceManager->GetShader("BaseShaderTexture.cgfx");
+        imgTexture = imgEffect->GetParameter("baseTex").release();
+        rectEffect = &this->_resourceManager->GetShader("BaseShaderColor.cgfx");
         this->_window->GetRenderer().SetClearColor(Tools::Color4f(0.5f, 0.5f, 0.5f, 1));
         this->_window->RegisterCallback(
             [this](Tools::Vector2u const& s)
@@ -90,13 +107,14 @@ namespace Client {
                 {
                     Tools::debug << "LoadingChunks...\n";
                     this->_state = LoadingChunks;
-                    // TODO:
-                    //this->_network.SendPacket(Network::PacketCreator::Settings());
+                    this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
                 }
                 break;
             case LoadingChunks:
                 break;
             case Running:
+                this->_game->Update();
+                this->_game->Render();
                 break;
             case Disconnected:
                 break;
@@ -107,10 +125,22 @@ namespace Client {
             // XXX EXAMPLE à virer
             //this->_window->GetRenderer().Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
             this->_window->GetRenderer().BeginDraw2D();
+
             this->_window->GetRenderer().SetModelMatrix(Tools::Matrix4<float>::identity);
-            font->Render("Coucou !", Tools::Color4f(1, 1, 1, 1));
+            fontColor->Set(Tools::Color4f(1, 1, 1, 1));
+            do
+            {
+                fontEffect->BeginPass();
+                font->Render(*fontTexture, "Coucou !");
+            } while (fontEffect->EndPass());
+            // ----------
             this->_window->GetRenderer().SetModelMatrix(Tools::Matrix4<float>::CreateScale(20, 20, 1) * Tools::Matrix4<float>::CreateTranslation(0, 20, 0));
-            rectangle->Render();
+            do
+            {
+                rectEffect->BeginPass();
+                rectangle->Render();
+            } while (rectEffect->EndPass());
+            // ----------
             // Attention à l'ordre des multiplications !
             auto tmp = std::sin(0.0005f * totalTimer.GetElapsedTime()) * 20 + 200,
                 tmp2 = std::cos(0.001f * totalTimer.GetElapsedTime()) * 50,
@@ -119,7 +149,12 @@ namespace Client {
                 Tools::Matrix4<float>::CreateYawPitchRollRotation(0, 0, std::sin(0.001f * totalTimer.GetElapsedTime()) * 0.05f)
                 * Tools::Matrix4<float>::CreateScale(tmp, tmp, 1)
                 * Tools::Matrix4<float>::CreateTranslation(280 + tmp2, 280 + tmp3, 0));
-            image->Render();
+            do
+            {
+                imgEffect->BeginPass();
+                image->Render(*imgTexture, *texture);
+            } while (imgEffect->EndPass());
+
             this->_window->GetRenderer().EndDraw2D();
             // XXX FIN EXAMPLE à virer
 
@@ -138,7 +173,7 @@ namespace Client {
         if (this->_state != Connecting)
             throw std::runtime_error("Bad client state");
         this->_state = LoadingResources;
-        this->_game = new Game::Game(*this, this->_network.GetHost(), worldIdentifier, worldName, worldVersion, nbCubeTypes);
+        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes);
     }
 
     void Client::Disconnect(std::string const& reason)

@@ -1,3 +1,5 @@
+#include "client2/precompiled.hpp"
+#include "client2/Settings.hpp"
 #include "client2/network/PacketCreator.hpp"
 
 #include "protocol/protocol.hpp"
@@ -70,5 +72,14 @@ namespace Client { namespace Network {
     //    p->Write(Protocol::ClientToServer::GetSpawnPosition);
     //    return  p;
     //}
+    std::unique_ptr<Common::Packet> PacketCreator::Settings(Client::Settings const& settings)
+    {
+        std::unique_ptr<Common::Packet> p(new Common::Packet());
+        p->Write(Protocol::ClientToServer::Settings);
+
+        p->Write(settings.chunkCacheDistance);
+        p->Write(settings.nickname);
+        return p;
+    }
 
 }}
