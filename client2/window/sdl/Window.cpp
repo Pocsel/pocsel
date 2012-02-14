@@ -7,7 +7,9 @@
 namespace Client { namespace Window { namespace Sdl {
 
     Window::Window(Client& client) :
-        ::Client::Window::Window(new InputManager(client, new InputBinder)), _size(800, 600), _targetSize(0)
+        ::Client::Window::Window(new InputManager(client, new InputBinder())),
+        _size(800, 600),
+        _targetSize(0)
     {
         if (SDL_Init(SDL_INIT_VIDEO))
             throw std::runtime_error(std::string("SDL_Init(): ") + SDL_GetError());

@@ -9,12 +9,16 @@ namespace Client {
         std::string port;
         std::string host;
         boost::filesystem::path confdir;
+        boost::filesystem::path bindingsFile;
+        boost::filesystem::path settingsFile;
         unsigned int fps;
         unsigned int chunkCacheDistance;
         std::string nickname;
 
     public:
         Settings(int ac, char** av);
+    private:
+        void _ReadSettings();
     };
 
 }

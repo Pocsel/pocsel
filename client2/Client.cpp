@@ -49,8 +49,9 @@ namespace Client {
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
 
-        this->_window->GetInputManager().GetInputBinder().Bind("eScApE", "quiT");
-        this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
+        //this->_window->GetInputManager().GetInputBinder().Bind("eScApE", "quiT");
+        //this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
+        this->_window->GetInputManager().GetInputBinder().LoadFile(this->_settings.bindingsFile.string());
 
         // XXX EXAMPLE à virer
         font = &this->_resourceManager->GetFont("DejaVuSerif-Italic.ttf", 16);

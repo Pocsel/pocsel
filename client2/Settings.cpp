@@ -19,7 +19,11 @@ namespace Client {
             ("port", boost::program_options::value<std::string>()->default_value("8173"),
              "Port of the " PROJECT_NAME " server")
             ("confdir,c", boost::program_options::value<std::string>()->default_value(Common::ConfDir::Client().string()),
-             "Path to the client configuration directory")
+             "Path to a client configuration directory")
+            ("settings,s", boost::program_options::value<std::string>()->default_value(Common::ConfDir::Client().string() + "/settings.lua"),
+             "Path to a settings file")
+            ("bindings,b", boost::program_options::value<std::string>()->default_value(Common::ConfDir::Client().string() + "/bindings.lua"),
+             "Path to a bindings file")
             ("version,v",
              "Show version and exit")
             ("help,h",
@@ -56,7 +60,14 @@ namespace Client {
         this->host = vm["host"].as<std::string>();
         this->port = vm["port"].as<std::string>();
         this->confdir = vm["confdir"].as<std::string>();
+        this->settingsFile = vm["settings"].as<std::string>();
+        this->bindingsFile = vm["bindings"].as<std::string>();
+        this->_ReadSettings();
         Tools::log << "Configuration directory: " << this->confdir.string() << Tools::endl;
+    }
+
+    void Settings::_ReadSettings()
+    {
     }
 
 }
