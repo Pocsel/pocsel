@@ -5,21 +5,33 @@
 
 namespace Tools { namespace Renderers { namespace Utils {
 
-    Rectangle::Rectangle(IRenderer& renderer, Vector3<float> const& pt1, Vector3<float> const& pt2, Vector3<float> const& pt3, Vector3<float> const& pt4)
+    Rectangle::Rectangle(IRenderer& renderer)
         : _renderer(renderer),
-        _point1(pt1),
-        _point2(pt2),
-        _point3(pt3),
-        _point4(pt4),
+        _point1(-1,  1, 0),
+        _point2( 1,  1, 0),
+        _point3( 1, -1, 0),
+        _point4(-1, -1, 0),
         _point1Color(1, 1, 1, 1),
         _point2Color(1, 1, 1, 1),
         _point3Color(1, 1, 1, 1),
         _point4Color(1, 1, 1, 1)
     {
-        Rectangle::_InitRender(renderer);
+        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
+        this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3); // position
+        this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Color, 4); // color
+        Rectangle::_vertexBuffer->SetData(4*3*sizeof(float) + 4*4*sizeof(float), 0, VertexBufferUsage::Static);
+        this->_RefreshVertexBuffer();
     }
 
     void Rectangle::Render()
+    {
+        static const unsigned char indices[] = { 2, 1, 3, 0 };
+        this->_vertexBuffer->Bind();
+        this->_renderer.DrawElements(sizeof(indices), Renderers::DataType::UnsignedByte, indices, Renderers::DrawingMode::TrianglesStrip);
+        this->_vertexBuffer->Unbind();
+    }
+
+    void Rectangle::_RefreshVertexBuffer()
     {
         float vertices[] =
         {
@@ -32,35 +44,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             this->_point4.x, this->_point4.y, this->_point4.z,
             this->_point4Color.r, this->_point4Color.g, this->_point4Color.b, this->_point4Color.a
         };
-        unsigned char indices[] = { 2, 1, 3, 0 };
-        Rectangle::_vertexBuffer->SetSubData(0, sizeof(vertices), vertices);
-
-        Rectangle::_vertexBuffer->Bind();
-        do
-        {
-            Rectangle::_shader->BeginPass();
-            this->_renderer.DrawElements(sizeof(indices), Renderers::DataType::UnsignedByte, indices, Renderers::DrawingMode::TrianglesStrip);
-        } while (Rectangle::_shader->EndPass());
-        Rectangle::_vertexBuffer->Unbind();
-    }
-
-    IVertexBuffer* Rectangle::_vertexBuffer = 0;
-    IShaderProgram* Rectangle::_shader = 0;
-
-    void Rectangle::_InitRender(IRenderer& renderer)
-    {
-        if (Rectangle::_shader != 0)
-            return;
-        // TODO: trouver un moyen de gérer ce type de resources (utile avant une connexion à une partie donc pas de ResourceManager)
-        std::ifstream t(RESOURCES_DIR "/BaseShaderColor.cgfx");
-        std::string shader((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-
-        Rectangle::_shader = renderer.CreateProgram(shader).release();
-
-        Rectangle::_vertexBuffer = renderer.CreateVertexBuffer().release();
-        Rectangle::_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Position, 3); // position
-        Rectangle::_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Color, 4); // color
-        Rectangle::_vertexBuffer->SetData(4*3*sizeof(float) + 4*4*sizeof(float), 0, Renderers::VertexBufferUsage::Dynamic);
+        this->_vertexBuffer->SetSubData(0, sizeof(vertices), vertices);
     }
 
 }}}

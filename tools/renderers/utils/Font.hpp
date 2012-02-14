@@ -24,11 +24,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         static const int endChar = 0xff;//'~';
 
     private:
-        static Renderers::IShaderProgram* _shader;
-        static Renderers::IShaderParameter* _shaderTexture;
-        static Renderers::IShaderParameter* _shaderColor;
-        static Renderers::IShaderParameter* _shaderMultZ;
-
         IRenderer& _renderer;
         FontData* _data;
         ITexture2D* _texture;
@@ -40,14 +35,10 @@ namespace Tools { namespace Renderers { namespace Utils {
         Font(IRenderer& renderer, void const* data, std::size_t dataLength, std::size_t fontSize);
         ~Font();
 
-        void Render(std::string const& text, Color4f const& color = Color4f(0, 0, 0, 1), bool invert = false);
+        void Render(IShaderParameter& textureParameter, std::string const& text, bool invert = false);
 
-#ifdef  DEBUG
-        void RenderTextureDebug();
-#endif
     private:
         void _InitTextures();
-        static void _InitShaders(IRenderer& renderer);
     };
 
 }}}

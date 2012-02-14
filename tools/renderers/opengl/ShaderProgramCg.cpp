@@ -113,6 +113,12 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         }
     }
 
+    void ShaderProgramCg::UpdateCurrentPass()
+    {
+        if (this->_pass != 0)
+            cgUpdatePassParameters(this->_pass);
+    }
+
     void ShaderProgramCg::BeginPass()
     {
         this->_renderer.SetCurrentProgram(*this);

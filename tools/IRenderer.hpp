@@ -220,6 +220,7 @@ namespace Tools {
             virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier) = 0;
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage) = 0;
             virtual void UpdateParameter(ShaderParameterUsage::Type usage) = 0;
+            virtual void UpdateCurrentPass() = 0;
             virtual void BeginPass() = 0;
             virtual bool EndPass() = 0; // Retourne true s'il n'y a plus de pass a faire sinon false.
 
@@ -255,6 +256,7 @@ namespace Tools {
         virtual void BeginDraw(Renderers::IRenderTarget* target = 0) = 0;
         virtual void EndDraw() = 0;
 
+        virtual void UpdateCurrentParameters() = 0;
         virtual void DrawElements(Uint32 count, Renderers::DataType::Type indicesType, void const* indices, Renderers::DrawingMode::Type mode = Renderers::DrawingMode::Triangles) = 0;
         virtual void DrawVertexBuffer(Uint32 offset, Uint32 count, Renderers::DrawingMode::Type mode = Renderers::DrawingMode::Triangles) = 0;
 
