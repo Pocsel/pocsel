@@ -7,6 +7,9 @@
 namespace Client {
     class Client;
 }
+namespace Tools {
+    class IRenderer;
+}
 
 namespace Client { namespace Game {
 
@@ -15,11 +18,15 @@ namespace Client { namespace Game {
     {
     private:
         Client& _client;
+        Tools::IRenderer& _renderer;
         CubeTypeManager _cubeTypeManager;
         Resources::ResourceManager _resourceManager;
 
     public:
         Game(Client& client, std::string const& host, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);
+
+        void Update();
+        void Render();
 
         CubeTypeManager& GetCubeTypeManager() { return this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return this->_resourceManager; }

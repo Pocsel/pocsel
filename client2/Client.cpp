@@ -113,6 +113,8 @@ namespace Client {
             case LoadingChunks:
                 break;
             case Running:
+                this->_game->Update();
+                this->_game->Render();
                 break;
             case Disconnected:
                 break;

@@ -4,6 +4,10 @@
 #include "common/BaseChunk.hpp"
 #include "common/Packet.hpp"
 
+namespace Client {
+    class Settings;
+}
+
 namespace Client { namespace Network {
 
     class PacketCreator
@@ -16,6 +20,7 @@ namespace Client { namespace Network {
         static std::unique_ptr<Common::Packet> GetResourceRange(Uint32 resourceId, Uint32 offset);
         static std::unique_ptr<Common::Packet> GetCubeType(Common::BaseChunk::CubeType id);
         //static std::unique_ptr<Common::Packet> GetSpawnPosition();
+        static std::unique_ptr<Common::Packet> Settings(Settings const& settings);
     };
 
 }}
