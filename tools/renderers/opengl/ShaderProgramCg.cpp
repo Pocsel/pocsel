@@ -111,6 +111,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         default:
             throw std::invalid_argument("ShaderProgramCg::UpdateParameter");
         }
+        this->UpdateCurrentPass();
     }
 
     void ShaderProgramCg::UpdateCurrentPass()
