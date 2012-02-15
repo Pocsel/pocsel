@@ -3,6 +3,8 @@
 #include "common/CubeType.hpp"
 #include "common/Position.hpp"
 
+#include "tools/SimpleMessageQueue.hpp"
+
 #include "server/game/map/gen/ChunkGenerator.hpp"
 
 namespace Server { namespace Game { namespace Map {
@@ -36,7 +38,14 @@ namespace Server { namespace Game { namespace Map {
         this->_gen->Stop();
     }
 
-    void Map::_GetChunk(Chunk::IdType id, ChunkCallback response)
+    void Map::HandleNewChunk(Chunk* chunk)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_HandleNewChunk, this, chunk));
+        this->_messageQueue.PushMessage(m);
+    }
+
+    void Map::GetChunk(Chunk::IdType id, ChunkCallback& response)
     {
         auto chunk_it = this->_chunks.find(id);
         if (chunk_it == this->_chunks.end())
@@ -44,7 +53,8 @@ namespace Server { namespace Game { namespace Map {
             if (this->_chunkRequests.find(id) == this->_chunkRequests.end())
             {
                 this->_chunkRequests[id].push_back(response);
-                this->_gen->GetChunk(id, std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
+                Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
+                this->_gen->GetChunk(id, cb);
             }
             else
                 this->_chunkRequests[id].push_back(response);
@@ -68,7 +78,7 @@ namespace Server { namespace Game { namespace Map {
         this->_chunkRequests.erase(chunk->id);
     }
 
-    void Map::_GetSpawnPosition(SpawnCallback response)
+    void Map::GetSpawnPosition(SpawnCallback& response)
     {
         if (this->_spawnPosition != 0)
         {
@@ -79,8 +89,8 @@ namespace Server { namespace Game { namespace Map {
             if (this->_spawnRequests.size() == 0)
             {
                 this->_spawnRequests.push_back(response);
-                this->_GetChunk(Chunk::CoordsToId(1 << 21, (1 << 19) + 30, 1 << 21),
-                                std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
+                ChunkCallback cb(std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
+                this->GetChunk(Chunk::CoordsToId(1 << 21, (1 << 19) + 30, 1 << 21), cb);
             }
             else
                 this->_spawnRequests.push_back(response);
@@ -96,11 +106,10 @@ namespace Server { namespace Game { namespace Map {
                 Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk.GetCube(0, y, 0) - 1];
                 if (biet.solid)
                 {
-                    Common::Position p(chunk.coords, Tools::Vector3f(0, y, 0));
-                    p += Tools::Vector3f(0.5, 2.5, 0.5);
-                    this->_spawnPosition = new Common::Position(p);
+                    this->_spawnPosition = new Common::Position(chunk.coords, Tools::Vector3f(0, y, 0));
+                    *this->_spawnPosition += Tools::Vector3f(0.5, 2.5, 0.5);
                     for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
-                        (*it)(p);
+                        (*it)(*this->_spawnPosition);
                     this->_spawnRequests.clear();
                     return;
                 }
@@ -113,24 +122,23 @@ namespace Server { namespace Game { namespace Map {
                             Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk.GetCube(x, y, 0) - 1];
                             if (biet.solid)
                             {
-                                Common::Position p(chunk.coords, Tools::Vector3f(x, y, 0));
-                                p += Tools::Vector3f(0.5, 2.5, 0.5);
-                                this->_spawnPosition = new Common::Position(p);
+                                this->_spawnPosition = new Common::Position(chunk.coords, Tools::Vector3f(x, y, 0));
+                                *this->_spawnPosition += Tools::Vector3f(0.5, 2.5, 0.5);
                                 for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
-                                    (*it)(p);
+                                    (*it)(*this->_spawnPosition);
                                 this->_spawnRequests.clear();
                                 return;
                             }
                         }
                     }
-                    this->GetChunk(Chunk::CoordsToId(chunk.coords.x + 1, chunk.coords.y, chunk.coords.z),
-                                   std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
+                    ChunkCallback cb(std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
+                    this->GetChunk(Chunk::CoordsToId(chunk.coords.x + 1, chunk.coords.y, chunk.coords.z), cb);
                     return;
                 }
             }
         }
-        this->GetChunk(Chunk::CoordsToId(chunk.coords.x, chunk.coords.y - 1, chunk.coords.z),
-                       std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
+        ChunkCallback cb(std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
+        this->GetChunk(Chunk::CoordsToId(chunk.coords.x, chunk.coords.y - 1, chunk.coords.z), cb);
     }
 
 }}}

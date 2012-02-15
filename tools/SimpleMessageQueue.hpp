@@ -5,8 +5,9 @@ namespace Tools {
 
     class SimpleMessageQueue
     {
-    private:
+    public:
         typedef std::function<void(void)> Message;
+    private:
         boost::mutex _messagesMutex;
         std::list<Message> _messages;
         boost::mutex _conditionMutex;
@@ -25,20 +26,7 @@ namespace Tools {
         ~SimpleMessageQueue()
         {
         }
-        void PushMessage(Message message)
-        {
-            this->_PushMessage(message);
-        }
-        void Start()
-        {
-            this->_Start();
-        }
-        void Stop()
-        {
-            this->_Stop();
-        }
-    protected:
-        void _PushMessage(Message message)
+        void PushMessage(Message& message)
         {
             {
                 boost::lock_guard<boost::mutex> lock(this->_messagesMutex);
@@ -46,7 +34,7 @@ namespace Tools {
             }
             this->_condition.notify_one();
         }
-        void _Start()
+        void Start()
         {
             assert(!this->_isRunning && "SimpleMessageQueue is already running");
             Tools::debug << "Starting SimpleMessageQueue with " << this->_nbThreads <<
@@ -56,7 +44,7 @@ namespace Tools {
             for (unsigned int i = 0; i < this->_nbThreads; ++i)
                 _threads[i] = new boost::thread(boost::bind(&SimpleMessageQueue::_Run, this));
         }
-        void _Stop()
+        void Stop()
         {
             if (!this->_isRunning)
                 return;

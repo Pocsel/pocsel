@@ -1,16 +1,18 @@
 #ifndef __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 #define __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 
-#include "common/Packet.hpp"
-#include "common/Position.hpp"
-#include "tools/SimpleMessageQueue.hpp"
-
 #include "server/Chunk.hpp"
 
 namespace Common {
 
     class Packet;
     struct Position;
+
+}
+
+namespace Tools {
+
+    class SimpleMessageQueue;
 
 }
 
@@ -43,10 +45,10 @@ namespace Server { namespace ClientManagement {
     class Client;
 
     class ClientManager :
-        public Tools::SimpleMessageQueue,
         private boost::noncopyable
     {
     private:
+        Tools::SimpleMessageQueue* _messageQueue;
         Server& _server;
         std::unordered_map<Uint32, Client*> _clients;
         Uint32 _nextId;
@@ -55,34 +57,16 @@ namespace Server { namespace ClientManagement {
         ClientManager(Server& server);
         ~ClientManager();
 
-        // A appeler d'un autre thread
         void Start();
         void Stop();
 
-        void HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection)
-        {
-            this->_PushMessage(std::bind(&ClientManager::_HandleNewClient, this, clientConnection));
-        }
-        void HandleClientError(Uint32 clientId)
-        {
-            this->_PushMessage(std::bind(&ClientManager::_HandleClientError, this, clientId));
-        }
-        void HandlePacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
-        {
-            this->_PushMessage(std::bind(&ClientManager::_HandlePacket, this, clientId, packet.release()));
-        }
-        void SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet)
-        {
-            this->_PushMessage(std::bind(&ClientManager::_SendPacket, this, clientId, packet.release()));
-        }
-        void SendChunk(Uint32 clientId, Chunk const& chunk)
-        {
-            this->_PushMessage(std::bind(&ClientManager::_SendChunk, this, clientId, std::cref(chunk)));
-        }
-        void ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)
-        {
-            this->_PushMessage(std::bind(&ClientManager::_ClientTeleport, this, clientId, map, position));
-        }
+        // A appeler d'un autre thread
+        void HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection);
+        void HandleClientError(Uint32 clientId);
+        void HandlePacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet);
+        void SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet);
+        void SendChunk(Uint32 clientId, Chunk const& chunk);
+        void ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position);
 
         // A appeler du thread clientmanagement
         Database::ResourceManager const& GetResourceManager() const;

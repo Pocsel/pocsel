@@ -3,13 +3,17 @@
 
 #include "server/game/map/Conf.hpp"
 
-#include "tools/SimpleMessageQueue.hpp"
-
 #include "server/Chunk.hpp"
 
 namespace Common {
 
     struct Position;
+
+}
+
+namespace Tools {
+
+    class SimpleMessageQueue;
 
 }
 
@@ -48,28 +52,14 @@ namespace Server { namespace Game { namespace Map {
         std::string const& GetName() const { return this->_conf.name; }
 
         // threadsafe
-        void HandleNewChunk(Chunk* chunk)
-        {
-            this->_messageQueue.PushMessage(std::bind(&Map::_HandleNewChunk, this, chunk));
-        }
-
-        void GetSpawnPosition(SpawnCallback response)
-        {
-            this->_messageQueue.PushMessage(std::bind(&Map::_GetSpawnPosition, this, response));
-        }
+        void HandleNewChunk(Chunk* chunk);
 
         // Uniquement pour le thread Game
-        void GetChunk(Chunk::IdType id, ChunkCallback response)
-        {
-            this->_GetChunk(id, response);
-//            this->_messageQueue.PushMessage(std::bind(&Map::_GetChunk, this, id, response));
-        }
-
+        void GetSpawnPosition(SpawnCallback& response);
+        void GetChunk(Chunk::IdType id, ChunkCallback& response);
 
     private:
-        void _GetChunk(Chunk::IdType id, ChunkCallback response);
         void _HandleNewChunk(Chunk* newChunk);
-        void _GetSpawnPosition(SpawnCallback response);
         void _FindSpawnPosition(Chunk const& chunk);
     };
 
