@@ -1,3 +1,5 @@
 nickname = "Boloss"
 fps = 60
-chunkCacheDistance = 5
+chunkViewDistance = 5
+chunkCacheArea = 2
+chunkMinimumArea = 2
