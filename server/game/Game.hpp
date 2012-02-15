@@ -1,13 +1,17 @@
 #ifndef __SERVER_GAME_GAME_HPP__
 #define __SERVER_GAME_GAME_HPP__
 
-#include "tools/SimpleMessageQueue.hpp"
-
 #include "server/Chunk.hpp"
 
 namespace Common {
 
     struct Position;
+
+}
+
+namespace Tools {
+
+    class SimpleMessageQueue;
 
 }
 
@@ -31,7 +35,7 @@ namespace Server { namespace Game {
 
     private:
         Server& _server;
-        Tools::SimpleMessageQueue _messageQueue;
+        Tools::SimpleMessageQueue* _messageQueue;
         World* _world;
         std::unordered_map<Uint32, Player*> _players;
 
@@ -45,20 +49,10 @@ namespace Server { namespace Game {
         World const& GetWorld() const { return *this->_world; }
         World& GetWorld() { return *this->_world; }
 
-        void SpawnPlayer(std::string const& clientName, Uint32 clientId)
-        {
-            this->_messageQueue.PushMessage(std::bind(&Game::_SpawnPlayer, this, std::cref(clientName), clientId));
-        }
-
-        void PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position)
-        {
-            this->_messageQueue.PushMessage(std::bind(&Game::_PlayerTeleport, this, id, std::cref(map), std::cref(position)));
-        }
-
-        void GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback)
-        {
-            this->_messageQueue.PushMessage(std::bind(&Game::_GetChunk, this, id, clientId, callback));
-        }
+        // Thread safe
+        void SpawnPlayer(std::string const& clientName, Uint32 clientId);
+        void PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
+        void GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback);
 
     private:
         void _SpawnPlayer(std::string const& clientName, Uint32 clientId);

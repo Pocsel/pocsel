@@ -1,9 +1,13 @@
 #ifndef __SERVER_GAME_MAP_GEN_CHUNKGENERATOR_HPP__
 #define __SERVER_GAME_MAP_GEN_CHUNKGENERATOR_HPP__
 
-#include "tools/SimpleMessageQueue.hpp"
-
 #include "server/Chunk.hpp"
+
+namespace Tools {
+
+    class SimpleMessageQueue;
+
+}
 
 namespace Server { namespace Game { namespace Map {
 
@@ -18,13 +22,13 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
     class IEquation;
 
     class ChunkGenerator :
-        public Tools::SimpleMessageQueue,
         private boost::noncopyable
     {
     public:
         typedef std::function<void(Chunk*)> Callback;
 
     private:
+        Tools::SimpleMessageQueue* _messageQueue;
         std::vector<CubeSpawnInfo> _cubes;
         std::vector<IEquation*> _equations;
         Perlin* _perlin;
@@ -36,14 +40,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         void Start();
         void Stop();
 
-        void GetChunk(Chunk::IdType id, Callback callback)
-        {
-            this->_PushMessage(std::bind(&ChunkGenerator::_GetChunk, this, id, callback));
-        }
+        void GetChunk(Chunk::IdType id, Callback& callback);
 
     private:
-        void _GetChunk(Chunk::IdType id, Callback callback);
-
+        void _GetChunk(Chunk::IdType id, Callback& callback);
     };
 
 }}}}
