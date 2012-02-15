@@ -71,20 +71,22 @@ namespace Client {
                 if (this->_network.IsConnected())
                 {
                     this->_network.SendPacket(Network::PacketCreator::Login("yalap_a"));
-                    this->_state = LoadingResources;
+                    this->_state = LoggingIn;
                 }
                 break;
+            case LoggingIn:
+                this->_menu->GetLoadingScreen().Render("Logging in...", this->_network.GetLoadingProgression());
+                break;
             case LoadingResources:
-                this->_menu->GetLoadingScreen().Render("Downloading resources", this->_game->GetLoadingProgression());
+                this->_menu->GetLoadingScreen().Render("Downloading resources...", this->_game->GetLoadingProgression());
                 if (this->_game->GetLoadingProgression() == 1.0f)
                 {
-                    Tools::debug << "LoadingChunks...\n";
                     this->_state = LoadingChunks;
                     this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
                 }
                 break;
             case LoadingChunks:
-                this->_menu->GetLoadingScreen().Render("Downloading chunks", this->_game->GetMap().GetLoadingProgression());
+                this->_menu->GetLoadingScreen().Render("Downloading chunks...", this->_game->GetMap().GetLoadingProgression());
                 break;
             case Running:
                 this->_game->Update();
@@ -112,7 +114,7 @@ namespace Client {
 
     void Client::Login(std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes)
     {
-        if (this->_state != Connecting)
+        if (this->_state != LoggingIn)
             throw std::runtime_error("Bad client state");
         this->_state = LoadingResources;
         if (this->_game)
