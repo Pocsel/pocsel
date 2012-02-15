@@ -134,7 +134,7 @@ namespace Client { namespace Map {
 
         this->_textureCoords = game.GetClient().GetWindow().GetRenderer().CreateVertexBuffer().release();
         this->_textureCoords->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2);
-        this->_textureCoords->SetData(textureCoords.size() * sizeof(float), textureCoords.data(), Tools::Renderers::VertexBufferUsage::Static);
+        this->_textureCoords->SetData(textureCoords.size() * sizeof(Tools::Vector2f), textureCoords.data(), Tools::Renderers::VertexBufferUsage::Static);
         for (auto it = indices.begin(), ite = indices.end(); it != ite; ++it)
         {
             if (it->second.size() == 0)
