@@ -33,6 +33,7 @@ namespace Client { namespace Game {
         void Update();
         void Render();
 
+        Client& GetClient() { return this->_client; }
         CubeTypeManager& GetCubeTypeManager() { return this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return this->_resourceManager; }
         float GetLoadingProgression() const { return (this->_cubeTypeManager.GetLoadingProgression() + this->_resourceManager.GetLoadingProgression()) / 2.0f; }

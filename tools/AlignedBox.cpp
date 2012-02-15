@@ -1,4 +1,5 @@
 #include "tools/AlignedBox.hpp"
+#include "tools/AlignedCube.hpp"
 #include "tools/Frustum.hpp"
 #include "tools/Plane.hpp"
 
@@ -48,6 +49,19 @@ namespace Tools {
         if (this->_min.x <= box._min.x && box._max.x <= this->_max.x &&
             this->_min.y <= box._min.y && box._max.y <= this->_max.y &&
             this->_min.z <= box._min.z && box._max.z <= this->_max.z)
+            return Inside;
+        return Intersecting;
+    }
+
+    AbstractCollider::IntersectionType AlignedBox::Contains(AlignedCube const& box) const
+    {
+        if (this->_max.x < box.GetPosition().x || this->_min.x > box.GetPosition().x + box.GetSize() ||
+            this->_max.y < box.GetPosition().y || this->_min.y > box.GetPosition().y + box.GetSize() ||
+            this->_max.z < box.GetPosition().z || this->_min.z > box.GetPosition().z + box.GetSize())
+            return Outside;
+        if (this->_min.x <= box.GetPosition().x && box.GetPosition().x + box.GetSize() <= this->_max.x &&
+            this->_min.y <= box.GetPosition().y && box.GetPosition().y + box.GetSize() <= this->_max.y &&
+            this->_min.z <= box.GetPosition().z && box.GetPosition().z + box.GetSize() <= this->_max.z)
             return Inside;
         return Intersecting;
     }

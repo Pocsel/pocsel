@@ -36,7 +36,7 @@ namespace Server { namespace Game {
         ~Player();
 
         void SetCurrentMap(Map::Map& map) { this->_currentMap = &map; }
-        bool HasMap() const { return this->_currentMap; }
+        bool HasMap() const { return this->_currentMap != 0; }
         Map::Map& GetCurrentMap() { assert(this->_currentMap); return *this->_currentMap; }
         void Teleport(Common::Position const& position);
     };

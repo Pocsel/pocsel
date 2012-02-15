@@ -32,6 +32,7 @@ namespace Tools {
 
         virtual IntersectionType Contains(Vector3d const& object) const;
         virtual IntersectionType Contains(AlignedBox const& object) const;
+        virtual IntersectionType Contains(AlignedCube const& object) const;
         virtual IntersectionType Contains(Frustum const& object) const;
 
         Vector3d const& SupportMapping(Vector3d const& v) const;

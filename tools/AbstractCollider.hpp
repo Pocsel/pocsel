@@ -6,6 +6,7 @@
 namespace Tools {
 
     class AlignedBox;
+    class AlignedCube;
     class Frustum;
     class Plane;
 
@@ -34,6 +35,7 @@ namespace Tools {
 
         virtual IntersectionType Contains(Vector3d const& object) const = 0;
         virtual IntersectionType Contains(AlignedBox const& object) const = 0;
+        virtual IntersectionType Contains(AlignedCube const& object) const = 0;
         virtual IntersectionType Contains(Frustum const& object) const = 0;
     };
 

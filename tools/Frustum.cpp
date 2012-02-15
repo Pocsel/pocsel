@@ -1,4 +1,5 @@
 #include "tools/AlignedBox.hpp"
+#include "tools/AlignedCube.hpp"
 #include "tools/Frustum.hpp"
 #include "tools/Gjk.hpp"
 #include "tools/Ray.hpp"
@@ -78,6 +79,27 @@ namespace Tools {
     }
 
     AbstractCollider::IntersectionType Frustum::Contains(AlignedBox const& box) const
+    {
+        bool flag = false;
+        for (int i = 0; i < 6; i++)
+        {
+            switch (box.Intersects(this->_planes[i]))
+            {
+            case Plane::Front:
+                return Outside;
+
+            case Plane::Intersecting:
+                flag = true;
+                break;
+
+            case Plane::Back:
+                break;
+            }
+        }
+        return flag ? Intersecting : Inside;
+    }
+
+    AbstractCollider::IntersectionType Frustum::Contains(AlignedCube const& box) const
     {
         bool flag = false;
         for (int i = 0; i < 6; i++)
