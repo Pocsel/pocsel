@@ -28,6 +28,7 @@ namespace Client { namespace Game {
         Resources::ResourceManager _resourceManager;
         Map::Map* _map;
         Player _player;
+        int _callbackId;
 
     public:
         Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);

@@ -18,15 +18,17 @@ namespace Client { namespace Game {
     {
         this->_player.GetCamera().Rotate(0, 0);
         this->_renderer.SetClearColor(Tools::Color4f(0.1f, 0.1f, 0.1f, 1));
-        this->_client.GetWindow().RegisterCallback(
+        this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](Tools::Vector2u const& size)
             {
                 this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, size.w / float(size.h), 0.001f, 1000.0f);
             });
+        this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.001f, 1000.0f);
     }
 
     Game::~Game()
     {
+        this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
     }
 
@@ -44,6 +46,7 @@ namespace Client { namespace Game {
 
     void Game::Update()
     {
+        this->_player.GetCamera().Rotate(0.1f, 0);
         this->_map->GetChunkManager().Update(this->_player.GetPosition());
     }
 
