@@ -38,6 +38,7 @@ namespace Client { namespace Game {
         void Render();
 
         Client& GetClient() { return this->_client; }
+        Player& GetPlayer() { return this->_player; }
         CubeTypeManager& GetCubeTypeManager() { return this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return this->_resourceManager; }
         Map::Map& GetMap() { return *this->_map; }

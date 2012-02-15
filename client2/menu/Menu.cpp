@@ -1,9 +1,10 @@
 #include "client2/menu/Menu.hpp"
 #include "client2/Client.hpp"
 #include "client2/resources/LocalResourceManager.hpp"
-#include "client2/menu/LoadingScreen.hpp"
 #include "client2/window/Window.hpp"
 #include "tools/IRenderer.hpp"
+#include "client2/menu/LoadingScreen.hpp"
+#include "client2/menu/DisconnectedScreen.hpp"
 
 namespace Client { namespace Menu {
 
@@ -16,10 +17,12 @@ namespace Client { namespace Menu {
         this->_fontTexture = this->_fontShader->GetParameter("fontTex").release();
         this->_rectShader = &client.GetLocalResourceManager().GetShader("BaseShaderColor.cgfx");
         this->_loadingScreen = new LoadingScreen(client, *this);
+        this->_disconnectedScreen = new DisconnectedScreen(client, *this);
     }
 
     Menu::~Menu()
     {
+        Tools::Delete(this->_disconnectedScreen);
         Tools::Delete(this->_loadingScreen);
         Tools::Delete(this->_fontTexture);
         Tools::Delete(this->_fontColor);
