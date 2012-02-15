@@ -14,8 +14,8 @@ equations = {
         alpha = 1.7,
         beta = 2.0,
         n = 8,
-        ip = 0,
-        ipp = 7
+        ip = 1,
+        ipp = 300
     },
     perlin3_caves = {
         function_name = "perlin3",
@@ -29,8 +29,8 @@ equations = {
         alpha = 2.0,
         beta = 2.0,
         n = 1,
-        ip = 0,
-        ipp = 7
+        ip = 1,
+        ipp = 5
     },
     perlin3_iron = {
         function_name = "perlin3",
@@ -44,8 +44,8 @@ equations = {
         alpha = 2.0,
         beta = 2.0,
         n = 1,
-        ip = 0,
-        ipp = 7
+        ip = 1,
+        ipp = 5
     },
     none = {
         function_name = "none"

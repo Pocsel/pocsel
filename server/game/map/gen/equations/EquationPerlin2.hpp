@@ -110,10 +110,15 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 return;
             }
 
-            for (ix = ipp / 2; ix < Common::ChunkSize; ix += 1 + ipp)
+            int ipp1 = ipp + 1;
+
+            ix = 0;
+            while (ix < Common::ChunkSize)
             {
                 xx = x + (double)ix / Common::ChunkSize;
-                for (iz = ipp / 2; iz < Common::ChunkSize; iz += 1 + ipp)
+
+                iz = 0;
+                while (iz < Common::ChunkSize)
                 {
                     zz = z + (double)iz / Common::ChunkSize;
                     p = _perlin.Noise2D(xx * xn + xa,
@@ -121,56 +126,204 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                                         alpha,
                                         beta,
                                         n) * mul;
+
                     res[ix * Common::ChunkSize2 + iz * Common::ChunkSize] = p;
+
+                    if (iz + ipp1 >= Common::ChunkSize && iz != Common::ChunkSize - 1)
+                        iz = Common::ChunkSize - 1;
+                    else
+                        iz += ipp1;
                 }
+
+                if (ix + ipp1 >= Common::ChunkSize && ix != Common::ChunkSize - 1)
+                    ix = Common::ChunkSize - 1;
+                else
+                    ix += ipp1;
             }
 
-            // INTERPOLATION
+            switch (ip)
+            {
+                case 0:
+                _InterpolationNearest(res);
+                break;
+                default:
+                _InterpolationLinear(res);
+            }
+        }
 
-            int x0, x1, xc;
-            int z0, z1, zc;
+    private:
+        void _InterpolationLinear(double* res) const
+        {
+            unsigned int ix, iz, iy;
+            double p;
+
+            int x0, x1, x0s, x1s;
+            int z0, z1, z0s, z1s;
+
+            int x1_0, x1_i, xi_0;
+            int z1_0, z1_i, zi_0;
+            int x1_0z1_0;
+
+            double p00, p01, p10, p11;
+
+            int tab[Common::ChunkSize * 2];
+
             int ipp1 = ipp + 1;
 
-            int xtab[Common::ChunkSize];
-            int ztab[Common::ChunkSize];
-
-#define SET_TAB_XZY(x) \
-            do { \
-                x##0 = ipp / 2; \
-                x##1 = ipp / 2; \
-                for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
-                { \
-                    if ((int)i % ipp1 == ipp / 2) \
-                    { \
-                        x##0 = i; \
-                        if (i + ipp1 >= Common::ChunkSize) \
-                            x##1 = i; \
-                        else \
-                            x##1 = i + ipp1; \
-                        x##tab[i] = x##0; \
-                    } \
-                    else \
-                    { \
-                        if ((int)i % ipp1 < ipp1 / 2) \
-                            x##tab[i] = x##1; \
-                        else \
-                            x##tab[i] = x##0; \
-                    } \
-                } \
-            } while (0);
-
-            SET_TAB_XZY(x);
-            SET_TAB_XZY(z);
+            x0 = 0;
+            x1 = 0;
+            for (unsigned int i = 0; i < Common::ChunkSize; ++i)
+            {
+                if ((int)i == Common::ChunkSize - 1)
+                {
+                    tab[i * 2] = i;
+                    tab[i * 2 + 1] = i;
+                }
+                else if ((int)i % ipp1 == 0)
+                {
+                    x0 = i;
+                    if (i + ipp1 >= Common::ChunkSize)
+                        x1 = Common::ChunkSize - 1;
+                    else
+                        x1 = i + ipp1;
+                    tab[i * 2] = x0;
+                    tab[i * 2 + 1] = x0;
+                }
+                else
+                {
+                    tab[i * 2] = x0;
+                    tab[i * 2 + 1] = x1;
+                }
+            }
 
             double* resBase = res;
 
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                xc = xtab[ix] * Common::ChunkSize2;
+                x0 = tab[ix * 2];
+                x1 = tab[ix * 2 + 1];
+
+                x0s = x0 * Common::ChunkSize2;
+                x1s = x1 * Common::ChunkSize2;
 
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    zc = ztab[iz] * Common::ChunkSize + xc;
+                    z0 = tab[iz * 2];
+                    z1 = tab[iz * 2 + 1];
+
+                    if ((z1 == z0))
+                    {
+                        if (x0 == x1)
+                        {
+                            p = resBase[ix * Common::ChunkSize2 + iz * Common::ChunkSize];
+                        }
+                        else
+                        {
+                            z0s = z0 * Common::ChunkSize;
+                            z1s = z1 * Common::ChunkSize;
+
+                            p00 = resBase[x0s + z0s];
+                            p10 = resBase[x1s + z0s];
+
+                            x1_0 = x1 - x0;
+                            x1_i = x1 - (int)ix;
+                            xi_0 = (int)ix - x0;
+
+                            p = (p00*x1_i)/(double)x1_0 +
+                                (p10*xi_0)/(double)x1_0;
+                        }
+                    }
+                    else if (x0 == x1)
+                    {
+                            z0s = z0 * Common::ChunkSize;
+                            z1s = z1 * Common::ChunkSize;
+
+                            p00 = resBase[x0s + z0s];
+                            p10 = resBase[x0s + z1s];
+
+                            z1_0 = z1 - z0;
+                            z1_i = z1 - (int)iz;
+                            zi_0 = (int)iz - z0;
+
+                            p = (p00*z1_i)/(double)z1_0 +
+                                (p10*zi_0)/(double)z1_0;
+                    }
+                    else
+                    {
+                        z0s = z0 * Common::ChunkSize;
+                        z1s = z1 * Common::ChunkSize;
+
+                        p00 = resBase[x0s + z0s];
+                        p01 = resBase[x0s + z1s];
+                        p10 = resBase[x1s + z0s];
+                        p11 = resBase[x1s + z1s];
+
+                        x1_0 = x1 - x0;
+                        x1_i = x1 - (int)ix;
+                        xi_0 = (int)ix - x0;
+
+                        z1_0 = z1 - z0;
+                        z1_i = z1 - (int)iz;
+                        zi_0 = (int)iz - z0;
+
+                        x1_0z1_0 = x1_0 * z1_0;
+
+                        p = (p00*x1_i*z1_i)/(double)x1_0z1_0 +
+                            (p10*xi_0*z1_i)/(double)x1_0z1_0 +
+                            (p01*x1_i*zi_0)/(double)x1_0z1_0 +
+                            (p11*xi_0*zi_0)/(double)x1_0z1_0;
+                    }
+
+                    for (iy = 0; iy < Common::ChunkSize; ++iy)
+                        *res++ = p;
+                }
+            }
+        }
+
+        void _InterpolationNearest(double* res) const
+        {
+            unsigned int ix, iz, iy;
+            double p;
+
+            int xc;
+            int zc;
+
+            int tab[Common::ChunkSize];
+
+            int ipp1 = ipp + 1;
+
+            int i0, i1;
+            i0 = 0;
+            i1 = 0;
+            for (unsigned int i = 0; i < Common::ChunkSize; ++i)
+            {
+                if ((int)i % ipp1 == 0)
+                {
+                    i0 = i;
+                    if (i + ipp1 >= Common::ChunkSize)
+                        i1 = Common::ChunkSize - 1;
+                    else
+                        i1 = i + ipp1;
+                    tab[i] = i0;
+                }
+                else
+                {
+                    if ((int)i % ipp1 < ipp1 / 2)
+                        tab[i] = i0;
+                    else
+                        tab[i] = i1;
+                }
+            }
+
+            double* resBase = res;
+
+            for (ix = 0; ix < Common::ChunkSize; ++ix)
+            {
+                xc = tab[ix] * Common::ChunkSize2;
+
+                for (iz = 0; iz < Common::ChunkSize; ++iz)
+                {
+                    zc = tab[iz] * Common::ChunkSize + xc;
 
                     p = resBase[zc];
 
@@ -178,9 +331,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                         *res++ = p;
                 }
             }
-
         }
-#undef SET_TAB_XZY
+
     };
 
 }}}}}
