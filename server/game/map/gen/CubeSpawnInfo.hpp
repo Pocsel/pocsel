@@ -19,13 +19,24 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
             Chunk::CubeType const cubeType;
 
         protected:
-            std::list<Validation> _validations;
+            std::vector<Validation> _validations;
+            Validation* _valBegin;
+            Validation* _valEnd;
 
         public:
-            explicit CubeSpawnInfo(Chunk::CubeType cubeType, std::list<Validation> const& validations);
+            explicit CubeSpawnInfo(Chunk::CubeType cubeType, std::vector<Validation> const& validations);
+            explicit CubeSpawnInfo(CubeSpawnInfo const& other);
+            CubeSpawnInfo const& operator=(CubeSpawnInfo const& other);
             ~CubeSpawnInfo();
 
-            std::list<Validation> const& GetValidations() const { return _validations; }
+            std::vector<Validation> const& GetValidations() const { return _validations; }
+            void _Init()
+            {
+                this->_valBegin = this->_validations.data();
+                this->_valEnd = this->_validations.data() + this->_validations.size();
+            }
+            Validation const* GetValBegin() const { return this->_valBegin; }
+            Validation const* GetValEnd() const { return this->_valEnd; }
     };
 
 }}}}

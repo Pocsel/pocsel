@@ -5,7 +5,7 @@
 #include <list>
 
 #include "protocol/protocol.hpp"
-//#include "client2/Chunk.hpp"
+#include "client2/map/Chunk.hpp"
 #include "common/CubeType.hpp"
 
 namespace Common {
@@ -37,10 +37,10 @@ namespace Client { namespace Network {
                 std::string& filename,
                 Uint32& totalSize,
                 Uint32& dataSize);
-        //static std::unique_ptr<Chunk> ExtractChunk(Common::Packet const& p);
+        static std::unique_ptr<Map::Chunk> ExtractChunk(Common::Packet const& p);
         static std::unique_ptr<Common::CubeType> ExtractCubeType(Common::Packet const& p);
 
-        //static void ExtractSpawnPosition(Common::Packet const& p, Common::Position& pos);
+        static void ExtractTeleportPlayer(Common::Packet const& p, std::string& map, Common::Position& position);
     };
 
 }}

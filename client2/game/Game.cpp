@@ -23,6 +23,18 @@ namespace Client { namespace Game {
         Tools::Delete(this->_map);
     }
 
+    void Game::TeleportPlayer(std::string const& map, Common::Position const& position)
+    {
+        // TODO: player
+        this->_player.SetPosition(position);
+        if (this->_map == 0)
+        {
+            this->_client.LoadChunks();
+            this->_map = new Map::Map(*this);
+            this->_map->GetChunkManager().Update(this->_player.GetPosition());
+        }
+    }
+
     void Game::Update()
     {
     }

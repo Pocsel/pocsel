@@ -22,6 +22,7 @@ namespace Client { namespace Map {
         Map(Game::Game& game);
 
         float GetLoadingProgression() const;
+        ChunkManager& GetChunkManager() { return this->_chunkManager; }
     private:
     };
 

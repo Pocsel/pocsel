@@ -14,7 +14,8 @@ namespace Client { namespace Resources {
         : _database(database),
         _network(network),
         _nbNeededResources(0),
-        _nbDownloadedResources(0)
+        _nbDownloadedResources(0),
+        _loading(0)
     {
     }
 
@@ -86,6 +87,7 @@ namespace Client { namespace Resources {
     {
         if (this->_nbDownloadedResources == this->_nbNeededResources)
         {
+            this->_loading = 1.0f;
             Tools::log << "All needed resources downloaded.\n";
             this->_database.ValidateUpdate();
         }
@@ -97,6 +99,7 @@ namespace Client { namespace Resources {
     {
         if (!this->_neededResourceIds.empty())
         {
+            this->_loading = this->_nbDownloadedResources / (float)this->_nbNeededResources;
             this->_network.SendPacket(Network::PacketCreator::GetResourceRange(this->_neededResourceIds.front(), 0));
             this->_neededResourceIds.pop_front();
         }

@@ -106,11 +106,14 @@ namespace Client {
             case Connecting:
                 break;
             case LoadingResources:
-                if (this->_game->GetLoadingProgression() == 1.0f)
                 {
-                    Tools::debug << "LoadingChunks...\n";
-                    this->_state = LoadingChunks;
-                    this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
+                    float tmp = this->_game->GetLoadingProgression();
+                    if (this->_game->GetLoadingProgression() == 1.0f)
+                    {
+                        Tools::debug << "LoadingChunks...\n";
+                        this->_state = LoadingChunks;
+                        this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
+                    }
                 }
                 break;
             case LoadingChunks:
@@ -177,6 +180,11 @@ namespace Client {
             throw std::runtime_error("Bad client state");
         this->_state = LoadingResources;
         this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes);
+    }
+
+    void Client::LoadChunks()
+    {
+        this->_state = LoadingChunks;
     }
 
     void Client::Disconnect(std::string const& reason)

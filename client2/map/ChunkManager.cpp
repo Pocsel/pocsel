@@ -5,6 +5,7 @@
 #include "client2/Settings.hpp"
 #include "client2/game/Game.hpp"
 #include "client2/map/ChunkManager.hpp"
+#include "client2/network/PacketCreator.hpp"
 
 namespace Client { namespace Map {
 
@@ -32,10 +33,11 @@ namespace Client { namespace Map {
 
     void ChunkManager::AddChunk(std::unique_ptr<Chunk>&& chunk)
     {
-        if (this->_downloadingChunks.find(chunk->id) != this->_downloadingChunks.end())
+        auto id = chunk->id;
+        if (this->_downloadingChunks.find(id) != this->_downloadingChunks.end())
         {
-            this->_downloadingChunks.erase(chunk->id);
-            this->_chunks.insert(std::unordered_map<Common::BaseChunk::IdType, ChunkNode>::value_type(chunk->id, ChunkNode(std::move(chunk))));
+            this->_downloadingChunks.erase(id);
+            this->_chunks.insert(std::unordered_map<Common::BaseChunk::IdType, ChunkNode>::value_type(id, ChunkNode(std::move(chunk))));
         }
     }
 
@@ -55,7 +57,8 @@ namespace Client { namespace Map {
     {
         unsigned int nbChunks = this->_game.GetClient().GetSettings().chunkViewDistance
             + this->_game.GetClient().GetSettings().chunkCacheArea;
-        Tools::AlignedCube cacheDistance(Tools::Vector3d(playerPosition.chunk), nbChunks * Common::ChunkSize * 2);
+        Tools::Vector3d pos(playerPosition.world - Tools::Vector3u(nbChunks * Common::ChunkSize));
+        Tools::AlignedCube cacheDistance(pos, nbChunks * Common::ChunkSize * 2);
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
             this->_octree[i]->RemoveElementsOut(
                 cacheDistance,
@@ -67,9 +70,10 @@ namespace Client { namespace Map {
 
     void ChunkManager::_DownloadNewChunks(Common::Position const& playerPosition)
     {
+        std::deque<Common::BaseChunk::IdType> tmp;
         int cacheDistance = (int)this->_game.GetClient().GetSettings().chunkViewDistance;
-        int min = -cacheDistance * 80 / 100; // TODO: valeur dans les settings
-        int max = cacheDistance * 80 / 100;
+        int min = -cacheDistance;
+        int max = cacheDistance;
 
         Common::BaseChunk::CoordsType const& coords = playerPosition.world;
         Common::BaseChunk::CoordsType pos;
@@ -94,10 +98,15 @@ namespace Client { namespace Map {
                     id = Chunk::CoordsToId(pos);
                     if (this->_downloadingChunks.find(id) == this->_downloadingChunks.end() &&
                         this->_chunks.find(id) == this->_chunks.end())
+                    {
+                        tmp.push_back(id);
                         this->_downloadingChunks.insert(id);
+                    }
                 }
             }
         }
+        while (!tmp.empty())
+            this->_game.GetClient().GetNetwork().SendPacket(Network::PacketCreator::NeedChunks(tmp));
     }
 
 }}
