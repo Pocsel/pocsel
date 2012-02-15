@@ -8,6 +8,7 @@
 #include "client2/network/Network.hpp"
 #include "client2/network/PacketCreator.hpp"
 #include "client2/network/PacketDispatcher.hpp"
+#include "client2/map/Map.hpp"
 #include "client2/menu/Menu.hpp"
 #include "client2/menu/LoadingScreen.hpp"
 
