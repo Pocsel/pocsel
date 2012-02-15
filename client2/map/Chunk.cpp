@@ -1,34 +1,29 @@
 #include "client2/precompiled.hpp"
 
 #include "client2/map/Chunk.hpp"
-#include "tools/IRenderer.hpp"
 
 namespace Client { namespace Map {
 
-        Chunk::Chunk(IdType id)
-            : Common::BaseChunk(id)
-        {
-        }
+    Chunk::Chunk(IdType id)
+        : Common::BaseChunk(id),
+        _mesh(0)
+    {
+    }
 
-        Chunk::Chunk(CoordsType const& c)
-            : Common::BaseChunk(c)
-        {
-        }
+    Chunk::Chunk(CoordsType const& c)
+        : Common::BaseChunk(c)
+    {
+    }
 
-        bool Chunk::HasTransparentCube() const
-        {
-            //return this->_dispChunk.HasTransparentCube();
-            return false;
-        }
+    Chunk::~Chunk()
+    {
+        Tools::Delete(this->_mesh);
+    }
 
-        void Chunk::RefreshDisplay(Tools::IRenderer& renderer, Map const& map)
-        {
-            //this->_dispChunk.Refresh(renderer, map);
-        }
-
-        void Chunk::Render(Tools::IRenderer& renderer, Common::Camera const& camera)
-        {
-            //this->_dispChunk.Render(camera, renderer);
-        }
-
+    void Chunk::SetMesh(std::unique_ptr<ChunkMesh> mesh)
+    {
+        if (this->_mesh != 0)
+            delete this->_mesh;
+        this->_mesh = mesh.release();
+    }
 }}

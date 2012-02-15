@@ -32,7 +32,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     ShaderProgramCg::~ShaderProgramCg()
     {
-        cgDestroyEffect(this->_effect);
         if (this->_mvp)
             cgDestroyParameter(this->_mvp);
         if (this->_mv)
@@ -43,6 +42,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             cgDestroyParameter(this->_view);
         if (this->_projection)
             cgDestroyParameter(this->_projection);
+        cgDestroyEffect(this->_effect);
     }
 
     std::unique_ptr<IShaderParameter> ShaderProgramCg::GetParameter(std::string const& identifier)

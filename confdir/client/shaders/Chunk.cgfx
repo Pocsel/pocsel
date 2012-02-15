@@ -1,6 +1,5 @@
 float4x4 mvp : WorldViewProjection;
 float4x4 mv : WorldView;
-float timer;
 float3 lightDirection = {-0.704, -0.704, 0};
 
 float3 fogColor = float3(0.8, 0.8, 0.9);

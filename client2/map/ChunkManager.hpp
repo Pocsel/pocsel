@@ -5,6 +5,7 @@
 #include "common/Position.hpp"
 #include "tools/AlignedCube.hpp"
 #include "client2/map/Chunk.hpp"
+#include "client2/map/ChunkRenderer.hpp"
 
 #include "tools/Octree.hpp"
 
@@ -44,9 +45,12 @@ namespace Client { namespace Map {
 
     private:
         Game::Game& _game;
+        ChunkRenderer _chunkRenderer;
         std::unordered_set<Common::BaseChunk::IdType> _downloadingChunks;
         std::unordered_map<Common::BaseChunk::IdType, ChunkNode> _chunks;
+        std::list<ChunkNode*> _waitingRefresh;
         Tools::Octree<ChunkNode>* _octree[16];
+        float _loadingProgression;
 
     public:
         ChunkManager(Game::Game& game);
@@ -56,8 +60,11 @@ namespace Client { namespace Map {
         template<class TFunc>
         void ForeachIn(Tools::AbstractCollider const& container, TFunc function);
         void Update(Common::Position const& playerPosition);
+        void Render();
 
-        float GetLoadingProgression() const;
+        Chunk* GetChunk(Common::BaseChunk::IdType id) const;
+        Chunk* GetChunk(Common::BaseChunk::CoordsType const& coords) const { return this->GetChunk(Common::BaseChunk::CoordsToId(coords)); }
+        float GetLoadingProgression() const { return this->_loadingProgression; }
     private:
         void _RemoveOldChunks(Common::Position const& playerPosition);
         void _DownloadNewChunks(Common::Position const& playerPosition);

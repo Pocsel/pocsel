@@ -65,12 +65,21 @@ namespace Client {
                 if (this->_game->GetLoadingProgression() == 1.0f)
                 {
                     Tools::debug << "LoadingChunks...\n";
-                    this->_state = LoadingChunks;
+                    this->_state = WaitingPosition;
                     this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
                 }
                 break;
+            case WaitingPosition:
+                this->_menu->GetLoadingScreen().Render("Waiting position", 0);
+                break;
             case LoadingChunks:
                 this->_menu->GetLoadingScreen().Render("Downloading chunks", this->_game->GetMap().GetLoadingProgression());
+                if (this->_game->GetLoadingProgression() == 1.0f)
+                {
+                    Tools::debug << "Run !\n";
+                    this->_state = Running;
+                    this->_network.SendPacket(Network::PacketCreator::TeleportOk());
+                }
                 break;
             case Running:
                 this->_game->Update();

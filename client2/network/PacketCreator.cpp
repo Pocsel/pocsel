@@ -66,12 +66,6 @@ namespace Client { namespace Network {
         return p;
     }
 
-    //std::unique_ptr<Common::Packet> PacketCreator::GetSpawnPosition()
-    //{
-    //    std::unique_ptr<Common::Packet> p(new Common::Packet());
-    //    p->Write(Protocol::ClientToServer::GetSpawnPosition);
-    //    return  p;
-    //}
     std::unique_ptr<Common::Packet> PacketCreator::Settings(Client::Settings const& settings)
     {
         std::unique_ptr<Common::Packet> p(new Common::Packet());
@@ -79,6 +73,13 @@ namespace Client { namespace Network {
 
         p->Write(settings.chunkViewDistance + settings.chunkCacheArea);
         p->Write(settings.nickname);
+        return p;
+    }
+
+    std::unique_ptr<Common::Packet> PacketCreator::TeleportOk()
+    {
+        std::unique_ptr<Common::Packet> p(new Common::Packet());
+        p->Write(Protocol::ClientToServer::TeleportOk);
         return p;
     }
 

@@ -59,8 +59,9 @@ namespace Tools {
             this->_position.y + this->_size < box._position.y || this->_position.y > box._position.y + box._size ||
             this->_position.z + this->_size < box._position.z || this->_position.z > box._position.z + box._size)
             return Outside;
-        if (this->_position.x <= box._position.x &&  this->_position.y <= box._position.y && 
-            this->_position.z <= box._position.z && box._size <= this->_size)
+        if (this->_position.x <= box._position.x && box._position.x + box._size <= this->_position.x + this->_size &&
+            this->_position.y <= box._position.y && box._position.y + box._size <= this->_position.y + this->_size &&
+            this->_position.z <= box._position.z && box._position.z + box._size <= this->_position.z + this->_size)
             return Inside;
         return Intersecting;
     }

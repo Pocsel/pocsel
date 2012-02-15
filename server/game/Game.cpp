@@ -51,7 +51,7 @@ namespace Server { namespace Game {
         newPlayer->SetCurrentMap(this->_world->GetDefaultMap());
 
         this->_world->GetDefaultMap().GetSpawnPosition(
-            std::bind(&Game::PlayerTeleport, this, clientId, this->_world->GetDefaultMap().GetName(), std::placeholders::_1)
+            std::bind(&Game::_PlayerTeleport, this, clientId, this->_world->GetDefaultMap().GetName(), std::placeholders::_1)
             );
     }
 

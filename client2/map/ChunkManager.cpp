@@ -10,7 +10,9 @@
 namespace Client { namespace Map {
 
     ChunkManager::ChunkManager(Game::Game& game)
-        : _game(game)
+        : _game(game),
+        _chunkRenderer(game),
+        _loadingProgression(0)
     {
         Tools::Vector3d coords;
         coords.y = 0;
@@ -33,39 +35,65 @@ namespace Client { namespace Map {
 
     void ChunkManager::AddChunk(std::unique_ptr<Chunk>&& chunk)
     {
+        this->_loadingProgression = std::max(1.0f, this->_loadingProgression + 0.01f);
         auto id = chunk->id;
         if (this->_downloadingChunks.find(id) != this->_downloadingChunks.end())
         {
             this->_downloadingChunks.erase(id);
             this->_chunks.insert(std::unordered_map<Common::BaseChunk::IdType, ChunkNode>::value_type(id, ChunkNode(std::move(chunk))));
+            auto elem = &this->_chunks.find(id)->second;
+            for (int i = 0; i < 16; ++i)
+                if (this->_octree[i]->Contains(*elem) == Tools::AbstractCollider::Inside)
+                    this->_octree[i]->InsertElement(elem);
+            this->_waitingRefresh.push_back(elem);
         }
     }
 
     void ChunkManager::Update(Common::Position const& playerPosition)
     {
+        int nb = 0;
+        while (!this->_waitingRefresh.empty() && ++nb < 20)
+        {
+            this->_chunkRenderer.RefreshDisplay(*this->_waitingRefresh.front()->chunk);
+            this->_waitingRefresh.pop_front();
+        }
         this->_DownloadNewChunks(playerPosition);
         this->_RemoveOldChunks(playerPosition);
     }
 
-    float ChunkManager::GetLoadingProgression() const
+    void ChunkManager::Render()
     {
-        // TODO
-        return 1.0f;
+        this->_chunkRenderer.Render();
+    }
+
+    Chunk* ChunkManager::GetChunk(Common::BaseChunk::IdType id) const
+    {
+        auto it = this->_chunks.find(id);
+        if (it == this->_chunks.end())
+            return 0;
+        return it->second.chunk;
     }
 
     void ChunkManager::_RemoveOldChunks(Common::Position const& playerPosition)
     {
+        return; // C'EST BUGGE
         unsigned int nbChunks = this->_game.GetClient().GetSettings().chunkViewDistance
             + this->_game.GetClient().GetSettings().chunkCacheArea;
-        Tools::Vector3d pos(playerPosition.world - Tools::Vector3u(nbChunks * Common::ChunkSize));
-        Tools::AlignedCube cacheDistance(pos, nbChunks * Common::ChunkSize * 2);
+        Tools::Vector3d pos((playerPosition.world - Tools::Vector3u(nbChunks)) * Common::ChunkSize);
+        Tools::AlignedCube cacheArea(pos, nbChunks * Common::ChunkSize * 2);
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
-            this->_octree[i]->RemoveElementsOut(
-                cacheDistance,
-                [this](ChunkNode& node)
+        {
+            std::deque<ChunkNode*> nodeToDelete;
+            this->_octree[i]->ForeachOut(
+                cacheArea,
+                [&nodeToDelete](ChunkNode& node)
                 {
-                    this->_chunks.erase(node.chunk->id);
+                    nodeToDelete.push_back(&node);
                 });
+            for (auto it = nodeToDelete.begin(), ite = nodeToDelete.end(); it != ite; ++it)
+                if (!this->_octree[i]->RemoveElement(*it))
+                    Tools::log << "AAAAAAAAHHHHHHHHH\n";
+        }
     }
 
     void ChunkManager::_DownloadNewChunks(Common::Position const& playerPosition)

@@ -48,13 +48,20 @@ namespace Tools {
                 this->_childs[6] = new Octree<T>(this->GetPosition() + Vector3d(size, size, 0   ), size);
                 this->_childs[7] = new Octree<T>(this->GetPosition() + Vector3d(size, size, size), size);
 
+                bool ok = false;
                 for (int i = 0; i < 8; ++i)
                 {
-                    if (this->_childs[i]->Contains(*this->_element) != AbstractCollider::Outside)
+                    if (this->_childs[i]->Contains(*this->_element) == AbstractCollider::Inside)
+                    {
+                        if (ok)
+                            Tools::log << "AAAAAAAAAHHHHHHHH\n";
                         this->_childs[i]->InsertElement(this->_element);
-                    if (this->_childs[i]->Contains(*element) != AbstractCollider::Outside)
+                        ok = this->_childs[i]->_element == this->_element;
+                    }
+                    if (this->_childs[i]->Contains(*element) == AbstractCollider::Inside)
                         this->_childs[i]->InsertElement(element);
                 }
+                this->_element = 0;
             }
             else
             {
@@ -98,88 +105,18 @@ namespace Tools {
                 if (!removed)
                     return false;
             }
-            if (--this->_count == 1)
+            this->_count--;
+            if (this->_count == 1)
             {
                 for (int i = 0; i < 8; ++i)
                 {
                     if (this->_childs[i]->_count == 1)
                         this->_element = this->_childs[i]->_element;
-                    Tools::Delete(this->_childs[i]);
+                    delete this->_childs[i];
+                    this->_childs[i] = 0;
                 }
             }
             return true;
-        }
-
-        template<class TFunc>
-        int RemoveElements(TFunc predicate)
-        {
-            if (this->_count == 0)
-                return false;
-            int removed = 0;
-            if (this->_count == 1)
-            {
-                if (!predicate(*this->_element))
-                    return 0;
-                this->_element = 0;
-                removed++;
-            }
-            else
-            {
-                for (int i = 0; i < 8; ++i)
-                    removed += this->_childs[i]->RemoveElements<TFunc>(predicate);
-            }
-            this->_count -= removed;
-            if (this->_count <= 1)
-            {
-                for (int i = 0; i < 8; ++i)
-                {
-                    if (this->_childs[i]->_count == 1)
-                        this->_element = this->_childs[i]->_element;
-                    Tools::Delete(this->_childs[i]);
-                }
-            }
-            return removed;
-        }
-
-        template<class TFunc>
-        int RemoveElementsOut(AbstractCollider const& container, TFunc free)
-        {
-            if (this->_count == 0)
-                return 0;
-            int removed = 0;
-            if (this->_element)
-            {
-                if (container.Contains(*this->_element) == AbstractCollider::Outside)
-                {
-                    free(*this->_element);
-                    this->_element = 0;
-                }
-                removed++;
-            }
-            else
-            {
-                for (int i = 0; i < 8; ++i)
-                    switch (container.Contains(*(this->_childs[i])))
-                    {
-                    case AbstractCollider::Inside:
-                        break;
-                    case AbstractCollider::Intersecting:
-                    case AbstractCollider::Outside: // Optimisations possibles
-                        removed += this->_childs[i]->RemoveElementsOut<TFunc>(container, free);
-                        break;
-                    }
-            }
-            this->_count -= removed;
-            if (this->_count <= 1)
-            {
-                for (int i = 0; i < 8; ++i)
-                {
-                    if (this->_childs[i]->_count == 1)
-                        this->_element = this->_childs[i]->_element;
-                    Tools::Delete(this->_childs[i]);
-                }
-            }
-            return removed;
         }
 
         template<class TFunc>
@@ -207,17 +144,18 @@ namespace Tools {
             else
             {
                 for (int i = 0; i < 8; ++i)
-                    switch (container.Contains(*(this->_childs[i])))
-                    {
-                    case AbstractCollider::Inside:
-                        this->_childs[i]->Foreach<TFunc>(function);
-                        break;
-                    case AbstractCollider::Intersecting:
-                        this->_childs[i]->ForeachIn<TFunc>(container, function);
-                        break;
-                    case AbstractCollider::Outside:
-                        break;
-                    }
+                    if (this->_childs[i] != 0)
+                        switch (container.Contains(*(this->_childs[i])))
+                        {
+                        case AbstractCollider::Inside:
+                            this->_childs[i]->Foreach<TFunc>(function);
+                            break;
+                        case AbstractCollider::Intersecting:
+                            this->_childs[i]->ForeachIn<TFunc>(container, function);
+                            break;
+                        case AbstractCollider::Outside:
+                            break;
+                        }
             }
         }
 
@@ -234,17 +172,18 @@ namespace Tools {
             else
             {
                 for (int i = 0; i < 8; ++i)
-                    switch (container.Contains(*(this->_childs[i])))
-                    {
-                    case AbstractCollider::Inside:
-                        break;
-                    case AbstractCollider::Intersecting:
-                        this->_childs[i]->ForeachOut<TFunc>(container, function);
-                        break;
-                    case AbstractCollider::Outside:
-                        this->_childs[i]->Foreach<TFunc>(function);
-                        break;
-                    }
+                    if (this->_childs[i] != 0)
+                        switch (container.Contains(*(this->_childs[i])))
+                        {
+                        case AbstractCollider::Inside:
+                            break;
+                        case AbstractCollider::Intersecting:
+                            this->_childs[i]->ForeachOut<TFunc>(container, function);
+                            break;
+                        case AbstractCollider::Outside:
+                            this->_childs[i]->Foreach<TFunc>(function);
+                            break;
+                        }
             }
         }
 

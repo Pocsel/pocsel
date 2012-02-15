@@ -2,15 +2,11 @@
 #define __CLIENT_MAP_CHUNK_HPP__
 
 #include "common/BaseChunk.hpp"
+#include "client2/map/ChunkMesh.hpp"
 
 namespace Common {
     struct Camera;
 }
-
-namespace Tools {
-    class IRenderer;
-}
-
 namespace Client { namespace Map {
     class Map;
 }}
@@ -21,15 +17,16 @@ namespace Client { namespace Map {
         : public Common::BaseChunk,
         private boost::noncopyable
     {
-        private:
+    private:
+        ChunkMesh* _mesh;
 
-        public:
-            Chunk(IdType id);
-            Chunk(CoordsType const& c);
+    public:
+        Chunk(IdType id);
+        Chunk(CoordsType const& c);
+        ~Chunk();
 
-            bool HasTransparentCube() const;
-            void RefreshDisplay(Tools::IRenderer& renderer, Map const& map);
-            void Render(Tools::IRenderer& renderer, Common::Camera const& camera);
+        ChunkMesh* GetMesh() { return this->_mesh; }
+        void SetMesh(std::unique_ptr<ChunkMesh> mesh);
     };
 
 }}

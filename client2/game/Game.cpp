@@ -16,6 +16,13 @@ namespace Client { namespace Game {
         _resourceManager(client, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion),
         _map(0)
     {
+        this->_player.GetCamera().Rotate(0, 0);
+        this->_renderer.SetClearColor(Tools::Color4f(0.1f, 0.1f, 0.1f, 1));
+        this->_client.GetWindow().RegisterCallback(
+            [this](Tools::Vector2u const& size)
+            {
+                this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, size.w / float(size.h), 0.001f, 1000.0f);
+            });
     }
 
     Game::~Game()
@@ -29,19 +36,24 @@ namespace Client { namespace Game {
         this->_player.SetPosition(position);
         if (this->_map == 0)
         {
-            this->_client.LoadChunks();
             this->_map = new Map::Map(*this);
             this->_map->GetChunkManager().Update(this->_player.GetPosition());
+            this->_client.LoadChunks();
         }
     }
 
     void Game::Update()
     {
+        this->_map->GetChunkManager().Update(this->_player.GetPosition());
     }
 
     void Game::Render()
     {
+        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+        this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
+        this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
         this->_renderer.BeginDraw();
+        this->_map->GetChunkManager().Render();
         this->_renderer.EndDraw();
     }
 

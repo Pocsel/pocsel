@@ -52,7 +52,9 @@ namespace Client { namespace Network {
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::TeleportPlayer] =
             [this](Common::Packet& p)
             {
-                if (this->_client.GetState() != Client::LoadingChunks && this->_client.GetState() != Client::Running)
+                if (this->_client.GetState() != Client::WaitingPosition &&
+                    this->_client.GetState() != Client::LoadingChunks &&
+                    this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for teleporting");
                 std::string map;
                 Common::Position position;
