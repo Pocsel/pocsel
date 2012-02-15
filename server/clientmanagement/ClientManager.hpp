@@ -2,6 +2,7 @@
 #define __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 
 #include "common/Packet.hpp"
+#include "common/Position.hpp"
 #include "tools/SimpleMessageQueue.hpp"
 
 #include "server/Chunk.hpp"
@@ -80,7 +81,7 @@ namespace Server { namespace ClientManagement {
         }
         void ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)
         {
-            this->_PushMessage(std::bind(&ClientManager::_ClientTeleport, this, clientId, std::cref(map), std::cref(position)));
+            this->_PushMessage(std::bind(&ClientManager::_ClientTeleport, this, clientId, map, position));
         }
 
         // A appeler du thread clientmanagement
