@@ -28,6 +28,7 @@ namespace Server { namespace ClientManagement {
     ClientManager::~ClientManager()
     {
         Tools::debug << "ClientManager::~ClientManager()\n";
+
         for (auto it = this->_clients.begin(), ite = this->_clients.end(); it != ite; ++it)
             Tools::Delete(it->second);
 

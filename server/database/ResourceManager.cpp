@@ -53,8 +53,7 @@ namespace Server { namespace Database {
 
     ResourceManager::~ResourceManager()
     {
-        for (auto it = this->_resources.begin(), end = this->_resources.end(); it != end; ++it)
-            Tools::Delete(*it);
+        std::for_each(this->_resources.begin(), this->_resources.end(), [](Common::Resource* r) { Tools::Delete(r); });
         Tools::Delete(this->_connectionPool);
     }
 
