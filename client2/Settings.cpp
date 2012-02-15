@@ -25,11 +25,11 @@ namespace Client {
              "Port of the " PROJECT_NAME " server")
             ("conf,c", boost::program_options::value<std::string>()->default_value(defaultConfDir),
              "Path to a client configuration directory")
-            ("settings,s",
+            ("settings,s", boost::program_options::value<std::string>(),
              "Path to a settings file")
-            ("bindings,b",
+            ("bindings,b", boost::program_options::value<std::string>(),
              "Path to a bindings file")
-            ("cache",
+            ("cache", boost::program_options::value<std::string>(),
              "Path to a cache directory")
             ("version,v",
              "Show version and exit")
