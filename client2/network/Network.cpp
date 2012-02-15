@@ -19,7 +19,11 @@ namespace Client { namespace Network {
 
     void Network::Connect(std::string const& host, std::string const& port)
     {
-        assert(!this->_isRunning);
+        {
+            boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+            if (this->_isRunning)
+                throw std::runtime_error("Network::Connect called while thread running");
+        }
 
         this->_host = host;
         this->_port = port;
@@ -51,6 +55,7 @@ namespace Client { namespace Network {
         {
             Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed.\n";
             boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+            this->_isRunning = false;
             this->_lastError = error.message();
             return;
         }
@@ -70,13 +75,19 @@ namespace Client { namespace Network {
 
     void Network::Stop()
     {
-        assert(this->_isRunning);
+        {
+            boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+            if (!this->_isRunning)
+                throw std::runtime_error("Network::Connect called while thread not running");
+        }
 
         if (this->IsConnected())
             this->_CloseSocket();
         this->_ioService.stop();
         this->_thread->join();
         this->_isRunning = false;
+        this->_lastError.clear();
+        this->_isConnected = false;
 
         // Pas de leak dans le cas où on refait un connect
         delete this->_thread;

@@ -66,7 +66,7 @@ namespace Client {
             switch (this->_state)
             {
             case Connecting:
-                this->_menu->GetLoadingScreen().Render("Connecting to " + this->_settings.host + ":" + this->_settings.port, 0);
+                this->_menu->GetLoadingScreen().Render("Connecting to " + this->_settings.host + ":" + this->_settings.port + "...", 0);
                 if (this->_network.IsConnected())
                 {
                     this->_network.SendPacket(Network::PacketCreator::Login("yalap_a"));
@@ -114,20 +114,23 @@ namespace Client {
         if (this->_state != Connecting)
             throw std::runtime_error("Bad client state");
         this->_state = LoadingResources;
+        if (this->_game)
+            delete this->_game;
         this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes);
     }
 
-    //void Client::LoadChunks()
-    //{
-    //    this->_state = LoadingChunks;
-    //}
+    void Client::LoadChunks()
+    {
+        this->_state = LoadingChunks;
+    }
 
-    //void Client::Disconnect(std::string const& reason)
-    //{
-    //    this->_network.Stop();
-    //    this->_state = Disconnected;
-    //    delete this->_game;
-    //}
+    void Client::Disconnect(std::string const& reason)
+    {
+        if (this->_network.IsRunning())
+            this->_network.Stop();
+        this->_menu->GetDisconnectedScreen().SetMessage(reason);
+        this->_state = Disconnected;
+    }
 
     void Client::Quit()
     {
