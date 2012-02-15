@@ -25,7 +25,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         typedef std::function<void(Chunk*)> Callback;
 
     private:
-        std::list<CubeSpawnInfo*> _cubes;
+        std::vector<CubeSpawnInfo> _cubes;
         std::vector<IEquation*> _equations;
         Perlin* _perlin;
 

@@ -77,7 +77,7 @@ namespace Client { namespace Network {
         std::unique_ptr<Common::Packet> p(new Common::Packet());
         p->Write(Protocol::ClientToServer::Settings);
 
-        p->Write(settings.chunkCacheDistance);
+        p->Write(settings.chunkViewDistance + settings.chunkCacheArea);
         p->Write(settings.nickname);
         return p;
     }

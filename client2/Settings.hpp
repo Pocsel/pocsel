@@ -14,9 +14,11 @@ namespace Client {
         boost::filesystem::path settingsFile;
         boost::filesystem::path cacheDir;
         // settings.lua
-        unsigned int fps;
-        unsigned int chunkCacheDistance;
         std::string nickname;
+        unsigned int fps;
+        unsigned int chunkViewDistance;
+        unsigned int chunkCacheArea;
+        unsigned int chunkMinimumArea;
 
     public:
         Settings(int ac, char** av);

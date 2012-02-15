@@ -131,48 +131,56 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             int z0, z1, zc;
             int ipp1 = ipp + 1;
 
-#define SET_0_1_C(ix, x0, x1, xc) \
+            int xtab[Common::ChunkSize];
+            int ztab[Common::ChunkSize];
+
+#define SET_TAB_XZY(x) \
             do { \
-                if ((int)ix % ipp1 == ipp / 2) \
+                x##0 = ipp / 2; \
+                x##1 = ipp / 2; \
+                for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
                 { \
-                    x0 = ix; \
-                    if (ix + ipp1 >= Common::ChunkSize) \
-                    x1 = ix; \
+                    if ((int)i % ipp1 == ipp / 2) \
+                    { \
+                        x##0 = i; \
+                        if (i + ipp1 >= Common::ChunkSize) \
+                            x##1 = i; \
+                        else \
+                            x##1 = i + ipp1; \
+                        x##tab[i] = x##0; \
+                    } \
                     else \
-                    x1 = ix + ipp1; \
-                    xc = x0; \
-                } \
-                else \
-                { \
-                    if ((int)ix % ipp1 < ipp1 / 2) \
-                    xc = x1; \
-                    else \
-                    xc = x0; \
+                    { \
+                        if ((int)i % ipp1 < ipp1 / 2) \
+                            x##tab[i] = x##1; \
+                        else \
+                            x##tab[i] = x##0; \
+                    } \
                 } \
             } while (0);
 
-            x0 = ipp / 2;
-            x1 = ipp / 2;
+            SET_TAB_XZY(x);
+            SET_TAB_XZY(z);
+
+            double* resBase = res;
+
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                SET_0_1_C(ix, x0, x1, xc);
+                xc = xtab[ix] * Common::ChunkSize2;
 
-                z0 = ipp / 2;
-                z1 = ipp / 2;
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    SET_0_1_C(iz, z0, z1, zc);
+                    zc = ztab[iz] * Common::ChunkSize + xc;
 
-                    p = res[(xc) * Common::ChunkSize2 +
-                        (zc) * Common::ChunkSize];
+                    p = resBase[zc];
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)
-                        res[ix * Common::ChunkSize2 + iz * Common::ChunkSize + iy] = p;
+                        *res++ = p;
                 }
             }
 
         }
-#undef SET_0_1_C
+#undef SET_TAB_XZY
     };
 
 }}}}}

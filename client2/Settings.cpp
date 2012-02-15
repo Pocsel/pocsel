@@ -4,18 +4,18 @@
 #include "client2/Settings.hpp"
 #include "ProgramInfo.hpp"
 #include "common/ConfDir.hpp"
+#include "tools/lua/Interpreter.hpp"
 
 namespace Client {
 
     Settings::Settings(int ac, char** av) :
+        nickname("Player"),
         fps(60),
-        chunkCacheDistance(5),
-        nickname("Player")
+        chunkViewDistance(4),
+        chunkCacheArea(2),
+        chunkMinimumArea(3)
     {
         std::string defaultConfDir = Common::ConfDir::Client().string();
-        std::string defaultSettingsFile = defaultConfDir + "/settings.lua";
-        std::string defaultBindingsFile = defaultConfDir + "/bindings.lua";
-        std::string defaultCacheDir = defaultConfDir + "/cache";
 
         boost::program_options::options_description options("Options");
         options.add_options()
@@ -25,11 +25,11 @@ namespace Client {
              "Port of the " PROJECT_NAME " server")
             ("conf,c", boost::program_options::value<std::string>()->default_value(defaultConfDir),
              "Path to a client configuration directory")
-            ("settings,s", boost::program_options::value<std::string>()->default_value(defaultSettingsFile),
+            ("settings,s", boost::program_options::value<std::string>(),
              "Path to a settings file")
-            ("bindings,b", boost::program_options::value<std::string>()->default_value(defaultBindingsFile),
+            ("bindings,b", boost::program_options::value<std::string>(),
              "Path to a bindings file")
-            ("cache", boost::program_options::value<std::string>()->default_value(defaultCacheDir),
+            ("cache", boost::program_options::value<std::string>(),
              "Path to a cache directory")
             ("version,v",
              "Show version and exit")
@@ -71,35 +71,72 @@ namespace Client {
         if (vm["conf"].as<std::string>() != defaultConfDir)
             Tools::log << "Configuration directory: " << this->confDir.string() << Tools::endl;
 
-        if (vm["settings"].as<std::string>() == defaultSettingsFile)
-            this->settingsFile = this->confDir / "settings.lua";
-        else
+        if (vm.count("settings"))
         {
             this->settingsFile = vm["settings"].as<std::string>();
             Tools::log << "Settings file: " << this->settingsFile.string() << Tools::endl;
         }
-
-        if (vm["bindings"].as<std::string>() == defaultBindingsFile)
-            this->bindingsFile = this->confDir / "bindings.lua";
         else
+            this->settingsFile = this->confDir / "settings.lua";
+
+        if (vm.count("bindings"))
         {
             this->bindingsFile = vm["bindings"].as<std::string>();
             Tools::log << "Bindings file: " << this->bindingsFile.string() << Tools::endl;
         }
-
-        if (vm["cache"].as<std::string>() == defaultCacheDir)
-            this->cacheDir = this->confDir / "cache";
         else
+            this->bindingsFile = this->confDir / "bindings.lua";
+
+        if (vm.count("cache"))
         {
             this->cacheDir = vm["cache"].as<std::string>();
             Tools::log << "Cache directory: " << this->cacheDir.string() << Tools::endl;
         }
+        else
+            this->cacheDir = this->confDir / "cache";
 
         this->_ReadSettings();
     }
 
     void Settings::_ReadSettings()
     {
+        try
+        {
+            Tools::Lua::Interpreter i;
+            i.ExecFile(this->settingsFile.string());
+
+            this->nickname = i["nickname"].as<std::string>();
+            this->fps = i["fps"].as<unsigned int>();
+            if (this->fps < 2)
+            {
+                this->fps = 2;
+                Tools::error << "Settings: fps too low, changing to " << this->fps << Tools::endl;
+            }
+            this->chunkViewDistance = i["chunkViewDistance"].as<unsigned int>();
+            if (this->chunkViewDistance < 2)
+            {
+                this->chunkViewDistance = 2;
+                Tools::error << "Settings: chunkViewDistance too low, changing to " << this->chunkViewDistance << Tools::endl;
+            }
+            this->chunkCacheArea = i["chunkCacheArea"].as<unsigned int>();
+            if (this->chunkCacheArea < 1)
+            {
+                this->chunkCacheArea = 1;
+                Tools::error << "Settings: chunkCacheArea too low, changing to " << this->chunkCacheArea << Tools::endl;
+            }
+            this->chunkMinimumArea = i["chunkMinimumArea"].as<unsigned int>();
+            if (this->chunkMinimumArea < 1 || this->chunkMinimumArea > this->chunkViewDistance)
+            {
+                this->chunkMinimumArea = this->chunkViewDistance - 1;
+                Tools::error << "Settings: invalid value for chunkMinimumArea, changing to " << this->chunkMinimumArea << Tools::endl;
+            }
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "Failed to load settings file \"" << this->settingsFile.string() << "\": " << e.what() << Tools::endl;
+            return;
+        }
+        Tools::debug << "Settings file \"" << this->settingsFile.string() << "\" successfully loaded.\n";
     }
 
 }
