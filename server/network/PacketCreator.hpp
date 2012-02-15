@@ -36,7 +36,8 @@ namespace Server { namespace Network {
 
         static std::unique_ptr<Common::Packet> CubeType(Common::CubeType const& cubeType);
 
-        static std::unique_ptr<Common::Packet> TeleportPlayer(Common::Position const& pos);
+        static std::unique_ptr<Common::Packet> TeleportPlayer(std::string const& map,
+                                                              Common::Position const& pos);
     };
 
 }}

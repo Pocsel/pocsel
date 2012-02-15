@@ -50,9 +50,9 @@ namespace Server { namespace Game {
             this->_messageQueue.PushMessage(std::bind(&Game::_SpawnPlayer, this, std::cref(clientName), clientId));
         }
 
-        void PlayerTeleport(Uint32 id, Common::Position const& position)
+        void PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position)
         {
-            this->_messageQueue.PushMessage(std::bind(&Game::_PlayerTeleport, this, id, std::cref(position)));
+            this->_messageQueue.PushMessage(std::bind(&Game::_PlayerTeleport, this, id, std::cref(map), std::cref(position)));
         }
 
         void GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback)
@@ -62,7 +62,7 @@ namespace Server { namespace Game {
 
     private:
         void _SpawnPlayer(std::string const& clientName, Uint32 clientId);
-        void _PlayerTeleport(Uint32 id, Common::Position const& position);
+        void _PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
         void _GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback);
     };
 

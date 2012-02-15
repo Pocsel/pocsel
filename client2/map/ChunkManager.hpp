@@ -6,9 +6,8 @@
 #include "tools/AlignedCube.hpp"
 #include "client2/map/Chunk.hpp"
 
-namespace Tools {
-    template<class T> class Octree;
-}
+#include "tools/Octree.hpp"
+
 namespace Client { namespace Game {
     class Game;
 }}
@@ -54,6 +53,8 @@ namespace Client { namespace Map {
         ~ChunkManager();
 
         void AddChunk(std::unique_ptr<Chunk>&& chunk);
+        template<class TFunc>
+        void ForeachIn(Tools::AbstractCollider const& container, TFunc function);
         void Update(Common::Position const& playerPosition);
 
         float GetLoadingProgression() const;
@@ -61,6 +62,17 @@ namespace Client { namespace Map {
         void _RemoveOldChunks(Common::Position const& playerPosition);
         void _DownloadNewChunks(Common::Position const& playerPosition);
     };
+
+    template<class TFunc>
+    void ChunkManager::ForeachIn(Tools::AbstractCollider const& container, TFunc function)
+    {
+        for (int i = 0; i < 16; ++i)
+            this->_octree[i]->ForeachIn(container,
+                [&function](ChunkNode& node)
+                {
+                    function(*node.chunk);
+                });
+    }
 
 }}
 
