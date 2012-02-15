@@ -29,8 +29,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
 
     CubeSpawnInfo::~CubeSpawnInfo()
     {
-        for (auto it = _validations.begin(), ite = _validations.end(); it != ite; ++it)
-            Tools::Delete(it->validator);
+        std::for_each(_validations.begin(), _validations.end(), [](Validation& val) { Tools::Delete(val.validator); });
     }
 
 }}}}

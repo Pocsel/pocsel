@@ -185,13 +185,11 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
     {
         Tools::debug << "ChunkGenerator::~ChunkGenerator()\n";
 
-//        for (auto it = this->_cubes.begin(), ite = this->_cubes.end() ; it != ite ; ++it)
-//            Tools::Delete(*it);
-        for (auto it = this->_equations.begin(), ite = this->_equations.end() ; it != ite ; ++it)
-            Tools::Delete(*it);
-        Tools::Delete(this->_perlin);
-
         Tools::Delete(this->_messageQueue);
+
+        std::for_each(this->_equations.begin(), this->_equations.end(), [](IEquation* eq) { Tools::Delete(eq); });
+
+        Tools::Delete(this->_perlin);
     }
 
     void ChunkGenerator::Start()
