@@ -22,7 +22,7 @@ namespace Tools { namespace Renderers {
         void ErrCallback()
         {
             auto error = cgGetError();
-            if (error == CG_NO_ERROR)
+            if (error == CG_NO_ERROR || error == CG_CANNOT_DESTROY_PARAMETER_ERROR)
                 return;
             if (error == CG_COMPILER_ERROR)
                 Tools::error << "Cg compiler:\n" << cgGetLastListing(_cgGlobalContext) << "\n";
