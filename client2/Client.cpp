@@ -2,7 +2,8 @@
 
 #include "client2/Client.hpp"
 #include "client2/Settings.hpp"
-#include "client2/game/Game.hpp"
+//#include "client2/game/Game.hpp"
+#include "client2/menu/Menu.hpp"
 #include "client2/resources/LocalResourceManager.hpp"
 #include "client2/window/sdl/Window.hpp"
 #include "client2/window/InputManager.hpp"
@@ -48,6 +49,7 @@ namespace Client {
         this->_window = new Window::Sdl::Window(*this);
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
+        this->_menu = new Menu::Menu(*this);
 
         //this->_window->GetInputManager().GetInputBinder().Bind("eScApE", "quiT");
         //this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
@@ -78,6 +80,7 @@ namespace Client {
     Client::~Client()
     {
         Tools::Delete(this->_game);
+        Tools::Delete(this->_menu);
         Tools::Delete(this->_packetDispatcher);
         Tools::Delete(this->_window);
     }

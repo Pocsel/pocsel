@@ -19,6 +19,9 @@ namespace Client {
     namespace Window {
         class Window;
     }
+    namespace Menu {
+        class Menu;
+    }
 }
 
 namespace Client {
@@ -45,6 +48,7 @@ namespace Client {
         Network::PacketDispatcher* _packetDispatcher;
         State _state;
         Game::Game* _game;
+        Menu::Menu* _menu;
 
     public:
         Client(Settings& settings);
@@ -59,6 +63,7 @@ namespace Client {
         Window::Window& GetWindow() { return *this->_window; }
         Resources::LocalResourceManager& GetLocalResourceManager() { return *this->_resourceManager; }
         Game::Game& GetGame() { return *this->_game; }
+        Menu::Menu& GetMenu() { return *this->_menu; }
         State GetState() const { return this->_state; }
     };
 
