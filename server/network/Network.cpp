@@ -4,8 +4,6 @@
 #include "server/Server.hpp"
 #include "server/Settings.hpp"
 
-#include "server/clientmanagement/ClientManager.hpp"
-
 namespace Server { namespace Network {
 
     Network::Network(Server& server, NewConnectionHandler newConnectionHandler) :

@@ -28,6 +28,11 @@ namespace Client { namespace Menu {
         Tools::Delete(this->_backRect);
     }
 
+    void DisconnectedScreen::SetMessage(std::string const& message)
+    {
+        this->_message = message;
+    }
+
     void DisconnectedScreen::_Resize(Tools::Vector2u const& size)
     {
         this->_text1Matrix = Tools::Matrix4<float>::CreateTranslation(10, size.h - 80, 0);
@@ -36,7 +41,7 @@ namespace Client { namespace Menu {
             * Tools::Matrix4<float>::CreateTranslation(size.w / 2, size.h / 2, 0);
     }
 
-    void DisconnectedScreen::Render(std::string const& message)
+    void DisconnectedScreen::Render()
     {
         this->_menu.BeginMenuDrawing();
         do
@@ -51,7 +56,7 @@ namespace Client { namespace Menu {
             this->_renderer.SetModelMatrix(this->_text1Matrix);
             this->_menu.GetFont().Render(this->_menu.GetFontTexture(), "Disconnected");
             this->_renderer.SetModelMatrix(this->_text2Matrix);
-            this->_menu.GetFont().Render(this->_menu.GetFontTexture(), message);
+            this->_menu.GetFont().Render(this->_menu.GetFontTexture(), this->_message);
         } while (this->_menu.GetFontShader().EndPass());
         this->_menu.EndMenuDrawing();
     }

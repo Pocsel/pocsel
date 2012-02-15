@@ -5,6 +5,8 @@
 
 #include "common/CubeType.hpp"
 
+#include "tools/SimpleMessageQueue.hpp"
+
 #include "server/Logger.hpp"
 
 #include "server/game/map/Conf.hpp"
@@ -15,8 +17,8 @@
 namespace Server { namespace Game { namespace Map { namespace Gen {
 
     ChunkGenerator::ChunkGenerator(Conf const& conf) :
-        Tools::SimpleMessageQueue(boost::thread::hardware_concurrency() + 1)
-        //Tools::SimpleMessageQueue(1)
+        _messageQueue(new Tools::SimpleMessageQueue(boost::thread::hardware_concurrency() + 1))
+        //_messageQueue(new Tools::SimpleMessageQueue(1))
     {
         Tools::debug << "ChunkGenerator::ChunkGenerator()\n";
         Log::load << "Loading chunk generator:\n" <<
@@ -183,26 +185,33 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
     {
         Tools::debug << "ChunkGenerator::~ChunkGenerator()\n";
 
-//        for (auto it = this->_cubes.begin(), ite = this->_cubes.end() ; it != ite ; ++it)
-//            Tools::Delete(*it);
-        for (auto it = this->_equations.begin(), ite = this->_equations.end() ; it != ite ; ++it)
-            Tools::Delete(*it);
+        Tools::Delete(this->_messageQueue);
+
+        std::for_each(this->_equations.begin(), this->_equations.end(), [](IEquation* eq) { Tools::Delete(eq); });
+
         Tools::Delete(this->_perlin);
     }
 
     void ChunkGenerator::Start()
     {
         Tools::debug << "ChunkGenerator::Start()\n";
-        this->_Start();
+        this->_messageQueue->Start();
     }
 
     void ChunkGenerator::Stop()
     {
         Tools::debug << "ChunkGenerator::Stop()\n";
-        this->_Stop();
+        this->_messageQueue->Stop();
     }
 
-    void ChunkGenerator::_GetChunk(Chunk::IdType id, Callback callback)
+    void ChunkGenerator::GetChunk(Chunk::IdType id, Callback& callback)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&ChunkGenerator::_GetChunk, this, id, callback));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void ChunkGenerator::_GetChunk(Chunk::IdType id, Callback& callback)
     {
         Chunk::CoordsType coords = Chunk::IdToCoords(id);
         Uint32 x, y, z;

@@ -34,6 +34,7 @@ namespace Client {
         {
             Quitting = 0,
             Connecting,
+            LoggingIn,
             LoadingResources,
             WaitingPosition,
             LoadingChunks,
