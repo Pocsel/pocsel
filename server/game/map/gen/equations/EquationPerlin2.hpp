@@ -229,24 +229,28 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                             x1_i = x1 - (int)ix;
                             xi_0 = (int)ix - x0;
 
-                            p = (p00*x1_i)/(double)x1_0 +
-                                (p10*xi_0)/(double)x1_0;
+                            p = (
+                                 (p00*x1_i) +
+                                 (p10*xi_0)
+                                )/(double)x1_0;
                         }
                     }
                     else if (x0 == x1)
                     {
-                            z0s = z0 * Common::ChunkSize;
-                            z1s = z1 * Common::ChunkSize;
+                        z0s = z0 * Common::ChunkSize;
+                        z1s = z1 * Common::ChunkSize;
 
-                            p00 = resBase[x0s + z0s];
-                            p10 = resBase[x0s + z1s];
+                        p00 = resBase[x0s + z0s];
+                        p10 = resBase[x0s + z1s];
 
-                            z1_0 = z1 - z0;
-                            z1_i = z1 - (int)iz;
-                            zi_0 = (int)iz - z0;
+                        z1_0 = z1 - z0;
+                        z1_i = z1 - (int)iz;
+                        zi_0 = (int)iz - z0;
 
-                            p = (p00*z1_i)/(double)z1_0 +
-                                (p10*zi_0)/(double)z1_0;
+                        p = (
+                             (p00*z1_i) +
+                             (p10*zi_0)
+                            )/(double)z1_0;
                     }
                     else
                     {
@@ -268,10 +272,12 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 
                         x1_0z1_0 = x1_0 * z1_0;
 
-                        p = (p00*x1_i*z1_i)/(double)x1_0z1_0 +
-                            (p10*xi_0*z1_i)/(double)x1_0z1_0 +
-                            (p01*x1_i*zi_0)/(double)x1_0z1_0 +
-                            (p11*xi_0*zi_0)/(double)x1_0z1_0;
+                        p = (
+                             (p00*x1_i*z1_i) +
+                             (p10*xi_0*z1_i) +
+                             (p01*x1_i*zi_0) +
+                             (p11*xi_0*zi_0)
+                            )/(double)x1_0z1_0;
                     }
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)

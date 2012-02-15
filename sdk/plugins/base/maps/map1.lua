@@ -30,7 +30,7 @@ equations = {
         beta = 2.0,
         n = 1,
         ip = 1,
-        ipp = 5
+        ipp = 300
     },
     perlin3_iron = {
         function_name = "perlin3",
@@ -45,7 +45,7 @@ equations = {
         beta = 2.0,
         n = 1,
         ip = 1,
-        ipp = 5
+        ipp = 300
     },
     none = {
         function_name = "none"
