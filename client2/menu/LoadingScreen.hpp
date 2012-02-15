@@ -29,7 +29,7 @@ namespace Client { namespace Menu {
         Tools::Renderers::Utils::Rectangle* _barRect;
 
     public:
-        LoadingScreen(Client& client);
+        LoadingScreen(Client& client, Menu& menu);
         ~LoadingScreen();
         void Render(std::string const& status, float progress);
     private:

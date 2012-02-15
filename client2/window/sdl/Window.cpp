@@ -24,6 +24,8 @@ namespace Client { namespace Window { namespace Sdl {
         SDL_EnableUNICODE(SDL_ENABLE);
         this->_renderer = new Tools::Renderers::GLRenderer();
         this->_renderer->Initialise();
+        this->_renderer->SetScreenSize(this->_size);
+        this->_renderer->SetViewport(Tools::Rectangle(Tools::Vector2i(0), this->_size));
     }
 
     Window::~Window()

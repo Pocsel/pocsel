@@ -7,10 +7,10 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     Rectangle::Rectangle(IRenderer& renderer)
         : _renderer(renderer),
-        _point1(-1,  1, 0),
-        _point2( 1,  1, 0),
-        _point3( 1, -1, 0),
-        _point4(-1, -1, 0),
+        _point1(-1, -1, 0),
+        _point2( 1, -1, 0),
+        _point3( 1,  1, 0),
+        _point4(-1,  1, 0),
         _point1Color(1, 1, 1, 1),
         _point2Color(1, 1, 1, 1),
         _point3Color(1, 1, 1, 1),

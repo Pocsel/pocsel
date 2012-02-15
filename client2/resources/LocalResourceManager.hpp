@@ -11,7 +11,6 @@ namespace Tools {
         class ITexture2D;
     }
 }
-
 namespace Client {
     class Client;
 }
