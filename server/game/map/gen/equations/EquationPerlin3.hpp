@@ -121,13 +121,20 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 return;
             }
 
-            for (ix = ipp / 2; ix < Common::ChunkSize; ix += 1 + ipp)
+            int ipp1 = ipp + 1;
+
+            ix = 0;
+            while (ix < Common::ChunkSize)
             {
                 xx = x + (double)ix / Common::ChunkSize;
-                for (iz = ipp / 2; iz < Common::ChunkSize; iz += 1 + ipp)
+
+                iz = 0;
+                while (iz < Common::ChunkSize)
                 {
                     zz = z + (double)iz / Common::ChunkSize;
-                    for (iy = ipp / 2; iy < Common::ChunkSize; iy += 1 + ipp)
+
+                    iy = 0;
+                    while (iy < Common::ChunkSize)
                     {
                         yy = y + (double)iy / Common::ChunkSize;
 
@@ -138,32 +145,59 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                                             alpha,
                                             beta,
                                             n) * mul;
+
+                        if (iy + ipp1 >= Common::ChunkSize && iy != Common::ChunkSize - 1)
+                            iy = Common::ChunkSize - 1;
+                        else
+                            iy += ipp1;
                     }
+                    if (iz + ipp1 >= Common::ChunkSize && iz != Common::ChunkSize - 1)
+                        iz = Common::ChunkSize - 1;
+                    else
+                        iz += ipp1;
                 }
+                if (ix + ipp1 >= Common::ChunkSize && ix != Common::ChunkSize - 1)
+                    ix = Common::ChunkSize - 1;
+                else
+                    ix += ipp1;
             }
 
-            // INTERPOLATION
+            switch (ip)
+            {
+                case 0:
+                _InterpolationNearest(res);
+                break;
+                default:
+                _InterpolationLinear(res);
+            }
+        }
+
+    private:
+        void _InterpolationLinear(double* res) const
+        {
+            unsigned int ix, iz, iy;
 
             int x0, x1, xc;
             int z0, z1, zc;
             int y0, y1, yc;
-            int ipp1 = ipp + 1;
 
             int xtab[Common::ChunkSize];
             int ztab[Common::ChunkSize];
             int ytab[Common::ChunkSize];
 
+            int ipp1 = ipp + 1;
+
 #define SET_TAB_XZY(x) \
             do { \
-                x##0 = ipp / 2; \
-                x##1 = ipp / 2; \
+                x##0 = 0; \
+                x##1 = 0; \
                 for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
                 { \
-                    if ((int)i % ipp1 == ipp / 2) \
+                    if ((int)i % ipp1 == 0) \
                     { \
                         x##0 = i; \
                         if (i + ipp1 >= Common::ChunkSize) \
-                            x##1 = i; \
+                            x##1 = Common::ChunkSize - 1; \
                         else \
                             x##1 = i + ipp1; \
                         x##tab[i] = x##0; \
@@ -171,9 +205,72 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     else \
                     { \
                         if ((int)i % ipp1 < ipp1 / 2) \
-                            x##tab[i] = x##1; \
-                        else \
                             x##tab[i] = x##0; \
+                        else \
+                            x##tab[i] = x##1; \
+                    } \
+                } \
+            } while (0);
+
+            SET_TAB_XZY(x);
+            SET_TAB_XZY(z);
+            SET_TAB_XZY(y);
+
+            double* resBase = res;
+
+            for (ix = 0; ix < Common::ChunkSize; ++ix)
+            {
+                xc = xtab[ix] * Common::ChunkSize2;
+
+                for (iz = 0; iz < Common::ChunkSize; ++iz)
+                {
+                    zc = ztab[iz] * Common::ChunkSize + xc;
+
+                    for (iy = 0; iy < Common::ChunkSize; ++iy)
+                    {
+                        yc = ytab[iy] + zc;
+
+                        *res++ = resBase[yc];
+                    }
+                }
+            }
+
+        }
+        void _InterpolationNearest(double* res) const
+        {
+            unsigned int ix, iz, iy;
+
+            int x0, x1, xc;
+            int z0, z1, zc;
+            int y0, y1, yc;
+
+            int xtab[Common::ChunkSize];
+            int ztab[Common::ChunkSize];
+            int ytab[Common::ChunkSize];
+
+            int ipp1 = ipp + 1;
+
+#define SET_TAB_XZY(x) \
+            do { \
+                x##0 = 0; \
+                x##1 = 0; \
+                for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
+                { \
+                    if ((int)i % ipp1 == 0) \
+                    { \
+                        x##0 = i; \
+                        if (i + ipp1 >= Common::ChunkSize) \
+                            x##1 = Common::ChunkSize - 1; \
+                        else \
+                            x##1 = i + ipp1; \
+                        x##tab[i] = x##0; \
+                    } \
+                    else \
+                    { \
+                        if ((int)i % ipp1 < ipp1 / 2) \
+                            x##tab[i] = x##0; \
+                        else \
+                            x##tab[i] = x##1; \
                     } \
                 } \
             } while (0);
