@@ -11,6 +11,7 @@
 #include "client2/map/Map.hpp"
 #include "client2/menu/Menu.hpp"
 #include "client2/menu/LoadingScreen.hpp"
+#include "client2/menu/DisconnectedScreen.hpp"
 
 #include "tools/Timer.hpp"
 
@@ -43,15 +44,22 @@ namespace Client {
     {
         Tools::Timer frameTimer;
         this->_network.Connect(this->_settings.host, this->_settings.port);
-        this->_network.SendPacket(Network::PacketCreator::Login("yalap_a"));
+
+        // main loop
         while (this->_state)
         {
             frameTimer.Reset();
 
+            // process packets & check connection
             if (this->_network.IsConnected())
-                this->_packetDispatcher->ProcessAllPackets(this->_network.ProcessInPackets());
-            else if (this->_state != Client::Disconnected)
-                this->Disconnect("Unknown reason");
+                this->_packetDispatcher->ProcessAllPackets(this->_network.GetInPackets());
+            else if (this->_state != Client::Disconnected && !this->_network.GetLastError().empty())
+            {
+                this->_state = Client::Disconnected;
+                this->_menu->GetDisconnectedScreen().SetMessage(this->_network.GetLastError());
+            }
+
+            // process events & dispatch them
             this->_window->GetInputManager().ProcessEvents();
             this->_window->GetInputManager().DispatchActions();
 
@@ -59,6 +67,11 @@ namespace Client {
             {
             case Connecting:
                 this->_menu->GetLoadingScreen().Render("Connecting to " + this->_settings.host + ":" + this->_settings.port, 0);
+                if (this->_network.IsConnected())
+                {
+                    this->_network.SendPacket(Network::PacketCreator::Login("yalap_a"));
+                    this->_state = LoadingResources;
+                }
                 break;
             case LoadingResources:
                 this->_menu->GetLoadingScreen().Render("Downloading resources", this->_game->GetLoadingProgression());
@@ -77,6 +90,7 @@ namespace Client {
                 this->_game->Render();
                 break;
             case Disconnected:
+                this->_menu->GetDisconnectedScreen().Render();
                 break;
             default:
                 ;
@@ -88,7 +102,10 @@ namespace Client {
             if (timeLeft > 2)
                 frameTimer.Sleep(timeLeft);
         }
-        this->_network.Stop();
+
+        if (this->_network.IsRunning())
+            this->_network.Stop();
+
         return boost::exit_success;
     }
 
@@ -100,17 +117,17 @@ namespace Client {
         this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes);
     }
 
-    void Client::LoadChunks()
-    {
-        this->_state = LoadingChunks;
-    }
+    //void Client::LoadChunks()
+    //{
+    //    this->_state = LoadingChunks;
+    //}
 
-    void Client::Disconnect(std::string const& reason)
-    {
-        this->_network.Stop();
-        this->_state = Disconnected;
-        delete this->_game;
-    }
+    //void Client::Disconnect(std::string const& reason)
+    //{
+    //    this->_network.Stop();
+    //    this->_state = Disconnected;
+    //    delete this->_game;
+    //}
 
     void Client::Quit()
     {

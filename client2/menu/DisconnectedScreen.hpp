@@ -28,11 +28,13 @@ namespace Client { namespace Menu {
         Tools::Matrix4<float> _backRectMatrix;
         Tools::Renderers::Utils::Rectangle* _backRect;
         int _callbackId;
+        std::string _message;
 
     public:
         DisconnectedScreen(Client& client, Menu& menu);
         ~DisconnectedScreen();
-        void Render(std::string const& message);
+        void SetMessage(std::string const& message);
+        void Render();
     private:
         void _Resize(Tools::Vector2u const& size);
     };

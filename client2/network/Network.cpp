@@ -7,16 +7,35 @@
 
 namespace Client { namespace Network {
 
-    Network::Network()
-        : _socket(_ioService),
+    Network::Network() :
+        _socket(_ioService),
         _thread(0),
         _sending(false),
-        _isConnected(false)
+        _isConnected(false),
+        _isRunning(false)
     {
         this->_sizeBuffer.resize(2);
     }
 
     void Network::Connect(std::string const& host, std::string const& port)
+    {
+        assert(!this->_isRunning);
+
+        this->_host = host;
+        this->_port = port;
+        this->_isRunning = true;
+        this->_lastError.clear();
+        this->_thread = new boost::thread(std::bind(&Network::_Connect, this, this->_host, this->_port));
+    }
+
+    Network::~Network()
+    {
+        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { delete p; });
+        std::for_each(this->_inQueue.begin(), this->_inQueue.end(), [](Common::Packet* p) { delete p; });
+        Tools::Delete(this->_thread);
+    }
+
+    void Network::_Connect(std::string host, std::string port)
     {
         boost::asio::ip::tcp::resolver resolver(this->_ioService);
         boost::asio::ip::tcp::resolver::query query(host, port);
@@ -31,19 +50,16 @@ namespace Client { namespace Network {
         if (error)
         {
             Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed.\n";
-            throw std::runtime_error("connection failed");
+            boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+            this->_lastError = error.message();
+            return;
         }
-        this->_host = host;
-        this->_port = port;
-        this->_isConnected = true;
-        this->_thread = new boost::thread(std::bind(&Network::_Run, this));
-    }
-
-    Network::~Network()
-    {
-        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { delete p; });
-        std::for_each(this->_inQueue.begin(), this->_inQueue.end(), [](Common::Packet* p) { delete p; });
-        Tools::Delete(this->_thread);
+        else
+        {
+            boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+            this->_isConnected = true;
+        }
+        this->_Run();
     }
 
     void Network::_Run()
@@ -54,9 +70,13 @@ namespace Client { namespace Network {
 
     void Network::Stop()
     {
-        this->_Disconnect();
+        assert(this->_isRunning);
+
+        if (this->IsConnected())
+            this->_CloseSocket();
         this->_ioService.stop();
         this->_thread->join();
+        this->_isRunning = false;
 
         // Pas de leak dans le cas où on refait un connect
         delete this->_thread;
@@ -69,10 +89,13 @@ namespace Client { namespace Network {
 
     void Network::SendPacket(std::unique_ptr<Common::Packet> packet)
     {
-        if (!this->_isConnected)
         {
-            Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
-            return;
+            boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+            if (!this->_isConnected)
+            {
+                Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
+                return;
+            }
         }
         bool sendNext = false;
         {
@@ -88,19 +111,28 @@ namespace Client { namespace Network {
             this->_SendNext();
     }
 
-    std::list<Common::Packet*> Network::ProcessInPackets()
+    std::list<Common::Packet*> Network::GetInPackets()
     {
         boost::unique_lock<boost::mutex> lock(this->_inMutex);
         return std::move(this->_inQueue);
     }
 
-    void Network::_Disconnect()
+    void Network::_CloseSocket()
     {
+        this->_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        this->_socket.close();
+    }
+
+    void Network::_DisconnectedByNetwork(std::string const& error)
+    {
+        {
+            boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+            this->_isConnected = false;
+            this->_lastError = error;
+        }
         try
         {
-            this->_isConnected = false;
-            this->_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-            this->_socket.close();
+            this->_CloseSocket();
         }
         catch (std::exception& e)
         {
@@ -127,7 +159,7 @@ namespace Client { namespace Network {
         if (error)
         {
             Tools::error << "Network::_HandleWrite: Write error: \"" << error.message() << "\".\n";
-            this->_Disconnect();
+            this->_DisconnectedByNetwork(error.message());
         }
         else
         {
@@ -156,10 +188,10 @@ namespace Client { namespace Network {
         if (error)
         {
             Tools::error << "Network::_HandleReceivePacketSize: Read error: \"" << error.message() << "\".\n";
-            this->_Disconnect();
+            this->_DisconnectedByNetwork(error.message());
         }
         else
-            this->_ReceivePacketContent(ntohs(*reinterpret_cast<Uint16*>(&this->_sizeBuffer[0])));
+            this->_ReceivePacketContent(ntohs(*reinterpret_cast<Uint16*>(this->_sizeBuffer.data())));
     }
 
     void Network::_ReceivePacketContent(unsigned int size)
@@ -173,7 +205,7 @@ namespace Client { namespace Network {
         if (error)
         {
             Tools::error << "Network::_HandleReceivePacketContent: Read error \"" << error.message() << "\".\n";
-            this->_Disconnect();
+            this->_DisconnectedByNetwork(error.message());
         }
         else
         {

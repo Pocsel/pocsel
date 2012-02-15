@@ -16,14 +16,17 @@ namespace Client { namespace Network {
         boost::thread* _thread;
         std::vector<char> _sizeBuffer;
         std::vector<char> _dataBuffer;
-        std::list<Common::Packet*> _outQueue;
-        std::list<Common::Packet*> _inQueue;
+        std::list<Common::Packet*> _outQueue; // protected by _outMutex
+        std::list<Common::Packet*> _inQueue; // protected by _inMutex
         boost::mutex _outMutex;
         boost::mutex _inMutex;
-        bool _sending;
+        mutable boost::mutex _metaMutex;
+        bool _sending; // protected by _inMutex
         std::string _host;
         std::string _port;
-        bool _isConnected;
+        bool _isConnected; // protected by _metaMutex
+        bool _isRunning;
+        std::string _lastError; // protected by _metaMutex
 
     public:
         Network();
@@ -31,13 +34,17 @@ namespace Client { namespace Network {
         void Connect(std::string const& host, std::string const& port);
         void Stop();
         void SendPacket(std::unique_ptr<Common::Packet> packet);
-        std::list<Common::Packet*> ProcessInPackets();
+        std::list<Common::Packet*> GetInPackets();
         std::string const& GetHost() const { return this->_host; }
         std::string const& GetPort() const { return this->_port; }
-        bool IsConnected() const { return this->_isConnected; }
+        bool IsRunning() const { return this->_isRunning; }
+        bool IsConnected() const { boost::unique_lock<boost::mutex> lock(this->_metaMutex); return this->_isConnected; }
+        std::string GetLastError() const { boost::unique_lock<boost::mutex> lock(this->_metaMutex); return this->_lastError; }
     private:
         void _Run();
-        void _Disconnect();
+        void _Connect(std::string host, std::string port);
+        void _CloseSocket();
+        void _DisconnectedByNetwork(std::string const& error);
         void _SendNext();
         void _HandleWrite(boost::system::error_code const& error);
         void _ReceivePacketSize();
