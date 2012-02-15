@@ -226,7 +226,7 @@ namespace Tools {
         r.m[3][2] = 0;
         r.m[3][3] = 1;
 
-        return r * Matrix4<T>::CreateTranslation(eye);
+        return Matrix4<T>::CreateTranslation(-eye) * r;
     }
 
     template<class T>

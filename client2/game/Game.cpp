@@ -35,7 +35,12 @@ namespace Client { namespace Game {
     void Game::TeleportPlayer(std::string const& map, Common::Position const& position)
     {
         // TODO: player
-        this->_player.SetPosition(position);
+        //this->_player.SetPosition(position);
+        // XXX
+        auto pos(position);
+        pos.world.y += 3;
+        this->_player.SetPosition(pos);
+        // XXX
         if (this->_map == 0)
         {
             this->_map = new Map::Map(*this);
@@ -46,7 +51,7 @@ namespace Client { namespace Game {
 
     void Game::Update()
     {
-        this->_player.GetCamera().Rotate(0.1f, 0);
+        this->_player.GetCamera().Rotate(0.01f, 0); // XXX
         this->_map->GetChunkManager().Update(this->_player.GetPosition());
     }
 

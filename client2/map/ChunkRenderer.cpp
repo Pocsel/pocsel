@@ -58,12 +58,13 @@ namespace Client { namespace Map {
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
         auto pos = camera.position.GetVector<double>();
-        auto viewProj = Tools::Matrix4<double>::CreateLookAt(pos, pos + Tools::Vector3d(camera.direction), Tools::Vector3d(0, 1, 0))
+        auto viewProj = 
+            Tools::Matrix4<double>::CreateLookAt(pos, Tools::Vector3d(pos + Tools::Vector3d(camera.direction)), Tools::Vector3d(0, 1, 0))
             * Tools::Matrix4<double>(camera.projection);
         Tools::Frustum frustum(viewProj);
 
         std::deque<Chunk*> chunkToRender;
-        this->_game.GetMap().GetChunkManager().ForeachIn(Tools::AlignedCube(Tools::Vector3d(0), 24*(1 << 23)),//frustum,
+        this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
             [&chunkToRender](Chunk& chunk)
             {
                 chunkToRender.push_back(&chunk);

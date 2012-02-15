@@ -66,6 +66,8 @@ namespace Client { namespace Map {
                         offset = (x * Common::ChunkSize2 + y * Common::ChunkSize + z) * 24;
                         type = cubes[cubeOffset];
                         auto const& cubeType = chunkRenderer.GetCubeInfo(type);
+                        if (cubeType.isTransparent)
+                            this->_hasTransparentCube = true;
 #define FRONT_FACE 0
 #define TOP_FACE 4
 #define RIGHT_FACE 8
@@ -85,12 +87,10 @@ namespace Client { namespace Map {
                                 indices[type].push_back(offset + decal + 0); \
                                 indices[type].push_back(offset + decal + 2); \
                                 indices[type].push_back(offset + decal + 3); \
-                                textureCoords[offset + decal + 0] = Tools::Vector2f(cubeType. FACE .u,  cubeType. FACE .v); \
-                                textureCoords[offset + decal + 1] = Tools::Vector2f(cubeType. FACE .v,  cubeType. FACE .v + cubeType. FACE .w); \
-                                textureCoords[offset + decal + 2] = Tools::Vector2f(cubeType. FACE .v + cubeType. FACE .w,  cubeType. FACE .v); \
-                                textureCoords[offset + decal + 3] = Tools::Vector2f(cubeType. FACE .v + cubeType. FACE .w,  cubeType. FACE .v + cubeType. FACE .w); \
-                                if (cubeType.isTransparent) \
-                                    this->_hasTransparentCube = true; \
+                                textureCoords[offset + decal + 0] = Tools::Vector2f(cubeType.FACE.u, cubeType.FACE.v); \
+                                textureCoords[offset + decal + 1] = Tools::Vector2f(cubeType.FACE.v + cubeType.FACE.w, cubeType.FACE.v); \
+                                textureCoords[offset + decal + 2] = Tools::Vector2f(cubeType.FACE.v + cubeType.FACE.w, cubeType.FACE.v + cubeType.FACE.w); \
+                                textureCoords[offset + decal + 3] = Tools::Vector2f(cubeType.FACE.v, cubeType.FACE.v + cubeType.FACE.w); \
                             } \
                         } while (0)
 
@@ -153,6 +153,7 @@ namespace Client { namespace Map {
             return;
         this->_textureCoords->Bind();
         this->_indices[cubeType].first->Bind();
+        renderer.UpdateCurrentParameters();
         renderer.DrawElements(this->_indices[cubeType].second, Tools::Renderers::DataType::UnsignedInt, 0);
         this->_indices[cubeType].first->Unbind();
         this->_textureCoords->Unbind();
