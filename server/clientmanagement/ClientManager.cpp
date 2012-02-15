@@ -186,7 +186,7 @@ namespace Server { namespace ClientManagement {
         this->_clients[clientId]->SendPacket(std::move(Network::PacketCreator::Chunk(chunk)));
     }
 
-    void ClientManager::_ClientTeleport(Uint32 clientId, Common::Position const& position)
+    void ClientManager::_ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)
     {
         if (this->_clients.find(clientId) == this->_clients.end())
         {
@@ -194,7 +194,7 @@ namespace Server { namespace ClientManagement {
             return ;
         }
 
-        this->_clients[clientId]->SendPacket(std::move(Network::PacketCreator::TeleportPlayer(position)));
+        this->_clients[clientId]->SendPacket(std::move(Network::PacketCreator::TeleportPlayer(map, position)));
 
         // TODO passer le client en mode teleport (il n'existe plus dans le monde)
     }

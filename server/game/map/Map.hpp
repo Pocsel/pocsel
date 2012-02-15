@@ -45,6 +45,8 @@ namespace Server { namespace Game { namespace Map {
         void Start();
         void Stop();
 
+        std::string const& GetName() const { return this->_conf.name; }
+
         // threadsafe
         void HandleNewChunk(Chunk* chunk)
         {
