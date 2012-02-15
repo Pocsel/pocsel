@@ -28,15 +28,15 @@ namespace Client { namespace Network {
         return p;
     }
 
-    //std::unique_ptr<Common::Packet> PacketCreator::NeedChunks(std::deque<Chunk::IdType>& chunkIds)
-    //{
-    //    std::unique_ptr<Common::Packet> p(new Common::Packet());
-    //    p->Write(Protocol::ClientToServer::NeedChunks);
+    std::unique_ptr<Common::Packet> PacketCreator::NeedChunks(std::deque<Common::BaseChunk::IdType>& chunkIds)
+    {
+        std::unique_ptr<Common::Packet> p(new Common::Packet());
+        p->Write(Protocol::ClientToServer::NeedChunks);
 
-    //    for (; !chunkIds.empty() && (p->GetSize() + sizeof(Chunk::IdType)) < (1 << 16); chunkIds.pop_back())
-    //        p->Write(chunkIds.back());
-    //    return p;
-    //}
+        for (; !chunkIds.empty() && (p->GetSize() + sizeof(Common::BaseChunk::IdType)) < (1 << 16); chunkIds.pop_back())
+            p->Write(chunkIds.back());
+        return p;
+    }
 
     std::unique_ptr<Common::Packet> PacketCreator::GetNeededResourceIds(Uint32 cacheVersion)
     {

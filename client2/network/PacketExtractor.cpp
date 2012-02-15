@@ -1,7 +1,7 @@
 #include "client2/precompiled.hpp"
-#include "client2/network/PacketExtractor.hpp"
-//#include "client2/ChunkSerializer.hpp"
 
+#include "client2/network/ChunkSerializer.hpp"
+#include "client2/network/PacketExtractor.hpp"
 #include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/PositionSerializer.hpp"
@@ -69,19 +69,20 @@ namespace Client { namespace Network {
         return p.ReadRawData(dataSize);
     }
 
-    //std::unique_ptr<Chunk> PacketExtractor::ExtractChunk(Common::Packet const& p)
-    //{
-    //    return p.Read<Chunk>();
-    //}
+    std::unique_ptr<Map::Chunk> PacketExtractor::ExtractChunk(Common::Packet const& p)
+    {
+        return p.Read<Map::Chunk>();
+    }
 
     std::unique_ptr<Common::CubeType> PacketExtractor::ExtractCubeType(Common::Packet const& p)
     {
         return p.Read<Common::CubeType>();
     }
 
-    //void PacketExtractor::ExtractSpawnPosition(Common::Packet const& p, Common::Position& pos)
-    //{
-    //    p.Read(pos);
-    //}
+    void PacketExtractor::ExtractTeleportPlayer(Common::Packet const& p, std::string& map, Common::Position& position)
+    {
+        //p.Read(map);
+        p.Read(position);
+    }
 
 }}

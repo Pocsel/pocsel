@@ -24,13 +24,14 @@ namespace Client { namespace Resources {
             Uint32 _nbNeededResources;
             Uint32 _nbDownloadedResources;
             std::map<Uint32, Common::Resource*> _inTransfer;
+            float _loading;
 
         public:
             ResourceDownloader(CacheDatabaseProxy& database, Network::Network& network);
 
             void AskResources(Uint32 nbResources, std::list<Uint32>& neededResources);
             void HandleResourceRange(Common::Packet& p);
-            float GetLoadingProgression() const { return this->_nbDownloadedResources / (float)this->_nbNeededResources; }
+            float GetLoadingProgression() const { return this->_loading; }
 
         private:
             void _RequestNextResource();
