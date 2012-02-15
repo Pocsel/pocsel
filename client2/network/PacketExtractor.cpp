@@ -81,7 +81,7 @@ namespace Client { namespace Network {
 
     void PacketExtractor::ExtractTeleportPlayer(Common::Packet const& p, std::string& map, Common::Position& position)
     {
-        //p.Read(map);
+        p.Read(map);
         p.Read(position);
     }
 

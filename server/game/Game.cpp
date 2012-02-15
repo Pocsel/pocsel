@@ -51,18 +51,18 @@ namespace Server { namespace Game {
         newPlayer->SetCurrentMap(this->_world->GetDefaultMap());
 
         this->_world->GetDefaultMap().GetSpawnPosition(
-            std::bind(&Game::PlayerTeleport, this, clientId, std::placeholders::_1)
+            std::bind(&Game::PlayerTeleport, this, clientId, this->_world->GetDefaultMap().GetName(), std::placeholders::_1)
             );
     }
 
-    void Game::_PlayerTeleport(Uint32 id, Common::Position const& position)
+    void Game::_PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position)
     {
         auto it = this->_players.find(id);
         if (it == this->_players.end())
             return;
         Player* player = it->second;
         player->Teleport(position);
-        this->_server.GetClientManager().ClientTeleport(id, position);
+        this->_server.GetClientManager().ClientTeleport(id, map, position);
     }
 
     void Game::_GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback)

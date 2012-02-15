@@ -115,10 +115,12 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(response);
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::TeleportPlayer(Common::Position const& pos)
+    std::unique_ptr<Common::Packet> PacketCreator::TeleportPlayer(std::string const& map,
+                                                                  Common::Position const& pos)
     {
         Common::Packet* ptr(new Common::Packet);
         ptr->Write(Protocol::ServerToClient::TeleportPlayer);
+        ptr->Write(map);
         ptr->Write(pos);
         return std::unique_ptr<Common::Packet>(ptr);
     }

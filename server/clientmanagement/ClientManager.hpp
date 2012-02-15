@@ -78,9 +78,9 @@ namespace Server { namespace ClientManagement {
         {
             this->_PushMessage(std::bind(&ClientManager::_SendChunk, this, clientId, std::cref(chunk)));
         }
-        void ClientTeleport(Uint32 clientId, Common::Position const& position)
+        void ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)
         {
-            this->_PushMessage(std::bind(&ClientManager::_ClientTeleport, this, clientId, std::cref(position)));
+            this->_PushMessage(std::bind(&ClientManager::_ClientTeleport, this, clientId, std::cref(map), std::cref(position)));
         }
 
         // A appeler du thread clientmanagement
@@ -97,7 +97,7 @@ namespace Server { namespace ClientManagement {
         void _HandlePacket(Uint32 clientId, Common::Packet* packet);
         void _SendPacket(Uint32 clientId, Common::Packet* packet);
         void _SendChunk(Uint32 clientId, Chunk const& chunk);
-        void _ClientTeleport(Uint32 clientId, Common::Position const& position);
+        void _ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position);
     };
 
 }}
