@@ -24,11 +24,13 @@ namespace Client { namespace Menu {
                 Tools::Color4f(0.93, 0.1, 0.1, 1),
                 Tools::Color4f(0.43, 0.1, 0.1, 1),
                 Tools::Color4f(0.43, 0.1, 0.1, 1));
+        this->_callbackId = this->_client.GetWindow().RegisterCallback(std::bind(&LoadingScreen::_Resize, this, std::placeholders::_1));
         this->_Resize(this->_client.GetWindow().GetSize());
     }
 
     LoadingScreen::~LoadingScreen()
     {
+        this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_barRect);
         Tools::Delete(this->_backRect);
     }

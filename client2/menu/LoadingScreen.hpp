@@ -27,6 +27,7 @@ namespace Client { namespace Menu {
         Tools::Matrix4<float> _text2Matrix;
         Tools::Renderers::Utils::Rectangle* _backRect;
         Tools::Renderers::Utils::Rectangle* _barRect;
+        int _callbackId;
 
     public:
         LoadingScreen(Client& client, Menu& menu);

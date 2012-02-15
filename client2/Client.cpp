@@ -55,6 +55,7 @@ namespace Client {
             switch (this->_state)
             {
             case Connecting:
+                this->_menu->GetLoadingScreen().Render("Connecting to " + this->_settings.host + ":" + this->_settings.port, 0);
                 break;
             case LoadingResources:
                 this->_menu->GetLoadingScreen().Render("Downloading resources", this->_game->GetLoadingProgression());
