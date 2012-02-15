@@ -1,5 +1,5 @@
-#ifndef __CLIENT_MENU_LOADGINGSCREEN_HPP__
-#define __CLIENT_MENU_LOADGINGSCREEN_HPP__
+#ifndef __CLIENT_MENU_DISCONNECTEDSCREEN_HPP__
+#define __CLIENT_MENU_DISCONNECTEDSCREEN_HPP__
 
 #include "tools/Matrix4.hpp"
 
@@ -17,7 +17,7 @@ namespace Client { namespace Menu {
 
     class Menu;
 
-    class LoadingScreen
+    class DisconnectedScreen
     {
     private:
         Client& _client;
@@ -27,13 +27,12 @@ namespace Client { namespace Menu {
         Tools::Matrix4<float> _text2Matrix;
         Tools::Matrix4<float> _backRectMatrix;
         Tools::Renderers::Utils::Rectangle* _backRect;
-        Tools::Renderers::Utils::Rectangle* _barRect;
         int _callbackId;
 
     public:
-        LoadingScreen(Client& client, Menu& menu);
-        ~LoadingScreen();
-        void Render(std::string const& status, float progress);
+        DisconnectedScreen(Client& client, Menu& menu);
+        ~DisconnectedScreen();
+        void Render(std::string const& message);
     private:
         void _Resize(Tools::Vector2u const& size);
     };

@@ -15,6 +15,7 @@ namespace Tools { namespace Renderers {
 namespace Client { namespace Menu {
 
     class LoadingScreen;
+    class DisconnectedScreen;
 
     class Menu
     {
@@ -26,6 +27,7 @@ namespace Client { namespace Menu {
         Tools::Renderers::IShaderParameter* _fontTexture;
         Tools::Renderers::IShaderProgram* _rectShader;
         LoadingScreen* _loadingScreen;
+        DisconnectedScreen* _disconnectedScreen;
 
     public:
         Menu(Client& client);
@@ -33,6 +35,7 @@ namespace Client { namespace Menu {
         void BeginMenuDrawing();
         void EndMenuDrawing();
         LoadingScreen& GetLoadingScreen() { return *this->_loadingScreen; }
+        DisconnectedScreen& GetDisconnectedScreen() { return *this->_disconnectedScreen; }
         Tools::Renderers::Utils::Font& GetFont() { return *this->_font; }
         Tools::Renderers::IShaderProgram& GetFontShader() { return *this->_fontShader; }
         Tools::Renderers::IShaderParameter& GetFontColor() { return *this->_fontColor; }

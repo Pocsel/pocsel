@@ -26,6 +26,7 @@ namespace Client {
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
         this->_menu = new Menu::Menu(*this);
 
+        this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
         this->_window->GetInputManager().GetInputBinder().LoadFile(this->_settings.bindingsFile.string());
     }
 
@@ -34,6 +35,7 @@ namespace Client {
         Tools::Delete(this->_game);
         Tools::Delete(this->_menu);
         Tools::Delete(this->_packetDispatcher);
+        Tools::Delete(this->_resourceManager);
         Tools::Delete(this->_window);
     }
 
