@@ -66,7 +66,8 @@ namespace Client {
             switch (this->_state)
             {
             case Connecting:
-                this->_menu->GetLoadingScreen().Render("Connecting to " + this->_settings.host + ":" + this->_settings.port + "...", 0);
+                this->_menu->GetLoadingScreen().Render("Connecting to " + this->_settings.host + ":" + this->_settings.port + "...",
+                        this->_network.GetLoadingProgression());
                 if (this->_network.IsConnected())
                 {
                     this->_network.SendPacket(Network::PacketCreator::Login("yalap_a"));

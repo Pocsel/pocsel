@@ -12,9 +12,16 @@ namespace Client { namespace Network {
         _thread(0),
         _sending(false),
         _isConnected(false),
-        _isRunning(false)
+        _isRunning(false),
+        _loading(0)
     {
         this->_sizeBuffer.resize(2);
+    }
+
+    float Network::GetLoadingProgression()
+    {
+        this->_loading += 0.00025f;
+        return this->_loading;
     }
 
     void Network::Connect(std::string const& host, std::string const& port)
@@ -28,6 +35,7 @@ namespace Client { namespace Network {
         this->_host = host;
         this->_port = port;
         this->_isRunning = true;
+        this->_loading = 0;
         this->_lastError.clear();
         this->_thread = new boost::thread(std::bind(&Network::_Connect, this, this->_host, this->_port));
     }
@@ -41,28 +49,39 @@ namespace Client { namespace Network {
 
     void Network::_Connect(std::string host, std::string port)
     {
-        boost::asio::ip::tcp::resolver resolver(this->_ioService);
-        boost::asio::ip::tcp::resolver::query query(host, port);
-        boost::asio::ip::tcp::resolver::iterator endpointIterator = resolver.resolve(query);
-        boost::asio::ip::tcp::resolver::iterator end;
-        boost::system::error_code error = boost::asio::error::host_not_found;
-        while (error && endpointIterator != end)
+        try
         {
-            this->_socket.close();
-            this->_socket.connect(*endpointIterator++, error);
+            boost::asio::ip::tcp::resolver resolver(this->_ioService);
+            boost::asio::ip::tcp::resolver::query query(host, port);
+            boost::asio::ip::tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+            boost::asio::ip::tcp::resolver::iterator end;
+            boost::system::error_code error = boost::asio::error::host_not_found;
+            while (error && endpointIterator != end)
+            {
+                this->_socket.close();
+                this->_socket.connect(*endpointIterator++, error);
+            }
+            if (error)
+            {
+                Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed: " << error.message() << ".\n";
+                boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+                this->_isRunning = false;
+                this->_lastError = error.message();
+                return;
+            }
+            else
+            {
+                boost::unique_lock<boost::mutex> lock(this->_metaMutex);
+                this->_isConnected = true;
+            }
         }
-        if (error)
+        catch (std::exception& e)
         {
-            Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed.\n";
+            Tools::error << "Network::Network: Exception while connecting to " << host << ":" << port << ": " << e.what() << ".\n";
             boost::unique_lock<boost::mutex> lock(this->_metaMutex);
             this->_isRunning = false;
-            this->_lastError = error.message();
+            this->_lastError = e.what();
             return;
-        }
-        else
-        {
-            boost::unique_lock<boost::mutex> lock(this->_metaMutex);
-            this->_isConnected = true;
         }
         this->_Run();
     }
@@ -84,6 +103,7 @@ namespace Client { namespace Network {
         if (this->IsConnected())
             this->_CloseSocket();
         this->_ioService.stop();
+        this->_ioService.reset();
         this->_thread->join();
         this->_isRunning = false;
         this->_lastError.clear();

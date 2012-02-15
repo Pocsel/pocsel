@@ -27,10 +27,12 @@ namespace Client { namespace Network {
         bool _isConnected; // protected by _metaMutex
         bool _isRunning; // protected by _metaMutex;
         std::string _lastError; // protected by _metaMutex
+        float _loading;
 
     public:
         Network();
         ~Network();
+        float GetLoadingProgression();
         void Connect(std::string const& host, std::string const& port);
         void Stop();
         void SendPacket(std::unique_ptr<Common::Packet> packet);
