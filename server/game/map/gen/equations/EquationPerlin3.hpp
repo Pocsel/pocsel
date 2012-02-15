@@ -177,58 +177,50 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         {
             unsigned int ix, iz, iy;
 
-            int x0, x1, xc;
-            int z0, z1, zc;
-            int y0, y1, yc;
+            int xc;
+            int zc;
+            int yc;
 
-            int xtab[Common::ChunkSize];
-            int ztab[Common::ChunkSize];
-            int ytab[Common::ChunkSize];
+            int tab[Common::ChunkSize];
 
             int ipp1 = ipp + 1;
 
-#define SET_TAB_XZY(x) \
-            do { \
-                x##0 = 0; \
-                x##1 = 0; \
-                for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
-                { \
-                    if ((int)i % ipp1 == 0) \
-                    { \
-                        x##0 = i; \
-                        if (i + ipp1 >= Common::ChunkSize) \
-                            x##1 = Common::ChunkSize - 1; \
-                        else \
-                            x##1 = i + ipp1; \
-                        x##tab[i] = x##0; \
-                    } \
-                    else \
-                    { \
-                        if ((int)i % ipp1 < ipp1 / 2) \
-                            x##tab[i] = x##0; \
-                        else \
-                            x##tab[i] = x##1; \
-                    } \
-                } \
-            } while (0);
-
-            SET_TAB_XZY(x);
-            SET_TAB_XZY(z);
-            SET_TAB_XZY(y);
+            int i0, i1;
+            i0 = 0;
+            i1 = 0;
+            for (unsigned int i = 0; i < Common::ChunkSize; ++i)
+            {
+                if ((int)i % ipp1 == 0)
+                {
+                    i0 = i;
+                    if (i + ipp1 >= Common::ChunkSize)
+                        i1 = Common::ChunkSize - 1;
+                    else
+                        i1 = i + ipp1;
+                    tab[i] = i0;
+                }
+                else
+                {
+                    if ((int)i % ipp1 < ipp1 / 2)
+                        tab[i] = i0;
+                    else
+                        tab[i] = i1;
+                }
+            }
 
             double* resBase = res;
 
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                xc = xtab[ix] * Common::ChunkSize2;
+                xc = tab[ix] * Common::ChunkSize2;
 
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    zc = ztab[iz] * Common::ChunkSize + xc;
+                    zc = tab[iz] * Common::ChunkSize + xc;
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)
                     {
-                        yc = ytab[iy] + zc;
+                        yc = tab[iy] + zc;
 
                         *res++ = resBase[yc];
                     }
@@ -240,58 +232,50 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         {
             unsigned int ix, iz, iy;
 
-            int x0, x1, xc;
-            int z0, z1, zc;
-            int y0, y1, yc;
+            int xc;
+            int zc;
+            int yc;
 
-            int xtab[Common::ChunkSize];
-            int ztab[Common::ChunkSize];
-            int ytab[Common::ChunkSize];
+            int tab[Common::ChunkSize];
 
             int ipp1 = ipp + 1;
 
-#define SET_TAB_XZY(x) \
-            do { \
-                x##0 = 0; \
-                x##1 = 0; \
-                for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
-                { \
-                    if ((int)i % ipp1 == 0) \
-                    { \
-                        x##0 = i; \
-                        if (i + ipp1 >= Common::ChunkSize) \
-                            x##1 = Common::ChunkSize - 1; \
-                        else \
-                            x##1 = i + ipp1; \
-                        x##tab[i] = x##0; \
-                    } \
-                    else \
-                    { \
-                        if ((int)i % ipp1 < ipp1 / 2) \
-                            x##tab[i] = x##0; \
-                        else \
-                            x##tab[i] = x##1; \
-                    } \
-                } \
-            } while (0);
-
-            SET_TAB_XZY(x);
-            SET_TAB_XZY(z);
-            SET_TAB_XZY(y);
+            int i0, i1;
+            i0 = 0;
+            i1 = 0;
+            for (unsigned int i = 0; i < Common::ChunkSize; ++i)
+            {
+                if ((int)i % ipp1 == 0)
+                {
+                    i0 = i;
+                    if (i + ipp1 >= Common::ChunkSize)
+                        i1 = Common::ChunkSize - 1;
+                    else
+                        i1 = i + ipp1;
+                    tab[i] = i0;
+                }
+                else
+                {
+                    if ((int)i % ipp1 < ipp1 / 2)
+                        tab[i] = i0;
+                    else
+                        tab[i] = i1;
+                }
+            }
 
             double* resBase = res;
 
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                xc = xtab[ix] * Common::ChunkSize2;
+                xc = tab[ix] * Common::ChunkSize2;
 
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    zc = ztab[iz] * Common::ChunkSize + xc;
+                    zc = tab[iz] * Common::ChunkSize + xc;
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)
                     {
-                        yc = ytab[iy] + zc;
+                        yc = tab[iy] + zc;
 
                         *res++ = resBase[yc];
                     }
@@ -299,7 +283,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             }
 
         }
-#undef SET_TAB_XZY
     };
 
 }}}}}
