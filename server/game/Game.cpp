@@ -80,7 +80,7 @@ namespace Server { namespace Game {
         Map::Map::SpawnCallback cb(std::bind(&Game::_PlayerTeleport,
                                              this,
                                              clientId,
-                                             this->_world->GetDefaultMap().GetName(),
+                                             std::cref(this->_world->GetDefaultMap().GetName()),
                                              std::placeholders::_1));
         this->_world->GetDefaultMap().GetSpawnPosition(cb);
     }
@@ -93,7 +93,7 @@ namespace Server { namespace Game {
         Player* player = it->second;
         player->Teleport(position);
         // TODO mode teleportation pour le player
-        this->_server.GetClientManager().ClientTeleport(id, map, position);
+        this->_server.GetClientManager().ClientTeleport(id, std::cref(map), position);
     }
 
     void Game::_GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback)

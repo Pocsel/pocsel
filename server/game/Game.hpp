@@ -30,7 +30,6 @@ namespace Server { namespace Game {
         private boost::noncopyable
     {
     public:
-        typedef std::function<void(Common::Position const&)> SpawnPlayerCallback;
         typedef std::function<void(Chunk const&)> ChunkCallback;
 
     private:
