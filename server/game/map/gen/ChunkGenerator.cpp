@@ -125,7 +125,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         int cur_equation_idx = 0;
         for (auto vbit = validationbloc_confs.begin(), vbite = validationbloc_confs.end(); vbit != vbite; ++vbit)
         {
-            std::list<CubeSpawnInfo::Validation> validations;
+            std::vector<CubeSpawnInfo::Validation> validations;
             // parcours des ValidatorConf
             for (auto it = (*vbit)->validators.begin(), ite = (*vbit)->validators.end(); it != ite; ++it)
             {
@@ -161,7 +161,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
             }
 
             if (validations.size())
-                this->_cubes.push_back(new CubeSpawnInfo((*vbit)->cube_type->id, validations));
+                this->_cubes.push_back(CubeSpawnInfo((*vbit)->cube_type->id, validations));
             else
             {
                 Log::load << "WARNING: a validation bloc for cube '" << (*vbit)->cube_type->id << "' is empty.\n";
@@ -182,8 +182,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
     {
         Tools::debug << "ChunkGenerator::~ChunkGenerator()\n";
 
-        for (auto it = this->_cubes.begin(), ite = this->_cubes.end() ; it != ite ; ++it)
-            Tools::Delete(*it);
+//        for (auto it = this->_cubes.begin(), ite = this->_cubes.end() ; it != ite ; ++it)
+//            Tools::Delete(*it);
         for (auto it = this->_equations.begin(), ite = this->_equations.end() ; it != ite ; ++it)
             Tools::Delete(*it);
         Tools::Delete(this->_perlin);
@@ -206,9 +206,18 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         Chunk::CoordsType coords = Chunk::IdToCoords(id);
         Uint32 x, y, z;
         double xx, yy, zz;
+        bool check;
         Chunk* nuChunk = new Chunk(coords);
 
         double* results = new double[this->_equations.size() * Common::ChunkSize3];
+        double* resultsBase = results;
+
+        CubeSpawnInfo const* csiBase = this->_cubes.data();
+        CubeSpawnInfo const* csi;
+        CubeSpawnInfo const* csiEnd = this->_cubes.data() + this->_cubes.size();
+
+        CubeSpawnInfo::Validation const* val;
+        CubeSpawnInfo::Validation const* valEnd;
 
         xx = (double)((int)coords.x - (1 << 21));
         zz = (double)((int)coords.z - (1 << 21));
@@ -226,23 +235,14 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
                 for (y = 0 ; y < Common::ChunkSize ; ++y)
                 {
                     yy = (double)((int)coords.y - (1 << 19)) + (double)y / Common::ChunkSize;
-                    for (auto it = this->_cubes.begin(),
-                         ite = this->_cubes.end() ; it != ite ; ++it)
+                    for (csi = csiBase; csi != csiEnd; ++csi)
                     {
-                        auto const& validations = (*it)->GetValidations();
-                        bool check = true;
-                        for (auto vit = validations.begin(), vite = validations.end(); vit != vite; ++vit)
+                        val = csi->GetValBegin();
+                        valEnd = csi->GetValEnd();
+                        check = true;
+                        for (; val != valEnd; ++val)
                         {
-//                            if (!results_done[vit->equationIndex])
-//                            {
-//                                results_done[vit->equationIndex] = true;
-//                                results[vit->equationIndex] = this->_equations[vit->equationIndex]->Calc(xx, yy, zz);
-//                            }
-
-                            if (!vit->validator->Check(xx, yy, zz, results[vit->equationIndex * Common::ChunkSize3 +
-                                                                           x * Common::ChunkSize2 +
-                                                                           z * Common::ChunkSize +
-                                                                           y]))
+                            if (!val->validator->Check(xx, yy, zz, results[val->equationIndex * Common::ChunkSize3]))
                             {
                                 check = false;
                                 break;
@@ -250,23 +250,17 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
                         }
                         if (check == true)
                         {
-                            nuChunk->SetCube(x, y, z, (*it)->cubeType);
+                            nuChunk->SetCube(x, y, z, (csi)->cubeType);
                             break;
                         }
                     }
 
-                    // reinit tout si il faut, sinon juste les 3D
-//                    for (unsigned int i = 0 ; i < this->_equations.size() ; ++i)
-//                    {
-//                        if (y == Common::ChunkSize - 1 || !this->_equations[i]->Is2D())
-//                            results_done[i] = false;
-//                    }
+                ++results;
                 }
             }
         }
 
-//        Tools::DeleteTab(results_done);
-        Tools::DeleteTab(results);
+        Tools::DeleteTab(resultsBase);
 
         callback(nuChunk);
     }
