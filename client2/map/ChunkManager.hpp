@@ -31,12 +31,6 @@ namespace Client { namespace Map {
                 chunk(chunk.release())
             {
             }
-            ChunkNode(ChunkNode&& node)
-                : Tools::AlignedCube(node),
-                chunk(node.chunk)
-            {
-                node.chunk = 0;
-            }
             ~ChunkNode()
             {
                 Tools::Delete(this->chunk);
@@ -47,7 +41,7 @@ namespace Client { namespace Map {
         Game::Game& _game;
         ChunkRenderer _chunkRenderer;
         std::unordered_set<Common::BaseChunk::IdType> _downloadingChunks;
-        std::unordered_map<Common::BaseChunk::IdType, ChunkNode> _chunks;
+        std::unordered_map<Common::BaseChunk::IdType, ChunkNode*> _chunks;
         std::list<ChunkNode*> _waitingRefresh;
         Tools::Octree<ChunkNode>* _octree[16];
         float _loadingProgression;
@@ -57,17 +51,19 @@ namespace Client { namespace Map {
         ~ChunkManager();
 
         void AddChunk(std::unique_ptr<Chunk>&& chunk);
-        template<class TFunc>
-        void ForeachIn(Tools::AbstractCollider const& container, TFunc function);
+        void UpdateLoading();
         void Update(Common::Position const& playerPosition);
         void Render();
 
+        template<class TFunc>
+        void ForeachIn(Tools::AbstractCollider const& container, TFunc function);
         Chunk* GetChunk(Common::BaseChunk::IdType id) const;
         Chunk* GetChunk(Common::BaseChunk::CoordsType const& coords) const { return this->GetChunk(Common::BaseChunk::CoordsToId(coords)); }
         float GetLoadingProgression() const { return this->_loadingProgression; }
     private:
         void _RemoveOldChunks(Common::Position const& playerPosition);
         void _DownloadNewChunks(Common::Position const& playerPosition);
+        void _RefreshNode(ChunkNode& node);
     };
 
     template<class TFunc>

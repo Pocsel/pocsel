@@ -31,28 +31,54 @@ namespace Client { namespace Map {
     {
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
             Tools::Delete(this->_octree[i]);
+        for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite; ++it)
+            Tools::Delete(it->second);
     }
 
     void ChunkManager::AddChunk(std::unique_ptr<Chunk>&& chunk)
     {
-        this->_loadingProgression = std::max(1.0f, this->_loadingProgression + 0.01f);
-        auto id = chunk->id;
-        if (this->_downloadingChunks.find(id) != this->_downloadingChunks.end())
-        {
-            this->_downloadingChunks.erase(id);
-            this->_chunks.insert(std::unordered_map<Common::BaseChunk::IdType, ChunkNode>::value_type(id, ChunkNode(std::move(chunk))));
-            auto elem = &this->_chunks.find(id)->second;
-            for (int i = 0; i < 16; ++i)
-                if (this->_octree[i]->Contains(*elem) == Tools::AbstractCollider::Inside)
-                    this->_octree[i]->InsertElement(elem);
-            this->_waitingRefresh.push_back(elem);
+        ChunkNode* node = 0;
+
+        if (this->_chunks.find(chunk->id) != this->_chunks.end())
+        { // Chunk Update
+            node = this->_chunks.find(chunk->id)->second;
+            delete node->chunk;
+            node->chunk = chunk.release();
         }
+        else
+        { // New chunk
+            this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.0005f);
+            this->_downloadingChunks.erase(chunk->id);
+            node = new ChunkNode(std::move(chunk));
+            this->_chunks.insert(std::unordered_map<Common::BaseChunk::IdType, ChunkNode*>::value_type(node->chunk->id, node));
+            for (int i = 0; i < 16; ++i)
+                if (this->_octree[i]->Contains(*node) == Tools::AbstractCollider::Inside)
+                    this->_octree[i]->InsertElement(node);
+        }
+
+        if (node == 0)
+            return;
+        this->_RefreshNode(*node);
+    }
+
+    void ChunkManager::UpdateLoading()
+    {
+        this->_waitingRefresh.unique();
+        int nb = 0;
+        while (!this->_waitingRefresh.empty() && ++nb < 15)
+        {
+            this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.0002f);
+            this->_chunkRenderer.RefreshDisplay(*this->_waitingRefresh.front()->chunk);
+            this->_waitingRefresh.pop_front();
+        }
+        if (this->_waitingRefresh.empty() && this->_loadingProgression > 0.6f)
+            this->_loadingProgression = 1.0f;
     }
 
     void ChunkManager::Update(Common::Position const& playerPosition)
     {
         int nb = 0;
-        while (!this->_waitingRefresh.empty() && ++nb < 20)
+        while (!this->_waitingRefresh.empty() && ++nb < 15)
         {
             this->_chunkRenderer.RefreshDisplay(*this->_waitingRefresh.front()->chunk);
             this->_waitingRefresh.pop_front();
@@ -71,7 +97,7 @@ namespace Client { namespace Map {
         auto it = this->_chunks.find(id);
         if (it == this->_chunks.end())
             return 0;
-        return it->second.chunk;
+        return it->second->chunk;
     }
 
     void ChunkManager::_RemoveOldChunks(Common::Position const& playerPosition)
@@ -135,6 +161,25 @@ namespace Client { namespace Map {
         }
         while (!tmp.empty())
             this->_game.GetClient().GetNetwork().SendPacket(Network::PacketCreator::NeedChunks(tmp));
+    }
+
+    void ChunkManager::_RefreshNode(ChunkNode& node)
+    {
+        auto chunkLeft  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0))),
+            chunkRight  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 1,  0,  0))),
+            chunkFront  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0,  1))),
+            chunkBack   = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0, -1))),
+            chunkTop    = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0))),
+            chunkBottom = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
+        this->_waitingRefresh.push_back(&node);
+        if (chunkLeft != this->_chunks.end()) this->_waitingRefresh.push_back(chunkLeft->second);
+        if (chunkRight != this->_chunks.end()) this->_waitingRefresh.push_back(chunkRight->second);
+        if (chunkFront != this->_chunks.end()) this->_waitingRefresh.push_back(chunkFront->second);
+        if (chunkBack != this->_chunks.end()) this->_waitingRefresh.push_back(chunkBack->second);
+        if (chunkTop != this->_chunks.end()) this->_waitingRefresh.push_back(chunkTop->second);
+        if (chunkBottom != this->_chunks.end()) this->_waitingRefresh.push_back(chunkBottom->second);
+        if (this->_game.GetClient().GetState() != Client::LoadingChunks)
+            this->_waitingRefresh.unique();
     }
 
 }}

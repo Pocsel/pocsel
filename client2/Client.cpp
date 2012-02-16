@@ -79,7 +79,7 @@ namespace Client {
                 break;
             case LoadingResources:
                 this->_menu->GetLoadingScreen().Render("Downloading resources...", this->_game->GetLoadingProgression());
-                if (this->_game->GetLoadingProgression() == 1.0f)
+                if (this->_game->GetLoadingProgression() >= 1.0f)
                 {
                     this->_state = WaitingPosition;
                     this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
@@ -90,7 +90,8 @@ namespace Client {
                 break;
             case LoadingChunks:
                 this->_menu->GetLoadingScreen().Render("Downloading chunks...", this->_game->GetMap().GetLoadingProgression());
-                if (this->_game->GetLoadingProgression() == 1.0f)
+                this->_game->GetMap().GetChunkManager().UpdateLoading();
+                if (this->_game->GetMap().GetLoadingProgression() >= 1.0f)
                 {
                     Tools::debug << "Run !\n";
                     this->_state = Running;

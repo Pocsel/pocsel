@@ -17,13 +17,13 @@ namespace Client { namespace Game {
         _map(0)
     {
         this->_player.GetCamera().Rotate(0, 0);
-        this->_renderer.SetClearColor(Tools::Color4f(0.1f, 0.1f, 0.1f, 1));
+        this->_renderer.SetClearColor(Tools::Color4f(0.0f, 0.0f, 0.1f, 1)); // XXX
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](Tools::Vector2u const& size)
             {
-                this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, size.w / float(size.h), 0.001f, 1000.0f);
+                this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, size.w / float(size.h), 0.001f, 500.0f);
             });
-        this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.001f, 1000.0f);
+        this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.001f, 500.0f);
     }
 
     Game::~Game()
