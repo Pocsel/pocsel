@@ -25,7 +25,8 @@ namespace Client { namespace Map {
         this->_cubeInfo.resize(cubeTypes.size());
         for (size_t i = 0; i < cubeTypes.size(); ++i)
         {
-            this->_cubeInfo[i].texture = &this->_game.GetResourceManager().GetTexture2D(cubeTypes[i].id);
+            this->_cubeInfo[i].id = cubeTypes[i].id;
+            this->_cubeInfo[i].texture = &this->_game.GetResourceManager().GetTexture2D(cubeTypes[i].textures.top);
             // TODO: les bonnes valeurs
             this->_cubeInfo[i].top = Tools::Vector3f(0, 0, 1);
             this->_cubeInfo[i].bottom = Tools::Vector3f(0, 0, 1);
@@ -86,7 +87,7 @@ namespace Client { namespace Map {
                         continue;
 
                     this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
-                    mesh->Render((int)i, this->_renderer);
+                    mesh->Render(this->_cubeInfo[i].id, this->_renderer);
                 }
 
                 this->_cubeInfo[i].texture->Unbind();

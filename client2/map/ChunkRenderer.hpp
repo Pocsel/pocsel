@@ -23,6 +23,7 @@ namespace Client { namespace Map {
     public:
         struct CubeInfo
         {
+            Common::BaseChunk::CubeType id;
             Tools::Renderers::ITexture2D* texture;
             Tools::Vector3f top; // x/u = position X, y/v = position Y, z/w = position Z
             Tools::Vector3f bottom;
