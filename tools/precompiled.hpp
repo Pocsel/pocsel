@@ -65,4 +65,10 @@
 #pragma warning(disable: 4355)
 #endif
 
+#ifdef _WIN32
+#define THREAD_LOCAL _declspec(thread)
+#else
+#define THREAD_LOCAL __thread
+#endif
+
 #endif

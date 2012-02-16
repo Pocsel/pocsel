@@ -52,7 +52,10 @@ namespace Client { namespace Map {
         Common::BaseChunk::CubeType nearType;
 
         std::map<Common::BaseChunk::CubeType, std::vector<unsigned int>> indices;
-        std::vector<Tools::Vector2f> textureCoords(Common::ChunkSize3 * 4 * 6); // 4 sommets, 6 faces
+
+        static THREAD_LOCAL Tools::Vector2f* textureCoords = 0;
+        if (textureCoords == 0)
+            textureCoords = new Tools::Vector2f[Common::ChunkSize3 * 4 * 6]; // 4 sommets, 6 faces
 
         for (x = 0; x < Common::ChunkSize; ++x)
         {
@@ -137,7 +140,7 @@ namespace Client { namespace Map {
 
         this->_textureCoords = game.GetClient().GetWindow().GetRenderer().CreateVertexBuffer().release();
         this->_textureCoords->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2);
-        this->_textureCoords->SetData(textureCoords.size() * sizeof(Tools::Vector2f), textureCoords.data(), Tools::Renderers::VertexBufferUsage::Static);
+        this->_textureCoords->SetData((Common::ChunkSize3 * 4 * 6) * sizeof(Tools::Vector2f), textureCoords, Tools::Renderers::VertexBufferUsage::Static);
         for (auto it = indices.begin(), ite = indices.end(); it != ite; ++it)
         {
             if (it->second.size() == 0)
