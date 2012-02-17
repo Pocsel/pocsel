@@ -86,7 +86,7 @@ namespace Client {
                 }
                 break;
             case WaitingPosition:
-                this->_menu->GetLoadingScreen().Render("Waiting position", 0);
+                this->_menu->GetLoadingScreen().Render("Waiting for position...", 0);
                 break;
             case LoadingChunks:
                 this->_menu->GetLoadingScreen().Render("Downloading chunks...", this->_game->GetMap().GetLoadingProgression());
@@ -142,6 +142,8 @@ namespace Client {
         if (this->_network.IsRunning())
             this->_network.Stop();
         this->_menu->GetDisconnectedScreen().SetMessage(reason);
+        delete this->_game;
+        this->_game = 0;
         this->_state = Disconnected;
     }
 
