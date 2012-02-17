@@ -138,8 +138,8 @@ namespace Server { namespace ClientManagement {
 
     void ClientManager::ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids)
     {
-        std::function<void(Chunk const&)> callback =
-            std::bind(&ClientManager::SendChunk, this, client.id, std::placeholders::_1);
+        std::function<void(Chunk const&)>
+            callback(std::bind(&ClientManager::SendChunk, this, client.id, std::placeholders::_1));
         for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
         {
             this->_server.GetGame().GetChunk(*it, client.id, callback);
@@ -167,10 +167,10 @@ namespace Server { namespace ClientManagement {
             id = this->_GetNextId();
         }
 
-        Network::ClientConnection::ErrorCallback ecb =
-            std::bind(&ClientManager::HandleClientError, this, id);
-        Network::ClientConnection::PacketCallback pcb =
-            std::bind(&ClientManager::HandlePacket, this, id, std::placeholders::_1);
+        Network::ClientConnection::ErrorCallback
+            ecb(std::bind(&ClientManager::HandleClientError, this, id));
+        Network::ClientConnection::PacketCallback
+            pcb(std::bind(&ClientManager::HandlePacket, this, id, std::placeholders::_1));
         clientConnection->SetCallbacks(ecb, pcb);
 
         Client* newClient = new Client(id, clientConnection);

@@ -6,7 +6,7 @@
 
 namespace Server { namespace Network {
 
-    Network::Network(Server& server, NewConnectionHandler newConnectionHandler) :
+    Network::Network(Server& server, NewConnectionHandler& newConnectionHandler) :
         _server(server),
         _newConnectionHandler(newConnectionHandler),
         _ioService(),

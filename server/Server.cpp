@@ -15,10 +15,10 @@ namespace Server {
         this->_resourceManager = new Database::ResourceManager(*this);
         this->_clientManager = new ClientManagement::ClientManager(*this);
         this->_game = new Game::Game(*this);
-        this->_network = new Network::Network(*this,
-                                              std::bind(&ClientManagement::ClientManager::HandleNewClient,
-                                                        this->_clientManager,
-                                                        std::placeholders::_1));
+
+        Network::Network::NewConnectionHandler
+            nch(std::bind(&ClientManagement::ClientManager::HandleNewClient, this->_clientManager, std::placeholders::_1));
+        this->_network = new Network::Network(*this, nch);
     }
 
     Server::~Server()

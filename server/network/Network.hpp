@@ -26,7 +26,7 @@ namespace Server { namespace Network {
         boost::asio::ip::tcp::socket* _newConnection;
 
     public:
-        Network(Server& server, NewConnectionHandler newConnectionHandler);
+        Network(Server& server, NewConnectionHandler& newConnectionHandler);
         ~Network();
 
         void Run();
