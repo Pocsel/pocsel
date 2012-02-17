@@ -44,8 +44,9 @@ namespace Client { namespace Game {
 
     void Game::Update()
     {
-        this->_player.UpdateMovements(this->_client.GetWindow());
+        this->_player.UpdateMovements(this->_client.GetWindow(), this->_updateTimer.GetElapsedTime());
         this->_map->GetChunkManager().Update(this->_player.GetPosition());
+        this->_updateTimer.Reset();
     }
 
     void Game::Render()

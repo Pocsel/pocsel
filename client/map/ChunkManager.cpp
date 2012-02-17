@@ -1,6 +1,7 @@
 #include "client/precompiled.hpp"
 
 #include "tools/Octree.hpp"
+#include "tools/Timer.hpp"
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/game/Game.hpp"
@@ -73,9 +74,9 @@ namespace Client { namespace Map {
 
     void ChunkManager::UpdateLoading()
     {
+        Tools::Timer timer;
         this->_waitingRefresh.unique();
-        int nb = 0;
-        while (!this->_waitingRefresh.empty() && ++nb < 15)
+        while (!this->_waitingRefresh.empty() && timer.GetElapsedTime() < 30)
         {
             this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.0002f);
             this->_chunkRenderer.RefreshDisplay(*this->_waitingRefresh.front()->chunk);
@@ -87,8 +88,8 @@ namespace Client { namespace Map {
 
     void ChunkManager::Update(Common::Position const& playerPosition)
     {
-        int nb = 0;
-        while (!this->_waitingRefresh.empty() && ++nb < 15)
+        Tools::Timer timer;
+        while (!this->_waitingRefresh.empty() && timer.GetElapsedTime() < 10)
         {
             this->_chunkRenderer.RefreshDisplay(*this->_waitingRefresh.front()->chunk);
             this->_waitingRefresh.pop_front();
@@ -112,7 +113,6 @@ namespace Client { namespace Map {
 
     void ChunkManager::_RemoveOldChunks(Common::Position const& playerPosition)
     {
-        return; // C'EST BUGGE
         unsigned int nbChunks = this->_game.GetClient().GetSettings().chunkViewDistance
             + this->_game.GetClient().GetSettings().chunkCacheArea;
         Tools::Vector3d pos((playerPosition.world - Tools::Vector3u(nbChunks)) * Common::ChunkSize);
@@ -127,8 +127,12 @@ namespace Client { namespace Map {
                     nodeToDelete.push_back(&node);
                 });
             for (auto it = nodeToDelete.begin(), ite = nodeToDelete.end(); it != ite; ++it)
-                if (!this->_octree[i]->RemoveElement(*it))
-                    Tools::log << "AAAAAAAAHHHHHHHHH\n";
+                if (this->_octree[i]->RemoveElement(*it))
+                {
+                    this->_chunks.erase((*it)->chunk->id);
+                    this->_waitingRefresh.remove(*it);
+                    Tools::Delete(*it);
+                }
         }
     }
 

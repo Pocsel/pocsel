@@ -92,8 +92,11 @@ namespace Tools {
             
             bool removed = false;
             for (int i = 0; i < 8; ++i)
-                if (this->_childs[i]->Contains(*element) == AbstractCollider::Inside)
-                    removed = removed || this->_childs[i]->RemoveElement(element);
+                if (this->_childs[i]->Contains(*element) == AbstractCollider::Inside && this->_childs[i]->RemoveElement(element))
+                {
+                    removed = true;
+                    break;
+                }
             if (!removed)
                 return false;
 
@@ -106,8 +109,8 @@ namespace Tools {
                 int nb = 0;
                 for (int i = 0; i < 8; ++i)
                 {
-                    for (int j = 0; j < this->_childs[i]->_count; ++j)
-                        this->_elements[nb++] = this->_childs[i]->_elements[j];
+                    for (int j = 0; j < childs[i]->_count; ++j)
+                        this->_elements[nb++] = childs[i]->_elements[j];
                     Tools::Delete(childs[i]);
                 }
             }
