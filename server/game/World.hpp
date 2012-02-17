@@ -43,7 +43,7 @@ namespace Server { namespace Game {
         ~World();
 
         bool HasMap(std::string const& name) { return this->_maps.find(name) != this->_maps.end(); }
-        Map::Map& GetMap(std::string const& name) { assert(this->_maps.find(name) == this->_maps.end()); return *this->_maps[name]; }
+        Map::Map& GetMap(std::string const& name) { assert(this->_maps.find(name) != this->_maps.end()); return *this->_maps[name]; }
         Map::Map& GetDefaultMap() const { return *this->_defaultMap; }
 
         void Start();
