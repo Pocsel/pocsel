@@ -15,7 +15,7 @@ equations = {
         beta = 2.0,
         n = 8,
         ip = 0,
-        ipp = 100
+        ipp = 55
     },
     perlin3_caves = {
         function_name = "perlin3",
