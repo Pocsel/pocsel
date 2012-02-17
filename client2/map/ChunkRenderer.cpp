@@ -65,10 +65,21 @@ namespace Client { namespace Map {
         Tools::Frustum frustum(viewProj);
 
         std::deque<Chunk*> chunkToRender;
+        std::multimap<double, Chunk*> transparentChunks;
         this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
-            [&chunkToRender](Chunk& chunk)
+            [&](Chunk& chunk)
             {
-                chunkToRender.push_back(&chunk);
+                if (chunk.GetMesh() == 0)
+                    return;
+                if (chunk.GetMesh()->HasTransparentCube())
+                {
+                    auto const& relativePosition = Common::Position(chunk.coords, Tools::Vector3f(Common::ChunkSize / 2.0f)) - camera.position;
+                    auto dist = relativePosition.GetMagnitudeSquared();
+                    auto value = std::multimap<double, Chunk*>::value_type(-dist, &chunk);
+                    transparentChunks.insert(value);
+                }
+                else
+                    chunkToRender.push_back(&chunk);
             });
 
         do
@@ -77,6 +88,8 @@ namespace Client { namespace Map {
             this->_baseVbo->Bind();
             for (size_t i = 0; i < this->_cubeInfo.size(); ++i)
             {
+                if (this->_cubeInfo[i].isTransparent)
+                    continue;
                 this->_cubeInfo[i].texture->Bind();
                 this->_shaderTexture->Set(*this->_cubeInfo[i].texture);
 
@@ -87,6 +100,41 @@ namespace Client { namespace Map {
                         continue;
 
                     this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
+                    mesh->Render(this->_cubeInfo[i].id, this->_renderer);
+                }
+
+                for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
+                {
+                    auto mesh = (*it).second->GetMesh();
+                    if (!mesh || !mesh->HasCubeType(this->_cubeInfo[i].id))
+                        continue;
+
+                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
+                    mesh->Render(this->_cubeInfo[i].id, this->_renderer);
+                }
+
+                this->_cubeInfo[i].texture->Unbind();
+            }
+            this->_baseVbo->Unbind();
+        } while (this->_shader->EndPass());
+        do
+        {
+            this->_shader->BeginPass();
+            this->_baseVbo->Bind();
+            for (size_t i = 0; i < this->_cubeInfo.size(); ++i)
+            {
+                if (!this->_cubeInfo[i].isTransparent)
+                    continue;
+                this->_cubeInfo[i].texture->Bind();
+                this->_shaderTexture->Set(*this->_cubeInfo[i].texture);
+
+                for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
+                {
+                    auto mesh = (*it).second->GetMesh();
+                    if (!mesh || !mesh->HasCubeType(this->_cubeInfo[i].id))
+                        continue;
+
+                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
                     mesh->Render(this->_cubeInfo[i].id, this->_renderer);
                 }
 
