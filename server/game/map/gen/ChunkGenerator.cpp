@@ -17,8 +17,8 @@
 namespace Server { namespace Game { namespace Map { namespace Gen {
 
     ChunkGenerator::ChunkGenerator(Conf const& conf) :
-        _messageQueue(new Tools::SimpleMessageQueue(boost::thread::hardware_concurrency() + 1))
-        //_messageQueue(new Tools::SimpleMessageQueue(1))
+        //_messageQueue(new Tools::SimpleMessageQueue(boost::thread::hardware_concurrency() + 1))
+        _messageQueue(new Tools::SimpleMessageQueue(1))
     {
         Tools::debug << "ChunkGenerator::ChunkGenerator()\n";
         Log::load << "Loading chunk generator:\n" <<

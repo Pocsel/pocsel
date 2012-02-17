@@ -111,35 +111,49 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             }
 
 
+            static int BIT3 = 10;
+
             int ipp1 = ipp + 1;
 
+            int xDiff = -(int)(((Uint64)cx * Common::ChunkSize) % ipp1);
+            int zDiff = -(int)(((Uint64)cz * Common::ChunkSize) % ipp1);
 
-            unsigned int nbCalcs = 0;
 
-            ix = 0;
-            while (ix < Common::ChunkSize)
+            unsigned int xnbCalcs = 0;
+            int iix = xDiff;
+            while (iix < (int)Common::ChunkSize)
             {
-                xx = x + (double)ix / Common::ChunkSize;
-
-                ++nbCalcs;
-
-                if (ix + ipp1 >= Common::ChunkSize && ix != Common::ChunkSize - 1)
-                    ix = Common::ChunkSize - 1;
-                else
-                    ix += ipp1;
+                ++xnbCalcs;
+                if (iix < (int)Common::ChunkSize - 1 &&
+                    iix + ipp1 >= (int)Common::ChunkSize)
+                    ++xnbCalcs;
+                iix += ipp1;
             }
 
-            double calcs[(Common::ChunkSize / 2)*(Common::ChunkSize / 2)];
+            unsigned int znbCalcs = 0;
+            int iiz = zDiff;
+            while (iiz < (int)Common::ChunkSize)
+            {
+                ++znbCalcs;
+                if (iiz < (int)Common::ChunkSize - 1 &&
+                    iiz + ipp1 >= (int)Common::ChunkSize)
+                    ++znbCalcs;
+                iiz += ipp1;
+            }
+
+            double calcs[(Common::ChunkSize / 2 + 1)*(Common::ChunkSize / 2 + 1)];
             double* calcsPtr = calcs;
 
+            x += (double)xDiff / Common::ChunkSize;
+            z += (double)zDiff / Common::ChunkSize;
 
-            for (ix = 0; ix < nbCalcs; ++ix)
+            for (ix = 0; ix < xnbCalcs; ++ix)
             {
-                xx = x + (-(double)( ((Uint64)cx * Common::ChunkSize % ipp1))) / Common::ChunkSize + ((double)ix * ipp1) / Common::ChunkSize;
+                xx = x + ((double)ix * ipp1) / Common::ChunkSize;
 
-                for (iz = 0; iz < nbCalcs; ++iz)
+                for (iz = 0; iz < znbCalcs; ++iz)
                 {
-                    zz = z + (-(double)(((Uint64)cz * Common::ChunkSize % ipp1))) / Common::ChunkSize + ((double)iz * ipp1) / Common::ChunkSize;
+                    zz = z + ((double)iz * ipp1) / Common::ChunkSize;
 
                     p = _perlin.Noise2D(xx * xn + xa,
                                         zz * zn + za,
@@ -147,6 +161,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                                         beta,
                                         n) * mul;
 
+                    if (BIT3) std::cout << "ix=" << ix << ", iz=" << iz << ", p=" << p << "\n";
                     *calcsPtr++ = p;
                 }
             }
@@ -154,16 +169,20 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             switch (ip)
             {
                 case 0:
-                    _InterpolationNearest(res, calcs, nbCalcs);
+                    _InterpolationNearest(res, calcs, xnbCalcs, znbCalcs, xDiff, zDiff);
                     break;
                 default:
-                    _InterpolationLinear(res, calcs, nbCalcs);
+                    _InterpolationLinear(res, calcs, xnbCalcs, znbCalcs, xDiff, zDiff);
             }
+
+            if (BIT3) --BIT3;
         }
 
     private:
-        void _InterpolationLinear(double* res, double* calcs, unsigned int nbCalcs) const
+        void _InterpolationLinear(double* res, double* calcs, unsigned int xnbCalcs, unsigned int znbCalcs, int xDiff, int zDiff) const
         {
+            static int BIT0 = 10;
+
             unsigned int ix, iz, iy;
             double p;
 
@@ -176,64 +195,84 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 
             double p00, p01, p10, p11;
 
-            int tab[Common::ChunkSize * 2];
+            // index dans calcs
+            int xctab[Common::ChunkSize * 2];
+            int zctab[Common::ChunkSize * 2];
+
+            // positions en vrai dans l'espace
+            int xtab[Common::ChunkSize * 2];
+            int ztab[Common::ChunkSize * 2];
 
             int ipp1 = ipp + 1;
 
-            x0 = 0;
-            x1 = 0;
-            for (unsigned int i = 0; i < Common::ChunkSize; ++i)
-            {
-                if ((int)i == Common::ChunkSize - 1)
-                {
-                    tab[i * 2] = i;
-                    tab[i * 2 + 1] = i;
-                }
-                else if ((int)i % ipp1 == 0)
-                {
-                    x0 = i;
-                    if (i + ipp1 >= Common::ChunkSize)
-                        x1 = Common::ChunkSize - 1;
-                    else
-                        x1 = i + ipp1;
-                    tab[i * 2] = x0;
-                    tab[i * 2 + 1] = x0;
-                }
-                else
-                {
-                    tab[i * 2] = x0;
-                    tab[i * 2 + 1] = x1;
-                }
+            unsigned int j;
+            int i0, i1;
+
+            if (BIT0) std::cout << "xnbCalcs=" << xnbCalcs << ", znbCalcs=" << znbCalcs << ", xDiff=" << xDiff << ", zDiff=" << zDiff << "\n";
+
+#define INIT_CALCINDEX_TAB(t) \
+            i0 = 0; \
+            i1 = 1; \
+            j = 0;\
+            for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
+            { \
+                if (((int)i - t##Diff) % ipp1 == 0) \
+                { \
+                    if (i != 0) \
+                        ++j; \
+                    i0 = j; \
+                    i1 = j + 1; \
+                    t##ctab[i * 2] = i0; \
+                    t##ctab[i * 2 + 1] = i0; \
+                    t##tab[i * 2] = t##Diff + i0 * ipp1; \
+                    t##tab[i * 2 + 1] = t##Diff + i0 * ipp1; \
+                    \
+                } \
+                else \
+                { \
+                    t##ctab[i * 2] = i0; \
+                    t##ctab[i * 2 + 1] = i1; \
+                    t##tab[i * 2] = t##Diff + i0 * ipp1; \
+                    t##tab[i * 2 + 1] = t##Diff + i1 * ipp1; \
+                } \
+                if (BIT0) std::cout << "i=" << i << ", j=" << j << ", i0=" << i0 << ", i1=" << i1 ;\
+                if (BIT0) std::cout << ", tab[i]=" << t##tab[i*2] ;\
+                if (BIT0) std::cout << ", tab[i1]=" << t##tab[i*2+1] ;\
+                if (BIT0) std::cout << ", ctab[i]=" << t##ctab[i*2] ;\
+                if (BIT0) std::cout << ", ctab[i1]=" << t##ctab[i*2+1] << "\n";\
             }
 
-            double* resBase = res;
+            INIT_CALCINDEX_TAB(x);
+            INIT_CALCINDEX_TAB(z);
+
+#undef INIT_CALCINDEX_TAB
 
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                x0 = tab[ix * 2];
-                x1 = tab[ix * 2 + 1];
+                x0 = xtab[ix * 2];
+                x1 = xtab[ix * 2 + 1];
 
-                x0s = x0 * Common::ChunkSize2;
-                x1s = x1 * Common::ChunkSize2;
+                x0s = xctab[ix * 2] * znbCalcs;
+                x1s = xctab[ix * 2 + 1] * znbCalcs;
 
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    z0 = tab[iz * 2];
-                    z1 = tab[iz * 2 + 1];
+                    z0 = ztab[iz * 2];
+                    z1 = ztab[iz * 2 + 1];
+
+                    z0s = zctab[iz * 2];
+                    z1s = zctab[iz * 2] + 1;
 
                     if ((z1 == z0))
                     {
                         if (x0 == x1)
                         {
-                            p = resBase[ix * Common::ChunkSize2 + iz * Common::ChunkSize];
+                            p = calcs[x0s + z0s];
                         }
                         else
                         {
-                            z0s = z0 * Common::ChunkSize;
-                            z1s = z1 * Common::ChunkSize;
-
-                            p00 = resBase[x0s + z0s];
-                            p10 = resBase[x1s + z0s];
+                            p00 = calcs[x0s + z0s];
+                            p10 = calcs[x1s + z0s];
 
                             x1_0 = x1 - x0;
                             x1_i = x1 - (int)ix;
@@ -247,11 +286,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     }
                     else if (x0 == x1)
                     {
-                        z0s = z0 * Common::ChunkSize;
-                        z1s = z1 * Common::ChunkSize;
-
-                        p00 = resBase[x0s + z0s];
-                        p10 = resBase[x0s + z1s];
+                        p00 = calcs[x0s + z0s];
+                        p10 = calcs[x0s + z1s];
 
                         z1_0 = z1 - z0;
                         z1_i = z1 - (int)iz;
@@ -264,13 +300,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     }
                     else
                     {
-                        z0s = z0 * Common::ChunkSize;
-                        z1s = z1 * Common::ChunkSize;
-
-                        p00 = resBase[x0s + z0s];
-                        p01 = resBase[x0s + z1s];
-                        p10 = resBase[x1s + z0s];
-                        p11 = resBase[x1s + z1s];
+                        p00 = calcs[x0s + z0s];
+                        p01 = calcs[x0s + z1s];
+                        p10 = calcs[x1s + z0s];
+                        p11 = calcs[x1s + z1s];
 
                         x1_0 = x1 - x0;
                         x1_i = x1 - (int)ix;
@@ -294,50 +327,67 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                         *res++ = p;
                 }
             }
+            if (BIT0) --BIT0;
         }
 
-        void _InterpolationNearest(double* res, double* calcs, unsigned int nbCalcs) const
+        void _InterpolationNearest(double* res, double* calcs, unsigned int xnbCalcs, unsigned int znbCalcs, int xDiff, int zDiff) const
         {
+            static bool BITE = true;
             unsigned int ix, iz, iy;
             double p;
 
             int xc;
             int zc;
 
-            int tab[Common::ChunkSize];
+            int xtab[Common::ChunkSize];
+            int ztab[Common::ChunkSize];
 
             int ipp1 = ipp + 1;
 
+            unsigned int j;
             int i0, i1;
-            i0 = 0;
-            i1 = 0;
-            for (unsigned int i = 0; i < Common::ChunkSize; ++i)
-            {
-                if ((int)i % ipp1 == 0)
-                {
-                    i0 = i / ipp1;
-                    if (i + ipp1 >= Common::ChunkSize)
-                        i1 = nbCalcs - 1;
-                    else
-                        i1 = i / ipp1 + 1;
-                    tab[i] = i0;
-                }
-                else
-                {
-                    if ((int)i % ipp1 < ipp1 / 2)
-                        tab[i] = i0;
-                    else
-                        tab[i] = i1;
-                }
+
+            if (BITE) std::cout << "xnbCalcs=" << xnbCalcs << ", xDiff=" << xDiff << ", zDiff=" << zDiff << "\n";
+
+#define INIT_CALCINDEX_TAB(t) \
+            i0 = 0; \
+            i1 = 1; \
+            j = 0;\
+            for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
+            { \
+                if (((int)i - t##Diff) % ipp1 == 0) \
+                { \
+                    if (i != 0) \
+                        ++j; \
+                    i0 = j; \
+                    i1 = j + 1; \
+                    t##tab[i] = i0; \
+                } \
+                else \
+                { \
+                    int reali = (int)i - t##Diff; \
+                    if (reali < 0) \
+                        reali = ipp1-reali; \
+                    if (reali % ipp1 < ipp1 / 2) \
+                        t##tab[i] = i0; \
+                    else \
+                        t##tab[i] = i1; \
+                } \
+                if (BITE) std::cout << "i=" << i << ", j=" << j << ", tab[i]=" << t##tab[i] << "\n";\
             }
+
+            INIT_CALCINDEX_TAB(x);
+            INIT_CALCINDEX_TAB(z);
+
+#undef INIT_CALCINDEX_TAB
 
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                xc = tab[ix] * nbCalcs;
+                xc = xtab[ix] * znbCalcs;
 
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    zc = tab[iz] + xc;
+                    zc = ztab[iz] + xc;
 
                     p = calcs[zc];
 
@@ -345,6 +395,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                         *res++ = p;
                 }
             }
+            BITE = false;
         }
 
     };
