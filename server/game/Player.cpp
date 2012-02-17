@@ -19,4 +19,10 @@ namespace Server { namespace Game {
         // TODO state 'en teleportation'
     }
 
+    void Player::Teleport(Map::Map& map, Common::Position const& position)
+    {
+        this->SetCurrentMap(map);
+        this->Teleport(position);
+    }
+
 }}

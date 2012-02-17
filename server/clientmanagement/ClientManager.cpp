@@ -166,9 +166,12 @@ namespace Server { namespace ClientManagement {
             Tools::log << "Client id " << id << " already taken.\n";
             id = this->_GetNextId();
         }
-        clientConnection->SetCallbacks(std::bind(&ClientManager::HandleClientError, this, id),
-                                       std::bind(&ClientManager::HandlePacket, this, id, std::placeholders::_1)
-                                      );
+
+        Network::ClientConnection::ErrorCallback ecb =
+            std::bind(&ClientManager::HandleClientError, this, id);
+        Network::ClientConnection::PacketCallback pcb =
+            std::bind(&ClientManager::HandlePacket, this, id, std::placeholders::_1);
+        clientConnection->SetCallbacks(ecb, pcb);
 
         Client* newClient = new Client(id, clientConnection);
 

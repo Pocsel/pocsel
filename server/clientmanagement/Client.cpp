@@ -16,6 +16,7 @@ namespace Server { namespace ClientManagement {
 
     Client::~Client()
     {
+        this->_connection->Shutdown();
     }
 
     void Client::SendPacket(std::unique_ptr<Common::Packet> packet)
