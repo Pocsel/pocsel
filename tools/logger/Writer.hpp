@@ -31,7 +31,7 @@ namespace Tools { namespace Logger {
 
             Buffer(Buffer&& buffer)
                 : _writer(buffer._writer),
-#ifdef _MSVC
+#ifdef _MSC_VER
                 _stream(std::move(buffer._stream))
 #else
                 _stream((buffer._stream.str()))
@@ -41,7 +41,7 @@ namespace Tools { namespace Logger {
 
             Buffer(Buffer& buffer)
                 : _writer(buffer._writer),
-#ifdef _MSVC
+#ifdef _MSC_VER
                 _stream(std::move(buffer._stream))
 #else
                 _stream((buffer._stream.str()))
@@ -56,7 +56,7 @@ namespace Tools { namespace Logger {
 
             Buffer& operator <<(Token const& t)
             {
-#ifdef _MSVC
+#ifdef _MSC_VER
                 if (&t == &flush)
                 {
                     this->_writer.Write(this->_stream.str());
