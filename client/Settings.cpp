@@ -7,7 +7,6 @@
 #include "tools/lua/Interpreter.hpp"
 
 namespace {
-
     template <typename T>
         T GetLuaGlobal(Tools::Lua::Interpreter i, std::string const& name, T defaultValue)
         {
@@ -20,7 +19,6 @@ namespace {
                 return defaultValue;
             }
         }
-
 }
 
 namespace Client {
