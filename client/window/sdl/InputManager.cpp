@@ -7,12 +7,17 @@
 namespace Client { namespace Window { namespace Sdl {
 
     InputManager::InputManager(::Client::Window::Window& window, InputBinder* inputBinder) :
-        ::Client::Window::InputManager(window, inputBinder), _inputBinder(*inputBinder), _mousePos(0)
+        ::Client::Window::InputManager(window, inputBinder),
+        _inputBinder(*inputBinder),
+        _mousePos(0),
+        _mouseShown(true),
+        _hasFocus(true)
     {
     }
 
     void InputManager::ProcessEvents()
     {
+        this->_ResetStates();
         InputBinder::Action action;
         SDL_Event e;
         while (SDL_PollEvent(&e))
@@ -93,9 +98,13 @@ namespace Client { namespace Window { namespace Sdl {
         }
     }
 
-    Tools::Vector2<int> const& InputManager::GetMousePos() const
+    void InputManager::ShowMouse(bool show /* = true */)
     {
-        return this->_mousePos;
+        if (show && !this->_mouseShown)
+            SDL_ShowCursor(SDL_ENABLE);
+        else if (!show && this->_mouseShown)
+            SDL_ShowCursor(SDL_DISABLE);
+        this->_mouseShown = show;
     }
 
     void InputManager::WarpMouse(Tools::Vector2<int> const& pos)

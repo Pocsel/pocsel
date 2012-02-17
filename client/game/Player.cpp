@@ -9,6 +9,10 @@ namespace Client { namespace Game {
 
     Player::Player()
     {
+        this->_actionBinder.Bind(BindAction::Forward, BindAction::Held, std::bind(&Player::MoveForward, this));
+        this->_actionBinder.Bind(BindAction::Backward, BindAction::Held, std::bind(&Player::MoveBackward, this));
+        this->_actionBinder.Bind(BindAction::Left, BindAction::Held, std::bind(&Player::StrafeLeft, this));
+        this->_actionBinder.Bind(BindAction::Right, BindAction::Held, std::bind(&Player::StrafeRight, this));
     }
 
     void Player::UpdateMovements(Window::Window& window, Uint32 time)
@@ -16,14 +20,9 @@ namespace Client { namespace Game {
         if (!window.GetInputManager().HasFocus())
             return;
 
-        if (window.GetInputManager().GetActionState(BindAction::Forward))
-            this->MoveForward(time);
-        if (window.GetInputManager().GetActionState(BindAction::Backward))
-            this->MoveBackward(time);
-        if (window.GetInputManager().GetActionState(BindAction::Left))
-            this->StrafeLeft(time);
-        if (window.GetInputManager().GetActionState(BindAction::Right))
-            this->StrafeRight(time);
+        this->_elapsedTime = time;
+
+        this->_actionBinder.Dispatch(window.GetInputManager());
 
         auto delta = (Tools::Vector2f(window.GetInputManager().GetMousePos()) - (Tools::Vector2f(window.GetSize()) / 2.0f)) / 300.0f;
         this->_camera.Rotate(delta);
@@ -35,34 +34,34 @@ namespace Client { namespace Game {
         this->_camera.position = pos;
     }
 
-    void Player::MoveForward(Uint32 time)
+    void Player::MoveForward()
     {
-        this->_Move(this->_camera.direction * (time / 100.0f));
+        this->_Move(this->_camera.direction * (this->_elapsedTime / 100.0f));
     }
 
-    void Player::MoveBackward(Uint32 time)
+    void Player::MoveBackward()
     {
-        this->_Move(-this->_camera.direction * (time / 100.0f));
+        this->_Move(-this->_camera.direction * (this->_elapsedTime / 100.0f));
     }
 
-    void Player::StrafeLeft(Uint32 time)
+    void Player::StrafeLeft()
     {
         Tools::Vector3f dir = this->_camera.direction;
         this->_Move(Tools::Vector3f(
             dir.y * 0 - dir.z * -1,
             dir.z * 0 - dir.x * 0,
             dir.x * -1 - dir.y * 0
-        ) * (time / 100.0f));
+        ) * (this->_elapsedTime / 100.0f));
     }
 
-    void Player::StrafeRight(Uint32 time)
+    void Player::StrafeRight()
     {
         Tools::Vector3f dir = this->_camera.direction;
         this->_Move(Tools::Vector3f(
             dir.y * 0 - dir.z * 1,
             dir.z * 0 - dir.x * 0,
             dir.x * 1 - dir.y * 0
-        ) * (time / 100.0f));
+        ) * (this->_elapsedTime / 100.0f));
     }
 
     void Player::Jump()

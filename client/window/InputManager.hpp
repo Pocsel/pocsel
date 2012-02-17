@@ -1,7 +1,7 @@
 #ifndef __CLIENT_WINDOW_INPUTMANAGER_HPP__
 #define __CLIENT_WINDOW_INPUTMANAGER_HPP__
 
-#include "client/window/InputBinder.hpp"
+#include "client/ActionBinder.hpp"
 #include "tools/Vector2.hpp"
 
 namespace Client { namespace Window {
@@ -11,18 +11,12 @@ namespace Client { namespace Window {
 namespace Client { namespace Window {
 
     class InputManager :
-        private boost::noncopyable
+        public ActionBinder
     {
     private:
         InputBinder* _inputBinder;
+        std::list<std::pair<InputBinder::Action, BindAction::Type>> _actionList;
         bool _actionStates[BindAction::NbBindActions];
-        std::queue<std::pair<InputBinder::Action, BindAction::Type>> _actionQueue;
-        std::map<std::string, std::list<std::function<void(void)>>> _stringPressBinds;
-        std::map<std::string, std::list<std::function<void(void)>>> _stringHoldBinds;
-        std::map<std::string, std::list<std::function<void(void)>>> _stringReleaseBinds;
-        std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _pressBinds;
-        std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _holdBinds;
-        std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _releaseBinds;
 
     protected:
         bool _hasFocus;
@@ -32,20 +26,21 @@ namespace Client { namespace Window {
         InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
         virtual ~InputManager();
         virtual void ProcessEvents() = 0;
-        void DispatchActions();
-        void Bind(std::string const& action, BindAction::Type type, std::function<void(void)> const& func);
-        void Bind(BindAction::BindAction action, BindAction::Type type, std::function<void(void)> const& func);
+        void FlushActionList();
         void TriggerAction(InputBinder::Action const& action, BindAction::Type type);
         void TriggerAction(std::string const& action, BindAction::Type type);
         void TriggerAction(BindAction::BindAction action, BindAction::Type type);
         virtual Tools::Vector2i const& GetMousePos() const = 0;
         virtual void WarpMouse(Tools::Vector2i const& pos) = 0;
         virtual void WarpMouse(int x, int y) = 0;
+        virtual void ShowMouse(bool show = true) = 0;
+        virtual bool HasFocus() const = 0;
 
+        std::list<std::pair<InputBinder::Action, BindAction::Type>>& GetActionList() { return this->_actionList; }
         InputBinder& GetInputBinder() { return *this->_inputBinder; }
-        bool HasFocus() const { return this->_hasFocus; }
         bool GetActionState(BindAction::BindAction action) { return this->_actionStates[static_cast<int>(action)]; }
-    private:
+
+    protected:
         void _ResetStates();
     };
 

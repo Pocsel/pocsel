@@ -3,6 +3,7 @@
 
 #include "common/Camera.hpp"
 #include "tools/Vector3.hpp"
+#include "client/ActionBinder.hpp"
 
 namespace Client { namespace Window {
     class InputManager;
@@ -17,6 +18,8 @@ namespace Client { namespace Game {
         private:
             std::string _nickname;
             Common::Camera _camera;
+            ActionBinder _actionBinder;
+            Uint32 _elapsedTime;
 
         public:
             Player();
@@ -28,10 +31,10 @@ namespace Client { namespace Game {
             Common::Camera const& GetCamera() const { return this->_camera; }
 
             void UpdateMovements(Window::Window& window, Uint32 time);
-            void MoveForward(Uint32 time);
-            void MoveBackward(Uint32 time);
-            void StrafeLeft(Uint32 time);
-            void StrafeRight(Uint32 time);
+            void MoveForward();
+            void MoveBackward();
+            void StrafeLeft();
+            void StrafeRight();
             void Jump();
 
         private:

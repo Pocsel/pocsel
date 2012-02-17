@@ -6,11 +6,31 @@
 #include "common/ConfDir.hpp"
 #include "tools/lua/Interpreter.hpp"
 
+namespace {
+
+    template <typename T>
+        T GetLuaGlobal(Tools::Lua::Interpreter i, std::string const& name, T defaultValue)
+        {
+            try
+            {
+                return i[name].as<T>();
+            }
+            catch (std::exception&)
+            {
+                return defaultValue;
+            }
+        }
+
+}
+
 namespace Client {
 
     Settings::Settings(int ac, char** av) :
         nickname("Player"),
         fps(60),
+        res(800, 600),
+        fullscreen(false),
+        useShaders(true),
         chunkViewDistance(4),
         chunkCacheArea(2),
         chunkMinimumArea(3)

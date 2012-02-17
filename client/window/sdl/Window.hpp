@@ -23,8 +23,8 @@ namespace Client { namespace Window { namespace Sdl {
         Window(Tools::Vector2u const& size = Tools::Vector2u(800, 600), bool fullscreen = false, bool useShaders = true);
         ~Window();
         virtual void Render();
-        virtual Tools::IRenderer& GetRenderer();
-        virtual Tools::Vector2u const& GetSize() const;
+        virtual Tools::IRenderer& GetRenderer() { return *this->_renderer; }
+        virtual Tools::Vector2u const& GetSize() const { return this->_size; }
         virtual void Resize(Tools::Vector2u const& size);
         virtual void Resize(unsigned int w, unsigned int h);
     };

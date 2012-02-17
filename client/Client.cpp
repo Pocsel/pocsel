@@ -59,9 +59,8 @@ namespace Client {
                 this->_menu->GetDisconnectedScreen().SetMessage(this->_network.GetLastError());
             }
 
-            // process events & dispatch them
+            // put events in buffer list
             this->_window->GetInputManager().ProcessEvents();
-            this->_window->GetInputManager().DispatchActions();
 
             switch (this->_state)
             {
@@ -109,6 +108,11 @@ namespace Client {
                 ;
             }
 
+            // dispatch actions that were not dispatched
+            this->_window->GetInputManager().Dispatch(this->_window->GetInputManager());
+            // remove actions that are not bound
+            this->_window->GetInputManager().FlushActionList();
+
             this->_window->Render();
 
             int timeLeft = 1000 / this->_settings.fps - frameTimer.GetElapsedTime();
@@ -149,6 +153,8 @@ namespace Client {
 
     void Client::Quit()
     {
+        if (this->_state == Connecting)
+            exit(boost::exit_success); // ohoho c'est pas cool mais ça evite d'attendre le timeout dans io_service.stop()
         this->_state = Quitting;
     }
 }

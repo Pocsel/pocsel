@@ -8,7 +8,9 @@
 
 namespace Client { namespace Window { namespace Sdl {
 
-    Window::Window(Tools::Vector2u const& size, bool fullscreen, bool useShaders) :
+    Window::Window(Tools::Vector2u const& size /* = Tools::Vector2u(800, 600) */,
+            bool fullscreen /* = false */,
+            bool useShaders /* = true */) :
         ::Client::Window::Window(new InputManager(*this, new InputBinder())),
         _size(size),
         _targetSize(0)
@@ -34,11 +36,6 @@ namespace Client { namespace Window { namespace Sdl {
     {
         Tools::Delete(this->_renderer);
         SDL_Quit();
-    }
-
-    Tools::IRenderer& Window::GetRenderer()
-    {
-        return *this->_renderer;
     }
 
     void Window::Render()
@@ -68,11 +65,6 @@ namespace Client { namespace Window { namespace Sdl {
     void Window::Resize(unsigned int w, unsigned int h)
     {
         this->Resize(Tools::Vector2u(w, h));
-    }
-
-    Tools::Vector2u const& Window::GetSize() const
-    {
-        return this->_size;
     }
 
 }}}
