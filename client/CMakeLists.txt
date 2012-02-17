@@ -1,6 +1,3 @@
-file(MAKE_DIRECTORY "${pocsel_client_dir}/cache/")
-
-# Sources
 file(GLOB_RECURSE client_src "*.[ch]pp")
 
 set(src
@@ -8,10 +5,9 @@ set(src
     ${common_src}
     ${tools_base_src}
     ${tools_database_src}
-    ${tools_gui_src}
+    ${tools_logger_src}
     ${tools_lua_src}
     ${tools_renderers_src}
-    ${tools_logger_src}
 )
 
 CreateGroups("${src}")
@@ -19,23 +15,12 @@ add_executable(client ${src})
 
 enable_pch(client src)
 
-#message("-- Link with ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${Boost_LIBRARIES}")
 target_link_libraries(client
-    ${Boost_LIBRARIES} # Utils
+    ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${SQLITE3_LIBRARIES}
     ${LUA_LIBRARIES}
-    ${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} ${CG_LIBRARY} ${CGGL_LIBRARY} # gui
+    ${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} ${CG_LIBRARY} ${CGGL_LIBRARY}
 )
-
-set(binds_file "${pocsel_client_dir}/bindings.lua")
 
 SetProgramInfo(client)
-
-add_custom_command(
-    OUTPUT "${binds_file}"
-    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/bindings.lua" "${pocsel_client_dir}"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/bindings.lua"
-)
-
-add_custom_target(binds ALL DEPENDS "${binds_file}")

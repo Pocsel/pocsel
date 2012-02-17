@@ -3,10 +3,11 @@
 
 // GLEW - OBLIGATOIREMENT en premier !
 #include <GL/glew.h>
+#include <SDL/SDL.h>
 
 #include "tools/precompiled.hpp"
 
-#include "tools/types.hpp"
-#include "tools/Delete.hpp"
+// Nos trucs
+#include "tools/logger/Logger.hpp"
 
 #endif
