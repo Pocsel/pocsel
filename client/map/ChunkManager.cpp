@@ -112,7 +112,6 @@ namespace Client { namespace Map {
 
     void ChunkManager::_RemoveOldChunks(Common::Position const& playerPosition)
     {
-        return; // C'EST BUGGE
         unsigned int nbChunks = this->_game.GetClient().GetSettings().chunkViewDistance
             + this->_game.GetClient().GetSettings().chunkCacheArea;
         Tools::Vector3d pos((playerPosition.world - Tools::Vector3u(nbChunks)) * Common::ChunkSize);
@@ -127,8 +126,12 @@ namespace Client { namespace Map {
                     nodeToDelete.push_back(&node);
                 });
             for (auto it = nodeToDelete.begin(), ite = nodeToDelete.end(); it != ite; ++it)
-                if (!this->_octree[i]->RemoveElement(*it))
-                    Tools::log << "AAAAAAAAHHHHHHHHH\n";
+                if (this->_octree[i]->RemoveElement(*it))
+                {
+                    this->_chunks.erase((*it)->chunk->id);
+                    this->_waitingRefresh.remove(*it);
+                    Tools::Delete(*it);
+                }
         }
     }
 
