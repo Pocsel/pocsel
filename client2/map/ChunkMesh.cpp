@@ -155,11 +155,10 @@ namespace Client { namespace Map {
 
     void ChunkMesh::Render(int cubeType, Tools::IRenderer& renderer)
     {
-        if (this->_chunk.IsEmpty() || this->_indices[cubeType].first == 0)
+        if (this->_triangleCount == 0 || this->_indices[cubeType].first == 0)
             return;
         //this->_textureCoords->Bind();
         this->_indices[cubeType].first->Bind();
-        renderer.UpdateCurrentParameters();
         renderer.DrawElements(this->_indices[cubeType].second, Tools::Renderers::DataType::UnsignedInt, 0);
         this->_indices[cubeType].first->Unbind();
         //this->_textureCoords->Unbind();

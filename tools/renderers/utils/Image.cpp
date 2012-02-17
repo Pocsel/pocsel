@@ -22,7 +22,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         texture.Bind();
         textureParameter.Set(texture);
 
-        this->_renderer.UpdateCurrentParameters();
         this->_renderer.DrawElements(sizeof(indices), Renderers::DataType::UnsignedByte, indices, Renderers::DrawingMode::TrianglesStrip);
 
         texture.Unbind();

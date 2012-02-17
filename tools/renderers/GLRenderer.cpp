@@ -166,11 +166,13 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode)
     {
+        this->UpdateCurrentParameters();
         GLCHECK(::glDrawElements(OpenGL::GetDrawingMode(mode), count, OpenGL::GetTypeFromDataType(indicesType), indices));
     }
 
     void GLRenderer::DrawVertexBuffer(Uint32 offset, Uint32 count, DrawingMode::Type mode)
     {
+        this->UpdateCurrentParameters();
         GLCHECK(::glDrawArrays(OpenGL::GetDrawingMode(mode), offset, count));
     }
 
