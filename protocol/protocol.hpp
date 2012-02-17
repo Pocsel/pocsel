@@ -49,12 +49,6 @@ namespace Protocol {
         GetCubeType,
 
         /**
-         * OBSOLETE
-         * void
-         */
-        GetSpawnPosition,
-
-        /**
          * Uint32 view distance
          * String player name
          */

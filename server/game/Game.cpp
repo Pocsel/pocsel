@@ -108,10 +108,6 @@ namespace Server { namespace Game {
     {
         static std::unordered_map<Uint32, Uint32> __;
 
-        this->_world->GetDefaultMap().GetChunk(id, callback);
-        return;
-        // TODO OBSOLETE virer les 2 lignes au dessus, qui sont pour le vieux protocole
-
         auto it = this->_players.find(clientId);
         if (it == this->_players.end())
             return;

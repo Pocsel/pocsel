@@ -98,12 +98,6 @@ namespace Server { namespace ClientManagement {
             client.SendPacket(std::move(Network::PacketCreator::CubeType(world.GetCubeType(id))));
         }
 
-        // TODO rm OBSOLETE
-        void _OBSOLETE(ClientManager&, Client& client, Common::Packet const&)
-        {
-            Tools::debug << "_OBSOLETE (client " << client.id << ")\n";
-        }
-
         void _HandleSettings(ClientManager& manager, Client& client, Common::Packet const& packet)
         {
             Tools::debug << "_HandleSettings (client " << client.id << ")\n";
@@ -137,7 +131,6 @@ namespace Server { namespace ClientManagement {
             &ClientActionsNS::_HandleGetNeededResourceIds,
             &ClientActionsNS::_HandleGetResourceRange,
             &ClientActionsNS::_HandleGetCubeType,
-            &ClientActionsNS::_OBSOLETE, // TODO rm
             &ClientActionsNS::_HandleSettings,
             &ClientActionsNS::_HandleTeleportOk,
         };
@@ -148,9 +141,8 @@ namespace Server { namespace ClientManagement {
         static_assert((int) Protocol::ClientToServer::GetNeededResourceIds == 3, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetResourceRange == 4, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetCubeType == 5, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::GetSpawnPosition == 6, "wrong callback index"); // TODO rm OBSOLETE
-        static_assert((int) Protocol::ClientToServer::Settings == 7, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::TeleportOk == 8, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Settings == 6, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::TeleportOk == 7, "wrong callback index");
 
         Protocol::ActionType action;
         packet.Read(action);
