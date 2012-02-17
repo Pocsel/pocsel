@@ -138,9 +138,9 @@ namespace Client { namespace Map {
         if (indices.size() == 0)
             return;
 
-        this->_textureCoords = game.GetClient().GetWindow().GetRenderer().CreateVertexBuffer().release();
-        this->_textureCoords->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2);
-        this->_textureCoords->SetData((Common::ChunkSize3 * 4 * 6) * sizeof(Tools::Vector2f), textureCoords, Tools::Renderers::VertexBufferUsage::Static);
+        //this->_textureCoords = game.GetClient().GetWindow().GetRenderer().CreateVertexBuffer().release();
+        //this->_textureCoords->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2);
+        //this->_textureCoords->SetData((Common::ChunkSize3 * 4 * 6) * sizeof(Tools::Vector2f), textureCoords, Tools::Renderers::VertexBufferUsage::Static);
         for (auto it = indices.begin(), ite = indices.end(); it != ite; ++it)
         {
             if (it->second.size() == 0)
@@ -157,12 +157,12 @@ namespace Client { namespace Map {
     {
         if (this->_chunk.IsEmpty() || this->_indices[cubeType].first == 0)
             return;
-        this->_textureCoords->Bind();
+        //this->_textureCoords->Bind();
         this->_indices[cubeType].first->Bind();
         renderer.UpdateCurrentParameters();
         renderer.DrawElements(this->_indices[cubeType].second, Tools::Renderers::DataType::UnsignedInt, 0);
         this->_indices[cubeType].first->Unbind();
-        this->_textureCoords->Unbind();
+        //this->_textureCoords->Unbind();
     }
 
 }}

@@ -114,15 +114,6 @@ namespace Client { namespace Map {
         unsigned int const normalLeft = 4;
         unsigned int const normalBack = 5;
 
-        float const cubeNormals[][3] = {
-            {0, 0, 1},
-            {0, 1, 0},
-            {1, 0, 0},
-            {0, -1, 0},
-            {-1, 0, 0},
-            {0, 0, -1}
-        };
-
         float const cubeVertices[][3] = {
             {0, 1, 1},
             {1, 1, 1},
@@ -133,7 +124,6 @@ namespace Client { namespace Map {
             {1, 0, 1},
             {0, 0, 1},
         };
-
         unsigned int const faceIndices[] = {
             frontTopLeft, frontBottomLeft, frontBottomRight, frontTopRight, // front
             frontTopLeft, frontTopRight, backTopRight, backTopLeft, // top
@@ -143,6 +133,14 @@ namespace Client { namespace Map {
             backTopLeft, backTopRight, backBottomRight, backBottomLeft, // back
         };
 
+        float const cubeNormals[][3] = {
+            {0, 0, 1},
+            {0, 1, 0},
+            {1, 0, 0},
+            {0, -1, 0},
+            {-1, 0, 0},
+            {0, 0, -1}
+        };
         unsigned int const faceIndicesN[] = {
             normalFront, normalFront, normalFront, normalFront, // front
             normalTop, normalTop, normalTop, normalTop, // top
@@ -152,7 +150,22 @@ namespace Client { namespace Map {
             normalBack, normalBack, normalBack, normalBack, // back
         };
 
-        float* vertices = new float[Common::ChunkSize3 * sizeof(faceIndices) / sizeof(faceIndices[0]) * 6];// * sizeof(float)];
+        float const cubeTexCoords[][2] = {
+            {0, 0},
+            {1, 0},
+            {1, 1},
+            {0, 1},
+        };
+        unsigned int const faceIndicesT[] = {
+            0, 1, 2, 3, // front
+            0, 1, 2, 3, // top
+            0, 1, 2, 3, // right
+            0, 1, 2, 3, // bottom
+            0, 1, 2, 3, // left
+            0, 1, 2, 3, // back
+        };
+
+        float* vertices = new float[Common::ChunkSize3 * sizeof(faceIndices) / sizeof(faceIndices[0]) * (3+3+2)];// * sizeof(float)];
 
         unsigned int x, y, z, i;
         size_t offset = 0;
@@ -171,6 +184,8 @@ namespace Client { namespace Map {
                         vertices[offset++] = vert[2] + z;
                         std::memcpy(&vertices[offset], &cubeNormals[faceIndicesN[i]], sizeof(cubeNormals[0]));
                         offset += 3;
+                        vertices[offset++] = cubeTexCoords[faceIndicesT[i]][0];
+                        vertices[offset++] = cubeTexCoords[faceIndicesT[i]][1];
                     }
                 }
             }
@@ -179,6 +194,7 @@ namespace Client { namespace Map {
         this->_baseVbo = this->_renderer.CreateVertexBuffer().release();
         this->_baseVbo->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
         this->_baseVbo->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 3); // Normales
-        this->_baseVbo->SetData(Common::ChunkSize3 * sizeof(faceIndices) / sizeof(faceIndices[0]) * 6 *sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);
+        this->_baseVbo->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // Textures
+        this->_baseVbo->SetData(Common::ChunkSize3 * sizeof(faceIndices) / sizeof(faceIndices[0]) * (3+3+2) *sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);
     }
 }}

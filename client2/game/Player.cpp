@@ -13,6 +13,18 @@ namespace Client { namespace Game {
 
     void Player::UpdateMovements(Window::Window& window)
     {
+        if (!window.GetInputManager().HasFocus())
+            return;
+
+        if (window.GetInputManager().GetActionState(BindAction::Forward) != BindAction::Released)
+            this->MoveForward();
+        if (window.GetInputManager().GetActionState(BindAction::Backward) != BindAction::Released)
+            this->MoveBackward();
+        if (window.GetInputManager().GetActionState(BindAction::Left) != BindAction::Released)
+            this->StrafeLeft();
+        if (window.GetInputManager().GetActionState(BindAction::Right) != BindAction::Released)
+            this->StrafeRight();
+
         auto delta = (Tools::Vector2f(window.GetInputManager().GetMousePos()) - (Tools::Vector2f(window.GetSize()) / 2.0f)) / 300.0f;
         this->_camera.Rotate(delta);
         window.GetInputManager().WarpMouse(Tools::Vector2i(window.GetSize() / 2));

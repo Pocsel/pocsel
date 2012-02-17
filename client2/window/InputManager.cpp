@@ -1,3 +1,5 @@
+#include "client2/precompiled.hpp"
+
 #include "client2/window/InputManager.hpp"
 #include "client2/window/InputBinder.hpp"
 
@@ -19,8 +21,11 @@ namespace Client { namespace Window {
 
     InputManager::InputManager(::Client::Window::Window& window, InputBinder* inputBinder) :
         _inputBinder(inputBinder),
+        _hasFocus(true),
         _window(window)
     {
+        for (Uint32 i = 0; i < BindAction::NbBindActions; ++i)
+            this->_actionStates[i] = BindAction::Released;
     }
 
     InputManager::~InputManager()
@@ -59,6 +64,7 @@ namespace Client { namespace Window {
                     CallFunctions(this->_stringReleaseBinds, a.first.string);
                     break;
                 }
+            this->_actionStates[(int)a.first.action] = a.second;
             this->_actionQueue.pop();
         }
     }

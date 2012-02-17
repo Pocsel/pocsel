@@ -7,6 +7,9 @@
 #include "client2/map/ChunkManager.hpp"
 #include "client2/network/PacketCreator.hpp"
 
+#include "client2/window/Window.hpp"
+#include "client2/window/InputManager.hpp"
+
 namespace Client { namespace Map {
 
     ChunkManager::ChunkManager(Game::Game& game)
@@ -25,6 +28,13 @@ namespace Client { namespace Map {
                 this->_octree[x + z * 4] = new Tools::Octree<ChunkNode>(coords * Common::ChunkSize, (1 << 20) * Common::ChunkSize);
             }
         }
+
+        game.GetClient().GetWindow().GetInputManager().Bind(BindAction::Test, BindAction::Released,
+            [this]()
+            {
+                for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
+                    this->_octree[i]->Dump(Tools::log);
+            });
     }
 
     ChunkManager::~ChunkManager()

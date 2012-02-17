@@ -30,17 +30,15 @@ namespace Tools { namespace Logger {
             }
 
             Buffer(Buffer&& buffer)
-                : _writer(buffer._writer)
+                : _writer(buffer._writer),
+                _stream(std::move(buffer._stream))
             {
-                this->_stream << buffer._stream.str();
-                buffer._stream.clear();
             }
 
             Buffer(Buffer& buffer)
-                : _writer(buffer._writer)
+                : _writer(buffer._writer),
+                _stream(std::move(buffer._stream))
             {
-                this->_stream << buffer._stream.str();
-                buffer._stream.clear();
             }
 
             ~Buffer()
@@ -53,7 +51,7 @@ namespace Tools { namespace Logger {
                 if (&t == &flush)
                 {
                     this->_writer.Write(this->_stream.str());
-                    this->_stream.clear();
+                    this->_stream = std::stringstream();
                 }
                 if (&t == &endl)
                     this->_stream << std::endl;

@@ -1,3 +1,5 @@
+#include "client2/precompiled.hpp"
+
 #include "client2/window/sdl/InputManager.hpp"
 #include "client2/window/sdl/InputBinder.hpp"
 #include "client2/window/Window.hpp"
@@ -16,6 +18,10 @@ namespace Client { namespace Window { namespace Sdl {
         while (SDL_PollEvent(&e))
             switch (e.type)
             {
+            case SDL_ACTIVEEVENT:
+                if ((e.active.state & SDL_APPINPUTFOCUS) == SDL_APPINPUTFOCUS)
+                    this->_hasFocus = e.active.gain != 0;
+                break;
             case SDL_MOUSEMOTION:
                 this->_mousePos.x = e.motion.x;
                 this->_mousePos.y = e.motion.y;

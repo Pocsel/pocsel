@@ -29,6 +29,7 @@ namespace Client { namespace Window {
         this->_actions["fire"] = BindAction::Fire;
         this->_actions["secondaryfire"] = BindAction::SecondaryFire;
         this->_actions["use"] = BindAction::Use;
+        this->_actions["test"] = BindAction::Test;
     }
 
     InputBinder::Action::Action() :

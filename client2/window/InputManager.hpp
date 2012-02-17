@@ -15,6 +15,7 @@ namespace Client { namespace Window {
     {
     private:
         InputBinder* _inputBinder;
+        BindAction::Type _actionStates[BindAction::NbBindActions];
         std::queue<std::pair<InputBinder::Action, BindAction::Type>> _actionQueue;
         std::map<std::string, std::list<std::function<void(void)>>> _stringPressBinds;
         std::map<std::string, std::list<std::function<void(void)>>> _stringHoldBinds;
@@ -24,6 +25,7 @@ namespace Client { namespace Window {
         std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _releaseBinds;
 
     protected:
+        bool _hasFocus;
         Window& _window;
 
     public:
@@ -40,6 +42,9 @@ namespace Client { namespace Window {
         virtual Tools::Vector2i const& GetMousePos() const = 0;
         virtual void WarpMouse(Tools::Vector2i const& pos) = 0;
         virtual void WarpMouse(int x, int y) = 0;
+
+        bool HasFocus() const { return this->_hasFocus; }
+        BindAction::Type GetActionState(BindAction::BindAction action) { return this->_actionStates[(int)action]; }
     };
 
 }}

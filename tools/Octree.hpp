@@ -12,32 +12,38 @@ namespace Tools {
         private boost::noncopyable
     {
     private:
-        Octree<T>* _childs[8];
+        union
+        {
+            Octree<T>* _childs[8];
+            T* _elements[8];
+        };
         unsigned int _size;
-        T* _element;
         int _count;
 
     public:
         Octree(Vector3d const& position, unsigned int size)
             : AlignedCube(position, size),
             _size(size),
-            _element(0),
             _count(0)
         {
             std::memset(this->_childs, 0, sizeof(this->_childs));
+            std::memset(this->_elements, 0, sizeof(this->_elements));
         }
         ~Octree()
         {
-            for (int i = 0; i < 8; ++i)
-                Tools::Delete(this->_childs[i]);
+            if (this->_count > 8)
+                for (int i = 0; i < 8; ++i)
+                    Tools::Delete(this->_childs[i]);
         }
 
         void InsertElement(T* element)
         {
-            if (this->_count == 0)
-                this->_element = element;
-            else if (this->_count == 1)
+            if (this->_count < 8)
+                this->_elements[this->_count] = element;
+            else if (this->_count == 8)
             {
+                T* elements[8];
+                std::memcpy(elements, this->_elements, sizeof(this->_elements));
                 unsigned int size = this->_size / 2;
                 this->_childs[0] = new Octree<T>(this->GetPosition() + Vector3d(   0,    0,    0), size);
                 this->_childs[1] = new Octree<T>(this->GetPosition() + Vector3d(   0,    0, size), size);
@@ -48,20 +54,14 @@ namespace Tools {
                 this->_childs[6] = new Octree<T>(this->GetPosition() + Vector3d(size, size, 0   ), size);
                 this->_childs[7] = new Octree<T>(this->GetPosition() + Vector3d(size, size, size), size);
 
-                bool ok = false;
                 for (int i = 0; i < 8; ++i)
                 {
-                    if (this->_childs[i]->Contains(*this->_element) == AbstractCollider::Inside)
-                    {
-                        if (ok)
-                            Tools::log << "AAAAAAAAAHHHHHHHH\n";
-                        this->_childs[i]->InsertElement(this->_element);
-                        ok = this->_childs[i]->_element == this->_element;
-                    }
                     if (this->_childs[i]->Contains(*element) == AbstractCollider::Inside)
                         this->_childs[i]->InsertElement(element);
+                    for (int j = 0; j < 8; ++j)
+                        if (this->_childs[i]->Contains(*elements[j]) == AbstractCollider::Inside)
+                            this->_childs[i]->InsertElement(elements[j]);
                 }
-                this->_element = 0;
             }
             else
             {
@@ -72,48 +72,43 @@ namespace Tools {
             this->_count++;
         }
 
-        void ReplaceElement(T* element)
-        {
-            if (this->_count == 0)
-                throw std::logic_error("Replace an inexistant item");
-            else if (this->_count == 1)
-                this->_element = element;
-            else
-            {
-                for (int i = 0; i < 8; ++i)
-                    if (this->_childs[i]->Contains(*element) == AbstractCollider::Inside)
-                        this->_childs[i]->ReplaceElement(element);
-            }
-        }
-
         bool RemoveElement(T* element)
         {
             if (this->_count == 0)
                 return false;
-            if (this->_count == 1)
+            if (this->_count <= 8)
             {
-                if (this->_element != element)
+                int i = 0;
+                for (; i < this->_count && this->_elements[i] != element; ++i);
+                if (i == 8)
                     return false;
-                this->_element = 0;
+                for (i += 1; i < this->_count; ++i)
+                    this->_elements[i - 1] = this->_elements[i];
+                this->_elements[this->_count - 1] = 0;
+
+                this->_count--;
+                return true;
             }
-            else
-            {
-                bool removed = false;
-                for (int i = 0; i < 8; ++i)
-                    if (this->_childs[i]->Contains(*element) == AbstractCollider::Inside)
-                        removed = removed || this->_childs[i]->RemoveElement(element);
-                if (!removed)
-                    return false;
-            }
+            
+            bool removed = false;
+            for (int i = 0; i < 8; ++i)
+                if (this->_childs[i]->Contains(*element) == AbstractCollider::Inside)
+                    removed = removed || this->_childs[i]->RemoveElement(element);
+            if (!removed)
+                return false;
+
             this->_count--;
-            if (this->_count == 1)
+            if (this->_count == 8)
             {
+                Octree<T>* childs[8];
+                std::memcpy(childs, this->_childs, sizeof(this->_childs));
+
+                int nb = 0;
                 for (int i = 0; i < 8; ++i)
                 {
-                    if (this->_childs[i]->_count == 1)
-                        this->_element = this->_childs[i]->_element;
-                    delete this->_childs[i];
-                    this->_childs[i] = 0;
+                    for (int j = 0; j < this->_childs[i]->_count; ++j)
+                        this->_elements[nb++] = this->_childs[i]->_elements[j];
+                    Tools::Delete(childs[i]);
                 }
             }
             return true;
@@ -124,8 +119,9 @@ namespace Tools {
         {
             if (this->_count == 0)
                 return;
-            if (this->_element)
-                function(*this->_element);
+            if (this->_count <= 8)
+                for (int i = 0; i < this->_count; ++i)
+                    function(*this->_elements[i]);
             else
                 for (int i = 0; i < 8; ++i)
                     this->_childs[i]->Foreach<TFunc>(function);
@@ -136,26 +132,26 @@ namespace Tools {
         {
             if (this->_count == 0)
                 return;
-            if (this->_element)
+            if (this->_count <= 8)
             {
-                if (container.Contains(*this->_element) != AbstractCollider::Outside)
-                    function(*this->_element);
+                for (int i = 0; i < this->_count; ++i)
+                   if (container.Contains(*this->_elements[i]) != AbstractCollider::Outside)
+                        function(*this->_elements[i]);
             }
             else
             {
                 for (int i = 0; i < 8; ++i)
-                    if (this->_childs[i] != 0)
-                        switch (container.Contains(*(this->_childs[i])))
-                        {
-                        case AbstractCollider::Inside:
-                            this->_childs[i]->Foreach<TFunc>(function);
-                            break;
-                        case AbstractCollider::Intersecting:
-                            this->_childs[i]->ForeachIn<TFunc>(container, function);
-                            break;
-                        case AbstractCollider::Outside:
-                            break;
-                        }
+                    switch (container.Contains(*(this->_childs[i])))
+                    {
+                    case AbstractCollider::Inside:
+                        this->_childs[i]->Foreach<TFunc>(function);
+                        break;
+                    case AbstractCollider::Intersecting:
+                        this->_childs[i]->ForeachIn<TFunc>(container, function);
+                        break;
+                    case AbstractCollider::Outside:
+                        break;
+                    }
             }
         }
 
@@ -164,10 +160,11 @@ namespace Tools {
         {
             if (this->_count == 0)
                 return;
-            if (this->_element)
+            if (this->_count <= 8)
             {
-                if (container.Contains(*this->_element) == AbstractCollider::Outside)
-                    function(*this->_element);
+                for (int i = 0; i < this->_count; ++i)
+                   if (container.Contains(*this->_elements[i]) == AbstractCollider::Outside)
+                        function(*this->_elements[i]);
             }
             else
             {
@@ -187,9 +184,32 @@ namespace Tools {
             }
         }
 
+        template<class TLogger>
+        void Dump(TLogger& log) const
+        {
+            this->_Dump(1, log);
+        }
+
         bool IsEmpty() const
         {
             return this->_count == 0;
+        }
+
+        unsigned int GetSize() const { return this->_size; }
+        T* GetElement() const { return this->_element; }
+        int GetCount() const { return this->_count; }
+
+    private:
+        template<class TLogger>
+        void _Dump(int depth, TLogger& log) const
+        {
+            std::stringstream ss;
+            ss.width(depth);
+            ss << ">" << this->_count << " " << this->_size << " (" << this << ")\n";
+            log << ss.str();
+            for (int i = 0; i < 8; ++i)
+                if (this->_childs[i] != 0)
+                    this->_childs[i]->_Dump(depth + 1, log);
         }
     };
 

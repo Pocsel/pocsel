@@ -32,8 +32,8 @@ namespace Client { namespace Window { namespace Sdl {
 
     Window::~Window()
     {
-        SDL_Quit();
         Tools::Delete(this->_renderer);
+        SDL_Quit();
     }
 
     Tools::IRenderer& Window::GetRenderer()

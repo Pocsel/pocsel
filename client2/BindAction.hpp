@@ -23,6 +23,10 @@ namespace Client { namespace BindAction {
         Fire,
         SecondaryFire,
         Use,
+        // Pour faire des tests rapidement:
+        Test,
+        // Pour les tableaux
+        NbBindActions
     };
 
 }}
