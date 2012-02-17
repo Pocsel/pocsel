@@ -1,9 +1,9 @@
 nickname = "Boloss"
 fps = 60
-resX = 1024
-resY = 768
+resX = 800
+resY = 600
 fullscreen = false
 useShaders = true
 chunkViewDistance = 5
-chunkCacheArea = 2
+chunkCacheArea = 15
 chunkMinimumArea = 2
