@@ -116,6 +116,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 
             unsigned int nbCalcs = 0;
 
+            ix = 0;
             while (ix < Common::ChunkSize)
             {
                 xx = x + (double)ix / Common::ChunkSize;
@@ -128,7 +129,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     ix += ipp1;
             }
 
-            double calcs[nbCalcs * nbCalcs];
+            double calcs[(Common::ChunkSize / 2)*(Common::ChunkSize / 2)];
             double* calcsPtr = calcs;
 
 
