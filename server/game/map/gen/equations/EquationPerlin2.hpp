@@ -84,7 +84,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         //            return true;
         //        }
 
-        virtual void Calc(double x, double, double z, double* res) const
+        virtual void Calc(double x, double, double z, Uint32 cx, Uint32, Uint32 cz, double* res) const
         {
             unsigned int ix, iz, iy;
             double xx, zz, p;
@@ -110,30 +110,17 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 return;
             }
 
+
             int ipp1 = ipp + 1;
 
-            ix = 0;
+
+            unsigned int nbCalcs = 0;
+
             while (ix < Common::ChunkSize)
             {
                 xx = x + (double)ix / Common::ChunkSize;
 
-                iz = 0;
-                while (iz < Common::ChunkSize)
-                {
-                    zz = z + (double)iz / Common::ChunkSize;
-                    p = _perlin.Noise2D(xx * xn + xa,
-                                        zz * zn + za,
-                                        alpha,
-                                        beta,
-                                        n) * mul;
-
-                    res[ix * Common::ChunkSize2 + iz * Common::ChunkSize] = p;
-
-                    if (iz + ipp1 >= Common::ChunkSize && iz != Common::ChunkSize - 1)
-                        iz = Common::ChunkSize - 1;
-                    else
-                        iz += ipp1;
-                }
+                ++nbCalcs;
 
                 if (ix + ipp1 >= Common::ChunkSize && ix != Common::ChunkSize - 1)
                     ix = Common::ChunkSize - 1;
@@ -141,18 +128,40 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     ix += ipp1;
             }
 
+            double calcs[nbCalcs * nbCalcs];
+            double* calcsPtr = calcs;
+
+
+            for (ix = 0; ix < nbCalcs; ++ix)
+            {
+                xx = x + (-(double)( ((Uint64)cx * Common::ChunkSize % ipp1))) / Common::ChunkSize + ((double)ix * ipp1) / Common::ChunkSize;
+
+                for (iz = 0; iz < nbCalcs; ++iz)
+                {
+                    zz = z + (-(double)(((Uint64)cz * Common::ChunkSize % ipp1))) / Common::ChunkSize + ((double)iz * ipp1) / Common::ChunkSize;
+
+                    p = _perlin.Noise2D(xx * xn + xa,
+                                        zz * zn + za,
+                                        alpha,
+                                        beta,
+                                        n) * mul;
+
+                    *calcsPtr++ = p;
+                }
+            }
+
             switch (ip)
             {
                 case 0:
-                _InterpolationNearest(res);
-                break;
+                    _InterpolationNearest(res, calcs, nbCalcs);
+                    break;
                 default:
-                _InterpolationLinear(res);
+                    _InterpolationLinear(res, calcs, nbCalcs);
             }
         }
 
     private:
-        void _InterpolationLinear(double* res) const
+        void _InterpolationLinear(double* res, double* calcs, unsigned int nbCalcs) const
         {
             unsigned int ix, iz, iy;
             double p;
@@ -286,7 +295,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             }
         }
 
-        void _InterpolationNearest(double* res) const
+        void _InterpolationNearest(double* res, double* calcs, unsigned int nbCalcs) const
         {
             unsigned int ix, iz, iy;
             double p;
@@ -305,11 +314,11 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             {
                 if ((int)i % ipp1 == 0)
                 {
-                    i0 = i;
+                    i0 = i / ipp1;
                     if (i + ipp1 >= Common::ChunkSize)
-                        i1 = Common::ChunkSize - 1;
+                        i1 = nbCalcs - 1;
                     else
-                        i1 = i + ipp1;
+                        i1 = i / ipp1 + 1;
                     tab[i] = i0;
                 }
                 else
@@ -321,17 +330,15 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 }
             }
 
-            double* resBase = res;
-
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                xc = tab[ix] * Common::ChunkSize2;
+                xc = tab[ix] * nbCalcs;
 
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    zc = tab[iz] * Common::ChunkSize + xc;
+                    zc = tab[iz] + xc;
 
-                    p = resBase[zc];
+                    p = calcs[zc];
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)
                         *res++ = p;

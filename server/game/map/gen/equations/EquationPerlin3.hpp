@@ -93,7 +93,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         //            return true;
         //        }
 
-        virtual void Calc(double x, double y, double z, double* res) const
+        virtual void Calc(double x, double y, double z, Uint32, Uint32, Uint32, double* res) const
         {
             unsigned int ix, iz, iy;
             double xx, zz, yy;

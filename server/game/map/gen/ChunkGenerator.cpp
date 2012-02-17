@@ -234,7 +234,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         yy = (double)((int)coords.y - (1 << 19));
 
         for (unsigned int i = 0; i < this->_equations.size(); ++i)
-            this->_equations[i]->Calc(xx, yy, zz, results + (i * Common::ChunkSize3));
+//            this->_equations[i]->Calc(xx, yy, zz, results + (i * Common::ChunkSize3));
+            this->_equations[i]->Calc(xx, yy, zz, coords.x, coords.y, coords.z, results + (i * Common::ChunkSize3));
 
         for (x = 0 ; x < Common::ChunkSize ; ++x)
         {

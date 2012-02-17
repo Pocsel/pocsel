@@ -28,7 +28,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 //            return true;
 //        }
 
-        virtual void Calc(double, double, double, double* res) const
+        virtual void Calc(double, double, double, Uint32, Uint32, Uint32, double* res) const
         {
             for (unsigned int i = 0; i < Common::ChunkSize3; ++i)
                 *res++ = 0.0;
