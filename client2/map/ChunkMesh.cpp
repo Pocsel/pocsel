@@ -42,6 +42,7 @@ namespace Client { namespace Map {
         delete this->_textureCoords;
         this->_textureCoords = 0;
         this->_triangleCount = 0;
+        this->_hasTransparentCube = false;
         if (this->_chunk.IsEmpty())
             return;
 
@@ -69,8 +70,6 @@ namespace Client { namespace Map {
                         offset = (x * Common::ChunkSize2 + y * Common::ChunkSize + z) * 24;
                         type = cubes[cubeOffset];
                         auto const& cubeType = chunkRenderer.GetCubeInfo(type);
-                        if (cubeType.isTransparent)
-                            this->_hasTransparentCube = true;
 #define FRONT_FACE 0
 #define TOP_FACE 4
 #define RIGHT_FACE 8
@@ -145,7 +144,8 @@ namespace Client { namespace Map {
         {
             if (it->second.size() == 0)
                 continue;
-            
+
+            this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetCubeInfo(it->first).isTransparent;
             auto ib = game.GetClient().GetWindow().GetRenderer().CreateIndexBuffer().release();
             ib->SetData(sizeof(unsigned int) * it->second.size(), it->second.data());
             this->_indices[it->first] = std::pair<Tools::Renderers::IIndexBuffer*, Uint32>(ib, (Uint32)it->second.size());
