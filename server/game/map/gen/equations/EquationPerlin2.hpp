@@ -111,13 +111,11 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             }
 
 
-            static int BIT3 = 10;
 
             int ipp1 = ipp + 1;
 
             int xDiff = -(int)(((Uint64)cx * Common::ChunkSize) % ipp1);
             int zDiff = -(int)(((Uint64)cz * Common::ChunkSize) % ipp1);
-
 
             unsigned int xnbCalcs = 0;
             int iix = xDiff;
@@ -141,7 +139,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 iiz += ipp1;
             }
 
-            double calcs[(Common::ChunkSize / 2 + 1)*(Common::ChunkSize / 2 + 1)];
+            double calcs[(Common::ChunkSize / 2 + 1) * (Common::ChunkSize / 2 + 1)];
             double* calcsPtr = calcs;
 
             x += (double)xDiff / Common::ChunkSize;
@@ -161,7 +159,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                                         beta,
                                         n) * mul;
 
-                    if (BIT3) std::cout << "ix=" << ix << ", iz=" << iz << ", p=" << p << "\n";
                     *calcsPtr++ = p;
                 }
             }
@@ -175,13 +172,11 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     _InterpolationLinear(res, calcs, xnbCalcs, znbCalcs, xDiff, zDiff);
             }
 
-            if (BIT3) --BIT3;
         }
 
     private:
         void _InterpolationLinear(double* res, double* calcs, unsigned int xnbCalcs, unsigned int znbCalcs, int xDiff, int zDiff) const
         {
-            static int BIT0 = 10;
 
             unsigned int ix, iz, iy;
             double p;
@@ -208,7 +203,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             unsigned int j;
             int i0, i1;
 
-            if (BIT0) std::cout << "xnbCalcs=" << xnbCalcs << ", znbCalcs=" << znbCalcs << ", xDiff=" << xDiff << ", zDiff=" << zDiff << "\n";
 
 #define INIT_CALCINDEX_TAB(t) \
             i0 = 0; \
@@ -235,11 +229,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     t##tab[i * 2] = t##Diff + i0 * ipp1; \
                     t##tab[i * 2 + 1] = t##Diff + i1 * ipp1; \
                 } \
-                if (BIT0) std::cout << "i=" << i << ", j=" << j << ", i0=" << i0 << ", i1=" << i1 ;\
-                if (BIT0) std::cout << ", tab[i]=" << t##tab[i*2] ;\
-                if (BIT0) std::cout << ", tab[i1]=" << t##tab[i*2+1] ;\
-                if (BIT0) std::cout << ", ctab[i]=" << t##ctab[i*2] ;\
-                if (BIT0) std::cout << ", ctab[i1]=" << t##ctab[i*2+1] << "\n";\
             }
 
             INIT_CALCINDEX_TAB(x);
@@ -327,12 +316,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                         *res++ = p;
                 }
             }
-            if (BIT0) --BIT0;
         }
 
         void _InterpolationNearest(double* res, double* calcs, unsigned int xnbCalcs, unsigned int znbCalcs, int xDiff, int zDiff) const
         {
-            static bool BITE = true;
             unsigned int ix, iz, iy;
             double p;
 
@@ -347,7 +334,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             unsigned int j;
             int i0, i1;
 
-            if (BITE) std::cout << "xnbCalcs=" << xnbCalcs << ", xDiff=" << xDiff << ", zDiff=" << zDiff << "\n";
 
 #define INIT_CALCINDEX_TAB(t) \
             i0 = 0; \
@@ -373,7 +359,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     else \
                         t##tab[i] = i1; \
                 } \
-                if (BITE) std::cout << "i=" << i << ", j=" << j << ", tab[i]=" << t##tab[i] << "\n";\
             }
 
             INIT_CALCINDEX_TAB(x);
@@ -395,7 +380,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                         *res++ = p;
                 }
             }
-            BITE = false;
         }
 
     };

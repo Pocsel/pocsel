@@ -93,7 +93,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         //            return true;
         //        }
 
-        virtual void Calc(double x, double y, double z, Uint32, Uint32, Uint32, double* res) const
+        virtual void Calc(double x, double y, double z, Uint32 cx, Uint32 cy, Uint32 cz, double* res) const
         {
             unsigned int ix, iz, iy;
             double xx, zz, yy;
@@ -121,59 +121,96 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 return;
             }
 
+
             int ipp1 = ipp + 1;
 
-            ix = 0;
-            while (ix < Common::ChunkSize)
+            int xDiff = -(int)(((Uint64)cx * Common::ChunkSize) % ipp1);
+            int zDiff = -(int)(((Uint64)cz * Common::ChunkSize) % ipp1);
+            int yDiff = -(int)(((Uint64)cy * Common::ChunkSize) % ipp1);
+
+            unsigned int xnbCalcs = 0;
+            int iix = xDiff;
+            while (iix < (int)Common::ChunkSize)
             {
-                xx = x + (double)ix / Common::ChunkSize;
+                ++xnbCalcs;
+                if (iix < (int)Common::ChunkSize - 1 &&
+                    iix + ipp1 >= (int)Common::ChunkSize)
+                    ++xnbCalcs;
+                iix += ipp1;
+            }
 
-                iz = 0;
-                while (iz < Common::ChunkSize)
+            unsigned int znbCalcs = 0;
+            int iiz = zDiff;
+            while (iiz < (int)Common::ChunkSize)
+            {
+                ++znbCalcs;
+                if (iiz < (int)Common::ChunkSize - 1 &&
+                    iiz + ipp1 >= (int)Common::ChunkSize)
+                    ++znbCalcs;
+                iiz += ipp1;
+            }
+
+            unsigned int ynbCalcs = 0;
+            int iiy = yDiff;
+            while (iiy < (int)Common::ChunkSize)
+            {
+                ++ynbCalcs;
+                if (iiy < (int)Common::ChunkSize - 1 &&
+                    iiy + ipp1 >= (int)Common::ChunkSize)
+                    ++ynbCalcs;
+                iiy += ipp1;
+            }
+
+
+            double calcs[(Common::ChunkSize / 2 + 1) * (Common::ChunkSize / 2 + 1) * (Common::ChunkSize / 2 + 1)];
+            double* calcsPtr = calcs;
+
+            x += (double)xDiff / Common::ChunkSize;
+            z += (double)zDiff / Common::ChunkSize;
+            y += (double)yDiff / Common::ChunkSize;
+
+            for (ix = 0; ix < xnbCalcs; ++ix)
+            {
+                xx = x + ((double)ix * ipp1) / Common::ChunkSize;
+
+                for (iz = 0; iz < znbCalcs; ++iz)
                 {
-                    zz = z + (double)iz / Common::ChunkSize;
+                    zz = z + ((double)iz * ipp1) / Common::ChunkSize;
 
-                    iy = 0;
-                    while (iy < Common::ChunkSize)
+                    for (iy = 0; iy < ynbCalcs; ++iy)
                     {
-                        yy = y + (double)iy / Common::ChunkSize;
+                        yy = y + ((double)iy * ipp1) / Common::ChunkSize;
 
-                        res[ix * Common::ChunkSize2 + iz * Common::ChunkSize + iy] =
+                        *calcsPtr++ =
                             _perlin.Noise3D(xx * xn + xa,
                                             yy * yn + ya,
                                             zz * zn + za,
                                             alpha,
                                             beta,
                                             n) * mul;
-
-                        if (iy + ipp1 >= Common::ChunkSize && iy != Common::ChunkSize - 1)
-                            iy = Common::ChunkSize - 1;
-                        else
-                            iy += ipp1;
                     }
-                    if (iz + ipp1 >= Common::ChunkSize && iz != Common::ChunkSize - 1)
-                        iz = Common::ChunkSize - 1;
-                    else
-                        iz += ipp1;
                 }
-                if (ix + ipp1 >= Common::ChunkSize && ix != Common::ChunkSize - 1)
-                    ix = Common::ChunkSize - 1;
-                else
-                    ix += ipp1;
             }
 
             switch (ip)
             {
                 case 0:
-                    _InterpolationNearest(res);
+                    _InterpolationNearest(res, calcs,
+                                          xnbCalcs, znbCalcs, ynbCalcs,
+                                          xDiff, zDiff, yDiff);
                     break;
                 default:
-                    _InterpolationLinear(res);
+                    _InterpolationLinear(res, calcs,
+                                         xnbCalcs, znbCalcs, ynbCalcs,
+                                         xDiff, zDiff, yDiff);
             }
         }
 
     private:
-        void _InterpolationLinear(double* res) const
+        void _InterpolationLinear(double* res, double* calcs,
+                                  unsigned int xnbCalcs, unsigned int znbCalcs, unsigned int ynbCalcs,
+                                  int xDiff, int zDiff, int yDiff
+                                  ) const
         {
             unsigned int ix, iz, iy;
             double p;
@@ -192,61 +229,77 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 
             double p000, p001, p010, p011, p100, p101, p110, p111;
 
-            int tab[Common::ChunkSize * 2];
+            // index dans calcs
+            int xctab[Common::ChunkSize * 2];
+            int zctab[Common::ChunkSize * 2];
+            int yctab[Common::ChunkSize * 2];
+
+            // positions en vrai dans l'espace
+            int xtab[Common::ChunkSize * 2];
+            int ztab[Common::ChunkSize * 2];
+            int ytab[Common::ChunkSize * 2];
 
             int ipp1 = ipp + 1;
 
-            x0 = 0;
-            x1 = 0;
-            for (unsigned int i = 0; i < Common::ChunkSize; ++i)
-            {
-                if ((int)i == Common::ChunkSize - 1)
-                {
-                    tab[i * 2] = i;
-                    tab[i * 2 + 1] = i;
-                }
-                else if ((int)i % ipp1 == 0)
-                {
-                    x0 = i;
-                    if (i + ipp1 >= Common::ChunkSize)
-                        x1 = Common::ChunkSize - 1;
-                    else
-                        x1 = i + ipp1;
-                    tab[i * 2] = x0;
-                    tab[i * 2 + 1] = x0;
-                }
-                else
-                {
-                    tab[i * 2] = x0;
-                    tab[i * 2 + 1] = x1;
-                }
+            unsigned int j;
+            int i0, i1;
+
+#define INIT_CALCINDEX_TAB(t) \
+            i0 = 0; \
+            i1 = 1; \
+            j = 0;\
+            for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
+            { \
+                if (((int)i - t##Diff) % ipp1 == 0) \
+                { \
+                    if (i != 0) \
+                        ++j; \
+                    i0 = j; \
+                    i1 = j + 1; \
+                    t##ctab[i * 2] = i0; \
+                    t##ctab[i * 2 + 1] = i0; \
+                    t##tab[i * 2] = t##Diff + i0 * ipp1; \
+                    t##tab[i * 2 + 1] = t##Diff + i0 * ipp1; \
+                    \
+                } \
+                else \
+                { \
+                    t##ctab[i * 2] = i0; \
+                    t##ctab[i * 2 + 1] = i1; \
+                    t##tab[i * 2] = t##Diff + i0 * ipp1; \
+                    t##tab[i * 2 + 1] = t##Diff + i1 * ipp1; \
+                } \
             }
 
-            double* resBase = res;
+            INIT_CALCINDEX_TAB(x);
+            INIT_CALCINDEX_TAB(z);
+            INIT_CALCINDEX_TAB(y);
+
+#undef INIT_CALCINDEX_TAB
 
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                x0 = tab[ix * 2];
-                x1 = tab[ix * 2 + 1];
+                x0 = xtab[ix * 2];
+                x1 = xtab[ix * 2 + 1];
 
-                x0s = x0 * Common::ChunkSize2;
-                x1s = x1 * Common::ChunkSize2;
+                x0s = xctab[ix * 2] * ynbCalcs * znbCalcs;
+                x1s = xctab[ix * 2 + 1] * ynbCalcs * znbCalcs;
 
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    z0 = tab[iz * 2];
-                    z1 = tab[iz * 2 + 1];
+                    z0 = ztab[iz * 2];
+                    z1 = ztab[iz * 2 + 1];
 
-                    z0s = z0 * Common::ChunkSize;
-                    z1s = z1 * Common::ChunkSize;
+                    z0s = zctab[iz * 2] * ynbCalcs;
+                    z1s = zctab[iz * 2 + 1] * ynbCalcs;
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)
                     {
-                        y0 = tab[iy * 2];
-                        y1 = tab[iy * 2 + 1];
+                        y0 = ytab[iy * 2];
+                        y1 = ytab[iy * 2 + 1];
 
-                        y0s = y0;
-                        y1s = y1;
+                        y0s = yctab[iy * 2];
+                        y1s = yctab[iy * 2 + 1];
 
                         if (y1 == y0)
                         {
@@ -254,12 +307,12 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                             {
                                 if (x0 == x1)
                                 {
-                                    p = resBase[ix * Common::ChunkSize2 + iz * Common::ChunkSize + iy];
+                                    p = calcs[x0s + z0s + y0s];
                                 }
                                 else
                                 {
-                                    p000 = resBase[x0s + z0s + y0s];
-                                    p100 = resBase[x1s + z0s + y0s];
+                                    p000 = calcs[x0s + z0s + y0s];
+                                    p100 = calcs[x1s + z0s + y0s];
 
                                     x1_0 = x1 - x0;
                                     x1_i = x1 - (int)ix;
@@ -271,8 +324,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                             }
                             else if (x0 == x1)
                             {
-                                p000 = resBase[x0s + z0s + y0s];
-                                p010 = resBase[x0s + z1s + y0s];
+                                p000 = calcs[x0s + z0s + y0s];
+                                p010 = calcs[x0s + z1s + y0s];
 
                                 z1_0 = z1 - z0;
                                 z1_i = z1 - (int)iz;
@@ -283,10 +336,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                             }
                             else
                             {
-                                p000 = resBase[x0s + z0s + y0s];
-                                p010 = resBase[x0s + z1s + y0s];
-                                p100 = resBase[x1s + z0s + y0s];
-                                p110 = resBase[x1s + z1s + y0s];
+                                p000 = calcs[x0s + z0s + y0s];
+                                p010 = calcs[x0s + z1s + y0s];
+                                p100 = calcs[x1s + z0s + y0s];
+                                p110 = calcs[x1s + z1s + y0s];
 
                                 x1_0 = x1 - x0;
                                 x1_i = x1 - (int)ix;
@@ -310,8 +363,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                             {
                                 if (x0 == x1)
                                 {
-                                    p000 = resBase[x0s + z0s + y0s];
-                                    p001 = resBase[x0s + z0s + y1s];
+                                    p000 = calcs[x0s + z0s + y0s];
+                                    p001 = calcs[x0s + z0s + y1s];
 
                                     y1_0 = y1 - y0;
                                     y1_i = y1 - (int)iy;
@@ -324,10 +377,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                                 }
                                 else
                                 {
-                                    p000 = resBase[x0s + z0s + y0s];
-                                    p001 = resBase[x0s + z0s + y1s];
-                                    p100 = resBase[x1s + z0s + y0s];
-                                    p101 = resBase[x1s + z0s + y1s];
+                                    p000 = calcs[x0s + z0s + y0s];
+                                    p001 = calcs[x0s + z0s + y1s];
+                                    p100 = calcs[x1s + z0s + y0s];
+                                    p101 = calcs[x1s + z0s + y1s];
 
                                     x1_0 = x1 - x0;
                                     x1_i = x1 - (int)ix;
@@ -349,10 +402,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                             }
                             else if (x0 == x1)
                             {
-                                p000 = resBase[x0s + z0s + y0s];
-                                p001 = resBase[x0s + z0s + y1s];
-                                p010 = resBase[x0s + z1s + y0s];
-                                p011 = resBase[x0s + z1s + y1s];
+                                p000 = calcs[x0s + z0s + y0s];
+                                p001 = calcs[x0s + z0s + y1s];
+                                p010 = calcs[x0s + z1s + y0s];
+                                p011 = calcs[x0s + z1s + y1s];
 
                                 z1_0 = z1 - z0;
                                 z1_i = z1 - (int)iz;
@@ -373,14 +426,14 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                             }
                             else
                             {
-                                p000 = resBase[x0s + z0s + y0s];
-                                p001 = resBase[x0s + z0s + y1s];
-                                p010 = resBase[x0s + z1s + y0s];
-                                p011 = resBase[x0s + z1s + y1s];
-                                p100 = resBase[x1s + z0s + y0s];
-                                p101 = resBase[x1s + z0s + y1s];
-                                p110 = resBase[x1s + z1s + y0s];
-                                p111 = resBase[x1s + z1s + y1s];
+                                p000 = calcs[x0s + z0s + y0s];
+                                p001 = calcs[x0s + z0s + y1s];
+                                p010 = calcs[x0s + z1s + y0s];
+                                p011 = calcs[x0s + z1s + y1s];
+                                p100 = calcs[x1s + z0s + y0s];
+                                p101 = calcs[x1s + z0s + y1s];
+                                p110 = calcs[x1s + z1s + y0s];
+                                p111 = calcs[x1s + z1s + y1s];
 
                                 x1_0 = x1 - x0;
                                 x1_i = x1 - (int)ix;
@@ -414,7 +467,11 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 }
             }
         }
-        void _InterpolationNearest(double* res) const
+
+        void _InterpolationNearest(double* res, double* calcs,
+                                   unsigned int xnbCalcs, unsigned int znbCalcs, unsigned int ynbCalcs,
+                                   int xDiff, int zDiff, int yDiff
+                                  ) const
         {
             unsigned int ix, iz, iy;
 
@@ -422,48 +479,60 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             int zc;
             int yc;
 
-            int tab[Common::ChunkSize];
+            int xtab[Common::ChunkSize];
+            int ztab[Common::ChunkSize];
+            int ytab[Common::ChunkSize];
 
             int ipp1 = ipp + 1;
 
+            unsigned int j;
             int i0, i1;
-            i0 = 0;
-            i1 = 0;
-            for (unsigned int i = 0; i < Common::ChunkSize; ++i)
-            {
-                if ((int)i % ipp1 == 0)
-                {
-                    i0 = i;
-                    if (i + ipp1 >= Common::ChunkSize)
-                        i1 = Common::ChunkSize - 1;
-                    else
-                        i1 = i + ipp1;
-                    tab[i] = i0;
-                }
-                else
-                {
-                    if ((int)i % ipp1 < ipp1 / 2)
-                        tab[i] = i0;
-                    else
-                        tab[i] = i1;
-                }
+
+#define INIT_CALCINDEX_TAB(t) \
+            i0 = 0; \
+            i1 = 1; \
+            j = 0;\
+            for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
+            { \
+                if (((int)i - t##Diff) % ipp1 == 0) \
+                { \
+                    if (i != 0) \
+                        ++j; \
+                    i0 = j; \
+                    i1 = j + 1; \
+                    t##tab[i] = i0; \
+                } \
+                else \
+                { \
+                    int reali = (int)i - t##Diff; \
+                    if (reali < 0) \
+                        reali = ipp1-reali; \
+                    if (reali % ipp1 < ipp1 / 2) \
+                        t##tab[i] = i0; \
+                    else \
+                        t##tab[i] = i1; \
+                } \
             }
 
-            double* resBase = res;
+            INIT_CALCINDEX_TAB(x);
+            INIT_CALCINDEX_TAB(z);
+            INIT_CALCINDEX_TAB(y);
+
+#undef INIT_CALCINDEX_TAB
 
             for (ix = 0; ix < Common::ChunkSize; ++ix)
             {
-                xc = tab[ix] * Common::ChunkSize2;
+                xc = xtab[ix] * ynbCalcs * znbCalcs;
 
                 for (iz = 0; iz < Common::ChunkSize; ++iz)
                 {
-                    zc = tab[iz] * Common::ChunkSize + xc;
+                    zc = ztab[iz] * ynbCalcs + xc;
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)
                     {
-                        yc = tab[iy] + zc;
+                        yc = ytab[iy] + zc;
 
-                        *res++ = resBase[yc];
+                        *res++ = calcs[yc];
                     }
                 }
             }
