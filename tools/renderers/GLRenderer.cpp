@@ -182,6 +182,7 @@ namespace Tools { namespace Renderers {
         {
             this->_modelViewProjection = this->_model * this->_view * this->_projection;
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
+            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         }
     }
@@ -193,6 +194,7 @@ namespace Tools { namespace Renderers {
         {
             this->_modelViewProjection = this->_model * this->_view * this->_projection;
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
+            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         }
     }

@@ -16,7 +16,6 @@ namespace Client { namespace Game {
         _resourceManager(client, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion),
         _map(0)
     {
-        this->_player.GetCamera().Rotate(0, 0);
         this->_renderer.SetClearColor(Tools::Color4f(0.0f, 0.0f, 0.1f, 1)); // XXX
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](Tools::Vector2u const& size)
@@ -34,13 +33,7 @@ namespace Client { namespace Game {
 
     void Game::TeleportPlayer(std::string const& map, Common::Position const& position)
     {
-        // TODO: player
-        //this->_player.SetPosition(position);
-        // XXX
-        auto pos(position);
-        pos.world.y += 3;
-        this->_player.SetPosition(pos);
-        // XXX
+        this->_player.SetPosition(position);
         if (this->_map == 0)
         {
             this->_map = new Map::Map(*this);
