@@ -279,7 +279,6 @@ namespace Tools { namespace Renderers { namespace Utils {
 
         textureParameter.Set(*this->_texture);
 
-        this->_renderer.UpdateCurrentParameters();
         this->_renderer.DrawElements(indiceValue * 6 / 4, Renderers::DataType::UnsignedShort, indices);
         if (invert)
         {

@@ -83,7 +83,7 @@ namespace Client { namespace Map {
                 for (auto it = chunkToRender.begin(), ite = chunkToRender.end(); it != ite; ++it)
                 {
                     auto mesh = (*it)->GetMesh();
-                    if (!mesh)
+                    if (!mesh || !mesh->HasCubeType(this->_cubeInfo[i].id))
                         continue;
 
                     this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));

@@ -33,9 +33,16 @@ namespace Client { namespace Map {
         ChunkMesh(Chunk& chunk);
         ~ChunkMesh();
 
-        bool HasTransparentCube() const { return this->_hasTransparentCube; }
         void Refresh(Game::Game& game, ChunkRenderer& chunkRenderer);
         void Render(int cubeType, Tools::IRenderer& renderer);
+        bool HasTransparentCube() const { return this->_hasTransparentCube; }
+        bool HasCubeType(int cubeType) const
+        {
+            if (this->_triangleCount == 0)
+                return false;
+            auto it = this->_indices.find(cubeType);
+            return (it->first != 0);
+        }
     };
 
 }}
