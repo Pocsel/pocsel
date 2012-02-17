@@ -130,6 +130,10 @@ namespace Client {
                 this->chunkMinimumArea = this->chunkViewDistance - 1;
                 Tools::error << "Settings: invalid value for chunkMinimumArea, changing to " << this->chunkMinimumArea << Tools::endl;
             }
+            this->res.x = i["resX"].as<unsigned int>();
+            this->res.y = i["resY"].as<unsigned int>();
+            this->fullscreen = i["fullscreen"].as<bool>();
+            this->useShaders = i["useShaders"].as<bool>();
         }
         catch (std::exception& e)
         {

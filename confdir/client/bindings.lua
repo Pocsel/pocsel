@@ -34,4 +34,4 @@ bind("Escape", "quit")
 
 bind("W", "toggle-wireframe")
 
-bind("T", "test")
+bind("T", "dump-octree")

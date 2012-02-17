@@ -30,7 +30,7 @@ namespace Client { namespace Map {
             }
         }
 
-        game.GetClient().GetWindow().GetInputManager().Bind(BindAction::Test, BindAction::Released,
+        game.GetClient().GetWindow().GetInputManager().Bind("dump-octree", BindAction::Released,
             [this]()
             {
                 for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)

@@ -1,6 +1,8 @@
 #ifndef __CLIENT_SETTINGS_HPP__
 #define __CLIENT_SETTINGS_HPP__
 
+#include "tools/Vector2.hpp"
+
 namespace Client {
 
     class Settings
@@ -16,6 +18,9 @@ namespace Client {
         // settings.lua
         std::string nickname;
         unsigned int fps;
+        Tools::Vector2u res;
+        bool fullscreen;
+        bool useShaders;
         unsigned int chunkViewDistance;
         unsigned int chunkCacheArea;
         unsigned int chunkMinimumArea;

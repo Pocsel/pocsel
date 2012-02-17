@@ -16,13 +16,13 @@ namespace Client { namespace Game {
         if (!window.GetInputManager().HasFocus())
             return;
 
-        if (window.GetInputManager().GetActionState(BindAction::Forward) != BindAction::Released)
+        if (window.GetInputManager().GetActionState(BindAction::Forward))
             this->MoveForward(time);
-        if (window.GetInputManager().GetActionState(BindAction::Backward) != BindAction::Released)
+        if (window.GetInputManager().GetActionState(BindAction::Backward))
             this->MoveBackward(time);
-        if (window.GetInputManager().GetActionState(BindAction::Left) != BindAction::Released)
+        if (window.GetInputManager().GetActionState(BindAction::Left))
             this->StrafeLeft(time);
-        if (window.GetInputManager().GetActionState(BindAction::Right) != BindAction::Released)
+        if (window.GetInputManager().GetActionState(BindAction::Right))
             this->StrafeRight(time);
 
         auto delta = (Tools::Vector2f(window.GetInputManager().GetMousePos()) - (Tools::Vector2f(window.GetSize()) / 2.0f)) / 300.0f;
