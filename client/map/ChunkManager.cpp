@@ -1,6 +1,7 @@
 #include "client/precompiled.hpp"
 
 #include "tools/Octree.hpp"
+#include "tools/Timer.hpp"
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/game/Game.hpp"
@@ -73,9 +74,9 @@ namespace Client { namespace Map {
 
     void ChunkManager::UpdateLoading()
     {
+        Tools::Timer timer;
         this->_waitingRefresh.unique();
-        int nb = 0;
-        while (!this->_waitingRefresh.empty() && ++nb < 15)
+        while (!this->_waitingRefresh.empty() && timer.GetElapsedTime() < 30)
         {
             this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.0002f);
             this->_chunkRenderer.RefreshDisplay(*this->_waitingRefresh.front()->chunk);
@@ -87,8 +88,8 @@ namespace Client { namespace Map {
 
     void ChunkManager::Update(Common::Position const& playerPosition)
     {
-        int nb = 0;
-        while (!this->_waitingRefresh.empty() && ++nb < 15)
+        Tools::Timer timer;
+        while (!this->_waitingRefresh.empty() && timer.GetElapsedTime() < 10)
         {
             this->_chunkRenderer.RefreshDisplay(*this->_waitingRefresh.front()->chunk);
             this->_waitingRefresh.pop_front();

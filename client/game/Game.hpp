@@ -2,6 +2,7 @@
 #define __CLIENT_GAME_GAME_HPP__
 
 #include "common/Position.hpp"
+#include "tools/Timer.hpp"
 #include "client/game/CubeTypeManager.hpp"
 #include "client/game/Player.hpp"
 #include "client/resources/ResourceManager.hpp"
@@ -29,6 +30,7 @@ namespace Client { namespace Game {
         Map::Map* _map;
         Player _player;
         int _callbackId;
+        Tools::Timer _updateTimer;
 
     public:
         Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);

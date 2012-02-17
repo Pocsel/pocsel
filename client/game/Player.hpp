@@ -27,11 +27,11 @@ namespace Client { namespace Game {
             Common::Camera& GetCamera() { return this->_camera; }
             Common::Camera const& GetCamera() const { return this->_camera; }
 
-            void UpdateMovements(Window::Window& window);
-            void MoveForward();
-            void MoveBackward();
-            void StrafeLeft();
-            void StrafeRight();
+            void UpdateMovements(Window::Window& window, Uint32 time);
+            void MoveForward(Uint32 time);
+            void MoveBackward(Uint32 time);
+            void StrafeLeft(Uint32 time);
+            void StrafeRight(Uint32 time);
             void Jump();
 
         private:
