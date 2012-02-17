@@ -129,7 +129,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     ix += ipp1;
             }
 
-            double calcs[nbCalcs * nbCalcs];
+            double calcs[(Common::ChunkSize / 2)*(Common::ChunkSize / 2)];
             double* calcsPtr = calcs;
 
 
