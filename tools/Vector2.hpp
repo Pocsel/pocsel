@@ -43,6 +43,10 @@ namespace Tools {
         explicit Vector2(T value) : x(value), y(value)
         {
         }
+        template<class Tin>
+        explicit Vector2(Vector2<Tin> const& value) : x((T)value.x), y((T)value.y)
+        {
+        }
 
         T GetMagnitude() const
         {

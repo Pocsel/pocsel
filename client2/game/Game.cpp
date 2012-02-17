@@ -51,7 +51,7 @@ namespace Client { namespace Game {
 
     void Game::Update()
     {
-        this->_player.GetCamera().Rotate(0.01f, 0); // XXX
+        this->_player.UpdateMovements(this->_client.GetWindow());
         this->_map->GetChunkManager().Update(this->_player.GetPosition());
     }
 

@@ -2,11 +2,20 @@
 
 #include "client2/game/Player.hpp"
 #include "client2/network/PacketDispatcher.hpp"
+#include "client2/window/InputManager.hpp"
+#include "client2/window/Window.hpp"
 
 namespace Client { namespace Game {
 
     Player::Player()
     {
+    }
+
+    void Player::UpdateMovements(Window::Window& window)
+    {
+        auto delta = (Tools::Vector2f(window.GetInputManager().GetMousePos()) - (Tools::Vector2f(window.GetSize()) / 2.0f)) / 300.0f;
+        this->_camera.Rotate(delta);
+        window.GetInputManager().WarpMouse(Tools::Vector2i(window.GetSize() / 2));
     }
 
     void Player::SetPosition(Common::Position const& pos)

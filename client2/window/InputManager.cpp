@@ -17,8 +17,9 @@ namespace {
 
 namespace Client { namespace Window {
 
-    InputManager::InputManager(Client& client, InputBinder* inputBinder) :
-        _inputBinder(inputBinder), _client(client)
+    InputManager::InputManager(::Client::Window::Window& window, InputBinder* inputBinder) :
+        _inputBinder(inputBinder),
+        _window(window)
     {
     }
 

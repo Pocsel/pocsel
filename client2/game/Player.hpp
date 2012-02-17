@@ -4,6 +4,11 @@
 #include "common/Camera.hpp"
 #include "tools/Vector3.hpp"
 
+namespace Client { namespace Window {
+    class InputManager;
+    class Window;
+}}
+
 namespace Client { namespace Game {
 
     class Player :
@@ -22,6 +27,7 @@ namespace Client { namespace Game {
             Common::Camera& GetCamera() { return this->_camera; }
             Common::Camera const& GetCamera() const { return this->_camera; }
 
+            void UpdateMovements(Window::Window& window);
             void MoveForward();
             void MoveBackward();
             void StrafeLeft();

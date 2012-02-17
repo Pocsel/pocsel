@@ -1,12 +1,11 @@
 #include "client2/window/sdl/InputManager.hpp"
 #include "client2/window/sdl/InputBinder.hpp"
-#include "client2/Client.hpp"
 #include "client2/window/Window.hpp"
 
 namespace Client { namespace Window { namespace Sdl {
 
-    InputManager::InputManager(Client& client, InputBinder* inputBinder) :
-        ::Client::Window::InputManager(client, inputBinder), _inputBinder(*inputBinder), _mousePos(0)
+    InputManager::InputManager(::Client::Window::Window& window, InputBinder* inputBinder) :
+        ::Client::Window::InputManager(window, inputBinder), _inputBinder(*inputBinder), _mousePos(0)
     {
     }
 
@@ -64,10 +63,10 @@ namespace Client { namespace Window { namespace Sdl {
                 }
                 break;
             case SDL_VIDEORESIZE:
-                this->_client.GetWindow().Resize(e.resize.w, e.resize.h);
+                this->_window.Resize(e.resize.w, e.resize.h);
                 break;
             case SDL_QUIT:
-                this->_client.Quit();
+                this->TriggerAction(BindAction::Quit, BindAction::Released);
                 break;
             default:
                 ;

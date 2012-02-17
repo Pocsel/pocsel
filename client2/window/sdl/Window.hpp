@@ -7,9 +7,6 @@
 namespace Tools {
     class IRenderer;
 }
-namespace Client {
-    class Client;
-}
 
 namespace Client { namespace Window { namespace Sdl {
 
@@ -23,7 +20,7 @@ namespace Client { namespace Window { namespace Sdl {
         Tools::Vector2u _targetSize;
 
     public:
-        Window(Client& client);
+        Window(Tools::Vector2u const& size = Tools::Vector2u(800, 600), bool fullscreen = false, bool useShaders = true);
         ~Window();
         virtual void Render();
         virtual Tools::IRenderer& GetRenderer();

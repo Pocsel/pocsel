@@ -51,6 +51,12 @@ namespace Common {
             dir.z = sinphi * sintheta;
             dir.Normalize();
         }
+
+        void Rotate(Tools::Vector2f const& delta)
+        {
+            this->Rotate(delta.x, delta.y);
+        }
+
         void Rotate(float dtheta, float dphi)
         {
             float const pi = std::atan2(0.0f,-1.0f);

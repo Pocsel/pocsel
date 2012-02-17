@@ -4,9 +4,9 @@
 #include "client2/window/InputManager.hpp"
 #include "tools/Vector2.hpp"
 
-namespace Client {
-    class Client;
-}
+namespace Client { namespace Window {
+    class Window;
+}}
 
 namespace Client { namespace Window { namespace Sdl {
 
@@ -34,7 +34,7 @@ namespace Client { namespace Window { namespace Sdl {
         Tools::Vector2i _mousePos;
 
     public:
-        InputManager(Client& client, InputBinder* inputBinder);
+        InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
         virtual void ProcessEvents();
         virtual Tools::Vector2i const& GetMousePos() const;
         virtual void WarpMouse(Tools::Vector2i const& pos);

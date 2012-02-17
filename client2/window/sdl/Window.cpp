@@ -1,3 +1,5 @@
+#include "client2/precompiled.hpp"
+
 #include "client2/window/sdl/Window.hpp"
 #include "client2/window/sdl/InputManager.hpp"
 #include "client2/window/sdl/InputBinder.hpp"
@@ -6,23 +8,23 @@
 
 namespace Client { namespace Window { namespace Sdl {
 
-    Window::Window(Client& client) :
-        ::Client::Window::Window(new InputManager(client, new InputBinder())),
-        _size(800, 600),
+    Window::Window(Tools::Vector2u const& size, bool fullscreen, bool useShaders) :
+        ::Client::Window::Window(new InputManager(*this, new InputBinder())),
+        _size(size),
         _targetSize(0)
     {
         if (SDL_Init(SDL_INIT_VIDEO))
             throw std::runtime_error(std::string("SDL_Init(): ") + SDL_GetError());
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
-        if (!(this->_screen = SDL_SetVideoMode(this->_size.w, this->_size.h, 0, SDL_RESIZABLE | SDL_OPENGL)))
+        if (!(this->_screen = SDL_SetVideoMode(this->_size.w, this->_size.h, 0, (fullscreen ? SDL_FULLSCREEN : SDL_RESIZABLE) | SDL_OPENGL)))
         {
             SDL_Quit();
             throw std::runtime_error(std::string("SDL_SetVideoMode(): ") + SDL_GetError());
         }
         SDL_WM_SetCaption(PROJECT_NAME, 0);
         SDL_EnableUNICODE(SDL_ENABLE);
-        this->_renderer = new Tools::Renderers::GLRenderer();
+        this->_renderer = new Tools::Renderers::GLRenderer(useShaders);
         this->_renderer->Initialise();
         this->_renderer->SetScreenSize(this->_size);
         this->_renderer->SetViewport(Tools::Rectangle(Tools::Vector2i(0), this->_size));

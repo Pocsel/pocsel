@@ -4,9 +4,9 @@
 #include "client2/window/InputBinder.hpp"
 #include "tools/Vector2.hpp"
 
-namespace Client {
-    class Client;
-}
+namespace Client { namespace Window {
+    class Window;
+}}
 
 namespace Client { namespace Window {
 
@@ -22,11 +22,12 @@ namespace Client { namespace Window {
         std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _pressBinds;
         std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _holdBinds;
         std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _releaseBinds;
+
     protected:
-        Client& _client;
+        Window& _window;
 
     public:
-        InputManager(Client& client, InputBinder* inputBinder);
+        InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
         virtual ~InputManager();
         virtual void ProcessEvents() = 0;
         void DispatchActions();
