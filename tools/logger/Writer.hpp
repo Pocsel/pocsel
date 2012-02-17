@@ -31,13 +31,21 @@ namespace Tools { namespace Logger {
 
             Buffer(Buffer&& buffer)
                 : _writer(buffer._writer),
+#ifdef _MSVC
                 _stream(std::move(buffer._stream))
+#else
+                _stream((buffer._stream.str()))
+#endif
             {
             }
 
             Buffer(Buffer& buffer)
                 : _writer(buffer._writer),
+#ifdef _MSVC
                 _stream(std::move(buffer._stream))
+#else
+                _stream((buffer._stream.str()))
+#endif
             {
             }
 
@@ -48,11 +56,13 @@ namespace Tools { namespace Logger {
 
             Buffer& operator <<(Token const& t)
             {
+#ifdef _MSVC
                 if (&t == &flush)
                 {
                     this->_writer.Write(this->_stream.str());
                     this->_stream = std::stringstream();
                 }
+#endif
                 if (&t == &endl)
                     this->_stream << std::endl;
                 return *this;
