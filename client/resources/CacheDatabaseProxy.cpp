@@ -5,8 +5,6 @@
 #include "tools/database/ConnectionPool.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 
-#include "resources/resources.hpp"
-
 #include "client/resources/CacheDatabaseProxy.hpp"
 #include "client/resources/ResourceDownloader.hpp"
 #include "client/resources/ResourceManager.hpp"

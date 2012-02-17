@@ -1,4 +1,3 @@
-#include "resources/resources.hpp"
 #include "common/constants.hpp"
 
 namespace Common {
