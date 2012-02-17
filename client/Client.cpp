@@ -22,7 +22,7 @@ namespace Client {
         _state(Connecting),
         _game(0)
     {
-        this->_window = new Window::Sdl::Window();
+        this->_window = new Window::Sdl::Window(this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
         this->_menu = new Menu::Menu(*this);

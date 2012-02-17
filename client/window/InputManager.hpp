@@ -15,7 +15,7 @@ namespace Client { namespace Window {
     {
     private:
         InputBinder* _inputBinder;
-        BindAction::Type _actionStates[BindAction::NbBindActions];
+        bool _actionStates[BindAction::NbBindActions];
         std::queue<std::pair<InputBinder::Action, BindAction::Type>> _actionQueue;
         std::map<std::string, std::list<std::function<void(void)>>> _stringPressBinds;
         std::map<std::string, std::list<std::function<void(void)>>> _stringHoldBinds;
@@ -33,7 +33,6 @@ namespace Client { namespace Window {
         virtual ~InputManager();
         virtual void ProcessEvents() = 0;
         void DispatchActions();
-        InputBinder& GetInputBinder();
         void Bind(std::string const& action, BindAction::Type type, std::function<void(void)> const& func);
         void Bind(BindAction::BindAction action, BindAction::Type type, std::function<void(void)> const& func);
         void TriggerAction(InputBinder::Action const& action, BindAction::Type type);
@@ -43,8 +42,11 @@ namespace Client { namespace Window {
         virtual void WarpMouse(Tools::Vector2i const& pos) = 0;
         virtual void WarpMouse(int x, int y) = 0;
 
+        InputBinder& GetInputBinder() { return *this->_inputBinder; }
         bool HasFocus() const { return this->_hasFocus; }
-        BindAction::Type GetActionState(BindAction::BindAction action) { return this->_actionStates[(int)action]; }
+        bool GetActionState(BindAction::BindAction action) { return this->_actionStates[static_cast<int>(action)]; }
+    private:
+        void _ResetStates();
     };
 
 }}

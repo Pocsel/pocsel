@@ -24,8 +24,7 @@ namespace Client { namespace Window {
         _hasFocus(true),
         _window(window)
     {
-        for (Uint32 i = 0; i < BindAction::NbBindActions; ++i)
-            this->_actionStates[i] = BindAction::Released;
+        this->_ResetStates();
     }
 
     InputManager::~InputManager()
@@ -33,12 +32,20 @@ namespace Client { namespace Window {
         delete this->_inputBinder;
     }
 
+    void InputManager::_ResetStates()
+    {
+        for (unsigned int i = 0; i < BindAction::NbBindActions; ++i)
+            this->_actionStates[i] = false;
+    }
+
     void InputManager::DispatchActions()
     {
+        this->_ResetStates();
         while (!this->_actionQueue.empty())
         {
             auto a = this->_actionQueue.front();
             if (a.first.string.empty())
+            {
                 switch (a.second)
                 {
                 case BindAction::Pressed:
@@ -51,6 +58,8 @@ namespace Client { namespace Window {
                     CallFunctions(this->_releaseBinds, a.first.action);
                     break;
                 }
+                this->_actionStates[static_cast<int>(a.first.action)] = true;
+            }
             else
                 switch (a.second)
                 {
@@ -64,14 +73,8 @@ namespace Client { namespace Window {
                     CallFunctions(this->_stringReleaseBinds, a.first.string);
                     break;
                 }
-            this->_actionStates[(int)a.first.action] = a.second;
             this->_actionQueue.pop();
         }
-    }
-
-    InputBinder& InputManager::GetInputBinder()
-    {
-        return *this->_inputBinder;
     }
 
     void InputManager::Bind(std::string const& action, BindAction::Type type, std::function<void(void)> const& func)
