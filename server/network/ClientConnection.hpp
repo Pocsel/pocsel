@@ -37,19 +37,12 @@ namespace Server { namespace Network {
     public:
         ClientConnection(boost::asio::ip::tcp::socket* socket);
         ~ClientConnection();
-        void SetCallbacks(ErrorCallback errorCallback, PacketCallback packetCallback);
-        void SendPacket(std::unique_ptr<Common::Packet> packet)
-        {
-            this->_ioService.dispatch(std::bind(&ClientConnection::_SendPacket, this->shared_from_this(), packet.release()));
-        }
-        void Shutdown()
-        {
-            this->_ioService.dispatch(std::bind(&ClientConnection::_Shutdown, this->shared_from_this()));
-        }
-        void ConnectRead()
-        {
-            this->_ioService.dispatch(std::bind(&ClientConnection::_ConnectRead, this->shared_from_this()));
-        }
+        void SetCallbacks(ErrorCallback& errorCallback, PacketCallback& packetCallback);
+
+        // threadsafe
+        void SendPacket(std::unique_ptr<Common::Packet> packet);
+        void Shutdown();
+        void ConnectRead();
 
     private:
         void _Shutdown();

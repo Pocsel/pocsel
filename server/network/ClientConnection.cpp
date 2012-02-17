@@ -1,9 +1,5 @@
 #include "server/network/ClientConnection.hpp"
 
-#include "server/clientmanagement/ClientManager.hpp"
-
-#include "common/Packet.hpp"
-
 #ifdef _WIN32
 // Desactive le warning "longueur du nom décoré dépassée, le nom a été tronqué"
 # pragma warning(disable: 4503)
@@ -32,10 +28,31 @@ namespace Server { namespace Network {
         Tools::Delete(this->_socket);
     }
 
-    void ClientConnection::SetCallbacks(ErrorCallback errorCallback, PacketCallback packetCallback)
+    void ClientConnection::SetCallbacks(ErrorCallback& errorCallback, PacketCallback& packetCallback)
     {
         this->_errorCallback = errorCallback;
         this->_packetCallback = packetCallback;
+    }
+
+    void ClientConnection::SendPacket(std::unique_ptr<Common::Packet> packet)
+    {
+        std::function<void(void)> fx =
+            std::bind(&ClientConnection::_SendPacket, this->shared_from_this(), packet.release());
+        this->_ioService.dispatch(fx);
+    }
+
+    void ClientConnection::Shutdown()
+    {
+        std::function<void(void)> fx =
+            std::bind(&ClientConnection::_Shutdown, this->shared_from_this());
+        this->_ioService.dispatch(fx);
+    }
+
+    void ClientConnection::ConnectRead()
+    {
+        std::function<void(void)> fx =
+            std::bind(&ClientConnection::_ConnectRead, this->shared_from_this());
+        this->_ioService.dispatch(fx);
     }
 
     void ClientConnection::_Shutdown()
