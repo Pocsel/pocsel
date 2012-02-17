@@ -3,7 +3,6 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#include "resources/resources.hpp"
 #include "tools/renderers/utils/Font.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils {

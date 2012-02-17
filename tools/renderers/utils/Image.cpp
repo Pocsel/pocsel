@@ -1,5 +1,4 @@
 #include "tools/precompiled.hpp"
-#include "resources/resources.hpp"
 #include "tools/renderers/utils/Image.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils {

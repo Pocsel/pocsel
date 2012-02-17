@@ -1,6 +1,5 @@
 #include "tools/precompiled.hpp"
 
-#include "resources/resources.hpp"
 #include "tools/renderers/utils/Rectangle.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils {
