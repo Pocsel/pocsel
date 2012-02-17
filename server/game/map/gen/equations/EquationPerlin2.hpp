@@ -116,6 +116,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 
             unsigned int nbCalcs = 0;
 
+            ix = 0;
             while (ix < Common::ChunkSize)
             {
                 xx = x + (double)ix / Common::ChunkSize;
