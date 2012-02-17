@@ -1,7 +1,7 @@
 #include <boost/program_options.hpp>
 #include <boost/cstdlib.hpp>
 
-#include "client2/Settings.hpp"
+#include "client/Settings.hpp"
 #include "ProgramInfo.hpp"
 #include "common/ConfDir.hpp"
 #include "tools/lua/Interpreter.hpp"

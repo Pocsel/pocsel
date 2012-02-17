@@ -1,6 +1,6 @@
-#include "client2/precompiled.hpp"
-#include "client2/Settings.hpp"
-#include "client2/network/PacketCreator.hpp"
+#include "client/precompiled.hpp"
+#include "client/Settings.hpp"
+#include "client/network/PacketCreator.hpp"
 
 #include "protocol/protocol.hpp"
 

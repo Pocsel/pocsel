@@ -1,13 +1,13 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/Client.hpp"
-#include "client2/network/Network.hpp"
-#include "client2/network/PacketCreator.hpp"
-#include "client2/resources/CacheDatabaseProxy.hpp"
-#include "client2/resources/ResourceDownloader.hpp"
-#include "client2/resources/ResourceManager.hpp"
-#include "client2/window/Window.hpp"
-#include "client2/Settings.hpp"
+#include "client/Client.hpp"
+#include "client/network/Network.hpp"
+#include "client/network/PacketCreator.hpp"
+#include "client/resources/CacheDatabaseProxy.hpp"
+#include "client/resources/ResourceDownloader.hpp"
+#include "client/resources/ResourceManager.hpp"
+#include "client/window/Window.hpp"
+#include "client/Settings.hpp"
 
 #include "tools/IRenderer.hpp"
 

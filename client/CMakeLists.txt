@@ -11,11 +11,11 @@ set(src
 )
 
 CreateGroups("${src}")
-add_executable(client2 ${src})
+add_executable(client ${src})
 
-enable_pch(client2 src)
+enable_pch(client src)
 
-target_link_libraries(client2
+target_link_libraries(client
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${SQLITE3_LIBRARIES}
@@ -23,4 +23,4 @@ target_link_libraries(client2
     ${FREETYPE_LIBRARIES} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${SDL_LIBRARY} ${CG_LIBRARY} ${CGGL_LIBRARY}
 )
 
-SetProgramInfo(client2)
+SetProgramInfo(client)

@@ -1,8 +1,8 @@
 #ifndef __CLIENT_RESOURCES_RESOURCEMANAGER_HPP__
 #define __CLIENT_RESOURCES_RESOURCEMANAGER_HPP__
 
-#include "client2/resources/CacheDatabaseProxy.hpp"
-#include "client2/resources/ResourceDownloader.hpp"
+#include "client/resources/CacheDatabaseProxy.hpp"
+#include "client/resources/ResourceDownloader.hpp"
 
 namespace Tools {
     class IRenderer;

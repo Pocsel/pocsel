@@ -1,6 +1,6 @@
-#include "client2/precompiled.hpp"
-#include "client2/window/Window.hpp"
-#include "client2/window/InputManager.hpp"
+#include "client/precompiled.hpp"
+#include "client/window/Window.hpp"
+#include "client/window/InputManager.hpp"
 
 namespace Client { namespace Window {
 

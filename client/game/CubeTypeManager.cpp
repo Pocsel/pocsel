@@ -1,6 +1,6 @@
-#include "client2/Client.hpp"
-#include "client2/game/CubeTypeManager.hpp"
-#include "client2/network/PacketCreator.hpp"
+#include "client/Client.hpp"
+#include "client/game/CubeTypeManager.hpp"
+#include "client/network/PacketCreator.hpp"
 
 #include "common/Packet.hpp"
 

@@ -1,6 +1,6 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/map/Chunk.hpp"
+#include "client/map/Chunk.hpp"
 
 namespace Client { namespace Map {
 

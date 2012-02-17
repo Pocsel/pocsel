@@ -1,4 +1,4 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
 #include "common/Packet.hpp"
 #include "common/Resource.hpp"
@@ -7,9 +7,9 @@
 
 #include "resources/resources.hpp"
 
-#include "client2/resources/CacheDatabaseProxy.hpp"
-#include "client2/resources/ResourceDownloader.hpp"
-#include "client2/resources/ResourceManager.hpp"
+#include "client/resources/CacheDatabaseProxy.hpp"
+#include "client/resources/ResourceDownloader.hpp"
+#include "client/resources/ResourceManager.hpp"
 
 #include "common/constants.hpp"
 

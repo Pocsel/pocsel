@@ -1,7 +1,7 @@
 #ifndef __CLIENT_WINDOW_SDL_INPUTMANAGER_HPP__
 #define __CLIENT_WINDOW_SDL_INPUTMANAGER_HPP__
 
-#include "client2/window/InputManager.hpp"
+#include "client/window/InputManager.hpp"
 #include "tools/Vector2.hpp"
 
 namespace Client { namespace Window {

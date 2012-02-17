@@ -1,9 +1,9 @@
-#include "client2/menu/LoadingScreen.hpp"
+#include "client/menu/LoadingScreen.hpp"
 #include "tools/renderers/utils/Rectangle.hpp"
 #include "tools/renderers/utils/Font.hpp"
-#include "client2/Client.hpp"
-#include "client2/window/Window.hpp"
-#include "client2/menu/Menu.hpp"
+#include "client/Client.hpp"
+#include "client/window/Window.hpp"
+#include "client/menu/Menu.hpp"
 
 namespace Client { namespace Menu {
 

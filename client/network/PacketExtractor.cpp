@@ -1,7 +1,7 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/network/ChunkSerializer.hpp"
-#include "client2/network/PacketExtractor.hpp"
+#include "client/network/ChunkSerializer.hpp"
+#include "client/network/PacketExtractor.hpp"
 #include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/PositionSerializer.hpp"

@@ -4,8 +4,8 @@
 #include "common/BaseChunk.hpp"
 #include "common/Position.hpp"
 #include "tools/AlignedCube.hpp"
-#include "client2/map/Chunk.hpp"
-#include "client2/map/ChunkRenderer.hpp"
+#include "client/map/Chunk.hpp"
+#include "client/map/ChunkRenderer.hpp"
 
 #include "tools/Octree.hpp"
 

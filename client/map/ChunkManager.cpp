@@ -1,14 +1,14 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
 #include "tools/Octree.hpp"
-#include "client2/Client.hpp"
-#include "client2/Settings.hpp"
-#include "client2/game/Game.hpp"
-#include "client2/map/ChunkManager.hpp"
-#include "client2/network/PacketCreator.hpp"
+#include "client/Client.hpp"
+#include "client/Settings.hpp"
+#include "client/game/Game.hpp"
+#include "client/map/ChunkManager.hpp"
+#include "client/network/PacketCreator.hpp"
 
-#include "client2/window/Window.hpp"
-#include "client2/window/InputManager.hpp"
+#include "client/window/Window.hpp"
+#include "client/window/InputManager.hpp"
 
 namespace Client { namespace Map {
 

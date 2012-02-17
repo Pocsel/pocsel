@@ -2,7 +2,7 @@
 #define __CLIENT_MAP_CHUNK_HPP__
 
 #include "common/BaseChunk.hpp"
-#include "client2/map/ChunkMesh.hpp"
+#include "client/map/ChunkMesh.hpp"
 
 namespace Common {
     struct Camera;

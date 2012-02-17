@@ -1,7 +1,7 @@
 #ifndef __CLIENT_NETWORK_CHUNKSERIALIZER_HPP__
 #define __CLIENT_NETWORK_CHUNKSERIALIZER_HPP__
 
-#include "client2/map/Chunk.hpp"
+#include "client/map/Chunk.hpp"
 
 #include "tools/ByteArray.hpp"
 #include "common/ChunkSerializer.hpp"

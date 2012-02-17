@@ -1,9 +1,9 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/game/Player.hpp"
-#include "client2/network/PacketDispatcher.hpp"
-#include "client2/window/InputManager.hpp"
-#include "client2/window/Window.hpp"
+#include "client/game/Player.hpp"
+#include "client/network/PacketDispatcher.hpp"
+#include "client/window/InputManager.hpp"
+#include "client/window/Window.hpp"
 
 namespace Client { namespace Game {
 

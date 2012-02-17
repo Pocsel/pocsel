@@ -1,4 +1,4 @@
-#include "client2/window/sdl/InputBinder.hpp"
+#include "client/window/sdl/InputBinder.hpp"
 
 namespace Client { namespace Window { namespace Sdl {
 

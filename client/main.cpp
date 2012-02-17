@@ -1,5 +1,5 @@
-#include "client2/Settings.hpp"
-#include "client2/Client.hpp"
+#include "client/Settings.hpp"
+#include "client/Client.hpp"
 
 int main(int ac, char** av)
 {

@@ -1,7 +1,7 @@
 #ifndef __CLIENT_WINDOW_SDL_WINDOW_HPP__
 #define __CLIENT_WINDOW_SDL_WINDOW_HPP__
 
-#include "client2/window/Window.hpp"
+#include "client/window/Window.hpp"
 #include "tools/Vector2.hpp"
 
 namespace Tools {

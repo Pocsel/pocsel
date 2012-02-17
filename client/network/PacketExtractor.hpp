@@ -5,7 +5,7 @@
 #include <list>
 
 #include "protocol/protocol.hpp"
-#include "client2/map/Chunk.hpp"
+#include "client/map/Chunk.hpp"
 #include "common/CubeType.hpp"
 
 namespace Common {

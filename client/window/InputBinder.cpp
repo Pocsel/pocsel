@@ -1,6 +1,6 @@
 #include <boost/algorithm/string.hpp>
 
-#include "client2/window/InputBinder.hpp"
+#include "client/window/InputBinder.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Bind.hpp"
 

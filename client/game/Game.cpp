@@ -1,11 +1,11 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
 #include "tools/IRenderer.hpp"
-#include "client2/Client.hpp"
-#include "client2/network/Network.hpp"
-#include "client2/game/Game.hpp"
-#include "client2/map/Map.hpp"
-#include "client2/window/Window.hpp"
+#include "client/Client.hpp"
+#include "client/network/Network.hpp"
+#include "client/game/Game.hpp"
+#include "client/map/Map.hpp"
+#include "client/window/Window.hpp"
 
 namespace Client { namespace Game {
 

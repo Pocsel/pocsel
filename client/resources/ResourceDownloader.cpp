@@ -1,10 +1,10 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/network/Network.hpp"
-#include "client2/network/PacketCreator.hpp"
-#include "client2/network/PacketExtractor.hpp"
-#include "client2/resources/CacheDatabaseProxy.hpp"
-#include "client2/resources/ResourceDownloader.hpp"
+#include "client/network/Network.hpp"
+#include "client/network/PacketCreator.hpp"
+#include "client/network/PacketExtractor.hpp"
+#include "client/resources/CacheDatabaseProxy.hpp"
+#include "client/resources/ResourceDownloader.hpp"
 
 #include "common/Resource.hpp"
 

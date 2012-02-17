@@ -1,8 +1,8 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/window/sdl/InputManager.hpp"
-#include "client2/window/sdl/InputBinder.hpp"
-#include "client2/window/Window.hpp"
+#include "client/window/sdl/InputManager.hpp"
+#include "client/window/sdl/InputBinder.hpp"
+#include "client/window/Window.hpp"
 
 namespace Client { namespace Window { namespace Sdl {
 

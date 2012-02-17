@@ -1,8 +1,8 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/window/sdl/Window.hpp"
-#include "client2/window/sdl/InputManager.hpp"
-#include "client2/window/sdl/InputBinder.hpp"
+#include "client/window/sdl/Window.hpp"
+#include "client/window/sdl/InputManager.hpp"
+#include "client/window/sdl/InputBinder.hpp"
 #include "tools/renderers/GLRenderer.hpp"
 #include "ProgramInfo.hpp"
 

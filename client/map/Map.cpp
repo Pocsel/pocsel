@@ -1,7 +1,7 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/game/Game.hpp"
-#include "client2/map/Map.hpp"
+#include "client/game/Game.hpp"
+#include "client/map/Map.hpp"
 
 namespace Client { namespace Map {
 

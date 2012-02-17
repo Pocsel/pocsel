@@ -1,8 +1,8 @@
 #ifndef __CLIENT_WINDOW_INPUTBINDER_HPP__
 #define __CLIENT_WINDOW_INPUTBINDER_HPP__
 
-#include "client2/window/Inputs.hpp"
-#include "client2/BindAction.hpp"
+#include "client/window/Inputs.hpp"
+#include "client/BindAction.hpp"
 
 namespace Client { namespace Window {
 

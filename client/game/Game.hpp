@@ -2,9 +2,9 @@
 #define __CLIENT_GAME_GAME_HPP__
 
 #include "common/Position.hpp"
-#include "client2/game/CubeTypeManager.hpp"
-#include "client2/game/Player.hpp"
-#include "client2/resources/ResourceManager.hpp"
+#include "client/game/CubeTypeManager.hpp"
+#include "client/game/Player.hpp"
+#include "client/resources/ResourceManager.hpp"
 
 namespace Client {
     class Client;

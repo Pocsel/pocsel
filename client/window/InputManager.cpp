@@ -1,7 +1,7 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/window/InputManager.hpp"
-#include "client2/window/InputBinder.hpp"
+#include "client/window/InputManager.hpp"
+#include "client/window/InputBinder.hpp"
 
 namespace {
 

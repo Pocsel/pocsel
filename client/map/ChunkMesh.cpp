@@ -1,13 +1,13 @@
-#include "client2/precompiled.hpp"
+#include "client/precompiled.hpp"
 
-#include "client2/Client.hpp"
-#include "client2/window/Window.hpp"
-#include "client2/game/Game.hpp"
-#include "client2/map/Chunk.hpp"
-#include "client2/map/ChunkManager.hpp"
-#include "client2/map/ChunkMesh.hpp"
-#include "client2/map/ChunkRenderer.hpp"
-#include "client2/map/Map.hpp"
+#include "client/Client.hpp"
+#include "client/window/Window.hpp"
+#include "client/game/Game.hpp"
+#include "client/map/Chunk.hpp"
+#include "client/map/ChunkManager.hpp"
+#include "client/map/ChunkMesh.hpp"
+#include "client/map/ChunkRenderer.hpp"
+#include "client/map/Map.hpp"
 
 namespace Client { namespace Map {
 

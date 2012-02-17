@@ -1,9 +1,0 @@
-#ifndef __RESOURCES_RESOURCES__
-#define __RESOURCES_RESOURCES__
-
-#define RESOURCES_DIR "@resources_dir@"
-#define WORLD_PATH "@world_path@"
-#define CACHE_DIR "@cache_dir@"
-#define BINDS_PATH "@bindings_path@"
-
-#endif

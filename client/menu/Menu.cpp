@@ -1,10 +1,10 @@
-#include "client2/menu/Menu.hpp"
-#include "client2/Client.hpp"
-#include "client2/resources/LocalResourceManager.hpp"
-#include "client2/window/Window.hpp"
+#include "client/menu/Menu.hpp"
+#include "client/Client.hpp"
+#include "client/resources/LocalResourceManager.hpp"
+#include "client/window/Window.hpp"
 #include "tools/IRenderer.hpp"
-#include "client2/menu/LoadingScreen.hpp"
-#include "client2/menu/DisconnectedScreen.hpp"
+#include "client/menu/LoadingScreen.hpp"
+#include "client/menu/DisconnectedScreen.hpp"
 
 namespace Client { namespace Menu {
 

@@ -2,8 +2,8 @@
 #define __CLIENT_CLIENT_HPP__
 
 #include "common/BaseChunk.hpp"
-#include "client2/game/Game.hpp"
-#include "client2/network/Network.hpp"
+#include "client/game/Game.hpp"
+#include "client/network/Network.hpp"
 
 namespace Client {
     class Settings;

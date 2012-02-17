@@ -2,7 +2,7 @@
 #define __CLIENT_MAP_MAP_HPP__
 
 #include "common/BaseChunk.hpp"
-#include "client2/map/ChunkManager.hpp"
+#include "client/map/ChunkManager.hpp"
 
 namespace Client {
     namespace Game {

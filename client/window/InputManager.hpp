@@ -1,7 +1,7 @@
 #ifndef __CLIENT_WINDOW_INPUTMANAGER_HPP__
 #define __CLIENT_WINDOW_INPUTMANAGER_HPP__
 
-#include "client2/window/InputBinder.hpp"
+#include "client/window/InputBinder.hpp"
 #include "tools/Vector2.hpp"
 
 namespace Client { namespace Window {
