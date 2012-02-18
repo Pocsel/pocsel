@@ -68,6 +68,15 @@ namespace Tools {
         {
         }
 
+        Vector2<T> GetXY() const
+        {
+            return Tools::Vector2<T>(this->x, this->y);
+        }
+        template<typename Vec2T>
+        Vector2<Vec2T> GetXY() const
+        {
+            return Tools::Vector2<Vec2T>((Vec2T)this->x, (Vec2T)this->y);
+        }
         T GetMagnitude() const
         {
             return std::sqrt(this->x*this->x + this->y*this->y + this->z*this->z);

@@ -69,7 +69,7 @@ namespace Client { namespace Map {
         this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
             [&](Chunk& chunk)
             {
-                if (chunk.GetMesh() == 0)
+                if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount() == 0)
                     return;
                 if (chunk.GetMesh()->HasTransparentCube())
                 {
@@ -117,6 +117,7 @@ namespace Client { namespace Map {
             }
             this->_baseVbo->Unbind();
         } while (this->_shader->EndPass());
+
         do
         {
             this->_shader->BeginPass();
@@ -155,13 +156,6 @@ namespace Client { namespace Map {
         unsigned int const frontBottomRight = 6;
         unsigned int const frontBottomLeft = 7;
 
-        unsigned int const normalFront = 0;
-        unsigned int const normalTop = 1;
-        unsigned int const normalRight = 2;
-        unsigned int const normalBottom = 3;
-        unsigned int const normalLeft = 4;
-        unsigned int const normalBack = 5;
-
         float const cubeVertices[][3] = {
             {0, 1, 1},
             {1, 1, 1},
@@ -181,6 +175,12 @@ namespace Client { namespace Map {
             backTopLeft, backTopRight, backBottomRight, backBottomLeft, // back
         };
 
+        unsigned int const normalFront = 0;
+        unsigned int const normalTop = 1;
+        unsigned int const normalRight = 2;
+        unsigned int const normalBottom = 3;
+        unsigned int const normalLeft = 4;
+        unsigned int const normalBack = 5;
         float const cubeNormals[][3] = {
             {0, 0, 1},
             {0, 1, 0},
