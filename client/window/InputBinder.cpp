@@ -21,6 +21,7 @@ namespace Client { namespace Window {
     {
         this->_actions["quit"] = BindAction::Quit;
         this->_actions["menu"] = BindAction::Menu;
+        this->_actions["menuclick"] = BindAction::MenuClick;
         this->_actions["forward"] = BindAction::Forward;
         this->_actions["backward"] = BindAction::Backward;
         this->_actions["left"] = BindAction::Left;
@@ -240,13 +241,13 @@ namespace Client { namespace Window {
 
     void InputBinder::_PopulateButtons()
     {
-        this->_buttons["left"] = Button::Left;
-        this->_buttons["middle"] = Button::Middle;
-        this->_buttons["right"] = Button::Right;
+        this->_buttons["leftclick"] = Button::Left;
+        this->_buttons["middleclick"] = Button::Middle;
+        this->_buttons["rightclick"] = Button::Right;
         this->_buttons["wheelup"] = Button::WheelUp;
         this->_buttons["wheeldown"] = Button::WheelDown;
-        this->_buttons["special1"] = Button::Special1;
-        this->_buttons["special2"] = Button::Special2;
+        this->_buttons["x1click"] = Button::Special1;
+        this->_buttons["x2click"] = Button::Special2;
     }
 
     void InputBinder::_PopulateSpecialKeys()

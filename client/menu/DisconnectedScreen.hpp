@@ -8,6 +8,10 @@ namespace Tools { namespace Renderers { namespace Utils {
 }}}
 namespace Client {
     class Client;
+    class ActionBinder;
+    namespace Menu { namespace Widget {
+        class Button;
+    }}
 }
 namespace Tools {
     class IRenderer;
@@ -29,6 +33,8 @@ namespace Client { namespace Menu {
         Tools::Renderers::Utils::Rectangle* _backRect;
         int _callbackId;
         std::string _message;
+        ActionBinder* _actionBinder;
+        Widget::Button* _button;
 
     public:
         DisconnectedScreen(Client& client, Menu& menu);
@@ -37,6 +43,7 @@ namespace Client { namespace Menu {
         void Render();
     private:
         void _Resize(Tools::Vector2u const& size);
+        void _RetryButton();
     };
 
 }}

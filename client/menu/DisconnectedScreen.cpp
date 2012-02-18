@@ -4,6 +4,8 @@
 #include "client/Client.hpp"
 #include "client/window/Window.hpp"
 #include "client/menu/Menu.hpp"
+#include "client/menu/widget/Button.hpp"
+#include "client/ActionBinder.hpp"
 
 namespace Client { namespace Menu {
 
@@ -12,6 +14,15 @@ namespace Client { namespace Menu {
         _menu(menu),
         _renderer(client.GetWindow().GetRenderer())
     {
+        this->_actionBinder = new ActionBinder();
+        std::function<void(void)> f = std::bind(&DisconnectedScreen::_RetryButton, this);
+        this->_button = new Widget::Button(this->_client.GetWindow().GetInputManager(),
+                menu,
+                this->_renderer,
+                *this->_actionBinder,
+                f,
+                "Retry",
+                Tools::Vector2f(100, 20));
         this->_backRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
         this->_backRect->SetColor(
                 Tools::Color4f(0.31f, 0.03f, 0.03f, 1),
@@ -26,6 +37,13 @@ namespace Client { namespace Menu {
     {
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_backRect);
+        Tools::Delete(this->_button);
+        Tools::Delete(this->_actionBinder);
+    }
+
+    void DisconnectedScreen::_RetryButton()
+    {
+        this->_client.Connect();
     }
 
     void DisconnectedScreen::SetMessage(std::string const& message)
@@ -39,6 +57,7 @@ namespace Client { namespace Menu {
         this->_text2Matrix = Tools::Matrix4<float>::CreateTranslation(10, size.h - 60, 0);
         this->_backRectMatrix = Tools::Matrix4<float>::CreateScale(size.w / 2, size.h / 2, 1)
             * Tools::Matrix4<float>::CreateTranslation(size.w / 2, size.h / 2, 0);
+        this->_button->SetPos(Tools::Vector2f(10, size.h - 30));
     }
 
     void DisconnectedScreen::Render()
@@ -58,7 +77,9 @@ namespace Client { namespace Menu {
             this->_renderer.SetModelMatrix(this->_text2Matrix);
             this->_menu.GetFont().Render(this->_menu.GetFontTexture(), this->_message);
         } while (this->_menu.GetFontShader().EndPass());
+        this->_button->Render();
         this->_menu.EndMenuDrawing();
+        this->_actionBinder->Dispatch(this->_client.GetWindow().GetInputManager());
     }
 
 }}

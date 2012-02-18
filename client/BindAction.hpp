@@ -15,6 +15,7 @@ namespace Client { namespace BindAction {
         None,
         Quit,
         Menu,
+        MenuClick,
         Forward,
         Backward,
         Left,

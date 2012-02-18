@@ -43,7 +43,7 @@ namespace Client {
     int Client::Run()
     {
         Tools::Timer frameTimer;
-        this->_network.Connect(this->_settings.host, this->_settings.port);
+        this->Connect();
 
         // main loop
         while (this->_state)
@@ -141,7 +141,15 @@ namespace Client {
         this->_state = LoadingChunks;
     }
 
-    void Client::Disconnect(std::string const& reason)
+    void Client::Connect()
+    {
+        if (this->_network.IsRunning())
+            this->_network.Stop();
+        this->_network.Connect(this->_settings.host, this->_settings.port);
+        this->_state = Connecting;
+    }
+
+    void Client::Disconnect(std::string const& reason /* = "" */)
     {
         if (this->_network.IsRunning())
             this->_network.Stop();

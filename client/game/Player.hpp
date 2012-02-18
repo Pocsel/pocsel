@@ -12,17 +12,20 @@ namespace Client { namespace Window {
 
 namespace Client { namespace Game {
 
+    class Game;
+
     class Player :
         private boost::noncopyable
     {
         private:
+            Game& _game;
             std::string _nickname;
             Common::Camera _camera;
             ActionBinder _actionBinder;
             Uint32 _elapsedTime;
 
         public:
-            Player();
+            Player(Game& game);
             std::string const& GetNickname() const { return this->_nickname; }
             void SetNickname(std::string const& nick) { this->_nickname = nick; }
             Common::Position const& GetPosition() const { return this->_camera.position; }
@@ -30,7 +33,7 @@ namespace Client { namespace Game {
             Common::Camera& GetCamera() { return this->_camera; }
             Common::Camera const& GetCamera() const { return this->_camera; }
 
-            void UpdateMovements(Window::Window& window, Uint32 time);
+            void UpdateMovements(Uint32 time);
             void MoveForward();
             void MoveBackward();
             void StrafeLeft();

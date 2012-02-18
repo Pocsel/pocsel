@@ -31,7 +31,8 @@ namespace Client {
         useShaders(true),
         chunkViewDistance(4),
         chunkCacheArea(2),
-        chunkMinimumArea(3)
+        chunkMinimumArea(3),
+        mouseSensitivity(0.707f)
     {
         std::string defaultConfDir = Common::ConfDir::Client().string();
 
@@ -152,6 +153,11 @@ namespace Client {
             this->res.y = i["resY"].as<unsigned int>();
             this->fullscreen = i["fullscreen"].as<bool>();
             this->useShaders = i["useShaders"].as<bool>();
+            this->mouseSensitivity = i["mouseSensitivity"].as<float>();
+            if (this->mouseSensitivity > 1)
+                this->mouseSensitivity = 1;
+            else if (this->mouseSensitivity < 0)
+                this->mouseSensitivity = 0;
         }
         catch (std::exception& e)
         {
