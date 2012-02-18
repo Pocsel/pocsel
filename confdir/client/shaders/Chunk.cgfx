@@ -7,7 +7,8 @@ float fogEnd = 750.0f;
 
 sampler2D cubeTexture = sampler_state
 {
-   minFilter = Nearest;
+   generateMipMap = true;
+   minFilter = LinearMipMapLinear;
    magFilter = Nearest;
 };
 

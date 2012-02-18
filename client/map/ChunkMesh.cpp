@@ -35,6 +35,13 @@ namespace Client { namespace Map {
             chunkBack   = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0,  0, -1)),
             chunkTop    = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0,  1,  0)),
             chunkBottom = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0, -1,  0));
+        if (chunkLeft == 0 ||
+            chunkRight  == 0 ||
+            chunkFront  == 0 ||
+            chunkBack   == 0 ||
+            chunkTop    == 0 ||
+            chunkBottom == 0)
+            return;
 
         for (auto it = this->_indices.begin(), ite = this->_indices.end(); it != ite; ++it)
             Tools::Delete(it->second.first);
@@ -54,9 +61,9 @@ namespace Client { namespace Map {
 
         std::map<Common::BaseChunk::CubeType, std::vector<unsigned int>> indices;
 
-        static THREAD_LOCAL Tools::Vector2f* textureCoords = 0;
-        if (textureCoords == 0)
-            textureCoords = new Tools::Vector2f[Common::ChunkSize3 * 4 * 6]; // 4 sommets, 6 faces
+        //static THREAD_LOCAL Tools::Vector2f* textureCoords = 0;
+        //if (textureCoords == 0)
+        //    textureCoords = new Tools::Vector2f[Common::ChunkSize3 * 4 * 6]; // 4 sommets, 6 faces
 
         for (x = 0; x < Common::ChunkSize; ++x)
         {
@@ -89,10 +96,10 @@ namespace Client { namespace Map {
                                 indices[type].push_back(offset + decal + 0); \
                                 indices[type].push_back(offset + decal + 2); \
                                 indices[type].push_back(offset + decal + 3); \
-                                textureCoords[offset + decal + 0] = Tools::Vector2f(cubeType.FACE.u, cubeType.FACE.v); \
+                                /*textureCoords[offset + decal + 0] = Tools::Vector2f(cubeType.FACE.u, cubeType.FACE.v); \
                                 textureCoords[offset + decal + 1] = Tools::Vector2f(cubeType.FACE.v + cubeType.FACE.w, cubeType.FACE.v); \
                                 textureCoords[offset + decal + 2] = Tools::Vector2f(cubeType.FACE.v + cubeType.FACE.w, cubeType.FACE.v + cubeType.FACE.w); \
-                                textureCoords[offset + decal + 3] = Tools::Vector2f(cubeType.FACE.v, cubeType.FACE.v + cubeType.FACE.w); \
+                                textureCoords[offset + decal + 3] = Tools::Vector2f(cubeType.FACE.v, cubeType.FACE.v + cubeType.FACE.w); */\
                             } \
                         } while (0)
 
