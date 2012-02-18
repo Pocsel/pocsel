@@ -4,10 +4,14 @@
 #include "client/network/PacketDispatcher.hpp"
 #include "client/window/InputManager.hpp"
 #include "client/window/Window.hpp"
+#include "client/game/Game.hpp"
+#include "client/Client.hpp"
+#include "client/Settings.hpp"
 
 namespace Client { namespace Game {
 
-    Player::Player()
+    Player::Player(Game& game) :
+        _game(game)
     {
         this->_actionBinder.Bind(BindAction::Forward, BindAction::Held, std::bind(&Player::MoveForward, this));
         this->_actionBinder.Bind(BindAction::Backward, BindAction::Held, std::bind(&Player::MoveBackward, this));
@@ -15,18 +19,21 @@ namespace Client { namespace Game {
         this->_actionBinder.Bind(BindAction::Right, BindAction::Held, std::bind(&Player::StrafeRight, this));
     }
 
-    void Player::UpdateMovements(Window::Window& window, Uint32 time)
+    void Player::UpdateMovements(Uint32 time)
     {
-        if (!window.GetInputManager().HasFocus())
-            return;
-
         this->_elapsedTime = time;
 
-        this->_actionBinder.Dispatch(window.GetInputManager());
+        Window::Window& w = this->_game.GetClient().GetWindow();
+        this->_actionBinder.Dispatch(w.GetInputManager());
 
-        auto delta = (Tools::Vector2f(window.GetInputManager().GetMousePos()) - (Tools::Vector2f(window.GetSize()) / 2.0f)) / 300.0f;
-        this->_camera.Rotate(delta);
-        window.GetInputManager().WarpMouse(Tools::Vector2i(window.GetSize() / 2));
+        if (w.GetInputManager().HasFocus())
+        {
+            Tools::Vector2f delta;
+            delta.x = (w.GetInputManager().GetMousePos().x - (static_cast<int>(w.GetSize().x) / 2)) / (1000.0f - 990.0f * this->_game.GetClient().GetSettings().mouseSensitivity);
+            delta.y = (w.GetInputManager().GetMousePos().y - (static_cast<int>(w.GetSize().y) / 2)) / (1000.0f - 990.0f * this->_game.GetClient().GetSettings().mouseSensitivity);
+            this->_camera.Rotate(delta);
+            w.GetInputManager().WarpMouse(Tools::Vector2i(w.GetSize() / 2));
+        }
     }
 
     void Player::SetPosition(Common::Position const& pos)

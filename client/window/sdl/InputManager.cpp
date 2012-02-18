@@ -23,10 +23,6 @@ namespace Client { namespace Window { namespace Sdl {
         while (SDL_PollEvent(&e))
             switch (e.type)
             {
-            case SDL_ACTIVEEVENT:
-                if ((e.active.state & SDL_APPINPUTFOCUS) == SDL_APPINPUTFOCUS)
-                    this->_hasFocus = e.active.gain != 0;
-                break;
             case SDL_MOUSEMOTION:
                 this->_mousePos.x = e.motion.x;
                 this->_mousePos.y = e.motion.y;
@@ -72,6 +68,10 @@ namespace Client { namespace Window { namespace Sdl {
                     else
                         Tools::debug << "InputManager: Button up " << e.button.button << " with no button down.\n";
                 }
+                break;
+            case SDL_ACTIVEEVENT:
+                if ((e.active.state & SDL_APPINPUTFOCUS) == SDL_APPINPUTFOCUS)
+                    this->_hasFocus = e.active.gain != 0;
                 break;
             case SDL_VIDEORESIZE:
                 this->_window.Resize(e.resize.w, e.resize.h);

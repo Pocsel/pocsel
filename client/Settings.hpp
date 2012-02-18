@@ -24,6 +24,7 @@ namespace Client {
         unsigned int chunkViewDistance;
         unsigned int chunkCacheArea;
         unsigned int chunkMinimumArea;
+        float mouseSensitivity;
 
     public:
         Settings(int ac, char** av);
