@@ -93,7 +93,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         //            return true;
         //        }
 
-        virtual void Calc(double x, double y, double z, Uint32 cx, Uint32 cy, Uint32 cz, double* res) const
+        virtual void Calc(double x, double y, double z, Uint32 cx, Uint32 cy, Uint32 cz, double* res, unsigned int offset) const
         {
             unsigned int ix, iz, iy;
             double xx, zz, yy;
@@ -109,12 +109,13 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                         for (iy = 0; iy < Common::ChunkSize; ++iy)
                         {
                             yy = y + (double)iy / Common::ChunkSize;
-                            *res++ = _perlin.Noise3D(xx * xn + xa,
-                                                     yy * yn + ya,
-                                                     zz * zn + za,
-                                                     alpha,
-                                                     beta,
-                                                     n) * mul;
+                            *res = _perlin.Noise3D(xx * xn + xa,
+                                                   yy * yn + ya,
+                                                   zz * zn + za,
+                                                   alpha,
+                                                   beta,
+                                                   n) * mul;
+                            res += offset;
                         }
                     }
                 }
@@ -195,20 +196,20 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             switch (ip)
             {
                 case 0:
-                    _InterpolationNearest(res, calcs,
+                    _InterpolationNearest(res, offset, calcs,
                                           xnbCalcs, znbCalcs, ynbCalcs,
                                           xDiff, zDiff, yDiff);
                     break;
                 default:
-                    _InterpolationLinear(res, calcs,
+                    _InterpolationLinear(res, offset, calcs,
                                          xnbCalcs, znbCalcs, ynbCalcs,
                                          xDiff, zDiff, yDiff);
             }
         }
 
     private:
-        void _InterpolationLinear(double* res, double* calcs,
-                                  unsigned int xnbCalcs, unsigned int znbCalcs, unsigned int ynbCalcs,
+        void _InterpolationLinear(double* res, unsigned int offset, double* calcs,
+                                  unsigned int, unsigned int znbCalcs, unsigned int ynbCalcs,
                                   int xDiff, int zDiff, int yDiff
                                   ) const
         {
@@ -462,14 +463,15 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                             }
                         }
 
-                        *res++ = p;
+                        *res = p;
+                        res += offset;
                     }
                 }
             }
         }
 
-        void _InterpolationNearest(double* res, double* calcs,
-                                   unsigned int xnbCalcs, unsigned int znbCalcs, unsigned int ynbCalcs,
+        void _InterpolationNearest(double* res, unsigned int offset, double* calcs,
+                                   unsigned int, unsigned int znbCalcs, unsigned int ynbCalcs,
                                    int xDiff, int zDiff, int yDiff
                                   ) const
         {
@@ -532,7 +534,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     {
                         yc = ytab[iy] + zc;
 
-                        *res++ = calcs[yc];
+                        *res = calcs[yc];
+                        res += offset;
                     }
                 }
             }

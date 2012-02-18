@@ -84,7 +84,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         //            return true;
         //        }
 
-        virtual void Calc(double x, double, double z, Uint32 cx, Uint32, Uint32 cz, double* res) const
+        virtual void Calc(double x, double, double z, Uint32 cx, Uint32, Uint32 cz, double* res, unsigned int offset) const
         {
             unsigned int ix, iz, iy;
             double xx, zz, p;
@@ -104,7 +104,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                                             n) * mul;
 
                         for (iy = 0; iy < Common::ChunkSize; ++iy)
-                            *res++ = p;
+                        {
+                            *res = p;
+                            res += offset;
+                        }
                     }
                 }
                 return;
@@ -166,18 +169,19 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             switch (ip)
             {
                 case 0:
-                    _InterpolationNearest(res, calcs, xnbCalcs, znbCalcs, xDiff, zDiff);
+                    _InterpolationNearest(res, offset, calcs, xnbCalcs, znbCalcs, xDiff, zDiff);
                     break;
                 default:
-                    _InterpolationLinear(res, calcs, xnbCalcs, znbCalcs, xDiff, zDiff);
+                    _InterpolationLinear(res, offset, calcs, xnbCalcs, znbCalcs, xDiff, zDiff);
             }
 
         }
 
     private:
-        void _InterpolationLinear(double* res, double* calcs, unsigned int xnbCalcs, unsigned int znbCalcs, int xDiff, int zDiff) const
+        void _InterpolationLinear(double* res, unsigned int offset, double* calcs,
+                                  unsigned int, unsigned int znbCalcs,
+                                  int xDiff, int zDiff) const
         {
-
             unsigned int ix, iz, iy;
             double p;
 
@@ -202,7 +206,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 
             unsigned int j;
             int i0, i1;
-
 
 #define INIT_CALCINDEX_TAB(t) \
             i0 = 0; \
@@ -313,12 +316,17 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     }
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)
-                        *res++ = p;
+                    {
+                        *res = p;
+                        res += offset;
+                    }
                 }
             }
         }
 
-        void _InterpolationNearest(double* res, double* calcs, unsigned int xnbCalcs, unsigned int znbCalcs, int xDiff, int zDiff) const
+        void _InterpolationNearest(double* res, unsigned int offset, double* calcs,
+                                   unsigned int, unsigned int znbCalcs,
+                                   int xDiff, int zDiff) const
         {
             unsigned int ix, iz, iy;
             double p;
@@ -377,7 +385,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     p = calcs[zc];
 
                     for (iy = 0; iy < Common::ChunkSize; ++iy)
-                        *res++ = p;
+                    {
+                        *res = p;
+                        res += offset;
+                    }
                 }
             }
         }
