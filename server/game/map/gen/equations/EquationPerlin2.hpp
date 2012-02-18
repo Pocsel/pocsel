@@ -20,6 +20,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
         double n;
         int ip;
         int ipp;
+        int ippmx;
+        int ippmz;
 
     public:
         explicit EquationPerlin2(Perlin const& perlin, std::map<std::string, double> const& vals) :
@@ -62,6 +64,18 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 ipp = vals.find("ipp")->second + 0.1;
                 if (ipp < 0)
                     ipp = 0;
+            }
+            if (vals.find("ippmx") != vals.end())
+            {
+                ippmx = vals.find("ippmx")->second + 0.1;
+                if (ippmx < 1)
+                    ippmx = 1;
+            }
+            if (vals.find("ippmz") != vals.end())
+            {
+                ippmz = vals.find("ippmz")->second + 0.1;
+                if (ippmz < 1)
+                    ippmz = 1;
             }
         }
 
@@ -114,33 +128,25 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             }
 
 
-
-            int ipp1 = ipp + 1;
-
-            int xDiff = -(int)(((Uint64)cx * Common::ChunkSize) % ipp1);
-            int zDiff = -(int)(((Uint64)cz * Common::ChunkSize) % ipp1);
-
-            unsigned int xnbCalcs = 0;
-            int iix = xDiff;
-            while (iix < (int)Common::ChunkSize)
-            {
-                ++xnbCalcs;
-                if (iix < (int)Common::ChunkSize - 1 &&
-                    iix + ipp1 >= (int)Common::ChunkSize)
-                    ++xnbCalcs;
-                iix += ipp1;
+#define INIT_XDIFF_XNBCALCS(t) \
+            int ipp##t = ipp * ippm##t; \
+            int ipp1##t = ipp##t + 1; \
+            int t##Diff = -(int)(((Uint64)c##t * Common::ChunkSize) % ipp1##t); \
+            unsigned int t##nbCalcs = 0; \
+            int ii##t = t##Diff; \
+            while (ii##t < (int)Common::ChunkSize) \
+            { \
+                ++t##nbCalcs; \
+                if (ii##t < (int)Common::ChunkSize - 1 && \
+                    ii##t + ipp1##t >= (int)Common::ChunkSize) \
+                    ++t##nbCalcs; \
+                ii##t += ipp1##t; \
             }
 
-            unsigned int znbCalcs = 0;
-            int iiz = zDiff;
-            while (iiz < (int)Common::ChunkSize)
-            {
-                ++znbCalcs;
-                if (iiz < (int)Common::ChunkSize - 1 &&
-                    iiz + ipp1 >= (int)Common::ChunkSize)
-                    ++znbCalcs;
-                iiz += ipp1;
-            }
+            INIT_XDIFF_XNBCALCS(x);
+            INIT_XDIFF_XNBCALCS(z);
+
+#undef INIT_XDIFF_XNBCALCS
 
             double calcs[(Common::ChunkSize / 2 + 1) * (Common::ChunkSize / 2 + 1)];
             double* calcsPtr = calcs;
@@ -150,11 +156,11 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 
             for (ix = 0; ix < xnbCalcs; ++ix)
             {
-                xx = x + ((double)ix * ipp1) / Common::ChunkSize;
+                xx = x + ((double)ix * ipp1x) / Common::ChunkSize;
 
                 for (iz = 0; iz < znbCalcs; ++iz)
                 {
-                    zz = z + ((double)iz * ipp1) / Common::ChunkSize;
+                    zz = z + ((double)iz * ipp1z) / Common::ChunkSize;
 
                     p = _perlin.Noise2D(xx * xn + xa,
                                         zz * zn + za,
@@ -202,18 +208,18 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             int xtab[Common::ChunkSize * 2];
             int ztab[Common::ChunkSize * 2];
 
-            int ipp1 = ipp + 1;
-
             unsigned int j;
             int i0, i1;
 
 #define INIT_CALCINDEX_TAB(t) \
+            int ipp##t = ipp * ippm##t; \
+            int ipp1##t = ipp##t + 1; \
             i0 = 0; \
             i1 = 1; \
             j = 0;\
             for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
             { \
-                if (((int)i - t##Diff) % ipp1 == 0) \
+                if (((int)i - t##Diff) % ipp1##t == 0) \
                 { \
                     if (i != 0) \
                         ++j; \
@@ -221,16 +227,16 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     i1 = j + 1; \
                     t##ctab[i * 2] = i0; \
                     t##ctab[i * 2 + 1] = i0; \
-                    t##tab[i * 2] = t##Diff + i0 * ipp1; \
-                    t##tab[i * 2 + 1] = t##Diff + i0 * ipp1; \
+                    t##tab[i * 2] = t##Diff + i0 * ipp1##t; \
+                    t##tab[i * 2 + 1] = t##Diff + i0 * ipp1##t; \
                     \
                 } \
                 else \
                 { \
                     t##ctab[i * 2] = i0; \
                     t##ctab[i * 2 + 1] = i1; \
-                    t##tab[i * 2] = t##Diff + i0 * ipp1; \
-                    t##tab[i * 2 + 1] = t##Diff + i1 * ipp1; \
+                    t##tab[i * 2] = t##Diff + i0 * ipp1##t; \
+                    t##tab[i * 2 + 1] = t##Diff + i1 * ipp1##t; \
                 } \
             }
 
@@ -337,19 +343,18 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             int xtab[Common::ChunkSize];
             int ztab[Common::ChunkSize];
 
-            int ipp1 = ipp + 1;
-
             unsigned int j;
             int i0, i1;
 
-
 #define INIT_CALCINDEX_TAB(t) \
+            int ipp##t = ipp * ippm##t; \
+            int ipp1##t = ipp##t + 1; \
             i0 = 0; \
             i1 = 1; \
             j = 0;\
             for (unsigned int i = 0; i < Common::ChunkSize; ++i) \
             { \
-                if (((int)i - t##Diff) % ipp1 == 0) \
+                if (((int)i - t##Diff) % ipp1##t == 0) \
                 { \
                     if (i != 0) \
                         ++j; \
@@ -361,8 +366,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 { \
                     int reali = (int)i - t##Diff; \
                     if (reali < 0) \
-                        reali = ipp1-reali; \
-                    if (reali % ipp1 < ipp1 / 2) \
+                        reali = ipp1##t-reali; \
+                    if (reali % ipp1##t < ipp1##t / 2) \
                         t##tab[i] = i0; \
                     else \
                         t##tab[i] = i1; \
