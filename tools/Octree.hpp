@@ -210,9 +210,10 @@ namespace Tools {
             ss.width(depth);
             ss << ">" << this->_count << " " << this->_size << " (" << this << ")\n";
             log << ss.str();
-            for (int i = 0; i < 8; ++i)
-                if (this->_childs[i] != 0)
-                    this->_childs[i]->_Dump(depth + 1, log);
+            if (this->_count > 8)
+                for (int i = 0; i < 8; ++i)
+                    if (this->_childs[i] != 0)
+                        this->_childs[i]->_Dump(depth + 1, log);
         }
     };
 
