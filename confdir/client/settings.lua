@@ -7,3 +7,4 @@ useShaders = true
 chunkViewDistance = 5
 chunkCacheArea = 15
 chunkMinimumArea = 2
+mouseSensitivity = 0.707

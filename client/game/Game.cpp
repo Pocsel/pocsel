@@ -9,12 +9,13 @@
 
 namespace Client { namespace Game {
 
-    Game::Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes)
-        : _client(client),
+    Game::Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes) :
+        _client(client),
         _renderer(client.GetWindow().GetRenderer()),
         _cubeTypeManager(client, nbCubeTypes),
         _resourceManager(client, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion),
-        _map(0)
+        _map(0),
+        _player(*this)
     {
         this->_renderer.SetClearColor(Tools::Color4f(1.0f, 0.5f, 0.9f, 1)); // XXX
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
@@ -44,7 +45,7 @@ namespace Client { namespace Game {
 
     void Game::Update()
     {
-        this->_player.UpdateMovements(this->_client.GetWindow(), this->_updateTimer.GetElapsedTime());
+        this->_player.UpdateMovements(this->_updateTimer.GetElapsedTime());
         this->_map->GetChunkManager().Update(this->_player.GetPosition());
         this->_updateTimer.Reset();
     }
