@@ -58,7 +58,8 @@ namespace Client {
         int Run();
         void Login(std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);
         void LoadChunks();
-        void Disconnect(std::string const& reason);
+        void Connect();
+        void Disconnect(std::string const& reason = "");
         void Quit();
 
         Settings& GetSettings() { return this->_settings; }

@@ -3,14 +3,14 @@
 
 #include "tools/Matrix4.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
-    class Rectangle;
-}}}
+namespace Tools {
+    namespace Renderers { namespace Utils {
+        class Rectangle;
+    }}
+    class IRenderer;
+}
 namespace Client {
     class Client;
-}
-namespace Tools {
-    class IRenderer;
 }
 
 namespace Client { namespace Menu {
