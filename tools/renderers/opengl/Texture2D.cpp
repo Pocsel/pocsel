@@ -1,3 +1,4 @@
+#include "tools/precompiled.hpp"
 #include <IL/il.h>
 
 #include "tools/renderers/GLRenderer.hpp"
@@ -10,7 +11,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     static int nbBindedTexture = 0;
 
-    Texture2D::Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize) :
+    Texture2D::Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData) :
         _renderer(renderer),
         _hasAlpha(false)
     {
@@ -32,7 +33,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         else
         {
             this->_size = imgSize;
-            this->_FinishLoading(GetInternalFormatFromPixelFormat(format), GetFormatFromPixelFormat(format), data);
+            this->_FinishLoading(GetInternalFormatFromPixelFormat(format), GetFormatFromPixelFormat(format), data, (format >> 24) & 0xFF, mipmapData);
         }
     }
 
@@ -77,11 +78,11 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         ilBindImage(0);
         ilDeleteImage(ilID);
 
-        this->_FinishLoading(4, GL_RGBA, pixmap);
+        this->_FinishLoading(4, GL_RGBA, pixmap, 4, 0);
         delete [] pixmap;
     }
 
-    void Texture2D::_FinishLoading(GLint internalFormat, GLenum format, GLvoid const* data)
+    void Texture2D::_FinishLoading(GLint internalFormat, GLenum format, GLvoid const* data, int pixelSize, void const* mipmapData)
     {
         GLCHECK(glGenTextures(1, &this->_id));
         GLCHECK(glBindTexture(GL_TEXTURE_2D, this->_id));
@@ -99,7 +100,20 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
         GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
         GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-        gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, this->_size.w, this->_size.h, format, GL_UNSIGNED_BYTE, data); 
+        if (mipmapData != 0)
+        {
+            int level = 1;
+            char const* idx = (char const*)mipmapData;
+            for (Tools::Vector2u size = this->_size / 2; size.w >= 1 && size.h >= 1; size /= 2)
+            {
+                GLCHECK(glTexImage2D(GL_TEXTURE_2D, level++, internalFormat, size.w, size.h, 0, format, GL_UNSIGNED_BYTE, idx));
+                idx += size.w * size.h * pixelSize;
+            }
+        }
+        else if (GLEW_VERSION_3_0)
+            GLCHECK(glGenerateMipmap(GL_TEXTURE_2D));
+        else
+            gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, this->_size.w, this->_size.h, format, GL_UNSIGNED_BYTE, data); 
 
         GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
         GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));

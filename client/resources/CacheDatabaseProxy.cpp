@@ -103,7 +103,7 @@ namespace Client { namespace Resources {
         ).Bind(res.id).Bind(res.type).Bind(b).Bind(res.pluginId).Bind(res.filename);
     }
 
-    Common::Resource* CacheDatabaseProxy::GetResource(Uint32 id)
+    std::unique_ptr<Common::Resource> CacheDatabaseProxy::GetResource(Uint32 id)
     {
         try
         {
@@ -113,12 +113,13 @@ namespace Client { namespace Resources {
             if (curs.HasData())
             {
                 auto& row = curs.FetchOne();
-                return new Common::Resource(row[0].GetInt(),
+                return std::unique_ptr<Common::Resource>(new Common::Resource(
+                        row[0].GetInt(),
                         row[1].GetInt(),
                         row[2].GetString(),
                         row[3].GetString(),
                         row[4].GetBlob().data,
-                        (Uint32)row[4].GetBlob().size);
+                        (Uint32)row[4].GetBlob().size));
             }
             else
                 return 0;

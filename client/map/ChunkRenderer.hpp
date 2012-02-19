@@ -4,6 +4,10 @@
 #include "common/BaseChunk.hpp"
 #include "tools/IRenderer.hpp"
 
+namespace Tools { namespace Renderers { namespace Utils {
+    class TextureAtlas;
+}}}
+
 namespace Client {
     namespace Game {
         class CubeTypeManager;
@@ -24,7 +28,7 @@ namespace Client { namespace Map {
         struct CubeInfo
         {
             Common::BaseChunk::CubeType id;
-            Tools::Renderers::ITexture2D* texture;
+            //Tools::Renderers::ITexture2D* texture;
             Tools::Vector3f top; // x/u = position X, y/v = position Y, z/w = position Z
             Tools::Vector3f bottom;
             Tools::Vector3f front;
@@ -39,8 +43,8 @@ namespace Client { namespace Map {
         Tools::IRenderer& _renderer;
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
-        Tools::Renderers::IVertexBuffer* _baseVbo;
         std::vector<CubeInfo> _cubeInfo;
+        Tools::Renderers::Utils::TextureAtlas* _atlas;
 
     public:
         ChunkRenderer(Game::Game& game);
@@ -49,8 +53,6 @@ namespace Client { namespace Map {
         void RefreshDisplay(Chunk& chunk);
         void Render();
         CubeInfo const& GetCubeInfo(int cubeType) const { return this->_cubeInfo[cubeType - 1]; }
-    private:
-        void _InitBaseVbo();
     };
 
 }}

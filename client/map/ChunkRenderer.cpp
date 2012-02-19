@@ -10,38 +10,56 @@
 #include "client/window/Window.hpp"
 
 #include "tools/Frustum.hpp"
+#include "tools/renderers/utils/TextureAtlas.hpp"
 
 namespace Client { namespace Map {
 
     ChunkRenderer::ChunkRenderer(Game::Game& game)
         : _game(game),
         _renderer(game.GetClient().GetWindow().GetRenderer()),
-        _baseVbo(0)
+        _atlas(0)
     {
-        this->_InitBaseVbo();
         this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("Chunk.cgfx");
         this->_shaderTexture = this->_shader->GetParameter("cubeTexture").release();
         auto const& cubeTypes = this->_game.GetCubeTypeManager().GetCubeTypes();
+
+        std::list<Uint32> textures;
+        for (size_t i = 0; i < cubeTypes.size(); ++i)
+        {
+            textures.push_back(cubeTypes[i].textures.top);
+            textures.push_back(cubeTypes[i].textures.bottom);
+            textures.push_back(cubeTypes[i].textures.front);
+            textures.push_back(cubeTypes[i].textures.back);
+            textures.push_back(cubeTypes[i].textures.left);
+            textures.push_back(cubeTypes[i].textures.right);
+        }
+        this->_atlas = game.GetResourceManager().CreateTextureAtlas(textures).release();
+
         this->_cubeInfo.resize(cubeTypes.size());
         for (size_t i = 0; i < cubeTypes.size(); ++i)
         {
             this->_cubeInfo[i].id = cubeTypes[i].id;
-            this->_cubeInfo[i].texture = &this->_game.GetResourceManager().GetTexture2D(cubeTypes[i].textures.top);
-            // TODO: les bonnes valeurs
-            this->_cubeInfo[i].top = Tools::Vector3f(0, 0, 1);
-            this->_cubeInfo[i].bottom = Tools::Vector3f(0, 0, 1);
-            this->_cubeInfo[i].front = Tools::Vector3f(0, 0, 1);
-            this->_cubeInfo[i].back = Tools::Vector3f(0, 0, 1);
-            this->_cubeInfo[i].left = Tools::Vector3f(0, 0, 1);
-            this->_cubeInfo[i].right = Tools::Vector3f(0, 0, 1);
-            this->_cubeInfo[i].isTransparent = this->_cubeInfo[i].texture->HasAlpha();
+            //this->_cubeInfo[i].texture = &this->_game.GetResourceManager().GetTexture2D(cubeTypes[i].textures.top);
+            this->_cubeInfo[i].top = this->_atlas->GetCoords(cubeTypes[i].textures.top);
+            this->_cubeInfo[i].bottom = this->_atlas->GetCoords(cubeTypes[i].textures.bottom);
+            this->_cubeInfo[i].front = this->_atlas->GetCoords(cubeTypes[i].textures.front);
+            this->_cubeInfo[i].back = this->_atlas->GetCoords(cubeTypes[i].textures.back);
+            this->_cubeInfo[i].left = this->_atlas->GetCoords(cubeTypes[i].textures.left);
+            this->_cubeInfo[i].right = this->_atlas->GetCoords(cubeTypes[i].textures.right);
+            this->_cubeInfo[i].isTransparent = 
+                this->_atlas->HasAlpha(cubeTypes[i].textures.top) ||
+                this->_atlas->HasAlpha(cubeTypes[i].textures.bottom) ||
+                this->_atlas->HasAlpha(cubeTypes[i].textures.front) ||
+                this->_atlas->HasAlpha(cubeTypes[i].textures.back) ||
+                this->_atlas->HasAlpha(cubeTypes[i].textures.left) ||
+                this->_atlas->HasAlpha(cubeTypes[i].textures.right);
         }
     }
 
     ChunkRenderer::~ChunkRenderer()
     {
-        Tools::Delete(this->_baseVbo);
         Tools::Delete(this->_shaderTexture);
+        Tools::Delete(this->_atlas);
     }
 
     void ChunkRenderer::RefreshDisplay(Chunk& chunk)
@@ -82,167 +100,54 @@ namespace Client { namespace Map {
                     chunkToRender.push_back(&chunk);
             });
 
+        this->_atlas->GetTexture().Bind();
+        this->_shaderTexture->Set(this->_atlas->GetTexture());
         do
         {
             this->_shader->BeginPass();
-            this->_baseVbo->Bind();
-            for (size_t i = 0; i < this->_cubeInfo.size(); ++i)
+            for (auto it = chunkToRender.begin(), ite = chunkToRender.end(); it != ite; ++it)
             {
-                if (this->_cubeInfo[i].isTransparent)
+                auto mesh = (*it)->GetMesh();
+                if (!mesh)
                     continue;
-                this->_cubeInfo[i].texture->Bind();
-                this->_shaderTexture->Set(*this->_cubeInfo[i].texture);
-
-                for (auto it = chunkToRender.begin(), ite = chunkToRender.end(); it != ite; ++it)
-                {
-                    auto mesh = (*it)->GetMesh();
-                    if (!mesh || !mesh->HasCubeType(this->_cubeInfo[i].id))
-                        continue;
-
-                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
-                    mesh->Render(this->_cubeInfo[i].id, this->_renderer);
-                }
-
-                for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
-                {
-                    auto mesh = (*it).second->GetMesh();
-                    if (!mesh || !mesh->HasCubeType(this->_cubeInfo[i].id))
-                        continue;
-
-                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
-                    mesh->Render(this->_cubeInfo[i].id, this->_renderer);
-                }
-
-                this->_cubeInfo[i].texture->Unbind();
+                this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
+                mesh->Render(0, this->_renderer);
             }
-            this->_baseVbo->Unbind();
-        } while (this->_shader->EndPass());
-
-        do
-        {
-            this->_shader->BeginPass();
-            this->_baseVbo->Bind();
-            for (size_t i = 0; i < this->_cubeInfo.size(); ++i)
+            for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
             {
-                if (!this->_cubeInfo[i].isTransparent)
+                auto mesh = (*it).second->GetMesh();
+                if (!mesh)
                     continue;
-                this->_cubeInfo[i].texture->Bind();
-                this->_shaderTexture->Set(*this->_cubeInfo[i].texture);
-
-                for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
-                {
-                    auto mesh = (*it).second->GetMesh();
-                    if (!mesh || !mesh->HasCubeType(this->_cubeInfo[i].id))
-                        continue;
-
-                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
-                    mesh->Render(this->_cubeInfo[i].id, this->_renderer);
-                }
-
-                this->_cubeInfo[i].texture->Unbind();
+                this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
+                mesh->Render(0, this->_renderer);
             }
-            this->_baseVbo->Unbind();
         } while (this->_shader->EndPass());
-    }
+        this->_atlas->GetTexture().Unbind();
 
-    void ChunkRenderer::_InitBaseVbo()
-    {
-        unsigned int const frontTopLeft = 0;
-        unsigned int const frontTopRight = 1;
-        unsigned int const backTopRight = 2;
-        unsigned int const backTopLeft = 3;
-        unsigned int const backBottomLeft = 4;
-        unsigned int const backBottomRight = 5;
-        unsigned int const frontBottomRight = 6;
-        unsigned int const frontBottomLeft = 7;
+        //do
+        //{
+        //    this->_shader->BeginPass();
+        //    this->_baseVbo->Bind();
+        //    for (size_t i = 0; i < this->_cubeInfo.size(); ++i)
+        //    {
+        //        if (!this->_cubeInfo[i].isTransparent)
+        //            continue;
+        //        this->_cubeInfo[i].texture->Bind();
+        //        this->_shaderTexture->Set(*this->_cubeInfo[i].texture);
 
-        float const cubeVertices[][3] = {
-            {0, 1, 1},
-            {1, 1, 1},
-            {1, 1, 0},
-            {0, 1, 0},
-            {0, 0, 0},
-            {1, 0, 0},
-            {1, 0, 1},
-            {0, 0, 1},
-        };
-        unsigned int const faceIndices[] = {
-            frontTopLeft, frontBottomLeft, frontBottomRight, frontTopRight, // front
-            frontTopLeft, frontTopRight, backTopRight, backTopLeft, // top
-            backTopRight, frontTopRight, frontBottomRight, backBottomRight, // right
-            frontBottomLeft, backBottomLeft, backBottomRight, frontBottomRight, // bottom
-            frontTopLeft, backTopLeft, backBottomLeft, frontBottomLeft, // left
-            backTopLeft, backTopRight, backBottomRight, backBottomLeft, // back
-        };
+        //        for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
+        //        {
+        //            auto mesh = (*it).second->GetMesh();
+        //            if (!mesh || !mesh->HasCubeType(this->_cubeInfo[i].id))
+        //                continue;
 
-        unsigned int const normalFront = 0;
-        unsigned int const normalTop = 1;
-        unsigned int const normalRight = 2;
-        unsigned int const normalBottom = 3;
-        unsigned int const normalLeft = 4;
-        unsigned int const normalBack = 5;
-        float const cubeNormals[][3] = {
-            {0, 0, 1},
-            {0, 1, 0},
-            {1, 0, 0},
-            {0, -1, 0},
-            {-1, 0, 0},
-            {0, 0, -1}
-        };
-        unsigned int const faceIndicesN[] = {
-            normalFront, normalFront, normalFront, normalFront, // front
-            normalTop, normalTop, normalTop, normalTop, // top
-            normalRight, normalRight, normalRight, normalRight, // right
-            normalBottom, normalBottom, normalBottom, normalBottom, // bottom
-            normalLeft, normalLeft, normalLeft, normalLeft, // left
-            normalBack, normalBack, normalBack, normalBack, // back
-        };
+        //            this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
+        //            mesh->Render(this->_cubeInfo[i].id, this->_renderer);
+        //        }
 
-        float const cubeTexCoords[][2] = {
-            {0, 0},
-            {1, 0},
-            {1, 1},
-            {0, 1},
-        };
-        unsigned int const faceIndicesT[] = {
-            0, 1, 2, 3, // front
-            0, 1, 2, 3, // top
-            0, 1, 2, 3, // right
-            0, 1, 2, 3, // bottom
-            0, 1, 2, 3, // left
-            0, 1, 2, 3, // back
-        };
-
-        float* vertices = new float[Common::ChunkSize3 * sizeof(faceIndices) / sizeof(faceIndices[0]) * (3+3+2)];// * sizeof(float)];
-
-        unsigned int x, y, z, i;
-        size_t offset = 0;
-        float const* vert;
-        for (x = 0; x < Common::ChunkSize; ++x)
-        {
-            for (y = 0; y < Common::ChunkSize; ++y)
-            {
-                for (z = 0; z < Common::ChunkSize; ++z)
-                {
-                    for (i = 0; i < sizeof(faceIndices) / sizeof(faceIndices[0]); ++i)
-                    {
-                        vert = cubeVertices[faceIndices[i]];
-                        vertices[offset++] = vert[0] + x;
-                        vertices[offset++] = vert[1] + y;
-                        vertices[offset++] = vert[2] + z;
-                        std::memcpy(&vertices[offset], &cubeNormals[faceIndicesN[i]], sizeof(cubeNormals[0]));
-                        offset += 3;
-                        vertices[offset++] = cubeTexCoords[faceIndicesT[i]][0];
-                        vertices[offset++] = cubeTexCoords[faceIndicesT[i]][1];
-                    }
-                }
-            }
-        }
-
-        this->_baseVbo = this->_renderer.CreateVertexBuffer().release();
-        this->_baseVbo->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-        this->_baseVbo->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 3); // Normales
-        this->_baseVbo->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // Textures
-        this->_baseVbo->SetData(Common::ChunkSize3 * sizeof(faceIndices) / sizeof(faceIndices[0]) * (3+3+2) *sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);
+        //        this->_cubeInfo[i].texture->Unbind();
+        //    }
+        //    this->_baseVbo->Unbind();
+        //} while (this->_shader->EndPass());
     }
 }}

@@ -35,7 +35,7 @@ namespace Client { namespace Resources {
             ~CacheDatabaseProxy();
             void ValidateUpdate();
             void AddResource(Common::Resource& res);
-            Common::Resource* GetResource(Uint32 id);
+            std::unique_ptr<Common::Resource> GetResource(Uint32 id);
             Uint32 GetCacheVersion() const { return this->_cacheVersion; }
         private:
             void _CheckCacheFile(std::string const& path);

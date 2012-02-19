@@ -10,6 +10,7 @@
 #include "client/Settings.hpp"
 
 #include "tools/IRenderer.hpp"
+#include "tools/renderers/utils/TextureAtlas.hpp"
 
 #include "common/Resource.hpp"
 
@@ -33,8 +34,8 @@ namespace Client { namespace Resources {
         auto it = this->_textures.find(id);
         if (it == this->_textures.end())
         {
-            Common::Resource* res = this->_database.GetResource(id);
-            if (res)
+            auto res = this->_database.GetResource(id);
+            if (res != 0)
             {
                 Tools::Renderers::ITexture2D* t = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Png, res->size, res->data).release();
                 this->_textures[id] = t;
@@ -50,6 +51,22 @@ namespace Client { namespace Resources {
         }
         else
             return *it->second;
+    }
+
+    std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)
+    {
+        std::list<std::unique_ptr<Common::Resource>> resources;
+        std::map<Uint32, std::pair<std::size_t, void const*>> textures;
+        for (auto it = textureIds.begin(), ite = textureIds.end(); it != ite; ++it)
+        {
+            auto res = this->_database.GetResource(*it);
+            if (res == 0)
+                textures[*it] = std::pair<std::size_t, void const*>(0, (void const*)0);
+            else
+                textures[*it] = std::pair<std::size_t, void const*>(res->size, res->data);
+            resources.push_back(std::move(res));
+        }
+        return std::unique_ptr<Tools::Renderers::Utils::TextureAtlas>(new Tools::Renderers::Utils::TextureAtlas(this->_renderer, textures));
     }
 
     void ResourceManager::_InitErrorTexture()

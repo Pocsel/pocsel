@@ -101,7 +101,7 @@ namespace Common {
 # pragma warning(disable: 4244)
 #endif
 
-        static void IdToCoords(IdType id, BaseChunk::CoordsType& coords)
+        static inline void IdToCoords(IdType id, BaseChunk::CoordsType& coords)
         {
             static_assert(sizeof(BaseChunk::IdType) == 8, "sizeof id type is 8");
             coords.x = (id                & ((1 << 22) - 1))/* - (1 << 21)*/;
@@ -109,14 +109,14 @@ namespace Common {
             coords.z = ((id >> (22 + 20)) & ((1 << 22) - 1))/* - (1 << 21)*/;
         }
 
-        static CoordsType IdToCoords(IdType id)
+        static inline CoordsType IdToCoords(IdType id)
         {
             BaseChunk::CoordsType coords;
             BaseChunk::IdToCoords(id, coords);
             return coords;
         }
 
-        static IdType CoordsToId(CoordType x, CoordType y, CoordType z)
+        static inline IdType CoordsToId(CoordType x, CoordType y, CoordType z)
         {
             return (
                     ((BaseChunk::IdType)  (x /*+ (1LL << 21)*/)) +
@@ -125,7 +125,7 @@ namespace Common {
                    );
         }
 
-        static IdType CoordsToId(CoordsType const& coord)
+        static inline IdType CoordsToId(CoordsType const& coord)
         {
             return BaseChunk::CoordsToId(coord.x, coord.y, coord.z);
         }

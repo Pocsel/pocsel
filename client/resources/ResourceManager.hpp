@@ -9,6 +9,9 @@ namespace Tools {
     namespace Renderers {
         class IShaderProgram;
         class ITexture2D;
+        namespace Utils {
+            class TextureAtlas;
+        }
     }
 }
 
@@ -37,6 +40,7 @@ namespace Client { namespace Resources {
 
             Tools::Renderers::ITexture2D& GetTexture2D(Uint32 id);
             Tools::Renderers::IShaderProgram& GetShader(Uint32 id);
+            std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> CreateTextureAtlas(std::list<Uint32> const& textureIds);
 
             CacheDatabaseProxy& GetDatabase() { return this->_database; }
             ResourceDownloader& GetDownloader() { return this->_downloader; }

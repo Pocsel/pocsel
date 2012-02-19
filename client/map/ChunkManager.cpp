@@ -89,6 +89,7 @@ namespace Client { namespace Map {
     void ChunkManager::Update(Common::Position const& playerPosition)
     {
         Tools::Timer timer;
+        this->_waitingRefresh.unique();
         while (!this->_waitingRefresh.empty() && timer.GetElapsedTime() < 10)
         {
             this->_chunkRenderer.RefreshDisplay(*this->_waitingRefresh.front()->chunk);
@@ -192,8 +193,6 @@ namespace Client { namespace Map {
         if (chunkBack != this->_chunks.end()) this->_waitingRefresh.push_back(chunkBack->second);
         if (chunkTop != this->_chunks.end()) this->_waitingRefresh.push_back(chunkTop->second);
         if (chunkBottom != this->_chunks.end()) this->_waitingRefresh.push_back(chunkBottom->second);
-        if (this->_game.GetClient().GetState() != Client::LoadingChunks)
-            this->_waitingRefresh.unique();
     }
 
 }}

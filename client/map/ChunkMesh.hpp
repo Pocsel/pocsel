@@ -39,6 +39,7 @@ namespace Client { namespace Map {
         std::map<int, Mesh> _meshes;
         Uint32 _triangleCount;
         bool _hasTransparentCube;
+        bool _isComputed;
 
     public:
         ChunkMesh(Chunk& chunk);

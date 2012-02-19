@@ -20,7 +20,7 @@ namespace Tools { namespace Renderers {
         bool _hasAlpha;
 
     public:
-        Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0));
+        Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0);
         Texture2D(GLRenderer& renderer, std::string const& imagePath);
         virtual ~Texture2D();
 
@@ -37,7 +37,7 @@ namespace Tools { namespace Renderers {
     private:
         void _InitDevIL();
         void _FinishLoading(unsigned int ilID);
-        void _FinishLoading(GLint internalFormat, GLenum format, GLvoid const* data);
+        void _FinishLoading(GLint internalFormat, GLenum format, GLvoid const* data, int pixelSize, void const* mipmapData);
     };
 
 }}}

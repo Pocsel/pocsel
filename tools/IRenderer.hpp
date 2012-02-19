@@ -45,21 +45,21 @@ namespace Tools {
         namespace PixelFormat
         {
             /**
-             * 0x<type><nb color><format>
+             * 0x<size><type><nb color><format>
              * format: Alpha = 1, Rgb = 2, Rgba = 3, Luminance = 4, png = 5, LuminanceAlpha = 6
              * type: 1*uint8 = 1, 4*uint8 = 2, 1*float = 3, 4*uint4 = 4, 2*uint8 = 5
              */
             enum Type
             {
-                Alpha8 = 0x010101,
-                Rgb8 = 0x020302,
-                Rgba8 = 0x020403,
-                Luminance = 0x030104,
-                Luminance8 = 0x010104,
-                Luminance8Alpha8 = 0x050206,
-                Rgb4 = 0x040302,
-                Rgba4 = 0x040403,
-                Png = 0x000405
+                Alpha8 = 0x01010101,
+                Rgb8 = 0x03020302,
+                Rgba8 = 0x04020403,
+                Luminance = 0x04030104,
+                Luminance8 = 0x01010104,
+                Luminance8Alpha8 = 0x02050206,
+                Rgb4 = 0x02040302,
+                Rgba4 = 0x02040403,
+                Png = 0x00000405
             };
         }
 
@@ -245,7 +245,7 @@ namespace Tools {
         // Resources
         virtual std::unique_ptr<Renderers::IIndexBuffer> CreateIndexBuffer() = 0;
         virtual std::unique_ptr<Renderers::IVertexBuffer> CreateVertexBuffer() = 0;
-        virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0)) = 0;
+        virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath) = 0;
         virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect) = 0;
 

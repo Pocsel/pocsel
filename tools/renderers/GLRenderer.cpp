@@ -82,9 +82,9 @@ namespace Tools { namespace Renderers {
         return std::unique_ptr<IIndexBuffer>(new OpenGL::IndexBuffer());
     }
 
-    std::unique_ptr<ITexture2D> GLRenderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize)
+    std::unique_ptr<ITexture2D> GLRenderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData)
     {
-        return std::unique_ptr<ITexture2D>(new OpenGL::Texture2D(*this, format, size, data, imgSize));
+        return std::unique_ptr<ITexture2D>(new OpenGL::Texture2D(*this, format, size, data, imgSize, mipmapData));
     }
 
     std::unique_ptr<ITexture2D> GLRenderer::CreateTexture2D(std::string const& imagePath)
