@@ -69,6 +69,8 @@ namespace Client {
         Game::Game& GetGame() { return *this->_game; }
         Menu::Menu& GetMenu() { return *this->_menu; }
         State GetState() const { return this->_state; }
+    private:
+        void _MenuBind();
     };
 
 }

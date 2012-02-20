@@ -18,7 +18,7 @@ namespace Client { namespace Menu {
         this->_actionBinder = new ActionBinder();
         std::function<void(void)> f = std::bind(&DisconnectedScreen::_RetryButton, this);
         this->_button = new Widget::Button(this->_client.GetWindow().GetInputManager(),
-                menu,
+                this->_menu,
                 this->_renderer,
                 *this->_actionBinder,
                 f,

@@ -12,6 +12,7 @@
 #include "client/menu/Menu.hpp"
 #include "client/menu/LoadingScreen.hpp"
 #include "client/menu/DisconnectedScreen.hpp"
+#include "client/menu/MainMenu.hpp"
 
 #include "tools/Timer.hpp"
 
@@ -28,6 +29,7 @@ namespace Client {
         this->_menu = new Menu::Menu(*this);
 
         this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
+        this->_window->GetInputManager().Bind(BindAction::Menu, BindAction::Released, std::bind(&Client::_MenuBind, this));
         this->_window->GetInputManager().GetInputBinder().LoadFile(this->_settings.bindingsFile.string());
     }
 
@@ -61,6 +63,9 @@ namespace Client {
 
             // put events in buffer list
             this->_window->GetInputManager().ProcessEvents();
+
+            if (this->_menu->GetMainMenu().IsVisible())
+                this->_menu->GetMainMenu().Update();
 
             switch (this->_state)
             {
@@ -107,6 +112,9 @@ namespace Client {
             default:
                 ;
             }
+
+            if (this->_menu->GetMainMenu().IsVisible())
+                this->_menu->GetMainMenu().Render();
 
             // dispatch actions that were not dispatched
             this->_window->GetInputManager().Dispatch(this->_window->GetInputManager(), true);
@@ -163,4 +171,10 @@ namespace Client {
             exit(boost::exit_success); // ohoho c'est pas cool mais ça evite d'attendre le timeout dans io_service.stop()
         this->_state = Quitting;
     }
+
+    void Client::_MenuBind()
+    {
+        this->_menu->GetMainMenu().SetVisible();
+    }
+
 }

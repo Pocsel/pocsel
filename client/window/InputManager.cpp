@@ -23,11 +23,6 @@ namespace Client { namespace Window {
             this->_actionStates[i] = false;
     }
 
-    void InputManager::FlushActionList()
-    {
-        this->_actionList.clear();
-    }
-
     void InputManager::TriggerAction(InputBinder::Action const& action, BindAction::Type type)
     {
         this->_actionList.push_back(std::make_pair(action, type));

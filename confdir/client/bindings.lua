@@ -30,7 +30,7 @@ bind("RightClick", "jump")
 bind("WheelDown", "jump")
 bind("Space", "jump")
 
-bind("Escape", "quit")
+bind("Escape", "menu")
 bind("LeftClick", "menuclick")
 
 bind("W", "toggle-wireframe")

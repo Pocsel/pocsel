@@ -5,6 +5,7 @@
 #include "tools/IRenderer.hpp"
 #include "client/menu/LoadingScreen.hpp"
 #include "client/menu/DisconnectedScreen.hpp"
+#include "client/menu/MainMenu.hpp"
 
 namespace Client { namespace Menu {
 
@@ -18,10 +19,12 @@ namespace Client { namespace Menu {
         this->_rectShader = &client.GetLocalResourceManager().GetShader("BaseShaderColor.cgfx");
         this->_loadingScreen = new LoadingScreen(client, *this);
         this->_disconnectedScreen = new DisconnectedScreen(client, *this);
+        this->_mainMenu = new MainMenu(client, *this);
     }
 
     Menu::~Menu()
     {
+        Tools::Delete(this->_mainMenu);
         Tools::Delete(this->_disconnectedScreen);
         Tools::Delete(this->_loadingScreen);
         Tools::Delete(this->_fontTexture);

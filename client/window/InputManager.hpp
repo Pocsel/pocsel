@@ -26,7 +26,6 @@ namespace Client { namespace Window {
         InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
         virtual ~InputManager();
         virtual void ProcessEvents() = 0;
-        void FlushActionList();
         void TriggerAction(InputBinder::Action const& action, BindAction::Type type);
         void TriggerAction(std::string const& action, BindAction::Type type);
         void TriggerAction(BindAction::BindAction action, BindAction::Type type);
@@ -35,6 +34,7 @@ namespace Client { namespace Window {
         virtual void WarpMouse(Tools::Vector2i const& pos) = 0;
         virtual void WarpMouse(int x, int y) = 0;
         virtual void ShowMouse() = 0;
+        virtual bool MouseShown() const = 0;
         virtual bool HasFocus() const = 0;
 
         std::list<std::pair<InputBinder::Action, BindAction::Type>>& GetActionList() { return this->_actionList; }

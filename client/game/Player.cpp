@@ -26,7 +26,7 @@ namespace Client { namespace Game {
         auto& w = this->_game.GetClient().GetWindow();
         this->_actionBinder.Dispatch(w.GetInputManager());
 
-        if (w.GetInputManager().HasFocus())
+        if (w.GetInputManager().HasFocus() && !w.GetInputManager().MouseShown())
         {
             auto sensi = this->_game.GetClient().GetSettings().mouseSensitivity;
             auto mousePos = w.GetInputManager().GetMousePosRealTime();

@@ -44,6 +44,7 @@ namespace Client { namespace Window { namespace Sdl {
         virtual void WarpMouse(Tools::Vector2i const& pos);
         virtual void WarpMouse(int x, int y);
         virtual void ShowMouse();
+        virtual bool MouseShown() const { return this->_showMouse; }
         virtual bool HasFocus() const { return this->_hasFocus; }
     private:
         char _UnicodeToAscii(Uint16 unicode) const;
