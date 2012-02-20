@@ -7,6 +7,9 @@
 
 #include "server/game/map/gen/ChunkGenerator.hpp"
 
+#include "server/game/entities/EntityManager.hpp"
+#include "server/game/engine/Engine.hpp"
+
 namespace Server { namespace Game { namespace Map {
 
     Map::Map(Conf const& conf, Tools::SimpleMessageQueue& gameMessageQueue) :
@@ -17,6 +20,8 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
+        this->_engine = new Engine::Engine(*this->_messageQueue);
+        this->_entityManager = new Entities::EntityManager();
     }
 
     Map::~Map()
@@ -25,6 +30,8 @@ namespace Server { namespace Game { namespace Map {
         for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite ; ++it)
             Tools::Delete(it->second);
         Tools::Delete(this->_gen);
+        Tools::Delete(this->_engine);
+        Tools::Delete(this->_entityManager);
         Tools::Delete(this->_messageQueue);
     }
 
@@ -32,6 +39,7 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Start() -- " << this->_conf.name << "\n";
         this->_gen->Start();
+        this->_entityManager->Start();
         this->_messageQueue->Start();
     }
 
@@ -39,6 +47,7 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Stop() -- " << this->_conf.name << "\n";
         this->_gen->Stop();
+        this->_entityManager->Stop();
         this->_messageQueue->Stop();
     }
 
