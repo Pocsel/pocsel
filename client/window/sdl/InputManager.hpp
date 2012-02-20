@@ -32,6 +32,7 @@ namespace Client { namespace Window { namespace Sdl {
         std::map<SDLKey, KeyHeld> _keysHeld;
         std::map<int, ButtonHeld> _buttonsHeld;
         Tools::Vector2i _mousePos;
+        bool _showMouse;
         bool _mouseShown;
         bool _hasFocus;
 
@@ -39,14 +40,16 @@ namespace Client { namespace Window { namespace Sdl {
         InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
         virtual void ProcessEvents();
         virtual Tools::Vector2i const& GetMousePos() const { return this->_mousePos; }
+        virtual Tools::Vector2i GetMousePosRealTime() const;
         virtual void WarpMouse(Tools::Vector2i const& pos);
         virtual void WarpMouse(int x, int y);
-        virtual void ShowMouse(bool show = true);
+        virtual void ShowMouse();
         virtual bool HasFocus() const { return this->_hasFocus; }
     private:
         char _UnicodeToAscii(Uint16 unicode) const;
         void _TriggerBind(KeyHeld const& k, BindAction::Type type);
         void _TriggerBind(ButtonHeld const& b, BindAction::Type type);
+        void _ShowMouse(bool show);
     };
 
 }}}

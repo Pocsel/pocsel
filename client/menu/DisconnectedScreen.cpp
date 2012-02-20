@@ -6,6 +6,7 @@
 #include "client/menu/Menu.hpp"
 #include "client/menu/widget/Button.hpp"
 #include "client/ActionBinder.hpp"
+#include "client/window/InputManager.hpp"
 
 namespace Client { namespace Menu {
 
@@ -62,6 +63,7 @@ namespace Client { namespace Menu {
 
     void DisconnectedScreen::Render()
     {
+        this->_client.GetWindow().GetInputManager().ShowMouse();
         this->_menu.BeginMenuDrawing();
         do
         {

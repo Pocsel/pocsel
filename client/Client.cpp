@@ -109,9 +109,7 @@ namespace Client {
             }
 
             // dispatch actions that were not dispatched
-            this->_window->GetInputManager().Dispatch(this->_window->GetInputManager());
-            // remove actions that are not bound
-            this->_window->GetInputManager().FlushActionList();
+            this->_window->GetInputManager().Dispatch(this->_window->GetInputManager(), true);
 
             this->_window->Render();
 

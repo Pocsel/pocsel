@@ -23,14 +23,16 @@ namespace Client { namespace Game {
     {
         this->_elapsedTime = time;
 
-        Window::Window& w = this->_game.GetClient().GetWindow();
+        auto& w = this->_game.GetClient().GetWindow();
         this->_actionBinder.Dispatch(w.GetInputManager());
 
         if (w.GetInputManager().HasFocus())
         {
+            auto sensi = this->_game.GetClient().GetSettings().mouseSensitivity;
+            auto mousePos = w.GetInputManager().GetMousePosRealTime();
             Tools::Vector2f delta;
-            delta.x = (w.GetInputManager().GetMousePos().x - (static_cast<int>(w.GetSize().x) / 2)) / (1000.0f - 990.0f * this->_game.GetClient().GetSettings().mouseSensitivity);
-            delta.y = (w.GetInputManager().GetMousePos().y - (static_cast<int>(w.GetSize().y) / 2)) / (1000.0f - 990.0f * this->_game.GetClient().GetSettings().mouseSensitivity);
+            delta.x = (mousePos.x - (static_cast<int>(w.GetSize().x) / 2)) / (1000.0f - 990.0f * sensi);
+            delta.y = (mousePos.y - (static_cast<int>(w.GetSize().y) / 2)) / (1000.0f - 990.0f * sensi);
             this->_camera.Rotate(delta);
             w.GetInputManager().WarpMouse(Tools::Vector2i(w.GetSize() / 2));
         }

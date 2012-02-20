@@ -22,7 +22,7 @@ namespace Client {
         std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _releaseBinds;
     public:
         virtual ~ActionBinder() {}
-        void Dispatch(Window::InputManager& inputManager);
+        void Dispatch(Window::InputManager& inputManager, bool catchAll = false);
         void Bind(std::string const& action, BindAction::Type type, std::function<void(void)> const& func);
         void Bind(BindAction::BindAction action, BindAction::Type type, std::function<void(void)> const& func);
     };
