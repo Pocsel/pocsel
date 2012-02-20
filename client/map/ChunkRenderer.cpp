@@ -64,8 +64,6 @@ namespace Client { namespace Map {
             this->_shader->BeginPass();
             for (auto texturesIt = this->_textures.begin(), texturesIte = this->_textures.end(); texturesIt != texturesIte; ++texturesIt)
             {
-                //if (texturesIt->second->HasAlpha())
-                //    continue;
                 texturesIt->second->Bind();
                 this->_shaderTexture->Set(*texturesIt->second);
                 this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
