@@ -104,30 +104,33 @@ namespace Client { namespace Map {
             }
         } while (this->_shader->EndPass());
 
-        //do
-        //{
-        //    this->_shader->BeginPass();
-        //    this->_baseVbo->Bind();
-        //    for (size_t i = 0; i < this->_cubeInfo.size(); ++i)
-        //    {
-        //        if (!this->_cubeInfo[i].isTransparent)
-        //            continue;
-        //        this->_cubeInfo[i].texture->Bind();
-        //        this->_shaderTexture->Set(*this->_cubeInfo[i].texture);
-
-        //        for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
-        //        {
-        //            auto mesh = (*it).second->GetMesh();
-        //            if (!mesh || !mesh->HasCubeType(this->_cubeInfo[i].id))
-        //                continue;
-
-        //            this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
-        //            mesh->Render(this->_cubeInfo[i].id, this->_renderer);
-        //        }
-
-        //        this->_cubeInfo[i].texture->Unbind();
-        //    }
-        //    this->_baseVbo->Unbind();
-        //} while (this->_shader->EndPass());
+        do
+        {
+            this->_shader->BeginPass();
+            for (auto texturesIt = this->_textures.begin(), texturesIte = this->_textures.end(); texturesIt != texturesIte; ++texturesIt)
+            {
+                if (!texturesIt->second->HasAlpha())
+                    continue;
+                texturesIt->second->Bind();
+                this->_shaderTexture->Set(*texturesIt->second);
+                for (auto it = chunkToRender.begin(), ite = chunkToRender.end(); it != ite; ++it)
+                {
+                    auto mesh = (*it)->GetMesh();
+                    if (!mesh)
+                        continue;
+                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
+                    mesh->Render(texturesIt->first, this->_renderer);
+                }
+                for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
+                {
+                    auto mesh = (*it).second->GetMesh();
+                    if (!mesh)
+                        continue;
+                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
+                    mesh->Render(texturesIt->first, this->_renderer);
+                }
+                texturesIt->second->Unbind();
+            }
+        } while (this->_shader->EndPass());
     }
 }}
