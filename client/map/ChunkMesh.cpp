@@ -85,10 +85,10 @@ namespace Client { namespace Map {
                 Tools::Vector3f(0, 0, -1), // back = 5;
             };
             Tools::Vector2f const textures[] = {
-                Tools::Vector2f(1, 1),
                 Tools::Vector2f(1, 0),
                 Tools::Vector2f(0, 0),
                 Tools::Vector2f(0, 1),
+                Tools::Vector2f(1, 1),
             };
             static int positionIndices[][4] = {
                 {6, 1, 0, 7}, // front = 0;
