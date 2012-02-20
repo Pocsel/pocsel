@@ -20,36 +20,17 @@ struct VSout
    float fogFactor : TEXCOORD2;
 };
 
-VSout vs(in float4 position : POSITION, in half inNormal : NORMAL)//, in float texCoord : TEXCOORD0)
+VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
 
-    vout.texCoord = float2(floor(inNormal), floor(frac(inNormal) * 2));
-    float3 normal = float3(floor(frac(inNormal * 2) * 4), floor(frac(inNormal * 8) * 4), floor(frac(inNormal * 32) * 4));
-    normal = normal - 1.0;
-
-//    if (texCoord == 0.0)
-//        vout.texCoord = float2(1, 1);
-//    else if (texCoord == 1.0)
-//        vout.texCoord = float2(1, 0);
-//    else if (texCoord == 2.0)
-//        vout.texCoord = float2(0, 0);
-//    else// if (texCoord == 4.0)
-//        vout.texCoord = float2(0, 1);
-//    float3 normal = float3(0);
-//    if (inNormal == 0.0)
-//        normal = float3(0, 0, 1);
-//    else if (inNormal == 1.0)
-//        normal = float3(0, 1, 0);
-//    else if (inNormal == 2.0)
-//        normal = float3(1, 0, 0);
-//    else if (inNormal == 4.0)
-//        normal = float3(0, -1, 0);
-//    else if (inNormal == 8.0)
-//        normal = float3(-1, 0, 0);
-//    else// if (inNormal == 16.0)
-//        normal = float3(0, 0, -1);
-
+    vout.texCoord = texCoord;//frac(float2(1.0, 2.0) * texCoord);
+/*    
+    float3 normal = float3(1.0, 4.0, 16.0);
+    normal = frac(normal * inNormal);
+    //Unpack to the -1..1 range
+    normal = (normal * 2.0) - 1.0;
+*/
     vout.position = mul(mvp, position);
     float fog = clamp(abs(vout.position.z), 0, fogEnd);
     fog = (fogEnd - fog) / fogEnd;

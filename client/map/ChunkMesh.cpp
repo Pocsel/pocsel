@@ -49,16 +49,18 @@ namespace Client { namespace Map {
         struct Vertex
         {
             Tools::Vector3f position;
-            float normalTexture;
+            Tools::Vector3f normal;
+            Tools::Vector2f texture;
             Vertex() {}
-            Vertex(Tools::Vector3f const& position, Tools::Vector3i const& normal, Tools::Vector2i const& texture)
+            Vertex(Tools::Vector3f const& position, Tools::Vector3f const& normal, Tools::Vector2f const& texture)
                 : position(position),
-                normalTexture(0)
+                normal(normal),
+                texture(texture)
             {
-                Uint32 packed = 
-                    (texture.x << 7) | (texture.y << 6) |
-                    ((normal.x + 1) << 4) | ((normal.y + 1) << 2) | (normal.z + 1);
-                normalTexture = ((float)packed) / ((float) (1 << 7));
+                //Uint32 packed = ((normal.x + 1) << 4) | ((normal.y + 1) << 2) | (normal.z + 1);
+                //this->normal = ((float)packed) / ((float) (1 << 6));
+                //packed = (texture.x << 1) | texture.y;
+                //this->texture = ((float)packed) / ((float) (1 << 2));
             }
         };
 
@@ -74,19 +76,19 @@ namespace Client { namespace Map {
                 Tools::Vector3f(1, 0, 1), // frontBottomRight = 6;
                 Tools::Vector3f(0, 0, 1), // frontBottomLeft = 7;
             };
-            static Tools::Vector3i const normals[] = {
-                Tools::Vector3i(0, 0, 1), // front = 0;
-                Tools::Vector3i(0, 1, 0), // top = 1;
-                Tools::Vector3i(1, 0, 0), // right = 2;
-                Tools::Vector3i(0, -1, 0), // bottom = 3;
-                Tools::Vector3i(-1, 0, 0), // left = 4;
-                Tools::Vector3i(0, 0, -1), // back = 5;
+            static Tools::Vector3f const normals[] = {
+                Tools::Vector3f(0, 0, 1), // front = 0;
+                Tools::Vector3f(0, 1, 0), // top = 1;
+                Tools::Vector3f(1, 0, 0), // right = 2;
+                Tools::Vector3f(0, -1, 0), // bottom = 3;
+                Tools::Vector3f(-1, 0, 0), // left = 4;
+                Tools::Vector3f(0, 0, -1), // back = 5;
             };
-            Tools::Vector2i const textures[] = {
-                Tools::Vector2i(1, 1),
-                Tools::Vector2i(1, 0),
-                Tools::Vector2i(0, 0),
-                Tools::Vector2i(0, 1),
+            Tools::Vector2f const textures[] = {
+                Tools::Vector2f(1, 1),
+                Tools::Vector2f(1, 0),
+                Tools::Vector2f(0, 0),
+                Tools::Vector2f(0, 1),
             };
             static int positionIndices[][4] = {
                 {6, 1, 0, 7}, // front = 0;
@@ -247,9 +249,9 @@ namespace Client { namespace Map {
 
         this->_vertices = game.GetClient().GetWindow().GetRenderer().CreateVertexBuffer().release();
         this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 1); // Normales + Textures
-        //this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 1); // Textures
-        this->_vertices->SetData(voffset * (3+1+0) * sizeof(float), vertices.data(), Tools::Renderers::VertexBufferUsage::Static);
+        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 3); // Normales + Textures
+        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // Textures
+        this->_vertices->SetData(voffset * (3+3+2) * sizeof(float), vertices.data(), Tools::Renderers::VertexBufferUsage::Static);
         for (auto it = indices.begin(), ite = indices.end(); it !=ite; ++it)
         {
             if (it->second.size() == 0)
