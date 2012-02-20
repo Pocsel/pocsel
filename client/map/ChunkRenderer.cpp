@@ -57,49 +57,35 @@ namespace Client { namespace Map {
             * Tools::Matrix4<double>(camera.projection);
         Tools::Frustum frustum(viewProj);
 
-        std::deque<Chunk*> chunkToRender;
         std::multimap<double, Chunk*> transparentChunks;
-        this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
-            [&](Chunk& chunk)
-            {
-                if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount() == 0)
-                    return;
-                if (chunk.GetMesh()->HasTransparentCube())
-                {
-                    auto const& relativePosition = Common::Position(chunk.coords, Tools::Vector3f(Common::ChunkSize / 2.0f)) - camera.position;
-                    auto dist = relativePosition.GetMagnitudeSquared();
-                    auto value = std::multimap<double, Chunk*>::value_type(-dist, &chunk);
-                    transparentChunks.insert(value);
-                }
-                else
-                    chunkToRender.push_back(&chunk);
-            });
 
         do
         {
             this->_shader->BeginPass();
             for (auto texturesIt = this->_textures.begin(), texturesIte = this->_textures.end(); texturesIt != texturesIte; ++texturesIt)
             {
-                if (texturesIt->second->HasAlpha())
-                    continue;
+                //if (texturesIt->second->HasAlpha())
+                //    continue;
                 texturesIt->second->Bind();
                 this->_shaderTexture->Set(*texturesIt->second);
-                for (auto it = chunkToRender.begin(), ite = chunkToRender.end(); it != ite; ++it)
-                {
-                    auto mesh = (*it)->GetMesh();
-                    if (!mesh)
-                        continue;
-                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
-                    mesh->Render(texturesIt->first, this->_renderer);
-                }
-                for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
-                {
-                    auto mesh = (*it).second->GetMesh();
-                    if (!mesh)
-                        continue;
-                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
-                    mesh->Render(texturesIt->first, this->_renderer);
-                }
+                this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
+                    [&](Chunk& chunk)
+                    {
+                        if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount() == 0)
+                            return;
+                        if (chunk.GetMesh()->HasTransparentCube())
+                        {
+                            auto const& relativePosition = Common::Position(chunk.coords, Tools::Vector3f(Common::ChunkSize / 2.0f)) - camera.position;
+                            auto dist = relativePosition.GetMagnitudeSquared();
+                            auto value = std::multimap<double, Chunk*>::value_type(-dist, &chunk);
+                            transparentChunks.insert(value);
+                        }
+                        if (!texturesIt->second->HasAlpha())
+                        {
+                            this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position(chunk.coords, Tools::Vector3f(0)) - camera.position));
+                            chunk.GetMesh()->Render(texturesIt->first, this->_renderer);
+                        }
+                    });
                 texturesIt->second->Unbind();
             }
         } while (this->_shader->EndPass());
@@ -113,14 +99,6 @@ namespace Client { namespace Map {
                     continue;
                 texturesIt->second->Bind();
                 this->_shaderTexture->Set(*texturesIt->second);
-                for (auto it = chunkToRender.begin(), ite = chunkToRender.end(); it != ite; ++it)
-                {
-                    auto mesh = (*it)->GetMesh();
-                    if (!mesh)
-                        continue;
-                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
-                    mesh->Render(texturesIt->first, this->_renderer);
-                }
                 for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
                 {
                     auto mesh = (*it).second->GetMesh();
