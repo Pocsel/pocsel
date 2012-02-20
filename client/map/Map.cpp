@@ -5,9 +5,10 @@
 
 namespace Client { namespace Map {
 
-    Map::Map(Game::Game& game)
+    Map::Map(Game::Game& game, std::string const& map)
         : _game(game),
-        _chunkManager(game)
+        _chunkManager(game),
+        _map(map)
     {
     }
 
