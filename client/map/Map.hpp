@@ -17,12 +17,14 @@ namespace Client { namespace Map {
     private:
         Game::Game& _game;
         ChunkManager _chunkManager;
+        std::string _name;
 
     public:
-        Map(Game::Game& game);
+        Map(Game::Game& game, std::string const& map);
 
         float GetLoadingProgression() const;
         ChunkManager& GetChunkManager() { return this->_chunkManager; }
+        std::string const& GetName() const { return this->_name; }
     private:
     };
 
