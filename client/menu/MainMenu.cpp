@@ -86,7 +86,7 @@ namespace Client { namespace Menu {
 
     void MainMenu::_Resize(Tools::Vector2u const& size)
     {
-        this->_backRectMatrix = Tools::Matrix4<float>::CreateScale(size.w / 2, size.h / 2, 1)
+        this->_backRectMatrix = Tools::Matrix4<float>::CreateScale(size.w / 2 + 1, size.h / 2 + 1, 1)
             * Tools::Matrix4<float>::CreateTranslation(size.w / 2, size.h / 2, 0);
         this->_quitButton->SetPos(Tools::Vector2f(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 80));
         this->_backButton->SetPos(Tools::Vector2f(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 40));
