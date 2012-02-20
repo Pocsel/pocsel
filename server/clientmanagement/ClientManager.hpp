@@ -48,13 +48,13 @@ namespace Server { namespace ClientManagement {
         private boost::noncopyable
     {
     private:
-        Tools::SimpleMessageQueue* _messageQueue;
+        Tools::SimpleMessageQueue& _messageQueue;
         Server& _server;
         std::unordered_map<Uint32, Client*> _clients;
         Uint32 _nextId;
 
     public:
-        ClientManager(Server& server);
+        ClientManager(Server& server, Tools::SimpleMessageQueue& messageQueue);
         ~ClientManager();
 
         void Start();

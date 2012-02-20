@@ -14,12 +14,12 @@
 
 namespace Server { namespace Game {
 
-    Game::Game(Server& server) :
+    Game::Game(Server& server, Tools::SimpleMessageQueue& messageQueue) :
         _server(server),
-        _messageQueue(new Tools::SimpleMessageQueue(1))
+        _messageQueue(messageQueue)
     {
         Tools::debug << "Game::Game()\n";
-        this->_world = new World(server, *this->_messageQueue);
+        this->_world = new World(server, this->_messageQueue);
     }
 
     Game::~Game()
@@ -30,42 +30,42 @@ namespace Server { namespace Game {
         for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
             Tools::Delete(it->second);
 
-        Tools::Delete(this->_messageQueue);
+//        Tools::Delete(this->_messageQueue);
     }
 
     void Game::Start()
     {
         Tools::debug << "Game::Start()\n";
         this->_world->Start();
-        this->_messageQueue->Start();
+//        this->_messageQueue->Start();
     }
 
     void Game::Stop()
     {
         Tools::debug << "Game::Stop()\n";
         this->_world->Stop();
-        this->_messageQueue->Stop();
+//        this->_messageQueue->Stop();
     }
 
     void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Game::_SpawnPlayer, this, std::cref(clientName), clientId));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     void Game::PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Game::_PlayerTeleport, this, id, std::cref(map), position));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     void Game::GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Game::_GetChunk, this, id, clientId, callback));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     void Game::_SpawnPlayer(std::string const& clientName, Uint32 clientId)
@@ -75,7 +75,7 @@ namespace Server { namespace Game {
         Player* newPlayer = new Player(*this, clientId);
         this->_players[clientId] = newPlayer;
 
-        Map::Map::SpawnCallback cb(std::bind(&Game::_PlayerTeleport,
+        Map::Map::SpawnCallback cb(std::bind(&Game::PlayerTeleport,
                                              this,
                                              clientId,
                                              std::cref(this->_world->GetDefaultMap().GetName()),

@@ -1,6 +1,8 @@
 #include "server/Server.hpp"
 #include "server/Settings.hpp"
 
+#include "tools/SimpleMessageQueue.hpp"
+
 #include "server/network/Network.hpp"
 #include "server/database/ResourceManager.hpp"
 #include "server/clientmanagement/ClientManager.hpp"
@@ -9,12 +11,13 @@
 namespace Server {
 
     Server::Server(Settings& settings) :
-        _settings(settings)
+        _settings(settings),
+        _admMessageQueue(new Tools::SimpleMessageQueue(1))
     {
         Tools::debug << "Server::Server()\n";
         this->_resourceManager = new Database::ResourceManager(*this);
-        this->_clientManager = new ClientManagement::ClientManager(*this);
-        this->_game = new Game::Game(*this);
+        this->_clientManager = new ClientManagement::ClientManager(*this, *this->_admMessageQueue);
+        this->_game = new Game::Game(*this, *this->_admMessageQueue);
 
         Network::Network::NewConnectionHandler
             nch(std::bind(&ClientManagement::ClientManager::HandleNewClient, this->_clientManager, std::placeholders::_1));
@@ -36,6 +39,7 @@ namespace Server {
 
         this->_clientManager->Start();
         this->_game->Start();
+        this->_admMessageQueue->Start();
         this->_network->Run();
 
         return 0;
@@ -47,6 +51,7 @@ namespace Server {
 
         this->_clientManager->Stop();
         this->_game->Stop();
+        this->_admMessageQueue->Stop();
         this->_network->Stop();
     }
 

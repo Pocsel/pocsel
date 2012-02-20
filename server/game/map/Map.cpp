@@ -11,7 +11,8 @@ namespace Server { namespace Game { namespace Map {
 
     Map::Map(Conf const& conf, Tools::SimpleMessageQueue& gameMessageQueue) :
         _conf(conf),
-        _messageQueue(gameMessageQueue),
+        _admMessageQueue(gameMessageQueue),
+        _messageQueue(new Tools::SimpleMessageQueue(1)),
         _spawnPosition(0)
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
@@ -24,28 +25,45 @@ namespace Server { namespace Game { namespace Map {
         for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite ; ++it)
             Tools::Delete(it->second);
         Tools::Delete(this->_gen);
+        Tools::Delete(this->_messageQueue);
     }
 
     void Map::Start()
     {
         Tools::debug << "Map::Start() -- " << this->_conf.name << "\n";
         this->_gen->Start();
+        this->_messageQueue->Start();
     }
 
     void Map::Stop()
     {
         Tools::debug << "Map::Stop() -- " << this->_conf.name << "\n";
         this->_gen->Stop();
+        this->_messageQueue->Stop();
     }
 
     void Map::HandleNewChunk(Chunk* chunk)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_HandleNewChunk, this, chunk));
-        this->_messageQueue.PushMessage(m);
+        this->_messageQueue->PushMessage(m);
     }
 
     void Map::GetChunk(Chunk::IdType id, ChunkCallback& response)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_GetChunk, this, id, response));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::GetSpawnPosition(SpawnCallback& response)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_GetSpawnPosition, this, response));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::_GetChunk(Chunk::IdType id, ChunkCallback& response)
     {
         auto chunk_it = this->_chunks.find(id);
         if (chunk_it == this->_chunks.end())
@@ -78,7 +96,7 @@ namespace Server { namespace Game { namespace Map {
         this->_chunkRequests.erase(chunk->id);
     }
 
-    void Map::GetSpawnPosition(SpawnCallback& response)
+    void Map::_GetSpawnPosition(SpawnCallback& response)
     {
         if (this->_spawnPosition != 0)
         {

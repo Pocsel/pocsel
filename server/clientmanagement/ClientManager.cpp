@@ -17,8 +17,8 @@
 
 namespace Server { namespace ClientManagement {
 
-    ClientManager::ClientManager(Server& server) :
-        _messageQueue(new Tools::SimpleMessageQueue(1)),
+    ClientManager::ClientManager(Server& server, Tools::SimpleMessageQueue& messageQueue) :
+        _messageQueue(messageQueue),
         _server(server),
         _nextId(1)
     {
@@ -32,61 +32,61 @@ namespace Server { namespace ClientManagement {
         for (auto it = this->_clients.begin(), ite = this->_clients.end(); it != ite; ++it)
             Tools::Delete(it->second);
 
-        Tools::Delete(this->_messageQueue);
+//        Tools::Delete(this->_messageQueue);
     }
 
     void ClientManager::Start()
     {
         Tools::debug << "ClientManager::Start()\n";
-        this->_messageQueue->Start();
+//        this->_messageQueue->Start();
     }
 
     void ClientManager::Stop()
     {
         Tools::debug << "ClientManager::Stop()\n";
-        this->_messageQueue->Stop();
+//        this->_messageQueue->Stop();
     }
 
     void ClientManager::HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_HandleNewClient, this, clientConnection));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     void ClientManager::HandleClientError(Uint32 clientId)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_HandleClientError, this, clientId));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     void ClientManager::HandlePacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_HandlePacket, this, clientId, packet.release()));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     void ClientManager::SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_SendPacket, this, clientId, packet.release()));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     void ClientManager::SendChunk(Uint32 clientId, Chunk const& chunk)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_SendChunk, this, clientId, std::cref(chunk)));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     void ClientManager::ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_ClientTeleport, this, clientId, std::cref(map), position));
-        this->_messageQueue->PushMessage(m);
+        this->_messageQueue.PushMessage(m);
     }
 
     Database::ResourceManager const& ClientManager::GetResourceManager() const

@@ -34,12 +34,12 @@ namespace Server { namespace Game {
 
     private:
         Server& _server;
-        Tools::SimpleMessageQueue* _messageQueue;
+        Tools::SimpleMessageQueue& _messageQueue;
         World* _world;
         std::unordered_map<Uint32, Player*> _players;
 
     public:
-        Game(Server& server);
+        Game(Server& server, Tools::SimpleMessageQueue& messageQueue);
         ~Game();
 
         void Start();

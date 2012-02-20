@@ -1,6 +1,12 @@
 #ifndef __SERVER_SERVER_HPP__
 #define __SERVER_SERVER_HPP__
 
+namespace Tools {
+
+    class SimpleMessageQueue;
+
+}
+
 namespace Server {
     namespace Network {
         class Network;
@@ -29,6 +35,7 @@ namespace Server {
         Database::ResourceManager* _resourceManager;
         ClientManagement::ClientManager* _clientManager;
         Game::Game* _game;
+        Tools::SimpleMessageQueue* _admMessageQueue;
 
     public:
         Server(Settings& settings);

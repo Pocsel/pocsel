@@ -23,6 +23,18 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
 
 }}}}
 
+namespace Server { namespace Game { namespace Engine {
+
+    class Engine;
+
+}}}
+
+namespace Server { namespace Game { namespace Entities {
+
+    class EntityManager;
+
+}}}
+
 namespace Server { namespace Game { namespace Map {
 
     class Map :
@@ -34,13 +46,16 @@ namespace Server { namespace Game { namespace Map {
 
     private:
         Conf _conf;
-        Tools::SimpleMessageQueue& _messageQueue;
+        Tools::SimpleMessageQueue& _admMessageQueue;
+        Tools::SimpleMessageQueue* _messageQueue;
 
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
         Gen::ChunkGenerator* _gen;
         std::unordered_map<Chunk::IdType, std::vector<ChunkCallback>> _chunkRequests;
         std::vector<SpawnCallback> _spawnRequests;
         Common::Position* _spawnPosition;
+        Entities::EntityManager* _entityManager;
+        Engine::Engine* _engine;
 
     public:
         Map(Conf const& conf, Tools::SimpleMessageQueue& gameMessageQueue);
@@ -53,13 +68,13 @@ namespace Server { namespace Game { namespace Map {
 
         // threadsafe
         void HandleNewChunk(Chunk* chunk);
-
-        // Uniquement pour le thread Game
         void GetSpawnPosition(SpawnCallback& response);
         void GetChunk(Chunk::IdType id, ChunkCallback& response);
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
+        void _GetSpawnPosition(SpawnCallback& response);
+        void _GetChunk(Chunk::IdType id, ChunkCallback& response);
         void _FindSpawnPosition(Chunk const& chunk);
     };
 
