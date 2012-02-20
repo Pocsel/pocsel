@@ -18,7 +18,7 @@ namespace {
 
 namespace Client {
 
-    void ActionBinder::Dispatch(Window::InputManager& inputManager)
+    void ActionBinder::Dispatch(Window::InputManager& inputManager, bool catchAll /* = false */)
     {
         bool bound;
         auto& actionList = inputManager.GetActionList();
@@ -59,6 +59,8 @@ namespace Client {
             else
                 ++it;
         }
+        if (catchAll)
+            actionList.clear();
     }
 
     void ActionBinder::Bind(std::string const& action, BindAction::Type type, std::function<void(void)> const& func)

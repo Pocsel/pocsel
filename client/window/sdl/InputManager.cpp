@@ -10,6 +10,7 @@ namespace Client { namespace Window { namespace Sdl {
         ::Client::Window::InputManager(window, inputBinder),
         _inputBinder(*inputBinder),
         _mousePos(0),
+        _showMouse(false),
         _mouseShown(true),
         _hasFocus(true)
     {
@@ -96,9 +97,28 @@ namespace Client { namespace Window { namespace Sdl {
             for (; it != itEnd; ++it)
                 this->_TriggerBind(it->second, BindAction::Held);
         }
+        // mouse
+        if (this->_showMouse)
+            this->_ShowMouse(true);
+        else
+            this->_ShowMouse(false);
+        this->_showMouse = false;
     }
 
-    void InputManager::ShowMouse(bool show /* = true */)
+    Tools::Vector2i InputManager::GetMousePosRealTime() const
+    {
+        Tools::Vector2i ret;
+        SDL_PumpEvents();
+        SDL_GetMouseState(&ret.x, &ret.y);
+        return ret;
+    }
+
+    void InputManager::ShowMouse()
+    {
+        this->_showMouse = true;
+    }
+
+    void InputManager::_ShowMouse(bool show)
     {
         if (show && !this->_mouseShown)
             SDL_ShowCursor(SDL_ENABLE);
