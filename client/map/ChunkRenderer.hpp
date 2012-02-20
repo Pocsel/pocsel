@@ -2,11 +2,8 @@
 #define __CLIENT_MAP_CHUNKRENDERER_HPP__
 
 #include "common/BaseChunk.hpp"
+#include "common/CubeType.hpp"
 #include "tools/IRenderer.hpp"
-
-namespace Tools { namespace Renderers { namespace Utils {
-    class TextureAtlas;
-}}}
 
 namespace Client {
     namespace Game {
@@ -24,27 +21,13 @@ namespace Client { namespace Map {
     class ChunkRenderer
         : private boost::noncopyable
     {
-    public:
-        struct CubeInfo
-        {
-            Common::BaseChunk::CubeType id;
-            //Tools::Renderers::ITexture2D* texture;
-            Tools::Vector3f top; // x/u = position X, y/v = position Y, z/w = position Z
-            Tools::Vector3f bottom;
-            Tools::Vector3f front;
-            Tools::Vector3f back;
-            Tools::Vector3f left;
-            Tools::Vector3f right;
-            bool isTransparent;
-        };
-
     private:
         Game::Game& _game;
         Tools::IRenderer& _renderer;
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
-        std::vector<CubeInfo> _cubeInfo;
-        Tools::Renderers::Utils::TextureAtlas* _atlas;
+        std::map<Uint32, Tools::Renderers::ITexture2D*> _textures;
+
 
     public:
         ChunkRenderer(Game::Game& game);
@@ -52,7 +35,13 @@ namespace Client { namespace Map {
 
         void RefreshDisplay(Chunk& chunk);
         void Render();
-        CubeInfo const& GetCubeInfo(int cubeType) const { return this->_cubeInfo[cubeType - 1]; }
+        Tools::Renderers::ITexture2D& GetTexture(Uint32 id)
+        {
+            auto it = this->_textures.find(id);
+            if (it == this->_textures.end())
+                throw std::runtime_error("bad id");
+            return *it->second;
+        }
     };
 
 }}

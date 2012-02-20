@@ -26,17 +26,17 @@ namespace Client { namespace Map {
         struct Mesh : private boost::noncopyable
         {
             Tools::Renderers::IIndexBuffer* indices;
-            Tools::Renderers::IVertexBuffer* vertices;
             Uint32 nbIndices;
             
-            Mesh() : indices(0), vertices(0), nbIndices(0) {}
+            Mesh() : indices(0), nbIndices(0) {}
             Mesh(Mesh&& m);
             ~Mesh();
 
             Mesh& operator =(Mesh&& m);
         };
         Chunk& _chunk;
-        std::map<int, Mesh> _meshes;
+        Tools::Renderers::IVertexBuffer* _vertices;
+        std::map<Uint32, Mesh> _meshes;
         Uint32 _triangleCount;
         bool _hasTransparentCube;
         bool _isComputed;
@@ -46,7 +46,7 @@ namespace Client { namespace Map {
         ~ChunkMesh();
 
         void Refresh(Game::Game& game, ChunkRenderer& chunkRenderer);
-        void Render(int cubeType, Tools::IRenderer& renderer);
+        void Render(Uint32 textureId, Tools::IRenderer& renderer);
         Uint32 GetTriangleCount() const { return this->_triangleCount; }
         bool HasTransparentCube() const { return this->_hasTransparentCube; }
         bool HasCubeType(int cubeType) const

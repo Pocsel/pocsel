@@ -13,30 +13,27 @@ namespace Client { namespace Map {
 
     ChunkMesh::Mesh::Mesh(Mesh&& m)
         : indices(m.indices),
-        vertices(m.vertices),
         nbIndices(m.nbIndices)
     {
         m.indices = 0;
-        m.vertices = 0;
         m.nbIndices = 0;
     }
 
     ChunkMesh::Mesh::~Mesh()
     {
         Tools::Delete(this->indices);
-        Tools::Delete(this->vertices);
     }
 
     ChunkMesh::Mesh& ChunkMesh::Mesh::operator =(ChunkMesh::Mesh&& m)
     {
         std::swap(this->indices, m.indices);
-        std::swap(this->vertices, m.vertices);
         std::swap(this->nbIndices, m.nbIndices);
         return *this;
     }
 
     ChunkMesh::ChunkMesh(Chunk& chunk)
         : _chunk(chunk),
+        _vertices(0),
         _triangleCount(0),
         _hasTransparentCube(false),
         _isComputed(false)
@@ -45,24 +42,29 @@ namespace Client { namespace Map {
 
     ChunkMesh::~ChunkMesh()
     {
+        Tools::Delete(this->_vertices);
     }
 
     namespace {
         struct Vertex
         {
             Tools::Vector3f position;
-            Tools::Vector3f normal;
-            Tools::Vector2f texture;
+            float normalTexture;
             Vertex() {}
-            Vertex(Tools::Vector3f const& position, Tools::Vector3f const& normal, Tools::Vector2f const& texture)
+            Vertex(Tools::Vector3f const& position, Tools::Vector3i const& normal, Tools::Vector2i const& texture)
                 : position(position),
-                normal(normal),
-                texture(texture)
+                normalTexture(0)
             {
+                //x, y z is your 8 bit normal
+                // (This assumes the the x,y,z are unsigned chars that have been bias and scaled to the 0..255 range  - like a bump map normal)
+                Uint32 packed = 
+                    (texture.x << 7) | (texture.y << 6) |
+                    ((normal.x + 1) << 4) | ((normal.y + 1) << 2) | (normal.z + 1);
+                normalTexture = ((float)packed) / ((float) (1 << 7));
             }
         };
 
-        inline void VerticesPushFace(std::vector<Vertex>& vertices, unsigned int& offset, Tools::Vector3f const& p, int idx, Tools::Vector3f const& texCoords)
+        inline void VerticesPushFace(std::vector<Vertex>& vertices, unsigned int& offset, Tools::Vector3f const& p, int idx)
         {
             static Tools::Vector3f const positions[] = {
                 Tools::Vector3f(0, 1, 1), // frontTopLeft = 0;
@@ -74,19 +76,19 @@ namespace Client { namespace Map {
                 Tools::Vector3f(1, 0, 1), // frontBottomRight = 6;
                 Tools::Vector3f(0, 0, 1), // frontBottomLeft = 7;
             };
-            static Tools::Vector3f const normals[] = {
-                Tools::Vector3f(0, 0, 1), // front = 0;
-                Tools::Vector3f(0, 1, 0), // top = 1;
-                Tools::Vector3f(1, 0, 0), // right = 2;
-                Tools::Vector3f(0, -1, 0), // bottom = 3;
-                Tools::Vector3f(-1, 0, 0), // left = 4;
-                Tools::Vector3f(0, 0, -1), // back = 5;
+            static Tools::Vector3i const normals[] = {
+                Tools::Vector3i(0, 0, 1), // front = 0;
+                Tools::Vector3i(0, 1, 0), // top = 1;
+                Tools::Vector3i(1, 0, 0), // right = 2;
+                Tools::Vector3i(0, -1, 0), // bottom = 3;
+                Tools::Vector3i(-1, 0, 0), // left = 4;
+                Tools::Vector3i(0, 0, -1), // back = 5;
             };
-            Tools::Vector2f const textures[] = {
-                Tools::Vector2f(texCoords.w, texCoords.w),
-                Tools::Vector2f(texCoords.w, 0),
-                Tools::Vector2f(0, 0),
-                Tools::Vector2f(0, texCoords.w),
+            Tools::Vector2i const textures[] = {
+                Tools::Vector2i(1, 1),
+                Tools::Vector2i(1, 0),
+                Tools::Vector2i(0, 0),
+                Tools::Vector2i(0, 1),
             };
             static int positionIndices[][4] = {
                 {6, 1, 0, 7}, // front = 0;
@@ -98,20 +100,20 @@ namespace Client { namespace Map {
             };
 
             int *pos = positionIndices[idx];
-            vertices[offset++] = Vertex(positions[*(pos++)] + p, normals[idx], textures[0] + texCoords.GetXY());
-            vertices[offset++] = Vertex(positions[*(pos++)] + p, normals[idx], textures[3] + texCoords.GetXY());
-            vertices[offset++] = Vertex(positions[*(pos++)] + p, normals[idx], textures[2] + texCoords.GetXY());
-            vertices[offset++] = Vertex(positions[*(pos++)] + p, normals[idx], textures[1] + texCoords.GetXY());
+            vertices[offset++] = Vertex(positions[*(pos++)] + p, normals[idx], textures[0]);
+            vertices[offset++] = Vertex(positions[*(pos++)] + p, normals[idx], textures[3]);
+            vertices[offset++] = Vertex(positions[*(pos++)] + p, normals[idx], textures[2]);
+            vertices[offset++] = Vertex(positions[*(pos++)] + p, normals[idx], textures[1]);
         }
 
         inline void IndicesPushFace(std::vector<unsigned int>& indices, unsigned int& offset, unsigned int voffset)
         {
-            indices[offset++] = voffset - 4;
-            indices[offset++] = voffset - 3;
-            indices[offset++] = voffset - 2;
-            indices[offset++] = voffset - 2;
-            indices[offset++] = voffset - 1;
-            indices[offset++] = voffset - 4;
+            indices.push_back(voffset - 4);
+            indices.push_back(voffset - 3);
+            indices.push_back(voffset - 2);
+            indices.push_back(voffset - 2);
+            indices.push_back(voffset - 1);
+            indices.push_back(voffset - 4);
         }
     }
 
@@ -139,11 +141,12 @@ namespace Client { namespace Map {
         if (this->_chunk.IsEmpty())
             return;
 
+        auto const& cubeTypes = game.GetCubeTypeManager().GetCubeTypes();
         Common::BaseChunk::CubeType const* cubes = this->_chunk.GetCubes();
         Common::BaseChunk::CubeType nearType;
 
         static std::vector<Vertex> vertices((Common::ChunkSize3 * 6 * 4) / 2);
-        static std::vector<unsigned int> indices((Common::ChunkSize3 * 6 * 3 * 2) / 2);
+        std::map<Uint32, std::vector<unsigned int>> indices;
         unsigned int ioffset = 0, voffset = 0;
 
         unsigned int x, y, z, cubeOffset;
@@ -157,7 +160,7 @@ namespace Client { namespace Map {
                     if (cubes[cubeOffset] == 0)
                         continue;
 
-                    auto const& cubeType = chunkRenderer.GetCubeInfo(cubes[cubeOffset]);
+                    auto const& cubeType = cubeTypes[cubes[cubeOffset] - 1];
                     Tools::Vector3f p(x, y, z);
 
                     // Right
@@ -166,11 +169,11 @@ namespace Client { namespace Map {
                         nearType = cubes[cubeOffset + 1];
                     else
                         nearType = chunkRight->GetCube(0, y, z);
-                    if (nearType != cubeType.id && (nearType == 0 || chunkRenderer.GetCubeInfo(nearType).isTransparent))
+                    if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.right).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || cubeType.isTransparent;
-                        VerticesPushFace(vertices, voffset, p, 2, cubeType.right);
-                        IndicesPushFace(indices, ioffset, voffset);
+                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.right).HasAlpha();
+                        VerticesPushFace(vertices, voffset, p, 2);
+                        IndicesPushFace(indices[cubeType.textures.right], ioffset, voffset);
                     }
 
                     // Top
@@ -179,11 +182,11 @@ namespace Client { namespace Map {
                         nearType = cubes[cubeOffset + Common::ChunkSize];
                     else
                         nearType = chunkTop->GetCube(x, 0, z);
-                    if (nearType != cubeType.id && (nearType == 0 || chunkRenderer.GetCubeInfo(nearType).isTransparent))
+                    if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.top).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || cubeType.isTransparent;
-                        VerticesPushFace(vertices, voffset, p, 1, cubeType.top);
-                        IndicesPushFace(indices, ioffset, voffset);
+                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.top).HasAlpha();
+                        VerticesPushFace(vertices, voffset, p, 1);
+                        IndicesPushFace(indices[cubeType.textures.top], ioffset, voffset);
                     }
 
                     // Front
@@ -192,11 +195,11 @@ namespace Client { namespace Map {
                         nearType = cubes[cubeOffset + Common::ChunkSize2];
                     else if (z == Common::ChunkSize - 1)
                         nearType = chunkFront->GetCube(x, y, 0);
-                    if (nearType != cubeType.id && (nearType == 0 || chunkRenderer.GetCubeInfo(nearType).isTransparent))
+                    if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.front).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || cubeType.isTransparent;
-                        VerticesPushFace(vertices, voffset, p, 0, cubeType.front);
-                        IndicesPushFace(indices, ioffset, voffset);
+                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.front).HasAlpha();
+                        VerticesPushFace(vertices, voffset, p, 0);
+                        IndicesPushFace(indices[cubeType.textures.front], ioffset, voffset);
                     }
 
                     // Left
@@ -205,11 +208,11 @@ namespace Client { namespace Map {
                         nearType = cubes[cubeOffset - 1];
                     else
                         nearType = chunkLeft->GetCube(Common::ChunkSize - 1, y, z);
-                    if (nearType != cubeType.id && (nearType == 0 || chunkRenderer.GetCubeInfo(nearType).isTransparent))
+                    if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.left).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || cubeType.isTransparent;
-                        VerticesPushFace(vertices, voffset, p, 4, cubeType.left);
-                        IndicesPushFace(indices, ioffset, voffset);
+                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.left).HasAlpha();
+                        VerticesPushFace(vertices, voffset, p, 4);
+                        IndicesPushFace(indices[cubeType.textures.left], ioffset, voffset);
                     }
 
                     // Bottom
@@ -218,11 +221,11 @@ namespace Client { namespace Map {
                         nearType = cubes[cubeOffset - Common::ChunkSize];
                     else
                         nearType = chunkBottom->GetCube(x, Common::ChunkSize - 1, z);
-                    if (nearType != cubeType.id && (nearType == 0 || chunkRenderer.GetCubeInfo(nearType).isTransparent))
+                    if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.bottom).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || cubeType.isTransparent;
-                        VerticesPushFace(vertices, voffset, p, 3, cubeType.bottom);
-                        IndicesPushFace(indices, ioffset, voffset);
+                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.bottom).HasAlpha();
+                        VerticesPushFace(vertices, voffset, p, 3);
+                        IndicesPushFace(indices[cubeType.textures.bottom], ioffset, voffset);
                     }
 
                     // Back
@@ -231,11 +234,11 @@ namespace Client { namespace Map {
                         nearType = cubes[cubeOffset - Common::ChunkSize2];
                     else
                         nearType = chunkBack->GetCube(x, y, Common::ChunkSize - 1);
-                    if (nearType != cubeType.id && (nearType == 0 || chunkRenderer.GetCubeInfo(nearType).isTransparent))
+                    if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.back).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || cubeType.isTransparent;
-                        VerticesPushFace(vertices, voffset, p, 5, cubeType.back);
-                        IndicesPushFace(indices, ioffset, voffset);
+                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.back).HasAlpha();
+                        VerticesPushFace(vertices, voffset, p, 5);
+                        IndicesPushFace(indices[cubeType.textures.back], ioffset, voffset);
                     }
                 }
             }
@@ -244,32 +247,34 @@ namespace Client { namespace Map {
         if (voffset == 0)
             return;
 
-        Mesh m;
-        m.vertices = game.GetClient().GetWindow().GetRenderer().CreateVertexBuffer().release();
-        m.vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-        m.vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 3); // Normales
-        m.vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // Textures
-        m.vertices->SetData(voffset * (3+3+2) * sizeof(float), vertices.data(), Tools::Renderers::VertexBufferUsage::Static);
-        Tools::debug << this->_chunk.id << " vertices: " << voffset << " (" << (voffset * (3+3+2) * sizeof(float) / 1024) << "ko)\n";
-        m.indices = game.GetClient().GetWindow().GetRenderer().CreateIndexBuffer().release();
-        m.indices->SetData(sizeof(unsigned int) * ioffset, indices.data());
-        m.nbIndices = (Uint32)ioffset;
-        this->_triangleCount += m.nbIndices / 3;
-        this->_meshes[0] = std::move(m);
+        this->_vertices = game.GetClient().GetWindow().GetRenderer().CreateVertexBuffer().release();
+        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
+        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 1); // Normales + Textures
+        //this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 1); // Textures
+        this->_vertices->SetData(voffset * (3+1+0) * sizeof(float), vertices.data(), Tools::Renderers::VertexBufferUsage::Static);
+        for (auto it = indices.begin(), ite = indices.end(); it !=ite; ++it)
+        {
+            Mesh m;
+            m.indices = game.GetClient().GetWindow().GetRenderer().CreateIndexBuffer().release();
+            m.indices->SetData(sizeof(unsigned int) * ioffset, it->second.data());
+            m.nbIndices = (Uint32)it->second.size();
+            this->_triangleCount += m.nbIndices / 3;
+            this->_meshes[it->first] = std::move(m);
+        }
     }
 
-    void ChunkMesh::Render(int cubeType, Tools::IRenderer& renderer)
+    void ChunkMesh::Render(Uint32 textureId, Tools::IRenderer& renderer)
     {
         if (this->_triangleCount == 0)
             return;
-        Mesh& m = this->_meshes[cubeType];
+        Mesh& m = this->_meshes[textureId];
         if (m.nbIndices == 0)
             return;
-        m.vertices->Bind();
+        this->_vertices->Bind();
         m.indices->Bind();
         renderer.DrawElements(m.nbIndices, Tools::Renderers::DataType::UnsignedInt, 0);
         m.indices->Unbind();
-        m.vertices->Unbind();
+        this->_vertices->Unbind();
     }
 
 }}

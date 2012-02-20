@@ -10,56 +10,31 @@
 #include "client/window/Window.hpp"
 
 #include "tools/Frustum.hpp"
-#include "tools/renderers/utils/TextureAtlas.hpp"
 
 namespace Client { namespace Map {
 
     ChunkRenderer::ChunkRenderer(Game::Game& game)
         : _game(game),
-        _renderer(game.GetClient().GetWindow().GetRenderer()),
-        _atlas(0)
+        _renderer(game.GetClient().GetWindow().GetRenderer())
     {
         this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("Chunk.cgfx");
         this->_shaderTexture = this->_shader->GetParameter("cubeTexture").release();
         auto const& cubeTypes = this->_game.GetCubeTypeManager().GetCubeTypes();
 
-        std::list<Uint32> textures;
         for (size_t i = 0; i < cubeTypes.size(); ++i)
         {
-            textures.push_back(cubeTypes[i].textures.top);
-            textures.push_back(cubeTypes[i].textures.bottom);
-            textures.push_back(cubeTypes[i].textures.front);
-            textures.push_back(cubeTypes[i].textures.back);
-            textures.push_back(cubeTypes[i].textures.left);
-            textures.push_back(cubeTypes[i].textures.right);
-        }
-        this->_atlas = game.GetResourceManager().CreateTextureAtlas(textures).release();
-
-        this->_cubeInfo.resize(cubeTypes.size());
-        for (size_t i = 0; i < cubeTypes.size(); ++i)
-        {
-            this->_cubeInfo[i].id = cubeTypes[i].id;
-            //this->_cubeInfo[i].texture = &this->_game.GetResourceManager().GetTexture2D(cubeTypes[i].textures.top);
-            this->_cubeInfo[i].top = this->_atlas->GetCoords(cubeTypes[i].textures.top);
-            this->_cubeInfo[i].bottom = this->_atlas->GetCoords(cubeTypes[i].textures.bottom);
-            this->_cubeInfo[i].front = this->_atlas->GetCoords(cubeTypes[i].textures.front);
-            this->_cubeInfo[i].back = this->_atlas->GetCoords(cubeTypes[i].textures.back);
-            this->_cubeInfo[i].left = this->_atlas->GetCoords(cubeTypes[i].textures.left);
-            this->_cubeInfo[i].right = this->_atlas->GetCoords(cubeTypes[i].textures.right);
-            this->_cubeInfo[i].isTransparent = 
-                this->_atlas->HasAlpha(cubeTypes[i].textures.top) ||
-                this->_atlas->HasAlpha(cubeTypes[i].textures.bottom) ||
-                this->_atlas->HasAlpha(cubeTypes[i].textures.front) ||
-                this->_atlas->HasAlpha(cubeTypes[i].textures.back) ||
-                this->_atlas->HasAlpha(cubeTypes[i].textures.left) ||
-                this->_atlas->HasAlpha(cubeTypes[i].textures.right);
+            for (Uint8 j = 0; j < 6; ++j)
+            {
+                Uint32 textureId = cubeTypes[i].textures.ids[j];
+                if (this->_textures.find(textureId) == this->_textures.end())
+                    this->_textures[textureId] = &this->_game.GetResourceManager().GetTexture2D(textureId);
+            }
         }
     }
 
     ChunkRenderer::~ChunkRenderer()
     {
         Tools::Delete(this->_shaderTexture);
-        Tools::Delete(this->_atlas);
     }
 
     void ChunkRenderer::RefreshDisplay(Chunk& chunk)
@@ -100,29 +75,34 @@ namespace Client { namespace Map {
                     chunkToRender.push_back(&chunk);
             });
 
-        this->_atlas->GetTexture().Bind();
-        this->_shaderTexture->Set(this->_atlas->GetTexture());
         do
         {
             this->_shader->BeginPass();
-            for (auto it = chunkToRender.begin(), ite = chunkToRender.end(); it != ite; ++it)
+            for (auto texturesIt = this->_textures.begin(), texturesIte = this->_textures.end(); texturesIt != texturesIte; ++texturesIt)
             {
-                auto mesh = (*it)->GetMesh();
-                if (!mesh)
+                if (texturesIt->second->HasAlpha())
                     continue;
-                this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
-                mesh->Render(0, this->_renderer);
-            }
-            for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
-            {
-                auto mesh = (*it).second->GetMesh();
-                if (!mesh)
-                    continue;
-                this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
-                mesh->Render(0, this->_renderer);
+                texturesIt->second->Bind();
+                this->_shaderTexture->Set(*texturesIt->second);
+                for (auto it = chunkToRender.begin(), ite = chunkToRender.end(); it != ite; ++it)
+                {
+                    auto mesh = (*it)->GetMesh();
+                    if (!mesh)
+                        continue;
+                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it)->coords, Tools::Vector3f(0)) - camera.position));
+                    mesh->Render(texturesIt->first, this->_renderer);
+                }
+                for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
+                {
+                    auto mesh = (*it).second->GetMesh();
+                    if (!mesh)
+                        continue;
+                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*it).second->coords, Tools::Vector3f(0)) - camera.position));
+                    mesh->Render(texturesIt->first, this->_renderer);
+                }
+                texturesIt->second->Unbind();
             }
         } while (this->_shader->EndPass());
-        this->_atlas->GetTexture().Unbind();
 
         //do
         //{

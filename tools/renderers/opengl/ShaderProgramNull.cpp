@@ -27,11 +27,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             GLCHECK(glLoadMatrixf(this->_renderer.GetProjectionMatrix().mm));
             break;
 
+        case ShaderParameterUsage::ModelViewMatrix:
         case ShaderParameterUsage::ModelMatrix:
-            this->_renderer.SetMatrixMode(GL_MODELVIEW);
-            GLCHECK(glLoadMatrixf((this->_renderer.GetModelMatrix() * this->_renderer.GetViewMatrix()).mm));
-            break;
-
         case ShaderParameterUsage::ViewMatrix:
             this->_renderer.SetMatrixMode(GL_MODELVIEW);
             GLCHECK(glLoadMatrixf((this->_renderer.GetModelMatrix() * this->_renderer.GetViewMatrix()).mm));

@@ -9,14 +9,18 @@ namespace Common {
     {
         BaseChunk::CubeType id;
         std::string name;
-        struct
+        union
         {
-            Uint32 top;
-            Uint32 left;
-            Uint32 front;
-            Uint32 right;
-            Uint32 back;
-            Uint32 bottom;
+            struct
+            {
+                Uint32 top;
+                Uint32 left;
+                Uint32 front;
+                Uint32 right;
+                Uint32 back;
+                Uint32 bottom;
+            };
+            Uint32 ids[6];
         } textures;
 
         bool solid;
