@@ -21,9 +21,9 @@ namespace Client { namespace Game {
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](Tools::Vector2u const& size)
             {
-                this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, size.w / float(size.h), 0.001f, 500.0f);
+                this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, size.w / float(size.h), 0.02f, 500.0f);
             });
-        this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.001f, 500.0f);
+        this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.02f, 500.0f);
     }
 
     Game::~Game()
