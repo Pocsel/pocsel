@@ -45,6 +45,7 @@ namespace Client { namespace Map {
         std::list<ChunkNode*> _waitingRefresh;
         Tools::Octree<ChunkNode>* _octree[16];
         float _loadingProgression;
+        Common::Position _oldPosition;
 
     public:
         ChunkManager(Game::Game& game);

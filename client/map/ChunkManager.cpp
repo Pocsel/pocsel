@@ -97,6 +97,7 @@ namespace Client { namespace Map {
         }
         this->_DownloadNewChunks(playerPosition);
         this->_RemoveOldChunks(playerPosition);
+        this->_oldPosition = playerPosition;
     }
 
     void ChunkManager::Render()
@@ -114,6 +115,8 @@ namespace Client { namespace Map {
 
     void ChunkManager::_RemoveOldChunks(Common::Position const& playerPosition)
     {
+        if (this->_oldPosition.world == playerPosition.world)
+            return;
         unsigned int nbChunks = this->_game.GetClient().GetSettings().chunkViewDistance
             + this->_game.GetClient().GetSettings().chunkCacheArea;
         Tools::Vector3d pos((playerPosition.world - Tools::Vector3u(nbChunks)) * Common::ChunkSize);
@@ -139,6 +142,8 @@ namespace Client { namespace Map {
 
     void ChunkManager::_DownloadNewChunks(Common::Position const& playerPosition)
     {
+        if (this->_oldPosition.world == playerPosition.world)
+            return;
         std::deque<Common::BaseChunk::IdType> tmp;
         int cacheDistance = (int)this->_game.GetClient().GetSettings().chunkViewDistance;
         int min = -cacheDistance;
