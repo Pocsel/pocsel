@@ -47,6 +47,7 @@ namespace Client { namespace Menu { namespace Widget {
                 std::string const& text = "",
                 Tools::Vector2f const& size = Tools::Vector2f(50, 20),
                 Tools::Vector2f const& pos = Tools::Vector2f(0));
+        ~Button();
         void Render();
         void SetText(std::string const& text);
         void SetSize(Tools::Vector2f const& size);
