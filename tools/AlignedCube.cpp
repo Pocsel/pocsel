@@ -16,15 +16,16 @@ namespace Tools {
     Plane::IntersectionType AlignedCube::Intersects(Plane const& plane) const
     {
         Vector3d vector;
-        vector.x = (plane.normal.x >= 0) ? this->_position.x : this->_position.x + this->_size;
-        vector.y = (plane.normal.y >= 0) ? this->_position.y : this->_position.y + this->_size;
-        vector.z = (plane.normal.z >= 0) ? this->_position.z : this->_position.z + this->_size;
+        Vector3d tmp(this->_position + Vector3d(this->_size));
+        vector.x = (plane.normal.x >= 0) ? this->_position.x : tmp.x;
+        vector.y = (plane.normal.y >= 0) ? this->_position.y : tmp.y;
+        vector.z = (plane.normal.z >= 0) ? this->_position.z : tmp.z;
         if ((Vector3d::Dot(plane.normal, vector) + plane.d) > 0)
             return Plane::Front;
 
-        vector.x = (plane.normal.x >= 0) ? this->_position.x + this->_size : this->_position.x;
-        vector.y = (plane.normal.y >= 0) ? this->_position.y + this->_size : this->_position.y;
-        vector.z = (plane.normal.z >= 0) ? this->_position.z + this->_size : this->_position.z;
+        vector.x = (plane.normal.x >= 0) ? tmp.x : this->_position.x;
+        vector.y = (plane.normal.y >= 0) ? tmp.y : this->_position.y;
+        vector.z = (plane.normal.z >= 0) ? tmp.z : this->_position.z;
         if ((Vector3d::Dot(plane.normal, vector) + plane.d) < 0)
             return Plane::Back;
 
