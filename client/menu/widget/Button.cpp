@@ -30,6 +30,11 @@ namespace Client { namespace Menu { namespace Widget {
         this->_Update();
     }
 
+    Button::~Button()
+    {
+        Tools::Delete(this->_rect);
+    }
+
     void Button::Render()
     {
         do
