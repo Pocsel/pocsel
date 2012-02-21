@@ -6,42 +6,42 @@ is_default = true
 equations = {
     my_perlin2 = {
         function_name = "perlin2",
-        xn = 0.0130,
-        xa = -0.112,
-        zn = 0.0139,
-        za = 0.761,
-        mul = 12.35545,
+        xn = 0.015,
+        xa = 0.0,
+        zn = 0.015,
+        za = 0.0,
+        mul = 10.0,
         alpha = 1.7,
         beta = 2.0,
         n = 8,
-        ip = 0,
-        ipp = 0,
+        ip = 1,
+        ipp = 2,
         ippmx = 1,
-        ippmz = 77
+        ippmz = 1
     },
     perlin3_caves = {
         function_name = "perlin3",
-        xn = 0.63,
-        xa = -0.937,
-        yn = 1.42,
-        ya = 0.841,
-        zn = 0.63,
-        za = 0.764,
+        xn = 0.5,
+        xa = 0.0,
+        yn = 3.5,
+        ya = 0.0,
+        zn = 0.5,
+        za = 0.0,
         mul = 1.0,
         alpha = 2.0,
         beta = 2.0,
-        n = 1,
+        n = 2,
         ip = 1,
         ipp = 1,
-        ippmx = 1,
-        ippmz = 1,
-        ippmy = 1
+        ippmx = 3,
+        ippmz = 3,
+        ippmy = 2
     },
     perlin3_iron = {
         function_name = "perlin3",
         xn = 2.0,
         xa = 0.0,
-        yn = 45.2,
+        yn = 45.0,
         ya = 0.0,
         zn = 2.0,
         za = 0.0,
@@ -51,8 +51,8 @@ equations = {
         n = 1,
         ip = 1,
         ipp = 1,
-        ippmx = 1,
-        ippmz = 1,
+        ippmx = 2,
+        ippmz = 2,
         ippmy = 1
     },
     none = {
@@ -60,7 +60,7 @@ equations = {
     }
 }
 
-cave_value = 0.26
+cave_value = 0.22
 height_value = 0
 
 cubes = {
@@ -82,7 +82,7 @@ cubes = {
 --        }
 --    },
 
-    water = {
+    void = {
         {
             priority = 0,
             validators = {
@@ -92,13 +92,13 @@ cubes = {
                 },
                 {
                     equation = "none",
-                    validator = "y_inferior_to",
+                    validator = "y_superior_to",
                     value = height_value
                 }
-            },
+            }
         },
         {
-            priority = 0,
+            priority = 2,
             validators = {
                 {
                     equation = "perlin3_caves",
@@ -107,7 +107,7 @@ cubes = {
                 },
                 {
                     equation = "none",
-                    validator = "y_inferior_to",
+                    validator = "y_superior_to",
                     value = height_value
                 }
             }
@@ -115,66 +115,37 @@ cubes = {
         }
     },
 
-    iron = {
+    water = {
         {
-            priority = 2,
+            priority = 1,
             validators = {
                 {
-                    equation = "perlin3_iron",
-                    validator = "ay+b<eq",
-                    a=0.01,
-                    b=0.80
-                },
-                {
                     equation = "my_perlin2",
-                    validator = "ay+b<eq",
-                    a = 1,
-                    b = 1
-                },
-                {
-                    equation = "perlin3_caves",
-                    validator = "eq_inferior_to",
-                    value = cave_value
+                    validator = "y_superior_to_eq",
                 }
-            }
-        }
-    },
-    rock = {
+            },
+        },
         {
             priority = 3,
             validators = {
                 {
-                    equation = "my_perlin2",
-                    validator = "ay+b<eq",
-                    a = 1,
-                    b = 1
-                },
-                {
                     equation = "perlin3_caves",
-                    validator = "eq_inferior_to",
+                    validator = "eq_superior_to",
                     value = cave_value
                 }
             }
+
         }
     },
     grass = {
         {
-            priority = 4,
+            priority = 6,
             validators = {
-                {
-                    equation = "my_perlin2",
-                    validator = "y_inferior_to_eq"
-                },
                 {
                     equation = "my_perlin2",
                     validator = "ay+b>eq",
                     a = 1,
-                    b = 1.0 / 24.0
-                },
-                {
-                    equation = "perlin3_caves",
-                    validator = "eq_inferior_to",
-                    value = cave_value
+                    b = 1.0 / 32.0
                 },
                 {
                     equation = "none",
@@ -186,16 +157,39 @@ cubes = {
     },
     dirt = {
         {
-            priority = 5,
+            priority = 7,
             validators = {
                 {
                     equation = "my_perlin2",
-                    validator = "y_inferior_to_eq"
-                },
+                    validator = "ay+b>eq",
+                    a = 1,
+                    b = 1
+                }
+            }
+        }
+    },
+    iron = {
+        {
+            priority = 8,
+            validators = {
                 {
-                    equation = "perlin3_caves",
-                    validator = "eq_inferior_to",
-                    value = cave_value
+                    equation = "perlin3_iron",
+                    validator = "ay+b<eq",
+                    a=0.006,
+                    b=0.60
+                }
+            }
+        }
+    },
+    rock = {
+        {
+            priority = 9,
+            validators = {
+                {
+                    equation = "my_perlin2",
+                    validator = "ay+b<eq",
+                    a = 1,
+                    b = 1
                 }
             }
         }
