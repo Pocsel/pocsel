@@ -1,5 +1,3 @@
-
-# Sources
 file(GLOB_RECURSE server_src "*.[ch]pp")
 
 set(src
