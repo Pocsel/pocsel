@@ -35,6 +35,8 @@ namespace Client { namespace Map {
     ChunkRenderer::~ChunkRenderer()
     {
         Tools::Delete(this->_shaderTexture);
+        for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
+            Tools::Delete(it->second);
     }
 
     void ChunkRenderer::RefreshDisplay(Chunk& chunk)

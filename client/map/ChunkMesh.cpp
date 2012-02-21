@@ -128,6 +128,8 @@ namespace Client { namespace Map {
             chunkBottom = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0, -1,  0));
 
         this->_meshes.clear();
+        delete this->_vertices;
+        this->_vertices = 0;
         this->_triangleCount = 0;
         this->_hasTransparentCube = false;
         if (chunkLeft   == 0 ||

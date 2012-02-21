@@ -3,7 +3,7 @@
 
 namespace Common {
     // static is needed when use in tab
-    static Uint32 const ChunkSize = 24;
+    static Uint32 const ChunkSize = 32;
     static Uint32 const ChunkSize2 = ChunkSize * ChunkSize;
     static Uint32 const ChunkSize3 = ChunkSize2 * ChunkSize;
 
