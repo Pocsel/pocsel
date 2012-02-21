@@ -3,6 +3,8 @@
 
 #include "server/Chunk.hpp"
 
+#include "server/game/map/gen/IValidator.hpp"
+
 namespace Server { namespace Game { namespace Map { namespace Gen {
 
     class IValidator;
@@ -12,6 +14,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         public:
             struct Validation
             {
+                // XXX mode MethodPtr
+//                IValidator validator;
                 unsigned int equationIndex;
                 IValidator* validator;
             };

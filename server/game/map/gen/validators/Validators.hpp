@@ -16,6 +16,9 @@
 #include "server/game/map/gen/validators/AYSuperiorToEq.hpp"
 #include "server/game/map/gen/validators/AYPlusBSuperiorToEq.hpp"
 
+// XXX mode MethodPtr
+// #include "server/game/map/gen/IValidator.hpp"
+
 #include "tools/CaseInsensitive.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen {
@@ -43,8 +46,15 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Va
 #define CREATE_THIS_ONE(val) IValidator* _Create##val(std::map<std::string, double> const& values) \
         { \
             return new val(values); \
-        } \
+        }
 
+        // XXX mode MethodPtr
+/*
+#define CREATE_THIS_ONE(val) IValidator* _Create##val(std::map<std::string, double> const& values) \
+        { \
+            return new IValidator(&IValidator::val, values); \
+        }
+*/
         CREATE_THIS_ONE(EqSuperiorTo)
         CREATE_THIS_ONE(EqInferiorTo)
         CREATE_THIS_ONE(YSuperiorTo)

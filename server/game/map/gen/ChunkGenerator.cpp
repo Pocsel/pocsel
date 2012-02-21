@@ -30,7 +30,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
 
         for (auto it = conf.cubes.begin(), ite = conf.cubes.end() ; it != ite ; ++it)
         {
-            std::cout << it->second.type->name << ": " << it->second.type->id << "\n";
+            Log::load << it->second.type->name << ": " << it->second.type->id << "\n";
 
             Log::load << "validation_blocs:\n";
             // parcours des ValidationBlocConf
@@ -145,6 +145,9 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
                             this->_equations.push_back(equations[v.equation]);
                         }
 
+                        // XXX mode Method Ptr
+//                        CubeSpawnInfo::Validation validation({*validator, idx});
+//                        Tools::Delete(validator);
                         CubeSpawnInfo::Validation validation;
                         validation.equationIndex = idx;
                         validation.validator = validator;
@@ -269,6 +272,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
                                 --rDoneCount;
                             }
 
+                            // XXX mode MethodPtr
+//                            if (!(val->validator.*val->validator.check)(xx, yy, zz, results[val->equationIndex]))
                             if (!val->validator->Check(xx, yy, zz, results[val->equationIndex]))
                             {
                                 check = false;
