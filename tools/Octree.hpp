@@ -1,14 +1,14 @@
 #ifndef __TOOLS_OCTREE_HPP__
 #define __TOOLS_OCTREE_HPP__
 
-#include "tools/AlignedCube.hpp"
+#include "tools/AlignedBox.hpp"
 //#include "tools/MemoryPool.hpp"
 
 namespace Tools {
 
     template<class T>
     class Octree
-        : public AlignedCube,
+        : public AlignedBox,
         private boost::noncopyable
     {
     private:
@@ -22,7 +22,7 @@ namespace Tools {
 
     public:
         Octree(Vector3d const& position, unsigned int size)
-            : AlignedCube(position, size),
+            : AlignedBox(position, position + Vector3d(size)),
             _size(size),
             _count(0)
         {
@@ -45,14 +45,14 @@ namespace Tools {
                 T* elements[8];
                 std::memcpy(elements, this->_elements, sizeof(this->_elements));
                 unsigned int size = this->_size / 2;
-                this->_childs[0] = new Octree<T>(this->GetPosition() + Vector3d(   0,    0,    0), size);
-                this->_childs[1] = new Octree<T>(this->GetPosition() + Vector3d(   0,    0, size), size);
-                this->_childs[2] = new Octree<T>(this->GetPosition() + Vector3d(   0, size, 0   ), size);
-                this->_childs[3] = new Octree<T>(this->GetPosition() + Vector3d(   0, size, size), size);
-                this->_childs[4] = new Octree<T>(this->GetPosition() + Vector3d(size,    0, 0   ), size);
-                this->_childs[5] = new Octree<T>(this->GetPosition() + Vector3d(size,    0, size), size);
-                this->_childs[6] = new Octree<T>(this->GetPosition() + Vector3d(size, size, 0   ), size);
-                this->_childs[7] = new Octree<T>(this->GetPosition() + Vector3d(size, size, size), size);
+                this->_childs[0] = new Octree<T>(this->GetMin() + Vector3d(   0,    0,    0), size);
+                this->_childs[1] = new Octree<T>(this->GetMin() + Vector3d(   0,    0, size), size);
+                this->_childs[2] = new Octree<T>(this->GetMin() + Vector3d(   0, size, 0   ), size);
+                this->_childs[3] = new Octree<T>(this->GetMin() + Vector3d(   0, size, size), size);
+                this->_childs[4] = new Octree<T>(this->GetMin() + Vector3d(size,    0, 0   ), size);
+                this->_childs[5] = new Octree<T>(this->GetMin() + Vector3d(size,    0, size), size);
+                this->_childs[6] = new Octree<T>(this->GetMin() + Vector3d(size, size, 0   ), size);
+                this->_childs[7] = new Octree<T>(this->GetMin() + Vector3d(size, size, size), size);
 
                 for (int i = 0; i < 8; ++i)
                 {
