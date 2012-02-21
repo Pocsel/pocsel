@@ -229,6 +229,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         CubeSpawnInfo::Validation const* val;
         CubeSpawnInfo::Validation const* valEnd;
 
+        bool* rDone = new bool[this->_equations.size()];
+
         unsigned int eqSize = this->_equations.size();
 
         xx = (double)((int)coords.x - (1 << 21));
@@ -236,8 +238,8 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         yy = (double)((int)coords.y - (1 << 19));
 
         for (unsigned int i = 0; i < this->_equations.size(); ++i)
-//            this->_equations[i]->Calc(xx, yy, zz, results + (i * Common::ChunkSize3));
-            this->_equations[i]->Calc(xx, yy, zz, coords.x, coords.y, coords.z, results + i, eqSize);// results + (i * Common::ChunkSize3));
+            rDone[i] = false;
+        unsigned int rDoneCount = eqSize;
 
         for (x = 0 ; x < Common::ChunkSize ; ++x)
         {
@@ -256,7 +258,18 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
                         check = true;
                         for (; val != valEnd; ++val)
                         {
-                            if (!val->validator->Check(xx, yy, zz, results[val->equationIndex]))// results[val->equationIndex * Common::ChunkSize3]))
+                            if (!rDone[val->equationIndex])
+                            {
+                                this->_equations[val->equationIndex]->Calc((double)((int)coords.x - (1 << 21)),
+                                                                           (double)((int)coords.y - (1 << 19)),
+                                                                           (double)((int)coords.z - (1 << 21)),
+                                                                           coords.x, coords.y, coords.z,
+                                                                           resultsBase + val->equationIndex, eqSize);
+                                rDone[val->equationIndex] = true;
+                                --rDoneCount;
+                            }
+
+                            if (!val->validator->Check(xx, yy, zz, results[val->equationIndex]))
                             {
                                 check = false;
                                 break;
@@ -275,6 +288,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         }
 
         Tools::DeleteTab(resultsBase);
+        Tools::DeleteTab(rDone);
 
         callback(nuChunk);
     }

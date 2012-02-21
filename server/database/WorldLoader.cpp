@@ -164,10 +164,10 @@ namespace Server { namespace Database {
                     Log::load << "WARNING: cube '" << name <<
                         "' is not recognized. It will be ignored." <<
                         "If you want to define empty cubes, name it 'void'\n";
-    //                continue;
+                    continue;
                 }
-                // TODO remplacer ce continue par la recuperation de void, ou je sais pas quoi
-                continue;
+
+                cube.type = new Common::CubeType(0, "void");
             }
 
             // Parcours des ValidationBlocConf
