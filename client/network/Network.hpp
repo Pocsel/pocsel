@@ -25,7 +25,7 @@ namespace Client { namespace Network {
         std::string _host;
         std::string _port;
         bool _isConnected; // protected by _metaMutex
-        bool _isRunning; // protected by _metaMutex;
+        bool _isRunning; // protected by _metaMutex
         std::string _lastError; // protected by _metaMutex
         float _loading;
 

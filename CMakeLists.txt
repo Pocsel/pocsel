@@ -72,6 +72,7 @@ file(GLOB tools_base_src "tools/*.[ch]pp" "tools/meta/*.[ch]pp")
 file(GLOB tools_database_src "tools/database/*.[ch]pp" "tools/database/sqlite/*.[ch]pp")
 file(GLOB_RECURSE tools_gui_src "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
+file(GLOB_RECURSE tools_lua2_src "tools/lua2/*.[ch]pp")
 file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
 file(GLOB_RECURSE tools_logger_src "tools/logger/*.[ch]pp")
 
@@ -101,4 +102,5 @@ configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/De
 add_subdirectory(sdk)
 add_subdirectory(client)
 add_subdirectory(server)
+add_subdirectory(lua2_test)
 #add_subdirectory(tests)
