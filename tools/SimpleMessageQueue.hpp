@@ -7,11 +7,15 @@ namespace Tools {
     {
     public:
         typedef std::function<void(void)> Message;
-    private:
-        boost::mutex _messagesMutex;
-        std::list<Message> _messages;
-        boost::mutex _conditionMutex;
-        boost::condition_variable _condition;
+//    private:
+//        boost::mutex _messagesMutex;
+//        std::list<Message> _messages;
+//        boost::mutex _conditionMutex;
+//        boost::condition_variable _condition;
+
+
+        boost::asio::io_service _ioService;
+
         volatile bool _isRunning;
         std::vector<boost::thread*> _threads;
         unsigned int _nbThreads;
@@ -27,11 +31,12 @@ namespace Tools {
         }
         void PushMessage(Message& message)
         {
-            {
-                boost::lock_guard<boost::mutex> lock(this->_messagesMutex);
-                this->_messages.push_back(message);
-            }
-            this->_condition.notify_one();
+            this->_ioService.dispatch(message);
+//            {
+//                boost::lock_guard<boost::mutex> lock(this->_messagesMutex);
+//                this->_messages.push_back(message);
+//            }
+//            this->_condition.notify_one();
         }
         void Start()
         {
@@ -52,7 +57,9 @@ namespace Tools {
 
             Tools::debug << "Stopping SimpleMessageQueue (" << this << ").\n";
 
-            this->_condition.notify_all();
+            this->_ioService.stop();
+
+//            this->_condition.notify_all();
 
             for (unsigned int i = 1; i < this->_threads.size() + 1; ++i)
             {
@@ -67,7 +74,7 @@ namespace Tools {
                             this->_threads[j] = 0;
                         }
                     }
-                    this->_condition.notify_all();
+//                    this->_condition.notify_all();
                     i = 0;
                 }
             }
@@ -78,27 +85,31 @@ namespace Tools {
     private:
         void _Run()
         {
-            while (this->_isRunning)
-            {
-                Message message(0);
-
-                {
-                    boost::lock_guard<boost::mutex> lock(this->_messagesMutex);
-                    if (this->_messages.size() > 0)
-                    {
-                        message = this->_messages.front();
-                        this->_messages.pop_front();
-                    }
-                }
-
-                if (!message)
-                {
-                    boost::unique_lock<boost::mutex> conditionLock(this->_conditionMutex);
-                    this->_condition.wait(conditionLock);
-                }
-                else
-                    message();
-            }
+            Tools::debug << "1 thread runnin'\n";
+            boost::asio::io_service::work work(this->_ioService);
+            this->_ioService.run();
+//            while (this->_isRunning)
+//            {
+//                Message message(0);
+//
+//                {
+//                    boost::lock_guard<boost::mutex> lock(this->_messagesMutex);
+//                    if (this->_messages.size() > 0)
+//                    {
+//                        message = this->_messages.front();
+//                        this->_messages.pop_front();
+//                    }
+//                }
+//
+//                if (!message)
+//                {
+//                    boost::unique_lock<boost::mutex> conditionLock(this->_conditionMutex);
+//                    this->_condition.wait(conditionLock);
+//                }
+//                else
+//                    message();
+//            }
+            Tools::debug << "1 thread over\n";
         }
     };
 
