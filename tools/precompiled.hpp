@@ -63,6 +63,8 @@
 #ifdef WIN32
 // warning this utilisé dans le constructeur
 #pragma warning(disable: 4355)
+// utilisation de throw() sur un membre
+#pragma warning(disable: 4290)
 #endif
 
 #ifdef _WIN32
