@@ -51,12 +51,13 @@ namespace Client {
         State _state;
         Game::Game* _game;
         Menu::Menu* _menu;
+        Uint32 _clientId;
 
     public:
         Client(Settings& settings);
         ~Client();
         int Run();
-        void Login(std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);
+        void Login(Uint32 clientId, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);
         void LoadChunks();
         void Connect();
         void Disconnect(std::string const& reason = "");
@@ -69,6 +70,7 @@ namespace Client {
         Game::Game& GetGame() { return *this->_game; }
         Menu::Menu& GetMenu() { return *this->_menu; }
         State GetState() const { return this->_state; }
+        Uint32 GetClientId() const { return this->_clientId; }
     private:
         void _MenuBind();
     };

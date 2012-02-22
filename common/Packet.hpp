@@ -17,9 +17,9 @@ namespace Common {
     public:
         explicit Packet();
         explicit Packet(Packet const& packet);
-        ~Packet();
+        virtual ~Packet();
 
-        void Dump() const;
+//        void Dump() const;
 
         Uint16 GetCompleteSize() const;
         char const* GetCompleteData() const;

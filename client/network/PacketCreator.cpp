@@ -1,10 +1,11 @@
-#include "client/precompiled.hpp"
 #include "client/Settings.hpp"
 #include "client/network/PacketCreator.hpp"
+#include "client/network/UdpPacket.hpp"
 
 #include "protocol/protocol.hpp"
 
 #include "common/Packet.hpp"
+#include "common/CameraSerializer.hpp"
 
 namespace Client { namespace Network {
 
@@ -80,6 +81,25 @@ namespace Client { namespace Network {
     {
         std::unique_ptr<Common::Packet> p(new Common::Packet());
         p->Write(Protocol::ClientToServer::TeleportOk);
+        return p;
+    }
+
+
+    std::unique_ptr<UdpPacket> PacketCreator::Move(Uint32 id, Common::Camera const& cam)
+    {
+        std::unique_ptr<UdpPacket> p(new UdpPacket(id));
+        p->Write(Protocol::ClientToServer::Move);
+
+        p->Write(cam);
+        return p;
+    }
+
+    std::unique_ptr<UdpPacket> PacketCreator::Action(Uint32 id, Common::Camera const& cam)
+    {
+        std::unique_ptr<UdpPacket> p(new UdpPacket(id));
+        p->Write(Protocol::ClientToServer::Action);
+
+        p->Write(cam);
         return p;
     }
 

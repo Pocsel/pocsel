@@ -5,9 +5,8 @@
 #include "protocol/protocol.hpp"
 
 namespace Common {
-
     class Packet;
-
+    class Camera;
 }
 
 namespace Server { namespace Network {
@@ -41,6 +40,9 @@ namespace Server { namespace Network {
                              std::string& playerName);
 
         static void TeleportOk(Common::Packet const& p);
+
+        static void Move(Common::Packet const& p, Common::Camera& cam);
+        static void Action(Common::Packet const& p, Common::Camera& cam);
     };
 
 }}

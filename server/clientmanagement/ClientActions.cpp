@@ -5,6 +5,7 @@
 #include "protocol/protocol.hpp"
 
 #include "common/Packet.hpp"
+#include "common/Camera.hpp"
 
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
@@ -121,12 +122,38 @@ namespace Server { namespace ClientManagement {
             manager.ClientTeleportOk(client);
         }
 
+        void _HandleMove(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+//            Tools::debug << "_HandleMove (client " << client.id << ")\n";
+
+            Common::Camera cam;
+
+            Network::PacketExtractor::Move(packet, cam);
+
+            auto& world = cam.position.world;
+            auto& chunk = cam.position.chunk;
+            auto& dir = cam.direction;
+            std::cout <<
+                "MOVE: \n" <<
+                "   world: " << world.x << ", " << world.y << ", " << world.z << "\n" <<
+                "   chunk: " << chunk.x << ", " << chunk.y << ", " << chunk.z << "\n" <<
+                "   dir: " << dir.x << ", " << dir.y << ", " << dir.z << "\n";
+
+//            manager.ClientTeleportOk(client);
+        }
+
+        void _HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandleTeleportOk (client " << client.id << ")\n";
+
+//            manager.ClientTeleportOk(client);
+        }
     }}
 
     void ClientActions::HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
     {
         typedef void (*ActionCallback)(ClientManager&, Client&, Common::Packet const&);
-        static ActionCallback actions[(int) Protocol::ClientToServer::NbPacketTypeClient] = {
+        static ActionCallback actions[] = {
             &ClientActionsNS::_HandleLogin,
             &ClientActionsNS::_HandlePong,
             &ClientActionsNS::_HandleNeedChunks,
@@ -135,6 +162,8 @@ namespace Server { namespace ClientManagement {
             &ClientActionsNS::_HandleGetCubeType,
             &ClientActionsNS::_HandleSettings,
             &ClientActionsNS::_HandleTeleportOk,
+            &ClientActionsNS::_HandleMove,
+            &ClientActionsNS::_HandleAction,
         };
 
         static_assert((int) Protocol::ClientToServer::Login == 0, "wrong callback index");
@@ -145,6 +174,12 @@ namespace Server { namespace ClientManagement {
         static_assert((int) Protocol::ClientToServer::GetCubeType == 5, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::Settings == 6, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::TeleportOk == 7, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Move == 8, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Action == 9, "wrong callback index");
+
+
+        static_assert((size_t)Protocol::ClientToServer::NbPacketTypeClient == sizeof(actions) / sizeof(*actions),
+                      "Not everything is implemented");
 
         Protocol::ActionType action;
         packet.Read(action);

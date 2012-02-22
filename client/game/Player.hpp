@@ -23,6 +23,8 @@ namespace Client { namespace Game {
             Common::Camera _camera;
             ActionBinder _actionBinder;
             Uint32 _elapsedTime;
+            bool _moved;
+            Uint32 _movedTime;
 
         public:
             Player(Game& game);

@@ -59,6 +59,17 @@ namespace Protocol {
          */
         TeleportOk,
 
+        /**
+         * Camera nouvelle position
+         */
+        Move,
+
+        /**
+         * Camera position
+         */
+        Action,
+
+
         NbPacketTypeClient, // pour les tableaux
     };
 
@@ -71,6 +82,7 @@ namespace Protocol {
          *  Si status == false :
          *   String reason
          *  Sinon :
+         *   Uint32 clientId
          *   String world identifier
          *   String world name
          *   Uint32 world version
@@ -175,7 +187,10 @@ namespace Tools {
                 "GetNeededResourceIds",
                 "GetResourceRange",
                 "GetCubeType",
-                "GetSpawnPosition"
+                "Settings",
+                "TeleportOk",
+                "Move",
+                "Action"
             };
             static std::string unknown = "Unknown";
 
@@ -197,7 +212,7 @@ namespace Tools {
                 "NeededResourceIds",
                 "ResourceRange",
                 "CubeType",
-                "SpawnPosition"
+                "TeleportPlayer"
             };
             static std::string unknown = "Unknown";
 

@@ -84,15 +84,16 @@ namespace Client { namespace Network {
         bool status;
         Protocol::Version major, minor;
         std::string reason, worldId, worldName;
+        Uint32 clientId;
         Uint32 worldVersion;
         Common::BaseChunk::CubeType nbCubeTypes;
-        PacketExtractor::ExtractLogin(p, status, major, minor, reason, worldId, worldName, worldVersion, nbCubeTypes);
+        PacketExtractor::ExtractLogin(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes);
 
         Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << major << "." << minor << "\n";
         if (status)
         {
             Tools::debug << "World: " << worldName << "(" << worldId << " version: " << worldVersion << ")\n";
-            this->_client.Login(worldId, worldName, worldVersion, nbCubeTypes);
+            this->_client.Login(clientId, worldId, worldName, worldVersion, nbCubeTypes);
         }
         else
             this->_client.Disconnect(reason);

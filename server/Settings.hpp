@@ -10,6 +10,7 @@ namespace Server {
         boost::filesystem::path worldDir;
         std::string host;
         std::string port;
+        std::string udpPort;
 
     public:
         Settings(int ac, char** av);
