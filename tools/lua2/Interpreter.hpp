@@ -1,6 +1,8 @@
 #ifndef __TOOLS_LUA_INTERPRETER_HPP__
 #define __TOOLS_LUA_INTERPRETER_HPP__
 
+#include "tools/lua2/Ref.hpp"
+
 extern "C" {
     struct lua_State;
 }
@@ -16,10 +18,11 @@ namespace Tools { namespace Lua {
     public:
         Interpreter() throw(std::runtime_error);
         ~Interpreter() throw();
-        operator lua_State*() const throw();
-        void DumpStack() const throw();
+        Ref operator [](std::string const& name) throw();
         void DoString(std::string const& code) throw(std::runtime_error);
         void DoFile(std::string const& path) throw(std::runtime_error);
+        void DumpStack() const throw();
+        operator lua_State*() const throw();
     };
 
 }}
