@@ -133,10 +133,11 @@ namespace Client {
         return boost::exit_success;
     }
 
-    void Client::Login(std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes)
+    void Client::Login(Uint32 clientId, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes)
     {
         if (this->_state != LoggingIn)
             throw std::runtime_error("Bad client state");
+        this->_clientId = clientId;
         this->_state = LoadingResources;
         if (this->_game)
             delete this->_game;

@@ -64,6 +64,13 @@ namespace Server { namespace ClientManagement {
         this->_messageQueue.PushMessage(m);
     }
 
+    void ClientManager::HandleUdpPacket(std::unique_ptr<Common::Packet>& packet)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&ClientManager::_HandleUdpPacket, this, packet.release()));
+        this->_messageQueue.PushMessage(m);
+    }
+
     void ClientManager::SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet)
     {
         Tools::SimpleMessageQueue::Message
@@ -119,6 +126,7 @@ namespace Server { namespace ClientManagement {
         client.SetLogin(login2);
         client.SendPacket(std::move(Network::PacketCreator::LoggedIn(true,
             "",
+            client.id,
             this->_server.GetGame().GetWorld().GetIdentifier(),
             this->_server.GetGame().GetWorld().GetFullname(),
             this->_server.GetGame().GetWorld().GetVersion(),
@@ -214,6 +222,26 @@ namespace Server { namespace ClientManagement {
         {
             Tools::log << "HandlePacket: " << e.what() << " (client " << clientId << ")\n";
             this->_HandleClientError(clientId);
+        }
+    }
+
+    void ClientManager::_HandleUdpPacket(Common::Packet* packet)
+    {
+        bool ok = false;
+        Uint32 clientId;
+        try
+        {
+            packet->Read(clientId);
+            ok = true;
+        }
+        catch (std::exception& e)
+        {
+            Tools::log << "Could not read id in UDP packet.\n";
+            Tools::Delete(packet);
+        }
+        if (ok)
+        {
+            this->_HandlePacket(clientId, packet);
         }
     }
 

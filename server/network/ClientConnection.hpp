@@ -24,6 +24,7 @@ namespace Server { namespace Network {
 
         boost::asio::io_service& _ioService;
         boost::asio::ip::tcp::socket* _socket;
+        boost::asio::ip::udp::socket _udpSocket;
         Uint8* _data;
         size_t _size;
         size_t _offset;
@@ -33,6 +34,7 @@ namespace Server { namespace Network {
         bool _writeConnected;
         ErrorCallback _errorCallback;
         PacketCallback _packetCallback;
+        bool _udp;
 
     public:
         ClientConnection(boost::asio::ip::tcp::socket* socket);

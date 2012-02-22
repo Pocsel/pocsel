@@ -16,6 +16,8 @@ namespace Server {
              "Path to a " PROJECT_NAME " world file")
             ("port,p", boost::program_options::value<std::string>()->default_value("8173"),
              "On which port to listen")
+            ("udpport,u", boost::program_options::value<std::string>()->default_value("8173"),
+             "On which UDP port to listen")
             ("host", boost::program_options::value<std::string>()->default_value("0.0.0.0"),
              "On which address to bind")
             ("version,v",
@@ -40,7 +42,7 @@ namespace Server {
 
         if (vm.count("help"))
         {
-            Tools::log << "Usage: " << (ac > 0 && av[0] ? av[0] : PROGRAM_NAME) << " [world_dir] [-p PORT] [--host HOST]\n\n";
+            Tools::log << "Usage: " << (ac > 0 && av[0] ? av[0] : PROGRAM_NAME) << " [world_dir] [-p PORT] [--host HOST] [-u udpPORT]\n\n";
             Tools::log << options;
             exit(boost::exit_success);
         }
@@ -53,6 +55,7 @@ namespace Server {
 
         this->host = vm["host"].as<std::string>();
         this->port = vm["port"].as<std::string>();
+        this->udpPort = vm["udpport"].as<std::string>();
         this->worldFile = vm["world"].as<std::string>();
         this->worldDir = this->worldFile.parent_path();
         Tools::log << "World directory: " << this->worldDir.string() << Tools::endl;

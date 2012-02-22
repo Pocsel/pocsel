@@ -33,7 +33,7 @@ namespace Tools {
     public:
         explicit ByteArray();
         explicit ByteArray(ByteArray const& ByteArray);
-        ~ByteArray();
+        virtual ~ByteArray();
 
         ByteArray& operator =(ByteArray const& ByteArray);
         Uint16 GetBytesLeft() const;
@@ -102,53 +102,6 @@ namespace Tools {
         virtual void _Resize(Uint16 target);
         void _PrepareWrite(Uint16 bytesCount);
     };
-
-/*
-// those methods new native types, define WITH_MALLOC_BYTEARRAY_READ_METHOD to use
-#ifdef WITH_MALLOC_BYTEARRAY_READ_METHOD
-# define BYTEARRAY_GEN_METHODS(Type, ReadMethod, WriteMethod) \
-    template<> \
-    inline std::unique_ptr<Type> ByteArray::Read<Type>() const \
-    { \
-        return std::unique_ptr<Type>(new Type(this->ReadMethod())); \
-    }
-
-    BYTEARRAY_GEN_METHODS(Uint8, Read8, Write8)
-    BYTEARRAY_GEN_METHODS(Int8, Read8, Write8)
-    BYTEARRAY_GEN_METHODS(Uint16, Read16, Write16)
-    BYTEARRAY_GEN_METHODS(Int16, Read16, Write16)
-    BYTEARRAY_GEN_METHODS(Uint32, Read32, Write32)
-    BYTEARRAY_GEN_METHODS(Int32, Read32, Write32)
-    BYTEARRAY_GEN_METHODS(Uint64, Read64, Write64)
-    BYTEARRAY_GEN_METHODS(Int64, Read64, Write64)
-    BYTEARRAY_GEN_METHODS(float, ReadFloat, WriteFloat)
-    BYTEARRAY_GEN_METHODS(double, ReadDouble, WriteDouble)
-    BYTEARRAY_GEN_METHODS(bool, ReadBool, WriteBool)
-    BYTEARRAY_GEN_METHODS(std::string, ReadString, WriteString)
-# undef BYTEARRAY_GEN_METHODS
-#endif
-*/
-
-// TODO
-//template<typename T> struct ByteArray::PodSerializer
-//{
-//  static std::unique_ptr<T> Read(ByteArray const& p)
-//  {
-//      std::unique_ptr<T> ptr(new T());
-//      std::memcpy(ptr.get(), p.ReadData(sizeof(T)), sizeof(T));
-//      return ptr;
-//  }
-//
-//  static void Read(ByteArray const& p, T& o)
-//  {
-//      std::memcpy(&o, p.ReadData(sizeof(T)), sizeof(T));
-//  }
-//
-//  static void Write(T const& o, ByteArray& p)
-//  {
-//      p.WriteData(&o, sizeof(T));
-//  }
-//};
 
 }
 

@@ -24,16 +24,16 @@ namespace Common {
         this->_data -= 2;
     }
 
-    void Packet::Dump() const
-    {
-        std::cout << "Packet dump (" << this->_size + 2 << " bytes total):" << std::endl;
-        for (Uint16 i = 0; i < this->_size + 2; ++i)
-        {
-            std::cout << std::setfill('0') << std::setw(2) << std::hex << static_cast<Uint32>(this->_data[i - 2]);
-            std::cout << " ";
-        }
-        std::cout << std::endl;
-    }
+//    void Packet::Dump() const
+//    {
+//        std::cout << "Packet dump (" << this->_size + 2 << " bytes total):" << std::endl;
+//        for (Uint16 i = 0; i < this->_size + 2; ++i)
+//        {
+//            std::cout << std::setfill('0') << std::setw(2) << std::hex << static_cast<Uint32>(this->_data[i - 2]);
+//            std::cout << " ";
+//        }
+//        std::cout << std::endl;
+//    }
 
     char const* Packet::GetCompleteData() const
     {
@@ -48,11 +48,9 @@ namespace Common {
 
     void Packet::_Resize(Uint16 target)
     {
-    //    assert(this->_allocSize < target);
         char* tmp = this->_data - 2;
         this->_data = new char[target + 2];
         std::memcpy(this->_data, tmp, this->_allocSize + 2);
-    //    std::memset(this->_data + this->_allocSize, 42, target - this->_allocSize);
         this->_allocSize = target;
         Tools::DeleteTab(tmp);
         this->_data = this->_data + 2;
@@ -62,7 +60,7 @@ namespace Common {
     {
         char* tmp = this->_data - 2;
         tmp[0] = (this->_size & 0xFF00) >> 8;
-        tmp[1] = this->_size & 0xFF;
+        tmp[1] = this->_size & 0x00FF;
     }
 
 }
