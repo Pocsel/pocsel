@@ -32,7 +32,7 @@ namespace Client { namespace Network {
                 throw std::runtime_error("Network::Connect called while thread running");
         }
 
-        if (this->_thread) // dans le cas ou le _Connect à foiré
+        if (this->_thread) // dans le cas ou le _Connect() à foiré
         {
             this->_thread->join(); // on attend pour etre sur qu'il a completement return de _Connect()
             delete this->_thread; // et on ne leak pas de mémoire

@@ -1,6 +1,17 @@
 #include "tools/lua2/Lua.hpp"
 #include "tools/lua2/Interpreter.hpp"
 
+namespace {
+
+    int _LuaCall(lua_State* state)
+    {
+        int* data = static_cast<int*>(lua_touserdata(state, lua_upvalueindex(1)));
+        Tools::log << "userdata: " << *data << Tools::endl;
+        return 0;
+    }
+
+}
+
 namespace Tools { namespace Lua {
 
     Interpreter::Interpreter() throw(std::runtime_error)
@@ -8,10 +19,15 @@ namespace Tools { namespace Lua {
         this->_state = luaL_newstate();
         if (!this->_state)
             throw std::runtime_error("Lua::Interpreter: Not enough memory");
+        this->_globals = new Ref(*this);
+        lua_pushvalue(*this, LUA_GLOBALSINDEX);
+        this->_globals->FromStack();
     }
 
     Interpreter::~Interpreter() throw()
     {
+        Tools::Delete(this->_globals);
+        Tools::log << "lua_close" << Tools::endl;
         lua_close(this->_state);
     }
 
@@ -20,11 +36,57 @@ namespace Tools { namespace Lua {
         return this->_state;
     }
 
-    Ref Interpreter::operator [](std::string const& name) throw()
+    Ref const& Interpreter::Globals() const throw()
+    {
+        return *this->_globals;
+    }
+
+    Ref Interpreter::MakeInteger(int val) throw()
     {
         Ref r(*this);
-        lua_pushstring(*this, name.c_str());
-        lua_rawget(*this, LUA_GLOBALSINDEX);
+        lua_pushinteger(*this, val);
+        r.FromStack();
+        return r;
+    }
+
+    Ref Interpreter::MakeNumber(double val) throw()
+    {
+        Ref r(*this);
+        lua_pushnumber(*this, val);
+        r.FromStack();
+        return r;
+    }
+
+    Ref Interpreter::MakeString(std::string const& val) throw()
+    {
+        Ref r(*this);
+        lua_pushstring(*this, val.c_str());
+        r.FromStack();
+        return r;
+    }
+
+    Ref Interpreter::MakeBoolean(bool val) throw()
+    {
+        Ref r(*this);
+        lua_pushboolean(*this, val);
+        r.FromStack();
+        return r;
+    }
+
+    Ref Interpreter::MakeTable() throw()
+    {
+        Ref r(*this);
+        lua_newtable(*this);
+        r.FromStack();
+        return r;
+    }
+
+    Ref Interpreter::MakeFunction(std::function<void(Stack&)> val) throw()
+    {
+        Ref r(*this);
+        int* data = static_cast<int*>(lua_newuserdata(*this, sizeof(int)));
+        *data = 1334;
+        lua_pushcclosure(*this, &_LuaCall, 1);
         r.FromStack();
         return r;
     }
