@@ -20,9 +20,19 @@ namespace Tools { namespace Lua {
         return this->_state;
     }
 
+    Ref Interpreter::operator [](std::string const& name) throw()
+    {
+        Ref r(*this);
+        lua_pushstring(*this, name.c_str());
+        lua_rawget(*this, LUA_GLOBALSINDEX);
+        r.FromStack();
+        return r;
+    }
+
     void Interpreter::DumpStack() const throw()
     {
         Tools::log << "------- Lua Stack Dump -------\n";
+        Tools::log << "(size: " << lua_gettop(*this) << ")\n";
         for (int i = 1; i <= lua_gettop(*this); ++i)
         {
             int type = lua_type(*this, i);
@@ -51,7 +61,7 @@ namespace Tools { namespace Lua {
         if (luaL_dostring(*this, code.c_str()))
         {
             std::string e = "Lua::Interpreter: Cannot load string: ";
-            e += lua_tostring(*this, 1);
+            e += lua_tostring(*this, -1);
             lua_pop(*this, 1);
             throw std::runtime_error(e);
         }
@@ -62,7 +72,7 @@ namespace Tools { namespace Lua {
         if (luaL_dofile(*this, path.c_str()))
         {
             std::string e = "Lua::Interpreter: Cannot load file: ";
-            e += lua_tostring(*this, 1);
+            e += lua_tostring(*this, -1);
             lua_pop(*this, 1);
             throw std::runtime_error(e);
         }

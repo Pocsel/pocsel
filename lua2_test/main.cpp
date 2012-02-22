@@ -1,36 +1,21 @@
 #include "tools/lua2/Interpreter.hpp"
-#include "tools/lua2/Var.hpp"
+#include "tools/lua2/Ref.hpp"
 
 int main(int, char**)
 {
     Tools::Lua::Interpreter i;
-    Tools::Lua::Var v(i);
 
-    Tools::log << v.IsNil() << Tools::endl;
-    Tools::log << v.GetType() << Tools::endl;
+    i.DoString("test = { test2 = 23 }");
 
-    i.DumpStack();
+    Tools::Lua::Ref r1 = i["test"];
+    Tools::Lua::Ref r2 = i["test"]["test2"];
+    Tools::Lua::Ref r3 = r2;
+    Tools::Lua::Ref r4(r1);
 
-    v.FromGlobalTable("test");
-    Tools::log << v.GetType() << Tools::endl;
-
-    i.DumpStack();
-
-    try
-    {
-        i.DoString("test = 12");
-    }
-    catch (std::exception& e)
-    {
-        Tools::log << e.what() << Tools::endl;
-    }
-
-    Tools::log << v.GetType() << Tools::endl;
-
-    v.FromGlobalTable("test");
-    Tools::log << v.ToDouble() << Tools::endl;
-
-    i.DumpStack();
+    Tools::log << "r1 " << r1.ToNumber() << Tools::endl;
+    Tools::log << "r2 " << r2.ToNumber() << Tools::endl;
+    Tools::log << "r3 " << r3.ToNumber() << Tools::endl;
+    Tools::log << "r4 " << r4.ToNumber() << Tools::endl;
 
     return 0;
 }
