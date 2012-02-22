@@ -31,20 +31,16 @@ namespace Server { namespace ClientManagement {
 
         for (auto it = this->_clients.begin(), ite = this->_clients.end(); it != ite; ++it)
             Tools::Delete(it->second);
-
-//        Tools::Delete(this->_messageQueue);
     }
 
     void ClientManager::Start()
     {
         Tools::debug << "ClientManager::Start()\n";
-//        this->_messageQueue->Start();
     }
 
     void ClientManager::Stop()
     {
         Tools::debug << "ClientManager::Stop()\n";
-//        this->_messageQueue->Stop();
     }
 
     void ClientManager::HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection)
@@ -130,10 +126,6 @@ namespace Server { namespace ClientManagement {
             ));
 
         Tools::log << "Client logged in: " << login2 << "\n";
-
-        //        client.Spawn(this->_game.GetWorld().GetDefaultMap());
-        // TODO
-        // spawn = créer le player, le foutre dans la game etc .. ?
     }
 
     void ClientManager::ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids)
@@ -146,9 +138,18 @@ namespace Server { namespace ClientManagement {
         }
     }
 
-    void ClientManager::ClientSpawn(Client& client)
+    void ClientManager::ClientSpawn(Client& client, Uint32 viewDistance, std::string const& playerName)
     {
-        this->_server.GetGame().SpawnPlayer(client.GetLogin(), client.id);
+        client.SetPlayerName(playerName);
+        this->_server.GetGame().SpawnPlayer(client.GetLogin(), client.id, playerName, viewDistance);
+    }
+
+    void ClientManager::ClientTeleportOk(Client& client)
+    {
+        if (client.teleportMode == false)
+            return;
+        client.teleportMode = false;
+        this->_server.GetGame().PlayerTeleportOk(client.id);
     }
 
     Uint32 ClientManager::_GetNextId()
@@ -191,6 +192,7 @@ namespace Server { namespace ClientManagement {
         Tools::debug << "Removing client " << clientId << "\n";
         Tools::Delete(this->_clients[clientId]);
         this->_clients.erase(clientId);
+        this->_server.GetGame().RemovePlayer(clientId);
         Tools::debug << "Removing client " << clientId << " done\n";
     }
 
@@ -247,9 +249,8 @@ namespace Server { namespace ClientManagement {
 
         Tools::debug << "ClientManager::_ClientTeleport\n";
 
+        this->_clients[clientId]->teleportMode = true;
         this->_clients[clientId]->SendPacket(std::move(Network::PacketCreator::TeleportPlayer(map, position)));
-
-        // TODO passer le client en mode teleport (il n'existe plus dans le monde)
     }
 
 }}

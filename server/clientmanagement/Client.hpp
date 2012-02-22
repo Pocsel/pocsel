@@ -20,9 +20,11 @@ namespace Server { namespace ClientManagement {
     {
     public:
         Uint32 const id;
+        bool teleportMode;
     private:
         boost::shared_ptr<Network::ClientConnection> _connection;
         std::string _login;
+        std::string _playerName;
 
     public:
         Client(Uint32 id, boost::shared_ptr<Network::ClientConnection> connection);
@@ -32,6 +34,8 @@ namespace Server { namespace ClientManagement {
 
         void SetLogin(std::string const& login);
         std::string const& GetLogin() const { return this->_login; }
+        void SetPlayerName(std::string const& playerName);
+        std::string const& GetPlayerName() const { return this->_playerName; }
     };
 
 }}

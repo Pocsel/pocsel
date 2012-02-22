@@ -8,6 +8,7 @@ namespace Server { namespace ClientManagement {
 
     Client::Client(Uint32 id,boost::shared_ptr<Network::ClientConnection> connection) :
         id(id),
+        teleportMode(false),
         _connection(connection),
         _login("")
     {
@@ -28,6 +29,12 @@ namespace Server { namespace ClientManagement {
     {
         assert(login.size() > 0 && "login is empty");
         this->_login = login;
+    }
+
+    void Client::SetPlayerName(std::string const& playerName)
+    {
+        assert(playerName.size() > 0 && "login is empty");
+        this->_playerName = playerName;
     }
 
 }}

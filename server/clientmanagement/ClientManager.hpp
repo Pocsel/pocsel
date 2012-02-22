@@ -73,7 +73,8 @@ namespace Server { namespace ClientManagement {
         Game::Game const& GetGame() const;
         void ClientLogin(Client& client, std::string const& login);
         void ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids);
-        void ClientSpawn(Client& client);
+        void ClientSpawn(Client& client, Uint32 viewDistance, std::string const& playerName);
+        void ClientTeleportOk(Client& client);
 
     private:
         Uint32 _GetNextId();

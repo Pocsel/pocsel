@@ -17,23 +17,23 @@ namespace Tools {
 
 }
 
-namespace Server { namespace Game { namespace Map { namespace Gen {
+namespace Server { namespace Game {
 
+    class Player;
+
+    namespace Map { namespace Gen {
     class ChunkGenerator;
+    }}
 
-}}}}
+    namespace Engine {
+        class Engine;
+    }
 
-namespace Server { namespace Game { namespace Engine {
+    namespace Entities {
+        class EntityManager;
+    }
 
-    class Engine;
-
-}}}
-
-namespace Server { namespace Game { namespace Entities {
-
-    class EntityManager;
-
-}}}
+}}
 
 namespace Server { namespace Game { namespace Map {
 
@@ -53,6 +53,7 @@ namespace Server { namespace Game { namespace Map {
         Gen::ChunkGenerator* _gen;
         std::unordered_map<Chunk::IdType, std::vector<ChunkCallback>> _chunkRequests;
         std::vector<SpawnCallback> _spawnRequests;
+        std::unordered_map<Uint32, std::shared_ptr<Player>> _players;
         Common::Position* _spawnPosition;
         Entities::EntityManager* _entityManager;
         Engine::Engine* _engine;
@@ -70,12 +71,16 @@ namespace Server { namespace Game { namespace Map {
         void HandleNewChunk(Chunk* chunk);
         void GetSpawnPosition(SpawnCallback& response);
         void GetChunk(Chunk::IdType id, ChunkCallback& response);
+        void AddPlayer(std::shared_ptr<Player> const& p);
+        void RemovePlayer(Uint32 id);
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
         void _GetSpawnPosition(SpawnCallback& response);
         void _GetChunk(Chunk::IdType id, ChunkCallback& response);
         void _FindSpawnPosition(Chunk const& chunk);
+        void _AddPlayer(std::shared_ptr<Player> const& p);
+        void _RemovePlayer(Uint32 id);
     };
 
 }}}

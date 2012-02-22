@@ -107,16 +107,18 @@ namespace Server { namespace ClientManagement {
 
             Network::PacketExtractor::Settings(packet, viewDistance, playerName);
 
-            // TODO add viewDistance, playerName
-            manager.ClientSpawn(client);
+            if (playerName.size() == 0)
+                playerName = "(void)";
+//                throw std::runtime_error("Empty player name");
+
+            manager.ClientSpawn(client, viewDistance, playerName);
         }
 
         void _HandleTeleportOk(ClientManager& manager, Client& client, Common::Packet const&)
         {
             Tools::debug << "_HandleTeleportOk (client " << client.id << ")\n";
 
-            // TODO fin de cycle teleportation pour le client
-
+            manager.ClientTeleportOk(client);
         }
 
     }}

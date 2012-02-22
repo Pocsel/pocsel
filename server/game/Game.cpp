@@ -27,8 +27,8 @@ namespace Server { namespace Game {
         Tools::debug << "Game::~Game()\n";
         Tools::Delete(this->_world);
 
-        for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
-            Tools::Delete(it->second);
+//        for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+//            Tools::Delete(it->second);
 
 //        Tools::Delete(this->_messageQueue);
     }
@@ -47,10 +47,20 @@ namespace Server { namespace Game {
 //        this->_messageQueue->Stop();
     }
 
-    void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId)
+    void Game::PlayerTeleportOk(Uint32 id)
+    {
+        auto it = this->_players.find(id);
+        if (it == this->_players.end())
+            return;
+        Player* player = it->second.get();
+
+        player->TeleportOk();
+    }
+
+    void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&Game::_SpawnPlayer, this, std::cref(clientName), clientId));
+            m(std::bind(&Game::_SpawnPlayer, this, std::cref(clientName), clientId, playerName, viewDistance));
         this->_messageQueue.PushMessage(m);
     }
 
@@ -68,12 +78,19 @@ namespace Server { namespace Game {
         this->_messageQueue.PushMessage(m);
     }
 
-    void Game::_SpawnPlayer(std::string const& clientName, Uint32 clientId)
+    void Game::RemovePlayer(Uint32 clientId)
     {
-        // dans le futur, clientName sera utilise pour un client connu par le serveur
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Game::_RemovePlayer, this, clientId));
+        this->_messageQueue.PushMessage(m);
+    }
 
-        Player* newPlayer = new Player(*this, clientId);
-        this->_players[clientId] = newPlayer;
+    void Game::_SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance)
+    {
+        // TODO dans le futur, clientName sera utilise pour un client connu par le serveur
+
+        Player* newPlayer = new Player(*this, clientId, playerName, viewDistance);
+        this->_players[clientId] = std::shared_ptr<Player>(newPlayer);
 
         Map::Map::SpawnCallback cb(std::bind(&Game::PlayerTeleport,
                                              this,
@@ -88,7 +105,7 @@ namespace Server { namespace Game {
         auto it = this->_players.find(id);
         if (it == this->_players.end())
             return;
-        Player* player = it->second;
+        Player* player = it->second.get();
 
         Map::Map* map;
 
@@ -99,25 +116,30 @@ namespace Server { namespace Game {
 
         player->Teleport(*map, position);
 
-        // TODO mode teleportation pour le player ??
-
         this->_server.GetClientManager().ClientTeleport(id, std::cref(map->GetName()), position);
     }
 
     void Game::_GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback)
     {
-        static std::unordered_map<Uint32, Uint32> __;
-
         auto it = this->_players.find(clientId);
         if (it == this->_players.end())
             return;
-        Player* player = it->second;
+        Player* player = it->second.get();
+
         if (!player->HasMap())
-        {
-            // kick player ?
             return;
-        }
         player->GetCurrentMap().GetChunk(id, callback);
+    }
+
+    void Game::_RemovePlayer(Uint32 clientId)
+    {
+        auto it = this->_players.find(clientId);
+        if (it == this->_players.end())
+            return;
+        Player* player = it->second.get();
+
+        player->RemoveFromMap();
+        this->_players.erase(clientId);
     }
 
 }}

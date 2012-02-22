@@ -10,6 +10,8 @@
 #include "server/game/entities/EntityManager.hpp"
 #include "server/game/engine/Engine.hpp"
 
+#include "server/game/Player.hpp"
+
 namespace Server { namespace Game { namespace Map {
 
     Map::Map(Conf const& conf, Tools::SimpleMessageQueue& gameMessageQueue) :
@@ -58,6 +60,13 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushMessage(m);
     }
 
+    void Map::GetSpawnPosition(SpawnCallback& response)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_GetSpawnPosition, this, response));
+        this->_messageQueue->PushMessage(m);
+    }
+
     void Map::GetChunk(Chunk::IdType id, ChunkCallback& response)
     {
         Tools::SimpleMessageQueue::Message
@@ -65,10 +74,17 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushMessage(m);
     }
 
-    void Map::GetSpawnPosition(SpawnCallback& response)
+    void Map::AddPlayer(std::shared_ptr<Player> const& p)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&Map::_GetSpawnPosition, this, response));
+            m(std::bind(&Map::_AddPlayer, this, p));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::RemovePlayer(Uint32 id)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_RemovePlayer, this, id));
         this->_messageQueue->PushMessage(m);
     }
 
@@ -166,6 +182,16 @@ namespace Server { namespace Game { namespace Map {
         }
         ChunkCallback cb(std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
         this->GetChunk(Chunk::CoordsToId(chunk.coords.x, chunk.coords.y - 1, chunk.coords.z), cb);
+    }
+
+    void Map::_AddPlayer(std::shared_ptr<Player> const& p)
+    {
+        this->_players[p->id] = p;
+    }
+
+    void Map::_RemovePlayer(Uint32 id)
+    {
+        this->_players.erase(id);
     }
 
 }}}

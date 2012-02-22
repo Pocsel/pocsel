@@ -36,7 +36,7 @@ namespace Server { namespace Game {
         Server& _server;
         Tools::SimpleMessageQueue& _messageQueue;
         World* _world;
-        std::unordered_map<Uint32, Player*> _players;
+        std::unordered_map<Uint32, std::shared_ptr<Player>> _players;
 
     public:
         Game(Server& server, Tools::SimpleMessageQueue& messageQueue);
@@ -48,15 +48,19 @@ namespace Server { namespace Game {
         World const& GetWorld() const { return *this->_world; }
         World& GetWorld() { return *this->_world; }
 
+        void PlayerTeleportOk(Uint32 id);
+
         // Thread safe
-        void SpawnPlayer(std::string const& clientName, Uint32 clientId);
+        void SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);
         void PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
         void GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback);
+        void RemovePlayer(Uint32 clientId);
 
     private:
-        void _SpawnPlayer(std::string const& clientName, Uint32 clientId);
+        void _SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);
         void _PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
         void _GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback);
+        void _RemovePlayer(Uint32 clientId);
     };
 
 }}

@@ -1,11 +1,7 @@
 #ifndef __SERVER_GAME_PLAYER_HPP__
 #define __SERVER_GAME_PLAYER_HPP__
 
-namespace Common {
-
-    struct Position;
-
-}
+#include "common/Position.hpp"
 
 namespace Server { namespace Game { namespace Map {
 
@@ -18,28 +14,30 @@ namespace Server { namespace Game {
     class Game;
 
     class Player :
-//        public std::enable_shared_from_this<Player>,
+        public std::enable_shared_from_this<Player>,
         private boost::noncopyable
     {
-    public:
-//        typedef std::function<void(Common::Position const&)> TeleportCallback;
-
     public:
         Uint32 const id;
     private:
         Game& _game;
+        std::string _playerName;
+        Uint32 _viewDistance;
         Map::Map* _currentMap;
-//        TeleportCallback _teleportCallback;
+        bool _inGame;
+        Common::Position _position;
 
     public:
-        Player(Game& game, Uint32 id);
+        Player(Game& game, Uint32 id, std::string const& playerName, Uint32 viewDistance);
         ~Player();
 
         void SetCurrentMap(Map::Map& map) { this->_currentMap = &map; }
         bool HasMap() const { return this->_currentMap != 0; }
         Map::Map& GetCurrentMap() { assert(this->_currentMap); return *this->_currentMap; }
-        void Teleport(Common::Position const& position);
+        Common::Position const& GetPosition() { return this->_position; }
         void Teleport(Map::Map& map, Common::Position const& position);
+        void TeleportOk();
+        void RemoveFromMap();
     };
 
 }}

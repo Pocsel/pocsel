@@ -31,6 +31,7 @@ namespace Server {
         Tools::Delete(this->_clientManager);
         Tools::Delete(this->_resourceManager);
         Tools::Delete(this->_network);
+        Tools::Delete(this->_admMessageQueue);
     }
 
     int Server::Run()

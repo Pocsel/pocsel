@@ -22,7 +22,6 @@ namespace Tools {
             _nbThreads(nbThreads)
         {
         }
-        // XXX destructeur non virtual, on aura jamais de pointeur sur cette merde
         ~SimpleMessageQueue()
         {
         }
