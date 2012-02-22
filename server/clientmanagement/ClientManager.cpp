@@ -126,6 +126,7 @@ namespace Server { namespace ClientManagement {
         client.SetLogin(login2);
         client.SendPacket(std::move(Network::PacketCreator::LoggedIn(true,
             "",
+            client.id,
             this->_server.GetGame().GetWorld().GetIdentifier(),
             this->_server.GetGame().GetWorld().GetFullname(),
             this->_server.GetGame().GetWorld().GetVersion(),

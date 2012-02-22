@@ -8,6 +8,9 @@
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 
+#include "client/network/PacketCreator.hpp"
+#include "client/network/Network.hpp"
+
 namespace Client { namespace Game {
 
     Player::Player(Game& game) :
@@ -33,8 +36,22 @@ namespace Client { namespace Game {
             Tools::Vector2f delta;
             delta.x = (mousePos.x - (static_cast<int>(w.GetSize().x) / 2)) / (1000.0f - 990.0f * sensi);
             delta.y = (mousePos.y - (static_cast<int>(w.GetSize().y) / 2)) / (1000.0f - 990.0f * sensi);
-            this->_camera.Rotate(delta);
+            if (delta.x != 0.0f || delta.y != 0.0f)
+            {
+                this->_camera.Rotate(delta);
+                this->_moved = true;
+            }
             w.GetInputManager().WarpMouse(Tools::Vector2i(w.GetSize() / 2));
+        }
+
+        this->_movedTime += time;
+        if (this->_moved && this->_movedTime > 40)
+        {
+            this->_game.GetClient().GetNetwork().SendUdpPacket(
+                    Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), this->_camera)
+                    );
+            this->_moved = false;
+            this->_movedTime = 0;
         }
     }
 
@@ -84,6 +101,7 @@ namespace Client { namespace Game {
         Common::Position p = this->_camera.position;
         p += moveVector;
         this->SetPosition(p);
+        this->_moved = true;
     }
 
 }}

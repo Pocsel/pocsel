@@ -1,6 +1,7 @@
 #include "server/network/PacketExtractor.hpp"
 
 #include "common/Packet.hpp"
+#include "common/CameraSerializer.hpp"
 
 namespace Server { namespace Network {
 
@@ -65,6 +66,16 @@ namespace Server { namespace Network {
 
     void PacketExtractor::TeleportOk(Common::Packet const&)
     {
+    }
+
+    void PacketExtractor::Move(Common::Packet const& p, Common::Camera& cam)
+    {
+        p.Read(cam);
+    }
+
+    void PacketExtractor::Action(Common::Packet const& p, Common::Camera& cam)
+    {
+        p.Read(cam);
     }
 
 }}

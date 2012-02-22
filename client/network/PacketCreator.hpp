@@ -3,6 +3,11 @@
 
 #include "common/BaseChunk.hpp"
 #include "common/Packet.hpp"
+#include "client/network/UdpPacket.hpp"
+
+namespace Common {
+    class Camera;
+}
 
 namespace Client {
     class Settings;
@@ -21,6 +26,9 @@ namespace Client { namespace Network {
         static std::unique_ptr<Common::Packet> GetCubeType(Common::BaseChunk::CubeType id);
         static std::unique_ptr<Common::Packet> Settings(Settings const& settings);
         static std::unique_ptr<Common::Packet> TeleportOk();
+
+        static std::unique_ptr<UdpPacket> Move(Uint32 id, Common::Camera const& cam);
+        static std::unique_ptr<UdpPacket> Action(Uint32 id, Common::Camera const& cam);
     };
 
 }}

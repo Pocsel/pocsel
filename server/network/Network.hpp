@@ -22,6 +22,7 @@ namespace Server { namespace Network {
         typedef std::function<void(std::unique_ptr<Common::Packet>&)> UdpPacketHandler;
 
     private:
+        static const unsigned int _buffSize = 1024;
         Server& _server;
         NewConnectionHandler _newConnectionHandler;
         UdpPacketHandler _udpPacketHandler;
@@ -29,6 +30,8 @@ namespace Server { namespace Network {
         boost::asio::ip::tcp::acceptor _acceptor;
         boost::asio::ip::tcp::socket* _newConnection;
         boost::asio::ip::udp::socket _udpSocket;
+        size_t _size;
+        Uint8* _data;
 
     public:
         Network(Server& server, NewConnectionHandler& newConnectionHandler, UdpPacketHandler& udpPacketHandler);
@@ -39,6 +42,8 @@ namespace Server { namespace Network {
     private:
         void _ConnectAccept();
         void _HandleAccept(boost::system::error_code const& e);
+        void _ConnectUdpRead();
+        void _HandleUdpRead(boost::system::error_code const& e, std::size_t size);
     };
 
 }}

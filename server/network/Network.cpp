@@ -13,7 +13,8 @@ namespace Server { namespace Network {
         _ioService(),
         _acceptor(this->_ioService),
         _newConnection(0),
-        _udpSocket(this->_ioService)
+        _udpSocket(this->_ioService),
+        _data(new Uint8[_buffSize])
     {
         Tools::debug << "Network::Network()\n";
         Settings const& settings = server.GetSettings();
@@ -57,6 +58,9 @@ namespace Server { namespace Network {
             boost::asio::ip::udp::endpoint udpEndpoint(*udpResolver.resolve(udpQuery)); // take first
             this->_udpSocket.open(udpEndpoint.protocol());
             this->_udpSocket.bind(udpEndpoint);
+
+            this->_ConnectUdpRead();
+
             Tools::log <<
                 "Listening on (UDP) " << udpEndpoint.address().to_string()
                 << ":" << settings.udpPort <<
@@ -77,6 +81,7 @@ namespace Server { namespace Network {
     {
         Tools::debug << "Network::~Network()\n";
         Tools::Delete(this->_newConnection);
+        Tools::DeleteTab(this->_data);
     }
 
     void Network::_ConnectAccept()
@@ -104,6 +109,33 @@ namespace Server { namespace Network {
         }
 
         this->_ConnectAccept();
+    }
+
+    void Network::_ConnectUdpRead()
+    {
+        this->_udpSocket.async_receive(
+            boost::asio::buffer(this->_data, _buffSize),
+            boost::bind(
+                &Network::_HandleUdpRead, this,
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred)
+            );
+    }
+
+    void Network::_HandleUdpRead(boost::system::error_code const& e, std::size_t transferredBytes)
+    {
+        if (!e)
+        {
+            std::unique_ptr<Common::Packet> packet(new Common::Packet());
+            packet->SetData((char*)this->_data, transferredBytes);
+            this->_udpPacketHandler(packet);
+        }
+        else
+        {
+            Tools::error << "UPD read failure: " << e.message() << "\n";
+        }
+
+        this->_ConnectUdpRead();
     }
 
     void Network::Run()

@@ -19,6 +19,7 @@ namespace Server { namespace Network {
     public:
         static std::unique_ptr<Common::Packet> LoggedIn(bool success,
                                         std::string const& reason = "",
+                                        Uint32 clientId = 0,
                                         std::string const& worldIdentifier = "",
                                         std::string const& worldName = "",
                                         Uint32 worldVersion = 0,

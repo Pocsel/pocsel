@@ -15,6 +15,7 @@ namespace Server { namespace Network {
 
     std::unique_ptr<Common::Packet> PacketCreator::LoggedIn(bool success,
                                             std::string const& reason /* = "" */,
+                                            Uint32 clientId,
                                             std::string const& worldIdentifier /* = "" */,
                                             std::string const& worldName /* = "" */,
                                             Uint32 worldVersion /* = 0 */,
@@ -27,6 +28,7 @@ namespace Server { namespace Network {
         p->Write(Protocol::Version::Minor);
         if (success)
         {
+            p->Write(clientId);
             p->Write(worldIdentifier);
             p->Write(worldName);
             p->Write(worldVersion);

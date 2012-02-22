@@ -23,6 +23,7 @@ namespace Client { namespace Network {
                 Protocol::Version& major,
                 Protocol::Version& minor,
                 std::string& reason,
+                Uint32& clientId,
                 std::string& worldIdentifier,
                 std::string& worldName,
                 Uint32& worldVersion,

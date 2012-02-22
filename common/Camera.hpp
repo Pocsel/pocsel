@@ -22,6 +22,21 @@ namespace Common {
             theta(0),
             phi(std::atan2(0.0f, -1.0f) / 2) // pi / 2
         {
+            this->SetAngles(theta, phi);
+        }
+
+        Camera(Common::Position const& pos) :
+            position(pos),
+            theta(0),
+            phi(std::atan2(0.0f, -1.0f) / 2) // pi / 2
+        {
+            this->SetAngles(theta, phi);
+        }
+
+        Camera(Common::Position const& pos, float theta, float phi) :
+            position(pos), theta(theta), phi(phi)
+        {
+            this->SetAngles(theta, phi);
         }
 
         Tools::Matrix4<float> GetViewMatrix() const
