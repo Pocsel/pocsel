@@ -6,12 +6,14 @@
 
 namespace Server { namespace Network {
 
-    Network::Network(Server& server, NewConnectionHandler& newConnectionHandler) :
+    Network::Network(Server& server, NewConnectionHandler& newConnectionHandler, UdpPacketHandler& udpPacketHandler) :
         _server(server),
         _newConnectionHandler(newConnectionHandler),
+        _udpPacketHandler(udpPacketHandler),
         _ioService(),
         _acceptor(this->_ioService),
-        _newConnection(0)
+        _newConnection(0),
+        _udpSocket(this->_ioService)
     {
         Tools::debug << "Network::Network()\n";
         Settings const& settings = server.GetSettings();
@@ -20,7 +22,7 @@ namespace Server { namespace Network {
             boost::asio::ip::tcp::resolver resolver(this->_ioService);
             boost::asio::ip::tcp::resolver::query query(
                     settings.host,
-                    Tools::ToString(settings.port),
+                    settings.port,
                     boost::asio::ip::tcp::resolver::query::passive
                     );
             boost::asio::ip::tcp::endpoint endpoint = *(resolver.resolve(query)); // take first
@@ -39,6 +41,32 @@ namespace Server { namespace Network {
             Tools::error <<
                 "Cannot bind to '" << settings.host <<
                 ":" << settings.port <<
+                "': " << e.what() <<
+                "\n";
+            throw;
+        }
+
+        try
+        {
+            boost::asio::ip::udp::resolver udpResolver(this->_ioService);
+            boost::asio::ip::udp::resolver::query udpQuery(
+                    settings.host,
+                    settings.udpPort,
+                    boost::asio::ip::udp::resolver::query::passive
+                    );
+            boost::asio::ip::udp::endpoint udpEndpoint(*udpResolver.resolve(udpQuery)); // take first
+            this->_udpSocket.open(udpEndpoint.protocol());
+            this->_udpSocket.bind(udpEndpoint);
+            Tools::log <<
+                "Listening on (UDP) " << udpEndpoint.address().to_string()
+                << ":" << settings.udpPort <<
+                "\n";
+        }
+        catch (std::exception& e)
+        {
+            Tools::error <<
+                "Cannot bind to (UDP) '" << settings.host <<
+                ":" << settings.udpPort <<
                 "': " << e.what() <<
                 "\n";
             throw;
@@ -65,6 +93,7 @@ namespace Server { namespace Network {
         if (!e)
         {
             Tools::log << "New connection.\n";
+
             boost::shared_ptr<ClientConnection> newClientConnection(new ClientConnection(this->_newConnection));
             this->_newConnectionHandler(newClientConnection);
         }

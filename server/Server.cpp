@@ -21,7 +21,9 @@ namespace Server {
 
         Network::Network::NewConnectionHandler
             nch(std::bind(&ClientManagement::ClientManager::HandleNewClient, this->_clientManager, std::placeholders::_1));
-        this->_network = new Network::Network(*this, nch);
+        Network::Network::UdpPacketHandler
+            uph(std::bind(&ClientManagement::ClientManager::HandleUdpPacket, this->_clientManager, std::placeholders::_1));
+        this->_network = new Network::Network(*this, nch, uph);
     }
 
     Server::~Server()

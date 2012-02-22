@@ -9,7 +9,8 @@ namespace Server { namespace Network {
 
     ClientConnection::ClientConnection(boost::asio::ip::tcp::socket* socket) :
         _ioService(socket->get_io_service()),
-        _socket(std::move(socket)),
+        _socket(socket),
+        _udpSocket(socket->get_io_service()),
         _data(new Uint8[_bufferSize]),
         _size(_bufferSize),
         _offset(0),
@@ -17,9 +18,20 @@ namespace Server { namespace Network {
         _connected(true),
         _writeConnected(false),
         _errorCallback(0),
-        _packetCallback(0)
+        _packetCallback(0),
+        _udp(true)
     {
-        assert(this->_socket);
+        try
+        {
+            boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
+            this->_udpSocket.open(endpoint.protocol());
+            this->_udpSocket.connect(endpoint);
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "Could not connect to UDP endpoint: " << e.what() << ".\n";
+            this->_udp = false;
+        }
     }
 
     ClientConnection::~ClientConnection()
