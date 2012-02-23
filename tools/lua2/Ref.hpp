@@ -4,7 +4,7 @@
 namespace Tools { namespace Lua {
 
     class Interpreter;
-    class Stack;
+    class Call;
 
     class Ref
     {
@@ -21,7 +21,7 @@ namespace Tools { namespace Lua {
         bool operator ==(Ref const& ref) const throw();
         bool operator !=(Ref const& ref) const throw();
         Ref operator [](Ref const& ref) const throw(std::runtime_error);
-        void operator ()(Stack& stack) const throw(std::runtime_error);
+        void operator ()(Call& call) const throw(std::runtime_error);
         // modifiers
         void Unref() throw();
         void FromStack() throw();

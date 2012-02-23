@@ -1,7 +1,7 @@
 #include "tools/lua2/Lua.hpp"
 #include "tools/lua2/Ref.hpp"
 #include "tools/lua2/Interpreter.hpp"
-#include "tools/lua2/Stack.hpp"
+#include "tools/lua2/Call.hpp"
 
 namespace Tools { namespace Lua {
 
@@ -56,7 +56,7 @@ namespace Tools { namespace Lua {
         return ret;
     }
 
-    void Ref::operator ()(Stack& stack) const throw(std::runtime_error)
+    void Ref::operator ()(Call& call) const throw(std::runtime_error)
     {
         this->ToStack();
         if (!lua_isfunction(this->_i, -1))
@@ -64,12 +64,12 @@ namespace Tools { namespace Lua {
             lua_pop(this->_i, 1);
             throw std::runtime_error("Lua::Ref: Calling a value that is not a function");
         }
-        auto const& args = stack.GetArgList();
+        auto const& args = call.GetArgList();
         auto it = args.begin();
         auto itEnd = args.begin();
         for (; it != itEnd; ++it)
             it->ToStack();
-        if (!lua_pcall(this->_i, args.size(), LUA_MULTRET, 0))
+        if (lua_pcall(this->_i, args.size(), LUA_MULTRET, 0))
         {
             std::string e = "Lua::Ref: Error in function call: ";
             e += lua_tostring(this->_i, -1);
@@ -80,7 +80,7 @@ namespace Tools { namespace Lua {
         {
             Ref ret(this->_i);
             ret.FromStack();
-            stack.PushRet(ret);
+            call.PushRet(ret);
         }
     }
 
