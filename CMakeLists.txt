@@ -74,6 +74,7 @@ file(GLOB_RECURSE tools_gui_src "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
 file(GLOB_RECURSE tools_lua2_src "tools/lua2/*.[ch]pp")
 file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
+file(GLOB_RECURSE tools_thread_src "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE tools_logger_src "tools/logger/*.[ch]pp")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")

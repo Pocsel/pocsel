@@ -21,7 +21,8 @@ namespace Client {
     Client::Client(Settings& settings) :
         _settings(settings),
         _state(Connecting),
-        _game(0)
+        _game(0),
+        _threadPool(2)
     {
         this->_window = new Window::Sdl::Window(this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
         this->_resourceManager = new Resources::LocalResourceManager(*this);

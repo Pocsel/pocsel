@@ -40,12 +40,17 @@ namespace Client { namespace Map {
         Uint32 _triangleCount;
         bool _hasTransparentCube;
         bool _isComputed;
+        boost::mutex _refreshMutex;
+        unsigned int _tmpNbVertices;
+        float* _tmpVertices;
+        std::map<Uint32, std::vector<unsigned int>> _tmpIndices;
 
     public:
         ChunkMesh(Chunk& chunk);
         ~ChunkMesh();
 
-        void Refresh(Game::Game& game, ChunkRenderer& chunkRenderer);
+        bool Refresh(Game::Game& game, ChunkRenderer& chunkRenderer);
+        bool RefreshGraphics(Tools::IRenderer& renderer);
         void Render(Uint32 textureId, Tools::IRenderer& renderer);
         Uint32 GetTriangleCount() const { return this->_triangleCount; }
         bool HasTransparentCube() const { return this->_hasTransparentCube; }

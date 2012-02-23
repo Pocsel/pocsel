@@ -36,13 +36,16 @@ namespace Client { namespace Map {
         _vertices(0),
         _triangleCount(0),
         _hasTransparentCube(false),
-        _isComputed(false)
+        _isComputed(false),
+        _tmpNbVertices(0),
+        _tmpVertices(0)
     {
     }
 
     ChunkMesh::~ChunkMesh()
     {
         Tools::Delete(this->_vertices);
+        Tools::DeleteTab(this->_tmpVertices);
     }
 
     namespace {
@@ -117,8 +120,9 @@ namespace Client { namespace Map {
         }
     }
 
-    void ChunkMesh::Refresh(Game::Game& game, ChunkRenderer& chunkRenderer)
+    bool ChunkMesh::Refresh(Game::Game& game, ChunkRenderer& chunkRenderer)
     {
+        boost::lock_guard<boost::mutex> lock(this->_refreshMutex);
         auto& cm = game.GetMap().GetChunkManager();
         auto chunkLeft  = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType(-1,  0,  0)),
             chunkRight  = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 1,  0,  0)),
@@ -127,10 +131,6 @@ namespace Client { namespace Map {
             chunkTop    = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0,  1,  0)),
             chunkBottom = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0, -1,  0));
 
-        this->_meshes.clear();
-        delete this->_vertices;
-        this->_vertices = 0;
-        this->_triangleCount = 0;
         this->_hasTransparentCube = false;
         if (chunkLeft   == 0 ||
             chunkRight  == 0 ||
@@ -138,16 +138,22 @@ namespace Client { namespace Map {
             chunkBack   == 0 ||
             chunkTop    == 0 ||
             chunkBottom == 0)
-            return;
+        {
+            this->_tmpNbVertices = 0;
+            delete [] this->_tmpVertices;
+            this->_tmpVertices = 0;
+            this->_tmpIndices.clear();
+            return false;
+        }
 
         if (this->_chunk.IsEmpty())
-            return;
+            return true;
 
         auto const& cubeTypes = game.GetCubeTypeManager().GetCubeTypes();
         Common::BaseChunk::CubeType const* cubes = this->_chunk.GetCubes();
         Common::BaseChunk::CubeType nearType;
 
-        static std::vector<Vertex> vertices((Common::ChunkSize3 * 6 * 4) / 2);
+        std::vector<Vertex> vertices((Common::ChunkSize3 * 6 * 4) / 2);
         std::map<Uint32, std::vector<unsigned int>> indices;
         unsigned int voffset = 0;
 
@@ -247,24 +253,50 @@ namespace Client { namespace Map {
         }
 
         if (voffset == 0)
-            return;
+            return true;
 
-        this->_vertices = game.GetClient().GetWindow().GetRenderer().CreateVertexBuffer().release();
+        this->_tmpIndices = std::move(indices);
+        this->_tmpNbVertices = voffset;
+        this->_tmpVertices = new float[voffset * (3+3+2)];
+        std::memcpy(this->_tmpVertices, vertices.data(), voffset * (3+3+2) * sizeof(float));
+        return true;
+    }
+
+    bool ChunkMesh::RefreshGraphics(Tools::IRenderer& renderer)
+    {
+        if (!this->_refreshMutex.try_lock())
+            return false;
+        boost::lock_guard<boost::mutex> lock(this->_refreshMutex, boost::adopt_lock);
+        // on clear tout
+        this->_meshes.clear();
+        delete this->_vertices;
+        this->_vertices = 0;
+        this->_triangleCount = 0;
+
+        if (this->_chunk.IsEmpty() || this->_tmpNbVertices == 0)
+            return true;
+
+        this->_vertices = renderer.CreateVertexBuffer().release();
         this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
         this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 3); // Normales + Textures
         this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // Textures
-        this->_vertices->SetData(voffset * (3+3+2) * sizeof(float), vertices.data(), Tools::Renderers::VertexBufferUsage::Static);
-        for (auto it = indices.begin(), ite = indices.end(); it !=ite; ++it)
+        this->_vertices->SetData(this->_tmpNbVertices * (3+3+2) * sizeof(*this->_tmpVertices), this->_tmpVertices, Tools::Renderers::VertexBufferUsage::Static);
+        for (auto it = this->_tmpIndices.begin(), ite = this->_tmpIndices.end(); it !=ite; ++it)
         {
             if (it->second.size() == 0)
                 continue;
             Mesh m;
-            m.indices = game.GetClient().GetWindow().GetRenderer().CreateIndexBuffer().release();
+            m.indices = renderer.CreateIndexBuffer().release();
             m.indices->SetData(sizeof(unsigned int) * it->second.size(), it->second.data());
             m.nbIndices = (Uint32)it->second.size();
             this->_triangleCount += m.nbIndices / 3;
             this->_meshes[it->first] = std::move(m);
         }
+
+        delete [] this->_tmpVertices;
+        this->_tmpVertices = 0;
+        this->_tmpIndices.clear();
+        return true;
     }
 
     void ChunkMesh::Render(Uint32 textureId, Tools::IRenderer& renderer)

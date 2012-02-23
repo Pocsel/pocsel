@@ -37,15 +37,14 @@ namespace Client { namespace Map {
         Tools::Delete(this->_shaderTexture);
     }
 
-    void ChunkRenderer::RefreshDisplay(Chunk& chunk)
+    bool ChunkRenderer::RefreshMesh(Chunk& chunk)
     {
-        ChunkMesh* mesh = chunk.GetMesh();
-        if (mesh == 0)
-        {
-            mesh = new ChunkMesh(chunk);
-            chunk.SetMesh(std::unique_ptr<ChunkMesh>(mesh));
-        }
-        mesh->Refresh(this->_game, *this);
+        return chunk.GetMesh()->Refresh(this->_game, *this);
+    }
+
+    bool ChunkRenderer::RefreshGraphics(Chunk& chunk)
+    {
+        return chunk.GetMesh()->RefreshGraphics(this->_renderer);
     }
 
     void ChunkRenderer::Render()

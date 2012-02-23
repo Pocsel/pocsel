@@ -4,6 +4,7 @@
 #include "common/BaseChunk.hpp"
 #include "client/game/Game.hpp"
 #include "client/network/Network.hpp"
+#include "tools/thread/ThreadPool.hpp"
 
 namespace Client {
     class Settings;
@@ -51,6 +52,7 @@ namespace Client {
         State _state;
         Game::Game* _game;
         Menu::Menu* _menu;
+        Tools::Thread::ThreadPool _threadPool;
         Uint32 _clientId;
 
     public:
@@ -70,6 +72,7 @@ namespace Client {
         Game::Game& GetGame() { return *this->_game; }
         Menu::Menu& GetMenu() { return *this->_menu; }
         State GetState() const { return this->_state; }
+        Tools::Thread::ThreadPool& GetThreadPool() { return this->_threadPool; }
         Uint32 GetClientId() const { return this->_clientId; }
     private:
         void _MenuBind();

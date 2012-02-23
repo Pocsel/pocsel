@@ -8,6 +8,11 @@
 #include "client/map/ChunkRenderer.hpp"
 
 #include "tools/Octree.hpp"
+#include "tools/thread/Task.hpp"
+
+namespace Tools { namespace Thread {
+    class ThreadPool;
+}}
 
 namespace Client { namespace Game {
     class Game;
@@ -20,20 +25,28 @@ namespace Client { namespace Map {
     {
     private:
         class ChunkNode
-            : public Tools::AlignedCube,
-            private boost::noncopyable
+            : public Tools::AlignedCube
         {
         public:
-            Chunk* chunk;
+            std::shared_ptr<Chunk> chunk;
 
-            ChunkNode(std::unique_ptr<Chunk> chunk)
+            ChunkNode(std::unique_ptr<Chunk>&& chunk)
                 : Tools::AlignedCube(Tools::Vector3d(chunk->coords * Common::ChunkSize), Common::ChunkSize),
-                chunk(chunk.release())
+                chunk(std::move(chunk))
             {
             }
-            ~ChunkNode()
+        };
+        struct RefreshTask
+        {
+            ChunkNode* node;
+            std::shared_ptr<Tools::Thread::Task<bool>> task;
+            RefreshTask(ChunkNode* node, std::shared_ptr<Tools::Thread::Task<bool>> task)
+                : node(node),
+                task(task)
             {
-                Tools::Delete(this->chunk);
+            }
+            ~RefreshTask()
+            {
             }
         };
 
@@ -42,10 +55,11 @@ namespace Client { namespace Map {
         ChunkRenderer _chunkRenderer;
         std::unordered_set<Common::BaseChunk::IdType> _downloadingChunks;
         std::unordered_map<Common::BaseChunk::IdType, ChunkNode*> _chunks;
-        std::list<ChunkNode*> _waitingRefresh;
+        std::list<RefreshTask> _refreshTasks;
         Tools::Octree<ChunkNode>* _octree[16];
         float _loadingProgression;
         Common::Position _oldPosition;
+        Tools::Thread::ThreadPool& _threadPool;
 
     public:
         ChunkManager(Game::Game& game);
@@ -58,13 +72,14 @@ namespace Client { namespace Map {
 
         template<class TFunc>
         void ForeachIn(Tools::AbstractCollider const& container, TFunc function);
-        Chunk* GetChunk(Common::BaseChunk::IdType id) const;
-        Chunk* GetChunk(Common::BaseChunk::CoordsType const& coords) const { return this->GetChunk(Common::BaseChunk::CoordsToId(coords)); }
+        std::shared_ptr<Chunk> GetChunk(Common::BaseChunk::IdType id) const;
+        std::shared_ptr<Chunk> GetChunk(Common::BaseChunk::CoordsType const& coords) const { return this->GetChunk(Common::BaseChunk::CoordsToId(coords)); }
         float GetLoadingProgression() const { return this->_loadingProgression; }
     private:
         void _RemoveOldChunks(Common::Position const& playerPosition);
         void _DownloadNewChunks(Common::Position const& playerPosition);
         void _RefreshNode(ChunkNode& node);
+        bool _RefreshChunkMesh(ChunkNode* chunk);
     };
 
     template<class TFunc>

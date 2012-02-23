@@ -62,6 +62,7 @@ namespace Server { namespace Game {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Game::_SpawnPlayer, this, std::cref(clientName), clientId, playerName, viewDistance));
         this->_messageQueue.PushMessage(m);
+        Tools::debug << "SpawnPlayer\n";
     }
 
     void Game::PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position)
