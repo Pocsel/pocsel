@@ -1,13 +1,12 @@
-#ifndef __TOOLS_LUA_CALL_HPP__
-#define __TOOLS_LUA_CALL_HPP__
-
-#include "tools/lua2/Ref.hpp"
+#ifndef __TOOLS_LUA_CALLHELPER_HPP__
+#define __TOOLS_LUA_CALLHELPER_HPP__
 
 namespace Tools { namespace Lua {
 
     class Interpreter;
+    class Ref;
 
-    class Call :
+    class CallHelper :
         private boost::noncopyable
     {
     private:
@@ -16,18 +15,20 @@ namespace Tools { namespace Lua {
         std::list<Ref> _rets;
 
     public:
-        Call(Interpreter& i);
+        CallHelper(Interpreter& i);
         Interpreter& GetInterpreter() { return this->_i; }
         // arguments
         void PushArg(Ref const& arg) throw();
         Ref PopArg() throw(std::runtime_error);
-        std::list<Ref> const& GetArgList() const throw() { return this->_args; }
+        std::list<Ref>& GetArgList() throw() { return this->_args; }
         std::size_t GetNbArgs() const throw() { return this->_args.size(); }
+        void ClearArgs() throw();
         // return values
         void PushRet(Ref const& ret) throw();
         Ref PopRet() throw(std::runtime_error);
-        std::list<Ref> const& GetRetList() const throw() { return this->_rets; }
+        std::list<Ref>& GetRetList() throw() { return this->_rets; }
         std::size_t GetNbRets() const throw() { return this->_rets.size(); }
+        void ClearRets() throw();
     };
 
 }}
