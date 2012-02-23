@@ -1,17 +1,21 @@
 #include "tools/lua2/Interpreter.hpp"
 #include "tools/lua2/Ref.hpp"
 
-void f(Tools::Lua::Call& call)
+void f(Tools::Lua::CallHelper& call)
 {
     auto const& args = call.GetArgList();
     auto it = args.begin();
     auto itEnd = args.end();
     for (; it != itEnd; ++it)
         Tools::log << "arg: " << it->ToNumber() << Tools::endl;
+    call.PopArg();
+    call.PopArg();
+    call.PopArg();
+    call.PopArg();
+    call.PopArg();
     Tools::log << "f()" << Tools::endl;
     call.PushRet(call.GetInterpreter().MakeNumber(123.2));
     call.PushRet(call.GetInterpreter().MakeNumber(-5.4));
-    throw std::runtime_error("OMg!");
 }
 
 int main(int, char**)
@@ -22,20 +26,23 @@ int main(int, char**)
 
     Tools::Lua::Ref bite = i.MakeFunction(std::bind(&f, std::placeholders::_1));
 
-    Tools::Lua::Call call(i);
     try
     {
-        bite(call);
+        Tools::log << bite(12, 14.4f).ToNumber() << " jksdfgjk " << sizeof(Tools::Lua::Ref) << Tools::endl;
     }
     catch (std::exception& e)
     {
-        Tools::log << e.what() << Tools::endl;
+        Tools::log << "from c++: " << e.what() << Tools::endl;
     }
-    auto const& rets = call.GetRetList();
-    auto it = rets.begin();
-    auto itEnd = rets.end();
-    for (; it != itEnd; ++it)
-        Tools::log << "ret: " << it->ToNumber() << Tools::endl;
+
+    try
+    {
+        i.DoString("bite(13.3, 13.4)");
+    }
+    catch (std::exception& e)
+    {
+        Tools::log << "from lua: " << e.what() << Tools::endl;
+    }
 
     return 0;
 }
