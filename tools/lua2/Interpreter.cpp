@@ -5,8 +5,17 @@ namespace {
 
     int _LuaCall(lua_State* state)
     {
-        int* data = static_cast<int*>(lua_touserdata(state, lua_upvalueindex(1)));
-        Tools::log << "userdata: " << *data << Tools::endl;
+        Tools::Lua::Interpreter::ClosureEnv* env = static_cast<Tools::Lua::Interpreter::ClosureEnv*>(lua_touserdata(state, lua_upvalueindex(1)));
+        assert(env && "lua call with no env upvalue");
+        Tools::Lua::Call call(*env->i);
+        return call.GetNbRets();
+    }
+
+    int _LuaGarbageCollect(lua_State* state)
+    {
+        Tools::Lua::Interpreter::ClosureEnv* env = static_cast<Tools::Lua::Interpreter::ClosureEnv*>(lua_touserdata(state, -1));
+        assert(env && "lua garbage collect with no user data");
+        delete env->f;
         return 0;
     }
 
@@ -43,50 +52,56 @@ namespace Tools { namespace Lua {
 
     Ref Interpreter::MakeInteger(int val) throw()
     {
-        Ref r(*this);
         lua_pushinteger(*this, val);
+        Ref r(*this);
         r.FromStack();
         return r;
     }
 
     Ref Interpreter::MakeNumber(double val) throw()
     {
-        Ref r(*this);
         lua_pushnumber(*this, val);
+        Ref r(*this);
         r.FromStack();
         return r;
     }
 
     Ref Interpreter::MakeString(std::string const& val) throw()
     {
-        Ref r(*this);
         lua_pushstring(*this, val.c_str());
+        Ref r(*this);
         r.FromStack();
         return r;
     }
 
     Ref Interpreter::MakeBoolean(bool val) throw()
     {
-        Ref r(*this);
         lua_pushboolean(*this, val);
+        Ref r(*this);
         r.FromStack();
         return r;
     }
 
     Ref Interpreter::MakeTable() throw()
     {
-        Ref r(*this);
         lua_newtable(*this);
+        Ref r(*this);
         r.FromStack();
         return r;
     }
 
-    Ref Interpreter::MakeFunction(std::function<void(Stack&)> val) throw()
+    Ref Interpreter::MakeFunction(std::function<void(Call&)> val) throw()
     {
-        Ref r(*this);
-        int* data = static_cast<int*>(lua_newuserdata(*this, sizeof(int)));
-        *data = 1334;
+        ClosureEnv* env = new (lua_newuserdata(*this, sizeof(ClosureEnv))) ClosureEnv();
+        env->i = this;
+        env->f = new std::function<void(Call&)>(val);
+        lua_createtable(*this, 0, 1);
+        lua_pushstring(*this, "__gc");
+        lua_pushcfunction(*this, &_LuaGarbageCollect);
+        lua_rawset(*this, -3);
+        lua_setmetatable(*this, -2);
         lua_pushcclosure(*this, &_LuaCall, 1);
+        Ref r(*this);
         r.FromStack();
         return r;
     }

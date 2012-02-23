@@ -1,5 +1,5 @@
-#ifndef __TOOLS_LUA_STACK_HPP__
-#define __TOOLS_LUA_STACK_HPP__
+#ifndef __TOOLS_LUA_CALL_HPP__
+#define __TOOLS_LUA_CALL_HPP__
 
 #include "tools/lua2/Ref.hpp"
 
@@ -7,7 +7,7 @@ namespace Tools { namespace Lua {
 
     class Interpreter;
 
-    class Stack :
+    class Call :
         private boost::noncopyable
     {
     private:
@@ -16,7 +16,8 @@ namespace Tools { namespace Lua {
         std::list<Ref> _rets;
 
     public:
-        Stack(Interpreter& i) throw();
+        Call(Interpreter& i);
+        Interpreter& GetInterpreter() { return this->_i; }
         // arguments
         void PushArg(Ref const& arg) throw();
         Ref PopArg() throw(std::runtime_error);
