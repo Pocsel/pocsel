@@ -66,7 +66,7 @@ namespace Tools { namespace Lua {
         }
         auto const& args = call.GetArgList();
         auto it = args.begin();
-        auto itEnd = args.begin();
+        auto itEnd = args.end();
         for (; it != itEnd; ++it)
             it->ToStack();
         if (lua_pcall(this->_i, args.size(), LUA_MULTRET, 0))
@@ -74,7 +74,7 @@ namespace Tools { namespace Lua {
             std::string e = "Lua::Ref: Error in function call: ";
             e += lua_tostring(this->_i, -1);
             lua_pop(this->_i, 1);
-            throw e;
+            throw std::runtime_error(e);
         }
         while (lua_gettop(this->_i))
         {
