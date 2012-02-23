@@ -112,7 +112,7 @@ namespace Tools { namespace Lua {
 
     Ref Interpreter::MakeFunction(std::function<void(Call&)> val) throw()
     {
-        ClosureEnv* env = new (lua_newuserdata(*this, sizeof(ClosureEnv))) ClosureEnv();
+        ClosureEnv* env = new (lua_newuserdata(*this, sizeof(ClosureEnv))) ClosureEnv;
         env->i = this;
         env->f = new std::function<void(Call&)>(val);
         lua_createtable(*this, 0, 1);
