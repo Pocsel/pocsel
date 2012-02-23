@@ -36,13 +36,26 @@ namespace Client { namespace Map {
             {
             }
         };
+        struct RefreshTask
+        {
+            ChunkNode* node;
+            std::shared_ptr<Tools::Thread::Task<bool>> task;
+            RefreshTask(ChunkNode* node, std::shared_ptr<Tools::Thread::Task<bool>> task)
+                : node(node),
+                task(task)
+            {
+            }
+            ~RefreshTask()
+            {
+            }
+        };
 
     private:
         Game::Game& _game;
         ChunkRenderer _chunkRenderer;
         std::unordered_set<Common::BaseChunk::IdType> _downloadingChunks;
         std::unordered_map<Common::BaseChunk::IdType, ChunkNode*> _chunks;
-        std::list<std::pair<ChunkNode*, std::shared_ptr<Tools::Thread::Task>>> _refreshTasks;
+        std::list<RefreshTask> _refreshTasks;
         Tools::Octree<ChunkNode>* _octree[16];
         float _loadingProgression;
         Common::Position _oldPosition;
@@ -66,7 +79,7 @@ namespace Client { namespace Map {
         void _RemoveOldChunks(Common::Position const& playerPosition);
         void _DownloadNewChunks(Common::Position const& playerPosition);
         void _RefreshNode(ChunkNode& node);
-        void _RefreshChunkMesh(ChunkNode* chunk);
+        bool _RefreshChunkMesh(ChunkNode* chunk);
     };
 
     template<class TFunc>

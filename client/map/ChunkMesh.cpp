@@ -120,7 +120,7 @@ namespace Client { namespace Map {
         }
     }
 
-    void ChunkMesh::Refresh(Game::Game& game, ChunkRenderer& chunkRenderer)
+    bool ChunkMesh::Refresh(Game::Game& game, ChunkRenderer& chunkRenderer)
     {
         boost::lock_guard<boost::mutex> lock(this->_refreshMutex);
         auto& cm = game.GetMap().GetChunkManager();
@@ -137,15 +137,17 @@ namespace Client { namespace Map {
             chunkFront  == 0 ||
             chunkBack   == 0 ||
             chunkTop    == 0 ||
-            chunkBottom == 0 ||
-            this->_chunk.IsEmpty())
+            chunkBottom == 0)
         {
             this->_tmpNbVertices = 0;
             delete [] this->_tmpVertices;
             this->_tmpVertices = 0;
             this->_tmpIndices.clear();
-            return;
+            return false;
         }
+
+        if (this->_chunk.IsEmpty())
+            return true;
 
         auto const& cubeTypes = game.GetCubeTypeManager().GetCubeTypes();
         Common::BaseChunk::CubeType const* cubes = this->_chunk.GetCubes();
@@ -251,12 +253,13 @@ namespace Client { namespace Map {
         }
 
         if (voffset == 0)
-            return;
+            return true;
 
         this->_tmpIndices = std::move(indices);
         this->_tmpNbVertices = voffset;
         this->_tmpVertices = new float[voffset * (3+3+2)];
         std::memcpy(this->_tmpVertices, vertices.data(), voffset * (3+3+2) * sizeof(float));
+        return true;
     }
 
     bool ChunkMesh::RefreshGraphics(Tools::IRenderer& renderer)

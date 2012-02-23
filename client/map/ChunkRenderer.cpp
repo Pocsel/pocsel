@@ -37,9 +37,9 @@ namespace Client { namespace Map {
         Tools::Delete(this->_shaderTexture);
     }
 
-    void ChunkRenderer::RefreshMesh(Chunk& chunk)
+    bool ChunkRenderer::RefreshMesh(Chunk& chunk)
     {
-        chunk.GetMesh()->Refresh(this->_game, *this);
+        return chunk.GetMesh()->Refresh(this->_game, *this);
     }
 
     bool ChunkRenderer::RefreshGraphics(Chunk& chunk)

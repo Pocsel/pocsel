@@ -33,7 +33,7 @@ namespace Client { namespace Map {
         ChunkRenderer(Game::Game& game);
         ~ChunkRenderer();
 
-        void RefreshMesh(Chunk& chunk);
+        bool RefreshMesh(Chunk& chunk);
         bool RefreshGraphics(Chunk& chunk);
         void Render();
         Tools::Renderers::ITexture2D& GetTexture(Uint32 id)

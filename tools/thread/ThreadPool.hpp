@@ -3,7 +3,7 @@
 
 namespace Tools { namespace Thread {
 
-    class Task;
+    template<class T> class Task;
 
     class ThreadPool
     {
@@ -20,7 +20,15 @@ namespace Tools { namespace Thread {
         ~ThreadPool();
 
         void PushTask(std::function<void()>&& task);
-        void PushTask(std::shared_ptr<Tools::Thread::Task> task);
+        template<class T>
+        void PushTask(std::shared_ptr<Tools::Thread::Task<T>> task)
+        {
+            this->PushTask(
+                [task]()
+                {
+                    task->Execute();
+                });
+        }
     private:
         void _Run();
     };

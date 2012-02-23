@@ -34,15 +34,6 @@ namespace Tools { namespace Thread {
         this->_condition.notify_one();
     }
 
-    void ThreadPool::PushTask(std::shared_ptr<Tools::Thread::Task> task)
-    {
-        this->PushTask(
-            [task]()
-            {
-                task->Execute();
-            });
-    }
-
     void ThreadPool::_Run()
     {
         while (this->_isRunning)

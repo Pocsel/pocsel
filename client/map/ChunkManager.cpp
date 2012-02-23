@@ -80,22 +80,24 @@ namespace Client { namespace Map {
         Tools::Timer timer;
         for (auto it = this->_refreshTasks.begin(), ite = this->_refreshTasks.end(); it != ite && timer.GetElapsedTime() <= 10;)
         {
-            if (it->second->IsFinish())
+            if (it->task->IsFinish() || it->task->IsCancelled())
             {
-                this->_chunkRenderer.RefreshGraphics(*it->first->chunk);
-                this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.0002f);
+                if (it->task->GetResult())
+                {
+                    this->_chunkRenderer.RefreshGraphics(*it->node->chunk);
+                    this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.001f);
+                }
+                else if (!it->task->IsCancelled())
+                {
+                    std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, it->node)));
+                    this->_threadPool.PushTask<bool>(t);
+                    this->_refreshTasks.push_back(RefreshTask(it->node, t));
+                }
                 this->_refreshTasks.erase(it++);
             }
             else
                 ++it;
         }
-        //while (!this->_refreshTasks.empty() && timer.GetElapsedTime() < 10)
-        //{
-        //    
-        //    
-        //    this->_chunkRenderer.RefreshGraphics(*this->_waitingRefresh.front()->chunk);
-        //    this->_waitingRefresh.pop_front();
-        //}
         if (this->_refreshTasks.empty() && this->_loadingProgression > 0.6f)
             this->_loadingProgression = 1.0f;
     }
@@ -105,9 +107,16 @@ namespace Client { namespace Map {
         Tools::Timer timer;
         for (auto it = this->_refreshTasks.begin(), ite = this->_refreshTasks.end(); it != ite && timer.GetElapsedTime() <= 10;)
         {
-            if (it->second->IsFinish())
+            if (it->task->IsFinish() || it->task->IsCancelled())
             {
-                this->_chunkRenderer.RefreshGraphics(*it->first->chunk);
+                if (it->task->GetResult())
+                    this->_chunkRenderer.RefreshGraphics(*it->node->chunk);
+                else if (!it->task->IsCancelled())
+                {
+                    std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, it->node)));
+                    this->_threadPool.PushTask<bool>(t);
+                    this->_refreshTasks.push_back(RefreshTask(it->node, t));
+                }
                 this->_refreshTasks.erase(it++);
             }
             else
@@ -209,51 +218,52 @@ namespace Client { namespace Map {
             chunkTop    = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0))),
             chunkBottom = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
         {
-            std::shared_ptr<Tools::Thread::Task> t(new Tools::Thread::Task(std::bind(&ChunkManager::_RefreshChunkMesh, this, &node)));
-            this->_threadPool.PushTask(t);
-            this->_refreshTasks.push_back(std::pair<ChunkNode*, std::shared_ptr<Tools::Thread::Task>>(&node, t));
+            std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, &node)));
+            this->_threadPool.PushTask<bool>(t);
+            this->_refreshTasks.push_back(RefreshTask(&node, t));
         }
         if (chunkLeft != this->_chunks.end())
         {
-            std::shared_ptr<Tools::Thread::Task> t(new Tools::Thread::Task(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkLeft->second)));
-            this->_threadPool.PushTask(t);
-            this->_refreshTasks.push_back(std::pair<ChunkNode*, std::shared_ptr<Tools::Thread::Task>>(chunkLeft->second, t));
+            std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkLeft->second)));
+            this->_threadPool.PushTask<bool>(t);
+            this->_refreshTasks.push_back(RefreshTask(chunkLeft->second, t));
         }
         if (chunkRight != this->_chunks.end())
         {
-            std::shared_ptr<Tools::Thread::Task> t(new Tools::Thread::Task(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkRight->second)));
-            this->_threadPool.PushTask(t);
-            this->_refreshTasks.push_back(std::pair<ChunkNode*, std::shared_ptr<Tools::Thread::Task>>(chunkRight->second, t));
+            std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkRight->second)));
+            this->_threadPool.PushTask<bool>(t);
+            this->_refreshTasks.push_back(RefreshTask(chunkRight->second, t));
         }
         if (chunkFront != this->_chunks.end())
         {
-            std::shared_ptr<Tools::Thread::Task> t(new Tools::Thread::Task(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkFront->second)));
-            this->_threadPool.PushTask(t);
-            this->_refreshTasks.push_back(std::pair<ChunkNode*, std::shared_ptr<Tools::Thread::Task>>(chunkFront->second, t));
+            std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkFront->second)));
+            this->_threadPool.PushTask<bool>(t);
+            this->_refreshTasks.push_back(RefreshTask(chunkFront->second, t));
         }
         if (chunkBack != this->_chunks.end())
         {
-            std::shared_ptr<Tools::Thread::Task> t(new Tools::Thread::Task(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkBack->second)));
-            this->_threadPool.PushTask(t);
-            this->_refreshTasks.push_back(std::pair<ChunkNode*, std::shared_ptr<Tools::Thread::Task>>(chunkBack->second, t));
+            std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkBack->second)));
+            this->_threadPool.PushTask<bool>(t);
+            this->_refreshTasks.push_back(RefreshTask(chunkBack->second, t));
         }
         if (chunkTop != this->_chunks.end())
         {
-            std::shared_ptr<Tools::Thread::Task> t(new Tools::Thread::Task(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkTop->second)));
-            this->_threadPool.PushTask(t);
-            this->_refreshTasks.push_back(std::pair<ChunkNode*, std::shared_ptr<Tools::Thread::Task>>(chunkTop->second, t));
+            std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkTop->second)));
+            this->_threadPool.PushTask<bool>(t);
+            this->_refreshTasks.push_back(RefreshTask(chunkTop->second, t));
         }
         if (chunkBottom != this->_chunks.end())
         {
-            std::shared_ptr<Tools::Thread::Task> t(new Tools::Thread::Task(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkBottom->second)));
-            this->_threadPool.PushTask(t);
-            this->_refreshTasks.push_back(std::pair<ChunkNode*, std::shared_ptr<Tools::Thread::Task>>(chunkBottom->second, t));
+            std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, chunkBottom->second)));
+            this->_threadPool.PushTask<bool>(t);
+            this->_refreshTasks.push_back(RefreshTask(chunkBottom->second, t));
         }
+        
     }
 
-    void ChunkManager::_RefreshChunkMesh(ChunkNode* chunk)
+    bool ChunkManager::_RefreshChunkMesh(ChunkNode* chunk)
     {
-        this->_chunkRenderer.RefreshMesh(*chunk->chunk);
+        return this->_chunkRenderer.RefreshMesh(*chunk->chunk);
     }
 
 }}
