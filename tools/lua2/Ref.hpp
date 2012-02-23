@@ -16,13 +16,11 @@ namespace Tools { namespace Lua {
         Ref(State& state) throw();
         Ref(Ref const& ref) throw();
         ~Ref() throw();
-        // operators
         Ref& operator =(Ref const& ref) throw();
         bool operator ==(Ref const& ref) const throw();
         bool operator !=(Ref const& ref) const throw();
-        Ref operator [](Ref const& index) const throw(std::runtime_error);
-        Ref operator [](int index) const throw(std::runtime_error);
-        Ref operator [](std::string const& index) const throw(std::runtime_error);
+        void Unref() throw();
+        // function call
         void operator ()(CallHelper& callHelper) const throw(std::runtime_error);
         Ref operator ()() const throw(std::runtime_error);
         template <typename T>
@@ -33,10 +31,14 @@ namespace Tools { namespace Lua {
             Ref operator ()(T a1, U a2, V a3) const throw(std::runtime_error);
         template <typename T, typename U, typename V, typename W>
             Ref operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error);
-        // modifiers
-        void Unref() throw();
-        void FromStack() throw();
+        // array access
+        Ref operator [](Ref const& index) const throw(std::runtime_error);
+        template <typename T>
+            Ref operator [](T const& index) const throw(std::runtime_error);
+        // array setters
         void Set(Ref const& key, Ref const& value) const throw(std::runtime_error);
+        template <typename T, typename U>
+            void Set(T const& key, U const& value) const throw(std::runtime_error);
         // type conversions
         bool ToBoolean() const throw();
         int ToInteger() const throw();
@@ -58,6 +60,8 @@ namespace Tools { namespace Lua {
         bool IsThread() const throw();
         bool IsUserData() const throw();
 
+        // touche pas, appelle pas
+        void FromStack() throw();
         void ToStack() const throw();
     };
 
@@ -120,6 +124,17 @@ namespace Tools { namespace Lua {
             return Ref(*this);
         }
 
+    template <typename T>
+        Ref Ref::operator [](T const& index) const throw(std::runtime_error)
+        {
+            return (*this)[this->_state.Make(index)];
+        }
+
+    template <typename T, typename U>
+        void Ref::Set(T const& key, U const& value) const throw(std::runtime_error)
+        {
+            this->Set(this->_state.Make(key), this->_state.Make(value));
+        }
 }}
 
 #endif

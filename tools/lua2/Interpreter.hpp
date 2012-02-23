@@ -29,7 +29,7 @@ namespace Tools { namespace Lua {
         Ref MakeString(std::string const& val) throw() { return this->_state->MakeString(val); }
         Ref MakeTable() throw() { return this->_state->MakeTable(); }
         template <typename T>
-            Ref Make(T const& val) throw() { return this->_state->Make<T>(val); }
+            Ref Make(T const& val) throw() { return this->_state->Make(val); }
         // other stuff
         State& GetState() throw() { return *this->_state; }
         void DumpStack() const throw();
