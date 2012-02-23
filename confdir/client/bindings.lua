@@ -26,12 +26,21 @@ bind("S", "left")
 bind("D", "backward")
 bind("F", "right")
 
-bind("RightClick", "jump")
+bind("Up", "forward")
+bind("Left", "left")
+bind("Down", "backward")
+bind("Right", "right")
+
 bind("WheelDown", "jump")
 bind("Space", "jump")
 
+bind("Lctrl", "crouch")
+bind("Rctrl", "crouch")
+
+bind("LeftClick", "fire")
+bind("RightClick", "altfire")
+
 bind("Escape", "menu")
-bind("LeftClick", "menuclick")
 
 bind("W", "toggle-wireframe")
 

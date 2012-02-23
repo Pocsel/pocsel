@@ -20,6 +20,11 @@ namespace Client { namespace Game {
         this->_actionBinder.Bind(BindAction::Backward, BindAction::Held, std::bind(&Player::MoveBackward, this));
         this->_actionBinder.Bind(BindAction::Left, BindAction::Held, std::bind(&Player::StrafeLeft, this));
         this->_actionBinder.Bind(BindAction::Right, BindAction::Held, std::bind(&Player::StrafeRight, this));
+
+        this->_actionBinder.Bind(BindAction::Jump, BindAction::Held, std::bind(&Player::Jump, this));
+        this->_actionBinder.Bind(BindAction::Crouch, BindAction::Held, std::bind(&Player::Crouch, this));
+
+        this->_actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Player::Action, this));
     }
 
     void Player::UpdateMovements(Uint32 time)
@@ -48,8 +53,8 @@ namespace Client { namespace Game {
         if (this->_moved && this->_movedTime > 40)
         {
             this->_game.GetClient().GetNetwork().SendUdpPacket(
-                    Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), this->_camera)
-                    );
+                Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), this->_camera)
+                );
             this->_moved = false;
             this->_movedTime = 0;
         }
@@ -93,6 +98,18 @@ namespace Client { namespace Game {
     void Player::Jump()
     {
         this->_Move(Tools::Vector3f(0, 1, 0));
+    }
+
+    void Player::Crouch()
+    {
+        this->_Move(Tools::Vector3f(0, 1, 0));
+    }
+
+    void Player::Action()
+    {
+        this->_game.GetClient().GetNetwork().SendUdpPacket(
+            Network::PacketCreator::Action(this->_game.GetClient().GetClientId(), this->_camera)
+            );
     }
 
     void Player::_Move(Tools::Vector3f moveVector)

@@ -41,6 +41,8 @@ namespace Client { namespace Game {
             void StrafeLeft();
             void StrafeRight();
             void Jump();
+            void Crouch();
+            void Action();
 
         private:
             void _Move(Tools::Vector3f moveVector);

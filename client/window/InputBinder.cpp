@@ -21,14 +21,14 @@ namespace Client { namespace Window {
     {
         this->_actions["quit"] = BindAction::Quit;
         this->_actions["menu"] = BindAction::Menu;
-        this->_actions["menuclick"] = BindAction::MenuClick;
         this->_actions["forward"] = BindAction::Forward;
         this->_actions["backward"] = BindAction::Backward;
         this->_actions["left"] = BindAction::Left;
         this->_actions["right"] = BindAction::Right;
         this->_actions["jump"] = BindAction::Jump;
+        this->_actions["crouch"] = BindAction::Crouch;
         this->_actions["fire"] = BindAction::Fire;
-        this->_actions["secondaryfire"] = BindAction::SecondaryFire;
+        this->_actions["altfire"] = BindAction::AltFire;
         this->_actions["use"] = BindAction::Use;
     }
 
