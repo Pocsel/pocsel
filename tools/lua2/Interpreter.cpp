@@ -7,28 +7,31 @@ namespace {
     {
         Tools::Lua::Interpreter::ClosureEnv* env = static_cast<Tools::Lua::Interpreter::ClosureEnv*>(lua_touserdata(state, lua_upvalueindex(1)));
         assert(env && "lua call with no env upvalue");
-        Tools::Lua::Call call(*env->i);
+        Tools::Lua::Call* call = new Tools::Lua::Call(*env->i);
         while (lua_gettop(state))
         {
             Tools::Lua::Ref arg(*env->i);
             arg.FromStack();
-            call.PushArg(arg);
+            call->PushArg(arg);
         }
         try
         {
             Tools::log << "function call ->" << Tools::endl;
-            (*env->f)(call);
+            (*env->f)(*call);
         }
         catch (std::exception& e)
         {
+            delete call;
             return luaL_error(state, "%s", e.what());
         }
-        auto const& rets = call.GetRetList();
+        auto const& rets = call->GetRetList();
         auto it = rets.begin();
         auto itEnd = rets.end();
         for (; it != itEnd; ++it)
             it->ToStack();
-        return call.GetNbRets();
+        int nbRet = static_cast<int>(call->GetNbRets());
+        delete call;
+        return nbRet;
     }
 
     int _LuaGarbageCollect(lua_State* state)
