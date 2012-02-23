@@ -7,9 +7,9 @@
 namespace Tools { namespace Renderers { namespace Utils {
 
     namespace {
-        int NextPowerOfTwo(int n)
+        unsigned int NextPowerOfTwo(unsigned int n)
         {
-            int i = 1;
+            unsigned int i = 1;
             while (i < n)
                 i *= 2;
             return i;
@@ -61,7 +61,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             }
             maxSize.w = std::max(maxSize.w, size.w);
             maxSize.h = std::max(maxSize.h, size.h);
-            
+
             textures[it->first] = id;
             auto data = ilGetData();
             this->_hasAlpha[it->first] = false;
@@ -78,7 +78,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         ILuint result = ilGenImage();
         ilBindImage(result);
         ilTexImage(totalSize.w, totalSize.h, 1, 4, IL_RGBA, IL_UNSIGNED_BYTE, 0);
-        
+
         Vector2u pos(0);
         for (auto it = textures.begin(), ite = textures.end(); it != ite; ++it)
         {
