@@ -49,9 +49,9 @@ namespace Client { namespace Network {
         std::list<Common::Packet*> GetInPackets();
         std::string const& GetHost() const { return this->_host; }
         std::string const& GetPort() const { return this->_port; }
-        bool IsRunning() const { boost::unique_lock<boost::mutex> lock(this->_metaMutex); return this->_isRunning; }
-        bool IsConnected() const { boost::unique_lock<boost::mutex> lock(this->_metaMutex); return this->_isConnected; }
-        std::string GetLastError() const { boost::unique_lock<boost::mutex> lock(this->_metaMutex); return this->_lastError; }
+        bool IsRunning() const { boost::lock_guard<boost::mutex> lock(this->_metaMutex); return this->_isRunning; }
+        bool IsConnected() const { boost::lock_guard<boost::mutex> lock(this->_metaMutex); return this->_isConnected; }
+        std::string GetLastError() const { boost::lock_guard<boost::mutex> lock(this->_metaMutex); return this->_lastError; }
     private:
         void _Run();
         void _Connect(std::string host, std::string port);
