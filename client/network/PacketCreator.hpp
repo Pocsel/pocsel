@@ -6,7 +6,7 @@
 #include "client/network/UdpPacket.hpp"
 
 namespace Common {
-    class Camera;
+    struct Camera;
 }
 
 namespace Client {

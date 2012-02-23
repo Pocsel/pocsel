@@ -9,26 +9,25 @@ namespace Tools { namespace Thread {
     private:
         std::function<T()> _task;
         bool _isCancelled;
-        bool _isFinish;
+        bool _isExecuted;
         T _result;
 
     public:
         Task(std::function<T()>&& task, T const& defaultValue = T())
             : _task(task),
             _isCancelled(false),
-            _isFinish(false),
+            _isExecuted(false),
             _result(defaultValue)
         {
         }
 
         void Execute()
         {
-            if (this->_isCancelled)
-                return;
-            this->_result = this->_task();
-            this->_isFinish = true;
+            if (!this->_isCancelled)
+                this->_result = this->_task();
+            this->_isExecuted = true;
         }
-        bool IsFinish() const { return this->_isFinish; }
+        bool IsExecuted() const { return this->_isExecuted; }
         T const& GetResult() const { return this->_result; }
         T& GetResult() { return this->_result; }
         bool IsCancelled() const { return this->_isCancelled; }
@@ -41,22 +40,23 @@ namespace Tools { namespace Thread {
     private:
         std::function<void()> _task;
         bool _isCancelled;
-        bool _isFinish;
+        bool _isExecuted;
 
     public:
         Task(std::function<void()>&& task)
             : _task(task),
             _isCancelled(false),
-            _isFinish(false)
+            _isExecuted(false)
         {
         }
 
         void Execute()
         {
-            this->_task();
-            this->_isFinish = true;
+            if (!this->_isCancelled)
+                this->_task();
+            this->_isExecuted = true;
         }
-        bool IsFinish() const { return this->_isFinish; }
+        bool IsExecuted() const { return this->_isExecuted; }
         bool IsCancelled() const { return this->_isCancelled; }
         void Cancel() { this->_isCancelled = true; }
     };

@@ -120,16 +120,15 @@ namespace Client { namespace Map {
         }
     }
 
-    bool ChunkMesh::Refresh(Game::Game& game, ChunkRenderer& chunkRenderer)
+    bool ChunkMesh::Refresh(ChunkRenderer& chunkRenderer, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk>> neighbors)
     {
         boost::lock_guard<boost::mutex> lock(this->_refreshMutex);
-        auto& cm = game.GetMap().GetChunkManager();
-        auto chunkLeft  = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType(-1,  0,  0)),
-            chunkRight  = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 1,  0,  0)),
-            chunkFront  = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0,  0,  1)),
-            chunkBack   = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0,  0, -1)),
-            chunkTop    = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0,  1,  0)),
-            chunkBottom = cm.GetChunk(this->_chunk.coords + Common::BaseChunk::CoordsType( 0, -1,  0));
+        auto const& chunkLeft   = neighbors[0].get();
+        auto const& chunkRight  = neighbors[1].get();
+        auto const& chunkFront  = neighbors[2].get();
+        auto const& chunkBack   = neighbors[3].get();
+        auto const& chunkTop    = neighbors[4].get();
+        auto const& chunkBottom = neighbors[5].get();
 
         this->_hasTransparentCube = false;
         if (chunkLeft   == 0 ||
@@ -149,7 +148,6 @@ namespace Client { namespace Map {
         if (this->_chunk.IsEmpty())
             return true;
 
-        auto const& cubeTypes = game.GetCubeTypeManager().GetCubeTypes();
         Common::BaseChunk::CubeType const* cubes = this->_chunk.GetCubes();
         Common::BaseChunk::CubeType nearType;
 

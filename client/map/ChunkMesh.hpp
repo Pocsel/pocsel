@@ -5,6 +5,7 @@
 
 namespace Common {
     struct Camera;
+    struct CubeType;
 }
 
 namespace Client {
@@ -49,7 +50,7 @@ namespace Client { namespace Map {
         ChunkMesh(Chunk& chunk);
         ~ChunkMesh();
 
-        bool Refresh(Game::Game& game, ChunkRenderer& chunkRenderer);
+        bool Refresh(ChunkRenderer& chunkRenderer, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk>> neighbors);
         bool RefreshGraphics(Tools::IRenderer& renderer);
         void Render(Uint32 textureId, Tools::IRenderer& renderer);
         Uint32 GetTriangleCount() const { return this->_triangleCount; }
