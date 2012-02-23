@@ -4,6 +4,10 @@
 #include "common/BaseChunk.hpp"
 #include "client/map/ChunkManager.hpp"
 
+namespace Common {
+    struct CubePosition;
+}
+
 namespace Client {
     namespace Game {
         class Game;
@@ -25,6 +29,7 @@ namespace Client { namespace Map {
         float GetLoadingProgression() const;
         ChunkManager& GetChunkManager() { return this->_chunkManager; }
         std::string const& GetName() const { return this->_name; }
+        bool GetFirstCube(std::vector<Common::CubePosition> const& positions, Common::CubePosition& result);
     private:
     };
 

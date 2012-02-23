@@ -7,9 +7,14 @@
 #include "client/game/Game.hpp"
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
+#include "client/map/Chunk.hpp"
+#include "client/map/Map.hpp"
 
 #include "client/network/PacketCreator.hpp"
 #include "client/network/Network.hpp"
+
+#include "common/RayCast.hpp"
+#include "common/CubePosition.hpp"
 
 namespace Client { namespace Game {
 
@@ -25,6 +30,7 @@ namespace Client { namespace Game {
         this->_actionBinder.Bind(BindAction::Crouch, BindAction::Held, std::bind(&Player::Crouch, this));
 
         this->_actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Player::Action, this));
+        //this->_actionBinder.Bind(BindAction::Fire, BindAction::Held, std::bind(&Player::Action, this));
     }
 
     void Player::UpdateMovements(Uint32 time)
@@ -102,13 +108,33 @@ namespace Client { namespace Game {
 
     void Player::Crouch()
     {
-        this->_Move(Tools::Vector3f(0, 1, 0));
+        this->_Move(Tools::Vector3f(0, -1, 0));
     }
 
     void Player::Action()
     {
+        auto cubes = Common::RayCast::GetResult(this->_camera, 5);
+
+        for (auto it = cubes.begin(), ite = cubes.end(); it != ite; ++it)
+        {
+            std::cout << "CHUNK " << Map::Chunk::CoordsToId(it->world) << ": " <<
+                it->chunk.x << ", " << it->chunk.y << ", " << it->chunk.z << "\n";
+        }
+
+        std::cout << "\n-------\n\n";
+
+        Common::CubePosition cubePos;
+
+        if (!this->_game.GetMap().GetFirstCube(cubes, cubePos))
+        {
+            cubePos = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
+            std::cout << "FAIL: " << Map::Chunk::CoordsToId(cubePos.world) << ": " <<
+                cubePos.chunk.x << ", " << cubePos.chunk.y << ", " << cubePos.chunk.z << "\n";
+        }
+
+
         this->_game.GetClient().GetNetwork().SendUdpPacket(
-            Network::PacketCreator::Action(this->_game.GetClient().GetClientId(), this->_camera)
+            Network::PacketCreator::Action(this->_game.GetClient().GetClientId(), this->_camera, cubePos)
             );
     }
 

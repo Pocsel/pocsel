@@ -2,9 +2,7 @@
 #define __SERVER_CLIENTMANAGEMENT_CLIENTACTIONS_HPP__
 
 namespace Common {
-
     class Packet;
-
 }
 
 namespace Server { namespace ClientManagement {

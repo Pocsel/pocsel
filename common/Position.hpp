@@ -37,12 +37,21 @@ namespace Common {
         {
             this->chunk += direction;
 #define JUMP_CHUNK(XYZ) do { \
-            if (this->chunk.XYZ < 0 || this->chunk.XYZ >= ((float)Common::ChunkSize)) \
+            if (this->chunk.XYZ < 0.0f || this->chunk.XYZ >= ((float)Common::ChunkSize)) \
             { \
-                this->world.XYZ += ((int)this->chunk.XYZ) / ((int)Common::ChunkSize); \
-                this->chunk.XYZ = std::fmod(this->chunk.XYZ, ((float)Common::ChunkSize)); \
+                if (this->chunk.XYZ < 0.0f) \
+                { \
+                    this->world.XYZ += ((int)this->chunk.XYZ - (int)Common::ChunkSize) / ((int)Common::ChunkSize); \
+                    this->chunk.XYZ += (float)Common::ChunkSize;\
+                } \
+                else \
+                    this->world.XYZ += ((int)this->chunk.XYZ + 1) / ((int)Common::ChunkSize); \
+                this->chunk.XYZ -= (float)(((int)this->chunk.XYZ) / ((int)Common::ChunkSize) * (int)Common::ChunkSize); \
             } \
             } while (0);
+
+/*                if (chunk.XYZ < 0.0f) \
+                    chunk.XYZ += (float)Common::ChunkSize; \*/
 
             JUMP_CHUNK(x);
             JUMP_CHUNK(y);

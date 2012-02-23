@@ -229,9 +229,9 @@ namespace Server { namespace ClientManagement {
             packet->Read(clientId);
             ok = true;
         }
-        catch (std::exception& e)
+        catch (std::exception&)
         {
-            Tools::log << "Could not read id in UDP packet.\n";
+            Tools::log << "Could not read id in UDP packet\n";
             Tools::Delete(packet);
         }
         if (ok)

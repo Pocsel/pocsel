@@ -2,6 +2,7 @@
 
 #include "common/CubeType.hpp"
 #include "common/Position.hpp"
+#include "common/CubePosition.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
 
@@ -10,13 +11,17 @@
 #include "server/game/entities/EntityManager.hpp"
 #include "server/game/engine/Engine.hpp"
 
+#include "server/game/Game.hpp"
 #include "server/game/Player.hpp"
+
+#include "server/Server.hpp"
+#include "server/clientmanagement/ClientManager.hpp"
 
 namespace Server { namespace Game { namespace Map {
 
-    Map::Map(Conf const& conf, Tools::SimpleMessageQueue& gameMessageQueue) :
+    Map::Map(Conf const& conf, Game& game) :
         _conf(conf),
-        _admMessageQueue(gameMessageQueue),
+        _game(game),
         _messageQueue(new Tools::SimpleMessageQueue(1)),
         _spawnPosition(0)
     {
@@ -86,6 +91,13 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_RemovePlayer, this, id));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::DestroyCube(Common::CubePosition const& pos)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_DestroyCube, this, pos));
         this->_messageQueue->PushMessage(m);
     }
 
@@ -186,7 +198,7 @@ namespace Server { namespace Game { namespace Map {
         this->GetChunk(Chunk::CoordsToId(chunk.coords.x, chunk.coords.y - 1, chunk.coords.z), cb);
     }
 
-    void Map::_AddPlayer(std::shared_ptr<Player> const& p)
+    void Map::_AddPlayer(std::shared_ptr<Player> p)
     {
         this->_players[p->id] = p;
     }
@@ -194,6 +206,26 @@ namespace Server { namespace Game { namespace Map {
     void Map::_RemovePlayer(Uint32 id)
     {
         this->_players.erase(id);
+    }
+
+    void Map::_DestroyCube(Common::CubePosition pos)
+    {
+        Chunk::IdType id = Chunk::CoordsToId(pos.world);
+
+        auto it = this->_chunks.find(id);
+        if (it == this->_chunks.end())
+            return;
+        Chunk* chunk = it->second;
+
+        if (chunk->GetCube(pos.chunk) != 0)
+        {
+            chunk->SetCube(pos.chunk, 0);
+
+            for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+            {
+                this->_game.GetServer().GetClientManager().SendChunk(it->second->id, *chunk);
+            }
+        }
     }
 
 }}}

@@ -6,7 +6,8 @@
 
 namespace Common {
     class Packet;
-    class Camera;
+    struct Camera;
+    struct CubePosition;
 }
 
 namespace Server { namespace Network {
@@ -42,7 +43,7 @@ namespace Server { namespace Network {
         static void TeleportOk(Common::Packet const& p);
 
         static void Move(Common::Packet const& p, Common::Camera& cam);
-        static void Action(Common::Packet const& p, Common::Camera& cam);
+        static void Action(Common::Packet const& p, Common::Camera& cam, Common::CubePosition& cubePos);
     };
 
 }}

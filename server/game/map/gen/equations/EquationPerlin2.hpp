@@ -55,25 +55,25 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 n = vals.find("n")->second;
             if (vals.find("ip") != vals.end())
             {
-                ip = vals.find("ip")->second + 0.1;
+                ip = vals.find("ip")->second;
                 if (ip < 0)
                     ip = 0;
             }
             if (vals.find("ipp") != vals.end())
             {
-                ipp = vals.find("ipp")->second + 0.1;
+                ipp = vals.find("ipp")->second;
                 if (ipp < 0)
                     ipp = 0;
             }
             if (vals.find("ippmx") != vals.end())
             {
-                ippmx = vals.find("ippmx")->second + 0.1;
+                ippmx = vals.find("ippmx")->second;
                 if (ippmx < 1)
                     ippmx = 1;
             }
             if (vals.find("ippmz") != vals.end())
             {
-                ippmz = vals.find("ippmz")->second + 0.1;
+                ippmz = vals.find("ippmz")->second;
                 if (ippmz < 1)
                     ippmz = 1;
             }

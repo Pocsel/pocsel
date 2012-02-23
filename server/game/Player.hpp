@@ -34,7 +34,8 @@ namespace Server { namespace Game {
         void SetCurrentMap(Map::Map& map) { this->_currentMap = &map; }
         bool HasMap() const { return this->_currentMap != 0; }
         Map::Map& GetCurrentMap() { assert(this->_currentMap); return *this->_currentMap; }
-        Common::Position const& GetPosition() { return this->_position; }
+        Common::Position const& GetPosition() const { return this->_position; }
+        bool IsInGame() const { return this->_inGame; }
         void Teleport(Map::Map& map, Common::Position const& position);
         void TeleportOk();
         void RemoveFromMap();

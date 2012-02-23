@@ -6,33 +6,26 @@
 #include "server/Chunk.hpp"
 
 namespace Common {
-
     struct Position;
-
+    struct CubePosition;
 }
 
 namespace Tools {
-
     class SimpleMessageQueue;
-
 }
 
 namespace Server { namespace Game {
-
+    class Game;
     class Player;
-
     namespace Map { namespace Gen {
     class ChunkGenerator;
     }}
-
     namespace Engine {
         class Engine;
     }
-
     namespace Entities {
         class EntityManager;
     }
-
 }}
 
 namespace Server { namespace Game { namespace Map {
@@ -46,7 +39,7 @@ namespace Server { namespace Game { namespace Map {
 
     private:
         Conf _conf;
-        Tools::SimpleMessageQueue& _admMessageQueue;
+        Game& _game;
         Tools::SimpleMessageQueue* _messageQueue;
 
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
@@ -59,7 +52,7 @@ namespace Server { namespace Game { namespace Map {
         Engine::Engine* _engine;
 
     public:
-        Map(Conf const& conf, Tools::SimpleMessageQueue& gameMessageQueue);
+        Map(Conf const& conf, Game& game);
         ~Map();
 
         void Start();
@@ -73,14 +66,16 @@ namespace Server { namespace Game { namespace Map {
         void GetChunk(Chunk::IdType id, ChunkCallback& response);
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
+        void DestroyCube(Common::CubePosition const& pos);
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
         void _GetSpawnPosition(SpawnCallback& response);
         void _GetChunk(Chunk::IdType id, ChunkCallback& response);
         void _FindSpawnPosition(Chunk const& chunk);
-        void _AddPlayer(std::shared_ptr<Player> const& p);
+        void _AddPlayer(std::shared_ptr<Player> p);
         void _RemovePlayer(Uint32 id);
+        void _DestroyCube(Common::CubePosition pos);
     };
 
 }}}

@@ -69,6 +69,11 @@ namespace Common {
             return this->_cubes[x + y * ChunkSize + z * ChunkSize2];
         }
 
+        inline void SetCube(CoordsType const& coords, CubeType type)
+        {
+            this->SetCube(coords.x, coords.y, coords.z, type);
+        }
+
         inline void SetCube(Uint32 x, Uint32 y, Uint32 z, CubeType type)
         {
             assert(x < ChunkSize);

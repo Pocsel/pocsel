@@ -4,21 +4,17 @@
 #include "server/Chunk.hpp"
 
 namespace Common {
-
     struct Position;
-
+    struct Camera;
+    struct CubePosition;
 }
 
 namespace Tools {
-
     class SimpleMessageQueue;
-
 }
 
 namespace Server {
-
     class Server;
-
 }
 
 namespace Server { namespace Game {
@@ -47,8 +43,11 @@ namespace Server { namespace Game {
 
         World const& GetWorld() const { return *this->_world; }
         World& GetWorld() { return *this->_world; }
+        Server const& GetServer() const { return this->_server; }
+        Server& GetServer() { return this->_server; }
 
         void PlayerTeleportOk(Uint32 id);
+        void PlayerAction(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos);
 
         // Thread safe
         void SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);

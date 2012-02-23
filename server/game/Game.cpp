@@ -19,32 +19,25 @@ namespace Server { namespace Game {
         _messageQueue(messageQueue)
     {
         Tools::debug << "Game::Game()\n";
-        this->_world = new World(server, this->_messageQueue);
+        this->_world = new World(*this, this->_messageQueue);
     }
 
     Game::~Game()
     {
         Tools::debug << "Game::~Game()\n";
         Tools::Delete(this->_world);
-
-//        for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
-//            Tools::Delete(it->second);
-
-//        Tools::Delete(this->_messageQueue);
     }
 
     void Game::Start()
     {
         Tools::debug << "Game::Start()\n";
         this->_world->Start();
-//        this->_messageQueue->Start();
     }
 
     void Game::Stop()
     {
         Tools::debug << "Game::Stop()\n";
         this->_world->Stop();
-//        this->_messageQueue->Stop();
     }
 
     void Game::PlayerTeleportOk(Uint32 id)
@@ -57,12 +50,23 @@ namespace Server { namespace Game {
         player->TeleportOk();
     }
 
+    void Game::PlayerAction(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos)
+    {
+        auto it = this->_players.find(id);
+        if (it == this->_players.end())
+            return;
+        Player* player = it->second.get();
+
+        if (!player->IsInGame())
+            return;
+        player->GetCurrentMap().DestroyCube(targetPos);
+    }
+
     void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Game::_SpawnPlayer, this, std::cref(clientName), clientId, playerName, viewDistance));
         this->_messageQueue.PushMessage(m);
-        Tools::debug << "SpawnPlayer\n";
     }
 
     void Game::PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position)

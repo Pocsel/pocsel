@@ -1,4 +1,5 @@
 #include "server/game/World.hpp"
+#include "server/game/Game.hpp"
 
 #include "server/Server.hpp"
 
@@ -8,14 +9,14 @@
 
 namespace Server { namespace Game{
 
-    World::World(Server& server, Tools::SimpleMessageQueue& gameMessageQueue) :
-        _server(server),
+    World::World(Game& game, Tools::SimpleMessageQueue& gameMessageQueue) :
+        _game(game),
         _messageQueue(gameMessageQueue)
     {
         Tools::debug << "World::World()\n";
         try
         {
-            Database::WorldLoader::Load(*this, server.GetResourceManager());
+            Database::WorldLoader::Load(*this, game.GetServer().GetResourceManager());
         }
         catch (std::exception& e)
         {

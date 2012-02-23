@@ -7,6 +7,7 @@
 
 namespace Common {
     struct Camera;
+    struct CubePosition;
 }
 
 namespace Client {
@@ -28,7 +29,9 @@ namespace Client { namespace Network {
         static std::unique_ptr<Common::Packet> TeleportOk();
 
         static std::unique_ptr<UdpPacket> Move(Uint32 id, Common::Camera const& cam);
-        static std::unique_ptr<UdpPacket> Action(Uint32 id, Common::Camera const& cam);
+        static std::unique_ptr<UdpPacket> Action(Uint32 id,
+                                                 Common::Camera const& cam,
+                                                 Common::CubePosition const& target);
     };
 
 }}

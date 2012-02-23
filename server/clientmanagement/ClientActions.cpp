@@ -6,6 +6,7 @@
 
 #include "common/Packet.hpp"
 #include "common/Camera.hpp"
+#include "common/CubePosition.hpp"
 
 #include "server/Server.hpp"
 
@@ -130,8 +131,9 @@ namespace Server { namespace ClientManagement {
 
             Common::Camera cam;
 
-            Network::PacketExtractor::Action(packet, cam);
-//            manager.ClientTeleportOk(client);
+            Network::PacketExtractor::Move(packet, cam);
+
+//            manager.GetServer().GetGame().PlayerMove(client.id, cam);
         }
 
         void _HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
@@ -139,19 +141,23 @@ namespace Server { namespace ClientManagement {
             Tools::debug << "_HandleAction (client " << client.id << ")\n";
 
             Common::Camera cam;
+            Common::CubePosition cubePos;
 
-            Network::PacketExtractor::Action(packet, cam);
+            Network::PacketExtractor::Action(packet, cam, cubePos);
 
             auto& world = cam.position.world;
             auto& chunk = cam.position.chunk;
             auto& dir = cam.direction;
             std::cout <<
-                "MOVE: \n" <<
+                "ACTION: \n" <<
                 "   world: " << world.x << ", " << world.y << ", " << world.z << "\n" <<
                 "   chunk: " << chunk.x << ", " << chunk.y << ", " << chunk.z << "\n" <<
-                "   dir: " << dir.x << ", " << dir.y << ", " << dir.z << "\n";
+                "   dir: " << dir.x << ", " << dir.y << ", " << dir.z << "\n" <<
+                "TARGETCUBE:\n"
+                "   world: " << cubePos.world.x << ", " << cubePos.world.y << ", " << cubePos.world.z << "\n" <<
+                "   chunk: " << cubePos.chunk.x << ", " << cubePos.chunk.y << ", " << cubePos.chunk.z << "\n\n";
 
-//            manager.GetServer().GetGame().ClientAction(client.id, cam);
+            manager.GetServer().GetGame().PlayerAction(client.id, cam, cubePos);
         }
     }}
 

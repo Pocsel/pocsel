@@ -6,30 +6,24 @@
 #include "tools/SimpleMessageQueue.hpp"
 
 namespace Server {
-
     class Server;
-
+    namespace Game { namespace Map {
+        class Map;
+    }}
     namespace Database {
-
         class WorldLoader;
-
     }
-
 }
 
 namespace Server { namespace Game {
 
-    namespace Map {
-
-        class Map;
-
-    }
+    class Game;
 
     class World :
         private boost::noncopyable
     {
     private:
-        Server& _server;
+        Game& _game;
         Tools::SimpleMessageQueue& _messageQueue;
         std::unordered_map<std::string, Map::Map*> _maps;
         Map::Map* _defaultMap;
@@ -39,7 +33,7 @@ namespace Server { namespace Game {
         Uint32 _version;
 
     public:
-        World(Server& server, Tools::SimpleMessageQueue& gameMessageQueue);
+        World(Game& game, Tools::SimpleMessageQueue& gameMessageQueue);
         ~World();
 
         bool HasMap(std::string const& name) { return this->_maps.find(name) != this->_maps.end(); }
