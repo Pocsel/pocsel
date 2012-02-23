@@ -35,6 +35,8 @@ int main(int, char**)
         Tools::log << "from c++: " << e.what() << Tools::endl;
     }
 
+    i.Globals().Set(std::string("bite"), i.MakeNil());
+
     try
     {
         i.DoString("bite(13.3, 13.4)");

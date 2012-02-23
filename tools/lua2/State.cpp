@@ -87,6 +87,14 @@ namespace Tools { namespace Lua {
         return r;
     }
 
+    Ref State::MakeNil() throw()
+    {
+        lua_pushnil(*this);
+        Ref r(*this);
+        r.FromStack();
+        return r;
+    }
+
     Ref State::MakeInteger(int val) throw()
     {
         lua_pushinteger(*this, val);

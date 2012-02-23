@@ -135,6 +135,7 @@ namespace Tools { namespace Lua {
         {
             this->Set(this->_state.Make(key), this->_state.Make(value));
         }
+
 }}
 
 #endif
