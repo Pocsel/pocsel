@@ -38,7 +38,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             }
             else
             {
-                if (!ilLoadL(IL_PNG, it->second.second, it->second.first) && !ilLoadL(IL_TYPE_UNKNOWN, it->second.second, it->second.first))
+                if (!ilLoadL(IL_PNG, it->second.second, (ILuint)it->second.first) && !ilLoadL(IL_TYPE_UNKNOWN, it->second.second, (ILuint)it->second.first))
                 {
                     ilBindImage(0);
                     ilDeleteImage(id);
@@ -73,7 +73,7 @@ namespace Tools { namespace Renderers { namespace Utils {
                 }
         }
 
-        unsigned int tmp = std::sqrt(textures.size()) + 1;
+        unsigned int tmp = (unsigned int)std::sqrt(textures.size()) + 1;
         Vector2u totalSize(tmp * maxSize.w, tmp * maxSize.h);
         ILuint result = ilGenImage();
         ilBindImage(result);
@@ -91,7 +91,7 @@ namespace Tools { namespace Renderers { namespace Utils {
                 pos.x, pos.y, 0,
                 0, 0, 0,
                 maxSize.w, maxSize.h, 1);
-            this->_textureCoords[it->first] = Vector3f(pos.x, totalSize.w - maxSize.w - pos.y, maxSize.w) / (float)totalSize.w;
+            this->_textureCoords[it->first] = Vector3f((float)pos.x, (float)(totalSize.w - maxSize.w - pos.y), (float)maxSize.w) / (float)totalSize.w;
 
             pos.x += maxSize.w;
             if (pos.x >= totalSize.w)

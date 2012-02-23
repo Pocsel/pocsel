@@ -21,12 +21,14 @@ namespace Tools { namespace Thread {
 
         void PushTask(std::function<void()>&& task);
         template<class T>
-        void PushTask(std::shared_ptr<Tools::Thread::Task<T>> task)
+        void PushTask(std::weak_ptr<Tools::Thread::Task<T>> task)
         {
             this->PushTask(
                 [task]()
                 {
-                    task->Execute();
+                    auto ptr = task.lock();
+                    if (ptr)
+                        ptr->Execute();
                 });
         }
     private:
