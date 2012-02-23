@@ -71,7 +71,7 @@ namespace Server { namespace ClientManagement {
 
         // A appeler du thread clientmanagement
         Database::ResourceManager const& GetResourceManager() const;
-        Game::Game const& GetGame() const;
+        Server& GetServer() { return this->_server; }
         void ClientLogin(Client& client, std::string const& login);
         void ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids);
         void ClientSpawn(Client& client, Uint32 viewDistance, std::string const& playerName);

@@ -97,11 +97,6 @@ namespace Server { namespace ClientManagement {
         return this->_server.GetResourceManager();
     }
 
-    Game::Game const& ClientManager::GetGame() const
-    {
-        return this->_server.GetGame();
-    }
-
     void ClientManager::ClientLogin(Client& client, std::string const& login)
     {
         if (client.GetLogin() != "")

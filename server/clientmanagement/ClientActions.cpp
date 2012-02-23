@@ -7,6 +7,8 @@
 #include "common/Packet.hpp"
 #include "common/Camera.hpp"
 
+#include "server/Server.hpp"
+
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 
@@ -92,7 +94,7 @@ namespace Server { namespace ClientManagement {
             Chunk::CubeType id;
             Network::PacketExtractor::GetCubeType(packet, id);
 
-            Game::World const& world = manager.GetGame().GetWorld();
+            Game::World const& world = manager.GetServer().GetGame().GetWorld();
 
             if (!world.HasCubeType(id))
                 throw std::runtime_error("Invalid cube description id: " + Tools::ToString(id));
@@ -128,7 +130,17 @@ namespace Server { namespace ClientManagement {
 
             Common::Camera cam;
 
-            Network::PacketExtractor::Move(packet, cam);
+            Network::PacketExtractor::Action(packet, cam);
+//            manager.ClientTeleportOk(client);
+        }
+
+        void _HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
+        {
+            Tools::debug << "_HandleAction (client " << client.id << ")\n";
+
+            Common::Camera cam;
+
+            Network::PacketExtractor::Action(packet, cam);
 
             auto& world = cam.position.world;
             auto& chunk = cam.position.chunk;
@@ -139,14 +151,7 @@ namespace Server { namespace ClientManagement {
                 "   chunk: " << chunk.x << ", " << chunk.y << ", " << chunk.z << "\n" <<
                 "   dir: " << dir.x << ", " << dir.y << ", " << dir.z << "\n";
 
-//            manager.ClientTeleportOk(client);
-        }
-
-        void _HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
-        {
-            Tools::debug << "_HandleTeleportOk (client " << client.id << ")\n";
-
-//            manager.ClientTeleportOk(client);
+//            manager.GetServer().GetGame().ClientAction(client.id, cam);
         }
     }}
 

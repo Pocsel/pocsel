@@ -24,8 +24,8 @@ namespace Client { namespace Menu { namespace Widget {
         _pos(pos),
         _pressed(false)
     {
-        actionBinder.Bind(BindAction::MenuClick, BindAction::Pressed, std::bind(&Button::_PressedBind, this));
-        actionBinder.Bind(BindAction::MenuClick, BindAction::Released, std::bind(&Button::_ReleasedBind, this));
+        actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Button::_PressedBind, this));
+        actionBinder.Bind(BindAction::Fire, BindAction::Released, std::bind(&Button::_ReleasedBind, this));
         this->_rect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
         this->_Update();
     }

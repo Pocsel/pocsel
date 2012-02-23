@@ -15,14 +15,14 @@ namespace Client { namespace BindAction {
         None,
         Quit,
         Menu,
-        MenuClick,
         Forward,
         Backward,
         Left,
         Right,
         Jump,
+        Crouch,
         Fire,
-        SecondaryFire,
+        AltFire,
         Use,
         // Pour les tableaux
         NbBindActions
