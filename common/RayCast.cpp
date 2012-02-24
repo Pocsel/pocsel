@@ -41,15 +41,12 @@ namespace Common {
                     sign = 1;
                 }
 
-                dist = GR_ABS((x - px) / vx);
-                while (dist < distance)
+                for (dist = GR_ABS((x - px) / vx); dist < distance ; dist = GR_ABS((x - px) / vx))
                 {
-                    dist = GR_ABS((x - px) / vx);
-
                     y = py + (dist * vy);
                     z = pz + (dist * vz);
 
-                    res[dist] = Tools::Vector3i((int)x - (sign ? 1 : 0),
+                    res[dist] = Tools::Vector3i((int)x,// - (sign ? 1 : 0),
                                                 (int)y,
                                                 (int)z
                                                );
@@ -70,8 +67,7 @@ namespace Common {
                     sign = 1;
                 }
 
-                dist = GR_ABS((y - py) / vy);
-                while (dist < distance)
+                for (dist = GR_ABS((y - py) / vy); dist < distance ; dist = GR_ABS((y - py) / vy))
                 {
                     dist = GR_ABS((y - py) / vy);
 
@@ -79,7 +75,7 @@ namespace Common {
                     z = pz + (dist * vz);
 
                     res[dist] = Tools::Vector3i((int)x,
-                                                (int)y - (sign ? 1 : 0),
+                                                (int)y,// - (sign ? 1 : 0),
                                                 (int)z
                                                );
 
@@ -100,17 +96,19 @@ namespace Common {
                     sign = 1;
                 }
 
-                dist = GR_ABS((z - pz) / vz);
-                while (dist < distance)
+                for (dist = GR_ABS((z - pz) / vz); dist < distance ; dist = GR_ABS((z - pz) / vz))
                 {
                     dist = GR_ABS((z - pz) / vz);
 
                     x = px + (dist * vx);
                     y = py + (dist * vy);
 
+                    if (x > dist || y > dist || z > dist)
+                        break;
+
                     res[dist] = Tools::Vector3i((int)x,
                                                 (int)y,
-                                                (int)z - (sign ? 1 : 0)
+                                                (int)z// - (sign ? 1 : 0)
                                                );
 
                     z += sign;
