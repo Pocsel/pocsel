@@ -137,7 +137,7 @@ namespace Client {
                 this->chunkCacheArea = 1;
                 Tools::error << "Settings: chunkCacheArea too low, changing to " << this->chunkCacheArea << Tools::endl;
             }
-            this->chunkCacheArea = _LuaGetGlobal<unsigned int>(i, "chunkMinimumArea", 2);
+            this->chunkMinimumArea = _LuaGetGlobal<unsigned int>(i, "chunkMinimumArea", 2);
             if (this->chunkMinimumArea < 1 || this->chunkMinimumArea > this->chunkViewDistance)
             {
                 this->chunkMinimumArea = this->chunkViewDistance - 1;

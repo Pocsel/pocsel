@@ -107,7 +107,7 @@ namespace Client { namespace Window {
         try
         {
             Tools::Lua::Interpreter i;
-            i.Globals().Set("bind", i.MakeFunction(std::bind(&InputBinder::_BindFromLua, this, std::placeholders::_1)));
+            i.Globals().Set(std::string("bind"), i.MakeFunction(std::bind(&InputBinder::_BindFromLua, this, std::placeholders::_1)));
             i.DoFile(path);
         }
         catch (std::exception& e)
@@ -121,8 +121,8 @@ namespace Client { namespace Window {
 
     void InputBinder::_BindFromLua(Tools::Lua::CallHelper& callHelper)
     {
-        std::string input = callHelper.PopArg().CheckString();
         std::string action = callHelper.PopArg().CheckString();
+        std::string input = callHelper.PopArg().CheckString();
         this->Bind(input, action);
     }
 
@@ -163,6 +163,7 @@ namespace Client { namespace Window {
                 return true;
             }
         }
+        Tools::error << "Could not bind \"" << input << "\" to \"" << action << "\" (input not found)" << Tools::endl;
         return false;
     }
 
