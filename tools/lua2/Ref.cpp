@@ -1,5 +1,6 @@
 #include "tools/lua2/Lua.hpp"
 #include "tools/lua2/Ref.hpp"
+#include "tools/lua2/Iterator.hpp"
 
 namespace Tools { namespace Lua {
 
@@ -11,8 +12,7 @@ namespace Tools { namespace Lua {
     Ref::Ref(Ref const& ref) throw() :
         _state(ref._state), _ref(LUA_NOREF)
     {
-        ref.ToStack();
-        this->FromStack();
+        *this = ref;
     }
 
     Ref::~Ref() throw()
@@ -29,12 +29,16 @@ namespace Tools { namespace Lua {
 
     bool Ref::operator ==(Ref const& ref) const throw()
     {
-        return this->_ref == ref._ref;
+        ref.ToStack();
+        this->ToStack();
+        bool equal = lua_rawequal(this->_state, -1, -2);
+        lua_pop(this->_state, 2);
+        return equal;
     }
 
     bool Ref::operator !=(Ref const& ref) const throw()
     {
-        return this->_ref != ref._ref;
+        return !(*this == ref);
     }
 
     void Ref::Unref() throw()
@@ -72,6 +76,16 @@ namespace Tools { namespace Lua {
         }
     }
 
+    Iterator Ref::Begin() const throw(std::runtime_error)
+    {
+        return Iterator(*this, false);
+    }
+
+    Iterator Ref::End() const throw(std::runtime_error)
+    {
+        return Iterator(*this, true);
+    }
+
     Ref Ref::operator [](Ref const& index) const throw(std::runtime_error)
     {
         this->ToStack();
@@ -88,7 +102,7 @@ namespace Tools { namespace Lua {
         return ret;
     }
 
-    void Ref::Set(Ref const& key, Ref const& value) const throw(std::runtime_error)
+    Ref Ref::Set(Ref const& key, Ref const& value) const throw(std::runtime_error)
     {
         this->ToStack();
         if (!lua_istable(this->_state, -1))
@@ -100,6 +114,7 @@ namespace Tools { namespace Lua {
         value.ToStack();
         lua_rawset(this->_state, -3);
         lua_pop(this->_state, 1);
+        return value;
     }
 
 #define MAKE_TOMETHOD(name, lua_func, type) \
@@ -114,7 +129,62 @@ namespace Tools { namespace Lua {
     MAKE_TOMETHOD(ToBoolean, lua_toboolean, bool);
     MAKE_TOMETHOD(ToInteger, lua_tointeger, int);
     MAKE_TOMETHOD(ToNumber, lua_tonumber, double);
-    MAKE_TOMETHOD(ToString, lua_tostring, std::string);
+
+    std::string Ref::ToString() const throw()
+    {
+        this->ToStack();
+        char const* str = lua_tostring(this->_state, -1);
+        if (str)
+        {
+            std::string ret(str);
+            lua_pop(this->_state, 1);
+            return ret;
+        }
+        lua_pop(this->_state, 1);
+        return std::string();
+    }
+
+#define MAKE_CHECKMETHOD(name, lua_checkfunc, lua_tofunc, type, error) \
+    type Ref::name() const throw(std::runtime_error) \
+    { \
+        this->ToStack(); \
+        if (!lua_checkfunc(this->_state, -1)) \
+        { \
+            lua_pop(this->_state, 1); \
+            throw std::runtime_error(error); \
+        } \
+        type ret = lua_tofunc(this->_state, -1); \
+        lua_pop(this->_state, 1); \
+        return ret; \
+    }
+
+    MAKE_CHECKMETHOD(CheckBoolean, lua_isboolean, lua_toboolean, bool, "Lua::Ref: Value is not of boolean type");
+    MAKE_CHECKMETHOD(CheckInteger, lua_isnumber, lua_tointeger, int, "Lua::Ref: Value is not of integer type");
+    MAKE_CHECKMETHOD(CheckNumber, lua_isnumber, lua_tonumber, double, "Lua::Ref: Value is not of number type");
+
+    std::string Ref::CheckString() const throw(std::runtime_error)
+    {
+        this->ToStack();
+        if (!lua_isstring(this->_state, -1))
+        {
+            lua_pop(this->_state, 1);
+            throw std::runtime_error("Lua::Ref: Value is not of string type");
+        }
+        char const* str = lua_tostring(this->_state, -1);
+        if (str)
+        {
+            std::string ret(str);
+            lua_pop(this->_state, 1);
+            return ret;
+        }
+        lua_pop(this->_state, 1);
+        return std::string();
+    }
+
+    std::string Ref::TypeName() const throw()
+    {
+        return lua_typename(this->_state, this->GetType());
+    }
 
     int Ref::GetType() const throw()
     {

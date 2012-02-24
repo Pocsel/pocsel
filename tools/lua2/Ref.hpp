@@ -6,6 +6,8 @@
 
 namespace Tools { namespace Lua {
 
+    class Iterator;
+
     class Ref
     {
     private:
@@ -32,19 +34,27 @@ namespace Tools { namespace Lua {
         template <typename T, typename U, typename V, typename W>
             Ref operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error);
         // array access
+        Iterator Begin() const throw(std::runtime_error);
+        Iterator End() const throw(std::runtime_error);
         Ref operator [](Ref const& index) const throw(std::runtime_error);
         template <typename T>
             Ref operator [](T const& index) const throw(std::runtime_error);
         // array setters
-        void Set(Ref const& key, Ref const& value) const throw(std::runtime_error);
+        Ref Set(Ref const& key, Ref const& value) const throw(std::runtime_error);
         template <typename T, typename U>
-            void Set(T const& key, U const& value) const throw(std::runtime_error);
-        // type conversions
-        bool ToBoolean() const throw();
-        int ToInteger() const throw();
-        double ToNumber() const throw();
-        std::string ToString() const throw();
+            Ref Set(T const& key, U const& value) const throw(std::runtime_error);
+        // safe type conversions
+        bool ToBoolean() const throw(); // true pour toute valeur differente de false ou nil
+        int ToInteger() const throw(); // conversion de type par lua, retourne 0 en cas d'erreur
+        double ToNumber() const throw(); // conversion de type par lua, retourne 0 en cas d'erreur
+        std::string ToString() const throw(); // conversion de type par lua, retourne une chaine vide en cas d'erreur
+        // unsafe type conversions
+        bool CheckBoolean() const throw(std::runtime_error);
+        int CheckInteger() const throw(std::runtime_error); // en fait, ça vérifie si c'est un number parce que le type integer est un number en interne
+        double CheckNumber() const throw(std::runtime_error);
+        std::string CheckString() const throw(std::runtime_error);
         // type tests
+        std::string TypeName() const throw();
         int GetType() const throw(); // valeurs possibles : LUA_TNIL, LUA_TBOOLEAN, LUA_TLIGHTUSERDATA, LUA_TNUMBER, LUA_TSTRING, LUA_TTABLE, LUA_TFUNCTION, LUA_TUSERDATA, LUA_TTHREAD, LUA_TNONE
         bool Exists() const throw(); // <- pareil que IsNoneOrNil(), utiliser ça en priorité plutôt que IsNil()/IsNoneOrNil()/IsNone()
         bool IsBoolean() const throw();
@@ -63,6 +73,7 @@ namespace Tools { namespace Lua {
         // touche pas, appelle pas
         void FromStack() throw();
         void ToStack() const throw();
+        State& GetState() const throw() { return this->_state; }
     };
 
     inline Ref Ref::operator ()() const throw(std::runtime_error)
@@ -131,9 +142,9 @@ namespace Tools { namespace Lua {
         }
 
     template <typename T, typename U>
-        void Ref::Set(T const& key, U const& value) const throw(std::runtime_error)
+        Ref Ref::Set(T const& key, U const& value) const throw(std::runtime_error)
         {
-            this->Set(this->_state.Make(key), this->_state.Make(value));
+            return this->Set(this->_state.Make(key), this->_state.Make(value));
         }
 
 }}
