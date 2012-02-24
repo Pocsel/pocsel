@@ -37,7 +37,7 @@ namespace Common {
                 }
                 else
                 {
-                    x = (int)px + 1;
+                    x = (int)px;// + 1;
                     sign = 1;
                 }
 
@@ -63,7 +63,7 @@ namespace Common {
                 }
                 else
                 {
-                    y = (int)py + 1;
+                    y = (int)py;// + 1;
                     sign = 1;
                 }
 
@@ -92,7 +92,7 @@ namespace Common {
                 }
                 else
                 {
-                    z = (int)pz + 1;
+                    z = (int)pz;// + 1;
                     sign = 1;
                 }
 

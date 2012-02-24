@@ -19,7 +19,9 @@
 namespace Client { namespace Game {
 
     Player::Player(Game& game) :
-        _game(game)
+        _game(game),
+        _moved(false),
+        _movedTime(0)
     {
         this->_actionBinder.Bind(BindAction::Forward, BindAction::Held, std::bind(&Player::MoveForward, this));
         this->_actionBinder.Bind(BindAction::Backward, BindAction::Held, std::bind(&Player::MoveBackward, this));
@@ -33,7 +35,7 @@ namespace Client { namespace Game {
         this->_actionBinder.Bind(BindAction::Fire, BindAction::Held, std::bind(&Player::Action, this));
 
         this->_actionBinder.Bind(BindAction::AltFire, BindAction::Pressed, std::bind(&Player::SuperAction, this));
-        //this->_actionBinder.Bind(BindAction::AtlFire, BindAction::Held, std::bind(&Player::SuperAction, this));
+        //this->_actionBinder.Bind(BindAction::AltFire, BindAction::Held, std::bind(&Player::SuperAction, this));
     }
 
     void Player::UpdateMovements(Uint32 time)

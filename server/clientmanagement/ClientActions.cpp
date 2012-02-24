@@ -145,17 +145,17 @@ namespace Server { namespace ClientManagement {
 
             Network::PacketExtractor::Action(packet, cam, cubePos);
 
-            auto& world = cam.position.world;
-            auto& chunk = cam.position.chunk;
-            auto& dir = cam.direction;
-            std::cout <<
-                "ACTION: \n" <<
-                "   world: " << world.x << ", " << world.y << ", " << world.z << "\n" <<
-                "   chunk: " << chunk.x << ", " << chunk.y << ", " << chunk.z << "\n" <<
-                "   dir: " << dir.x << ", " << dir.y << ", " << dir.z << "\n" <<
-                "TARGETCUBE:\n"
-                "   world: " << cubePos.world.x << ", " << cubePos.world.y << ", " << cubePos.world.z << "\n" <<
-                "   chunk: " << cubePos.chunk.x << ", " << cubePos.chunk.y << ", " << cubePos.chunk.z << "\n\n";
+//            auto& world = cam.position.world;
+//            auto& chunk = cam.position.chunk;
+//            auto& dir = cam.direction;
+//            std::cout <<
+//                "ACTION: \n" <<
+//                "   world: " << world.x << ", " << world.y << ", " << world.z << "\n" <<
+//                "   chunk: " << chunk.x << ", " << chunk.y << ", " << chunk.z << "\n" <<
+//                "   dir: " << dir.x << ", " << dir.y << ", " << dir.z << "\n" <<
+//                "TARGETCUBE:\n"
+//                "   world: " << cubePos.world.x << ", " << cubePos.world.y << ", " << cubePos.world.z << "\n" <<
+//                "   chunk: " << cubePos.chunk.x << ", " << cubePos.chunk.y << ", " << cubePos.chunk.z << "\n\n";
 
             manager.GetServer().GetGame().PlayerAction(client.id, cam, cubePos);
         }
