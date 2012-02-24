@@ -43,6 +43,7 @@ namespace Client { namespace Game {
             void Jump();
             void Crouch();
             void Action();
+            void SuperAction();
 
         private:
             void _Move(Tools::Vector3f moveVector);

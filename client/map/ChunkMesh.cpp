@@ -118,9 +118,14 @@ namespace Client { namespace Map {
             indices.push_back(voffset - 1);
             indices.push_back(voffset - 4);
         }
+
+        inline Chunk::CubeType GetCube(Chunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z)
+        {
+            return cubes[x + y * Common::ChunkSize + z * Common::ChunkSize2];
+        }
     }
 
-    bool ChunkMesh::Refresh(ChunkRenderer& chunkRenderer, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk>> neighbors)
+    bool ChunkMesh::Refresh(ChunkRenderer& chunkRenderer, std::vector<Common::CubeType> cubeTypes, std::shared_ptr<Chunk::CubeType> myCubes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
     {
         boost::lock_guard<boost::mutex> lock(this->_refreshMutex);
         auto const& chunkLeft   = neighbors[0].get();
@@ -130,25 +135,34 @@ namespace Client { namespace Map {
         auto const& chunkTop    = neighbors[4].get();
         auto const& chunkBottom = neighbors[5].get();
 
-        this->_hasTransparentCube = false;
-        if (chunkLeft   == 0 ||
-            chunkRight  == 0 ||
-            chunkFront  == 0 ||
-            chunkBack   == 0 ||
-            chunkTop    == 0 ||
-            chunkBottom == 0)
-        {
-            this->_tmpNbVertices = 0;
-            delete [] this->_tmpVertices;
-            this->_tmpVertices = 0;
-            this->_tmpIndices.clear();
-            return false;
-        }
+//        if (chunkLeft   == 0 ||
+//            chunkRight  == 0 ||
+//            chunkFront  == 0 ||
+//            chunkBack   == 0 ||
+//            chunkTop    == 0 ||
+//            chunkBottom == 0)
+//        {
+//            this->_tmpNbVertices = 0;
+//            delete [] this->_tmpVertices;
+//            this->_tmpVertices = 0;
+//            this->_tmpIndices.clear();
+//            return false;
+//        }
+
+        this->_tmpNbVertices = 0;
+        delete [] this->_tmpVertices;
+        this->_tmpVertices = 0;
+        this->_tmpIndices.clear();
 
         if (this->_chunk.IsEmpty())
+        {
+            this->_hasTransparentCube = false;
             return true;
+        }
 
-        Common::BaseChunk::CubeType const* cubes = this->_chunk.GetCubes();
+        bool hasTransparentCube = false;
+
+        Common::BaseChunk::CubeType const* cubes = myCubes.get();
         Common::BaseChunk::CubeType nearType;
 
         std::vector<Vertex> vertices((Common::ChunkSize3 * 6 * 4) / 2);
@@ -173,11 +187,11 @@ namespace Client { namespace Map {
                     nearType = 0;
                     if (x != Common::ChunkSize - 1)
                         nearType = cubes[cubeOffset + 1];
-                    else
-                        nearType = chunkRight->GetCube(0, y, z);
+                    else if (chunkRight != 0)
+                        nearType = GetCube(chunkRight, 0, y, z);
                     if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.right).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.right).HasAlpha();
+                        hasTransparentCube = hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.right).HasAlpha();
                         VerticesPushFace(vertices, voffset, p, 2);
                         IndicesPushFace(indices[cubeType.textures.right], voffset);
                     }
@@ -186,11 +200,11 @@ namespace Client { namespace Map {
                     nearType = 0;
                     if (y != Common::ChunkSize - 1)
                         nearType = cubes[cubeOffset + Common::ChunkSize];
-                    else
-                        nearType = chunkTop->GetCube(x, 0, z);
+                    else if (chunkTop != 0)
+                        nearType = GetCube(chunkTop, x, 0, z);
                     if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.top).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.top).HasAlpha();
+                        hasTransparentCube = hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.top).HasAlpha();
                         VerticesPushFace(vertices, voffset, p, 1);
                         IndicesPushFace(indices[cubeType.textures.top], voffset);
                     }
@@ -199,11 +213,11 @@ namespace Client { namespace Map {
                     nearType = 0;
                     if (z != Common::ChunkSize - 1)
                         nearType = cubes[cubeOffset + Common::ChunkSize2];
-                    else if (z == Common::ChunkSize - 1)
-                        nearType = chunkFront->GetCube(x, y, 0);
+                    else if (chunkFront != 0)
+                        nearType = GetCube(chunkFront, x, y, 0);
                     if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.front).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.front).HasAlpha();
+                        hasTransparentCube = hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.front).HasAlpha();
                         VerticesPushFace(vertices, voffset, p, 0);
                         IndicesPushFace(indices[cubeType.textures.front], voffset);
                     }
@@ -212,11 +226,11 @@ namespace Client { namespace Map {
                     nearType = 0;
                     if (x != 0)
                         nearType = cubes[cubeOffset - 1];
-                    else
-                        nearType = chunkLeft->GetCube(Common::ChunkSize - 1, y, z);
+                    else if (chunkLeft != 0)
+                        nearType = GetCube(chunkLeft, Common::ChunkSize - 1, y, z);
                     if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.left).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.left).HasAlpha();
+                        hasTransparentCube = hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.left).HasAlpha();
                         VerticesPushFace(vertices, voffset, p, 4);
                         IndicesPushFace(indices[cubeType.textures.left], voffset);
                     }
@@ -225,11 +239,11 @@ namespace Client { namespace Map {
                     nearType = 0;
                     if (y != 0)
                         nearType = cubes[cubeOffset - Common::ChunkSize];
-                    else
-                        nearType = chunkBottom->GetCube(x, Common::ChunkSize - 1, z);
+                    else if (chunkBottom != 0)
+                        nearType = GetCube(chunkBottom, x, Common::ChunkSize - 1, z);
                     if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.bottom).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.bottom).HasAlpha();
+                        hasTransparentCube = hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.bottom).HasAlpha();
                         VerticesPushFace(vertices, voffset, p, 3);
                         IndicesPushFace(indices[cubeType.textures.bottom], voffset);
                     }
@@ -238,11 +252,11 @@ namespace Client { namespace Map {
                     nearType = 0;
                     if (z != 0)
                         nearType = cubes[cubeOffset - Common::ChunkSize2];
-                    else
-                        nearType = chunkBack->GetCube(x, y, Common::ChunkSize - 1);
+                    else if (chunkBack != 0)
+                        nearType = GetCube(chunkBack, x, y, Common::ChunkSize - 1);
                     if (nearType == 0 || (nearType != cubeType.id && chunkRenderer.GetTexture(cubeTypes[nearType - 1].textures.back).HasAlpha()))
                     {
-                        this->_hasTransparentCube = this->_hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.back).HasAlpha();
+                        hasTransparentCube = hasTransparentCube || chunkRenderer.GetTexture(cubeType.textures.back).HasAlpha();
                         VerticesPushFace(vertices, voffset, p, 5);
                         IndicesPushFace(indices[cubeType.textures.back], voffset);
                     }
@@ -250,6 +264,7 @@ namespace Client { namespace Map {
             }
         }
 
+        this->_hasTransparentCube = hasTransparentCube;
         if (voffset == 0)
             return true;
 

@@ -118,7 +118,7 @@ namespace Common {
                 }
             }
 
-            chunkPtr->SetCubes(cubesPtr);
+            chunkPtr->SetCubes(std::move(cubesPtr));
             return chunkPtr;
         }
 

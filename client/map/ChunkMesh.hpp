@@ -3,6 +3,8 @@
 
 #include "tools/IRenderer.hpp"
 
+#include "common/BaseChunk.hpp"
+
 namespace Common {
     struct Camera;
     struct CubeType;
@@ -28,7 +30,7 @@ namespace Client { namespace Map {
         {
             Tools::Renderers::IIndexBuffer* indices;
             Uint32 nbIndices;
-            
+
             Mesh() : indices(0), nbIndices(0) {}
             Mesh(Mesh&& m);
             ~Mesh();
@@ -50,7 +52,11 @@ namespace Client { namespace Map {
         ChunkMesh(Chunk& chunk);
         ~ChunkMesh();
 
-        bool Refresh(ChunkRenderer& chunkRenderer, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk>> neighbors);
+        bool Refresh(ChunkRenderer& chunkRenderer,
+                     std::vector<Common::CubeType> cubeTypes,
+                     std::shared_ptr<Common::BaseChunk::CubeType> cubes,
+                     std::vector<std::shared_ptr<Common::BaseChunk::CubeType>> neighbors);
+
         bool RefreshGraphics(Tools::IRenderer& renderer);
         void Render(Uint32 textureId, Tools::IRenderer& renderer);
         Uint32 GetTriangleCount() const { return this->_triangleCount; }
