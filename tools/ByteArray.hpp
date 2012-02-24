@@ -38,6 +38,7 @@ namespace Tools {
         ByteArray& operator =(ByteArray const& ByteArray);
         Uint16 GetBytesLeft() const;
         void Clear();
+        void ResetOffset();
         void SetData(char const* data, Uint16 size);
         void Write8(Uint8 val);
         void Write16(Uint16 val);

@@ -19,7 +19,7 @@ namespace Server { namespace Game {
     class Game;
     class Player;
     namespace Map { namespace Gen {
-    class ChunkGenerator;
+        class ChunkGenerator;
     }}
     namespace Engine {
         class Engine;
@@ -30,6 +30,8 @@ namespace Server { namespace Game {
 }}
 
 namespace Server { namespace Game { namespace Map {
+
+    class ChunkManager;
 
     class Map :
         private boost::noncopyable
@@ -44,14 +46,15 @@ namespace Server { namespace Game { namespace Map {
         Game& _game;
         Tools::SimpleMessageQueue* _messageQueue;
 
-        std::unordered_map<Chunk::IdType, Chunk*> _chunks;
         Gen::ChunkGenerator* _gen;
         std::unordered_map<Chunk::IdType, std::vector<ChunkCallback>> _chunkRequests;
         std::vector<SpawnCallback> _spawnRequests;
-        std::unordered_map<Uint32, std::shared_ptr<Player>> _players;
+
+        std::map<Uint32, std::shared_ptr<Player>> _players;
         Common::Position* _spawnPosition;
         Entities::EntityManager* _entityManager;
         Engine::Engine* _engine;
+        ChunkManager* _chunkManager;
 
     public:
         Map(Conf const& conf, Game& game);

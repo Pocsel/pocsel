@@ -239,6 +239,11 @@ namespace Tools {
         this->_offset = 0;
     }
 
+    void ByteArray::ResetOffset()
+    {
+        this->_offset = 0;
+    }
+
     void ByteArray::SetData(char const* data, Uint16 size)
     {
         if (this->_allocSize < size)

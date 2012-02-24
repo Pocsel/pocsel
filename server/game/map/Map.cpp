@@ -1,4 +1,5 @@
 #include "server/game/map/Map.hpp"
+#include "server/game/map/ChunkManager.hpp"
 
 #include "common/CubeType.hpp"
 #include "common/Position.hpp"
@@ -28,17 +29,17 @@ namespace Server { namespace Game { namespace Map {
         this->_gen = new Gen::ChunkGenerator(this->_conf);
         this->_engine = new Engine::Engine(*this->_messageQueue);
         this->_entityManager = new Entities::EntityManager();
+        this->_chunkManager = new ChunkManager();
     }
 
     Map::~Map()
     {
         Tools::debug << "Map::~Map() -- " << this->_conf.name << "\n";
-        for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite ; ++it)
-            Tools::Delete(it->second);
         Tools::Delete(this->_gen);
         Tools::Delete(this->_engine);
         Tools::Delete(this->_entityManager);
         Tools::Delete(this->_messageQueue);
+        Tools::Delete(this->_chunkManager);
     }
 
     void Map::Start()
@@ -108,8 +109,8 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_GetChunk(Chunk::IdType id, ChunkCallback& response)
     {
-        auto chunk_it = this->_chunks.find(id);
-        if (chunk_it == this->_chunks.end())
+        Chunk* chunk = this->_chunkManager->GetChunk(id);
+        if (chunk == 0)
         {
             if (this->_chunkRequests.find(id) == this->_chunkRequests.end())
             {
@@ -122,21 +123,21 @@ namespace Server { namespace Game { namespace Map {
         }
         else
         {
-            response(*chunk_it->second);
+            response(*chunk);
         }
     }
 
     void Map::_GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response)
     {
-        auto chunk_it = this->_chunks.find(id);
-        if (chunk_it == this->_chunks.end())
+        Chunk* chunk = this->_chunkManager->GetChunk(id);
+        if (chunk == 0)
         {
             ChunkCallback ccb(std::bind(&Map::_SendChunkPacket, this, std::placeholders::_1, response));
             this->_GetChunk(id, ccb);
         }
         else
         {
-            this->_SendChunkPacket(*chunk_it->second, response);
+            this->_SendChunkPacket(*chunk, response);
         }
     }
 
@@ -147,8 +148,6 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_HandleNewChunk(Chunk* chunk)
     {
-        assert(this->_chunks.find(chunk->id) == this->_chunks.end() && "CHUNK ALREADY GENERATED");
-        this->_chunks[chunk->id] = chunk;
         auto& requests = this->_chunkRequests[chunk->id];
         for (auto it = requests.begin(), ite = requests.end(); it != ite; ++it)
         {
@@ -156,6 +155,8 @@ namespace Server { namespace Game { namespace Map {
         }
         requests.clear();
         this->_chunkRequests.erase(chunk->id);
+
+        this->_chunkManager->AddChunk(std::unique_ptr<Chunk>(chunk));
     }
 
     void Map::_GetSpawnPosition(SpawnCallback& response)
@@ -235,10 +236,9 @@ namespace Server { namespace Game { namespace Map {
     {
         Chunk::IdType id = Chunk::CoordsToId(pos.world);
 
-        auto it = this->_chunks.find(id);
-        if (it == this->_chunks.end())
+        Chunk* chunk = this->_chunkManager->GetChunk(id);
+        if (chunk == 0)
             return;
-        Chunk* chunk = it->second;
 
         if (chunk->GetCube(pos.chunk) != 0)
         {
