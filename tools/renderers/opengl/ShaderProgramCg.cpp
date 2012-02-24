@@ -1,5 +1,6 @@
-#include "tools/renderers/GLRenderer.hpp"
+#include "tools/precompiled.hpp"
 
+#include "tools/renderers/GLRenderer.hpp"
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/ShaderProgramCg.hpp"
 #include "tools/renderers/opengl/ShaderParameterCg.hpp"
@@ -123,14 +124,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
         this->_renderer.SetCurrentProgram(*this);
         if (this->_pass == 0)
-        {
-            this->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
-            this->UpdateParameter(ShaderParameterUsage::ModelMatrix);
-            this->UpdateParameter(ShaderParameterUsage::ViewMatrix);
-            this->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
-            this->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
             this->_pass = cgGetFirstPass(this->_technique);
-        }
         cgSetPassState(this->_pass);
         this->_nbTextures = 0;
     }
