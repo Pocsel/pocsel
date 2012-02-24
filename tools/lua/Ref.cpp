@@ -2,6 +2,11 @@
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Iterator.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4244) // return conversion double to float (data lost)
+#pragma warning(disable: 4800) // int to bool
+#endif
+
 namespace Tools { namespace Lua {
 
     Ref::Ref(State& state) throw() :

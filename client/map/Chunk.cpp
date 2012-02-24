@@ -11,7 +11,8 @@ namespace Client { namespace Map {
     }
 
     Chunk::Chunk(CoordsType const& c)
-        : Common::BaseChunk(c)
+        : Common::BaseChunk(c),
+        _mesh(0)
     {
     }
 
