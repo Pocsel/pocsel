@@ -3,19 +3,18 @@
 #include "common/CubeType.hpp"
 #include "common/Position.hpp"
 #include "common/CubePosition.hpp"
+#include "common/Packet.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
 
-#include "server/game/map/gen/ChunkGenerator.hpp"
-
-#include "server/game/entities/EntityManager.hpp"
-#include "server/game/engine/Engine.hpp"
-
-#include "server/game/Game.hpp"
-#include "server/game/Player.hpp"
-
 #include "server/Server.hpp"
 #include "server/clientmanagement/ClientManager.hpp"
+#include "server/game/Game.hpp"
+#include "server/game/Player.hpp"
+#include "server/game/engine/Engine.hpp"
+#include "server/game/entities/EntityManager.hpp"
+#include "server/game/map/gen/ChunkGenerator.hpp"
+#include "server/network/PacketCreator.hpp"
 
 namespace Server { namespace Game { namespace Map {
 
@@ -79,6 +78,13 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushMessage(m);
     }
 
+    void Map::GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_GetChunkPacket, this, id, response));
+        this->_messageQueue->PushMessage(m);
+    }
+
     void Map::AddPlayer(std::shared_ptr<Player> const& p)
     {
         Tools::SimpleMessageQueue::Message
@@ -118,6 +124,25 @@ namespace Server { namespace Game { namespace Map {
         {
             response(*chunk_it->second);
         }
+    }
+
+    void Map::_GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response)
+    {
+        auto chunk_it = this->_chunks.find(id);
+        if (chunk_it == this->_chunks.end())
+        {
+            ChunkCallback ccb(std::bind(&Map::_SendChunkPacket, this, std::placeholders::_1, response));
+            this->_GetChunk(id, ccb);
+        }
+        else
+        {
+            this->_SendChunkPacket(*chunk_it->second, response);
+        }
+    }
+
+    void Map::_SendChunkPacket(Chunk const& chunk, ChunkPacketCallback& response)
+    {
+        response(Network::PacketCreator::Chunk(chunk));
     }
 
     void Map::_HandleNewChunk(Chunk* chunk)
@@ -221,7 +246,7 @@ namespace Server { namespace Game { namespace Map {
 
             for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
             {
-                this->_game.GetServer().GetClientManager().SendChunk(it->second->id, *chunk);
+                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, Network::PacketCreator::Chunk(*chunk));
             }
         }
     }

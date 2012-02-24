@@ -78,13 +78,6 @@ namespace Server { namespace ClientManagement {
         this->_messageQueue.PushMessage(m);
     }
 
-    void ClientManager::SendChunk(Uint32 clientId, Chunk const& chunk)
-    {
-        Tools::SimpleMessageQueue::Message
-            m(std::bind(&ClientManager::_SendChunk, this, clientId, std::cref(chunk)));
-        this->_messageQueue.PushMessage(m);
-    }
-
     void ClientManager::ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)
     {
         Tools::SimpleMessageQueue::Message
@@ -133,11 +126,11 @@ namespace Server { namespace ClientManagement {
 
     void ClientManager::ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids)
     {
-        std::function<void(Chunk const&)>
-            callback(std::bind(&ClientManager::SendChunk, this, client.id, std::placeholders::_1));
+        Game::Game::ChunkPacketCallback
+            callback(std::bind(&ClientManager::SendPacket, this, client.id, std::placeholders::_1));
         for (auto it = ids.begin(), ite = ids.end() ; it != ite ; ++it)
         {
-            this->_server.GetGame().GetChunk(*it, client.id, callback);
+            this->_server.GetGame().GetChunkPacket(*it, client.id, callback);
         }
     }
 
@@ -250,16 +243,6 @@ namespace Server { namespace ClientManagement {
         }
 
         this->_clients[clientId]->SendPacket(std::unique_ptr<Common::Packet>(packet));
-    }
-
-    void ClientManager::_SendChunk(Uint32 clientId, Chunk const& chunk)
-    {
-        if (this->_clients.find(clientId) == this->_clients.end())
-        {
-            return ;
-        }
-
-        this->_clients[clientId]->SendPacket(std::move(Network::PacketCreator::Chunk(chunk)));
     }
 
     void ClientManager::_ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)

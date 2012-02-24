@@ -7,6 +7,7 @@ namespace Common {
     struct Position;
     struct Camera;
     struct CubePosition;
+    class Packet;
 }
 
 namespace Tools {
@@ -26,7 +27,7 @@ namespace Server { namespace Game {
         private boost::noncopyable
     {
     public:
-        typedef std::function<void(Chunk const&)> ChunkCallback;
+        typedef std::function<void(std::unique_ptr<Common::Packet>)> ChunkPacketCallback;
 
     private:
         Server& _server;
@@ -52,13 +53,13 @@ namespace Server { namespace Game {
         // Thread safe
         void SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);
         void PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
-        void GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback);
+        void GetChunkPacket(Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback);
         void RemovePlayer(Uint32 clientId);
 
     private:
         void _SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);
         void _PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
-        void _GetChunk(Chunk::IdType id, Uint32 clientId, ChunkCallback callback);
+        void _GetChunkPacket(Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback);
         void _RemovePlayer(Uint32 clientId);
     };
 

@@ -6,6 +6,7 @@
 #include "server/Chunk.hpp"
 
 namespace Common {
+    struct Packet;
     struct Position;
     struct CubePosition;
 }
@@ -35,6 +36,7 @@ namespace Server { namespace Game { namespace Map {
     {
     public:
         typedef std::function<void(Chunk const&)> ChunkCallback;
+        typedef std::function<void(std::unique_ptr<Common::Packet>)> ChunkPacketCallback;
         typedef std::function<void(Common::Position const& pos)> SpawnCallback;
 
     private:
@@ -64,6 +66,7 @@ namespace Server { namespace Game { namespace Map {
         void HandleNewChunk(Chunk* chunk);
         void GetSpawnPosition(SpawnCallback& response);
         void GetChunk(Chunk::IdType id, ChunkCallback& response);
+        void GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response);
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
         void DestroyCube(Common::CubePosition const& pos);
@@ -72,6 +75,8 @@ namespace Server { namespace Game { namespace Map {
         void _HandleNewChunk(Chunk* newChunk);
         void _GetSpawnPosition(SpawnCallback& response);
         void _GetChunk(Chunk::IdType id, ChunkCallback& response);
+        void _GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response);
+        void _SendChunkPacket(Chunk const& chunk, ChunkPacketCallback& response);
         void _FindSpawnPosition(Chunk const& chunk);
         void _AddPlayer(std::shared_ptr<Player> p);
         void _RemovePlayer(Uint32 id);
