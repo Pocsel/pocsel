@@ -1,3 +1,5 @@
+#include "client/precompiled.hpp"
+
 #include "client/network/Network.hpp"
 #include "client/network/UdpPacket.hpp"
 #include "client/Client.hpp"
@@ -96,16 +98,9 @@ namespace Client { namespace Network {
 
         try
         {
-            boost::asio::ip::udp::resolver resolver(this->_ioService);
-            boost::asio::ip::udp::resolver::query query(host, port);
-            boost::asio::ip::udp::resolver::iterator endpointIterator = resolver.resolve(query);
-            boost::asio::ip::udp::resolver::iterator end;
+            boost::asio::ip::udp::endpoint endpoint(this->_socket.remote_endpoint().address(), this->_socket.remote_endpoint().port());
             boost::system::error_code error = boost::asio::error::host_not_found;
-            while (error && endpointIterator != end)
-            {
-                this->_udpSocket.close();
-                this->_udpSocket.connect(*endpointIterator++, error);
-            }
+            this->_udpSocket.connect(endpoint, error);
             if (error)
             {
                 Tools::error << "Network::Network: Connection to (UDP) " << host << ":" << port << " failed: " << error.message() << ".\n";
