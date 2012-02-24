@@ -30,6 +30,7 @@ namespace Tools { namespace Lua {
         ~State() throw();
         Ref MakeBoolean(bool val) throw();
         Ref MakeFunction(std::function<void(CallHelper&)> val) throw();
+        Ref MakeNil() throw();
         Ref MakeInteger(int val) throw();
         Ref MakeNumber(double val) throw();
         Ref MakeString(std::string const& val) throw();

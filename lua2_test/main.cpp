@@ -1,5 +1,6 @@
 #include "tools/lua2/Interpreter.hpp"
 #include "tools/lua2/Ref.hpp"
+#include "tools/lua2/Iterator.hpp"
 
 void f(Tools::Lua::CallHelper& call)
 {
@@ -35,6 +36,8 @@ int main(int, char**)
         Tools::log << "from c++: " << e.what() << Tools::endl;
     }
 
+    i.Globals().Set(std::string("bite"), bite);
+
     try
     {
         i.DoString("bite(13.3, 13.4)");
@@ -42,6 +45,15 @@ int main(int, char**)
     catch (std::exception& e)
     {
         Tools::log << "from lua: " << e.what() << Tools::endl;
+    }
+
+    i.DoString("test = \"sjkldglkhsdfg\" g = 323.4 jdsk = {} iwer = {} jkd = function() end");
+
+    Tools::Lua::Iterator it = i.Globals().Begin();
+    Tools::Lua::Iterator itEnd = i.Globals().End();
+    for (; it != itEnd; ++it)
+    {
+        Tools::log << it.GetValue().TypeName() << ": " << it.GetValue().ToString() << " (key " << it.GetKey().TypeName() << " " << it.GetKey().ToString() << ")" << Tools::endl;
     }
 
     return 0;

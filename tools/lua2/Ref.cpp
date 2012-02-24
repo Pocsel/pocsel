@@ -1,5 +1,6 @@
 #include "tools/lua2/Lua.hpp"
 #include "tools/lua2/Ref.hpp"
+#include "tools/lua2/Iterator.hpp"
 
 namespace Tools { namespace Lua {
 
@@ -11,8 +12,7 @@ namespace Tools { namespace Lua {
     Ref::Ref(Ref const& ref) throw() :
         _state(ref._state), _ref(LUA_NOREF)
     {
-        ref.ToStack();
-        this->FromStack();
+        *this = ref;
     }
 
     Ref::~Ref() throw()
@@ -29,38 +29,22 @@ namespace Tools { namespace Lua {
 
     bool Ref::operator ==(Ref const& ref) const throw()
     {
-        return this->_ref == ref._ref;
+        ref.ToStack();
+        this->ToStack();
+        bool equal = lua_rawequal(this->_state, -1, -2);
+        lua_pop(this->_state, 2);
+        return equal;
     }
 
     bool Ref::operator !=(Ref const& ref) const throw()
     {
-        return this->_ref != ref._ref;
+        return !(*this == ref);
     }
 
-    Ref Ref::operator [](Ref const& index) const throw(std::runtime_error)
+    void Ref::Unref() throw()
     {
-        this->ToStack();
-        if (!lua_istable(this->_state, -1))
-        {
-            lua_pop(this->_state, 1);
-            throw std::runtime_error("Lua::Ref: Indexing a value that is not a table");
-        }
-        index.ToStack();
-        lua_rawget(this->_state, -2);
-        Ref ret(this->_state);
-        ret.FromStack();
-        lua_pop(this->_state, 1);
-        return ret;
-    }
-
-    Ref Ref::operator [](int index) const throw(std::runtime_error)
-    {
-        return (*this)[this->_state.MakeInteger(index)];
-    }
-
-    Ref Ref::operator [](std::string const& index) const throw(std::runtime_error)
-    {
-        return (*this)[this->_state.MakeString(index)];
+        luaL_unref(this->_state, LUA_REGISTRYINDEX, this->_ref);
+        this->_ref = LUA_NOREF;
     }
 
     void Ref::operator ()(CallHelper& call) const throw(std::runtime_error)
@@ -92,16 +76,45 @@ namespace Tools { namespace Lua {
         }
     }
 
-    void Ref::Unref() throw()
+    Iterator Ref::Begin() const throw(std::runtime_error)
     {
-        luaL_unref(this->_state, LUA_REGISTRYINDEX, this->_ref);
-        this->_ref = LUA_NOREF;
+        return Iterator(*this, false);
     }
 
-    void Ref::FromStack() throw()
+    Iterator Ref::End() const throw(std::runtime_error)
     {
-        this->Unref();
-        this->_ref = luaL_ref(this->_state, LUA_REGISTRYINDEX);
+        return Iterator(*this, true);
+    }
+
+    Ref Ref::operator [](Ref const& index) const throw(std::runtime_error)
+    {
+        this->ToStack();
+        if (!lua_istable(this->_state, -1))
+        {
+            lua_pop(this->_state, 1);
+            throw std::runtime_error("Lua::Ref: Indexing a value that is not a table");
+        }
+        index.ToStack();
+        lua_rawget(this->_state, -2);
+        Ref ret(this->_state);
+        ret.FromStack();
+        lua_pop(this->_state, 1);
+        return ret;
+    }
+
+    Ref Ref::Set(Ref const& key, Ref const& value) const throw(std::runtime_error)
+    {
+        this->ToStack();
+        if (!lua_istable(this->_state, -1))
+        {
+            lua_pop(this->_state, 1);
+            throw std::runtime_error("Lua::Ref: Indexing a value that is not a table");
+        }
+        key.ToStack();
+        value.ToStack();
+        lua_rawset(this->_state, -3);
+        lua_pop(this->_state, 1);
+        return value;
     }
 
 #define MAKE_TOMETHOD(name, lua_func, type) \
@@ -116,7 +129,62 @@ namespace Tools { namespace Lua {
     MAKE_TOMETHOD(ToBoolean, lua_toboolean, bool);
     MAKE_TOMETHOD(ToInteger, lua_tointeger, int);
     MAKE_TOMETHOD(ToNumber, lua_tonumber, double);
-    MAKE_TOMETHOD(ToString, lua_tostring, std::string);
+
+    std::string Ref::ToString() const throw()
+    {
+        this->ToStack();
+        char const* str = lua_tostring(this->_state, -1);
+        if (str)
+        {
+            std::string ret(str);
+            lua_pop(this->_state, 1);
+            return ret;
+        }
+        lua_pop(this->_state, 1);
+        return std::string();
+    }
+
+#define MAKE_CHECKMETHOD(name, lua_checkfunc, lua_tofunc, type, error) \
+    type Ref::name() const throw(std::runtime_error) \
+    { \
+        this->ToStack(); \
+        if (!lua_checkfunc(this->_state, -1)) \
+        { \
+            lua_pop(this->_state, 1); \
+            throw std::runtime_error(error); \
+        } \
+        type ret = lua_tofunc(this->_state, -1); \
+        lua_pop(this->_state, 1); \
+        return ret; \
+    }
+
+    MAKE_CHECKMETHOD(CheckBoolean, lua_isboolean, lua_toboolean, bool, "Lua::Ref: Value is not of boolean type");
+    MAKE_CHECKMETHOD(CheckInteger, lua_isnumber, lua_tointeger, int, "Lua::Ref: Value is not of integer type");
+    MAKE_CHECKMETHOD(CheckNumber, lua_isnumber, lua_tonumber, double, "Lua::Ref: Value is not of number type");
+
+    std::string Ref::CheckString() const throw(std::runtime_error)
+    {
+        this->ToStack();
+        if (!lua_isstring(this->_state, -1))
+        {
+            lua_pop(this->_state, 1);
+            throw std::runtime_error("Lua::Ref: Value is not of string type");
+        }
+        char const* str = lua_tostring(this->_state, -1);
+        if (str)
+        {
+            std::string ret(str);
+            lua_pop(this->_state, 1);
+            return ret;
+        }
+        lua_pop(this->_state, 1);
+        return std::string();
+    }
+
+    std::string Ref::TypeName() const throw()
+    {
+        return lua_typename(this->_state, this->GetType());
+    }
 
     int Ref::GetType() const throw()
     {
@@ -152,6 +220,12 @@ namespace Tools { namespace Lua {
     MAKE_ISMETHOD(IsTable, lua_istable);
     MAKE_ISMETHOD(IsThread, lua_isthread);
     MAKE_ISMETHOD(IsUserData, lua_isuserdata);
+
+    void Ref::FromStack() throw()
+    {
+        this->Unref();
+        this->_ref = luaL_ref(this->_state, LUA_REGISTRYINDEX);
+    }
 
     void Ref::ToStack() const throw()
     {

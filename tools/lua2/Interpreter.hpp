@@ -24,12 +24,13 @@ namespace Tools { namespace Lua {
         // reference creators
         Ref MakeBoolean(bool val) throw() { return this->_state->MakeBoolean(val); }
         Ref MakeFunction(std::function<void(CallHelper&)> val) throw() { return this->_state->MakeFunction(val); }
+        Ref MakeNil() throw() { return this->_state->MakeNil(); }
         Ref MakeInteger(int val) throw() { return this->_state->MakeInteger(val); }
         Ref MakeNumber(double val) throw() { return this->_state->MakeNumber(val); }
         Ref MakeString(std::string const& val) throw() { return this->_state->MakeString(val); }
         Ref MakeTable() throw() { return this->_state->MakeTable(); }
         template <typename T>
-            Ref Make(T const& val) throw() { return this->_state->Make<T>(val); }
+            Ref Make(T const& val) throw() { return this->_state->Make(val); }
         // other stuff
         State& GetState() throw() { return *this->_state; }
         void DumpStack() const throw();
