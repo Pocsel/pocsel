@@ -64,7 +64,6 @@ namespace Client { namespace Map {
     {
         ChunkNode* node = 0;
 
-        chunk->SetMesh(std::unique_ptr<ChunkMesh>(new ChunkMesh(*chunk)));
         if (this->_chunks.find(chunk->id) != this->_chunks.end())
         { // Chunk Update
             node = this->_chunks.find(chunk->id)->second;
@@ -72,6 +71,7 @@ namespace Client { namespace Map {
         }
         else
         { // New chunk
+            chunk->SetMesh(std::unique_ptr<ChunkMesh>(new ChunkMesh(*chunk)));
             this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.0005f);
             this->_downloadingChunks.erase(chunk->id);
             node = new ChunkNode(std::move(chunk));
@@ -239,21 +239,27 @@ namespace Client { namespace Map {
         auto chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0)));
         if (chk != 0)
             neighbors[0] = chk->GetSharedCubes();
+        else return;
         chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 1,  0,  0)));
         if (chk != 0)
             neighbors[1] = chk->GetSharedCubes();
+        else return;
         chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0,  1)));
         if (chk != 0)
             neighbors[2] = chk->GetSharedCubes();
+        else return;
         chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0, -1)));
         if (chk != 0)
             neighbors[3] = chk->GetSharedCubes();
+        else return;
         chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0)));
         if (chk != 0)
             neighbors[4] = chk->GetSharedCubes();
+        else return;
         chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
         if (chk != 0)
             neighbors[5] = chk->GetSharedCubes();
+        else return;
 
         auto const& cubeTypes = this->_game.GetCubeTypeManager().GetCubeTypes();
         std::shared_ptr<Tools::Thread::Task<bool>>
