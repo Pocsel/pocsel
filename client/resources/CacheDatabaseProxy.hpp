@@ -36,6 +36,7 @@ namespace Client { namespace Resources {
             void ValidateUpdate();
             void AddResource(Common::Resource& res);
             std::unique_ptr<Common::Resource> GetResource(Uint32 id);
+            Uint32 GetResourceId(Uint32 pluginId, std::string const& filename);
             Uint32 GetCacheVersion() const { return this->_cacheVersion; }
         private:
             void _CheckCacheFile(std::string const& path);
