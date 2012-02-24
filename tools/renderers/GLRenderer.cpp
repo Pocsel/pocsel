@@ -160,6 +160,9 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::UpdateCurrentParameters()
     {
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         if (this->_currentProgram != 0)
             this->_currentProgram->UpdateCurrentPass();
     }
@@ -181,12 +184,7 @@ namespace Tools { namespace Renderers {
     {
         this->_model = matrix;
         if (this->_currentProgram != 0)
-        {
             this->_modelViewProjection = this->_model * this->_view * this->_projection;
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
-        }
     }
 
     void GLRenderer::SetViewMatrix(Matrix4<float> const& matrix)
