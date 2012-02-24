@@ -68,7 +68,7 @@ namespace Client { namespace Map {
         if (this->_chunks.find(chunk->id) != this->_chunks.end())
         { // Chunk Update
             node = this->_chunks.find(chunk->id)->second;
-            node->chunk = std::move(chunk);
+            node->chunk->SetCubes(chunk->StealCubes());
         }
         else
         { // New chunk
@@ -234,22 +234,43 @@ namespace Client { namespace Map {
         auto it = this->_refreshTasks.find(&node);
         if (it != this->_refreshTasks.end())
             it->second->Cancel();
-        std::vector<std::shared_ptr<Chunk>> neighbors(6);
-        neighbors[0] = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0))),
-        neighbors[1] = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 1,  0,  0))),
-        neighbors[2] = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0,  1))),
-        neighbors[3] = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0, -1))),
-        neighbors[4] = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0))),
-        neighbors[5] = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
+        std::vector<std::shared_ptr<Chunk::CubeType>> neighbors(6);
+
+        auto chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0)));
+        if (chk != 0)
+            neighbors[0] = chk->GetSharedCubes();
+        chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 1,  0,  0)));
+        if (chk != 0)
+            neighbors[1] = chk->GetSharedCubes();
+        chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0,  1)));
+        if (chk != 0)
+            neighbors[2] = chk->GetSharedCubes();
+        chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0, -1)));
+        if (chk != 0)
+            neighbors[3] = chk->GetSharedCubes();
+        chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0)));
+        if (chk != 0)
+            neighbors[4] = chk->GetSharedCubes();
+        chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
+        if (chk != 0)
+            neighbors[5] = chk->GetSharedCubes();
+
         auto const& cubeTypes = this->_game.GetCubeTypeManager().GetCubeTypes();
-        std::shared_ptr<Tools::Thread::Task<bool>> t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh, this, node.chunk, std::move(cubeTypes), std::move(neighbors))));
+        std::shared_ptr<Tools::Thread::Task<bool>>
+            t(new Tools::Thread::Task<bool>(std::bind(&ChunkManager::_RefreshChunkMesh,
+                this,
+                node.chunk,
+                node.chunk->GetSharedCubes(),
+                std::move(cubeTypes),
+                std::move(neighbors))));
+
         this->_threadPool.PushTask<bool>(t);
         this->_refreshTasks[&node] = t;
     }
 
-    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk>> neighbors)
+    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
     {
-        return chunk->GetMesh()->Refresh(this->_chunkRenderer, cubeTypes, neighbors);
+        return chunk->GetMesh()->Refresh(this->_chunkRenderer, cubeTypes, cubes, neighbors);
     }
 
 }}

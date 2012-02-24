@@ -19,6 +19,7 @@ namespace Common {
         CoordsType const coords;      // ChunkSize unit
 
     private:
+        std::shared_ptr<CubeType> _sharedCubes;
         CubeType* _cubes;
 
     public:
@@ -46,7 +47,7 @@ namespace Common {
 
         ~BaseChunk() // XXX destructor is not virtual
         {
-            Tools::DeleteTab(this->_cubes);
+//            Tools::DeleteTab(this->_cubes);
         }
 
         inline bool IsEmpty() const
@@ -85,6 +86,7 @@ namespace Common {
                     return;
                 this->_cubes = new CubeType[ChunkSize3];
                 std::memset(this->_cubes, 0, ChunkSize3 * sizeof(CubeType)); // vraiment ?
+                this->_sharedCubes.reset(this->_cubes);
             }
             this->_cubes[x + y * ChunkSize + z * ChunkSize2] = type;
         }
@@ -95,12 +97,31 @@ namespace Common {
             return this->_cubes;
         }
 
-        inline void SetCubes(std::unique_ptr<CubeType>& cubes)
+        inline std::shared_ptr<CubeType> GetSharedCubes()
         {
-            Tools::DeleteTab(this->_cubes);
-            this->_cubes = cubes.release();
-            assert(this->_cubes != 0 && "Ca va pas non ?");
+            return this->_sharedCubes;
         }
+
+        inline void SetCubes(std::unique_ptr<CubeType> cubes)
+        {
+            this->_cubes = cubes.release();
+            this->_sharedCubes.reset(this->_cubes);
+        }
+
+        inline void SetCubes(std::shared_ptr<CubeType> cubes)
+        {
+            this->_sharedCubes = cubes;
+            this->_cubes = cubes.get();
+        }
+
+        inline std::shared_ptr<CubeType> StealCubes()
+        {
+            std::shared_ptr<CubeType> ret = this->_sharedCubes;
+            this->_sharedCubes.reset();
+            this->_cubes = 0;
+            return ret;
+        }
+
 
 #ifdef _WIN32
 # pragma warning(disable: 4244)

@@ -113,7 +113,7 @@ namespace Client { namespace Game {
 
     void Player::Action()
     {
-        auto cubes = Common::RayCast::GetResult(this->_camera, 5);
+        auto cubes = Common::RayCast::GetResult(this->_camera, 77);
 
         for (auto it = cubes.begin(), ite = cubes.end(); it != ite; ++it)
         {
