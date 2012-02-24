@@ -161,11 +161,17 @@ namespace Client { namespace Map {
                     nodeToDelete.push_back(&node);
                 });
             for (auto it = nodeToDelete.begin(), ite = nodeToDelete.end(); it != ite; ++it)
-                if (this->_octree[i]->RemoveElement(*it))
+            {
+                auto taskIt = this->_refreshTasks.find(*it);
+                if (taskIt != this->_refreshTasks.end())
                 {
-                    this->_chunks.erase((*it)->chunk->id);
-                    Tools::Delete(*it);
+                    taskIt->second->Cancel();
                 }
+                this->_octree[i]->RemoveElement(*it);
+                this->_chunks.erase((*it)->chunk->id);
+                // this->_refreshTasks.erase(*it);
+                Tools::Delete(*it);
+            }
         }
     }
 

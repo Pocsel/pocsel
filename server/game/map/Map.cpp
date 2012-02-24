@@ -70,7 +70,6 @@ namespace Server { namespace Game { namespace Map {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_GetSpawnPosition, this, response));
         this->_messageQueue->PushMessage(m);
-        Tools::debug << "GetSpawnPosition\n";
     }
 
     void Map::GetChunk(Chunk::IdType id, ChunkCallback& response)
@@ -155,7 +154,6 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_FindSpawnPosition(Chunk const& chunk)
     {
-        Tools::debug << "_FindSpawnPosition\n";
         for (int y = Common::ChunkSize - 1 ; y >= 0 ; --y)
         {
             if (chunk.GetCube(0, y, 0))
