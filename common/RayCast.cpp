@@ -37,7 +37,7 @@ namespace Common {
                 }
                 else
                 {
-                    x = (int)px;// + 1;
+                    x = (int)px + 1;
                     sign = 1;
                 }
 
@@ -63,14 +63,12 @@ namespace Common {
                 }
                 else
                 {
-                    y = (int)py;// + 1;
+                    y = (int)py + 1;
                     sign = 1;
                 }
 
                 for (dist = GR_ABS((y - py) / vy); dist < distance ; dist = GR_ABS((y - py) / vy))
                 {
-                    dist = GR_ABS((y - py) / vy);
-
                     x = px + (dist * vx);
                     z = pz + (dist * vz);
 
@@ -92,19 +90,14 @@ namespace Common {
                 }
                 else
                 {
-                    z = (int)pz;// + 1;
+                    z = (int)pz + 1;
                     sign = 1;
                 }
 
                 for (dist = GR_ABS((z - pz) / vz); dist < distance ; dist = GR_ABS((z - pz) / vz))
                 {
-                    dist = GR_ABS((z - pz) / vz);
-
                     x = px + (dist * vx);
                     y = py + (dist * vy);
-
-                    if (x > dist || y > dist || z > dist)
-                        break;
 
                     res[dist] = Tools::Vector3i((int)x,
                                                 (int)y,
