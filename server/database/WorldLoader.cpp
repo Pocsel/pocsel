@@ -4,6 +4,7 @@
 #include "tools/database/IConnectionPool.hpp"
 
 #include "tools/lua/Interpreter.hpp"
+#include "tools/lua/Iterator.hpp"
 
 #include "server/game/World.hpp"
 
@@ -53,12 +54,20 @@ namespace Server { namespace Database {
         while (curs.HasData())
         {
             auto& row = curs.FetchOne();
-            Game::Map::Conf conf;
-            WorldLoader::_LoadMapConf(conf, row[0].GetString(), row[1].GetString(), world);
-            conf.cubeTypes = &world._cubeTypes;
-            world._maps[conf.name] = new Game::Map::Map(conf, world._game);
-            if (conf.is_default) {
-                world._defaultMap = world._maps[conf.name];
+            try
+            {
+                Game::Map::Conf conf;
+                WorldLoader::_LoadMapConf(conf, row[0].GetString(), row[1].GetString(), world);
+                conf.cubeTypes = &world._cubeTypes;
+                world._maps[conf.name] = new Game::Map::Map(conf, world._game);
+                if (conf.is_default) {
+                    world._defaultMap = world._maps[conf.name];
+                }
+            }
+            catch (std::exception& e)
+            {
+                Log::load << "WorldLoader: Failed to load map \"" << row[0].GetString() << "\": " << e.what() << Tools::endl;
+                Tools::error << "WorldLoader: Failed to load map \"" << row[0].GetString() << "\": " << e.what() << Tools::endl;
             }
         }
         if (world._defaultMap == 0)
@@ -67,19 +76,21 @@ namespace Server { namespace Database {
 
     void WorldLoader::_LoadCubeType(Common::CubeType& descr, std::string const& code, ResourceManager const& manager)
     {
-        Tools::Lua::Interpreter lua(code);
         try
         {
-            auto textures = lua["textures"];
-            descr.textures.top =    manager.GetId(textures["top"].as<std::string>());
-            descr.textures.left =   manager.GetId(textures["left"].as<std::string>());
-            descr.textures.front =  manager.GetId(textures["front"].as<std::string>());
-            descr.textures.right =  manager.GetId(textures["right"].as<std::string>());
-            descr.textures.back =   manager.GetId(textures["back"].as<std::string>());
-            descr.textures.bottom = manager.GetId(textures["bottom"].as<std::string>());
+            Tools::Lua::Interpreter lua;
+            lua.DoString(code);
 
-            descr.solid = lua["solid"];
-            descr.transparent = lua["transparent"];
+            auto textures = lua.Globals()["textures"];
+            descr.textures.top = manager.GetId(textures["top"].To<std::string>());
+            descr.textures.left = manager.GetId(textures["left"].To<std::string>());
+            descr.textures.front = manager.GetId(textures["front"].To<std::string>());
+            descr.textures.right = manager.GetId(textures["right"].To<std::string>());
+            descr.textures.back = manager.GetId(textures["back"].To<std::string>());
+            descr.textures.bottom = manager.GetId(textures["bottom"].To<std::string>());
+
+            descr.solid = lua.Globals()["solid"].To<bool>();
+            descr.transparent = lua.Globals()["transparent"].To<bool>();
 
             Log::load << "name: " << descr.name << " " << descr.id << "\n";
             Log::load << "textures.top: " << descr.textures.top << "\n";
@@ -96,7 +107,8 @@ namespace Server { namespace Database {
         }
         catch (std::exception& e)
         {
-            Tools::error << "CubeTypeLoader::Load: " << e.what() << ".\n";
+            Tools::error << "WorldLoader: " << e.what();
+            Log::load << "WorldLoader: " << e.what();
             throw;
         }
     }
@@ -106,54 +118,44 @@ namespace Server { namespace Database {
                                    std::string const& code,
                                    Game::World const& world)
     {
-        // TODO rajouter des verifications au niveau de la lecture du lua
-        // genre:
-        // est-ce que ce truc est bien un int ?
-        // est-ce que ca va pas faire un throw ?
-        // est-ce que l'utilisateur sait coder ?
-
         conf.name = name;
 
-
         Log::load << "Load lua code:\n'''\n" << code << "\n'''\n";
-        Tools::Lua::Interpreter lua(code);
-        auto fullname = lua["fullname"],
-             is_default = lua["is_default"],
-             cubes = lua["cubes"],
-             equations = lua["equations"];
+        Tools::Lua::Interpreter lua;
+        lua.DoString(code);
+        auto fullname = lua.Globals()["fullname"],
+             is_default = lua.Globals()["is_default"],
+             cubes = lua.Globals()["cubes"],
+             equations = lua.Globals()["equations"];
 
-        lua.DumpStack(Log::load);
-        conf.fullname = fullname.as<std::string>();
-        conf.is_default = is_default.as<bool>();
+        conf.fullname = fullname.To<std::string>();
+        conf.is_default = is_default.To<bool>();
 
-        for (auto it = equations.begin(), end = equations.end(); it != end; ++it)
+        for (auto it = equations.Begin(), end = equations.End(); it != end; ++it)
         {
-            auto eq = it.value();
-            auto& eq_conf = conf.equations[it.key()];
-            Log::load << "Loading equation " << it.key() << "\n";
-            eq_conf.function_name = eq["function_name"].as<std::string>();
-            for (auto it = eq.begin(), end = eq.end(); it != end; ++it)
+            auto eq = it.GetValue();
+            auto& eq_conf = conf.equations[it.GetKey().To<std::string>()];
+            Log::load << "Loading equation " << it.GetKey().To<std::string>() << "\n";
+            eq_conf.function_name = eq["function_name"].To<std::string>();
+            for (auto it2 = eq.Begin(), end2 = eq.End(); it2 != end2; ++it2)
             {
-                if (it.value().IsNumber())
-                    eq_conf.values[it.key().as<std::string>()] = it.value().as<double>();
+                if (it2.GetValue().IsNumber())
+                    eq_conf.values[it2.GetKey().To<std::string>()] = it2.GetValue().To<double>();
             }
         }
-        for (auto it = cubes.begin(), end = cubes.end(); it != end; ++it)
+
+        for (auto cubeIt = cubes.Begin(), cubeItEnd = cubes.End(); cubeIt != cubeItEnd; ++cubeIt)
         {
-            auto cf = it.value();
-            auto name = it.key().as<std::string>();
-            Log::load << "Loading cube " << it.key() << "\n";
+            auto cvb = cubeIt.GetValue(); // Cube validation block, lol
+            auto name = cubeIt.GetKey().To<std::string>();
+            Log::load << "Loading cube " << cubeIt.GetKey().To<std::string>() << "\n";
 
             if (conf.cubes.find(name) != conf.cubes.end())
             {
-                Log::load <<
-                    "WARNING: cube '" << name <<
-                    "' already defined, only one definition will be used.\n";
+                Log::load << "WARNING: cube \"" << name << "\" already defined, only one definition will be used.\n";
+                Tools::error << "WARNING: cube \"" << name << "\" already defined, only one definition will be used.\n";
                 continue;
             }
-
-            // XXX fait un assert dans la lecture du lua, c'est ptet pas une bonne idée
-    //        assert(conf.cubes.find(name) == conf.cubes.end());
 
             auto& cube = conf.cubes[name];
             cube.type = WorldLoader::_GetCubeTypeByName(name, world);
@@ -161,38 +163,32 @@ namespace Server { namespace Database {
             {
                 if (name != "void")
                 {
-                    Log::load << "WARNING: cube '" << name <<
-                        "' is not recognized. It will be ignored." <<
-                        "If you want to define empty cubes, name it 'void'\n";
+                    Log::load << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
+                    Tools::error << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
                     continue;
                 }
-
                 cube.type = new Common::CubeType(0, "void");
             }
 
             // Parcours des ValidationBlocConf
-            for (auto it = cf.begin(), ite = cf.end(); it != ite; ++it)
+            for (auto it = cvb.Begin(), ite = cvb.End(); it != ite; ++it)
             {
                 Game::Map::Conf::ValidationBlocConf validation_bloc;
 
                 validation_bloc.cube_type = cube.type;
-                validation_bloc.priority = (*it)["priority"].as<int>();
+                validation_bloc.priority = it.GetValue()["priority"].To<int>();
 
-                auto validators = (*it)["validators"];
+                auto validators = it.GetValue()["validators"];
 
                 // Parcours des ValidatorConf
-                for (auto it2 = validators.begin(), ite2 = validators.end(); it2 != ite2; ++it2)
+                for (auto it2 = validators.Begin(), ite2 = validators.End(); it2 != ite2; ++it2)
                 {
                     Game::Map::Conf::ValidatorConf validator;
-                    validator.equation = (*it2)["equation"].as<std::string>();
-                    validator.validator = (*it2)["validator"].as<std::string>();
-                    for (auto it3 = (*it2).begin(), ite3 = (*it2).end(); it3 != ite3; ++it3)
-                    {
-                        if (it3.value().IsNumber())
-                        {
-                            validator.values[it3.key().as<std::string>()] = it3.value().as<double>();
-                        }
-                    }
+                    validator.equation = it2.GetValue()["equation"].To<std::string>();
+                    validator.validator = it2.GetValue()["validator"].To<std::string>();
+                    for (auto it3 = it2.GetValue().Begin(), ite3 = it2.GetValue().End(); it3 != ite3; ++it3)
+                        if (it3.GetValue().IsNumber())
+                            validator.values[it3.GetKey().To<std::string>()] = it3.GetValue().To<double>();
                     validation_bloc.validators.push_back(validator);
                 }
                 cube.validation_blocs.push_back(validation_bloc);

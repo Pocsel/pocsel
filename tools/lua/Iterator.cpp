@@ -1,5 +1,5 @@
-#include "tools/lua2/Lua.hpp"
-#include "tools/lua2/Iterator.hpp"
+#include "tools/lua/Lua.hpp"
+#include "tools/lua/Iterator.hpp"
 
 namespace Tools { namespace Lua {
 
@@ -28,7 +28,8 @@ namespace Tools { namespace Lua {
     {
         if (this->_end && iterator.IsEnd())
             return true;
-        return iterator.GetTable() == this->_table && iterator.GetKey() == this->_key;
+        return false;
+        //return iterator.GetTable() == this->_table && iterator.GetKey() == this->_key;
     }
 
     bool Iterator::operator !=(Iterator const& iterator) const throw()

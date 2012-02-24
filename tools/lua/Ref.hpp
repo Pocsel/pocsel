@@ -1,8 +1,8 @@
 #ifndef __TOOLS_LUA_REF_HPP__
 #define __TOOLS_LUA_REF_HPP__
 
-#include "tools/lua2/CallHelper.hpp"
-#include "tools/lua2/State.hpp"
+#include "tools/lua/CallHelper.hpp"
+#include "tools/lua/State.hpp"
 
 namespace Tools { namespace Lua {
 
@@ -35,24 +35,30 @@ namespace Tools { namespace Lua {
             Ref operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error);
         // array access
         Iterator Begin() const throw(std::runtime_error);
-        Iterator End() const throw(std::runtime_error);
+        Iterator End() const throw(std::runtime_error); // un Iterator n'est égal à un autre uniquement si les 2 sont des Iterator de fin
         Ref operator [](Ref const& index) const throw(std::runtime_error);
         template <typename T>
-            Ref operator [](T const& index) const throw(std::runtime_error);
+            Ref operator [](T index) const throw(std::runtime_error);
         // array setters
         Ref Set(Ref const& key, Ref const& value) const throw(std::runtime_error);
         template <typename T, typename U>
-            Ref Set(T const& key, U const& value) const throw(std::runtime_error);
+            Ref Set(T key, U value) const throw(std::runtime_error);
         // safe type conversions
-        bool ToBoolean() const throw(); // true pour toute valeur differente de false ou nil
+        bool ToBoolean() const throw(); // true pour toute valeur differente de false ou nil (true pour 0 ou "0")
         int ToInteger() const throw(); // conversion de type par lua, retourne 0 en cas d'erreur
         double ToNumber() const throw(); // conversion de type par lua, retourne 0 en cas d'erreur
         std::string ToString() const throw(); // conversion de type par lua, retourne une chaine vide en cas d'erreur
+        template <typename T>
+            T To() const throw();
+        template <typename T>
+            T To(T const& defaultValue) const throw();
         // unsafe type conversions
         bool CheckBoolean() const throw(std::runtime_error);
         int CheckInteger() const throw(std::runtime_error); // en fait, ça vérifie si c'est un number parce que le type integer est un number en interne
         double CheckNumber() const throw(std::runtime_error);
         std::string CheckString() const throw(std::runtime_error);
+        template <typename T>
+            T Check() const throw(std::runtime_error);
         // type tests
         std::string TypeName() const throw();
         int GetType() const throw(); // valeurs possibles : LUA_TNIL, LUA_TBOOLEAN, LUA_TLIGHTUSERDATA, LUA_TNUMBER, LUA_TSTRING, LUA_TTABLE, LUA_TFUNCTION, LUA_TUSERDATA, LUA_TTHREAD, LUA_TNONE
@@ -76,6 +82,37 @@ namespace Tools { namespace Lua {
         State& GetState() const throw() { return this->_state; }
     };
 
+    template<> bool Ref::To<bool>() const throw();
+    template<> int Ref::To<int>() const throw();
+    template<> unsigned int Ref::To<unsigned int>() const throw();
+    template<> char Ref::To<char>() const throw();
+    template<> unsigned char Ref::To<unsigned char>() const throw();
+    template<> double Ref::To<double>() const throw();
+    template<> float Ref::To<float>() const throw();
+    template<> std::string Ref::To<std::string>() const throw();
+
+    template<> bool Ref::Check<bool>() const throw(std::runtime_error);
+    template<> int Ref::Check<int>() const throw(std::runtime_error);
+    template<> unsigned int Ref::Check<unsigned int>() const throw(std::runtime_error);
+    template<> char Ref::Check<char>() const throw(std::runtime_error);
+    template<> unsigned char Ref::Check<unsigned char>() const throw(std::runtime_error);
+    template<> double Ref::Check<double>() const throw(std::runtime_error);
+    template<> float Ref::Check<float>() const throw(std::runtime_error);
+    template<> std::string Ref::Check<std::string>() const throw(std::runtime_error);
+
+    template <typename T>
+        inline T Ref::To(T const& defaultValue) const throw()
+        {
+            try
+            {
+                return this->Check<T>();
+            }
+            catch (std::exception& e)
+            {
+                return defaultValue;
+            }
+        }
+
     inline Ref Ref::operator ()() const throw(std::runtime_error)
     {
         CallHelper callHelper(this->_state.GetInterpreter());
@@ -86,7 +123,7 @@ namespace Tools { namespace Lua {
     }
 
     template <typename T>
-        Ref Ref::operator ()(T a1) const throw(std::runtime_error)
+        inline Ref Ref::operator ()(T a1) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
             callHelper.PushArg(this->_state.Make(a1));
@@ -97,7 +134,7 @@ namespace Tools { namespace Lua {
         }
 
     template <typename T, typename U>
-        Ref Ref::operator ()(T a1, U a2) const throw(std::runtime_error)
+        inline Ref Ref::operator ()(T a1, U a2) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
             callHelper.PushArg(this->_state.Make(a1));
@@ -109,7 +146,7 @@ namespace Tools { namespace Lua {
         }
 
     template <typename T, typename U, typename V>
-        Ref Ref::operator ()(T a1, U a2, V a3) const throw(std::runtime_error)
+        inline Ref Ref::operator ()(T a1, U a2, V a3) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
             callHelper.PushArg(this->_state.Make(a1));
@@ -122,7 +159,7 @@ namespace Tools { namespace Lua {
         }
 
     template <typename T, typename U, typename V, typename W>
-        Ref Ref::operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error)
+        inline Ref Ref::operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
             callHelper.PushArg(this->_state.Make(a1));
@@ -136,13 +173,13 @@ namespace Tools { namespace Lua {
         }
 
     template <typename T>
-        Ref Ref::operator [](T const& index) const throw(std::runtime_error)
+        inline Ref Ref::operator [](T index) const throw(std::runtime_error)
         {
             return (*this)[this->_state.Make(index)];
         }
 
     template <typename T, typename U>
-        Ref Ref::Set(T const& key, U const& value) const throw(std::runtime_error)
+        inline Ref Ref::Set(T key, U value) const throw(std::runtime_error)
         {
             return this->Set(this->_state.Make(key), this->_state.Make(value));
         }

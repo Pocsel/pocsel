@@ -41,12 +41,15 @@ namespace Tools { namespace Lua {
         Interpreter& GetInterpreter() throw() { return this->_interpreter; }
     };
 
+    template<> Ref State::Make<bool>(bool const& val) throw();
     template<> Ref State::Make<int>(int const& val) throw();
+    template<> Ref State::Make<unsigned int>(unsigned int const& val) throw();
     template<> Ref State::Make<char>(char const& val) throw();
     template<> Ref State::Make<unsigned char>(unsigned char const& val) throw();
     template<> Ref State::Make<double>(double const& val) throw();
     template<> Ref State::Make<float>(float const& val) throw();
     template<> Ref State::Make<std::string>(std::string const& val) throw();
+    template<> Ref State::Make<char const*>(char const* const& val) throw();
 
     template<> Ref State::Make<Ref>(Ref const& val) throw();
 

@@ -1,6 +1,6 @@
-#include "tools/lua2/Lua.hpp"
-#include "tools/lua2/Ref.hpp"
-#include "tools/lua2/Iterator.hpp"
+#include "tools/lua/Lua.hpp"
+#include "tools/lua/Ref.hpp"
+#include "tools/lua/Iterator.hpp"
 
 namespace Tools { namespace Lua {
 
@@ -144,6 +144,22 @@ namespace Tools { namespace Lua {
         return std::string();
     }
 
+#define MAKE_TOTEMPLATEMETHOD(method, type) \
+    template <> \
+        type Ref::To<type>() const throw() \
+        { \
+            return this->method(); \
+        }
+
+    MAKE_TOTEMPLATEMETHOD(ToBoolean, bool);
+    MAKE_TOTEMPLATEMETHOD(ToInteger, int);
+    MAKE_TOTEMPLATEMETHOD(ToNumber, unsigned int); // je ne suis pas sur
+    MAKE_TOTEMPLATEMETHOD(ToInteger, char);
+    MAKE_TOTEMPLATEMETHOD(ToInteger, unsigned char);
+    MAKE_TOTEMPLATEMETHOD(ToNumber, double);
+    MAKE_TOTEMPLATEMETHOD(ToNumber, float);
+    MAKE_TOTEMPLATEMETHOD(ToString, std::string);
+
 #define MAKE_CHECKMETHOD(name, lua_checkfunc, lua_tofunc, type, error) \
     type Ref::name() const throw(std::runtime_error) \
     { \
@@ -180,6 +196,22 @@ namespace Tools { namespace Lua {
         lua_pop(this->_state, 1);
         return std::string();
     }
+
+#define MAKE_CHECKTEMPLATEMETHOD(method, type) \
+    template <> \
+        type Ref::Check<type>() const throw(std::runtime_error) \
+        { \
+            return this->method(); \
+        }
+
+    MAKE_CHECKTEMPLATEMETHOD(CheckBoolean, bool);
+    MAKE_CHECKTEMPLATEMETHOD(CheckInteger, int);
+    MAKE_CHECKTEMPLATEMETHOD(CheckNumber, unsigned int); // je ne suis pas sur
+    MAKE_CHECKTEMPLATEMETHOD(CheckInteger, char);
+    MAKE_CHECKTEMPLATEMETHOD(CheckInteger, unsigned char);
+    MAKE_CHECKTEMPLATEMETHOD(CheckNumber, double);
+    MAKE_CHECKTEMPLATEMETHOD(CheckNumber, float);
+    MAKE_CHECKTEMPLATEMETHOD(CheckString, std::string);
 
     std::string Ref::TypeName() const throw()
     {

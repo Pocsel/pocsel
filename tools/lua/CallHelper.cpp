@@ -1,6 +1,6 @@
-#include "tools/lua2/CallHelper.hpp"
-#include "tools/lua2/Interpreter.hpp"
-#include "tools/lua2/Ref.hpp"
+#include "tools/lua/CallHelper.hpp"
+#include "tools/lua/Interpreter.hpp"
+#include "tools/lua/Ref.hpp"
 
 namespace Tools { namespace Lua {
 

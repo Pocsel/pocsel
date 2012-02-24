@@ -7,32 +7,26 @@
 #include "tools/lua/Interpreter.hpp"
 
 namespace {
+
     template <typename T>
-        T GetLuaGlobal(Tools::Lua::Interpreter i, std::string const& name, T defaultValue)
+        T _LuaGetGlobal(Tools::Lua::Interpreter const& i, std::string const& name, T const& defaultValue)
         {
             try
             {
-                return i[name].as<T>();
+                return i.Globals()[name].Check<T>();
             }
             catch (std::exception&)
             {
+                Tools::error << "Settings: Could not read \"" << name << "\", using default \"" << defaultValue << "\"" << Tools::endl;
                 return defaultValue;
             }
         }
+
 }
 
 namespace Client {
 
-    Settings::Settings(int ac, char** av) :
-        nickname("Player"),
-        fps(60),
-        res(800, 600),
-        fullscreen(false),
-        useShaders(true),
-        chunkViewDistance(4),
-        chunkCacheArea(2),
-        chunkMinimumArea(3),
-        mouseSensitivity(0.707f)
+    Settings::Settings(int ac, char** av)
     {
         std::string defaultConfDir = Common::ConfDir::Client().string();
 
@@ -122,38 +116,38 @@ namespace Client {
         try
         {
             Tools::Lua::Interpreter i;
-            i.ExecFile(this->settingsFile.string());
+            i.DoFile(this->settingsFile.string());
 
-            this->nickname = i["nickname"].as<std::string>();
-            this->fps = i["fps"].as<unsigned int>();
+            this->nickname = _LuaGetGlobal<std::string>(i, "nickname", "Newbie");
+            this->fps = _LuaGetGlobal<unsigned int>(i, "fps", 60);
             if (this->fps < 2)
             {
                 this->fps = 2;
                 Tools::error << "Settings: fps too low, changing to " << this->fps << Tools::endl;
             }
-            this->chunkViewDistance = i["chunkViewDistance"].as<unsigned int>();
+            this->chunkViewDistance = _LuaGetGlobal<unsigned int>(i, "chunkViewDistance", 4);
             if (this->chunkViewDistance < 2)
             {
                 this->chunkViewDistance = 2;
                 Tools::error << "Settings: chunkViewDistance too low, changing to " << this->chunkViewDistance << Tools::endl;
             }
-            this->chunkCacheArea = i["chunkCacheArea"].as<unsigned int>();
+            this->chunkCacheArea = _LuaGetGlobal<unsigned int>(i, "chunkCacheArea", 10);
             if (this->chunkCacheArea < 1)
             {
                 this->chunkCacheArea = 1;
                 Tools::error << "Settings: chunkCacheArea too low, changing to " << this->chunkCacheArea << Tools::endl;
             }
-            this->chunkMinimumArea = i["chunkMinimumArea"].as<unsigned int>();
+            this->chunkCacheArea = _LuaGetGlobal<unsigned int>(i, "chunkMinimumArea", 2);
             if (this->chunkMinimumArea < 1 || this->chunkMinimumArea > this->chunkViewDistance)
             {
                 this->chunkMinimumArea = this->chunkViewDistance - 1;
                 Tools::error << "Settings: invalid value for chunkMinimumArea, changing to " << this->chunkMinimumArea << Tools::endl;
             }
-            this->res.x = i["resX"].as<unsigned int>();
-            this->res.y = i["resY"].as<unsigned int>();
-            this->fullscreen = i["fullscreen"].as<bool>();
-            this->useShaders = i["useShaders"].as<bool>();
-            this->mouseSensitivity = i["mouseSensitivity"].as<float>();
+            this->res.x = _LuaGetGlobal<unsigned int>(i, "resX", 800);
+            this->res.y = _LuaGetGlobal<unsigned int>(i, "resY", 600);
+            this->fullscreen = _LuaGetGlobal<bool>(i, "fullscreen", false);
+            this->useShaders = _LuaGetGlobal<bool>(i, "useShaders", true);
+            this->mouseSensitivity = _LuaGetGlobal<float>(i, "mouseSensitivity", 0.707);
             if (this->mouseSensitivity > 1)
                 this->mouseSensitivity = 1;
             else if (this->mouseSensitivity < 0)
@@ -164,7 +158,7 @@ namespace Client {
             Tools::error << "Failed to load settings file \"" << this->settingsFile.string() << "\": " << e.what() << Tools::endl;
             return;
         }
-        Tools::debug << "Settings file \"" << this->settingsFile.string() << "\" successfully loaded.\n";
+        Tools::debug << "Settings file \"" << this->settingsFile.string() << "\" loaded.\n";
     }
 
 }

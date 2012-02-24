@@ -1,52 +1,74 @@
-#include "tools/lua/Exception.hpp"
+#include "tools/lua/Lua.hpp"
 #include "tools/lua/Interpreter.hpp"
-#include "tools/lua/StackRef.hpp"
-#include "tools/lua/Setters.hpp"
 
 namespace Tools { namespace Lua {
 
-    Interpreter::Interpreter(std::string const& code)
+    Interpreter::Interpreter() throw(std::runtime_error)
     {
-        Exec(code);
+        this->_state = new State(*this);
+        this->_globals = new Ref(*this->_state);
+        lua_pushvalue(*this->_state, LUA_GLOBALSINDEX);
+        this->_globals->FromStack();
     }
 
-    Interpreter::Interpreter()
+    Interpreter::~Interpreter() throw()
     {
+        Tools::Delete(this->_globals);
+        Tools::Delete(this->_state);
     }
 
-    void Interpreter::Load(std::string const& code)
+    Ref const& Interpreter::Globals() const throw()
     {
-        api.loadstring(code.c_str());
+        return *this->_globals;
     }
 
-    void Interpreter::Exec(std::string const& code)
+    void Interpreter::DumpStack() const throw()
     {
-        api.dostring(code.c_str());
+        Tools::log << "------- Lua Stack Dump -------\n";
+        Tools::log << "(size: " << lua_gettop(*this->_state) << ")\n";
+        for (int i = 1; i <= lua_gettop(*this->_state); ++i)
+        {
+            int type = lua_type(*this->_state, i);
+            Tools::log << i << "\t | " << lua_typename(*this->_state, type);
+            switch (type)
+            {
+            case LUA_TSTRING:
+                Tools::log << "\t | \"" << lua_tostring(*this->_state, i) << "\"";
+                break;
+            case LUA_TBOOLEAN:
+                Tools::log << "\t | " << lua_toboolean(*this->_state, i);
+                break;
+            case LUA_TNUMBER:
+                Tools::log << "\t | " << lua_tonumber(*this->_state, i);
+                break;
+            default:
+                ;
+            }
+            Tools::log << "\n";
+        }
+        Tools::log << "------------------------------\n";
     }
 
-    void Interpreter::ExecFile(std::string const& path)
+    void Interpreter::DoString(std::string const& code) throw(std::runtime_error)
     {
-        api.dofile(path.c_str());
+        if (luaL_dostring(*this->_state, code.c_str()))
+        {
+            std::string e = "Lua::Interpreter: Cannot load string: ";
+            e += lua_tostring(*this->_state, -1);
+            lua_pop(*this->_state, 1);
+            throw std::runtime_error(e);
+        }
     }
 
-    Interpreter::~Interpreter()
+    void Interpreter::DoFile(std::string const& path) throw(std::runtime_error)
     {
-        auto it = this->_bound.begin(),
-             end = this->_bound.end();
-        for (;it != end; ++it)
-            delete *it;
-    }
-
-    Object Interpreter::operator [] (char const* key)
-    {
-        api.getglobal(key);
-        StackRefPtr newRef(new StackRef(api));
-        return Object(newRef, GlobalSetter(newRef, key));
-    }
-
-    Object Interpreter::operator [] (std::string const& key)
-    {
-        return (*this)[key.c_str()];
+        if (luaL_dofile(*this->_state, path.c_str()))
+        {
+            std::string e = "Lua::Interpreter: Cannot load file: ";
+            e += lua_tostring(*this->_state, -1);
+            lua_pop(*this->_state, 1);
+            throw std::runtime_error(e);
+        }
     }
 
 }}

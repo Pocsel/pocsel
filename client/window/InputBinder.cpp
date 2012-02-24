@@ -2,7 +2,6 @@
 
 #include "client/window/InputBinder.hpp"
 #include "tools/lua/Interpreter.hpp"
-#include "tools/lua/Bind.hpp"
 
 namespace Client { namespace Window {
 
@@ -108,8 +107,8 @@ namespace Client { namespace Window {
         try
         {
             Tools::Lua::Interpreter i;
-            i.Bind("bind", &InputBinder::Bind, this, std::placeholders::_1, std::placeholders::_2);
-            i.ExecFile(path);
+            i.Globals().Set("bind", i.MakeFunction(std::bind(&InputBinder::_BindFromLua, this, std::placeholders::_1)));
+            i.DoFile(path);
         }
         catch (std::exception& e)
         {
@@ -118,6 +117,13 @@ namespace Client { namespace Window {
         }
         Tools::debug << "Bindings file \"" << path << "\" successfully loaded.\n";
         return true;
+    }
+
+    void InputBinder::_BindFromLua(Tools::Lua::CallHelper& callHelper)
+    {
+        std::string input = callHelper.PopArg().CheckString();
+        std::string action = callHelper.PopArg().CheckString();
+        this->Bind(input, action);
     }
 
     bool InputBinder::Bind(std::string const& input, std::string const& action)

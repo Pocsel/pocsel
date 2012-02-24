@@ -1,6 +1,6 @@
-#include "tools/lua2/Interpreter.hpp"
-#include "tools/lua2/Ref.hpp"
-#include "tools/lua2/Iterator.hpp"
+#include "tools/lua/Interpreter.hpp"
+#include "tools/lua/Ref.hpp"
+#include "tools/lua/Iterator.hpp"
 
 void f(Tools::Lua::CallHelper& call)
 {
@@ -9,11 +9,8 @@ void f(Tools::Lua::CallHelper& call)
     auto itEnd = args.end();
     for (; it != itEnd; ++it)
         Tools::log << "arg: " << it->ToNumber() << Tools::endl;
-    call.PopArg();
-    call.PopArg();
-    call.PopArg();
-    call.PopArg();
-    call.PopArg();
+    Tools::log << call.PopArg().CheckBoolean() << Tools::endl;
+    Tools::log << call.PopArg().CheckString() << Tools::endl;
     Tools::log << "f()" << Tools::endl;
     call.PushRet(call.GetInterpreter().MakeNumber(123.2));
     call.PushRet(call.GetInterpreter().MakeNumber(-5.4));
@@ -29,7 +26,7 @@ int main(int, char**)
 
     try
     {
-        Tools::log << bite(12, 14.4f).ToNumber() << " jksdfgjk " << sizeof(Tools::Lua::Ref) << Tools::endl;
+        Tools::log << bite(false, "123").ToNumber() << " jksdfgjk " << sizeof(Tools::Lua::Ref) << Tools::endl;
     }
     catch (std::exception& e)
     {
@@ -40,7 +37,7 @@ int main(int, char**)
 
     try
     {
-        i.DoString("bite(13.3, 13.4)");
+        i.DoString("bite(false, 234)");
     }
     catch (std::exception& e)
     {

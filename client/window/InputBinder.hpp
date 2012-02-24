@@ -4,6 +4,10 @@
 #include "client/window/Inputs.hpp"
 #include "client/BindAction.hpp"
 
+namespace Tools { namespace Lua {
+    class CallHelper;
+}}
+
 namespace Client { namespace Window {
 
     class InputBinder :
@@ -40,6 +44,7 @@ namespace Client { namespace Window {
             bool GetSpecialKeyAction(SpecialKey::SpecialKey specialKey, Action& action) const;
             bool GetButtonAction(Button::Button button, Action& action) const;
         private:
+            void _BindFromLua(Tools::Lua::CallHelper& callHelper);
             void _Bind(Button::Button button, std::string const& action);
             void _Bind(SpecialKey::SpecialKey specialKey, std::string const& action);
             void _Bind(char ascii, std::string const& action);

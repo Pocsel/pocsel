@@ -1,7 +1,7 @@
 #ifndef __TOOLS_LUA_ITERATOR_HPP__
 #define __TOOLS_LUA_ITERATOR_HPP__
 
-#include "tools/lua2/Ref.hpp"
+#include "tools/lua/Ref.hpp"
 
 namespace Tools { namespace Lua {
 
@@ -17,7 +17,7 @@ namespace Tools { namespace Lua {
         Iterator(Ref const& table, bool end) throw(std::runtime_error);
         Iterator(Iterator const& iterator) throw();
         Iterator& operator =(Iterator const& iterator) throw();
-        bool operator ==(Iterator const& iterator) const throw();
+        bool operator ==(Iterator const& iterator) const throw(); // un Iterator n'est égal à un autre uniquement si les 2 sont des Iterator de fin
         bool operator !=(Iterator const& iterator) const throw();
         Iterator& operator ++() throw(std::runtime_error);
         bool IsEnd() const throw() { return this->_end; }

@@ -1,8 +1,8 @@
-#include "tools/lua2/Lua.hpp"
-#include "tools/lua2/State.hpp"
-#include "tools/lua2/CallHelper.hpp"
-#include "tools/lua2/Ref.hpp"
-#include "tools/lua2/Interpreter.hpp"
+#include "tools/lua/Lua.hpp"
+#include "tools/lua/State.hpp"
+#include "tools/lua/CallHelper.hpp"
+#include "tools/lua/Ref.hpp"
+#include "tools/lua/Interpreter.hpp"
 
 namespace {
 
@@ -134,12 +134,15 @@ namespace Tools { namespace Lua {
             return this->make_func(val); \
         }
 
+    MAKE_MAKEMETHOD(bool, MakeBoolean);
     MAKE_MAKEMETHOD(int, MakeInteger);
+    MAKE_MAKEMETHOD(unsigned int, MakeNumber); // je ne suis pas sur
     MAKE_MAKEMETHOD(char, MakeInteger);
     MAKE_MAKEMETHOD(unsigned char, MakeInteger);
     MAKE_MAKEMETHOD(double, MakeNumber);
     MAKE_MAKEMETHOD(float, MakeNumber);
     MAKE_MAKEMETHOD(std::string, MakeString);
+    MAKE_MAKEMETHOD(char const*, MakeString);
 
     template <>
         Ref State::Make<Ref>(Ref const& val) throw()

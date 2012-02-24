@@ -1,100 +1,39 @@
 #ifndef __TOOLS_LUA_INTERPRETER_HPP__
 #define __TOOLS_LUA_INTERPRETER_HPP__
 
-#include "tools/lua/LuaState.hpp"
-#include "tools/lua/Object.hpp"
+#include "tools/lua/State.hpp"
+#include "tools/lua/Ref.hpp"
 
 namespace Tools { namespace Lua {
 
-    struct Callable
-    {
-        virtual void operator()(LuaState&) = 0;
-        virtual ~Callable() {}
-    };
-
-    class Interpreter : boost::noncopyable
+    class Interpreter :
+        private boost::noncopyable
     {
     private:
-        std::list<Callable*> _bound;
+        State* _state;
+        Ref* _globals;
 
     public:
-        LuaState api;
-
-    public:
-        Interpreter(std::string const& code);
-        Interpreter();
-        ~Interpreter();
-        Object operator [] (std::string const& key);
-        Object operator [] (char const* key);
-        void Load(std::string const& code);
-        void Exec(std::string const& code);
-        void ExecFile(std::string const& path);
-        /////////////////////////////////////////////////////////////////////
-        // Object Bind(Func, Args...)
-        template<typename Func>
-            Object Bind(Func func);
-        template<typename Func, typename T1>
-            Object Bind(Func func, T1 t1);
-        template<typename Func, typename T1, typename T2>
-            Object Bind(Func func, T1 t1, T2 t2);
-        template<typename Func, typename T1, typename T2, typename T3>
-            Object Bind(Func func, T1 t1, T2 t2, T3 t3);
-        template<typename Func, typename T1, typename T2, typename T3, typename T4>
-            Object Bind(Func func, T1 t1, T2 t2, T3 t3, T4 t4);
-
-        /////////////////////////////////////////////////////////////////////
-        // Object Bind(char const*, Func, Args...)
-        template<typename Func>
-            Object Bind(char const* str, Func func);
-        template<typename Func, typename T1>
-            Object Bind(char const* str, Func func, T1 t1);
-        template<typename Func, typename T1, typename T2>
-            Object Bind(char const* str, Func func, T1 t1, T2 t2);
-        template<typename Func, typename T1, typename T2, typename T3>
-            Object Bind(char const* str, Func func, T1 t1, T2 t2, T3 t3);
-        template<typename Func, typename T1, typename T2, typename T3, typename T4>
-            Object Bind(char const* str, Func func, T1 t1, T2 t2, T3 t3, T4 t4);
-
-        /////////////////////////////////////////////////////////////////////
-        // Object Bind(std::string const&, Func, Args...)
-        template<typename Func>
-            Object Bind(std::string const& str, Func func)
-            { return Bind<Func>(str.c_str(), func); }
-        template<typename Func, typename T1>
-            Object Bind(std::string const& str, Func func, T1 t1)
-            { return Bind<Func, T1>(str.c_str(), func, t1); }
-        template<typename Func, typename T1, typename T2>
-            Object Bind(std::string const& str, Func func, T1 t1, T2 t2)
-            { return Bind<Func, T1, T2>(str.c_str(), func, t1, t2); }
-        template<typename Func, typename T1, typename T2, typename T3>
-            Object Bind(std::string const& str, Func func, T1 t1, T2 t2, T3 t3)
-            { return Bind<Func, T1, T2, T3>(str.c_str(), func, t1, t2, t3); }
-        template<typename Func, typename T1, typename T2, typename T3, typename T4>
-            Object Bind(std::string const& str, Func func, T1 t1, T2 t2, T3 t3, T4 t4)
-            { return Bind<Func, T1, T2, T3, T4>(str.c_str(), func, t1, t2, t3, t4); }
-
-        template<typename TLogger>
-            void DumpStack(TLogger& logger)
-            {
-                logger << "------------------------------- Dump stack\n";
-                int top = api.gettop();
-                for (int i = 1; i <= top; i++)
-                {
-                    logger << i << ": " << api.typestring(i) << ": ";
-                    if (api.isnumber(i)) logger << api.tonumber(i);
-                    else if (api.isstring(i)) logger << api.tostring(i);
-                    else if (api.isboolean(i)) logger << (api.toboolean(i) ? "true" : "false");
-                    else logger << api.topointer(i);
-                    logger << '\n';
-                }
-                logger << "------------------------------- top = " << top << "\n";
-            }
-
-        void DumpStack() { this->DumpStack(std::cout); }
-
-    private:
-        template<typename Sig, typename Func>
-            void _Bind(Func f);
+        Interpreter() throw(std::runtime_error);
+        ~Interpreter() throw();
+        // script loading
+        void DoString(std::string const& code) throw(std::runtime_error);
+        void DoFile(std::string const& path) throw(std::runtime_error);
+        // global table
+        Ref const& Globals() const throw();
+        // reference creators
+        Ref MakeBoolean(bool val) throw() { return this->_state->MakeBoolean(val); }
+        Ref MakeFunction(std::function<void(CallHelper&)> val) throw() { return this->_state->MakeFunction(val); }
+        Ref MakeNil() throw() { return this->_state->MakeNil(); }
+        Ref MakeInteger(int val) throw() { return this->_state->MakeInteger(val); }
+        Ref MakeNumber(double val) throw() { return this->_state->MakeNumber(val); }
+        Ref MakeString(std::string const& val) throw() { return this->_state->MakeString(val); }
+        Ref MakeTable() throw() { return this->_state->MakeTable(); }
+        template <typename T>
+            Ref Make(T const& val) throw() { return this->_state->Make(val); }
+        // other stuff
+        State& GetState() throw() { return *this->_state; }
+        void DumpStack() const throw();
     };
 
 }}
