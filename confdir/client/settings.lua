@@ -5,6 +5,6 @@ resY = 600
 fullscreen = false
 useShaders = true
 chunkViewDistance = 5
-chunkCacheArea = 10
+chunkCacheArea = 0
 chunkMinimumArea = 2
 mouseSensitivity = 0.707
