@@ -15,8 +15,8 @@ namespace Tools { namespace Lua {
         std::list<Ref> _rets;
 
     public:
-        CallHelper(Interpreter& i);
-        Interpreter& GetInterpreter() { return this->_i; }
+        CallHelper(Interpreter& i) throw();
+        Interpreter& GetInterpreter() throw() { return this->_i; }
         // arguments
         void PushArg(Ref const& arg) throw();
         Ref PopArg() throw(std::runtime_error);

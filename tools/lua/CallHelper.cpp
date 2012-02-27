@@ -4,7 +4,7 @@
 
 namespace Tools { namespace Lua {
 
-    CallHelper::CallHelper(Interpreter& i) :
+    CallHelper::CallHelper(Interpreter& i) throw() :
         _i(i)
     {
     }

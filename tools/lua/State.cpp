@@ -16,7 +16,7 @@ namespace {
             {
                 Tools::Lua::Ref arg(env->i->GetState());
                 arg.FromStack();
-                callHelper.PushArg(arg);
+                callHelper.GetArgList().push_front(arg);
             }
             try
             {
@@ -55,7 +55,7 @@ namespace Tools { namespace Lua {
     {
         this->_state = luaL_newstate();
         if (!this->_state)
-            throw std::runtime_error("Lua::State: Not enough memory");
+            throw std::runtime_error("Lua::State: Not enough memory to instantiate new interpreter");
     }
 
     State::~State() throw()
@@ -122,6 +122,16 @@ namespace Tools { namespace Lua {
     Ref State::MakeTable() throw()
     {
         lua_newtable(*this);
+        Ref r(*this);
+        r.FromStack();
+        return r;
+    }
+
+    Ref State::MakeUserData(void** data, size_t size) throw(std::runtime_error)
+    {
+        *data = lua_newuserdata(*this, size);
+        if (!*data)
+            throw std::runtime_error("Lua::State: Not enough memory to instantiate new user data");
         Ref r(*this);
         r.FromStack();
         return r;
