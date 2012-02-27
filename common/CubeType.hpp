@@ -22,6 +22,7 @@ namespace Common {
             };
             Uint32 ids[6];
         } textures;
+        std::string effectName;
 
         bool solid;
         bool transparent;

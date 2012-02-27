@@ -4,6 +4,9 @@
 #include "client/resources/CacheDatabaseProxy.hpp"
 #include "client/resources/ResourceDownloader.hpp"
 
+namespace Common {
+    class Resource;
+}
 namespace Tools {
     class IRenderer;
     namespace Renderers {
@@ -47,6 +50,7 @@ namespace Client { namespace Resources {
         Tools::Renderers::ITexture2D& GetTexture2D(Uint32 pluginId, std::string const& filename);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& filename);
         std::string GetScript(Uint32 pluginId, std::string const& filename);
+        std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& filename);
 
         std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> CreateTextureAtlas(std::list<Uint32> const& textureIds);
 

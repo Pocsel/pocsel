@@ -1,15 +1,10 @@
-effectName = "Coucou"
-
-shader = "cubes/water/effect.cgfx"
-parameters = {
-    texture = "cubeTexture",
-    gameTime = "gameTime",
-    normalMap = "normalMap",
-    reflection = {
-        identifier = "reflectionTexture",
-        update = function () -- todo: les arguments (un objet/table qui contient l'etat du jeu, camera, player, timers, etc...)
-                
-                RenderWorld()
-            end
-    }
+Client.Effect.Create{
+    name = "water",
+    resource = "cubes/water/effect.cgfx",
+    initObject = function(effect, object)
+        -- effect.id = current shader
+    end,
+    update = function(effect, object)
+        -- effect.id = current shader
+    end,
 }

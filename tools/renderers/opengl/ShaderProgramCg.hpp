@@ -32,6 +32,7 @@ namespace Tools { namespace Renderers {
             virtual ~ShaderProgramCg();
 
             virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier);
+            virtual std::unique_ptr<IShaderParameter> GetParameterFromSemantic(std::string const& semantic);
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage);
             virtual void UpdateParameter(ShaderParameterUsage::Type usage);
             virtual void UpdateCurrentPass();

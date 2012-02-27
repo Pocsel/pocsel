@@ -27,8 +27,13 @@ namespace Client { namespace Resources {
 
     ResourceManager::~ResourceManager()
     {
+        Tools::Renderers::ITexture2D* errTex = 0;
+        if (this->_textures.find(0) != this->_textures.end())
+            errTex = this->_textures[0];
+        delete errTex;
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
-            Tools::Delete(it->second);
+            if (it->second != errTex)
+                Tools::Delete(it->second);
         for (auto it = this->_shaders.begin(), ite = this->_shaders.end(); it != ite; ++it)
             Tools::Delete(it->second);
     }
@@ -111,6 +116,11 @@ namespace Client { namespace Resources {
     std::string ResourceManager::GetScript(Uint32 pluginId, std::string const& filename)
     {
         return this->GetScript(this->_database.GetResourceId(pluginId, filename));
+    }
+
+    std::unique_ptr<Common::Resource> ResourceManager::GetResource(Uint32 pluginId, std::string const& filename)
+    {
+        return this->_database.GetResource(this->_database.GetResourceId(pluginId, filename));
     }
 
     std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)
