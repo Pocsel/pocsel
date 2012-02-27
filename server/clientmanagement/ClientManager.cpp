@@ -71,7 +71,7 @@ namespace Server { namespace ClientManagement {
         this->_messageQueue.PushMessage(m);
     }
 
-    void ClientManager::SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet)
+    void ClientManager::SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_SendPacket, this, clientId, packet.release()));

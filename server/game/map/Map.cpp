@@ -85,7 +85,7 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response)
     {
-        ChunkCallback ccb(std::bind(&Map::_SendChunkPacket, this, std::placeholders::_1, response));
+        ChunkCallback ccb(std::bind(&Map::_SendChunkPacket, this, std::placeholders::_1, std::move(response)));
         this->GetChunk(id, ccb);
     }
 

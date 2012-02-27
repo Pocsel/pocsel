@@ -27,7 +27,7 @@ namespace Server { namespace Game {
         private boost::noncopyable
     {
     public:
-        typedef std::function<void(std::unique_ptr<Common::Packet>)> ChunkPacketCallback;
+        typedef std::function<void(std::unique_ptr<Common::Packet>&)> ChunkPacketCallback;
 
     private:
         Server& _server;
