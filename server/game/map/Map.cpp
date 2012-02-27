@@ -51,7 +51,7 @@ namespace Server { namespace Game { namespace Map {
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
-        this->_messageQueue->SetLoopTimer(100, m);
+        this->_messageQueue->SetLoopTimer(256, m);
     }
 
     void Map::Stop()

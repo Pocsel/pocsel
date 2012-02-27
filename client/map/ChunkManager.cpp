@@ -64,9 +64,12 @@ namespace Client { namespace Map {
     {
         ChunkNode* node = 0;
 
+        std::shared_ptr<Chunk::CubeType> cubes(0);
+
         if (this->_chunks.find(chunk->id) != this->_chunks.end())
         { // Chunk Update
             node = this->_chunks.find(chunk->id)->second;
+            cubes = node->chunk->GetSharedCubes();
             node->chunk->SetCubes(chunk->StealCubes());
         }
         else
@@ -83,7 +86,11 @@ namespace Client { namespace Map {
 
         if (node == 0)
             return;
-        this->_RefreshNode(*node);
+
+        if (cubes == 0)
+            this->_RefreshNode(*node);
+        else
+            this->_RefreshNode(*node, cubes);
     }
 
     void ChunkManager::UpdateLoading()
@@ -233,6 +240,97 @@ namespace Client { namespace Map {
         if (chunkBack != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBack->second);
         if (chunkTop != this->_chunks.end()) this->_AddNodeToRefresh(*chunkTop->second);
         if (chunkBottom != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBottom->second);
+    }
+
+    namespace {
+        template<int x0, int y0, int z0>
+            inline bool CheckModif(Chunk::CubeType const* oldCubes, Chunk::CubeType const* newCubes)
+            {
+                static_assert(x0 == 0 || x0 == Common::ChunkSize - 1 ||
+                              y0 == 0 || y0 == Common::ChunkSize - 1 ||
+                              z0 == 0 || z0 == Common::ChunkSize - 1,
+                              "need a correct value");
+
+                if (newCubes == 0)
+                    return true;
+
+                if (x0 != -1)
+                {
+                    unsigned int x = x0;
+                    unsigned int y, z;
+                    for (z = 0; z < Common::ChunkSize * Common::ChunkSize2; z += Common::ChunkSize2)
+                    {
+                        for (y = 0; y < Common::ChunkSize * Common::ChunkSize; y += Common::ChunkSize)
+                        {
+                            if (oldCubes[x + y + z] != newCubes[x + y + z])
+                                return true;
+                        }
+                    }
+                }
+                else if (y0 != -1)
+                {
+                    unsigned int y = y0;
+                    unsigned int x, z;
+                    for (z = 0; z < Common::ChunkSize * Common::ChunkSize2; z += Common::ChunkSize2)
+                    {
+                        for (x = 0; x < Common::ChunkSize; x += 1)
+                        {
+                            if (oldCubes[x + y + z] != newCubes[x + y + z])
+                                return true;
+                        }
+                    }
+                }
+                else
+                {
+                    unsigned int z = z0;
+                    unsigned int x, y;
+                    for (y = 0; y < Common::ChunkSize * Common::ChunkSize; y += Common::ChunkSize)
+                    {
+                        for (x = 0; x < Common::ChunkSize; x += 1)
+                        {
+                            if (oldCubes[x + y + z] != newCubes[x + y + z])
+                                return true;
+                        }
+                    }
+                }
+                return false;
+            }
+    }
+
+    void ChunkManager::_RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeType> oldCubes)
+    {
+        this->_AddNodeToRefresh(node);
+
+        if (CheckModif<0, -1, -1>(oldCubes.get(), node.chunk->GetCubes()))
+        {
+            auto chunkLeft  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0)));
+            if (chunkLeft != this->_chunks.end()) this->_AddNodeToRefresh(*chunkLeft->second);
+        }
+        if (CheckModif<Common::ChunkSize - 1, -1, -1>(oldCubes.get(), node.chunk->GetCubes()))
+        {
+            auto chunkRight  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 1,  0,  0)));
+            if (chunkRight != this->_chunks.end()) this->_AddNodeToRefresh(*chunkRight->second);
+        }
+        if (CheckModif<-1, -1, Common::ChunkSize - 1>(oldCubes.get(), node.chunk->GetCubes()))
+        {
+            auto chunkFront  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0,  1)));
+            if (chunkFront != this->_chunks.end()) this->_AddNodeToRefresh(*chunkFront->second);
+        }
+        if (CheckModif<-1, -1, 0>(oldCubes.get(), node.chunk->GetCubes()))
+        {
+            auto chunkBack   = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0, -1)));
+            if (chunkBack != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBack->second);
+        }
+        if (CheckModif<-1, Common::ChunkSize - 1, -1>(oldCubes.get(), node.chunk->GetCubes()))
+        {
+            auto chunkTop    = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0)));
+            if (chunkTop != this->_chunks.end()) this->_AddNodeToRefresh(*chunkTop->second);
+        }
+        if (CheckModif<-1, 0, -1>(oldCubes.get(), node.chunk->GetCubes()))
+        {
+            auto chunkBottom = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
+            if (chunkBottom != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBottom->second);
+        }
     }
 
     void ChunkManager::_AddNodeToRefresh(ChunkNode& node)

@@ -48,9 +48,8 @@ namespace Tools {
         void Stop();
 
     private:
-        void _SetLoopTimer(Uint32 ms, TimerLoopMessage& message);
         void _ExecLoopTimer(Uint32 index, boost::system::error_code const& error);
-        void _ExecTimedMessage(TimerLoopMessage& message,
+        void _ExecTimedMessage(Message& message,
                                std::shared_ptr<boost::asio::deadline_timer>,
                                boost::system::error_code const& error);
         void _Run();
