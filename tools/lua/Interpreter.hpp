@@ -29,6 +29,7 @@ namespace Tools { namespace Lua {
         Ref MakeNumber(double val) throw() { return this->_state->MakeNumber(val); }
         Ref MakeString(std::string const& val) throw() { return this->_state->MakeString(val); }
         Ref MakeTable() throw() { return this->_state->MakeTable(); }
+        Ref MakeUserData(void** data, size_t size) throw(std::runtime_error) { return this->_state->MakeUserData(data, size); }
         template <typename T>
             Ref Make(T const& val) throw() { return this->_state->Make(val); }
         // other stuff

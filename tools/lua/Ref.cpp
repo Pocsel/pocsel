@@ -52,6 +52,23 @@ namespace Tools { namespace Lua {
         this->_ref = LUA_NOREF;
     }
 
+    size_t Ref::GetLength() throw()
+    {
+        this->ToStack();
+        size_t ret = lua_objlen(this->_state, -1);
+        lua_pop(this->_state, 1);
+        return ret;
+    }
+
+    Ref Ref::operator ()() const throw(std::runtime_error)
+    {
+        CallHelper callHelper(this->_state.GetInterpreter());
+        (*this)(callHelper);
+        if (callHelper.GetNbRets())
+            return callHelper.PopRet();
+        return Ref(*this);
+    }
+
     void Ref::operator ()(CallHelper& call) const throw(std::runtime_error)
     {
         this->ToStack();
@@ -122,6 +139,46 @@ namespace Tools { namespace Lua {
         return value;
     }
 
+    Ref Ref::SetMetaTable(Ref const& table) const throw(std::runtime_error)
+    {
+        this->ToStack();
+        table.ToStack();
+        if (!lua_istable(this->_state, -1))
+        {
+            lua_pop(this->_state, 2);
+            throw std::runtime_error("Lua::Ref: Setting metatable to a value that is not a table");
+        }
+        lua_setmetatable(this->_state, -2);
+        lua_pop(this->_state, 1);
+        return table;
+    }
+
+    bool Ref::HasMetaTable() const throw()
+    {
+        this->ToStack();
+        if (lua_getmetatable(this->_state, -1))
+        {
+            lua_pop(this->_state, 2);
+            return true;
+        }
+        lua_pop(this->_state, 1);
+        return false;
+    }
+
+    Ref Ref::GetMetaTable() const throw()
+    {
+        this->ToStack();
+        if (lua_getmetatable(this->_state, -1))
+        {
+            Ref ret(this->_state);
+            ret.FromStack();
+            lua_pop(this->_state, 1);
+            return ret;
+        }
+        lua_pop(this->_state, 1);
+        return Ref(this->_state);
+    }
+
 #define MAKE_TOMETHOD(name, lua_func, type) \
     type Ref::name() const throw() \
     { \
@@ -134,6 +191,7 @@ namespace Tools { namespace Lua {
     MAKE_TOMETHOD(ToBoolean, lua_toboolean, bool);
     MAKE_TOMETHOD(ToInteger, lua_tointeger, int);
     MAKE_TOMETHOD(ToNumber, lua_tonumber, double);
+    MAKE_TOMETHOD(ToUserData, lua_touserdata, void*);
 
     std::string Ref::ToString() const throw()
     {
@@ -182,6 +240,7 @@ namespace Tools { namespace Lua {
     MAKE_CHECKMETHOD(CheckBoolean, lua_isboolean, lua_toboolean, bool, "Lua::Ref: Value is not of boolean type");
     MAKE_CHECKMETHOD(CheckInteger, lua_isnumber, lua_tointeger, int, "Lua::Ref: Value is not of integer type");
     MAKE_CHECKMETHOD(CheckNumber, lua_isnumber, lua_tonumber, double, "Lua::Ref: Value is not of number type");
+    MAKE_CHECKMETHOD(CheckUserData, lua_isuserdata, lua_touserdata, void*, "Lua::Ref: Value is not of user data type");
 
     std::string Ref::CheckString() const throw(std::runtime_error)
     {
@@ -218,7 +277,7 @@ namespace Tools { namespace Lua {
     MAKE_CHECKTEMPLATEMETHOD(CheckNumber, float);
     MAKE_CHECKTEMPLATEMETHOD(CheckString, std::string);
 
-    std::string Ref::TypeName() const throw()
+    std::string Ref::GetTypeName() const throw()
     {
         return lua_typename(this->_state, this->GetType());
     }

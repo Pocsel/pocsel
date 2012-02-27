@@ -26,7 +26,7 @@ int main(int, char**)
 
     try
     {
-        Tools::log << bite(false, "123").ToNumber() << " jksdfgjk " << sizeof(Tools::Lua::Ref) << Tools::endl;
+        Tools::log << bite(1, 2).ToNumber() << " jksdfgjk " << sizeof(Tools::Lua::Ref) << Tools::endl;
     }
     catch (std::exception& e)
     {
@@ -37,7 +37,7 @@ int main(int, char**)
 
     try
     {
-        i.DoString("bite(false, 234)");
+        i.DoString("bite(1, 2)");
     }
     catch (std::exception& e)
     {
@@ -50,8 +50,24 @@ int main(int, char**)
     Tools::Lua::Iterator itEnd = i.Globals().End();
     for (; it != itEnd; ++it)
     {
-        Tools::log << it.GetValue().TypeName() << ": " << it.GetValue().ToString() << " (key " << it.GetKey().TypeName() << " " << it.GetKey().ToString() << ")" << Tools::endl;
+        Tools::log << it.GetValue().GetTypeName() << ": " << it.GetValue().ToString() << " (key " << it.GetKey().GetTypeName() << " " << it.GetKey().ToString() << ")" << Tools::endl;
     }
+
+    i.DoString("FUCK = function() print \"FUCK\" end");
+    Tools::Lua::Ref meta = i.MakeTable();
+    meta.Set("__index", i.Globals()["FUCK"]);
+    meta.Set(1, "test");
+    meta.Set(2, "tests2");
+    Tools::log << "Type of FUCK: " << meta["__index"].GetTypeName() << Tools::endl;
+    Tools::log << "size of metatable: " << meta.GetLength() << Tools::endl;
+    Tools::Lua::Ref metaTest = i.MakeTable();
+    metaTest.SetMetaTable(meta);
+    i.Globals().Set("metaTest", metaTest);
+    i.DoString("a = metaTest[12]");
+    i.DoString("b = metaTest[14]");
+    i.DoString("c = metaTest[15]");
+
+    i.DumpStack();
 
     return 0;
 }

@@ -35,6 +35,7 @@ namespace Tools { namespace Lua {
         Ref MakeNumber(double val) throw();
         Ref MakeString(std::string const& val) throw();
         Ref MakeTable() throw();
+        Ref MakeUserData(void** data, size_t size) throw(std::runtime_error);
         template <typename T>
             Ref Make(T const& val) throw();
         operator lua_State*() const throw() { return this->_state; }

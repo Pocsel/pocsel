@@ -22,6 +22,7 @@ namespace Tools { namespace Lua {
         bool operator ==(Ref const& ref) const throw();
         bool operator !=(Ref const& ref) const throw();
         void Unref() throw();
+        size_t GetLength() throw(); // retourne la longueur pour une chaine, la taille pour un tableau (#), le nombre d'octets pour un user data et 0 pour le reste
         // function call
         void operator ()(CallHelper& callHelper) const throw(std::runtime_error);
         Ref operator ()() const throw(std::runtime_error);
@@ -40,14 +41,19 @@ namespace Tools { namespace Lua {
         template <typename T>
             Ref operator [](T index) const throw(std::runtime_error);
         // array setters
-        Ref Set(Ref const& key, Ref const& value) const throw(std::runtime_error);
+        Ref Set(Ref const& key, Ref const& value) const throw(std::runtime_error); // retourne value
         template <typename T, typename U>
-            Ref Set(T key, U value) const throw(std::runtime_error);
+            Ref Set(T key, U value) const throw(std::runtime_error); // retourne une nouvelle reference vers value
+        // metatable
+        Ref SetMetaTable(Ref const& table) const throw(std::runtime_error); // retourne table
+        bool HasMetaTable() const throw();
+        Ref GetMetaTable() const throw(); // retourne une reference vers nil si pas de metatable
         // safe type conversions
         bool ToBoolean() const throw(); // true pour toute valeur differente de false ou nil (true pour 0 ou "0")
         int ToInteger() const throw(); // conversion de type par lua, retourne 0 en cas d'erreur
         double ToNumber() const throw(); // conversion de type par lua, retourne 0 en cas d'erreur
         std::string ToString() const throw(); // conversion de type par lua, retourne une chaine vide en cas d'erreur
+        void* ToUserData() const throw(); // retourne un pointeur nul si ce n'est pas un userdata
         template <typename T>
             T To() const throw();
         template <typename T>
@@ -57,10 +63,11 @@ namespace Tools { namespace Lua {
         int CheckInteger() const throw(std::runtime_error); // en fait, ça vérifie si c'est un number parce que le type integer est un number en interne
         double CheckNumber() const throw(std::runtime_error);
         std::string CheckString() const throw(std::runtime_error);
+        void* CheckUserData() const throw(std::runtime_error);
         template <typename T>
             T Check() const throw(std::runtime_error);
         // type tests
-        std::string TypeName() const throw();
+        std::string GetTypeName() const throw();
         int GetType() const throw(); // valeurs possibles : LUA_TNIL, LUA_TBOOLEAN, LUA_TLIGHTUSERDATA, LUA_TNUMBER, LUA_TSTRING, LUA_TTABLE, LUA_TFUNCTION, LUA_TUSERDATA, LUA_TTHREAD, LUA_TNONE
         bool Exists() const throw(); // <- pareil que IsNoneOrNil(), utiliser ça en priorité plutôt que IsNil()/IsNoneOrNil()/IsNone()
         bool IsBoolean() const throw();
@@ -113,15 +120,6 @@ namespace Tools { namespace Lua {
             }
         }
 
-    inline Ref Ref::operator ()() const throw(std::runtime_error)
-    {
-        CallHelper callHelper(this->_state.GetInterpreter());
-        (*this)(callHelper);
-        if (callHelper.GetNbRets())
-            return callHelper.PopRet();
-        return Ref(*this);
-    }
-
     template <typename T>
         inline Ref Ref::operator ()(T a1) const throw(std::runtime_error)
         {
@@ -137,8 +135,8 @@ namespace Tools { namespace Lua {
         inline Ref Ref::operator ()(T a1, U a2) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
-            callHelper.PushArg(this->_state.Make(a1));
             callHelper.PushArg(this->_state.Make(a2));
+            callHelper.PushArg(this->_state.Make(a1));
             (*this)(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
@@ -149,9 +147,9 @@ namespace Tools { namespace Lua {
         inline Ref Ref::operator ()(T a1, U a2, V a3) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
-            callHelper.PushArg(this->_state.Make(a1));
-            callHelper.PushArg(this->_state.Make(a2));
             callHelper.PushArg(this->_state.Make(a3));
+            callHelper.PushArg(this->_state.Make(a2));
+            callHelper.PushArg(this->_state.Make(a1));
             (*this)(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
@@ -162,10 +160,10 @@ namespace Tools { namespace Lua {
         inline Ref Ref::operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
-            callHelper.PushArg(this->_state.Make(a1));
-            callHelper.PushArg(this->_state.Make(a2));
-            callHelper.PushArg(this->_state.Make(a3));
             callHelper.PushArg(this->_state.Make(a4));
+            callHelper.PushArg(this->_state.Make(a3));
+            callHelper.PushArg(this->_state.Make(a2));
+            callHelper.PushArg(this->_state.Make(a1));
             (*this)(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
