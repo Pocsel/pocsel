@@ -131,7 +131,8 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_SendChunkPacket(Chunk* chunk, ChunkPacketCallback& response)
     {
-        response(Network::PacketCreator::Chunk(*chunk));
+        auto toto = Network::PacketCreator::Chunk(*chunk);
+        response(toto);
     }
 
     void Map::_HandleNewChunk(Chunk* chunk)
@@ -228,7 +229,8 @@ namespace Server { namespace Game { namespace Map {
 
             for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
             {
-                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, Network::PacketCreator::Chunk(*chunk));
+                auto toto = Network::PacketCreator::Chunk(*chunk);
+                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, toto);
             }
         }
     }
