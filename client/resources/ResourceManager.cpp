@@ -27,8 +27,13 @@ namespace Client { namespace Resources {
 
     ResourceManager::~ResourceManager()
     {
+        Tools::Renderers::ITexture2D* errTex = 0;
+        if (this->_textures.find(0) != this->_textures.end())
+            errTex = this->_textures[0];
+        delete errTex;
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
-            Tools::Delete(it->second);
+            if (it->second != errTex)
+                Tools::Delete(it->second);
     }
 
     Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 id)

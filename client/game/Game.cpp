@@ -50,8 +50,8 @@ namespace Client { namespace Game {
 
     void Game::Update()
     {
-        this->_player.UpdateMovements(this->_updateTimer.GetElapsedTime());
         this->_map->GetChunkManager().Update(this->_player.GetPosition());
+        this->_player.UpdateMovements(this->_updateTimer.GetElapsedTime());
         this->_updateTimer.Reset();
     }
 
