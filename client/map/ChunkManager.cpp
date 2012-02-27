@@ -75,7 +75,18 @@ namespace Client { namespace Map {
         else
         { // New chunk
             chunk->SetMesh(std::unique_ptr<ChunkMesh>(new ChunkMesh(*chunk)));
-            this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.0005f);
+
+
+
+
+
+
+
+
+            this->_loadingProgression = std::min(1.0f,
+                this->_loadingProgression +
+                (1.0f / (float)(this->_game.GetClient().GetSettings().chunkViewDistance))
+                );
             this->_downloadingChunks.erase(chunk->id);
             node = new ChunkNode(std::move(chunk));
             this->_chunks.insert(std::unordered_map<Common::BaseChunk::IdType, ChunkNode*>::value_type(node->chunk->id, node));
@@ -233,13 +244,13 @@ namespace Client { namespace Map {
             chunkBack   = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0, -1))),
             chunkTop    = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0))),
             chunkBottom = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
-        this->_AddNodeToRefresh(node);
         if (chunkLeft != this->_chunks.end()) this->_AddNodeToRefresh(*chunkLeft->second);
         if (chunkRight != this->_chunks.end()) this->_AddNodeToRefresh(*chunkRight->second);
         if (chunkFront != this->_chunks.end()) this->_AddNodeToRefresh(*chunkFront->second);
         if (chunkBack != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBack->second);
         if (chunkTop != this->_chunks.end()) this->_AddNodeToRefresh(*chunkTop->second);
         if (chunkBottom != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBottom->second);
+        this->_AddNodeToRefresh(node);
     }
 
     namespace {
@@ -269,7 +280,7 @@ namespace Client { namespace Map {
                 }
                 else if (y0 != -1)
                 {
-                    unsigned int y = y0;
+                    unsigned int y = y0 * Common::ChunkSize;
                     unsigned int x, z;
                     for (z = 0; z < Common::ChunkSize * Common::ChunkSize2; z += Common::ChunkSize2)
                     {
@@ -282,7 +293,7 @@ namespace Client { namespace Map {
                 }
                 else
                 {
-                    unsigned int z = z0;
+                    unsigned int z = z0 * Common::ChunkSize2;
                     unsigned int x, y;
                     for (y = 0; y < Common::ChunkSize * Common::ChunkSize; y += Common::ChunkSize)
                     {
@@ -299,8 +310,6 @@ namespace Client { namespace Map {
 
     void ChunkManager::_RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeType> oldCubes)
     {
-        this->_AddNodeToRefresh(node);
-
         if (CheckModif<0, -1, -1>(oldCubes.get(), node.chunk->GetCubes()))
         {
             auto chunkLeft  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0)));
@@ -331,6 +340,7 @@ namespace Client { namespace Map {
             auto chunkBottom = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
             if (chunkBottom != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBottom->second);
         }
+        this->_AddNodeToRefresh(node);
     }
 
     void ChunkManager::_AddNodeToRefresh(ChunkNode& node)
