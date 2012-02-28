@@ -22,7 +22,7 @@ namespace Tools {
                     ));
 
         std::function<void(boost::system::error_code const& e)>
-            runLoop(std::bind(&SimpleMessageQueue::_ExecLoopTimer, this, this->_timers.size() - 1, std::placeholders::_1));
+            runLoop(std::bind(&SimpleMessageQueue::_ExecLoopTimer, this, (Uint32)this->_timers.size() - 1, std::placeholders::_1));
         this->_timers.back()->timer.async_wait(runLoop);
     }
 
