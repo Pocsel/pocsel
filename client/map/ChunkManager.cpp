@@ -253,6 +253,9 @@ namespace Client { namespace Map {
         this->_AddNodeToRefresh(node);
     }
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4307 4308)
+#endif
     namespace {
         template<int x0, int y0, int z0>
             inline bool CheckModif(Chunk::CubeType const* oldCubes, Chunk::CubeType const* newCubes)
