@@ -83,6 +83,9 @@ int main(int, char**)
     i.DoString("b = metaTest[14]");
     i.DoString("c = metaTest[15]");
 
+    i.DoString("serializeTest = { bite = { 1, 3, 4 }, test = \"HEY\", allo = false }");
+    Tools::log << "serialize: \"\"\"" << i.Serialize(i.Globals()["serializeTest"]) << "\"\"\"\n";
+
     i.DumpStack();
 
     return 0;
