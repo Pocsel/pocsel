@@ -25,6 +25,7 @@ namespace Client { namespace Game {
             Uint32 _elapsedTime;
             bool _moved;
             Uint32 _movedTime;
+            bool _sprint;
 
         public:
             Player(Game& game);
@@ -44,9 +45,11 @@ namespace Client { namespace Game {
             void Crouch();
             void Action();
             void SuperAction();
+            void ToggleSprint();
 
         private:
             void _Move(Tools::Vector3f moveVector);
+            float _GetSpeed();
     };
 
 }}

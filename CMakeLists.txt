@@ -30,7 +30,7 @@ endif ()
 if (UNIX)
     set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -Winvalid-pch")
     set(CMAKE_CXX_CUSTOM_FLAGS_DEBUG "-g -DDEBUG -UNDEBUG")
-    set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -g -DNDEBUG -UDEBUG -march=native -mtune=native")
+    set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -ffast-math -g -DNDEBUG -UDEBUG -march=native -mtune=native")
     #set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -DNDEBUG -UDEBUG -m32") # cross compilation x86 sur un linux x64
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
 else (UNIX)
