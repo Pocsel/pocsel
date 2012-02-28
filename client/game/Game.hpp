@@ -38,7 +38,7 @@ namespace Client { namespace Game {
         Tools::Lua::Interpreter _interpreter;
 
     public:
-        Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);
+        Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash);
         ~Game();
 
         void TeleportPlayer(std::string const& map, Common::Position const& position);

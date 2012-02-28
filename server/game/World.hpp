@@ -31,6 +31,7 @@ namespace Server { namespace Game {
         std::string _identifier;
         std::string _fullname;
         Uint32 _version;
+        std::string _buildHash;
 
     public:
         World(Game& game, Tools::SimpleMessageQueue& gameMessageQueue);
@@ -50,6 +51,7 @@ namespace Server { namespace Game {
         std::string const& GetIdentifier() const { return this->_identifier; }
         std::string const& GetFullname() const { return this->_fullname; }
         Uint32 GetVersion() const { return this->_version; }
+        std::string const& GetBuildHash() const { return this->_buildHash; }
 
     private:
         friend class Database::WorldLoader;

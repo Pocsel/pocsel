@@ -87,6 +87,7 @@ namespace Protocol {
          *   String world name
          *   Uint32 world version
          *   Uint16 (CubeType) nombre de types de cube
+         *   String world build hash - ajouté le 28/2/12
          */
         LoggedIn = 0,
 

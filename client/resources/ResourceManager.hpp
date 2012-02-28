@@ -49,7 +49,8 @@ namespace Client { namespace Resources {
                         std::string const& host,
                         std::string const& worldIdentifier,
                         std::string const& worldName,
-                        Uint32 worldVersion);
+                        Uint32 worldVersion,
+                        std::string const& worldBuildHash);
         ~ResourceManager();
 
         Tools::Renderers::ITexture2D& GetTexture2D(Uint32 id);

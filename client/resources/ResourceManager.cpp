@@ -66,9 +66,9 @@ namespace {
 
 namespace Client { namespace Resources {
 
-    ResourceManager::ResourceManager(Game::Game& game, std::string const& host, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion) :
+    ResourceManager::ResourceManager(Game::Game& game, std::string const& host, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, std::string const& worldBuildHash) :
         _game(game),
-        _database(game.GetClient().GetSettings().cacheDir, host, worldIdentifier, worldName, worldVersion),
+        _database(game.GetClient().GetSettings().cacheDir, host, worldIdentifier, worldName, worldVersion, worldBuildHash),
         _downloader(_database, game.GetClient().GetNetwork()),
         _renderer(game.GetClient().GetWindow().GetRenderer())
     {

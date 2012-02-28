@@ -25,13 +25,15 @@ namespace Client { namespace Resources {
             std::string _worldName;
             Tools::Database::IConnectionPool* _connectionPool;
             Uint32 _cacheVersion;
+            std::string _worldBuildHash;
 
         public:
             CacheDatabaseProxy(boost::filesystem::path const& cacheDir,
                                std::string const& host,
                                std::string const& worldIdentifier,
                                std::string const& worldName,
-                               Uint32 worldVersion);
+                               Uint32 worldVersion,
+                               std::string const& worldBuildHash);
             ~CacheDatabaseProxy();
             void ValidateUpdate();
             void AddResource(Common::Resource& res);

@@ -10,13 +10,13 @@
 
 namespace Client { namespace Game {
 
-    Game::Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes) :
+    Game::Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash) :
         _client(client),
         _renderer(client.GetWindow().GetRenderer()),
         _cubeTypeManager(client, nbCubeTypes),
         _map(0)
     {
-        this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion);
+        this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
         this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
         this->_player = new Player(*this);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(

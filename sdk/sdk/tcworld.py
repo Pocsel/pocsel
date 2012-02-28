@@ -129,7 +129,7 @@ def installPlugin(worldconn, pluginconn, server_version):
                         )
                 wconn.commit()
 
-def finalizeWorld(worldconn, fullname, identifier, format_version):
+def finalizeWorld(worldconn, fullname, identifier, format_version, build_hash):
     conn = worldconn()
     curs = conn.cursor()
     curs.execute("DELETE FROM world")
@@ -137,10 +137,10 @@ def finalizeWorld(worldconn, fullname, identifier, format_version):
     version = curs.fetchone()[0]
     curs.execute(
         """
-            INSERT INTO world (version, fullname, identifier, format_version)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO world (version, fullname, identifier, format_version, build_hash)
+            VALUES (?, ?, ?, ?, ?)
         """,
-        (version, fullname, identifier, format_version)
+        (version, fullname, identifier, format_version, build_hash)
     )
     conn.commit()
     print "World '%s' successfully finalized" % fullname

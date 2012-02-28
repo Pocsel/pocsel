@@ -21,13 +21,14 @@ namespace Server { namespace Database {
         auto& curs = conn->GetCursor();
 
         // Meta data
-        curs.Execute("SELECT identifier, fullname, version FROM world");
+        curs.Execute("SELECT identifier, fullname, version, build_hash FROM world");
         if (curs.HasData())
         {
             auto& row = curs.FetchOne();
             world._identifier = row[0].GetString();
             world._fullname = row[1].GetString();
             world._version = row[2].GetInt();
+            world._buildHash = row[3].GetString();
         }
         else
             throw std::runtime_error("World file missing metadata.");

@@ -19,7 +19,8 @@ namespace Server { namespace Network {
                                             std::string const& worldIdentifier /* = "" */,
                                             std::string const& worldName /* = "" */,
                                             Uint32 worldVersion /* = 0 */,
-                                            Chunk::CubeType nbCubeTypes /* = 0 */)
+                                            Chunk::CubeType nbCubeTypes /* = 0 */,
+                                            std::string const& worldBuildHash /* = 0 */)
     {
         Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::LoggedIn);
@@ -33,6 +34,7 @@ namespace Server { namespace Network {
             p->Write(worldName);
             p->Write(worldVersion);
             p->Write(nbCubeTypes);
+            p->Write(worldBuildHash);
         }
         else
         {

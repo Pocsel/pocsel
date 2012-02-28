@@ -17,7 +17,8 @@ namespace Client { namespace Network {
             std::string& worldIdentifier,
             std::string& worldName,
             Uint32& worldVersion,
-            Common::BaseChunk::CubeType& nbCubeTypes)
+            Common::BaseChunk::CubeType& nbCubeTypes,
+            std::string& worldBuildHash)
     {
         p.Read(status);
         p.Read(major);
@@ -31,6 +32,7 @@ namespace Client { namespace Network {
             p.Read(worldName);
             p.Read(worldVersion);
             p.Read(nbCubeTypes);
+            p.Read(worldBuildHash);
             if (nbCubeTypes == 0)
                 throw std::runtime_error("nbCubeTypes == 0");
         }
