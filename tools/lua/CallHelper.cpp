@@ -11,7 +11,7 @@ namespace Tools { namespace Lua {
 
     void CallHelper::PushArg(Ref const& arg) throw()
     {
-        this->_args.push_back(arg);
+        this->_args.push_front(arg);
     }
 
     Ref CallHelper::PopArg() throw(std::runtime_error)
@@ -30,7 +30,7 @@ namespace Tools { namespace Lua {
 
     void CallHelper::PushRet(Ref const& ret) throw()
     {
-        this->_rets.push_back(ret);
+        this->_rets.push_front(ret);
     }
 
     Ref CallHelper::PopRet() throw(std::runtime_error)

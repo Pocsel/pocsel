@@ -17,6 +17,80 @@ namespace Tools { namespace Lua {
         Tools::Delete(this->_state);
     }
 
+    void Interpreter::RegisterLib(LibId lib) const throw(std::runtime_error)
+    {
+        char const* name;
+        lua_CFunction func;
+        switch (lib)
+        {
+            case Base:
+                name = "";
+                func = &luaopen_base;
+                break;
+            case Math:
+                name = LUA_MATHLIBNAME;
+                func = &luaopen_math;
+                break;
+            case Table:
+                name = LUA_TABLIBNAME;
+                func = &luaopen_table;
+                break;
+            case String:
+                name = LUA_STRLIBNAME;
+                func = &luaopen_string;
+                break;
+            case Io:
+                name = LUA_IOLIBNAME;
+                func = &luaopen_io;
+                break;
+            case Os:
+                name = LUA_OSLIBNAME;
+                func = &luaopen_os;
+                break;
+            case Debug:
+                name = LUA_DBLIBNAME;
+                func = &luaopen_debug;
+                break;
+            case Package:
+                name = LUA_LOADLIBNAME;
+                func = &luaopen_package;
+                break;
+            default:
+                throw std::runtime_error("Lua::Interpreter: Lib not found");
+        }
+        lua_pushcfunction(*this->_state, func);
+        lua_pushstring(*this->_state, name);
+        if (lua_pcall(*this->_state, 1, 0, 0))
+        {
+            std::string e = "Lua::Interpreter: Cannot load lib: ";
+            e += lua_tostring(*this->_state, -1);
+            lua_pop(*this->_state, 1);
+            throw std::runtime_error(e);
+        }
+    }
+
+    void Interpreter::DoString(std::string const& code) const throw(std::runtime_error)
+    {
+        if (luaL_dostring(*this->_state, code.c_str()))
+        {
+            std::string e = "Lua::Interpreter: Cannot load string: ";
+            e += lua_tostring(*this->_state, -1);
+            lua_pop(*this->_state, 1);
+            throw std::runtime_error(e);
+        }
+    }
+
+    void Interpreter::DoFile(std::string const& path) const throw(std::runtime_error)
+    {
+        if (luaL_dofile(*this->_state, path.c_str()))
+        {
+            std::string e = "Lua::Interpreter: Cannot load file: ";
+            e += lua_tostring(*this->_state, -1);
+            lua_pop(*this->_state, 1);
+            throw std::runtime_error(e);
+        }
+    }
+
     Ref const& Interpreter::Globals() const throw()
     {
         return *this->_globals;
@@ -47,28 +121,6 @@ namespace Tools { namespace Lua {
             Tools::log << "\n";
         }
         Tools::log << "------------------------------\n";
-    }
-
-    void Interpreter::DoString(std::string const& code) throw(std::runtime_error)
-    {
-        if (luaL_dostring(*this->_state, code.c_str()))
-        {
-            std::string e = "Lua::Interpreter: Cannot load string: ";
-            e += lua_tostring(*this->_state, -1);
-            lua_pop(*this->_state, 1);
-            throw std::runtime_error(e);
-        }
-    }
-
-    void Interpreter::DoFile(std::string const& path) throw(std::runtime_error)
-    {
-        if (luaL_dofile(*this->_state, path.c_str()))
-        {
-            std::string e = "Lua::Interpreter: Cannot load file: ";
-            e += lua_tostring(*this->_state, -1);
-            lua_pop(*this->_state, 1);
-            throw std::runtime_error(e);
-        }
     }
 
 }}
