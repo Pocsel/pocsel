@@ -54,12 +54,6 @@ namespace Common {
                     y = py + (dist * vy);
                     z = pz + (dist * vz);
 
-                    std::cout <<
-                        "X dist=" << dist <<
-                        ",  " << x <<
-                        "   " << y <<
-                        "   " << z << "\n";
-
                     res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x) - (sign < 0 ? 1 : 0),
                                                 (int)GR_NEGFLOOR(y),
                                                 (int)GR_NEGFLOOR(z)
@@ -86,11 +80,6 @@ namespace Common {
                     x = px + (dist * vx);
                     z = pz + (dist * vz);
 
-                    std::cout <<
-                        "Y dist=" << dist <<
-                        ",  " << x <<
-                        "   " << y <<
-                        "   " << z << "\n";
                     res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x),
                                                 (int)GR_NEGFLOOR(y) - (sign < 0 ? 1 : 0),
                                                 (int)GR_NEGFLOOR(z)
@@ -118,11 +107,6 @@ namespace Common {
                     x = px + (dist * vx);
                     y = py + (dist * vy);
 
-                    std::cout <<
-                        "Z dist=" << dist <<
-                        ",  " << x <<
-                        "   " << y <<
-                        "   " << z << "\n";
                     res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x),
                                                 (int)GR_NEGFLOOR(y),
                                                 (int)GR_NEGFLOOR(z) - (sign < 0 ? 1 : 0)

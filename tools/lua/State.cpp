@@ -153,6 +153,7 @@ namespace Tools { namespace Lua {
     MAKE_MAKEMETHOD(float, MakeNumber);
     MAKE_MAKEMETHOD(std::string, MakeString);
     MAKE_MAKEMETHOD(char const*, MakeString);
+    MAKE_MAKEMETHOD(std::function<void(CallHelper&)>, MakeFunction);
 
     template <>
         Ref State::Make<Ref>(Ref const& val) throw()

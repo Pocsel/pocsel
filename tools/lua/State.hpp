@@ -51,6 +51,7 @@ namespace Tools { namespace Lua {
     template<> Ref State::Make<float>(float const& val) throw();
     template<> Ref State::Make<std::string>(std::string const& val) throw();
     template<> Ref State::Make<char const*>(char const* const& val) throw();
+    template<> Ref State::Make<std::function<void(CallHelper&)>>(std::function<void(CallHelper&)> const& val) throw();
 
     template<> Ref State::Make<Ref>(Ref const& val) throw();
 

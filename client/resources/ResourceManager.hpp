@@ -40,6 +40,7 @@ namespace Client { namespace Resources {
         Tools::IRenderer& _renderer;
         std::map<Uint32, Uint32> _resourceToPluginId;
         std::map<Uint32, Tools::Renderers::ITexture2D*> _textures;
+        std::map<Uint32, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextures;
         std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
         std::map<Uint32, std::string> _scripts;
 
@@ -52,9 +53,13 @@ namespace Client { namespace Resources {
         ~ResourceManager();
 
         Tools::Renderers::ITexture2D& GetTexture2D(Uint32 id);
+        std::vector<Tools::Renderers::ITexture2D*> const& GetAnimatedTexture(Uint32 id);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 id);
         std::string GetScript(Uint32 id);
+        std::unique_ptr<Common::Resource> GetResource(Uint32 id);
+
         Tools::Renderers::ITexture2D& GetTexture2D(Uint32 pluginId, std::string const& filename);
+        std::vector<Tools::Renderers::ITexture2D*> const& GetAnimatedTexture(Uint32 pluginId, std::string const& filename);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& filename);
         std::string GetScript(Uint32 pluginId, std::string const& filename);
         std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& filename);
