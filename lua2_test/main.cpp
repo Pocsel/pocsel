@@ -12,13 +12,15 @@ void f(Tools::Lua::CallHelper& call)
     Tools::log << call.PopArg().CheckBoolean() << Tools::endl;
     Tools::log << call.PopArg().CheckString() << Tools::endl;
     Tools::log << "f()" << Tools::endl;
-    call.PushRet(call.GetInterpreter().MakeNumber(123.2));
-    call.PushRet(call.GetInterpreter().MakeNumber(-5.4));
+    call.PushRet(call.GetInterpreter().MakeNumber(1.5));
+    call.PushRet(call.GetInterpreter().MakeNumber(2.6));
 }
 
 int main(int, char**)
 {
     Tools::Lua::Interpreter i;
+    i.RegisterLib(Tools::Lua::Interpreter::Base);
+    i.RegisterLib(Tools::Lua::Interpreter::Math);
 
     i.DoString("test = {} test[4] = 23.34");
 
@@ -42,6 +44,20 @@ int main(int, char**)
     catch (std::exception& e)
     {
         Tools::log << "from lua: " << e.what() << Tools::endl;
+    }
+
+    {
+        Tools::Lua::CallHelper helper(i);
+        helper.PushArg(i.Make(true));
+        helper.PushArg(i.Make("Hey!!"));
+        bite(helper);
+        auto const& rets = helper.GetRetList();
+        auto it = rets.begin();
+        auto itEnd = rets.end();
+        for (; it != itEnd; ++it)
+            Tools::log << "ret: " << it->ToString() << Tools::endl;
+        i.DoString("ret1, ret2 = bite(false, \"ZOB\")");
+        Tools::log << "ret1: " << i.Globals()["ret1"].ToString() << ", ret2: " << i.Globals()["ret2"].ToString() << Tools::endl;
     }
 
     i.DoString("test = \"sjkldglkhsdfg\" g = 323.4 jdsk = {} iwer = {} jkd = function() end");
