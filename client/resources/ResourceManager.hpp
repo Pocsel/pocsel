@@ -20,6 +20,12 @@ namespace Tools {
 
 namespace Client {
     class Client;
+    namespace Game {
+        class Game;
+    }
+    namespace Resources {
+        class ITexture;
+    }
 }
 
 namespace Client { namespace Resources {
@@ -28,6 +34,7 @@ namespace Client { namespace Resources {
         : private boost::noncopyable
     {
     private:
+        Game::Game& _game;
         CacheDatabaseProxy _database;
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
@@ -37,7 +44,7 @@ namespace Client { namespace Resources {
         std::map<Uint32, std::string> _scripts;
 
     public:
-        ResourceManager(Client& client,
+        ResourceManager(Game::Game& game,
                         std::string const& host,
                         std::string const& worldIdentifier,
                         std::string const& worldName,
@@ -52,6 +59,7 @@ namespace Client { namespace Resources {
         std::string GetScript(Uint32 pluginId, std::string const& filename);
         std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& filename);
 
+        std::unique_ptr<ITexture> CreateTexture(Uint32 id);
         std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> CreateTextureAtlas(std::list<Uint32> const& textureIds);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }

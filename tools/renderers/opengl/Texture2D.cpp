@@ -64,12 +64,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         unsigned int size = this->_size.w * this->_size.h;
         auto pixmap = new Color4<Uint8>[size];
         ilCopyPixels(0, 0, 0, this->_size.w, this->_size.h, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
-        for (unsigned int i = 0; i < size; ++i)
-            if (pixmap[i].a != 255)
-            {
-                this->_hasAlpha = true;
-                break;
-            }
 
         ilBindImage(0);
         ilDeleteImage(ilID);
@@ -91,6 +85,15 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 format,
                 GL_UNSIGNED_BYTE,
                 data));
+
+        Color4<Uint8> const* pixmap = reinterpret_cast<Color4<Uint8> const*>(data);
+        unsigned int size = this->_size.w * this->_size.h;
+        for (unsigned int i = 0; i < size; ++i)
+            if (pixmap[i].a != 255)
+            {
+                this->_hasAlpha = true;
+                break;
+            }
 
         GLCHECK(glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE));
 

@@ -6,6 +6,9 @@
 #include "client/resources/CacheDatabaseProxy.hpp"
 #include "client/resources/ResourceDownloader.hpp"
 #include "client/resources/ResourceManager.hpp"
+#include "client/resources/ITexture.hpp"
+#include "client/resources/AnimatedTexture.hpp"
+#include "client/resources/Texture.hpp"
 #include "client/window/Window.hpp"
 #include "client/Settings.hpp"
 
@@ -16,13 +19,14 @@
 
 namespace Client { namespace Resources {
 
-    ResourceManager::ResourceManager(Client& client, std::string const& host, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion) :
-        _database(client.GetSettings().cacheDir, host, worldIdentifier, worldName, worldVersion),
-        _downloader(_database, client.GetNetwork()),
-        _renderer(client.GetWindow().GetRenderer())
+    ResourceManager::ResourceManager(Game::Game& game, std::string const& host, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion) :
+        _game(game),
+        _database(game.GetClient().GetSettings().cacheDir, host, worldIdentifier, worldName, worldVersion),
+        _downloader(_database, game.GetClient().GetNetwork()),
+        _renderer(game.GetClient().GetWindow().GetRenderer())
     {
         Tools::log << "Cache version " << this->_database.GetCacheVersion() << ", asking for resources...\n";
-        client.GetNetwork().SendPacket(Network::PacketCreator::GetNeededResourceIds(this->_database.GetCacheVersion()));
+        game.GetClient().GetNetwork().SendPacket(Network::PacketCreator::GetNeededResourceIds(this->_database.GetCacheVersion()));
     }
 
     ResourceManager::~ResourceManager()
@@ -121,6 +125,14 @@ namespace Client { namespace Resources {
     std::unique_ptr<Common::Resource> ResourceManager::GetResource(Uint32 pluginId, std::string const& filename)
     {
         return this->_database.GetResource(this->_database.GetResourceId(pluginId, filename));
+    }
+
+    std::unique_ptr<ITexture> ResourceManager::CreateTexture(Uint32 id)
+    {
+        auto res = this->_database.GetResource(id);
+        if (res == 0 || res->type == "image")
+            return std::unique_ptr<ITexture>(new Texture(this->GetTexture2D(id)));
+        return std::unique_ptr<ITexture>(new AnimatedTexture(this->_game, res->pluginId, this->GetScript(id)));
     }
 
     std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)

@@ -27,7 +27,7 @@ namespace Client { namespace Map {
             {
                 Uint32 textureId = cubeTypes[i].textures.ids[j];
                 if (this->_textures.find(textureId) == this->_textures.end())
-                    this->_textures[textureId] = &this->_game.GetResourceManager().GetTexture2D(textureId);
+                    this->_textures[textureId] = this->_game.GetResourceManager().CreateTexture(textureId);
             }
         }
     }
@@ -40,6 +40,12 @@ namespace Client { namespace Map {
     bool ChunkRenderer::RefreshGraphics(Chunk& chunk)
     {
         return chunk.GetMesh()->RefreshGraphics(this->_renderer);
+    }
+
+    void ChunkRenderer::Update(Uint64 totalTime)
+    {
+        for (auto texturesIt = this->_textures.begin(), texturesIte = this->_textures.end(); texturesIt != texturesIte; ++texturesIt)
+            texturesIt->second->Update(totalTime);
     }
 
     void ChunkRenderer::Render()
@@ -59,7 +65,7 @@ namespace Client { namespace Map {
             for (auto texturesIt = this->_textures.begin(), texturesIte = this->_textures.end(); texturesIt != texturesIte; ++texturesIt)
             {
                 texturesIt->second->Bind();
-                this->_shaderTexture->Set(*texturesIt->second);
+                this->_shaderTexture->Set(texturesIt->second->GetCurrentTexture());
                 this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
                     [&](Chunk& chunk)
                     {
@@ -90,7 +96,7 @@ namespace Client { namespace Map {
                 if (!texturesIt->second->HasAlpha())
                     continue;
                 texturesIt->second->Bind();
-                this->_shaderTexture->Set(*texturesIt->second);
+                this->_shaderTexture->Set(texturesIt->second->GetCurrentTexture());
                 for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
                 {
                     auto mesh = (*it).second->GetMesh();

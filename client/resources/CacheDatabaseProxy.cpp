@@ -137,7 +137,7 @@ namespace Client { namespace Resources {
         {
             auto conn = this->_connectionPool->GetConnection();
             auto& curs = conn->GetCursor();
-            curs.Execute("SELECT id FROM resource WHERE plugin_id = ?, filename = ?").Bind(pluginId).Bind(filename);
+            curs.Execute("SELECT id FROM resource WHERE plugin_id = ? AND filename = ?").Bind(pluginId).Bind(filename);
             if (curs.HasData())
             {
                 auto& row = curs.FetchOne();

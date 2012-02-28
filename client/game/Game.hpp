@@ -27,11 +27,12 @@ namespace Client { namespace Game {
         Client& _client;
         Tools::IRenderer& _renderer;
         CubeTypeManager _cubeTypeManager;
-        Resources::ResourceManager _resourceManager;
+        Resources::ResourceManager* _resourceManager;
         Map::Map* _map;
         Player _player;
         int _callbackId;
         Tools::Timer _updateTimer;
+        Tools::Timer _gameTimer;
         Tools::Lua::Interpreter _interpreter;
 
     public:
@@ -46,10 +47,10 @@ namespace Client { namespace Game {
         Tools::IRenderer& GetRenderer() { return this->_renderer; }
         Player& GetPlayer() { return this->_player; }
         CubeTypeManager& GetCubeTypeManager() { return this->_cubeTypeManager; }
-        Resources::ResourceManager& GetResourceManager() { return this->_resourceManager; }
+        Resources::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
         Map::Map& GetMap() { return *this->_map; }
         Tools::Lua::Interpreter& GetInterpreter() { return this->_interpreter; }
-        float GetLoadingProgression() const { return (this->_cubeTypeManager.GetLoadingProgression() + this->_resourceManager.GetLoadingProgression()) / 2.0f; }
+        float GetLoadingProgression() const { return (this->_cubeTypeManager.GetLoadingProgression() + this->_resourceManager->GetLoadingProgression()) / 2.0f; }
     };
 
 }}

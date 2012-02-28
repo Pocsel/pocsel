@@ -7,11 +7,11 @@
 #include "tools/lua/Interpreter.hpp"
 #include "client/game/Game.hpp"
 #include "client/resources/ResourceManager.hpp"
-#include "client/resources/Texture.hpp"
+#include "client/resources/AnimatedTexture.hpp"
 
 namespace Client { namespace Resources {
 
-    Texture::Texture(Game::Game& game, Uint32 pluginId, std::string const& description)
+    AnimatedTexture::AnimatedTexture(Game::Game& game, Uint32 pluginId, std::string const& description)
         : _currentFrame(0),
         _lastFrame(0)
     {
@@ -24,6 +24,8 @@ namespace Client { namespace Resources {
             auto animationTime = globals["animationTime"].ToNumber();
 
             auto res = game.GetResourceManager().GetResource(pluginId, globals["texture"].ToString());
+            if (res == 0)
+                throw std::runtime_error("Resource not found (plugin: " + Tools::ToString(pluginId) + " path: " + globals["texture"].ToString() + ")");
             this->_InitializeFrames(game.GetRenderer(), res->data, res->size);
 
             this->_timePerFrame = Uint64(animationTime * 0.000001 / this->_frames.size());
@@ -35,23 +37,23 @@ namespace Client { namespace Resources {
         }
     }
 
-    void Texture::Update(Uint64 totalTime)
+    void AnimatedTexture::Update(Uint64 totalTime)
     {
         if (totalTime - this->_lastFrame >= this->_timePerFrame)
             this->_currentFrame = int((this->_currentFrame + 1) % this->_frames.size());
     }
 
-    void Texture::Bind()
+    void AnimatedTexture::Bind()
     {
         this->GetCurrentTexture().Bind();
     }
 
-    void Texture::Unbind()
+    void AnimatedTexture::Unbind()
     {
         this->GetCurrentTexture().Unbind();
     }
 
-    void Texture::_InitializeFrames(Tools::IRenderer& renderer, void const* data, std::size_t dataSize)
+    void AnimatedTexture::_InitializeFrames(Tools::IRenderer& renderer, void const* data, std::size_t dataSize)
     {
         ilDisable(IL_BLIT_BLEND);
 
@@ -73,7 +75,7 @@ namespace Client { namespace Resources {
         }
 
         auto size = Tools::Vector2u((ILuint)ilGetInteger(IL_IMAGE_WIDTH), (ILuint)ilGetInteger(IL_IMAGE_HEIGHT));
-        if (size.w % size.h != 0)
+        if (size.h % size.w != 0)
         {
             ilBindImage(0);
             ilDeleteImage(id);

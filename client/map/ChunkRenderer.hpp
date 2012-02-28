@@ -4,6 +4,7 @@
 #include "common/BaseChunk.hpp"
 #include "common/CubeType.hpp"
 #include "tools/IRenderer.hpp"
+#include "client/resources/ITexture.hpp"
 
 namespace Client {
     namespace Game {
@@ -26,7 +27,7 @@ namespace Client { namespace Map {
         Tools::IRenderer& _renderer;
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
-        std::map<Uint32, Tools::Renderers::ITexture2D*> _textures;
+        std::map<Uint32, std::unique_ptr<Resources::ITexture>> _textures;
 
 
     public:
@@ -34,13 +35,14 @@ namespace Client { namespace Map {
         ~ChunkRenderer();
 
         bool RefreshGraphics(Chunk& chunk);
+        void Update(Uint64 totalTime);
         void Render();
         Tools::Renderers::ITexture2D& GetTexture(Uint32 id)
         {
             auto it = this->_textures.find(id);
             if (it == this->_textures.end())
                 throw std::runtime_error("bad id");
-            return *it->second;
+            return it->second->GetCurrentTexture();
         }
     };
 
