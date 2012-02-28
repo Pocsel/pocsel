@@ -1,6 +1,7 @@
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Iterator.hpp"
+#include "tools/Matrix4.hpp"
 
 void f(Tools::Lua::CallHelper& call)
 {
@@ -14,6 +15,37 @@ void f(Tools::Lua::CallHelper& call)
     Tools::log << "f()" << Tools::endl;
     call.PushRet(call.GetInterpreter().MakeNumber(1.5));
     call.PushRet(call.GetInterpreter().MakeNumber(2.6));
+}
+
+using namespace Tools::Lua;
+
+void Init(Interpreter& i)
+{
+    auto n = i.MakeTable();
+    auto metaTable = i.MakeTable();
+    auto prototype = i.MakeTable();
+    i.Globals().Set("Matrix4f", n);
+    prototype.Set("Rotate", i.MakeFunction([](CallHelper& helper) { }));
+    prototype.Set("Dump", i.MakeFunction(
+        [](CallHelper& helper)
+        {
+            auto self = helper.PopArg();
+            auto m = (Tools::Matrix4<float>*)self.CheckUserData();
+            for (int i = 0; i < 4; ++i)
+                Tools::log << m->m[i][0] << ", " << m->m[i][1] << ", " << m->m[i][2] << ", " << m->m[i][3] << "\n";
+        }));
+    metaTable.Set("__index", prototype);
+    metaTable.Set("__gc", i.MakeFunction([](CallHelper& helper) { auto m = (Tools::Matrix4<float>*)helper.PopArg().CheckUserData(); m->~Matrix4<float>(); }));
+
+    n.Set("New", i.MakeFunction(
+        [metaTable](CallHelper& helper)
+        {
+            Tools::Matrix4<float>* matrix;
+            auto table = helper.GetInterpreter().MakeUserData((void**)&matrix, sizeof(*matrix));
+            *matrix = Tools::Matrix4<float>::identity;
+            table.SetMetaTable(metaTable);
+            helper.PushRet(table);
+        }));
 }
 
 int main(int, char**)
@@ -82,6 +114,10 @@ int main(int, char**)
     i.DoString("a = metaTest[12]");
     i.DoString("b = metaTest[14]");
     i.DoString("c = metaTest[15]");
+
+    Init(i);
+    i.DoString("m = Matrix4f.New()");
+    i.DoString("m:Dump()");
 
     i.DumpStack();
 
