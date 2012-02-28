@@ -4,8 +4,8 @@
 
 namespace Server { namespace Game { namespace Entities {
 
-    EntityManager::EntityManager() :
-        _messageQueue(new Tools::SimpleMessageQueue(1))
+    EntityManager::EntityManager(Tools::SimpleMessageQueue& messageQueue) :
+        _messageQueue(messageQueue)
     {
         Tools::debug << "EntityManager::EntityManager()\n";
     }
@@ -13,19 +13,16 @@ namespace Server { namespace Game { namespace Entities {
     EntityManager::~EntityManager()
     {
         Tools::debug << "EntityManager::~EntityManager()\n";
-        Tools::Delete(this->_messageQueue);
     }
 
     void EntityManager::Start()
     {
         Tools::debug << "EntityManager::Start()\n";
-        this->_messageQueue->Start();
     }
 
     void EntityManager::Stop()
     {
         Tools::debug << "EntityManager::Stop()\n";
-        this->_messageQueue->Stop();
     }
 
 }}}
