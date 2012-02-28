@@ -137,7 +137,7 @@ namespace Client { namespace Map {
         {
             if (it->second->IsExecuted() || it->second->IsCancelled())
             {
-                if (it->second->GetResult())
+                if (it->second->GetResult() && !it->second->IsCancelled())
                     this->_chunkRenderer.RefreshGraphics(*it->first->chunk);
                 else if (!it->second->IsCancelled())
                     this->_AddNodeToRefresh(*it->first);
