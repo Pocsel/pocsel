@@ -2,6 +2,7 @@
 #define __CLIENT_RESOURCES_TEXTURE_HPP__
 
 #include "tools/IRenderer.hpp"
+#include "client/resources/ITexture.hpp"
 
 namespace Client { namespace Game {
     class Game;
@@ -9,28 +10,22 @@ namespace Client { namespace Game {
 
 namespace Client { namespace Resources {
 
-    class Texture
+    class Texture : public ITexture
     {
     private:
-        std::vector<std::unique_ptr<Tools::Renderers::ITexture2D>> _frames;
-        Uint64 _timePerFrame;
-        int _currentFrame;
-        Uint64 _lastFrame;
-        bool _animated;
+        Tools::Renderers::ITexture2D* _texture;
 
     public:
-        Texture(Game::Game& game, Uint32 pluginId, std::string const& description);
-        ~Texture();
+        Texture(Tools::Renderers::ITexture2D& texture) : _texture(&texture) {}
+        virtual ~Texture() {}
 
-        void Update(Uint64 totalTime); // totalTime in microsecond
-        void Bind();
-        void Unbind();
+        virtual void Update(Uint64 totalTime) {} // totalTime in microsecond
+        virtual void Bind() { this->_texture->Bind(); }
+        virtual void Unbind() { this->_texture->Unbind(); }
 
-        Tools::Renderers::ITexture2D& GetCurrentTexture() { return *(this->_frames[this->_currentFrame]); }
-        Tools::Renderers::ITexture2D const& GetCurrentTexture() const { return *(this->_frames[this->_currentFrame]); }
-        bool HasAlpha() const { return this->GetCurrentTexture().HasAlpha(); }
-    private:
-        void _InitializeFrames(Tools::IRenderer& renderer, void const* data, std::size_t dataSize);
+        virtual Tools::Renderers::ITexture2D& GetCurrentTexture() { return *this->_texture; }
+        virtual Tools::Renderers::ITexture2D const& GetCurrentTexture() const { return *this->_texture; }
+        virtual bool HasAlpha() const { return this->_texture->HasAlpha(); }
     };
 
 }}

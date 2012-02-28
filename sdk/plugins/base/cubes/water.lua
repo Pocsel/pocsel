@@ -1,10 +1,10 @@
 textures = {
-    top = "cubes/water/texture.png",
-    bottom = "cubes/water/texture.png",
-    left = "cubes/water/texture.png",
-    right = "cubes/water/texture.png",
-    front = "cubes/water/texture.png",
-    back = "cubes/water/texture.png",
+    top = "cubes/water/texture.lua",
+    bottom = "cubes/water/texture.lua",
+    left = "cubes/water/texture.lua",
+    right = "cubes/water/texture.lua",
+    front = "cubes/water/texture.lua",
+    back = "cubes/water/texture.lua",
 }
 
 effect = "Chunk"

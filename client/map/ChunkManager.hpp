@@ -54,7 +54,7 @@ namespace Client { namespace Map {
 
         void AddChunk(std::unique_ptr<Chunk>&& chunk);
         void UpdateLoading();
-        void Update(Common::Position const& playerPosition);
+        void Update(Uint64 totalTime, Common::Position const& playerPosition);
         void Render();
 
         template<class TFunc>

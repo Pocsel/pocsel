@@ -129,7 +129,7 @@ namespace Client { namespace Map {
             this->_loadingProgression = 1.0f;
     }
 
-    void ChunkManager::Update(Common::Position const& playerPosition)
+    void ChunkManager::Update(Uint64 totalTime, Common::Position const& playerPosition)
     {
         Tools::Timer timer;
         std::list<ChunkNode*> toDelete;
@@ -147,6 +147,7 @@ namespace Client { namespace Map {
         std::for_each(toDelete.begin(), toDelete.end(), [this](ChunkNode* node) { this->_refreshTasks.erase(node); });
         this->_DownloadNewChunks(playerPosition);
         this->_RemoveOldChunks(playerPosition);
+        this->_chunkRenderer.Update(totalTime);
         this->_oldPosition = playerPosition;
     }
 
