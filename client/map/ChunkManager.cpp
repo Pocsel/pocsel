@@ -76,17 +76,13 @@ namespace Client { namespace Map {
         { // New chunk
             chunk->SetMesh(std::unique_ptr<ChunkMesh>(new ChunkMesh(*chunk)));
 
-
-
-
-
-
-
-
+            int viewDistance = this->_game.GetClient().GetSettings().chunkViewDistance * 2;
+            int nbChunks = viewDistance * viewDistance * viewDistance;
             this->_loadingProgression = std::min(1.0f,
                 this->_loadingProgression +
-                (1.0f / (float)(this->_game.GetClient().GetSettings().chunkViewDistance))
+                (0.5f / (float)(nbChunks))
                 );
+
             this->_downloadingChunks.erase(chunk->id);
             node = new ChunkNode(std::move(chunk));
             this->_chunks.insert(std::unordered_map<Common::BaseChunk::IdType, ChunkNode*>::value_type(node->chunk->id, node));
@@ -115,7 +111,13 @@ namespace Client { namespace Map {
                 if (it->second->GetResult())
                 {
                     this->_chunkRenderer.RefreshGraphics(*it->first->chunk);
-                    this->_loadingProgression = std::min(1.0f, this->_loadingProgression + 0.001f);
+
+                    int viewDistance = this->_game.GetClient().GetSettings().chunkViewDistance * 2 - 2;
+                    int nbChunks = viewDistance * viewDistance * viewDistance;
+                    this->_loadingProgression = std::min(1.0f,
+                        this->_loadingProgression +
+                        (0.5f / (float)(nbChunks))
+                        );
                 }
                 else if (!it->second->IsCancelled())
                     this->_AddNodeToRefresh(*it->first);
@@ -123,7 +125,7 @@ namespace Client { namespace Map {
             }
         }
         std::for_each(toDelete.begin(), toDelete.end(), [this](ChunkNode* node) { this->_refreshTasks.erase(node); });
-        if (this->_refreshTasks.empty() && this->_loadingProgression > 0.6f)
+        if (this->_loadingProgression > 0.99f)
             this->_loadingProgression = 1.0f;
     }
 
