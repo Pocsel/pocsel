@@ -17,7 +17,7 @@ namespace Client { namespace Game {
         _map(0)
     {
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion);
-        this->_renderer.SetClearColor(Tools::Color4f(0.0f, 0.0f, 0.0f, 1)); // XXX
+        this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
         this->_player = new Player(*this);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](Tools::Vector2u const& size)

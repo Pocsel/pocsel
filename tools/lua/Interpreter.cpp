@@ -21,7 +21,7 @@ namespace Tools { namespace Lua {
 
     std::string Interpreter::Serialize(Ref const& ref) const throw(std::runtime_error)
     {
-        return "return " + this->_Serialize(ref, 1) + "\n";
+        return "local ret; " + this->_Serialize(ref, 1) + "\n";
     }
 
     std::string Interpreter::_Serialize(Ref const& ref, unsigned int level) const throw(std::runtime_error)
