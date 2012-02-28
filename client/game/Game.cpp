@@ -6,6 +6,7 @@
 #include "client/game/Game.hpp"
 #include "client/map/Map.hpp"
 #include "client/window/Window.hpp"
+#include "client/game/Player.hpp"
 
 namespace Client { namespace Game {
 
@@ -13,11 +14,11 @@ namespace Client { namespace Game {
         _client(client),
         _renderer(client.GetWindow().GetRenderer()),
         _cubeTypeManager(client, nbCubeTypes),
-        _resourceManager(client, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion),
-        _map(0),
-        _player(*this)
+        _map(0)
     {
-        this->_renderer.SetClearColor(Tools::Color4f(1.0f, 0.5f, 0.9f, 1)); // XXX
+        this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion);
+        this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
+        this->_player = new Player(*this);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](Tools::Vector2u const& size)
             {
@@ -30,11 +31,13 @@ namespace Client { namespace Game {
     {
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
+        Tools::Delete(this->_player);
+        Tools::Delete(this->_resourceManager);
     }
 
     void Game::TeleportPlayer(std::string const& map, Common::Position const& position)
     {
-        this->_player.SetPosition(position);
+        this->_player->SetPosition(position);
         if (this->_map != 0 && this->_map->GetName() != map)
         {
             delete this->_map;
@@ -43,15 +46,15 @@ namespace Client { namespace Game {
         if (this->_map == 0)
         {
             this->_map = new Map::Map(*this, map);
-            this->_map->GetChunkManager().Update(this->_player.GetPosition());
+            this->_map->GetChunkManager().Update(0, this->_player->GetPosition());
             this->_client.LoadChunks();
         }
     }
 
     void Game::Update()
     {
-        this->_player.UpdateMovements(this->_updateTimer.GetElapsedTime());
-        this->_map->GetChunkManager().Update(this->_player.GetPosition());
+        this->_map->GetChunkManager().Update(this->_gameTimer.GetPreciseElapsedTime(), this->_player->GetPosition());
+        this->_player->UpdateMovements(this->_updateTimer.GetElapsedTime());
         this->_updateTimer.Reset();
     }
 
@@ -62,6 +65,7 @@ namespace Client { namespace Game {
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
         this->_renderer.BeginDraw();
         this->_map->GetChunkManager().Render();
+        this->_player->Render();
         this->_renderer.EndDraw();
     }
 

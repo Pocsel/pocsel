@@ -11,10 +11,14 @@
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
-    ShaderParameterCg::ShaderParameterCg(ShaderProgramCg& program, std::string const& identifier) :
-        _program(program), _effect(program.GetEffect()), _identifier(identifier)
+    ShaderParameterCg::ShaderParameterCg(ShaderProgramCg& program, std::string const& identifier)
     {
-        this->_param = cgGetNamedEffectParameter(this->_effect, identifier.c_str());
+        this->_param = cgGetNamedEffectParameter(program.GetEffect(), identifier.c_str());
+    }
+
+    ShaderParameterCg::ShaderParameterCg(ShaderProgramCg& program, CGparameter parameter) :
+        _param(parameter)
+    {
     }
 
     ShaderParameterCg::~ShaderParameterCg()

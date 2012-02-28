@@ -45,3 +45,5 @@ bind("Escape", "menu")
 bind("W", "toggle-wireframe")
 
 bind("T", "dump-octree")
+
+bind("Q", "togglesprint")

@@ -1,5 +1,7 @@
 #include "tools/precompiled.hpp"
 
+#include <IL/il.h>
+
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/IndexBuffer.hpp"
 #include "tools/renderers/opengl/ShaderProgramCg.hpp"
@@ -31,6 +33,27 @@ namespace Tools { namespace Renderers {
                 + ToString(error) + "): "
                 + cgGetErrorString(cgGetError()));
         }
+
+        void InitDevIL()
+        {
+            static bool initialized = false;
+            if (!initialized)
+            {
+                ilInit();
+
+                ilEnable(IL_ORIGIN_SET);
+                ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+
+                ilEnable(IL_TYPE_SET);
+                ilTypeFunc(IL_UNSIGNED_BYTE);
+
+                ilEnable(IL_FORMAT_SET);
+                ilFormatFunc(IL_RGBA);
+                ilEnable(IL_ALPHA);
+
+                initialized = true;
+            }
+        }
     }
 
     void GLRenderer::Initialise()
@@ -61,6 +84,7 @@ namespace Tools { namespace Renderers {
             cgGLRegisterStates(this->_cgContext);
             cgGLSetManageTextureParameters(this->_cgContext, CG_TRUE);
         }
+        InitDevIL();
     }
 
     void GLRenderer::Shutdown()

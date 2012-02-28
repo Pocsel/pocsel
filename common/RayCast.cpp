@@ -4,6 +4,14 @@
 #include "common/CubePosition.hpp"
 
 #define GR_ABS(a) ((a) < 0 ? -(a) : (a))
+#define GR_NEGFLOOR(a) ((a) >= 0 ? \
+                            (int)(a) \
+                        : \
+                            (double)(int)(a) == a ? \
+                                (int)(a) \
+                            : \
+                                (int)((a) - 1) \
+                        )
 
 namespace Common {
 
@@ -30,7 +38,7 @@ namespace Common {
 
             if (vx != 0)
             {
-                if (cam.direction.x < 0)
+                if (vx < 0)
                 {
                     x = (int)px;
                     sign = -1;
@@ -46,9 +54,9 @@ namespace Common {
                     y = py + (dist * vy);
                     z = pz + (dist * vz);
 
-                    res[dist] = Tools::Vector3i((int)x,// - (sign ? 1 : 0),
-                                                (int)y,
-                                                (int)z
+                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x) - (sign < 0 ? 1 : 0),
+                                                (int)GR_NEGFLOOR(y),
+                                                (int)GR_NEGFLOOR(z)
                                                );
                     x += sign;
                 }
@@ -56,7 +64,7 @@ namespace Common {
 
             if (vy != 0)
             {
-                if (cam.direction.y < 0)
+                if (vy < 0)
                 {
                     y = (int)py;
                     sign = -1;
@@ -72,9 +80,9 @@ namespace Common {
                     x = px + (dist * vx);
                     z = pz + (dist * vz);
 
-                    res[dist] = Tools::Vector3i((int)x,
-                                                (int)y,// - (sign ? 1 : 0),
-                                                (int)z
+                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x),
+                                                (int)GR_NEGFLOOR(y) - (sign < 0 ? 1 : 0),
+                                                (int)GR_NEGFLOOR(z)
                                                );
 
                     y += sign;
@@ -83,7 +91,7 @@ namespace Common {
 
             if (vz != 0)
             {
-                if (cam.direction.z < 0)
+                if (vz < 0)
                 {
                     z = (int)pz;
                     sign = -1;
@@ -99,9 +107,9 @@ namespace Common {
                     x = px + (dist * vx);
                     y = py + (dist * vy);
 
-                    res[dist] = Tools::Vector3i((int)x,
-                                                (int)y,
-                                                (int)z// - (sign ? 1 : 0)
+                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x),
+                                                (int)GR_NEGFLOOR(y),
+                                                (int)GR_NEGFLOOR(z) - (sign < 0 ? 1 : 0)
                                                );
 
                     z += sign;

@@ -24,6 +24,8 @@ namespace Tools {
         Plane _planes[6];
         Matrix4<double> _matrix;
         Vector3d _corners[8];
+        Vector3d _center;
+        double _radiusSquared;
 
     public:
         Frustum(Matrix4<double> const& view);

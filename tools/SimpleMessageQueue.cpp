@@ -15,13 +15,33 @@ namespace Tools {
 
     void SimpleMessageQueue::SetLoopTimer(Uint32 ms, TimerLoopMessage& message)
     {
-        Message addSmqTimerMessage(std::bind(&SimpleMessageQueue::_SetLoopTimer, this, ms, message));
-        this->PushMessage(addSmqTimerMessage);
+        Tools::debug << "Adding new timer: " << ms << "ms.\n";
+
+        this->_timers.push_back(new SmqTimer(
+                    this->_ioService, ms, message
+                    ));
+
+        std::function<void(boost::system::error_code const& e)>
+            runLoop(std::bind(&SimpleMessageQueue::_ExecLoopTimer, this, (Uint32)this->_timers.size() - 1, std::placeholders::_1));
+        this->_timers.back()->timer.async_wait(runLoop);
     }
 
     void SimpleMessageQueue::PushMessage(Message& message)
     {
         this->_ioService.dispatch(message);
+    }
+
+    void SimpleMessageQueue::PushTimedMessage(Uint32 ms, Message& message)
+    {
+        boost::asio::deadline_timer *t = new boost::asio::deadline_timer(this->_ioService, boost::posix_time::milliseconds(ms));
+
+        std::function<void(boost::system::error_code const& e)>
+            function(std::bind(&SimpleMessageQueue::_ExecTimedMessage,
+                               this,
+                               message,
+                               std::shared_ptr<boost::asio::deadline_timer>(t),
+                               std::placeholders::_1));
+        t->async_wait(function);
     }
 
     void SimpleMessageQueue::Start()
@@ -55,21 +75,15 @@ namespace Tools {
         Tools::debug << "SimpleMessageQueue stopped (" << this << ").\n";
     }
 
-    void SimpleMessageQueue::_SetLoopTimer(Uint32 ms, TimerLoopMessage& message)
-    {
-        Tools::debug << "Adding new timer: " << ms << "ms.\n";
-
-        this->_timers.push_back(new SmqTimer(
-                    this->_ioService, ms, message
-                    ));
-
-        std::function<void(boost::system::error_code const& e)>
-            runLoop(std::bind(&SimpleMessageQueue::_ExecLoopTimer, this, this->_timers.size() - 1, std::placeholders::_1));
-        this->_timers.back()->timer.async_wait(runLoop);
-    }
-
     void SimpleMessageQueue::_ExecLoopTimer(Uint32 index, boost::system::error_code const& error)
     {
+        if (error == boost::asio::error::operation_aborted)
+        {
+            Tools::debug << "Timer loop aborted;";
+            Tools::Delete(this->_timers[index]);
+            this->_timers[index] = 0;
+            return;
+        }
         SmqTimer& t = *this->_timers[index];
 
         Uint32 elapsedTime = t.chrono.GetElapsedTime();
@@ -87,6 +101,19 @@ namespace Tools {
                 boost::posix_time::milliseconds(waitTime)
                 );
         t.timer.async_wait(runLoop);
+    }
+
+    void SimpleMessageQueue::_ExecTimedMessage(Message& message,
+                                               std::shared_ptr<boost::asio::deadline_timer>,
+                                               boost::system::error_code const& error)
+    {
+        if (error == boost::asio::error::operation_aborted)
+        {
+            Tools::debug << "Timer aborted;";
+            return;
+        }
+
+        message();
     }
 
     void SimpleMessageQueue::_Run()

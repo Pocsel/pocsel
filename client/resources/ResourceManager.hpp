@@ -4,6 +4,9 @@
 #include "client/resources/CacheDatabaseProxy.hpp"
 #include "client/resources/ResourceDownloader.hpp"
 
+namespace Common {
+    class Resource;
+}
 namespace Tools {
     class IRenderer;
     namespace Renderers {
@@ -17,6 +20,12 @@ namespace Tools {
 
 namespace Client {
     class Client;
+    namespace Game {
+        class Game;
+    }
+    namespace Resources {
+        class ITexture;
+    }
 }
 
 namespace Client { namespace Resources {
@@ -25,16 +34,18 @@ namespace Client { namespace Resources {
         : private boost::noncopyable
     {
     private:
+        Game::Game& _game;
         CacheDatabaseProxy _database;
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
         std::map<Uint32, Uint32> _resourceToPluginId;
         std::map<Uint32, Tools::Renderers::ITexture2D*> _textures;
+        std::map<Uint32, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextures;
         std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
         std::map<Uint32, std::string> _scripts;
 
     public:
-        ResourceManager(Client& client,
+        ResourceManager(Game::Game& game,
                         std::string const& host,
                         std::string const& worldIdentifier,
                         std::string const& worldName,
@@ -42,12 +53,18 @@ namespace Client { namespace Resources {
         ~ResourceManager();
 
         Tools::Renderers::ITexture2D& GetTexture2D(Uint32 id);
+        std::vector<Tools::Renderers::ITexture2D*> const& GetAnimatedTexture(Uint32 id);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 id);
         std::string GetScript(Uint32 id);
+        std::unique_ptr<Common::Resource> GetResource(Uint32 id);
+
         Tools::Renderers::ITexture2D& GetTexture2D(Uint32 pluginId, std::string const& filename);
+        std::vector<Tools::Renderers::ITexture2D*> const& GetAnimatedTexture(Uint32 pluginId, std::string const& filename);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& filename);
         std::string GetScript(Uint32 pluginId, std::string const& filename);
+        std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& filename);
 
+        std::unique_ptr<ITexture> CreateTexture(Uint32 id);
         std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> CreateTextureAtlas(std::list<Uint32> const& textureIds);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }

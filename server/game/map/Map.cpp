@@ -28,7 +28,7 @@ namespace Server { namespace Game { namespace Map {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
         this->_engine = new Engine::Engine(*this->_messageQueue);
-        this->_entityManager = new Entities::EntityManager();
+        this->_entityManager = new Entities::EntityManager(*this->_messageQueue);
         this->_chunkManager = new ChunkManager();
     }
 
@@ -51,7 +51,7 @@ namespace Server { namespace Game { namespace Map {
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
-        this->_messageQueue->SetLoopTimer(100, m);
+        this->_messageQueue->SetLoopTimer(10, m);
     }
 
     void Map::Stop()
@@ -85,8 +85,8 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response)
     {
-        ChunkCallback ccb(std::bind(&Map::_SendChunkPacket, this, std::placeholders::_1, response));
-        this->_GetChunk(id, ccb);
+        ChunkCallback ccb(std::bind(&Map::_SendChunkPacket, this, std::placeholders::_1, std::move(response)));
+        this->GetChunk(id, ccb);
     }
 
     void Map::DestroyCube(Common::CubePosition const& pos)
@@ -131,7 +131,8 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_SendChunkPacket(Chunk* chunk, ChunkPacketCallback& response)
     {
-        response(Network::PacketCreator::Chunk(*chunk));
+        auto toto = Network::PacketCreator::Chunk(*chunk);
+        response(toto);
     }
 
     void Map::_HandleNewChunk(Chunk* chunk)
@@ -228,7 +229,8 @@ namespace Server { namespace Game { namespace Map {
 
             for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
             {
-                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, Network::PacketCreator::Chunk(*chunk));
+                auto toto = Network::PacketCreator::Chunk(*chunk);
+                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, toto);
             }
         }
     }

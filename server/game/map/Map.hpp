@@ -6,7 +6,7 @@
 #include "server/Chunk.hpp"
 
 namespace Common {
-    struct Packet;
+    class Packet;
     struct Position;
     struct CubePosition;
 }
@@ -38,7 +38,7 @@ namespace Server { namespace Game { namespace Map {
     {
     public:
         typedef std::function<void(Chunk*)> ChunkCallback;
-        typedef std::function<void(std::unique_ptr<Common::Packet>)> ChunkPacketCallback;
+        typedef std::function<void(std::unique_ptr<Common::Packet>&)> ChunkPacketCallback;
         typedef std::function<void(Common::Position const& pos)> SpawnCallback;
 
     private:
