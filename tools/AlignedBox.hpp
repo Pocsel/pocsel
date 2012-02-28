@@ -23,6 +23,9 @@ namespace Tools {
 
         Vector3d const& GetMin() const { return this->_min; }
         Vector3d const& GetMax() const { return this->_max; }
+        Vector3d GetCenter() const { return (this->_max - this->_min) * 0.5 + this->_min; }
+        double GetRadius() const { return Vector3d::GetDistance(this->GetCenter(), this->_min); }
+        double GetRadiusSquared() const { return Vector3d::GetDistanceSquared(this->GetCenter(), this->_min); }
         void SetMin(Vector3d const& min) { this->_min = min; this->_Update(); }
         void SetMax(Vector3d const& max) { this->_max = max; this->_Update(); }
 
@@ -47,7 +50,6 @@ namespace Tools {
             this->_max.z = std::max(min.z, this->_max.z);
         }
     };
-
 }
 
 #endif
