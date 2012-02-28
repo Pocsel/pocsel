@@ -46,7 +46,7 @@ namespace Client { namespace Map {
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
         auto pos = camera.position.GetVector<double>();
-        auto viewProj = 
+        auto viewProj =
             Tools::Matrix4<double>::CreateLookAt(pos, Tools::Vector3d(pos + Tools::Vector3d(camera.direction)), Tools::Vector3d(0, 1, 0))
             * Tools::Matrix4<double>(camera.projection);
         Tools::Frustum frustum(viewProj);

@@ -65,7 +65,7 @@ namespace Server { namespace ClientManagement {
         void HandleClientError(Uint32 clientId);
         void HandlePacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet);
         void HandleUdpPacket(std::unique_ptr<Common::Packet>& packet);
-        void SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet);
+        void SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet);
         void ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position);
 
         // A appeler du thread clientmanagement

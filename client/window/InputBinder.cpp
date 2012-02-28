@@ -121,8 +121,8 @@ namespace Client { namespace Window {
 
     void InputBinder::_BindFromLua(Tools::Lua::CallHelper& callHelper)
     {
-        std::string action = callHelper.PopArg().CheckString();
         std::string input = callHelper.PopArg().CheckString();
+        std::string action = callHelper.PopArg().CheckString();
         this->Bind(input, action);
     }
 

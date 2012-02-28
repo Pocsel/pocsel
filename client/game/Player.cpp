@@ -78,12 +78,12 @@ namespace Client { namespace Game {
 
     void Player::MoveForward()
     {
-        this->_Move(this->_camera.direction * (this->_elapsedTime / 100.0f));
+        this->_Move(this->_camera.direction * (this->_elapsedTime / 500.0f));
     }
 
     void Player::MoveBackward()
     {
-        this->_Move(-this->_camera.direction * (this->_elapsedTime / 100.0f));
+        this->_Move(-this->_camera.direction * (this->_elapsedTime / 500.0f));
     }
 
     void Player::StrafeLeft()
@@ -93,7 +93,7 @@ namespace Client { namespace Game {
             dir.y * 0 - dir.z * -1,
             dir.z * 0 - dir.x * 0,
             dir.x * -1 - dir.y * 0
-        ) * (this->_elapsedTime / 100.0f));
+        ) * (this->_elapsedTime / 500.0f));
     }
 
     void Player::StrafeRight()
@@ -103,7 +103,7 @@ namespace Client { namespace Game {
             dir.y * 0 - dir.z * 1,
             dir.z * 0 - dir.x * 0,
             dir.x * 1 - dir.y * 0
-        ) * (this->_elapsedTime / 100.0f));
+        ) * (this->_elapsedTime / 500.0f));
     }
 
     void Player::Jump()
@@ -157,7 +157,6 @@ namespace Client { namespace Game {
 
     void Player::_Move(Tools::Vector3f moveVector)
     {
-        moveVector.Normalize();
         Common::Position p = this->_camera.position;
         p += moveVector;
         this->SetPosition(p);

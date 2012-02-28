@@ -10,16 +10,13 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     class ShaderParameterCg : public IShaderParameter
     {
     private:
-        ShaderProgramCg& _program;
-        CGeffect _effect;
         CGparameter _param;
-        std::string _identifier;
 
     public:
         ShaderParameterCg(ShaderProgramCg& program, std::string const& identifier);
+        ShaderParameterCg(ShaderProgramCg& program, CGparameter parameter);
         virtual ~ShaderParameterCg();
 
-        virtual std::string const& GetIdentifier() const { return this->_identifier; }
         virtual void Set(bool value);
         virtual void Set(int value);
         virtual void Set(float value);

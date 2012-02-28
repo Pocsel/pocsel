@@ -27,7 +27,14 @@ namespace Client { namespace Resources {
 
     ResourceManager::~ResourceManager()
     {
+        Tools::Renderers::ITexture2D* errTex = 0;
+        if (this->_textures.find(0) != this->_textures.end())
+            errTex = this->_textures[0];
+        delete errTex;
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
+            if (it->second != errTex)
+                Tools::Delete(it->second);
+        for (auto it = this->_shaders.begin(), ite = this->_shaders.end(); it != ite; ++it)
             Tools::Delete(it->second);
     }
 
@@ -39,6 +46,7 @@ namespace Client { namespace Resources {
             auto res = this->_database.GetResource(id);
             if (res != 0)
             {
+                this->_resourceToPluginId[id] = res->pluginId;
                 Tools::Renderers::ITexture2D* t = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Png, res->size, res->data).release();
                 this->_textures[id] = t;
                 return *t;
@@ -53,6 +61,66 @@ namespace Client { namespace Resources {
         }
         else
             return *it->second;
+    }
+
+    Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 id)
+    {
+        auto it = this->_shaders.find(id);
+        if (it == this->_shaders.end())
+        {
+            auto res = this->_database.GetResource(id);
+            if (res != 0)
+            {
+                this->_resourceToPluginId[id] = res->pluginId;
+                Tools::Renderers::IShaderProgram* s = this->_renderer.CreateProgram(std::string((char const*)res->data, res->size)).release();
+                this->_shaders[id] = s;
+                return *s;
+            }
+            else
+                throw std::runtime_error("Bad id (remove your cache)");
+        }
+        else
+            return *it->second;
+    }
+
+    std::string ResourceManager::GetScript(Uint32 id)
+    {
+        auto it = this->_scripts.find(id);
+        if (it == this->_scripts.end())
+        {
+            auto res = this->_database.GetResource(id);
+            if (res != 0)
+            {
+                this->_resourceToPluginId[id] = res->pluginId;
+                std::string str((char const*)res->data, res->size);
+                this->_scripts[id] = str;
+                return str;
+            }
+            else
+                throw std::runtime_error("Bad id (remove your cache)");
+        }
+        else
+            return it->second;
+    }
+
+    Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 pluginId, std::string const& filename)
+    {
+        return this->GetTexture2D(this->_database.GetResourceId(pluginId, filename));
+    }
+
+    Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 pluginId, std::string const& filename)
+    {
+        return this->GetShader(this->_database.GetResourceId(pluginId, filename));
+    }
+
+    std::string ResourceManager::GetScript(Uint32 pluginId, std::string const& filename)
+    {
+        return this->GetScript(this->_database.GetResourceId(pluginId, filename));
+    }
+
+    std::unique_ptr<Common::Resource> ResourceManager::GetResource(Uint32 pluginId, std::string const& filename)
+    {
+        return this->_database.GetResource(this->_database.GetResourceId(pluginId, filename));
     }
 
     std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)

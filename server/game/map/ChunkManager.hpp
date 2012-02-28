@@ -19,6 +19,7 @@ namespace Server { namespace Game { namespace Map {
         ~ChunkManager();
 
         Chunk* GetChunk(Chunk::IdType id);
+        std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);
 
         void AddChunk(std::unique_ptr<Chunk> chunk);
 

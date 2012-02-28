@@ -24,6 +24,8 @@ namespace Tools { namespace Database {
     {
     public:
         virtual int GetInt() = 0;
+        virtual Int32 GetInt32() = 0;
+        virtual Uint32 GetUint32() = 0;
         virtual Int64 GetInt64() = 0;
         virtual Uint64 GetUint64() = 0;
         virtual float GetFloat() = 0;

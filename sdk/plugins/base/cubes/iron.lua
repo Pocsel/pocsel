@@ -7,5 +7,6 @@ textures = {
     back = "cubes/iron/back.png",
 }
 
+effect = "effects/chunk.cgfx"
 solid = true
 transparent = false

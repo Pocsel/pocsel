@@ -3,6 +3,7 @@
 
 #include "common/Position.hpp"
 #include "tools/Timer.hpp"
+#include "tools/lua/Interpreter.hpp"
 #include "client/game/CubeTypeManager.hpp"
 #include "client/game/Player.hpp"
 #include "client/resources/ResourceManager.hpp"
@@ -31,6 +32,7 @@ namespace Client { namespace Game {
         Player _player;
         int _callbackId;
         Tools::Timer _updateTimer;
+        Tools::Lua::Interpreter _interpreter;
 
     public:
         Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes);
@@ -41,10 +43,12 @@ namespace Client { namespace Game {
         void Render();
 
         Client& GetClient() { return this->_client; }
+        Tools::IRenderer& GetRenderer() { return this->_renderer; }
         Player& GetPlayer() { return this->_player; }
         CubeTypeManager& GetCubeTypeManager() { return this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return this->_resourceManager; }
         Map::Map& GetMap() { return *this->_map; }
+        Tools::Lua::Interpreter& GetInterpreter() { return this->_interpreter; }
         float GetLoadingProgression() const { return (this->_cubeTypeManager.GetLoadingProgression() + this->_resourceManager.GetLoadingProgression()) / 2.0f; }
     };
 

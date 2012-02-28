@@ -1,3 +1,5 @@
+#include "tools/precompiled.hpp"
+
 #include "tools/database/sqlite/Value.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {
@@ -10,6 +12,22 @@ namespace Tools { namespace Database { namespace Sqlite {
     int Value::GetInt()
     {
         int res = ::sqlite3_column_int(this->_stmt, this->_index);
+        if (res == 0 && ::sqlite3_errcode(this->_db) == SQLITE_NOMEM)
+            throw std::runtime_error("Out of memory");
+        return res;
+    }
+
+    Int32 Value::GetInt32()
+    {
+        Int32 res = ::sqlite3_column_int(this->_stmt, this->_index);
+        if (res == 0 && ::sqlite3_errcode(this->_db) == SQLITE_NOMEM)
+            throw std::runtime_error("Out of memory");
+        return res;
+    }
+
+    Uint32 Value::GetUint32()
+    {
+        Uint32 res = ::sqlite3_column_int(this->_stmt, this->_index);
         if (res == 0 && ::sqlite3_errcode(this->_db) == SQLITE_NOMEM)
             throw std::runtime_error("Out of memory");
         return res;

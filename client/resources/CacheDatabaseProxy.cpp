@@ -124,8 +124,31 @@ namespace Client { namespace Resources {
             else
                 return 0;
         }
-        catch (std::exception&)
+        catch (std::exception& e)
         {
+            Tools::error << "Cache error : " << e.what() << "\n";
+            return 0;
+        }
+    }
+
+    Uint32 CacheDatabaseProxy::GetResourceId(Uint32 pluginId, std::string const& filename)
+    {
+        try
+        {
+            auto conn = this->_connectionPool->GetConnection();
+            auto& curs = conn->GetCursor();
+            curs.Execute("SELECT id FROM resource WHERE plugin_id = ?, filename = ?").Bind(pluginId).Bind(filename);
+            if (curs.HasData())
+            {
+                auto& row = curs.FetchOne();
+                return row[0].GetInt();
+            }
+            else
+                return 0;
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "Cache error : " << e.what() << "\n";
             return 0;
         }
     }

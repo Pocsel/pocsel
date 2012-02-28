@@ -48,6 +48,10 @@ namespace Server { namespace Game { namespace Map {
         this->_gen->Start();
         this->_entityManager->Start();
         this->_messageQueue->Start();
+
+        Tools::SimpleMessageQueue::TimerLoopMessage
+            m(std::bind(&Map::_Tick, this, std::placeholders::_1));
+        this->_messageQueue->SetLoopTimer(256, m);
     }
 
     void Map::Stop()
@@ -81,9 +85,14 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response)
     {
-        Tools::SimpleMessageQueue::Message
-            m(std::bind(&Map::_GetChunkPacket, this, id, response));
-        this->_messageQueue->PushMessage(m);
+        ChunkCallback ccb(std::bind(&Map::_SendChunkPacket, this, std::placeholders::_1, std::move(response)));
+        this->GetChunk(id, ccb);
+    }
+
+    void Map::DestroyCube(Common::CubePosition const& pos)
+    {
+        ChunkCallback cb(std::bind(&Map::_DestroyCube, this, std::placeholders::_1, pos.chunk));
+        this->GetChunk(Chunk::CoordsToId(pos.world), cb);
     }
 
     void Map::AddPlayer(std::shared_ptr<Player> const& p)
@@ -97,13 +106,6 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_RemovePlayer, this, id));
-        this->_messageQueue->PushMessage(m);
-    }
-
-    void Map::DestroyCube(Common::CubePosition const& pos)
-    {
-        Tools::SimpleMessageQueue::Message
-            m(std::bind(&Map::_DestroyCube, this, pos));
         this->_messageQueue->PushMessage(m);
     }
 
@@ -123,27 +125,14 @@ namespace Server { namespace Game { namespace Map {
         }
         else
         {
-            response(*chunk);
+            response(chunk);
         }
     }
 
-    void Map::_GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response)
+    void Map::_SendChunkPacket(Chunk* chunk, ChunkPacketCallback& response)
     {
-        Chunk* chunk = this->_chunkManager->GetChunk(id);
-        if (chunk == 0)
-        {
-            ChunkCallback ccb(std::bind(&Map::_SendChunkPacket, this, std::placeholders::_1, response));
-            this->_GetChunk(id, ccb);
-        }
-        else
-        {
-            this->_SendChunkPacket(*chunk, response);
-        }
-    }
-
-    void Map::_SendChunkPacket(Chunk const& chunk, ChunkPacketCallback& response)
-    {
-        response(Network::PacketCreator::Chunk(chunk));
+        auto toto = Network::PacketCreator::Chunk(*chunk);
+        response(toto);
     }
 
     void Map::_HandleNewChunk(Chunk* chunk)
@@ -151,7 +140,7 @@ namespace Server { namespace Game { namespace Map {
         auto& requests = this->_chunkRequests[chunk->id];
         for (auto it = requests.begin(), ite = requests.end(); it != ite; ++it)
         {
-            (*it)(*chunk);
+            (*it)(chunk);
         }
         requests.clear();
         this->_chunkRequests.erase(chunk->id);
@@ -178,16 +167,16 @@ namespace Server { namespace Game { namespace Map {
         }
     }
 
-    void Map::_FindSpawnPosition(Chunk const& chunk)
+    void Map::_FindSpawnPosition(Chunk* chunk)
     {
         for (int y = Common::ChunkSize - 1 ; y >= 0 ; --y)
         {
-            if (chunk.GetCube(0, y, 0))
+            if (chunk->GetCube(0, y, 0))
             {
-                Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk.GetCube(0, y, 0) - 1];
+                Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk->GetCube(0, y, 0) - 1];
                 if (biet.solid)
                 {
-                    this->_spawnPosition = new Common::Position(chunk.coords, Tools::Vector3f(0, y, 0));
+                    this->_spawnPosition = new Common::Position(chunk->coords, Tools::Vector3f(0, y, 0));
                     *this->_spawnPosition += Tools::Vector3f(0.5, 2.5, 0.5);
                     for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                         (*it)(*this->_spawnPosition);
@@ -198,12 +187,12 @@ namespace Server { namespace Game { namespace Map {
                 {
                     for (unsigned int x = 0; x < Common::ChunkSize; ++x)
                     {
-                        if (chunk.GetCube(x, y, 0))
+                        if (chunk->GetCube(x, y, 0))
                         {
-                            Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk.GetCube(x, y, 0) - 1];
+                            Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk->GetCube(x, y, 0) - 1];
                             if (biet.solid)
                             {
-                                this->_spawnPosition = new Common::Position(chunk.coords, Tools::Vector3f(x, y, 0));
+                                this->_spawnPosition = new Common::Position(chunk->coords, Tools::Vector3f(x, y, 0));
                                 *this->_spawnPosition += Tools::Vector3f(0.5, 2.5, 0.5);
                                 for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                                     (*it)(*this->_spawnPosition);
@@ -213,13 +202,13 @@ namespace Server { namespace Game { namespace Map {
                         }
                     }
                     ChunkCallback cb(std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
-                    this->GetChunk(Chunk::CoordsToId(chunk.coords.x + 1, chunk.coords.y, chunk.coords.z), cb);
+                    this->GetChunk(Chunk::CoordsToId(chunk->coords.x + 1, chunk->coords.y, chunk->coords.z), cb);
                     return;
                 }
             }
         }
         ChunkCallback cb(std::bind(&Map::_FindSpawnPosition, this, std::placeholders::_1));
-        this->GetChunk(Chunk::CoordsToId(chunk.coords.x, chunk.coords.y - 1, chunk.coords.z), cb);
+        this->GetChunk(Chunk::CoordsToId(chunk->coords.x, chunk->coords.y - 1, chunk->coords.z), cb);
     }
 
     void Map::_AddPlayer(std::shared_ptr<Player> p)
@@ -232,23 +221,23 @@ namespace Server { namespace Game { namespace Map {
         this->_players.erase(id);
     }
 
-    void Map::_DestroyCube(Common::CubePosition pos)
+    void Map::_DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos)
     {
-        Chunk::IdType id = Chunk::CoordsToId(pos.world);
-
-        Chunk* chunk = this->_chunkManager->GetChunk(id);
-        if (chunk == 0)
-            return;
-
-        if (chunk->GetCube(pos.chunk) != 0)
+        if (chunk->GetCube(cubePos) != 0)
         {
-            chunk->SetCube(pos.chunk, 0);
+            chunk->SetCube(cubePos, 0);
 
             for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
             {
-                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, Network::PacketCreator::Chunk(*chunk));
+                auto toto = Network::PacketCreator::Chunk(*chunk);
+                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, toto);
             }
         }
+    }
+
+    void Map::_Tick(unsigned int elapsedTime)
+    {
+        std::cout << "Map::_Tick" << elapsedTime << "\n";
     }
 
 }}}

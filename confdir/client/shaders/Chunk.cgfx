@@ -5,6 +5,10 @@ float3 lightDirection = {-0.704, -0.704, 0};
 float3 fogColor = float3(0.8, 0.8, 0.9);
 float fogEnd = 750.0f;
 
+// Water
+float time = 0;
+float displacement = 4.0;
+
 sampler2D cubeTexture = sampler_state
 {
    generateMipMap = true;
@@ -18,6 +22,8 @@ struct VSout
    float2 texCoord : TEXCOORD0;
    float lightIntensity : TEXCOORD1;
    float fogFactor : TEXCOORD2;
+   // Water:
+   //float4 texProj;
 };
 
 VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)

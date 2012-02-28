@@ -23,6 +23,7 @@ namespace Common {
             p.Read(ptr->textures.right);
             p.Read(ptr->textures.back);
             p.Read(ptr->textures.bottom);
+            p.Read(ptr->effectName);
 
             p.Read(ptr->solid);
             p.Read(ptr->transparent);
@@ -40,6 +41,7 @@ namespace Common {
             p.Write(cube.textures.right);
             p.Write(cube.textures.back);
             p.Write(cube.textures.bottom);
+            p.Write(cube.effectName);
 
             p.Write(cube.solid);
             p.Write(cube.transparent);

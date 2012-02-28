@@ -7,5 +7,6 @@ textures = {
     back = "cubes/water/texture.png",
 }
 
+effect = "Chunk"
 solid = false
 transparent = true
