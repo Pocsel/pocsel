@@ -28,7 +28,7 @@ namespace Client { namespace Resources {
                 throw std::runtime_error("Resource not found (plugin: " + Tools::ToString(pluginId) + " path: " + globals["texture"].ToString() + ")");
             this->_InitializeFrames(game.GetRenderer(), res->data, res->size);
 
-            this->_timePerFrame = Uint64(animationTime * 0.000001 / this->_frames.size());
+            this->_timePerFrame = Uint64(animationTime * 1000000 / this->_frames.size());
         }
         catch (std::exception& e)
         {
@@ -39,8 +39,11 @@ namespace Client { namespace Resources {
 
     void AnimatedTexture::Update(Uint64 totalTime)
     {
-        if (totalTime - this->_lastFrame >= this->_timePerFrame)
-            this->_currentFrame = int((this->_currentFrame + 1) % this->_frames.size());
+        if ((totalTime - this->_lastFrame) >= this->_timePerFrame)
+        {
+           this->_currentFrame = int((this->_currentFrame + 1) % this->_frames.size());
+           this->_lastFrame = totalTime;
+        }
     }
 
     void AnimatedTexture::Bind()
