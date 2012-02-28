@@ -86,7 +86,7 @@ namespace Client { namespace Resources {
             if (it->second != errTex)
                 Tools::Delete(it->second);
         for (auto it = this->_animatedTextures.begin(), ite = this->_animatedTextures.end(); it != ite; ++it)
-            for (int i = 0; i < it->second.size(); ++i)
+            for (unsigned int i = 0; i < it->second.size(); ++i)
                 if (it->second[i] != errTex)
                     Tools::Delete(it->second[i]);
         for (auto it = this->_shaders.begin(), ite = this->_shaders.end(); it != ite; ++it)
