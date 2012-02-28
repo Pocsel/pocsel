@@ -1,6 +1,7 @@
 #include "client/precompiled.hpp"
 
 #include "client/game/Player.hpp"
+#include "client/game/TargetedCubeRenderer.hpp"
 #include "client/network/PacketDispatcher.hpp"
 #include "client/window/InputManager.hpp"
 #include "client/window/Window.hpp"
@@ -22,7 +23,9 @@ namespace Client { namespace Game {
         _game(game),
         _moved(false),
         _movedTime(0),
-        _sprint(false)
+        _sprint(false),
+        _targetedCube(0),
+        _targetedCubeRenderer(new TargetedCubeRenderer(game))
     {
         this->_actionBinder.Bind(BindAction::Forward, BindAction::Held, std::bind(&Player::MoveForward, this));
         this->_actionBinder.Bind(BindAction::Backward, BindAction::Held, std::bind(&Player::MoveBackward, this));
@@ -39,6 +42,17 @@ namespace Client { namespace Game {
         //this->_actionBinder.Bind(BindAction::AltFire, BindAction::Held, std::bind(&Player::SuperAction, this));
 
         this->_actionBinder.Bind(BindAction::ToggleSprint, BindAction::Pressed, std::bind(&Player::ToggleSprint, this));
+    }
+
+    Player::~Player()
+    {
+        Tools::Delete(this->_targetedCubeRenderer);
+    }
+
+    void Player::Render()
+    {
+        if (this->_targetedCube != 0)
+            this->_targetedCubeRenderer->Render(*this->_targetedCube);
     }
 
     void Player::UpdateMovements(Uint32 time)
@@ -70,7 +84,27 @@ namespace Client { namespace Game {
                 Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), this->_camera)
                 );
             this->_moved = false;
-            this->_movedTime = 0;
+            this->_movedTime %= 40;
+        }
+
+        {
+            auto cubes = Common::RayCast::GetResult(this->_camera, 50);
+
+            Common::CubePosition cubePos;
+
+            if (!this->_game.GetMap().GetFirstCube(cubes, cubePos))
+            {
+                Tools::Delete(this->_targetedCube);
+                this->_targetedCube = 0;
+            }
+            else
+            {
+                if (this->_targetedCube != 0)
+                    *this->_targetedCube = cubePos;
+                else
+                    this->_targetedCube = new Common::CubePosition(cubePos);
+            }
+
         }
     }
 

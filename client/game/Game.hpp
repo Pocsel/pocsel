@@ -5,13 +5,15 @@
 #include "tools/Timer.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "client/game/CubeTypeManager.hpp"
-#include "client/game/Player.hpp"
 #include "client/resources/ResourceManager.hpp"
 
 namespace Client {
     class Client;
     namespace Map {
         class Map;
+    }
+    namespace Game {
+        class Player;
     }
 }
 namespace Tools {
@@ -29,7 +31,7 @@ namespace Client { namespace Game {
         CubeTypeManager _cubeTypeManager;
         Resources::ResourceManager* _resourceManager;
         Map::Map* _map;
-        Player _player;
+        Player* _player;
         int _callbackId;
         Tools::Timer _updateTimer;
         Tools::Timer _gameTimer;
@@ -45,7 +47,7 @@ namespace Client { namespace Game {
 
         Client& GetClient() { return this->_client; }
         Tools::IRenderer& GetRenderer() { return this->_renderer; }
-        Player& GetPlayer() { return this->_player; }
+        Player& GetPlayer() { return *this->_player; }
         CubeTypeManager& GetCubeTypeManager() { return this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
         Map::Map& GetMap() { return *this->_map; }
