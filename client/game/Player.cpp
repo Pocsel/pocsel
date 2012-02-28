@@ -21,7 +21,8 @@ namespace Client { namespace Game {
     Player::Player(Game& game) :
         _game(game),
         _moved(false),
-        _movedTime(0)
+        _movedTime(0),
+        _sprint(false)
     {
         this->_actionBinder.Bind(BindAction::Forward, BindAction::Held, std::bind(&Player::MoveForward, this));
         this->_actionBinder.Bind(BindAction::Backward, BindAction::Held, std::bind(&Player::MoveBackward, this));
@@ -36,6 +37,8 @@ namespace Client { namespace Game {
 
         this->_actionBinder.Bind(BindAction::AltFire, BindAction::Pressed, std::bind(&Player::SuperAction, this));
         //this->_actionBinder.Bind(BindAction::AltFire, BindAction::Held, std::bind(&Player::SuperAction, this));
+
+        this->_actionBinder.Bind(BindAction::ToggleSprint, BindAction::Pressed, std::bind(&Player::ToggleSprint, this));
     }
 
     void Player::UpdateMovements(Uint32 time)
@@ -78,12 +81,12 @@ namespace Client { namespace Game {
 
     void Player::MoveForward()
     {
-        this->_Move(this->_camera.direction * (this->_elapsedTime / 500.0f));
+        this->_Move(this->_camera.direction * this->_GetSpeed());
     }
 
     void Player::MoveBackward()
     {
-        this->_Move(-this->_camera.direction * (this->_elapsedTime / 500.0f));
+        this->_Move(-this->_camera.direction * this->_GetSpeed());
     }
 
     void Player::StrafeLeft()
@@ -92,8 +95,7 @@ namespace Client { namespace Game {
         this->_Move(Tools::Vector3f(
             dir.y * 0 - dir.z * -1,
             dir.z * 0 - dir.x * 0,
-            dir.x * -1 - dir.y * 0
-        ) * (this->_elapsedTime / 500.0f));
+            dir.x * -1 - dir.y * 0));
     }
 
     void Player::StrafeRight()
@@ -102,8 +104,7 @@ namespace Client { namespace Game {
         this->_Move(Tools::Vector3f(
             dir.y * 0 - dir.z * 1,
             dir.z * 0 - dir.x * 0,
-            dir.x * 1 - dir.y * 0
-        ) * (this->_elapsedTime / 500.0f));
+            dir.x * 1 - dir.y * 0));
     }
 
     void Player::Jump()
@@ -155,12 +156,24 @@ namespace Client { namespace Game {
         }
     }
 
+    void Player::ToggleSprint()
+    {
+        this->_sprint = !this->_sprint;
+    }
+
     void Player::_Move(Tools::Vector3f moveVector)
     {
+        moveVector.Normalize();
+        moveVector *= this->_GetSpeed();
         Common::Position p = this->_camera.position;
         p += moveVector;
         this->SetPosition(p);
         this->_moved = true;
+    }
+
+    float Player::_GetSpeed()
+    {
+        return this->_elapsedTime / (this->_sprint ? 10.0f : 200.0f);
     }
 
 }}

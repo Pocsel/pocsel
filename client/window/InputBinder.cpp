@@ -29,6 +29,7 @@ namespace Client { namespace Window {
         this->_actions["fire"] = BindAction::Fire;
         this->_actions["altfire"] = BindAction::AltFire;
         this->_actions["use"] = BindAction::Use;
+        this->_actions["togglesprint"] = BindAction::ToggleSprint;
     }
 
     InputBinder::Action::Action() :

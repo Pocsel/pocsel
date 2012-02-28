@@ -52,6 +52,14 @@ namespace Tools {
         ray = this->_planes[1].GetIntersection(this->_planes[3]);
         this->_corners[5] = this->_planes[4].GetIntersection(ray);
         this->_corners[6] = this->_planes[5].GetIntersection(ray);
+
+        this->_center = this->_corners[0];
+        for (int i = 1; i < 8; ++i)
+            this->_center += this->_corners[i];
+        this->_center /= 8;
+        this->_radiusSquared = 0;
+        for (int i = 0; i < 8; ++i)
+            this->_radiusSquared = std::max(this->_radiusSquared, Vector3d::GetDistanceSquared(this->_corners[i], this->_center));
     }
 
     Vector3d const& Frustum::SupportMapping(Vector3d const& v) const
@@ -72,6 +80,8 @@ namespace Tools {
 
     AbstractCollider::IntersectionType Frustum::Contains(Vector3d const& point) const
     {
+        if (Vector3d::GetDistanceSquared(point, this->_center) > this->_radiusSquared)
+            return Outside;
         for (int i = 0; i < 6; i++)
             if (Vector3d::Dot(this->_planes[i].normal, point) + this->_planes[i].d > 1E-05)
                 return Outside;
@@ -80,6 +90,8 @@ namespace Tools {
 
     AbstractCollider::IntersectionType Frustum::Contains(AlignedBox const& box) const
     {
+        if (Vector3d::GetDistance(box.GetCenter(), this->_center) > std::sqrt(this->_radiusSquared) + std::sqrt(box.GetRadiusSquared()))
+            return Outside;
         bool flag = false;
         for (int i = 0; i < 6; i++)
         {

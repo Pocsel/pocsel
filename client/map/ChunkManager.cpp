@@ -137,7 +137,7 @@ namespace Client { namespace Map {
         {
             if (it->second->IsExecuted() || it->second->IsCancelled())
             {
-                if (it->second->GetResult())
+                if (it->second->GetResult() && !it->second->IsCancelled())
                     this->_chunkRenderer.RefreshGraphics(*it->first->chunk);
                 else if (!it->second->IsCancelled())
                     this->_AddNodeToRefresh(*it->first);
@@ -255,6 +255,9 @@ namespace Client { namespace Map {
         this->_AddNodeToRefresh(node);
     }
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4307 4308)
+#endif
     namespace {
         template<int x0, int y0, int z0>
             inline bool CheckModif(Chunk::CubeType const* oldCubes, Chunk::CubeType const* newCubes)

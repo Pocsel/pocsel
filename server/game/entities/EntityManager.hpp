@@ -12,10 +12,10 @@ namespace Server { namespace Game { namespace Entities {
     class EntityManager
     {
     private:
-        Tools::SimpleMessageQueue* _messageQueue;
+        Tools::SimpleMessageQueue& _messageQueue;
 
     public:
-        EntityManager();
+        EntityManager(Tools::SimpleMessageQueue& messageQueue);
         ~EntityManager();
 
         void Start();

@@ -24,6 +24,7 @@ namespace Client { namespace BindAction {
         Fire,
         AltFire,
         Use,
+        ToggleSprint,
         // Pour les tableaux
         NbBindActions
     };

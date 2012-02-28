@@ -28,7 +28,7 @@ namespace Server { namespace Game { namespace Map {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
         this->_engine = new Engine::Engine(*this->_messageQueue);
-        this->_entityManager = new Entities::EntityManager();
+        this->_entityManager = new Entities::EntityManager(*this->_messageQueue);
         this->_chunkManager = new ChunkManager();
     }
 
@@ -51,7 +51,7 @@ namespace Server { namespace Game { namespace Map {
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
-        this->_messageQueue->SetLoopTimer(256, m);
+        this->_messageQueue->SetLoopTimer(10, m);
     }
 
     void Map::Stop()
