@@ -18,6 +18,10 @@ namespace Server { namespace Game { namespace Engine {
     EventManager::~EventManager()
     {
         Tools::debug << "EventManager::~EventManager()\n";
+        std::for_each(this->_events.begin(), this->_events.end(), [](std::pair<Uint64 const, Event*>& it)
+                {
+                    Tools::Delete(it.second);
+                });
     }
 
     void EventManager::DispatchEvents()

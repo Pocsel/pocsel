@@ -73,6 +73,7 @@ namespace Server { namespace Database {
         }
         if (world._defaultMap == 0)
             throw std::runtime_error("Cannot find default map");
+
     }
 
     void WorldLoader::_LoadCubeType(Common::CubeType& descr, std::string const& code, ResourceManager const& manager)
