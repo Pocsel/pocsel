@@ -92,7 +92,7 @@ int main(int, char**)
         Tools::log << "ret1: " << i.Globals()["ret1"].ToString() << ", ret2: " << i.Globals()["ret2"].ToString() << Tools::endl;
     }
 
-    i.DoString("test = \"sjkldglkhsdfg\" g = 323.4 jdsk = {} iwer = {} jkd = function() end");
+    i.DoString("test = \"sjkldg\\nlkéhsdfg\" g = 323.4 jdsk = {} iwer = {} jkd = function() end");
 
     Tools::Lua::Iterator it = i.Globals().Begin();
     Tools::Lua::Iterator itEnd = i.Globals().End();
@@ -115,8 +115,20 @@ int main(int, char**)
     i.DoString("b = metaTest[14]");
     i.DoString("c = metaTest[15]");
 
-    i.DoString("serializeTest = { bite = { 1, 3, 4 }, test = \"HEY\", allo = false }");
-    Tools::log << "serialize: \"\"\"" << i.Serialize(i.Globals()["serializeTest"]) << "\"\"\"\n";
+    i.DoString("sharedTable = { 213, 23, \"sdfg\" }");
+    i.DoString("serializeTest = { bite = { 1, 3, 4, sharedTable }, test = \"HEY\", allo = false }");
+    std::string serialized = i.Serialize(i.Globals()["serializeTest"]);
+    Tools::log << "serialize1: \"\"\"" << serialized << "\"\"\"\n";
+    try
+    {
+        Tools::log << "serialize2: \"\"\"" << i.Serialize(i.Globals()["FUCK"]) << "\"\"\"\n";
+    }
+    catch (std::exception& e)
+    {
+        Tools::log << "serialize fail: " << e.what() << Tools::endl;
+    }
+    Tools::log << "serialize3: \"\"\"" << i.Serialize(i.Globals()["test"]) << "\"\"\"\n";
+    Tools::log << "Deserialize: \"\"\"" << i.Serialize(i.Deserialize(serialized)) << "\"\"\"\n";
 
     Init(i);
     i.DoString("m = Matrix4f.New()");

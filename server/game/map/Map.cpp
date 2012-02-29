@@ -13,7 +13,6 @@
 #include "server/game/Game.hpp"
 #include "server/game/Player.hpp"
 #include "server/game/engine/Engine.hpp"
-#include "server/game/entities/EntityManager.hpp"
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/network/PacketCreator.hpp"
 
@@ -27,8 +26,7 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
-        this->_engine = new Engine::Engine(*this->_messageQueue);
-        this->_entityManager = new Entities::EntityManager(*this->_messageQueue);
+        this->_engine = new Engine::Engine();
         this->_chunkManager = new ChunkManager();
     }
 
@@ -37,7 +35,6 @@ namespace Server { namespace Game { namespace Map {
         Tools::debug << "Map::~Map() -- " << this->_conf.name << "\n";
         Tools::Delete(this->_gen);
         Tools::Delete(this->_engine);
-        Tools::Delete(this->_entityManager);
         Tools::Delete(this->_messageQueue);
         Tools::Delete(this->_chunkManager);
     }
@@ -46,7 +43,6 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Start() -- " << this->_conf.name << "\n";
         this->_gen->Start();
-        this->_entityManager->Start();
         this->_messageQueue->Start();
 
         Tools::SimpleMessageQueue::TimerLoopMessage
@@ -58,7 +54,6 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Stop() -- " << this->_conf.name << "\n";
         this->_gen->Stop();
-        this->_entityManager->Stop();
         this->_messageQueue->Stop();
     }
 
@@ -235,9 +230,10 @@ namespace Server { namespace Game { namespace Map {
         }
     }
 
-    void Map::_Tick(unsigned int elapsedTime)
+    void Map::_Tick(Uint64 currentTime)
     {
-        std::cout << "Map::_Tick" << elapsedTime << "\n";
+        this->_engine->Tick(currentTime);
+        //std::cout << "Map::_Tick" << elapsedTime << "\n";
     }
 
 }}}

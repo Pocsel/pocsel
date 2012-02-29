@@ -24,9 +24,6 @@ namespace Server { namespace Game {
     namespace Engine {
         class Engine;
     }
-    namespace Entities {
-        class EntityManager;
-    }
 }}
 
 namespace Server { namespace Game { namespace Map {
@@ -52,7 +49,6 @@ namespace Server { namespace Game { namespace Map {
 
         std::map<Uint32, std::shared_ptr<Player>> _players;
         Common::Position* _spawnPosition;
-        Entities::EntityManager* _entityManager;
         Engine::Engine* _engine;
         ChunkManager* _chunkManager;
 
@@ -83,7 +79,7 @@ namespace Server { namespace Game { namespace Map {
         void _AddPlayer(std::shared_ptr<Player> p);
         void _RemovePlayer(Uint32 id);
         void _DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos);
-        void _Tick(Uint32 elapsedTime);
+        void _Tick(Uint64 currentTime);
     };
 
 }}}

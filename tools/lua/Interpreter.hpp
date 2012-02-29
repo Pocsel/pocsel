@@ -34,6 +34,7 @@ namespace Tools { namespace Lua {
         Interpreter() throw(std::runtime_error);
         ~Interpreter() throw();
         std::string Serialize(Ref const& ref) const throw(std::runtime_error);
+        Ref Deserialize(std::string const& string) const throw(std::runtime_error);
         // script loading
         Ref LoadString(std::string const& code) const throw(std::runtime_error);
         void RegisterLib(LibId lib) const throw(std::runtime_error);
@@ -56,7 +57,9 @@ namespace Tools { namespace Lua {
         State& GetState() throw() { return *this->_state; }
         void DumpStack() const throw();
     private:
-        std::string _Serialize(Ref const& ref, unsigned int level) const throw(std::runtime_error);
+        std::string _SerializeSimpleValue(Ref const& ref) const throw(std::runtime_error);
+        std::string _SerializeString(std::string const& string) const;
+        std::string _Serialize(Ref const& ref, std::list<Ref>& tables, unsigned int level) const throw(std::runtime_error);
     };
 
 }}
