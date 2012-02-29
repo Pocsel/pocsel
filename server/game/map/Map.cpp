@@ -47,7 +47,7 @@ namespace Server { namespace Game { namespace Map {
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
-        this->_messageQueue->SetLoopTimer(10, m);
+        this->_messageQueue->SetLoopTimer(10000, m);
     }
 
     void Map::Stop()
@@ -275,7 +275,6 @@ namespace Server { namespace Game { namespace Map {
     void Map::_Tick(Uint64 currentTime)
     {
         this->_engine->Tick(currentTime);
-        //std::cout << "Map::_Tick" << elapsedTime << "\n";
     }
 
 }}}
