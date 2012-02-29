@@ -14,30 +14,30 @@ namespace Common {
         static std::unique_ptr<Camera> Read(Tools::ByteArray const& p)
         {
             Common::Position pos;
-            float phi, theta;
+            float theta, phi;
             p.Read(pos);
-            p.Read(phi);
             p.Read(theta);
+            p.Read(phi);
 
             return std::unique_ptr<Camera>(
-                    new Camera(pos, phi, theta)
+                    new Camera(pos, theta, phi)
                     );
         }
 
         static void Write(Camera const& cam, Tools::ByteArray& p)
         {
             p.Write(cam.position);
-            p.Write(cam.phi);
             p.Write(cam.theta);
+            p.Write(cam.phi);
         }
 
         static void Read(Tools::ByteArray const& p, Camera& cam)
         {
             p.Read(cam.position);
-            float phi, theta;
-            p.Read(phi);
+            float theta, phi;
             p.Read(theta);
-            cam.SetAngles(phi, theta);
+            p.Read(phi);
+            cam.SetAngles(theta, phi);
         }
     };
 

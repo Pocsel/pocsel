@@ -67,6 +67,7 @@ namespace Server { namespace Game { namespace Map {
         void GetChunk(Chunk::IdType id, ChunkCallback& response);
         void GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response);
         void DestroyCube(Common::CubePosition const& pos);
+        void DestroyCubes(std::vector<Common::CubePosition> const& pos);
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
 
@@ -79,6 +80,7 @@ namespace Server { namespace Game { namespace Map {
         void _AddPlayer(std::shared_ptr<Player> p);
         void _RemovePlayer(Uint32 id);
         void _DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos);
+        void _DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos);
         void _Tick(Uint64 currentTime);
     };
 
