@@ -35,8 +35,8 @@ namespace Client { namespace Game {
         this->_actionBinder.Bind(BindAction::Jump, BindAction::Held, std::bind(&Player::Jump, this));
         this->_actionBinder.Bind(BindAction::Crouch, BindAction::Held, std::bind(&Player::Crouch, this));
 
-        //this->_actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Player::Action, this));
-        this->_actionBinder.Bind(BindAction::Fire, BindAction::Held, std::bind(&Player::Action, this));
+        this->_actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Player::Action, this));
+        //this->_actionBinder.Bind(BindAction::Fire, BindAction::Held, std::bind(&Player::Action, this));
 
         this->_actionBinder.Bind(BindAction::AltFire, BindAction::Pressed, std::bind(&Player::SuperAction, this));
         //this->_actionBinder.Bind(BindAction::AltFire, BindAction::Held, std::bind(&Player::SuperAction, this));
