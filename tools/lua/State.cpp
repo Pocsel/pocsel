@@ -62,13 +62,14 @@ namespace Tools { namespace Lua {
 
     State::~State() throw()
     {
-        this->_metaTables.clear();
+        for (auto it = this->_metaTables.begin(), ite = this->_metaTables.end(); it != ite; ++it)
+            Tools::Delete(it->second);
         lua_close(this->_state);
     }
 
     void State::RegisterMetaTable(Ref const& metaTable, std::size_t hash) throw()
     {
-        this->_metaTables.insert(std::unordered_map<std::size_t, Ref>::value_type(hash, metaTable));
+        this->_metaTables.insert(std::unordered_map<std::size_t, Ref*>::value_type(hash, new Ref(metaTable)));
     }
 
     Ref State::MakeBoolean(bool val) throw()
@@ -174,6 +175,6 @@ namespace Tools { namespace Lua {
         auto it = this->_metaTables.find(hash);
         if (it == this->_metaTables.end())
             throw std::runtime_error("Lua::State: MetaTable not found");
-        return it->second;
+        return *it->second;
     }
 }}

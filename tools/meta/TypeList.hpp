@@ -8,27 +8,29 @@ namespace Tools { namespace Meta {
         static const size_t size = 0;
     };
 
-    template<class THead, class TTail>
-    struct TypeList
-    {
-    private:
-        template<class TList>
+    template<class TList>
         struct _GetSize
         {
             static const size_t value = _GetSize<typename TList::Tail>::value + 1;
         };
-
-        template<>
+    template<>
         struct _GetSize<NullList>
         {
             static const size_t value = 0;
         };
+
+    template<class THead, class TTail>
+    struct TypeList
+    {
+    private:
+
     public:
         typedef THead Head;
         typedef TTail Tail;
 
         static const size_t size = _GetSize<Tail>::value + 1;
     };
+
 
 /////////////////////////////////////////////////////////////////////////////
 // TOOLS_META_TYPELIST(...) macros

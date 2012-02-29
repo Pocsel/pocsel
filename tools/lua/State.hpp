@@ -24,7 +24,7 @@ namespace Tools { namespace Lua {
     private:
         Interpreter& _interpreter;
         lua_State* _state;
-        std::unordered_map<std::size_t, Ref> _metaTables;
+        std::unordered_map<std::size_t, Ref*> _metaTables;
 
     public:
         State(Interpreter& interpreter) throw(std::runtime_error);

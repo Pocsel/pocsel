@@ -31,7 +31,7 @@ void Init(Interpreter& i)
     MetaTable m(i, Tools::Matrix4<float>());
     i.Globals().Set("Matrix4f", n);
     m.AddMethod("Rotate", [](CallHelper& helper) { });
-    m.AddMethod("Dump", 
+    m.AddMethod("Dump",
         [](CallHelper& helper)
         {
             auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
@@ -43,7 +43,7 @@ void Init(Interpreter& i)
     m.AddMetaMethod(
         MetaTable::Collect,
         [](CallHelper& helper) { helper.PopArg().Check<Tools::Matrix4<float>*>()->~Matrix4<float>(); });
-    i.Bind(&Tools::Matrix4<float>::Translate, std::placeholders::_1, std::placeholders::_2);
+    //i.Bind(&Tools::Matrix4<float>::Translate, std::placeholders::_1, std::placeholders::_2);
     //i.Bind(&Tools::Vector2f::Dot, std::placeholders::_1, std::placeholders::_2);
     m.AddMetaMethod(
         MetaTable::Multiply,// i.Bind(&Tools::Matrix4<float>::operator*, std::placeholders::_1, std::placeholders::_2));
@@ -162,16 +162,17 @@ int main(int, char**)
     i.DoString("m2 = Matrix4f.New()");
     i.DoString("m3 = m * m2");
     i.DoString("m3:Dump()");
-    i.Globals().Set("TestFunction", i.Bind(&TestFunction));
-    i.DoString("TestFunction(10)");
+    //i.Globals().Set("TestFunction", i.Bind(&TestFunction));
+    //i.DoString("TestFunction(10)");
 
     MetaTable mA(i, A());
-    auto r = i.Globals().Set("A", i.Bind(&A::Print, std::placeholders::_1, std::placeholders::_2));
-    r(A(), 50);
+    //auto bite5 = i.Bind(&A::Print, std::placeholders::_1, std::placeholders::_2);
+    //auto r = i.Globals().Set("A", bite5);
+    //r(A(), 50);
 
 
     MetaTable mVector2d(i, Tools::Vector2d());
-    i.Bind(&Tools::Vector2d::Normalize, std::placeholders::_1);
+    //i.Bind(&Tools::Vector2d::Normalize, std::placeholders::_1);
     //i.Bind(&Tools::Vector2d::Dot, std::placeholders::_1, std::placeholders::_2);
 
     //auto tmp = std::bind(&A::Print, std::placeholders::_1, std::placeholders::_2);
