@@ -97,13 +97,15 @@ namespace Client { namespace Network {
 
     std::unique_ptr<UdpPacket> PacketCreator::Action(Uint32 id,
                                                      Common::Camera const& cam,
-                                                     Common::CubePosition const& target)
+                                                     Common::CubePosition const& target,
+                                                     Uint32 actionId)
     {
         std::unique_ptr<UdpPacket> p(new UdpPacket(id));
         p->Write(Protocol::ClientToServer::Action);
 
         p->Write(cam);
         p->Write(target);
+        p->Write(actionId);
         return p;
     }
 

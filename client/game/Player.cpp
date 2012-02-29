@@ -88,7 +88,7 @@ namespace Client { namespace Game {
         }
 
         {
-            auto cubes = Common::RayCast::GetResult(this->_camera, 50);
+            auto cubes = Common::RayCast::Ray(this->_camera, 50);
 
             Common::CubePosition cubePos;
 
@@ -154,41 +154,41 @@ namespace Client { namespace Game {
 
     void Player::Action()
     {
-        auto cubes = Common::RayCast::GetResult(this->_camera, 50);
-
-//        for (auto it = cubes.begin(), ite = cubes.end(); it != ite; ++it)
-//        {
-//            std::cout << "CHUNK " << Map::Chunk::CoordsToId(it->world) << ": " <<
-//                it->chunk.x << ", " << it->chunk.y << ", " << it->chunk.z << "\n";
-//        }
-//
-//        std::cout << "\n-------\n\n";
-
-        Common::CubePosition cubePos;
-
-        if (!this->_game.GetMap().GetFirstCube(cubes, cubePos))
-        {
-            cubePos = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
-//            std::cout << "FAIL: " << Map::Chunk::CoordsToId(cubePos.world) << ": " <<
-//                cubePos.chunk.x << ", " << cubePos.chunk.y << ", " << cubePos.chunk.z << "\n";
-        }
-
+        Common::CubePosition target;
+        if (this->_targetedCube != 0)
+            target = *this->_targetedCube;
+        else
+            target = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
 
         this->_game.GetClient().GetNetwork().SendUdpPacket(
-            Network::PacketCreator::Action(this->_game.GetClient().GetClientId(), this->_camera, cubePos)
+            Network::PacketCreator::Action(
+                this->_game.GetClient().GetClientId(),
+                this->_camera,
+                target,
+                1
+                )
             );
     }
 
     void Player::SuperAction()
     {
-        auto cubes = Common::RayCast::GetResult(this->_camera, 50);
+        Common::CubePosition target;
+        if (this->_targetedCube != 0)
+            target = *this->_targetedCube;
+        else
+            target = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
 
-        for (auto it = cubes.begin(), ite = cubes.end(); it != ite; ++it)
-        {
-            this->_game.GetClient().GetNetwork().SendUdpPacket(
-                Network::PacketCreator::Action(this->_game.GetClient().GetClientId(), this->_camera, *it)
-                );
-        }
+
+        Common::Camera& cam = this->_camera;
+
+        this->_game.GetClient().GetNetwork().SendUdpPacket(
+            Network::PacketCreator::Action(
+                this->_game.GetClient().GetClientId(),
+                this->_camera,
+                target,
+                2
+                )
+            );
     }
 
     void Player::ToggleSprint()

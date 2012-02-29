@@ -13,7 +13,6 @@
 #include "server/game/Game.hpp"
 #include "server/game/Player.hpp"
 #include "server/game/engine/Engine.hpp"
-#include "server/game/entities/EntityManager.hpp"
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/network/PacketCreator.hpp"
 
@@ -27,8 +26,7 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
-        this->_engine = new Engine::Engine(*this->_messageQueue);
-        this->_entityManager = new Entities::EntityManager(*this->_messageQueue);
+        this->_engine = new Engine::Engine();
         this->_chunkManager = new ChunkManager();
     }
 
@@ -37,7 +35,6 @@ namespace Server { namespace Game { namespace Map {
         Tools::debug << "Map::~Map() -- " << this->_conf.name << "\n";
         Tools::Delete(this->_gen);
         Tools::Delete(this->_engine);
-        Tools::Delete(this->_entityManager);
         Tools::Delete(this->_messageQueue);
         Tools::Delete(this->_chunkManager);
     }
@@ -46,19 +43,17 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Start() -- " << this->_conf.name << "\n";
         this->_gen->Start();
-        this->_entityManager->Start();
         this->_messageQueue->Start();
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
-        this->_messageQueue->SetLoopTimer(10, m);
+        this->_messageQueue->SetLoopTimer(10000, m);
     }
 
     void Map::Stop()
     {
         Tools::debug << "Map::Stop() -- " << this->_conf.name << "\n";
         this->_gen->Stop();
-        this->_entityManager->Stop();
         this->_messageQueue->Stop();
     }
 
@@ -93,6 +88,24 @@ namespace Server { namespace Game { namespace Map {
     {
         ChunkCallback cb(std::bind(&Map::_DestroyCube, this, std::placeholders::_1, pos.chunk));
         this->GetChunk(Chunk::CoordsToId(pos.world), cb);
+    }
+
+    void Map::DestroyCubes(std::vector<Common::CubePosition> const& pos)
+    {
+        std::map<Chunk::IdType, std::vector<Chunk::CoordsType>> positions;
+
+        std::for_each(pos.begin(), pos.end(), [&positions](Common::CubePosition const& p)
+            {
+                positions[Chunk::CoordsToId(p.world)].push_back(p.chunk);
+            }
+            );
+
+        std::for_each(positions.begin(), positions.end(), [this](std::pair<Chunk::IdType const, std::vector<Chunk::CoordsType>>& p)
+            {
+                ChunkCallback cb(std::bind(&Map::_DestroyCubes, this, std::placeholders::_1, p.second));
+                this->GetChunk(p.first, cb);
+            }
+            );
     }
 
     void Map::AddPlayer(std::shared_ptr<Player> const& p)
@@ -226,18 +239,40 @@ namespace Server { namespace Game { namespace Map {
         if (chunk->GetCube(cubePos) != 0)
         {
             chunk->SetCube(cubePos, 0);
-
-            for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
-            {
-                auto toto = Network::PacketCreator::Chunk(*chunk);
-                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, toto);
-            }
+            this->_SendChunkToPlayers(chunk);
         }
     }
 
-    void Map::_Tick(unsigned int elapsedTime)
+    void Map::_DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos)
     {
-        std::cout << "Map::_Tick" << elapsedTime << "\n";
+        bool send = false;
+
+        std::for_each(cubePos.begin(), cubePos.end(), [chunk, &send](Chunk::CoordsType& pos)
+            {
+                if (chunk->GetCube(pos) != 0)
+                {
+                    chunk->SetCube(pos, 0);
+                    send = true;
+                }
+            }
+            );
+
+        if (send)
+            this->_SendChunkToPlayers(chunk);
+    }
+
+    void Map::_SendChunkToPlayers(Chunk* chunk)
+    {
+        for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+        {
+            auto toto = Network::PacketCreator::Chunk(*chunk);
+            this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
+        }
+    }
+
+    void Map::_Tick(Uint64 currentTime)
+    {
+        this->_engine->Tick(currentTime);
     }
 
 }}}

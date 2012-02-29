@@ -34,6 +34,7 @@ namespace Tools { namespace Lua {
         Interpreter() throw(std::runtime_error);
         ~Interpreter() throw();
         std::string Serialize(Ref const& ref) const throw(std::runtime_error);
+        Ref Deserialize(std::string const& string) const throw(std::runtime_error);
         // script loading
         Ref LoadString(std::string const& code) const throw(std::runtime_error);
         void RegisterLib(LibId lib) const throw(std::runtime_error);
@@ -65,7 +66,9 @@ namespace Tools { namespace Lua {
         template<class T, class TA1, class TA2, class TA3>
         Ref Bind(T function, TA1 arg1, TA2 arg2, TA3 arg3);
     private:
-        std::string _Serialize(Ref const& ref, unsigned int level) const throw(std::runtime_error);
+        std::string _SerializeSimpleValue(Ref const& ref) const throw(std::runtime_error);
+        std::string _SerializeString(std::string const& string) const;
+        std::string _Serialize(Ref const& ref, std::list<Ref>& tables, unsigned int level) const throw(std::runtime_error);
     };
 
     template <typename T>

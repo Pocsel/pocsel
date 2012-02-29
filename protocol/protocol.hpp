@@ -66,9 +66,10 @@ namespace Protocol {
 
         /**
          * Camera position
+         * CubePosition target
+         * Uint32 actionId
          */
         Action,
-
 
         NbPacketTypeClient, // pour les tableaux
     };
