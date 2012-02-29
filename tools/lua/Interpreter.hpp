@@ -95,6 +95,6 @@ namespace Tools { namespace Lua {
 
 }}
 
-#include "tools/lua/Function.cpp"
+#include "tools/lua/Function.hpp"
 
 #endif
