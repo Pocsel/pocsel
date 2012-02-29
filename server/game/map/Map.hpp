@@ -81,6 +81,7 @@ namespace Server { namespace Game { namespace Map {
         void _RemovePlayer(Uint32 id);
         void _DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos);
         void _DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos);
+        void _SendChunkToPlayers(Chunk* chunk);
         void _Tick(Uint64 currentTime);
     };
 
