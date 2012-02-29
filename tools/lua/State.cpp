@@ -5,6 +5,7 @@
 #include "tools/lua/CallHelper.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/lua/Iterator.hpp"
 
 namespace {
 
@@ -64,6 +65,7 @@ namespace Tools { namespace Lua {
     {
         for (auto it = this->_metaTables.begin(), ite = this->_metaTables.end(); it != ite; ++it)
             Tools::Delete(it->second);
+        this->_metaTables.clear(); // leak possible
         lua_close(this->_state);
     }
 
