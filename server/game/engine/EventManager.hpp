@@ -9,7 +9,8 @@ namespace Server { namespace Game { namespace Engine {
 
     class Engine;
 
-    class EventManager
+    class EventManager :
+        private boost::noncopyable
     {
     private:
         struct Event
@@ -21,7 +22,7 @@ namespace Server { namespace Game { namespace Engine {
 
     private:
         Engine& _engine;
-        std::map<Uint64, Event*> _events;
+        std::map<Uint64, std::list<Event*>> _events;
 
     public:
         EventManager(Engine& engine);

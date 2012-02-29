@@ -7,7 +7,8 @@ namespace Server { namespace Game { namespace Engine {
 
     class Engine;
 
-    class EntityManager
+    class EntityManager :
+        private boost::noncopyable
     {
     private:
         struct EntityType
@@ -43,7 +44,7 @@ namespace Server { namespace Game { namespace Engine {
         void BeginPluginRegistering(Uint32 pluginId);
         void EndPluginRegistering();
         void CallEntityFunction(int entityId, std::string function, Tools::Lua::Ref const& args);
-        int SpawnEntity(std::string typeName, Uint32 pluginId, Tools::Lua::Ref const& args);
+        int SpawnEntity(std::string name, Uint32 pluginId, Tools::Lua::Ref const& args) throw(std::runtime_error);
     private:
         void _Register(Tools::Lua::CallHelper& helper);
     };

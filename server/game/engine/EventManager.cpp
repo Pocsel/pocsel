@@ -18,9 +18,9 @@ namespace Server { namespace Game { namespace Engine {
     EventManager::~EventManager()
     {
         Tools::debug << "EventManager::~EventManager()\n";
-        std::for_each(this->_events.begin(), this->_events.end(), [](std::pair<Uint64 const, Event*>& it)
+        std::for_each(this->_events.begin(), this->_events.end(), [](std::pair<Uint64 const, std::list<Event*>>& it)
                 {
-                    Tools::Delete(it.second);
+                    std::for_each(it.second.begin(), it.second.end(), [](Event* e) { Tools::Delete(e); });
                 });
     }
 
@@ -32,11 +32,16 @@ namespace Server { namespace Game { namespace Engine {
         {
             if (it->first > this->_engine.GetCurrentTime())
                 break;
-            this->_engine.GetEntityManager().CallEntityFunction(
-                    it->second->entityId,
-                    it->second->function,
-                    this->_engine.GetInterpreter().Deserialize(it->second->args));
-            Tools::Delete(it->second);
+            auto itEvent = it->second.begin();
+            auto itEventEnd = it->second.end();
+            for (; itEvent != itEventEnd; ++itEvent)
+            {
+                this->_engine.GetEntityManager().CallEntityFunction(
+                        (*itEvent)->entityId,
+                        (*itEvent)->function,
+                        this->_engine.GetInterpreter().Deserialize((*itEvent)->args));
+                Tools::Delete(*itEvent);
+            }
         }
         this->_events.erase(this->_events.begin(), it);
     }
@@ -44,6 +49,8 @@ namespace Server { namespace Game { namespace Engine {
     void EventManager::_CallLater(Tools::Lua::CallHelper& helper)
     {
         double seconds = helper.PopArg().CheckNumber();
+        if (seconds < 0)
+            seconds = 0;
         int entityId = helper.PopArg().CheckInteger();
         std::string function = helper.PopArg().CheckString();
         std::string args;
@@ -53,7 +60,7 @@ namespace Server { namespace Game { namespace Engine {
         e->entityId = entityId;
         e->function = function;
         e->args = args;
-        this->_events[this->_engine.GetCurrentTime() + seconds / 1000000] = e;
+        this->_events[this->_engine.GetCurrentTime() + seconds * 1000000.0].push_back(e);
     }
 
 }}}

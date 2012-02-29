@@ -40,7 +40,7 @@ namespace Server { namespace Game { namespace Engine {
                 this->_engine.GetInterpreter().MakeNil());
     }
 
-    int EntityManager::SpawnEntity(std::string name, Uint32 pluginId, Tools::Lua::Ref const& args)
+    int EntityManager::SpawnEntity(std::string name, Uint32 pluginId, Tools::Lua::Ref const& args) throw(std::runtime_error)
     {
         auto itPlugin = this->_entityTypes.find(pluginId);
         if (itPlugin == this->_entityTypes.end())

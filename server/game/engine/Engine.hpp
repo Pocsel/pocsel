@@ -10,7 +10,8 @@ namespace Server { namespace Game { namespace Engine {
     class EventManager;
     class EntityManager;
 
-    class Engine
+    class Engine :
+        private boost::noncopyable
     {
     private:
         Tools::Lua::Interpreter* _interpreter;
