@@ -47,7 +47,7 @@ namespace Server { namespace Game { namespace Map {
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
-        this->_messageQueue->SetLoopTimer(10, m);
+        this->_messageQueue->SetLoopTimer(10000, m);
     }
 
     void Map::Stop()
@@ -239,12 +239,7 @@ namespace Server { namespace Game { namespace Map {
         if (chunk->GetCube(cubePos) != 0)
         {
             chunk->SetCube(cubePos, 0);
-
-            for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
-            {
-                auto toto = Network::PacketCreator::Chunk(*chunk);
-                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, toto);
-            }
+            this->_SendChunkToPlayers(chunk);
         }
     }
 
@@ -263,19 +258,21 @@ namespace Server { namespace Game { namespace Map {
             );
 
         if (send)
+            this->_SendChunkToPlayers(chunk);
+    }
+
+    void Map::_SendChunkToPlayers(Chunk* chunk)
+    {
+        for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
         {
-            for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
-            {
-                auto toto = Network::PacketCreator::Chunk(*chunk);
-                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, toto);
-            }
+            auto toto = Network::PacketCreator::Chunk(*chunk);
+            this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
         }
     }
 
     void Map::_Tick(Uint64 currentTime)
     {
         this->_engine->Tick(currentTime);
-        //std::cout << "Map::_Tick" << elapsedTime << "\n";
     }
 
 }}}

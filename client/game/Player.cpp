@@ -88,7 +88,7 @@ namespace Client { namespace Game {
         }
 
         {
-            auto cubes = Common::RayCast::GetResult(this->_camera, 50);
+            auto cubes = Common::RayCast::Ray(this->_camera, 50);
 
             Common::CubePosition cubePos;
 
