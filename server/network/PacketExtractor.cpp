@@ -74,10 +74,11 @@ namespace Server { namespace Network {
         p.Read(cam);
     }
 
-    void PacketExtractor::Action(Common::Packet const& p, Common::Camera& cam, Common::CubePosition& cubePos)
+    void PacketExtractor::Action(Common::Packet const& p, Common::Camera& cam, Common::CubePosition& cubePos, Uint32& actionId)
     {
         p.Read(cam);
         p.Read(cubePos);
+        p.Read(actionId);
     }
 
 }}

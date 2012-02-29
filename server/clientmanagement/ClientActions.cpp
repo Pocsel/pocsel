@@ -142,23 +142,18 @@ namespace Server { namespace ClientManagement {
 
             Common::Camera cam;
             Common::CubePosition cubePos;
+            Uint32 actionId;
 
-            Network::PacketExtractor::Action(packet, cam, cubePos);
+            Network::PacketExtractor::Action(packet, cam, cubePos, actionId);
 
-//            auto& world = cam.position.world;
-//            auto& chunk = cam.position.chunk;
-//            auto& dir = cam.direction;
-//            std::cout <<
-//                "ACTION: \n" <<
-//                "   world: " << world.x << ", " << world.y << ", " << world.z << "\n" <<
-//                "   chunk: " << chunk.x << ", " << chunk.y << ", " << chunk.z << "\n" <<
-//                "   dir: " << dir.x << ", " << dir.y << ", " << dir.z << "\n" <<
-//                "TARGETCUBE:\n"
-//                "   world: " << cubePos.world.x << ", " << cubePos.world.y << ", " << cubePos.world.z << "\n" <<
-//                "   chunk: " << cubePos.chunk.x << ", " << cubePos.chunk.y << ", " << cubePos.chunk.z << "\n\n";
-
-            manager.GetServer().GetGame().PlayerAction(client.id, cam, cubePos);
+            if (actionId == 1)
+                manager.GetServer().GetGame().PlayerAction(client.id, cam, cubePos);
+            else if (actionId == 2)
+                manager.GetServer().GetGame().PlayerAction2(client.id, cam, cubePos);
+            else
+                Tools::log << "client " << client.id << ": unknown action " << actionId << ".\n";
         }
+
     }}
 
     void ClientActions::HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)

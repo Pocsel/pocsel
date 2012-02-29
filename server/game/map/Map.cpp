@@ -95,6 +95,24 @@ namespace Server { namespace Game { namespace Map {
         this->GetChunk(Chunk::CoordsToId(pos.world), cb);
     }
 
+    void Map::DestroyCubes(std::vector<Common::CubePosition> const& pos)
+    {
+        std::map<Chunk::IdType, std::vector<Chunk::CoordsType>> positions;
+
+        std::for_each(pos.begin(), pos.end(), [&positions](Common::CubePosition const& p)
+            {
+                positions[Chunk::CoordsToId(p.world)].push_back(p.chunk);
+            }
+            );
+
+        std::for_each(positions.begin(), positions.end(), [this](std::pair<Chunk::IdType const, std::vector<Chunk::CoordsType>>& p)
+            {
+                ChunkCallback cb(std::bind(&Map::_DestroyCubes, this, std::placeholders::_1, p.second));
+                this->GetChunk(p.first, cb);
+            }
+            );
+    }
+
     void Map::AddPlayer(std::shared_ptr<Player> const& p)
     {
         Tools::SimpleMessageQueue::Message
@@ -227,6 +245,30 @@ namespace Server { namespace Game { namespace Map {
         {
             chunk->SetCube(cubePos, 0);
 
+            for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+            {
+                auto toto = Network::PacketCreator::Chunk(*chunk);
+                this->_game.GetServer().GetClientManager().SendPacket(it->second->id, toto);
+            }
+        }
+    }
+
+    void Map::_DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos)
+    {
+        bool send = false;
+
+        std::for_each(cubePos.begin(), cubePos.end(), [chunk, &send](Chunk::CoordsType& pos)
+            {
+                if (chunk->GetCube(pos) != 0)
+                {
+                    chunk->SetCube(pos, 0);
+                    send = true;
+                }
+            }
+            );
+
+        if (send)
+        {
             for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
             {
                 auto toto = Network::PacketCreator::Chunk(*chunk);
