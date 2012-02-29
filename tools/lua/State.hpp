@@ -24,10 +24,12 @@ namespace Tools { namespace Lua {
     private:
         Interpreter& _interpreter;
         lua_State* _state;
+        std::unordered_map<std::size_t, Ref> _metaTables;
 
     public:
         State(Interpreter& interpreter) throw(std::runtime_error);
         ~State() throw();
+        void RegisterMetaTable(Ref const& metaTable, std::size_t hash) throw();
         Ref MakeBoolean(bool val) throw();
         Ref MakeFunction(std::function<void(CallHelper&)> val) throw();
         Ref MakeNil() throw();
@@ -36,10 +38,11 @@ namespace Tools { namespace Lua {
         Ref MakeString(std::string const& val) throw();
         Ref MakeTable() throw();
         Ref MakeUserData(void** data, size_t size) throw(std::runtime_error);
-        template <typename T>
+        template<typename T>
             Ref Make(T const& val) throw();
         operator lua_State*() const throw() { return this->_state; }
         Interpreter& GetInterpreter() throw() { return this->_interpreter; }
+        Ref GetMetaTable(std::size_t hash) throw(std::runtime_error);
     };
 
     template<> Ref State::Make<bool>(bool const& val) throw();

@@ -1,6 +1,7 @@
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Iterator.hpp"
+#include "tools/lua/MetaTable.hpp"
 #include "tools/Matrix4.hpp"
 
 void f(Tools::Lua::CallHelper& call)
@@ -19,34 +20,57 @@ void f(Tools::Lua::CallHelper& call)
 
 using namespace Tools::Lua;
 
+void TestFunction(int test)
+{
+    std::cout << test << std::endl;
+}
+
 void Init(Interpreter& i)
 {
     auto n = i.MakeTable();
-    auto metaTable = i.MakeTable();
-    auto prototype = i.MakeTable();
+    MetaTable m(i, Tools::Matrix4<float>());
     i.Globals().Set("Matrix4f", n);
-    prototype.Set("Rotate", i.MakeFunction([](CallHelper& helper) { }));
-    prototype.Set("Dump", i.MakeFunction(
+    m.AddMethod("Rotate", [](CallHelper& helper) { });
+    m.AddMethod("Dump", 
         [](CallHelper& helper)
         {
-            auto self = helper.PopArg();
-            auto m = (Tools::Matrix4<float>*)self.CheckUserData();
+            auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
             for (int i = 0; i < 4; ++i)
                 Tools::log << m->m[i][0] << ", " << m->m[i][1] << ", " << m->m[i][2] << ", " << m->m[i][3] << "\n";
-        }));
-    metaTable.Set("__index", prototype);
-    metaTable.Set("__gc", i.MakeFunction([](CallHelper& helper) { auto m = (Tools::Matrix4<float>*)helper.PopArg().CheckUserData(); m->~Matrix4<float>(); }));
+        });
+    m.AddMetaMethod(MetaTable::Call,
+        [](CallHelper& helper) { Tools::log << "call !\n"; });
+    m.AddMetaMethod(
+        MetaTable::Collect,
+        [](CallHelper& helper) { helper.PopArg().Check<Tools::Matrix4<float>*>()->~Matrix4<float>(); });
+    i.Bind(&Tools::Matrix4<float>::Translate, std::placeholders::_1, std::placeholders::_2);
+    //i.Bind(&Tools::Vector2f::Dot, std::placeholders::_1, std::placeholders::_2);
+    m.AddMetaMethod(
+        MetaTable::Multiply,// i.Bind(&Tools::Matrix4<float>::operator*, std::placeholders::_1, std::placeholders::_2));
+        [m](CallHelper& helper)
+        {
+            auto m1 = helper.PopArg().Check<Tools::Matrix4<float>*>();
+            auto m2 = helper.PopArg().Check<Tools::Matrix4<float>*>();
+
+            helper.PushRet(helper.GetInterpreter().Make(m1->operator *(*m2)));
+        });
 
     n.Set("New", i.MakeFunction(
-        [metaTable](CallHelper& helper)
+        [](CallHelper& helper)
         {
-            Tools::Matrix4<float>* matrix;
-            auto table = helper.GetInterpreter().MakeUserData((void**)&matrix, sizeof(*matrix));
-            *matrix = Tools::Matrix4<float>::identity;
-            table.SetMetaTable(metaTable);
-            helper.PushRet(table);
+            helper.PushRet(helper.GetInterpreter().Make(Tools::Matrix4<float>::identity));
         }));
 }
+
+class A
+{
+public:
+    A Print(int i)
+    {
+        std::cout << "AAA" << i << "\n";
+        return A();
+    }
+};
 
 int main(int, char**)
 {
@@ -56,7 +80,8 @@ int main(int, char**)
 
     i.DoString("test = {} test[4] = 23.34");
 
-    Tools::Lua::Ref bite = i.MakeFunction(std::bind(&f, std::placeholders::_1));
+    Tools::Lua::Ref bite = i.Bind(&f, std::placeholders::_1);
+    //Tools::Lua::Ref bite = i.MakeFunction(std::bind(&f, std::placeholders::_1));
 
     try
     {
@@ -121,8 +146,29 @@ int main(int, char**)
     Init(i);
     i.DoString("m = Matrix4f.New()");
     i.DoString("m:Dump()");
+    i.DoString("m()");
+    i.DoString("m2 = Matrix4f.New()");
+    i.DoString("m3 = m * m2");
+    i.DoString("m3:Dump()");
+    i.Globals().Set("TestFunction", i.Bind(&TestFunction));
+    i.DoString("TestFunction(10)");
+
+    MetaTable mA(i, A());
+    auto r = i.Globals().Set("A", i.Bind(&A::Print, std::placeholders::_1, std::placeholders::_2));
+    r(A(), 50);
+
+
+    MetaTable mVector2d(i, Tools::Vector2d());
+    i.Bind(&Tools::Vector2d::Normalize, std::placeholders::_1);
+    //i.Bind(&Tools::Vector2d::Dot, std::placeholders::_1, std::placeholders::_2);
+
+    //auto tmp = std::bind(&A::Print, std::placeholders::_1, std::placeholders::_2);
+    //tmp(A(), 10);
 
     i.DumpStack();
 
+#ifdef _WIN32
+    std::cin.get();
+#endif
     return 0;
 }

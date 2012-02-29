@@ -98,6 +98,13 @@ namespace Tools { namespace Lua {
     template<> float Ref::To<float>() const throw();
     template<> std::string Ref::To<std::string>() const throw();
 
+    template<class T>
+    inline T Ref::Check() const throw(std::runtime_error)
+    {
+        if (this->GetMetaTable() != this->_state.GetMetaTable(typeid(std::remove_pointer<T>::type).hash_code()))
+            throw std::runtime_error(std::string("Lua::Ref: Value is not of ") + typeid(std::remove_pointer<T>::type).name() + " type");
+        return reinterpret_cast<T>(this->CheckUserData());
+    }
     template<> bool Ref::Check<bool>() const throw(std::runtime_error);
     template<> int Ref::Check<int>() const throw(std::runtime_error);
     template<> unsigned int Ref::Check<unsigned int>() const throw(std::runtime_error);
@@ -124,7 +131,7 @@ namespace Tools { namespace Lua {
         inline Ref Ref::operator ()(T a1) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
-            callHelper.PushArg(this->_state.Make(a1));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a1));
             (*this)(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
@@ -135,8 +142,8 @@ namespace Tools { namespace Lua {
         inline Ref Ref::operator ()(T a1, U a2) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
-            callHelper.PushArg(this->_state.Make(a1));
-            callHelper.PushArg(this->_state.Make(a2));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a1));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a2));
             (*this)(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
@@ -147,9 +154,9 @@ namespace Tools { namespace Lua {
         inline Ref Ref::operator ()(T a1, U a2, V a3) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
-            callHelper.PushArg(this->_state.Make(a1));
-            callHelper.PushArg(this->_state.Make(a2));
-            callHelper.PushArg(this->_state.Make(a3));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a1));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a2));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a3));
             (*this)(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
@@ -160,10 +167,10 @@ namespace Tools { namespace Lua {
         inline Ref Ref::operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error)
         {
             CallHelper callHelper(this->_state.GetInterpreter());
-            callHelper.PushArg(this->_state.Make(a1));
-            callHelper.PushArg(this->_state.Make(a2));
-            callHelper.PushArg(this->_state.Make(a3));
-            callHelper.PushArg(this->_state.Make(a4));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a1));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a2));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a3));
+            callHelper.PushArg(this->_state.GetInterpreter().Make(a4));
             (*this)(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();

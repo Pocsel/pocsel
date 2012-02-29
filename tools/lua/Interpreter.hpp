@@ -51,14 +51,47 @@ namespace Tools { namespace Lua {
         Ref MakeTable() throw() { return this->_state->MakeTable(); }
         Ref MakeUserData(void** data, size_t size) throw(std::runtime_error) { return this->_state->MakeUserData(data, size); }
         template <typename T>
-            Ref Make(T val) throw() { return this->_state->Make(val); }
+        Ref Make(T val) throw(std::runtime_error);
         // other stuff
         State& GetState() throw() { return *this->_state; }
         void DumpStack() const throw();
+
+        template<class T>
+        Ref Bind(T function);
+        template<class T, class TA1>
+        Ref Bind(T function, TA1 arg1);
+        template<class T, class TA1, class TA2>
+        Ref Bind(T function, TA1 arg1, TA2 arg2);
+        template<class T, class TA1, class TA2, class TA3>
+        Ref Bind(T function, TA1 arg1, TA2 arg2, TA3 arg3);
     private:
         std::string _Serialize(Ref const& ref, unsigned int level) const throw(std::runtime_error);
     };
 
+    template <typename T>
+    inline Ref Interpreter::Make(T val) throw(std::runtime_error)
+    {
+        auto m = this->_state->GetMetaTable(typeid(T).hash_code());
+        T* luaValue;
+        auto r = this->_state->MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
+        *luaValue = val;
+        r.SetMetaTable(m);
+        return r;
+    }
+    template<> inline Ref Interpreter::Make<bool>(bool val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<int>(int val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<unsigned int>(unsigned int val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<char>(char val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<unsigned char>(unsigned char val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<double>(double val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<float>(float val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<std::string>(std::string val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<char const*>(char const* val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<std::function<void(CallHelper&)>>(std::function<void(CallHelper&)> val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<Ref>(Ref val) throw(std::runtime_error) { return this->_state->Make(val); }
+
 }}
+
+#include "tools/lua/Function.cpp"
 
 #endif

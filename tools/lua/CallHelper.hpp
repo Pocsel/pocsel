@@ -6,8 +6,7 @@ namespace Tools { namespace Lua {
     class Interpreter;
     class Ref;
 
-    class CallHelper :
-        private boost::noncopyable
+    class CallHelper
     {
     private:
         Interpreter& _i;

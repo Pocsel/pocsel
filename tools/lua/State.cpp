@@ -1,3 +1,5 @@
+#include "tools/precompiled.hpp"
+
 #include "tools/lua/Lua.hpp"
 #include "tools/lua/State.hpp"
 #include "tools/lua/CallHelper.hpp"
@@ -60,7 +62,13 @@ namespace Tools { namespace Lua {
 
     State::~State() throw()
     {
+        this->_metaTables.clear();
         lua_close(this->_state);
+    }
+
+    void State::RegisterMetaTable(Ref const& metaTable, std::size_t hash) throw()
+    {
+        this->_metaTables.insert(std::unordered_map<std::size_t, Ref>::value_type(hash, metaTable));
     }
 
     Ref State::MakeBoolean(bool val) throw()
@@ -161,4 +169,11 @@ namespace Tools { namespace Lua {
             return val;
         }
 
+    Ref State::GetMetaTable(std::size_t hash) throw(std::runtime_error)
+    {
+        auto it = this->_metaTables.find(hash);
+        if (it == this->_metaTables.end())
+            throw std::runtime_error("Lua::State: MetaTable not found");
+        return it->second;
+    }
 }}
