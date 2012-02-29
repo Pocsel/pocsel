@@ -16,10 +16,12 @@ namespace Client { namespace Game {
 
     TargetedCubeRenderer::TargetedCubeRenderer(Game& game) :
         _game(game),
-        _renderer(game.GetClient().GetWindow().GetRenderer())
+        _renderer(game.GetClient().GetWindow().GetRenderer()),
+        _elapsedTime(0)
     {
-        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("BaseShaderTexture.cgfx");
+        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.cgfx");
         this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
+        this->_shaderTime = this->_shader->GetParameter("time").release();
 
         this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("CubeTarget.png");
 
@@ -29,19 +31,11 @@ namespace Client { namespace Game {
     TargetedCubeRenderer::~TargetedCubeRenderer()
     {
         Tools::Delete(this->_shaderTexture);
+        Tools::Delete(this->_shaderTime);
     }
 
     void TargetedCubeRenderer::Render(Common::CubePosition const& pos)
     {
-//        static const unsigned char indices[] = {
-//            2, 1, 3, 0,
-//            6, 5, 7, 4,
-//            10, 9, 11, 8,
-//            14, 13, 15, 12,
-//            18, 17, 19, 16,
-//            22, 21, 23, 20
-//        };
-
         auto const& camera = this->_game.GetPlayer().GetCamera();
 
         this->_shader->BeginPass();
@@ -55,12 +49,17 @@ namespace Client { namespace Game {
         this->_vertexBuffer->Bind();
         this->_texture->Bind();
         this->_shaderTexture->Set(*this->_texture);
-//        this->_renderer.DrawElements(sizeof(indices), Tools::Renderers::DataType::UnsignedByte, indices, Tools::Renderers::DrawingMode::TrianglesStrip);
+        this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
         this->_renderer.DrawVertexBuffer(0, 6*6);
         this->_texture->Unbind();
         this->_vertexBuffer->Unbind();
 
         this->_shader->EndPass();
+    }
+
+    void TargetedCubeRenderer::Update(Uint32 time)
+    {
+        this->_elapsedTime += time;
     }
 
     void TargetedCubeRenderer::_InitVertexBuffer()

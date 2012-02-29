@@ -104,8 +104,9 @@ namespace Client { namespace Game {
                 else
                     this->_targetedCube = new Common::CubePosition(cubePos);
             }
-
         }
+
+        this->_targetedCubeRenderer->Update(time);
     }
 
     void Player::SetPosition(Common::Position const& pos)
