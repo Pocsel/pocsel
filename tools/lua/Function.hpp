@@ -173,7 +173,8 @@ namespace Tools { namespace Lua {
     template<class T>
     inline T Ref::Check() const throw(std::runtime_error)
     {
-        if (this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
+        // Pas la peine de vérifier si c'est la bonne metatable, le lua ne peut pas modifier la metatable d'un UserData
+        if (!(this->IsUserData() || this->IsLightUserData()) || this->GetMetaTable().IsNoneOrNil())
             throw std::runtime_error(std::string("Lua::Ref: Value is not of ") + typeid(typename std::remove_pointer<T>::type).name() + " type");
         return reinterpret_cast<T>(this->CheckUserData());
     }

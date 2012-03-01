@@ -27,6 +27,7 @@ namespace {
             }
             catch (std::exception& e)
             {
+                Tools::debug << "_LuaCall error: " << e.what() << ".\n"; // Lors du lua_close, les erreurs sont ignorées
                 lua_pushstring(state, e.what());
                 goto error;
             }
