@@ -46,7 +46,7 @@ namespace Tools { namespace Lua {
         return r;
     }
 
-    void Interpreter::RegisterLib(LibId lib) const throw(std::runtime_error)
+    void Interpreter::RegisterLib(LibId lib) throw(std::runtime_error)
     {
         char const* name;
         lua_CFunction func;
@@ -95,6 +95,18 @@ namespace Tools { namespace Lua {
             e += lua_tostring(*this->_state, -1);
             lua_pop(*this->_state, 1);
             throw std::runtime_error(e);
+        }
+        if (lib == Base)
+        {
+            auto oldGetmetatable = this->Globals()["getmetatable"];
+            this->Globals().Set("getmetatable", this->MakeFunction(
+                [oldGetmetatable](CallHelper& helper)
+                {
+                    auto obj = helper.GetArgList().front();
+                    if (obj.IsUserData() || obj.IsLightUserData())
+                        throw std::runtime_error("getmetatable can be used only on \"Table\"");
+                    oldGetmetatable(helper);
+                }));
         }
     }
 
