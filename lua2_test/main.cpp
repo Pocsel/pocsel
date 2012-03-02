@@ -166,7 +166,7 @@ int main(int, char**)
         }
         catch (std::exception& e)
         {
-            Tools::log << "getmetatable(UserData): " << e.what() << "\n";
+            Tools::log << "call \"Matrix4<float>::Dump\" with a variable of type \"A\": " << e.what() << "\n";
         }
         try
         {
