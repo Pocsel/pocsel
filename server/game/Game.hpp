@@ -27,7 +27,7 @@ namespace Server { namespace Game {
         private boost::noncopyable
     {
     public:
-        typedef std::function<void(std::unique_ptr<Common::Packet>)> ChunkPacketCallback;
+        typedef std::function<void(std::unique_ptr<Common::Packet>&)> ChunkPacketCallback;
 
     private:
         Server& _server;
@@ -49,6 +49,7 @@ namespace Server { namespace Game {
 
         void PlayerTeleportOk(Uint32 id);
         void PlayerAction(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos);
+        void PlayerAction2(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos);
 
         // Thread safe
         void SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);

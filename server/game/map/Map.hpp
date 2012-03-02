@@ -6,7 +6,7 @@
 #include "server/Chunk.hpp"
 
 namespace Common {
-    struct Packet;
+    class Packet;
     struct Position;
     struct CubePosition;
 }
@@ -24,9 +24,6 @@ namespace Server { namespace Game {
     namespace Engine {
         class Engine;
     }
-    namespace Entities {
-        class EntityManager;
-    }
 }}
 
 namespace Server { namespace Game { namespace Map {
@@ -38,7 +35,7 @@ namespace Server { namespace Game { namespace Map {
     {
     public:
         typedef std::function<void(Chunk*)> ChunkCallback;
-        typedef std::function<void(std::unique_ptr<Common::Packet>)> ChunkPacketCallback;
+        typedef std::function<void(std::unique_ptr<Common::Packet>&)> ChunkPacketCallback;
         typedef std::function<void(Common::Position const& pos)> SpawnCallback;
 
     private:
@@ -52,7 +49,6 @@ namespace Server { namespace Game { namespace Map {
 
         std::map<Uint32, std::shared_ptr<Player>> _players;
         Common::Position* _spawnPosition;
-        Entities::EntityManager* _entityManager;
         Engine::Engine* _engine;
         ChunkManager* _chunkManager;
 
@@ -64,6 +60,7 @@ namespace Server { namespace Game { namespace Map {
         void Stop();
 
         std::string const& GetName() const { return this->_conf.name; }
+        Engine::Engine& GetEngine() { return *this->_engine; }
 
         // threadsafe
         void HandleNewChunk(Chunk* chunk);
@@ -71,6 +68,7 @@ namespace Server { namespace Game { namespace Map {
         void GetChunk(Chunk::IdType id, ChunkCallback& response);
         void GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response);
         void DestroyCube(Common::CubePosition const& pos);
+        void DestroyCubes(std::vector<Common::CubePosition> const& pos);
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
 
@@ -83,7 +81,9 @@ namespace Server { namespace Game { namespace Map {
         void _AddPlayer(std::shared_ptr<Player> p);
         void _RemovePlayer(Uint32 id);
         void _DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos);
-        void _Tick(Uint32 elapsedTime);
+        void _DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos);
+        void _SendChunkToPlayers(Chunk* chunk);
+        void _Tick(Uint64 currentTime);
     };
 
 }}}

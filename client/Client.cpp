@@ -94,7 +94,7 @@ namespace Client {
                 this->_menu->GetLoadingScreen().Render("Waiting for position...", 0);
                 break;
             case LoadingChunks:
-                this->_menu->GetLoadingScreen().Render("Downloading chunks...", this->_game->GetMap().GetLoadingProgression());
+                this->_menu->GetLoadingScreen().Render("Downloading & generating chunks...", this->_game->GetMap().GetLoadingProgression());
                 this->_game->GetMap().GetChunkManager().UpdateLoading();
                 if (this->_game->GetMap().GetLoadingProgression() >= 1.0f)
                 {
@@ -133,7 +133,7 @@ namespace Client {
         return boost::exit_success;
     }
 
-    void Client::Login(Uint32 clientId, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes)
+    void Client::Login(Uint32 clientId, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash)
     {
         if (this->_state != LoggingIn)
             throw std::runtime_error("Bad client state");
@@ -141,7 +141,7 @@ namespace Client {
         this->_state = LoadingResources;
         if (this->_game)
             delete this->_game;
-        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes);
+        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes, worldBuildHash);
     }
 
     void Client::LoadChunks()

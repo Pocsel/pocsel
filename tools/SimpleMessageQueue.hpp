@@ -9,19 +9,19 @@ namespace Tools {
     {
     public:
         typedef std::function<void(void)> Message;
-        typedef std::function<void(Uint32)> TimerLoopMessage;
+        typedef std::function<void(Uint64)> TimerLoopMessage;
 
     private:
         struct SmqTimer
         {
             boost::asio::deadline_timer timer;
-            Uint32 ms;
+            Uint64 us;
             TimerLoopMessage message;
             Timer chrono;
-            Uint32 lastTime;
-            SmqTimer(boost::asio::io_service& io, Uint32 ms, TimerLoopMessage& m) :
-                timer(io, boost::posix_time::milliseconds(ms)),
-                ms(ms),
+            Uint64 lastTime;
+            SmqTimer(boost::asio::io_service& io, Uint64 us, TimerLoopMessage& m) :
+                timer(io, boost::posix_time::microseconds(us)),
+                us(us),
                 message(m),
                 chrono(),
                 lastTime(0)
@@ -41,16 +41,15 @@ namespace Tools {
     public:
         SimpleMessageQueue(unsigned int nbThreads);
         ~SimpleMessageQueue();
-        void SetLoopTimer(Uint32 ms, TimerLoopMessage& message);
+        void SetLoopTimer(Uint64 us, TimerLoopMessage& message);
         void PushMessage(Message& message);
-        void PushTimedMessage(Uint32 ms, Message& message);
+        void PushTimedMessage(Uint64 us, Message& message);
         void Start();
         void Stop();
 
     private:
-        void _SetLoopTimer(Uint32 ms, TimerLoopMessage& message);
-        void _ExecLoopTimer(Uint32 index, boost::system::error_code const& error);
-        void _ExecTimedMessage(TimerLoopMessage& message,
+        void _ExecLoopTimer(size_t index, boost::system::error_code const& error);
+        void _ExecTimedMessage(Message& message,
                                std::shared_ptr<boost::asio::deadline_timer>,
                                boost::system::error_code const& error);
         void _Run();

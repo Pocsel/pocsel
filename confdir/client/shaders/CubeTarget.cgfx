@@ -1,0 +1,58 @@
+float4x4 mvp : WorldViewProjection;
+float time;
+
+sampler2D baseTex = sampler_state
+{
+    minFilter = Linear;
+    magFilter = Linear;
+};
+
+struct VSout
+{
+   float4 position : POSITION;
+   float2 texCoord : TEXCOORD0;
+};
+
+VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
+{
+   VSout vout;
+   vout.position = mul(mvp, position);
+
+   vout.texCoord = texCoord;
+   return vout;
+}
+
+float4 fs(in VSout v) : COLOR
+{
+   v.texCoord.x = 0.5 - abs(v.texCoord.x - 0.5);
+   v.texCoord.y = 0.5 - abs(v.texCoord.y - 0.5);
+
+   float2 ddd = float2((v.texCoord.x - 0.5) * 2.0, (v.texCoord.y - 0.5) * 2.0);
+
+   ddd.x = (ddd.x * ddd.x);
+   ddd.y = (ddd.y * ddd.y);
+
+   float2 coord;
+   coord.x = v.texCoord.x + ddd.y * cos(time * 3.01) * (0.5 - abs(v.texCoord.x - 0.5));
+   coord.y = v.texCoord.y + ddd.x * cos(time * 3.01) * (0.5 - abs(v.texCoord.y - 0.5));
+
+   return tex2D(baseTex, coord);
+}
+
+technique tech
+{
+   pass p0
+   {
+       VertexProgram = compile glslv vs();
+       FragmentProgram = compile glslf fs();
+   }
+}
+
+technique tech_arb
+{
+   pass p0
+   {
+       VertexProgram = compile arbvp1 vs();
+       FragmentProgram = compile arbfp1 fs();
+   }
+}

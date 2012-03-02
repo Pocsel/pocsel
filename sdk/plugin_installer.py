@@ -5,6 +5,7 @@ import argparse
 import os
 import sqlite3
 import sys
+import time
 import traceback
 
 from sdk import tools, tcworld
@@ -57,6 +58,7 @@ world_tables = [
             "fullname TEXT",
             "format_version INTEGER",
             "identifier TEXT",
+            "build_hash TEXT",
         ]
     ),
     (
@@ -128,7 +130,8 @@ def main():
         pluginconn = lambda: sqlite3.connect(os.path.join(plugins_dir, plugin))
         tcworld.installPlugin(worldconn, pluginconn, version)
 
-    tcworld.finalizeWorld(worldconn, fullname, identifier, format_version)
+    build_hash = str(time.time())
+    tcworld.finalizeWorld(worldconn, fullname, identifier, format_version, build_hash)
 
 if __name__ == '__main__':
     try:

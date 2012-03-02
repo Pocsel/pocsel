@@ -71,7 +71,7 @@ namespace Server { namespace ClientManagement {
         this->_messageQueue.PushMessage(m);
     }
 
-    void ClientManager::SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet> packet)
+    void ClientManager::SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_SendPacket, this, clientId, packet.release()));
@@ -118,8 +118,9 @@ namespace Server { namespace ClientManagement {
             this->_server.GetGame().GetWorld().GetIdentifier(),
             this->_server.GetGame().GetWorld().GetFullname(),
             this->_server.GetGame().GetWorld().GetVersion(),
-            static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()))
-            ));
+            static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()),
+            this->_server.GetGame().GetWorld().GetBuildHash()
+            )));
 
         Tools::log << "Client logged in: " << login2 << "\n";
     }

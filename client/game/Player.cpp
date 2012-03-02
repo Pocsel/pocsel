@@ -1,6 +1,7 @@
 #include "client/precompiled.hpp"
 
 #include "client/game/Player.hpp"
+#include "client/game/TargetedCubeRenderer.hpp"
 #include "client/network/PacketDispatcher.hpp"
 #include "client/window/InputManager.hpp"
 #include "client/window/Window.hpp"
@@ -21,7 +22,10 @@ namespace Client { namespace Game {
     Player::Player(Game& game) :
         _game(game),
         _moved(false),
-        _movedTime(0)
+        _movedTime(0),
+        _sprint(false),
+        _targetedCube(0),
+        _targetedCubeRenderer(new TargetedCubeRenderer(game))
     {
         this->_actionBinder.Bind(BindAction::Forward, BindAction::Held, std::bind(&Player::MoveForward, this));
         this->_actionBinder.Bind(BindAction::Backward, BindAction::Held, std::bind(&Player::MoveBackward, this));
@@ -31,11 +35,24 @@ namespace Client { namespace Game {
         this->_actionBinder.Bind(BindAction::Jump, BindAction::Held, std::bind(&Player::Jump, this));
         this->_actionBinder.Bind(BindAction::Crouch, BindAction::Held, std::bind(&Player::Crouch, this));
 
-        //this->_actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Player::Action, this));
-        this->_actionBinder.Bind(BindAction::Fire, BindAction::Held, std::bind(&Player::Action, this));
+        this->_actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Player::Action, this));
+        //this->_actionBinder.Bind(BindAction::Fire, BindAction::Held, std::bind(&Player::Action, this));
 
         this->_actionBinder.Bind(BindAction::AltFire, BindAction::Pressed, std::bind(&Player::SuperAction, this));
         //this->_actionBinder.Bind(BindAction::AltFire, BindAction::Held, std::bind(&Player::SuperAction, this));
+
+        this->_actionBinder.Bind(BindAction::ToggleSprint, BindAction::Pressed, std::bind(&Player::ToggleSprint, this));
+    }
+
+    Player::~Player()
+    {
+        Tools::Delete(this->_targetedCubeRenderer);
+    }
+
+    void Player::Render()
+    {
+        if (this->_targetedCube != 0)
+            this->_targetedCubeRenderer->Render(*this->_targetedCube);
     }
 
     void Player::UpdateMovements(Uint32 time)
@@ -67,8 +84,29 @@ namespace Client { namespace Game {
                 Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), this->_camera)
                 );
             this->_moved = false;
-            this->_movedTime = 0;
+            this->_movedTime %= 40;
         }
+
+        {
+            auto cubes = Common::RayCast::Ray(this->_camera, 50);
+
+            Common::CubePosition cubePos;
+
+            if (!this->_game.GetMap().GetFirstCube(cubes, cubePos))
+            {
+                Tools::Delete(this->_targetedCube);
+                this->_targetedCube = 0;
+            }
+            else
+            {
+                if (this->_targetedCube != 0)
+                    *this->_targetedCube = cubePos;
+                else
+                    this->_targetedCube = new Common::CubePosition(cubePos);
+            }
+        }
+
+        this->_targetedCubeRenderer->Update(time);
     }
 
     void Player::SetPosition(Common::Position const& pos)
@@ -78,12 +116,12 @@ namespace Client { namespace Game {
 
     void Player::MoveForward()
     {
-        this->_Move(this->_camera.direction * (this->_elapsedTime / 100.0f));
+        this->_Move(this->_camera.direction * this->_GetSpeed());
     }
 
     void Player::MoveBackward()
     {
-        this->_Move(-this->_camera.direction * (this->_elapsedTime / 100.0f));
+        this->_Move(-this->_camera.direction * this->_GetSpeed());
     }
 
     void Player::StrafeLeft()
@@ -92,8 +130,7 @@ namespace Client { namespace Game {
         this->_Move(Tools::Vector3f(
             dir.y * 0 - dir.z * -1,
             dir.z * 0 - dir.x * 0,
-            dir.x * -1 - dir.y * 0
-        ) * (this->_elapsedTime / 100.0f));
+            dir.x * -1 - dir.y * 0));
     }
 
     void Player::StrafeRight()
@@ -102,8 +139,7 @@ namespace Client { namespace Game {
         this->_Move(Tools::Vector3f(
             dir.y * 0 - dir.z * 1,
             dir.z * 0 - dir.x * 0,
-            dir.x * 1 - dir.y * 0
-        ) * (this->_elapsedTime / 100.0f));
+            dir.x * 1 - dir.y * 0));
     }
 
     void Player::Jump()
@@ -118,50 +154,61 @@ namespace Client { namespace Game {
 
     void Player::Action()
     {
-        auto cubes = Common::RayCast::GetResult(this->_camera, 50);
-
-//        for (auto it = cubes.begin(), ite = cubes.end(); it != ite; ++it)
-//        {
-//            std::cout << "CHUNK " << Map::Chunk::CoordsToId(it->world) << ": " <<
-//                it->chunk.x << ", " << it->chunk.y << ", " << it->chunk.z << "\n";
-//        }
-//
-//        std::cout << "\n-------\n\n";
-
-        Common::CubePosition cubePos;
-
-        if (!this->_game.GetMap().GetFirstCube(cubes, cubePos))
-        {
-            cubePos = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
-//            std::cout << "FAIL: " << Map::Chunk::CoordsToId(cubePos.world) << ": " <<
-//                cubePos.chunk.x << ", " << cubePos.chunk.y << ", " << cubePos.chunk.z << "\n";
-        }
-
+        Common::CubePosition target;
+        if (this->_targetedCube != 0)
+            target = *this->_targetedCube;
+        else
+            target = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
 
         this->_game.GetClient().GetNetwork().SendUdpPacket(
-            Network::PacketCreator::Action(this->_game.GetClient().GetClientId(), this->_camera, cubePos)
+            Network::PacketCreator::Action(
+                this->_game.GetClient().GetClientId(),
+                this->_camera,
+                target,
+                1
+                )
             );
     }
 
     void Player::SuperAction()
     {
-        auto cubes = Common::RayCast::GetResult(this->_camera, 50);
+        Common::CubePosition target;
+        if (this->_targetedCube != 0)
+            target = *this->_targetedCube;
+        else
+            target = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
 
-        for (auto it = cubes.begin(), ite = cubes.end(); it != ite; ++it)
-        {
-            this->_game.GetClient().GetNetwork().SendUdpPacket(
-                Network::PacketCreator::Action(this->_game.GetClient().GetClientId(), this->_camera, *it)
-                );
-        }
+
+        Common::Camera& cam = this->_camera;
+
+        this->_game.GetClient().GetNetwork().SendUdpPacket(
+            Network::PacketCreator::Action(
+                this->_game.GetClient().GetClientId(),
+                this->_camera,
+                target,
+                2
+                )
+            );
+    }
+
+    void Player::ToggleSprint()
+    {
+        this->_sprint = !this->_sprint;
     }
 
     void Player::_Move(Tools::Vector3f moveVector)
     {
         moveVector.Normalize();
+        moveVector *= this->_GetSpeed();
         Common::Position p = this->_camera.position;
         p += moveVector;
         this->SetPosition(p);
         this->_moved = true;
+    }
+
+    float Player::_GetSpeed()
+    {
+        return this->_elapsedTime / (this->_sprint ? 10.0f : 200.0f);
     }
 
 }}

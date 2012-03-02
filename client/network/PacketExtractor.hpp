@@ -27,7 +27,8 @@ namespace Client { namespace Network {
                 std::string& worldIdentifier,
                 std::string& worldName,
                 Uint32& worldVersion,
-                Common::BaseChunk::CubeType& nbCubeTypes);
+                Common::BaseChunk::CubeType& nbCubeTypes,
+                std::string& worldBuildHash);
         static Uint64 ExtractPing(Common::Packet const& p);
         static void ExtractNeededResourceIds(Common::Packet const& p, Uint32& nbResourceIds, std::list<Uint32>& ids);
         static char const* ExtractResourceRange(Common::Packet const& p,

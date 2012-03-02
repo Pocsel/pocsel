@@ -7,6 +7,8 @@
 #include "tools/lua/Iterator.hpp"
 
 #include "server/game/World.hpp"
+#include "server/game/engine/Engine.hpp"
+#include "server/game/engine/EntityManager.hpp"
 
 #include "server/game/map/Conf.hpp"
 #include "server/game/map/Map.hpp"
@@ -21,13 +23,14 @@ namespace Server { namespace Database {
         auto& curs = conn->GetCursor();
 
         // Meta data
-        curs.Execute("SELECT identifier, fullname, version FROM world");
+        curs.Execute("SELECT identifier, fullname, version, build_hash FROM world");
         if (curs.HasData())
         {
             auto& row = curs.FetchOne();
             world._identifier = row[0].GetString();
             world._fullname = row[1].GetString();
             world._version = row[2].GetInt();
+            world._buildHash = row[3].GetString();
         }
         else
             throw std::runtime_error("World file missing metadata.");
@@ -72,6 +75,31 @@ namespace Server { namespace Database {
         }
         if (world._defaultMap == 0)
             throw std::runtime_error("Cannot find default map");
+
+        // Entity types
+        curs.Execute("SELECT plugin_id, name, lua FROM entity_type");
+        while (curs.HasData())
+        {
+            auto& row = curs.FetchOne();
+            try
+            {
+                auto itMap = world._maps.begin();
+                auto itMapEnd = world._maps.end();
+                for (; itMap != itMapEnd; ++itMap)
+                {
+                    itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row[0].GetUint32());
+                    itMap->second->GetEngine().GetInterpreter().DoString(row[2].GetString());
+                    itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
+                    // XXX test
+//                    itMap->second->GetEngine().GetEntityManager().SpawnEntity("GrosTest", 1, itMap->second->GetEngine().GetInterpreter().MakeNil());
+                }
+            }
+            catch (std::exception& e)
+            {
+                Log::load << "WorldLoader: Failed to load entity file \"" << row[1].GetString() << "\": " << e.what() << Tools::endl;
+                Tools::error << "WorldLoader: Failed to load entity file \"" << row[1].GetString() << "\": " << e.what() << Tools::endl;
+            }
+        }
     }
 
     void WorldLoader::_LoadCubeType(Common::CubeType& descr, std::string const& code, ResourceManager const& manager)

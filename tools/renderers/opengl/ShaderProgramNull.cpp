@@ -16,6 +16,11 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         return std::unique_ptr<IShaderParameter>(new ShaderParameterNull());
     }
 
+    std::unique_ptr<IShaderParameter> ShaderProgramNull::GetParameterFromSemantic(std::string const& semantic)
+    {
+        return std::unique_ptr<IShaderParameter>(new ShaderParameterNull());
+    }
+
     void ShaderProgramNull::UpdateParameter(ShaderParameterUsage::Type usage)
     {
         switch (usage)

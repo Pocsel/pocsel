@@ -31,7 +31,8 @@ namespace Client { namespace Network {
         static std::unique_ptr<UdpPacket> Move(Uint32 id, Common::Camera const& cam);
         static std::unique_ptr<UdpPacket> Action(Uint32 id,
                                                  Common::Camera const& cam,
-                                                 Common::CubePosition const& target);
+                                                 Common::CubePosition const& target,
+                                                 Uint32 actionId);
     };
 
 }}

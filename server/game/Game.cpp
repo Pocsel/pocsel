@@ -3,6 +3,9 @@
 #include "server/game/World.hpp"
 
 #include "common/Position.hpp"
+#include "common/CubePosition.hpp"
+#include "common/RayCast.hpp"
+#include "common/Camera.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
 
@@ -59,7 +62,30 @@ namespace Server { namespace Game {
 
         if (!player->IsInGame())
             return;
+
         player->GetCurrentMap().DestroyCube(targetPos);
+    }
+
+    void Game::PlayerAction2(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos)
+    {
+        auto it = this->_players.find(id);
+        if (it == this->_players.end())
+            return;
+        Player* player = it->second.get();
+
+        if (!player->IsInGame())
+            return;
+
+        Common::Position p0(targetPos.world,
+                            Tools::Vector3f(targetPos.chunk.x + 0.5,
+                                            targetPos.chunk.y + 0.5,
+                                            targetPos.chunk.z + 0.5));
+
+        float dist = (p0 - cam.position).GetMagnitude();
+
+        player->GetCurrentMap().DestroyCubes(Common::RayCast::Ray(cam, 50.0f));
+        if (dist > 1)
+            player->GetCurrentMap().DestroyCubes(Common::RayCast::SphereArea(p0, 120.0f / dist));
     }
 
     void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance)

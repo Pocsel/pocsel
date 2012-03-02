@@ -5,7 +5,7 @@ float3 lightDirection = {-0.704, -0.704, 0};
 float3 fogColor = float3(0.8, 0.8, 0.9);
 float fogEnd = 750.0f;
 
-sampler2D cubeTexture = sampler_state
+sampler2D cubeTexture : TEXUNIT0 = sampler_state
 {
    generateMipMap = true;
    minFilter = LinearMipMapLinear;

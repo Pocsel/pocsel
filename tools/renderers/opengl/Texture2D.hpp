@@ -35,7 +35,6 @@ namespace Tools { namespace Renderers {
         virtual void SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter);
 
     private:
-        void _InitDevIL();
         void _FinishLoading(unsigned int ilID);
         void _FinishLoading(GLint internalFormat, GLenum format, GLvoid const* data, int pixelSize, void const* mipmapData);
     };

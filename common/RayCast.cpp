@@ -4,17 +4,22 @@
 #include "common/CubePosition.hpp"
 
 #define GR_ABS(a) ((a) < 0 ? -(a) : (a))
+#define GR_NEGFLOOR(a) ((a) >= 0 ? \
+                            (int)(a) \
+                        : \
+                            (double)(int)(a) == a ? \
+                                (int)(a) \
+                            : \
+                                (int)((a) - 1) \
+                        )
 
 namespace Common {
 
     namespace {
 
-        void __GetRes(Common::Camera const& cam, float distance,
-                       std::map<double, Tools::Vector3i>& res)
+        void __Ray(Common::Camera const& cam, float distance,
+                   std::map<double, Tools::Vector3i>& res)
         {
-            if (cam.direction.x == 0)
-                return;
-
             double x, y, z;
             const double
                 vx = cam.direction.x,
@@ -30,7 +35,7 @@ namespace Common {
 
             if (vx != 0)
             {
-                if (cam.direction.x < 0)
+                if (vx < 0)
                 {
                     x = (int)px;
                     sign = -1;
@@ -46,9 +51,9 @@ namespace Common {
                     y = py + (dist * vy);
                     z = pz + (dist * vz);
 
-                    res[dist] = Tools::Vector3i((int)x,// - (sign ? 1 : 0),
-                                                (int)y,
-                                                (int)z
+                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x) - (sign < 0 ? 1 : 0),
+                                                (int)GR_NEGFLOOR(y),
+                                                (int)GR_NEGFLOOR(z)
                                                );
                     x += sign;
                 }
@@ -56,7 +61,7 @@ namespace Common {
 
             if (vy != 0)
             {
-                if (cam.direction.y < 0)
+                if (vy < 0)
                 {
                     y = (int)py;
                     sign = -1;
@@ -72,9 +77,9 @@ namespace Common {
                     x = px + (dist * vx);
                     z = pz + (dist * vz);
 
-                    res[dist] = Tools::Vector3i((int)x,
-                                                (int)y,// - (sign ? 1 : 0),
-                                                (int)z
+                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x),
+                                                (int)GR_NEGFLOOR(y) - (sign < 0 ? 1 : 0),
+                                                (int)GR_NEGFLOOR(z)
                                                );
 
                     y += sign;
@@ -83,7 +88,7 @@ namespace Common {
 
             if (vz != 0)
             {
-                if (cam.direction.z < 0)
+                if (vz < 0)
                 {
                     z = (int)pz;
                     sign = -1;
@@ -99,9 +104,9 @@ namespace Common {
                     x = px + (dist * vx);
                     y = py + (dist * vy);
 
-                    res[dist] = Tools::Vector3i((int)x,
-                                                (int)y,
-                                                (int)z// - (sign ? 1 : 0)
+                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x),
+                                                (int)GR_NEGFLOOR(y),
+                                                (int)GR_NEGFLOOR(z) - (sign < 0 ? 1 : 0)
                                                );
 
                     z += sign;
@@ -109,65 +114,181 @@ namespace Common {
             }
         }
 
+        template<typename T>
+        std::vector<Common::CubePosition> __MapToTab(std::map<T, Tools::Vector3i> const& preRes, Common::Position const& pos)
+        {
+            Common::BaseChunk::CoordsType world;
+            Tools::Vector3u chunk;
+
+            std::vector<Common::CubePosition> res;
+
+            for (auto mit = preRes.begin(), mite = preRes.end(); mit != mite; ++mit)
+            {
+                world = pos.world;
+
+                Tools::Vector3i r = mit->second;
+
+                while (r.x < 0)
+                {
+                    r.x += Common::ChunkSize;
+                    world.x -= 1;
+                }
+                while (r.x >= (int)Common::ChunkSize)
+                {
+                    r.x -= Common::ChunkSize;
+                    world.x += 1;
+                }
+                while (r.y < 0)
+                {
+                    r.y += Common::ChunkSize;
+                    world.y -= 1;
+                }
+                while (r.y >= (int)Common::ChunkSize)
+                {
+                    r.y -= Common::ChunkSize;
+                    world.y += 1;
+                }
+                while (r.z < 0)
+                {
+                    r.z += Common::ChunkSize;
+                    world.z -= 1;
+                }
+                while (r.z >= (int)Common::ChunkSize)
+                {
+                    r.z -= Common::ChunkSize;
+                    world.z += 1;
+                }
+
+                chunk.x = r.x;
+                chunk.y = r.y;
+                chunk.z = r.z;
+
+                res.push_back(Common::CubePosition(world, chunk));
+            }
+
+            return res;
+        }
+
     }
 
-    std::vector<Common::CubePosition>RayCast::GetResult(Common::Camera const& cam, float distance)
+    std::vector<Common::CubePosition> RayCast::Ray(Common::Camera const& cam, float distance)
     {
         std::map<double, Tools::Vector3i> preRes;
 
-        __GetRes(cam, distance, preRes);
-
-        std::vector<Common::CubePosition> res;
-
-        Common::BaseChunk::CoordsType world;
-        Tools::Vector3u chunk;
+        __Ray(cam, distance, preRes);
 
 
-        for (auto mit = preRes.begin(), mite = preRes.end(); mit != mite; ++mit)
+        return __MapToTab(preRes, cam.position);
+    }
+
+    namespace {
+
+        void __SphereArea(Common::Position const& pos, float distance,
+                    std::vector<Tools::Vector3i>& res)
         {
-            world = cam.position.world;
+            double sqdist = (double)distance * (double)distance;
 
-            Tools::Vector3i r = mit->second;
-
-            while (r.x < 0)
+            for (double x = -distance; x < distance; x += 1)
             {
-                r.x += Common::ChunkSize;
-                world.x -= 1;
+                for (double y = -distance; y < distance; y += 1)
+                {
+                    for (double z = -distance; z < distance; z += 1)
+                    {
+                        if (x*x+y*y+z*z < sqdist)
+                            res.push_back(Tools::Vector3i(x + pos.chunk.x, y + pos.chunk.y, z + pos.chunk.z));
+                    }
+                }
             }
-            while (r.x >= (int)Common::ChunkSize)
-            {
-                r.x -= Common::ChunkSize;
-                world.x += 1;
-            }
-            while (r.y < 0)
-            {
-                r.y += Common::ChunkSize;
-                world.y -= 1;
-            }
-            while (r.y >= (int)Common::ChunkSize)
-            {
-                r.y -= Common::ChunkSize;
-                world.y += 1;
-            }
-            while (r.z < 0)
-            {
-                r.z += Common::ChunkSize;
-                world.z -= 1;
-            }
-            while (r.z >= (int)Common::ChunkSize)
-            {
-                r.z -= Common::ChunkSize;
-                world.z += 1;
-            }
-
-            chunk.x = r.x;
-            chunk.y = r.y;
-            chunk.z = r.z;
-
-            res.push_back(Common::CubePosition(world, chunk));
         }
 
-        return res;
+        void __CubeArea(Common::Position const& pos, float distance,
+                    std::vector<Tools::Vector3i>& res)
+        {
+            for (double x = -distance; x < distance; x += 1)
+            {
+                for (double y = -distance; y < distance; y += 1)
+                {
+                    for (double z = -distance; z < distance; z += 1)
+                    {
+                        res.push_back(Tools::Vector3i(x + pos.chunk.x, y + pos.chunk.y, z + pos.chunk.z));
+                    }
+                }
+            }
+        }
+
+        std::vector<Common::CubePosition> __TabToTab(std::vector<Tools::Vector3i> const& preRes, Common::Position const& pos)
+        {
+            std::vector<Common::CubePosition> res;
+
+            Common::BaseChunk::CoordsType world;
+            Tools::Vector3u chunk;
+
+
+            for (auto mit = preRes.begin(), mite = preRes.end(); mit != mite; ++mit)
+            {
+                world = pos.world;
+
+                Tools::Vector3i r = *mit;
+
+                while (r.x < 0)
+                {
+                    r.x += Common::ChunkSize;
+                    world.x -= 1;
+                }
+                while (r.x >= (int)Common::ChunkSize)
+                {
+                    r.x -= Common::ChunkSize;
+                    world.x += 1;
+                }
+                while (r.y < 0)
+                {
+                    r.y += Common::ChunkSize;
+                    world.y -= 1;
+                }
+                while (r.y >= (int)Common::ChunkSize)
+                {
+                    r.y -= Common::ChunkSize;
+                    world.y += 1;
+                }
+                while (r.z < 0)
+                {
+                    r.z += Common::ChunkSize;
+                    world.z -= 1;
+                }
+                while (r.z >= (int)Common::ChunkSize)
+                {
+                    r.z -= Common::ChunkSize;
+                    world.z += 1;
+                }
+
+                chunk.x = r.x;
+                chunk.y = r.y;
+                chunk.z = r.z;
+
+                res.push_back(Common::CubePosition(world, chunk));
+            }
+
+            return res;
+        }
+
+    }
+
+    std::vector<Common::CubePosition> RayCast::SphereArea(Common::Position const& pos, float distance)
+    {
+        std::vector<Tools::Vector3i> preRes;
+
+        __SphereArea(pos, distance, preRes);
+
+        return __TabToTab(preRes, pos);
+    }
+
+    std::vector<Common::CubePosition> RayCast::CubeArea(Common::Position const& pos, float distance)
+    {
+        std::vector<Tools::Vector3i> preRes;
+
+        __CubeArea(pos, distance, preRes);
+
+        return __TabToTab(preRes, pos);
     }
 
 }

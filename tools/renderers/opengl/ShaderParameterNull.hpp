@@ -8,7 +8,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     class ShaderParameterNull : public IShaderParameter
     {
     public:
-        virtual std::string const& GetIdentifier() const { throw std::runtime_error("Don't call GetIdentifier()."); }
         virtual void Set(bool) {}
         virtual void Set(int) {}
         virtual void Set(float) {}

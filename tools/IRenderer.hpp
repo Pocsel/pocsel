@@ -195,7 +195,6 @@ namespace Tools {
         public:
             virtual ~IShaderParameter() {}
 
-            virtual std::string const& GetIdentifier() const = 0;
             virtual void Set(bool value) = 0;
             virtual void Set(int value) = 0;
             virtual void Set(float value) = 0;
@@ -218,6 +217,7 @@ namespace Tools {
             virtual ~IShaderProgram() {}
 
             virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier) = 0;
+            virtual std::unique_ptr<IShaderParameter> GetParameterFromSemantic(std::string const& semantic) = 0;
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage) = 0;
             virtual void UpdateParameter(ShaderParameterUsage::Type usage) = 0;
             virtual void UpdateCurrentPass() = 0;

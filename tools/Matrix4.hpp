@@ -37,7 +37,6 @@ namespace Tools {
                 T m30, T m31, T m32, T m33);
 
         Matrix4<T> operator *(Matrix4<T> const& m2) const;
-        Matrix4<T> operator *(T scalar) const;
         Matrix4<T> operator +(Matrix4<T> const& m2) const;
         Matrix4<T> operator -(Matrix4<T> const& m2) const;
         bool operator ==(Matrix4<T> const& m2) const;
@@ -301,16 +300,6 @@ namespace Tools {
         r.m[3][3] = m[3][0] * m2.m[0][3] + m[3][1] * m2.m[1][3] + m[3][2] * m2.m[2][3] + m[3][3] * m2.m[3][3];
 
         return r;
-    }
-
-    template<class T>
-    Matrix4<T> Matrix4<T>::operator *(T scalar) const
-    {
-        return Matrix4<T>(
-            scalar * m[0][0], scalar * m[0][1], scalar * m[0][2], scalar * m[0][3],
-            scalar * m[1][0], scalar * m[1][1], scalar * m[1][2], scalar * m[1][3],
-            scalar * m[2][0], scalar * m[2][1], scalar * m[2][2], scalar * m[2][3],
-            scalar * m[3][0], scalar * m[3][1], scalar * m[3][2], scalar * m[3][3]);
     }
 
     template<class T>

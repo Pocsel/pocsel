@@ -54,7 +54,7 @@ namespace Client { namespace Map {
 
         void AddChunk(std::unique_ptr<Chunk>&& chunk);
         void UpdateLoading();
-        void Update(Common::Position const& playerPosition);
+        void Update(Uint64 totalTime, Common::Position const& playerPosition);
         void Render();
 
         template<class TFunc>
@@ -66,6 +66,7 @@ namespace Client { namespace Map {
         void _RemoveOldChunks(Common::Position const& playerPosition);
         void _DownloadNewChunks(Common::Position const& playerPosition);
         void _RefreshNode(ChunkNode& node);
+        void _RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeType> oldCubes);
         void _AddNodeToRefresh(ChunkNode& node);
         bool _RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors);
     };

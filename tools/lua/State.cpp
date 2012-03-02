@@ -1,8 +1,11 @@
+#include "tools/precompiled.hpp"
+
 #include "tools/lua/Lua.hpp"
 #include "tools/lua/State.hpp"
 #include "tools/lua/CallHelper.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/lua/Iterator.hpp"
 
 namespace {
 
@@ -16,7 +19,7 @@ namespace {
             {
                 Tools::Lua::Ref arg(env->i->GetState());
                 arg.FromStack();
-                callHelper.PushArg(arg);
+                callHelper.GetArgList().push_front(arg);
             }
             try
             {
@@ -24,6 +27,7 @@ namespace {
             }
             catch (std::exception& e)
             {
+                Tools::debug << "_LuaCall error: " << e.what() << ".\n"; // Lors du lua_close, les erreurs sont ignorées
                 lua_pushstring(state, e.what());
                 goto error;
             }
@@ -55,12 +59,20 @@ namespace Tools { namespace Lua {
     {
         this->_state = luaL_newstate();
         if (!this->_state)
-            throw std::runtime_error("Lua::State: Not enough memory");
+            throw std::runtime_error("Lua::State: Not enough memory to instantiate new interpreter");
     }
 
     State::~State() throw()
     {
+        for (auto it = this->_metaTables.begin(), ite = this->_metaTables.end(); it != ite; ++it)
+            Tools::Delete(it->second);
+        this->_metaTables.clear(); // leak possible
         lua_close(this->_state);
+    }
+
+    void State::RegisterMetaTable(Ref const& metaTable, std::size_t hash) throw()
+    {
+        this->_metaTables.insert(std::unordered_map<std::size_t, Ref*>::value_type(hash, new Ref(metaTable)));
     }
 
     Ref State::MakeBoolean(bool val) throw()
@@ -127,6 +139,16 @@ namespace Tools { namespace Lua {
         return r;
     }
 
+    Ref State::MakeUserData(void** data, size_t size) throw(std::runtime_error)
+    {
+        *data = lua_newuserdata(*this, size);
+        if (!*data)
+            throw std::runtime_error("Lua::State: Not enough memory to instantiate new user data");
+        Ref r(*this);
+        r.FromStack();
+        return r;
+    }
+
 #define MAKE_MAKEMETHOD(type, make_func) \
     template <> \
         Ref State::Make<type>(type const& val) throw() \
@@ -143,6 +165,7 @@ namespace Tools { namespace Lua {
     MAKE_MAKEMETHOD(float, MakeNumber);
     MAKE_MAKEMETHOD(std::string, MakeString);
     MAKE_MAKEMETHOD(char const*, MakeString);
+    MAKE_MAKEMETHOD(std::function<void(CallHelper&)>, MakeFunction);
 
     template <>
         Ref State::Make<Ref>(Ref const& val) throw()
@@ -150,4 +173,11 @@ namespace Tools { namespace Lua {
             return val;
         }
 
+    Ref State::GetMetaTable(std::size_t hash) throw(std::runtime_error)
+    {
+        auto it = this->_metaTables.find(hash);
+        if (it == this->_metaTables.end())
+            throw std::runtime_error("Lua::State: MetaTable not found");
+        return *it->second;
+    }
 }}

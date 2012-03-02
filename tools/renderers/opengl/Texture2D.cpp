@@ -15,8 +15,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         _renderer(renderer),
         _hasAlpha(false)
     {
-        _InitDevIL();
-
         if (format == PixelFormat::Png)
         {
             ILuint ilID;
@@ -39,8 +37,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     Texture2D::Texture2D(GLRenderer& renderer, std::string const& imagePath) : _renderer(renderer), _hasAlpha(false)
     {
-        _InitDevIL();
-
         ILuint ilID;
         ilGenImages(1, &ilID);
         ilBindImage(ilID);
@@ -68,12 +64,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         unsigned int size = this->_size.w * this->_size.h;
         auto pixmap = new Color4<Uint8>[size];
         ilCopyPixels(0, 0, 0, this->_size.w, this->_size.h, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
-        for (unsigned int i = 0; i < size; ++i)
-            if (pixmap[i].a != 255)
-            {
-                this->_hasAlpha = true;
-                break;
-            }
 
         ilBindImage(0);
         ilDeleteImage(ilID);
@@ -95,6 +85,15 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 format,
                 GL_UNSIGNED_BYTE,
                 data));
+
+        Color4<Uint8> const* pixmap = reinterpret_cast<Color4<Uint8> const*>(data);
+        unsigned int size = this->_size.w * this->_size.h;
+        for (unsigned int i = 0; i < size; ++i)
+            if (pixmap[i].a != 255)
+            {
+                this->_hasAlpha = true;
+                break;
+            }
 
         GLCHECK(glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE));
 
@@ -142,27 +141,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
         this->_bindId = -1;
         --nbBindedTexture;
-    }
-
-    void Texture2D::_InitDevIL()
-    {
-        static bool initialized = false;
-        if (!initialized)
-        {
-            ilInit();
-
-            ilEnable(IL_ORIGIN_SET);
-            ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
-
-            ilEnable(IL_TYPE_SET);
-            ilTypeFunc(IL_UNSIGNED_BYTE);
-
-            ilEnable(IL_FORMAT_SET);
-            ilFormatFunc(IL_RGBA);
-            ilEnable(IL_ALPHA);
-
-            initialized = true;
-        }
     }
 
     void Texture2D::SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter)

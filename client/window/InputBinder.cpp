@@ -29,6 +29,7 @@ namespace Client { namespace Window {
         this->_actions["fire"] = BindAction::Fire;
         this->_actions["altfire"] = BindAction::AltFire;
         this->_actions["use"] = BindAction::Use;
+        this->_actions["togglesprint"] = BindAction::ToggleSprint;
     }
 
     InputBinder::Action::Action() :
@@ -121,8 +122,8 @@ namespace Client { namespace Window {
 
     void InputBinder::_BindFromLua(Tools::Lua::CallHelper& callHelper)
     {
-        std::string action = callHelper.PopArg().CheckString();
         std::string input = callHelper.PopArg().CheckString();
+        std::string action = callHelper.PopArg().CheckString();
         this->Bind(input, action);
     }
 
