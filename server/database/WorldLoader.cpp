@@ -91,7 +91,7 @@ namespace Server { namespace Database {
                     itMap->second->GetEngine().GetInterpreter().DoString(row[2].GetString());
                     itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
                     // XXX test
-                    itMap->second->GetEngine().GetEntityManager().SpawnEntity("GrosTest", 1, itMap->second->GetEngine().GetInterpreter().MakeNil());
+//                    itMap->second->GetEngine().GetEntityManager().SpawnEntity("GrosTest", 1, itMap->second->GetEngine().GetInterpreter().MakeNil());
                 }
             }
             catch (std::exception& e)

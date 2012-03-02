@@ -45,6 +45,7 @@ namespace Server { namespace Game { namespace Engine {
         void EndPluginRegistering();
         void CallEntityFunction(int entityId, std::string function, Tools::Lua::Ref const& args);
         int SpawnEntity(std::string name, Uint32 pluginId, Tools::Lua::Ref const& args) throw(std::runtime_error);
+        void SpawnInitEntities();
     private:
         void _Register(Tools::Lua::CallHelper& helper);
     };

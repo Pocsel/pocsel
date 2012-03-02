@@ -56,6 +56,22 @@ namespace Server { namespace Game { namespace Engine {
         return this->_currentEntityId++;
     }
 
+    void EntityManager::SpawnInitEntities()
+    {
+        for (auto it = this->_entityTypes.begin(), ite = this->_entityTypes.end(); it != ite; ++it)
+        {
+            // TODO rajouter un "if (le plugin a deja ete charge une fois)"
+            try
+            {
+                this->SpawnEntity("Init", it->first, this->_engine.GetInterpreter().MakeNil());
+            }
+            catch (std::exception&)
+            {
+                Tools::log << "Could not find an Init entity in plugin " << it->first << "\n";
+            }
+        }
+    }
+
     void EntityManager::CallEntityFunction(int entityId, std::string function, Tools::Lua::Ref const& args)
     {
         auto it = this->_entities.find(entityId);

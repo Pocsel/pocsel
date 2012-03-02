@@ -13,6 +13,7 @@
 #include "server/game/Game.hpp"
 #include "server/game/Player.hpp"
 #include "server/game/engine/Engine.hpp"
+#include "server/game/engine/EntityManager.hpp"
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/network/PacketCreator.hpp"
 
@@ -44,6 +45,8 @@ namespace Server { namespace Game { namespace Map {
         Tools::debug << "Map::Start() -- " << this->_conf.name << "\n";
         this->_gen->Start();
         this->_messageQueue->Start();
+
+        this->_engine->GetEntityManager().SpawnInitEntities();
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
