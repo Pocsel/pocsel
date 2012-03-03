@@ -27,25 +27,17 @@ void TestFunction(int test)
 
 void Init(Interpreter& i)
 {
-    auto n = i.MakeTable();
     MetaTable m(i, Tools::Matrix4<float>());
-    i.Globals().Set("Matrix4f", n);
-    m.AddMethod("Rotate", [](CallHelper& helper) { });
-    m.AddMethod("Dump",
+    m.SetMethod("Rotate", [](CallHelper& helper) { });
+    m.SetMethod("Dump",
         [](CallHelper& helper)
         {
             auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
             for (int i = 0; i < 4; ++i)
                 Tools::log << m->m[i][0] << ", " << m->m[i][1] << ", " << m->m[i][2] << ", " << m->m[i][3] << "\n";
         });
-    m.AddMetaMethod(MetaTable::Call,
-        [](CallHelper& helper) { Tools::log << "call !\n"; });
-    m.AddMetaMethod(
-        MetaTable::Collect,
-        [](CallHelper& helper) { Tools::log << "dtor\n"; helper.PopArg().Check<Tools::Matrix4<float>*>()->~Matrix4<float>(); });
-    //i.Bind(&Tools::Matrix4<float>::Translate, std::placeholders::_1, std::placeholders::_2);
-    //i.Bind(&Tools::Vector2f::Dot, std::placeholders::_1, std::placeholders::_2);
-    m.AddMetaMethod(
+    m.SetMetaMethod(MetaTable::Call, [](CallHelper& helper) { Tools::log << "call !\n"; });
+    m.SetMetaMethod(
         MetaTable::Multiply,// i.Bind(&Tools::Matrix4<float>::operator*, std::placeholders::_1, std::placeholders::_2));
         [m](CallHelper& helper)
         {
@@ -55,16 +47,17 @@ void Init(Interpreter& i)
             helper.PushRet(helper.GetInterpreter().Make(m1->operator *(*m2)));
         });
 
+    auto n = i.MakeTable();
     n.Set("New", i.MakeFunction(
         [](CallHelper& helper)
         {
             helper.PushRet(helper.GetInterpreter().Make(Tools::Matrix4<float>::identity));
         }));
+    i.Globals().Set("Matrix4f", n);
 }
 
-class A
+struct A
 {
-public:
     A Print(int i)
     {
         std::cout << "AAA" << i << "\n";
@@ -163,10 +156,29 @@ int main(int, char**)
         i.DoString("m2 = Matrix4f.New()");
         i.DoString("m3 = m * m2");
         i.DoString("m3:Dump()");
-        //i.Globals().Set("TestFunction", i.Bind(&TestFunction));
-        //i.DoString("TestFunction(10)");
 
         MetaTable mA(i, A());
+        i.Globals().Set("NewA", i.MakeFunction([&i](CallHelper& helper) { helper.PushRet(i.Make(A())); }));
+
+        try
+        {
+            i.DoString("m.Dump(NewA())");
+        }
+        catch (std::exception& e)
+        {
+            Tools::log << "call \"Matrix4<float>::Dump\" with a variable of type \"A\": " << e.what() << "\n";
+        }
+        try
+        {
+            i.DoString("table = getmetatable(m)");
+        }
+        catch (std::exception& e)
+        {
+            Tools::log << "getmetatable(UserData): " << e.what() << "\n";
+        }
+
+        //i.Globals().Set("TestFunction", i.Bind(&TestFunction));
+        //i.DoString("TestFunction(10)");
         //auto bite5 = i.Bind(&A::Print, std::placeholders::_1, std::placeholders::_2);
         //auto r = i.Globals().Set("A", bite5);
         //r(A(), 50);

@@ -37,7 +37,7 @@ namespace Tools { namespace Lua {
         Ref Deserialize(std::string const& string) const throw(std::runtime_error);
         // script loading
         Ref LoadString(std::string const& code) const throw(std::runtime_error);
-        void RegisterLib(LibId lib) const throw(std::runtime_error);
+        void RegisterLib(LibId lib) throw(std::runtime_error);
         void DoString(std::string const& code) const throw(std::runtime_error);
         void DoFile(std::string const& path) const throw(std::runtime_error);
         // global table

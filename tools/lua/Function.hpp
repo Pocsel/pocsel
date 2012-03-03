@@ -161,6 +161,11 @@ namespace Tools { namespace Lua {
         return this->MakeFunction(_Functor<Tools::Meta::Signature<T>>(std::bind(function, arg1, arg2, arg3)));
     }
 
+    template<class T>
+    inline T Ref::To() const throw()
+    {
+        return reinterpret_cast<T>(this->ToUserData());
+    }
     template<> bool Ref::To<bool>() const throw();
     template<> int Ref::To<int>() const throw();
     template<> unsigned int Ref::To<unsigned int>() const throw();
@@ -173,9 +178,9 @@ namespace Tools { namespace Lua {
     template<class T>
     inline T Ref::Check() const throw(std::runtime_error)
     {
-        // Pas la peine de vérifier si c'est la bonne metatable, le lua ne peut pas modifier la metatable d'un UserData
-        if (!(this->IsUserData() || this->IsLightUserData()) || this->GetMetaTable().IsNoneOrNil())
-            throw std::runtime_error(std::string("Lua::Ref: Value is not of ") + typeid(typename std::remove_pointer<T>::type).name() + " type");
+        if (!(this->IsUserData() || this->IsLightUserData()) || this->GetMetaTable().IsNoneOrNil() ||
+            this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
+            throw std::runtime_error(std::string("Lua::Ref: Value is not of \"") + typeid(typename std::remove_pointer<T>::type).name() + "\" type");
         return reinterpret_cast<T>(this->CheckUserData());
     }
     template<> bool Ref::Check<bool>() const throw(std::runtime_error);

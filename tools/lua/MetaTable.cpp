@@ -27,25 +27,25 @@ namespace Tools { namespace Lua {
         };
     }
 
-    MetaTable& MetaTable::AddMethod(std::string const& name, std::function<void(CallHelper&)> const& method)
+    MetaTable& MetaTable::SetMethod(std::string const& name, std::function<void(CallHelper&)> const& method)
     {
         this->_prototype.Set(name, this->_interpreter.MakeFunction(method));
         return *this;
     }
 
-    MetaTable& MetaTable::AddMetaMethod(MetaMethod type, std::function<void(CallHelper&)> const& method)
+    MetaTable& MetaTable::SetMetaMethod(MetaMethod type, std::function<void(CallHelper&)> const& method)
     {
         this->_metaTable.Set(operators[(int)type], this->_interpreter.MakeFunction(method));
         return *this;
     }
 
-    MetaTable& MetaTable::AddMethod(std::string const& name, Ref const& method)
+    MetaTable& MetaTable::SetMethod(std::string const& name, Ref const& method)
     {
         this->_prototype.Set(name, method);
         return *this;
     }
 
-    MetaTable& MetaTable::AddMetaMethod(MetaMethod type, Ref const& method)
+    MetaTable& MetaTable::SetMetaMethod(MetaMethod type, Ref const& method)
     {
         this->_metaTable.Set(operators[(int)type], method);
         return *this;
