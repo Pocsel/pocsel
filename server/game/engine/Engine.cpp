@@ -33,4 +33,9 @@ namespace Server { namespace Game { namespace Engine {
         this->_eventManager->DispatchEvents();
     }
 
+    void Engine::Save(Tools::Database::IConnectionPool& connectionPool)
+    {
+        //TODO
+    }
+
 }}}

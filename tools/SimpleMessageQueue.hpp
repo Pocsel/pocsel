@@ -19,13 +19,14 @@ namespace Tools {
             TimerLoopMessage message;
             Timer chrono;
             Uint64 lastTime;
-            SmqTimer(boost::asio::io_service& io, Uint64 us, TimerLoopMessage& m) :
+            SmqTimer(boost::asio::io_service& io, Uint64 us, TimerLoopMessage& m, Uint64 startTime = 0) :
                 timer(io, boost::posix_time::microseconds(us)),
                 us(us),
                 message(m),
                 chrono(),
-                lastTime(0)
+                lastTime(startTime)
             {
+                chrono.Set(startTime);
             }
         };
 
@@ -41,7 +42,7 @@ namespace Tools {
     public:
         SimpleMessageQueue(unsigned int nbThreads);
         ~SimpleMessageQueue();
-        void SetLoopTimer(Uint64 us, TimerLoopMessage& message);
+        void SetLoopTimer(Uint64 us, TimerLoopMessage& message, Uint64 startTime = 0);
         void PushMessage(Message& message);
         void PushTimedMessage(Uint64 us, Message& message);
         void Start();

@@ -19,6 +19,10 @@ namespace Tools {
         Timer();
         void Reset();
         /**
+          * Takes time in microseconds
+          */
+        void Set(Uint64 time);
+        /**
          * Returns elapsed time in milliseconds
          */
         Uint32 GetElapsedTime() const;

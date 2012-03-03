@@ -4,6 +4,10 @@
 #include "server/Chunk.hpp"
 #include "tools/ByteArray.hpp"
 
+namespace Tools { namespace Database {
+    class IConnectionPool;
+}}
+
 namespace Server { namespace Game { namespace Map {
 
     class ChunkManager :
@@ -17,6 +21,8 @@ namespace Server { namespace Game { namespace Map {
     public:
         ChunkManager();
         ~ChunkManager();
+
+        void Save(Tools::Database::IConnectionPool& connectionPool);
 
         Chunk* GetChunk(Chunk::IdType id);
         std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);

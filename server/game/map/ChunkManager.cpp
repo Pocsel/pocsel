@@ -16,6 +16,10 @@ namespace Server { namespace Game { namespace Map {
             Tools::Delete(it->second);
     }
 
+    void ChunkManager::Save(Tools::Database::IConnectionPool& connectionPool)
+    {
+    }
+
     Chunk* ChunkManager::GetChunk(Chunk::IdType id)
     {
         Chunk* chunk;
