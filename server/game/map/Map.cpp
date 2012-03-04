@@ -73,6 +73,7 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::Save(std::string const& filename)
     {
+        std::cout << "MapSave\n";
         Tools::Database::IConnectionPool* connectionPool
             = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(
                     filename
@@ -80,6 +81,19 @@ namespace Server { namespace Game { namespace Map {
 
         this->_chunkManager->Save(*connectionPool);
         this->_engine->Save(*connectionPool);
+
+        Tools::Delete(connectionPool);
+    }
+
+    void Map::Load(std::string const& filename)
+    {
+        Tools::Database::IConnectionPool* connectionPool
+            = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(
+                    filename
+                    );
+
+        this->_chunkManager->Load(*connectionPool);
+        this->_engine->Load(*connectionPool);
 
         Tools::Delete(connectionPool);
     }

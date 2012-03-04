@@ -38,4 +38,9 @@ namespace Server { namespace Game { namespace Engine {
         //TODO
     }
 
+    void Engine::Load(Tools::Database::IConnectionPool& connectionPool)
+    {
+        //TODO
+    }
+
 }}}

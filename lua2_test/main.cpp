@@ -28,7 +28,7 @@ void TestFunction(int test)
 void Init(Interpreter& i)
 {
     MetaTable m(i, Tools::Matrix4<float>());
-    m.SetMethod("Rotate", [](CallHelper& helper) { });
+    m.SetMethod("Rotate", [](CallHelper&) { });
     m.SetMethod("Dump",
         [](CallHelper& helper)
         {
@@ -36,7 +36,7 @@ void Init(Interpreter& i)
             for (int i = 0; i < 4; ++i)
                 Tools::log << m->m[i][0] << ", " << m->m[i][1] << ", " << m->m[i][2] << ", " << m->m[i][3] << "\n";
         });
-    m.SetMetaMethod(MetaTable::Call, [](CallHelper& helper) { Tools::log << "call !\n"; });
+    m.SetMetaMethod(MetaTable::Call, [](CallHelper&) { Tools::log << "call !\n"; });
     m.SetMetaMethod(
         MetaTable::Multiply,// i.Bind(&Tools::Matrix4<float>::operator*, std::placeholders::_1, std::placeholders::_2));
         [m](CallHelper& helper)
@@ -177,19 +177,30 @@ int main(int, char**)
             Tools::log << "getmetatable(UserData): " << e.what() << "\n";
         }
 
-        //i.Globals().Set("TestFunction", i.Bind(&TestFunction));
-        //i.DoString("TestFunction(10)");
-        //auto bite5 = i.Bind(&A::Print, std::placeholders::_1, std::placeholders::_2);
-        //auto r = i.Globals().Set("A", bite5);
-        //r(A(), 50);
+        i.Globals().Set("TestFunction", i.Bind(&TestFunction, std::placeholders::_1));
+        i.DoString("TestFunction(10)");
+        auto r = i.Globals().Set("A", i.Bind(&A::Print, std::placeholders::_1, std::placeholders::_2));
+        r(A(), 50);
 
-
+		//// Vector2d - MetaTable
         MetaTable mVector2d(i, Tools::Vector2d());
-        //i.Bind(&Tools::Vector2d::Normalize, std::placeholders::_1);
-        //i.Bind(&Tools::Vector2d::Dot, std::placeholders::_1, std::placeholders::_2);
-
-        //auto tmp = std::bind(&A::Print, std::placeholders::_1, std::placeholders::_2);
-        //tmp(A(), 10);
+        mVector2d.SetMethod("Normalize", i.Bind(&Tools::Vector2d::Normalize, std::placeholders::_1));
+        mVector2d.SetMethod("Dot", i.Bind(&Tools::Vector2d::Dot, std::placeholders::_1, std::placeholders::_2));
+		mVector2d.SetMethod("Dump",
+			[](CallHelper& helper)
+			{
+				auto v = helper.PopArg().Check<Tools::Vector2d*>();
+				Tools::log << "(" << v->x << ";" << v->y << ")\n";
+			});
+		// Namespace
+		auto n = i.MakeTable();
+		n.Set("New", i.MakeFunction([&i](CallHelper& helper) { helper.PushRet(i.Make(Tools::Vector2d(helper.PopArg().Check<double>(), helper.PopArg().Check<double>()))); }));
+		i.Globals().Set("Vector2d", n);
+		i.DoString(
+			"v = Vector2d.New(2, 3)"
+			"v:Dump()"
+			"v:Normalize()"
+			"v:Dump()");
 
         i.DumpStack();
     }

@@ -29,7 +29,7 @@ namespace Tools { namespace Meta {
     /////////////////////////////////////////////////////////////////////////////
     // Ret(void)
     template<typename Ret, typename Class>
-    struct Signature<Ret(Class::*)(void)> : public Signature<Ret(Class)> {};
+    struct Signature<Ret(Class::*)(void)> : public Signature<Ret(Class*)> {};
 
     template<typename Ret>
     struct Signature<Ret(void)>
@@ -42,7 +42,7 @@ namespace Tools { namespace Meta {
     /////////////////////////////////////////////////////////////////////////////
     // Ret(P1)
     template<typename Ret, typename Class, typename P1>
-    struct Signature<Ret(Class::*)(P1)> : public Signature<Ret(Class, P1)> {};
+    struct Signature<Ret(Class::*)(P1)> : public Signature<Ret(Class*, P1)> {};
 
     template<typename Ret, typename P1>
     struct Signature<Ret(P1)>
@@ -55,7 +55,7 @@ namespace Tools { namespace Meta {
     /////////////////////////////////////////////////////////////////////////////
     // Ret(P1, P2)
     template<typename Ret, typename Class, typename P1, typename P2>
-    struct Signature<Ret(Class::*)(P1, P2)> : public Signature<Ret(Class, P1, P2)> {};
+    struct Signature<Ret(Class::*)(P1, P2)> : public Signature<Ret(Class*, P1, P2)> {};
 
     template<typename Ret, typename P1, typename P2>
     struct Signature<Ret(P1, P2)>
@@ -68,7 +68,7 @@ namespace Tools { namespace Meta {
     /////////////////////////////////////////////////////////////////////////////
     // Ret(P1, P2, P3)
     template<typename Ret, typename Class, typename P1, typename P2, typename P3>
-    struct Signature<Ret(Class::*)(P1, P2, P3)> : public Signature<Ret(Class, P1, P2, P3)> {};
+    struct Signature<Ret(Class::*)(P1, P2, P3)> : public Signature<Ret(Class*, P1, P2, P3)> {};
 
     template<typename Ret, typename P1, typename P2, typename P3>
     struct Signature<Ret(P1, P2, P3)>

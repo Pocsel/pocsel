@@ -23,11 +23,8 @@ find_package(Cg REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(Sqlite3 REQUIRED)
 
-if (CMAKE_COMPILER_IS_GNUCXX)
-    add_definitions(-std=c++0x) #Enable C++0x mode
-endif ()
-
 if (UNIX)
+    add_definitions(-std=c++0x) #Enable C++0x mode
     set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -Winvalid-pch")
     set(CMAKE_CXX_CUSTOM_FLAGS_DEBUG "-g -DDEBUG -UNDEBUG")
     set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -ffast-math -g -DNDEBUG -UDEBUG -march=native -mtune=native")

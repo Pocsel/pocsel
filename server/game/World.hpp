@@ -46,6 +46,7 @@ namespace Server { namespace Game {
 
         void Start();
         void Stop();
+        void Save();
 
         // Appelable d'un autre thread, que des trucs const qui ne peuvent pas disparaitre
         std::vector<Common::CubeType> const& GetCubeTypes() const { return this->_cubeTypes; }

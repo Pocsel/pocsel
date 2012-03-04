@@ -61,6 +61,7 @@ namespace Server { namespace Game { namespace Map {
         void Start();
         void Stop();
         void Save(std::string const& filename);
+        void Load(std::string const& filename);
 
         std::string const& GetName() const { return this->_conf.name; }
         Engine::Engine& GetEngine() { return *this->_engine; }
