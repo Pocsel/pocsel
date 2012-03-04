@@ -8,6 +8,10 @@
 
 #include "tools/SimpleMessageQueue.hpp"
 
+#include "tools/database/ConnectionPool.hpp"
+
+#include "tools/database/sqlite/Connection.hpp"
+
 #include "server/Server.hpp"
 #include "server/clientmanagement/ClientManager.hpp"
 #include "server/game/Game.hpp"
@@ -23,7 +27,8 @@ namespace Server { namespace Game { namespace Map {
         _conf(conf),
         _game(game),
         _messageQueue(new Tools::SimpleMessageQueue(1)),
-        _spawnPosition(0)
+        _spawnPosition(0),
+        _currentTime(0)
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
@@ -50,7 +55,7 @@ namespace Server { namespace Game { namespace Map {
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
-        this->_messageQueue->SetLoopTimer(10000, m);
+        this->_messageQueue->SetLoopTimer(10000, m, this->_currentTime);
     }
 
     void Map::Stop()
@@ -58,6 +63,33 @@ namespace Server { namespace Game { namespace Map {
         Tools::debug << "Map::Stop() -- " << this->_conf.name << "\n";
         this->_gen->Stop();
         this->_messageQueue->Stop();
+    }
+
+    void Map::Save(std::string const& filename)
+    {
+        std::cout << "MapSave\n";
+        Tools::Database::IConnectionPool* connectionPool
+            = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(
+                    filename
+                    );
+
+        this->_chunkManager->Save(*connectionPool);
+        this->_engine->Save(*connectionPool);
+
+        Tools::Delete(connectionPool);
+    }
+
+    void Map::Load(std::string const& filename)
+    {
+        Tools::Database::IConnectionPool* connectionPool
+            = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(
+                    filename
+                    );
+
+        this->_chunkManager->Load(*connectionPool);
+        this->_engine->Load(*connectionPool);
+
+        Tools::Delete(connectionPool);
     }
 
     void Map::HandleNewChunk(Chunk* chunk)
@@ -122,6 +154,13 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_RemovePlayer, this, id));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::SaveThreadSafe(std::string const& filename)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::Save, this, filename));
         this->_messageQueue->PushMessage(m);
     }
 
@@ -275,6 +314,7 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_Tick(Uint64 currentTime)
     {
+        this->_currentTime = currentTime;
         this->_engine->Tick(currentTime);
     }
 

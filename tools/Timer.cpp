@@ -30,6 +30,12 @@ namespace Tools {
 #endif
     }
 
+    void Timer::Set(Uint64 time)
+    {
+        this->Reset();
+        this->_base_time -= time;
+    }
+
     Uint32 Timer::GetElapsedTime() const
     {
 #ifdef _WIN32 //windows

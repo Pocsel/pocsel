@@ -13,12 +13,12 @@ namespace Tools {
         std::for_each(this->_timers.begin(), this->_timers.end(), [](SmqTimer* t) { Tools::Delete(t); });
     }
 
-    void SimpleMessageQueue::SetLoopTimer(Uint64 us, TimerLoopMessage& message)
+    void SimpleMessageQueue::SetLoopTimer(Uint64 us, TimerLoopMessage& message, Uint64 startTime)
     {
         Tools::debug << "Adding new timer: " << us << "us.\n";
 
         this->_timers.push_back(new SmqTimer(
-                    this->_ioService, us, message
+                    this->_ioService, us, message, startTime
                     ));
 
         std::function<void(boost::system::error_code const& e)>
@@ -71,6 +71,15 @@ namespace Tools {
             Tools::Delete(this->_threads[i]);
         }
         this->_threads.clear();
+
+
+        std::for_each(this->_timers.begin(), this->_timers.end(), [](SmqTimer* t)
+                {
+                    Tools::Delete(t);
+                });
+
+        this->_timers.clear();
+
 
         Tools::debug << "SimpleMessageQueue stopped (" << this << ").\n";
     }

@@ -47,4 +47,13 @@ namespace Server { namespace Game{
             it->second->Stop();
     }
 
+    void World::Save()
+    {
+        Tools::debug << "World::Save()\n";
+        for (auto it = this->_maps.begin(), ite = this->_maps.end(); it != ite; ++it)
+        {
+            it->second->Save(it->first + ".tcmapsave");
+        }
+    }
+
 }}

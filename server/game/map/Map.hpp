@@ -52,12 +52,16 @@ namespace Server { namespace Game { namespace Map {
         Engine::Engine* _engine;
         ChunkManager* _chunkManager;
 
+        Uint64 _currentTime;
+
     public:
         Map(Conf const& conf, Game& game);
         ~Map();
 
         void Start();
         void Stop();
+        void Save(std::string const& filename);
+        void Load(std::string const& filename);
 
         std::string const& GetName() const { return this->_conf.name; }
         Engine::Engine& GetEngine() { return *this->_engine; }
@@ -71,6 +75,7 @@ namespace Server { namespace Game { namespace Map {
         void DestroyCubes(std::vector<Common::CubePosition> const& pos);
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
+        void SaveThreadSafe(std::string const& filename);
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
