@@ -41,6 +41,7 @@ namespace Server { namespace Game {
 
         void Start();
         void Stop();
+        void Save();
 
         World const& GetWorld() const { return *this->_world; }
         World& GetWorld() { return *this->_world; }

@@ -56,6 +56,8 @@ namespace Server {
         this->_game->Stop();
         this->_admMessageQueue->Stop();
         this->_network->Stop();
+
+        this->_game->Save();
     }
 
 }

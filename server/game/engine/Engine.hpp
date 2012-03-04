@@ -28,6 +28,7 @@ namespace Server { namespace Game { namespace Engine {
         ~Engine();
         void Tick(Uint64 currentTime);
         void Save(Tools::Database::IConnectionPool& connectionPool);
+        void Load(Tools::Database::IConnectionPool& connectionPool);
         EventManager& GetEventManager() { return *this->_eventManager; }
         EntityManager& GetEntityManager() { return *this->_entityManager; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }

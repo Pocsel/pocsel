@@ -23,6 +23,7 @@ namespace Server { namespace Game { namespace Map {
         ~ChunkManager();
 
         void Save(Tools::Database::IConnectionPool& connectionPool);
+        void Load(Tools::Database::IConnectionPool& connectionPool);
 
         Chunk* GetChunk(Chunk::IdType id);
         std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);

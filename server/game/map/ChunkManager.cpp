@@ -20,6 +20,10 @@ namespace Server { namespace Game { namespace Map {
     {
     }
 
+    void ChunkManager::Load(Tools::Database::IConnectionPool& connectionPool)
+    {
+    }
+
     Chunk* ChunkManager::GetChunk(Chunk::IdType id)
     {
         Chunk* chunk;

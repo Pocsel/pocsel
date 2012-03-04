@@ -43,6 +43,12 @@ namespace Server { namespace Game {
         this->_world->Stop();
     }
 
+    void Game::Save()
+    {
+        Tools::debug << "Game::Save()\n";
+        this->_world->Save();
+    }
+
     void Game::PlayerTeleportOk(Uint32 id)
     {
         auto it = this->_players.find(id);
