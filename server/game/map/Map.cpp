@@ -15,6 +15,8 @@
 #include "server/Server.hpp"
 #include "server/clientmanagement/ClientManager.hpp"
 #include "server/game/Game.hpp"
+#include "server/game/World.hpp"
+#include "server/game/PluginManager.hpp"
 #include "server/game/Player.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
@@ -51,7 +53,11 @@ namespace Server { namespace Game { namespace Map {
         this->_gen->Start();
         this->_messageQueue->Start();
 
-        this->_engine->GetEntityManager().SpawnInitEntities();
+        auto& plugins = this->_game.GetWorld().GetPluginManager().GetPlugins();
+        auto it = plugins.begin();
+        auto itEnd = plugins.end();
+        for (; it != itEnd; ++it)
+            this->_engine->GetEntityManager().BootstrapPlugin(it->first);
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));

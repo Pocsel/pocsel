@@ -1,5 +1,6 @@
 #include "server/game/World.hpp"
 #include "server/game/Game.hpp"
+#include "server/game/PluginManager.hpp"
 
 #include "server/Server.hpp"
 
@@ -14,6 +15,7 @@ namespace Server { namespace Game{
         _messageQueue(gameMessageQueue)
     {
         Tools::debug << "World::World()\n";
+        this->_pluginManager = new PluginManager();
         try
         {
             Database::WorldLoader::Load(*this, game.GetServer().GetResourceManager());
@@ -31,6 +33,8 @@ namespace Server { namespace Game{
 
         for (auto it = this->_maps.begin(), ite = this->_maps.end(); it != ite; ++it)
             Tools::Delete(it->second);
+
+        Tools::Delete(this->_pluginManager);
     }
 
     void World::Start()
