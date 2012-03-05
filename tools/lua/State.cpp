@@ -9,37 +9,41 @@
 
 namespace {
 
+    int _RealLuaCall(lua_State* state)
+    {
+        Tools::Lua::State::ClosureEnv* env = static_cast<Tools::Lua::State::ClosureEnv*>(lua_touserdata(state, lua_upvalueindex(1)));
+        assert(env && "lua call with no env upvalue");
+        Tools::Lua::CallHelper callHelper(*env->i);
+        while (lua_gettop(state))
+        {
+            Tools::Lua::Ref arg(env->i->GetState());
+            arg.FromStack();
+            callHelper.GetArgList().push_front(arg);
+        }
+        try
+        {
+            (*env->f)(callHelper);
+        }
+        catch (std::exception& e)
+        {
+            Tools::debug << "_LuaCall error: " << e.what() << ".\n"; // Lors du lua_close, les erreurs sont ignorées
+            lua_pushstring(state, e.what());
+            return -1;
+        }
+        auto const& rets = callHelper.GetRetList();
+        auto it = rets.rbegin();
+        auto itEnd = rets.rend();
+        for (; it != itEnd; ++it)
+            it->ToStack();
+        return static_cast<int>(callHelper.GetNbRets());
+    }
+
     int _LuaCall(lua_State* state)
     {
-        {
-            Tools::Lua::State::ClosureEnv* env = static_cast<Tools::Lua::State::ClosureEnv*>(lua_touserdata(state, lua_upvalueindex(1)));
-            assert(env && "lua call with no env upvalue");
-            Tools::Lua::CallHelper callHelper(*env->i);
-            while (lua_gettop(state))
-            {
-                Tools::Lua::Ref arg(env->i->GetState());
-                arg.FromStack();
-                callHelper.GetArgList().push_front(arg);
-            }
-            try
-            {
-                (*env->f)(callHelper);
-            }
-            catch (std::exception& e)
-            {
-                Tools::debug << "_LuaCall error: " << e.what() << ".\n"; // Lors du lua_close, les erreurs sont ignorées
-                lua_pushstring(state, e.what());
-                goto error;
-            }
-            auto const& rets = callHelper.GetRetList();
-            auto it = rets.rbegin();
-            auto itEnd = rets.rend();
-            for (; it != itEnd; ++it)
-                it->ToStack();
-            return static_cast<int>(callHelper.GetNbRets());
-        }
-        error:
+        int ret = _RealLuaCall(state);
+        if (ret == -1)
             return lua_error(state);
+        return ret;
     }
 
     int _LuaGarbageCollect(lua_State* state)
