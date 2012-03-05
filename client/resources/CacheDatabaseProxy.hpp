@@ -1,12 +1,15 @@
 #ifndef __CLIENT_RESOURCES_CACHEDATABASEPROXY_HPP__
 #define __CLIENT_RESOURCES_CACHEDATABASEPROXY_HPP__
 
-#include "tools/database/IConnectionPool.hpp"
-
 namespace Common {
     class Packet;
     class Resource;
 }
+
+namespace Tools { namespace Database {
+    class IConnectionPool;
+}}
+
 namespace Client { namespace Resources {
 
     class ResourceManager;
