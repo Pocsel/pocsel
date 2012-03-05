@@ -1,10 +1,15 @@
 #include "server/game/map/ChunkManager.hpp"
+#include "server/game/map/Map.hpp"
+
+#include "tools/database/IConnection.hpp"
+#include "tools/database/IValue.hpp"
 
 #include "server/network/ChunkSerializer.hpp"
 
 namespace Server { namespace Game { namespace Map {
 
-    ChunkManager::ChunkManager()
+    ChunkManager::ChunkManager(Map& map) :
+        _map(map)
     {
     }
 
@@ -18,7 +23,39 @@ namespace Server { namespace Game { namespace Map {
 
     void ChunkManager::Save(Tools::Database::IConnection& conn)
     {
+        auto& curs = conn.GetCursor();
+
+        std::string query = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
+            "_chunk (id, data) VALUES (?, ?)";
+        for (auto it = this->_inflatedChunks.begin(), ite = this->_inflatedChunks.end(); it != ite; ++it)
+        {
+            Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
+            curs.Execute(
+                    query.c_str())
+//                    "REPLACE INTO ? (id, data) VALUES (?, ?)")
+//                .Bind(this->_map.GetName() + "_chunk")
+                .Bind(it->first)
+                .Bind(blob);
+        }
+
     }
+
+    struct Blob
+    {
+        size_t const size;
+        void const* data;
+
+        Blob(void const* d, size_t s) :
+            size(s), data(d)
+        {
+        }
+        Blob(Blob const& b) :
+            size(b.size), data(b.data)
+        {
+        }
+    private:
+        Blob& operator =(Blob const& b);
+    };
 
     Chunk* ChunkManager::GetChunk(Chunk::IdType id)
     {

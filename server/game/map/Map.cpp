@@ -38,7 +38,7 @@ namespace Server { namespace Game { namespace Map {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
         this->_engine = new Engine::Engine();
-        this->_chunkManager = new ChunkManager();
+        this->_chunkManager = new ChunkManager(*this);
     }
 
     Map::~Map()
@@ -83,9 +83,8 @@ namespace Server { namespace Game { namespace Map {
             auto& curs = conn->GetCursor();
 
             curs.Execute(
-                    "UPDATE map SET current_time = ? WHERE name = ?"
+                    "UPDATE map SET tick = ? WHERE name = ?"
                     ).Bind(this->_currentTime).Bind(this->_conf.name);
-//            curs.Execute("INSERT INTO cache (version, format_version) VALUES (0, ?)").Bind(CacheFormatVersion);
         }
 
         this->_chunkManager->Save(*conn);

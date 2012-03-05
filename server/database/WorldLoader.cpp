@@ -54,7 +54,7 @@ namespace Server { namespace Database {
         }
 
         // Maps
-        curs.Execute("SELECT name, lua, current_time FROM map");
+        curs.Execute("SELECT name, lua, tick FROM map");
         while (curs.HasData())
         {
             auto& row = curs.FetchOne();
