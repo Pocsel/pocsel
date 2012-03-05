@@ -18,6 +18,7 @@ namespace Server {
 namespace Server { namespace Game {
 
     class Game;
+    class PluginManager;
 
     class World :
         private boost::noncopyable
@@ -32,6 +33,7 @@ namespace Server { namespace Game {
         std::string _fullname;
         Uint32 _version;
         std::string _buildHash;
+        PluginManager* _pluginManager;
 
     public:
         World(Game& game, Tools::SimpleMessageQueue& gameMessageQueue);
@@ -40,6 +42,7 @@ namespace Server { namespace Game {
         bool HasMap(std::string const& name) { return this->_maps.find(name) != this->_maps.end(); }
         Map::Map& GetMap(std::string const& name) { assert(this->_maps.find(name) != this->_maps.end()); return *this->_maps[name]; }
         Map::Map& GetDefaultMap() const { return *this->_defaultMap; }
+        PluginManager& GetPluginManager() { return *this->_pluginManager; }
 
         void Start();
         void Stop();

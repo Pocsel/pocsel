@@ -7,6 +7,7 @@
 #include "tools/lua/Iterator.hpp"
 
 #include "server/game/World.hpp"
+#include "server/game/PluginManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
 
@@ -76,6 +77,22 @@ namespace Server { namespace Database {
         if (world._defaultMap == 0)
             throw std::runtime_error("Cannot find default map");
 
+        // Plugins
+        curs.Execute("SELECT id, fullname, identifier FROM plugin");
+        while (curs.HasData())
+        {
+            auto& row = curs.FetchOne();
+            try
+            {
+                world.GetPluginManager().AddPlugin(row[0].GetUint32(), row[1].GetString(), row[2].GetString());
+            }
+            catch (std::exception& e)
+            {
+                Log::load << "WorldLoader: Failed to load plugin \"" << row[1].GetString() << "\": " << e.what() << Tools::endl;
+                Tools::error << "WorldLoader: Failed to load plugin \"" << row[1].GetString() << "\": " << e.what() << Tools::endl;
+            }
+        }
+
         // Entity types
         curs.Execute("SELECT plugin_id, name, lua FROM entity_type");
         while (curs.HasData())
@@ -90,8 +107,6 @@ namespace Server { namespace Database {
                     itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row[0].GetUint32());
                     itMap->second->GetEngine().GetInterpreter().DoString(row[2].GetString());
                     itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
-                    // XXX test
-//                    itMap->second->GetEngine().GetEntityManager().SpawnEntity("GrosTest", 1, itMap->second->GetEngine().GetInterpreter().MakeNil());
                 }
             }
             catch (std::exception& e)

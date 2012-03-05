@@ -56,19 +56,16 @@ namespace Server { namespace Game { namespace Engine {
         return this->_currentEntityId++;
     }
 
-    void EntityManager::SpawnInitEntities()
+    void EntityManager::BootstrapPlugin(Uint32 pluginId)
     {
-        for (auto it = this->_entityTypes.begin(), ite = this->_entityTypes.end(); it != ite; ++it)
+        // TODO rajouter un "if !(le plugin a deja ete charge une fois dans cette map)"
+        try
         {
-            // TODO rajouter un "if (le plugin a deja ete charge une fois)"
-            try
-            {
-                this->SpawnEntity("Init", it->first, this->_engine.GetInterpreter().MakeNil());
-            }
-            catch (std::exception&)
-            {
-                Tools::log << "Could not find an Init entity in plugin " << it->first << "\n";
-            }
+            this->SpawnEntity("Init", pluginId, this->_engine.GetInterpreter().MakeNil());
+        }
+        catch (std::exception& e)
+        {
+            Tools::log << "EntityManager::StartPlugin: Error: " << e.what() << Tools::endl;
         }
     }
 
