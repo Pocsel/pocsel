@@ -54,7 +54,7 @@ namespace Server { namespace Database {
         }
 
         // Maps
-        curs.Execute("SELECT name, lua FROM map");
+        curs.Execute("SELECT name, lua, current_time FROM map");
         while (curs.HasData())
         {
             auto& row = curs.FetchOne();
@@ -63,7 +63,8 @@ namespace Server { namespace Database {
                 Game::Map::Conf conf;
                 WorldLoader::_LoadMapConf(conf, row[0].GetString(), row[1].GetString(), world);
                 conf.cubeTypes = &world._cubeTypes;
-                world._maps[conf.name] = new Game::Map::Map(conf, world._game);
+                Uint64 curTime = row[2].GetUint64();
+                world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game);
                 if (conf.is_default) {
                     world._defaultMap = world._maps[conf.name];
                 }
