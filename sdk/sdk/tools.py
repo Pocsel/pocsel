@@ -8,13 +8,16 @@ def hasTable(conn, table):
     """, (table,))
     return curs.fetchone() is not None
 
+def createTable(conn, table_name, columns):
+    if not hasTable(conn, table_name):
+        print "Create table", table_name
+        request = "CREATE TABLE %s (%s)" % (table_name, ', '.join(columns))
+        curs = conn.cursor()
+        curs.execute(request)
+
 def prepareDatabase(conn, tables):
     for table_name, columns in tables:
-        if not hasTable(conn, table_name):
-            print "Create table", table_name
-            request = "CREATE TABLE %s (%s)" % (table_name, ', '.join(columns))
-            curs = conn.cursor()
-            curs.execute(request)
+        createTable(conn, table_name, columns)
     conn.commit();
 
 

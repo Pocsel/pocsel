@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from sdk import tcplug
+from sdk import tools, tcplug
 
 def insertResource(worldconn, pluginconn, plugin_id, filename, version):
     print "Insert new resource '%s'" % filename
@@ -76,7 +76,18 @@ def installPlugin(worldconn, pluginconn, server_version):
     with worldconn() as wconn:
         wcurs = wconn.cursor()
         for name, lua in maps:
-            wcurs.execute("INSERT INTO map (name, plugin_id, lua) VALUES (?, ?, ?)", (name, plugin_id, lua))
+            fullname = "%s_%s" % (plugin_infos['identifier'], name)
+            wcurs.execute(
+                "INSERT INTO map (name, plugin_id, lua, current_time) VALUES (?, ?, ?, 0)",
+                (fullname, plugin_id, lua)
+            )
+            tools.createTable(wconn, "%s_chunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
+            tools.createTable(wconn, "%s_entity" % (fullname), ["id INTEGER", "type_id INTEGER", "storage TEXT"])
+            tools.createTable(wconn, "%s_event" % (fullname), ["time INTEGER", "entity_id INTEGER", "function TEXT", "args TEXT"])
+
+
+
+
 
     with worldconn() as wconn:
         wcurs = wconn.cursor()
