@@ -2,7 +2,7 @@
 #define __SERVER_GAME_ENGINE_ENGINE_HPP__
 
 namespace Tools { namespace Database {
-    class IConnectionPool;
+    class IConnection;
 }}
 
 namespace Tools { namespace Lua {
@@ -27,8 +27,7 @@ namespace Server { namespace Game { namespace Engine {
         Engine();
         ~Engine();
         void Tick(Uint64 currentTime);
-        void Save(Tools::Database::IConnectionPool& connectionPool);
-        void Load(Tools::Database::IConnectionPool& connectionPool);
+        void Save(Tools::Database::IConnection& conn);
         EventManager& GetEventManager() { return *this->_eventManager; }
         EntityManager& GetEntityManager() { return *this->_entityManager; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }

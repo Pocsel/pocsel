@@ -8,7 +8,8 @@
 
 #include "tools/SimpleMessageQueue.hpp"
 
-#include "tools/database/ConnectionPool.hpp"
+#include "tools/database/IConnectionPool.hpp"
+#include "tools/database/IConnection.hpp"
 
 #include "tools/database/sqlite/Connection.hpp"
 
@@ -21,6 +22,7 @@
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/map/gen/ChunkGenerator.hpp"
+#include "server/database/ResourceManager.hpp"
 #include "server/network/PacketCreator.hpp"
 
 namespace Server { namespace Game { namespace Map {
@@ -71,31 +73,19 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->Stop();
     }
 
-    void Map::Save(std::string const& filename)
+    void Map::Save()
     {
         std::cout << "MapSave\n";
-        Tools::Database::IConnectionPool* connectionPool
-            = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(
-                    filename
-                    );
 
-        this->_chunkManager->Save(*connectionPool);
-        this->_engine->Save(*connectionPool);
+        auto conn = this->_game.GetServer().GetResourceManager().GetConnectionPool().GetConnection();
+        {
+            auto& curs = conn->GetCursor();
+        }
 
-        Tools::Delete(connectionPool);
-    }
+        this->_chunkManager->Save(*conn);
+        this->_engine->Save(*conn);
 
-    void Map::Load(std::string const& filename)
-    {
-        Tools::Database::IConnectionPool* connectionPool
-            = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(
-                    filename
-                    );
-
-        this->_chunkManager->Load(*connectionPool);
-        this->_engine->Load(*connectionPool);
-
-        Tools::Delete(connectionPool);
+        // TODO conn.commit
     }
 
     void Map::HandleNewChunk(Chunk* chunk)
@@ -160,13 +150,6 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_RemovePlayer, this, id));
-        this->_messageQueue->PushMessage(m);
-    }
-
-    void Map::SaveThreadSafe(std::string const& filename)
-    {
-        Tools::SimpleMessageQueue::Message
-            m(std::bind(&Map::Save, this, filename));
         this->_messageQueue->PushMessage(m);
     }
 

@@ -5,7 +5,7 @@
 #include "tools/ByteArray.hpp"
 
 namespace Tools { namespace Database {
-    class IConnectionPool;
+    class IConnection;
 }}
 
 namespace Server { namespace Game { namespace Map {
@@ -22,8 +22,7 @@ namespace Server { namespace Game { namespace Map {
         ChunkManager();
         ~ChunkManager();
 
-        void Save(Tools::Database::IConnectionPool& connectionPool);
-        void Load(Tools::Database::IConnectionPool& connectionPool);
+        void Save(Tools::Database::IConnection& conn);
 
         Chunk* GetChunk(Chunk::IdType id);
         std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);

@@ -16,11 +16,7 @@ namespace Server { namespace Game { namespace Map {
             Tools::Delete(it->second);
     }
 
-    void ChunkManager::Save(Tools::Database::IConnectionPool& connectionPool)
-    {
-    }
-
-    void ChunkManager::Load(Tools::Database::IConnectionPool& connectionPool)
+    void ChunkManager::Save(Tools::Database::IConnection& conn)
     {
     }
 
