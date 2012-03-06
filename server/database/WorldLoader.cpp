@@ -85,8 +85,8 @@ namespace Server { namespace Database {
             }
             catch (std::exception& e)
             {
-                Log::load << "WorldLoader: Failed to load map \"" << row[0].GetString() << "\": " << e.what() << Tools::endl;
-                Tools::error << "WorldLoader: Failed to load map \"" << row[0].GetString() << "\": " << e.what() << Tools::endl;
+                Log::load << "WorldLoader: Failed to load map \"" << row[0].GetString() << "\": " << e.what() << std::endl;
+                Tools::error << "WorldLoader: Failed to load map \"" << row[0].GetString() << "\": " << e.what() << std::endl;
             }
         }
         if (world._defaultMap == 0)
@@ -103,8 +103,8 @@ namespace Server { namespace Database {
             }
             catch (std::exception& e)
             {
-                Log::load << "WorldLoader: Failed to load plugin \"" << row[1].GetString() << "\": " << e.what() << Tools::endl;
-                Tools::error << "WorldLoader: Failed to load plugin \"" << row[1].GetString() << "\": " << e.what() << Tools::endl;
+                Log::load << "WorldLoader: Failed to load plugin \"" << row[1].GetString() << "\": " << e.what() << std::endl;
+                Tools::error << "WorldLoader: Failed to load plugin \"" << row[1].GetString() << "\": " << e.what() << std::endl;
             }
         }
 
@@ -126,8 +126,8 @@ namespace Server { namespace Database {
             }
             catch (std::exception& e)
             {
-                Log::load << "WorldLoader: Failed to load entity file \"" << row[1].GetString() << "\": " << e.what() << Tools::endl;
-                Tools::error << "WorldLoader: Failed to load entity file \"" << row[1].GetString() << "\": " << e.what() << Tools::endl;
+                Log::load << "WorldLoader: Failed to load entity file \"" << row[1].GetString() << "\": " << e.what() << std::endl;
+                Tools::error << "WorldLoader: Failed to load entity file \"" << row[1].GetString() << "\": " << e.what() << std::endl;
             }
         }
     }

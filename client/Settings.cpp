@@ -17,7 +17,7 @@ namespace {
             }
             catch (std::exception&)
             {
-                Tools::error << "Settings: Could not read \"" << name << "\", using default \"" << defaultValue << "\"" << Tools::endl;
+                Tools::error << "Settings: Could not read \"" << name << "\", using default \"" << defaultValue << "\"" << std::endl;
                 return defaultValue;
             }
         }
@@ -60,7 +60,7 @@ namespace Client {
         }
         catch (std::exception& e)
         {
-            Tools::error << "Invalid arguments (use -h for help): " << e.what() << Tools::endl;
+            Tools::error << "Invalid arguments (use -h for help): " << e.what() << std::endl;
             exit(boost::exit_failure);
         }
 
@@ -73,7 +73,7 @@ namespace Client {
 
         if (vm.count("version"))
         {
-            Tools::log << PROJECT_NAME << " - " << PROGRAM_NAME << " - Version " << GIT_VERSION << Tools::endl;
+            Tools::log << PROJECT_NAME << " - " << PROGRAM_NAME << " - Version " << GIT_VERSION << std::endl;
             exit(boost::exit_success);
         }
 
@@ -82,12 +82,12 @@ namespace Client {
 
         this->confDir = vm["conf"].as<std::string>();
         if (vm["conf"].as<std::string>() != defaultConfDir)
-            Tools::log << "Configuration directory: " << this->confDir.string() << Tools::endl;
+            Tools::log << "Configuration directory: " << this->confDir.string() << std::endl;
 
         if (vm.count("settings"))
         {
             this->settingsFile = vm["settings"].as<std::string>();
-            Tools::log << "Settings file: " << this->settingsFile.string() << Tools::endl;
+            Tools::log << "Settings file: " << this->settingsFile.string() << std::endl;
         }
         else
             this->settingsFile = this->confDir / "settings.lua";
@@ -95,7 +95,7 @@ namespace Client {
         if (vm.count("bindings"))
         {
             this->bindingsFile = vm["bindings"].as<std::string>();
-            Tools::log << "Bindings file: " << this->bindingsFile.string() << Tools::endl;
+            Tools::log << "Bindings file: " << this->bindingsFile.string() << std::endl;
         }
         else
             this->bindingsFile = this->confDir / "bindings.lua";
@@ -103,7 +103,7 @@ namespace Client {
         if (vm.count("cache"))
         {
             this->cacheDir = vm["cache"].as<std::string>();
-            Tools::log << "Cache directory: " << this->cacheDir.string() << Tools::endl;
+            Tools::log << "Cache directory: " << this->cacheDir.string() << std::endl;
         }
         else
             this->cacheDir = this->confDir / "cache";
@@ -123,25 +123,25 @@ namespace Client {
             if (this->fps < 2)
             {
                 this->fps = 2;
-                Tools::error << "Settings: fps too low, changing to " << this->fps << Tools::endl;
+                Tools::error << "Settings: fps too low, changing to " << this->fps << std::endl;
             }
             this->chunkViewDistance = _LuaGetGlobal<unsigned int>(i, "chunkViewDistance", 4);
             if (this->chunkViewDistance < 2)
             {
                 this->chunkViewDistance = 2;
-                Tools::error << "Settings: chunkViewDistance too low, changing to " << this->chunkViewDistance << Tools::endl;
+                Tools::error << "Settings: chunkViewDistance too low, changing to " << this->chunkViewDistance << std::endl;
             }
             this->chunkCacheArea = _LuaGetGlobal<unsigned int>(i, "chunkCacheArea", 10);
             if (this->chunkCacheArea < 1)
             {
                 this->chunkCacheArea = 1;
-                Tools::error << "Settings: chunkCacheArea too low, changing to " << this->chunkCacheArea << Tools::endl;
+                Tools::error << "Settings: chunkCacheArea too low, changing to " << this->chunkCacheArea << std::endl;
             }
             this->chunkMinimumArea = _LuaGetGlobal<unsigned int>(i, "chunkMinimumArea", 2);
             if (this->chunkMinimumArea < 1 || this->chunkMinimumArea > this->chunkViewDistance)
             {
                 this->chunkMinimumArea = this->chunkViewDistance - 1;
-                Tools::error << "Settings: invalid value for chunkMinimumArea, changing to " << this->chunkMinimumArea << Tools::endl;
+                Tools::error << "Settings: invalid value for chunkMinimumArea, changing to " << this->chunkMinimumArea << std::endl;
             }
             this->res.x = _LuaGetGlobal<unsigned int>(i, "resX", 800);
             this->res.y = _LuaGetGlobal<unsigned int>(i, "resY", 600);
@@ -155,7 +155,7 @@ namespace Client {
         }
         catch (std::exception& e)
         {
-            Tools::error << "Failed to load settings file \"" << this->settingsFile.string() << "\": " << e.what() << Tools::endl;
+            Tools::error << "Failed to load settings file \"" << this->settingsFile.string() << "\": " << e.what() << std::endl;
             return;
         }
         Tools::debug << "Settings file \"" << this->settingsFile.string() << "\" loaded.\n";

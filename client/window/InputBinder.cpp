@@ -113,7 +113,7 @@ namespace Client { namespace Window {
         }
         catch (std::exception& e)
         {
-            Tools::error << "Failed to load bindings file \"" << path << "\": " << e.what() << Tools::endl;
+            Tools::error << "Failed to load bindings file \"" << path << "\": " << e.what() << std::endl;
             return false;
         }
         Tools::debug << "Bindings file \"" << path << "\" successfully loaded.\n";
@@ -164,7 +164,7 @@ namespace Client { namespace Window {
                 return true;
             }
         }
-        Tools::error << "Could not bind \"" << input << "\" to \"" << action << "\" (input not found)" << Tools::endl;
+        Tools::error << "Could not bind \"" << input << "\" to \"" << action << "\" (input not found)" << std::endl;
         return false;
     }
 

@@ -36,7 +36,7 @@ namespace Server {
         }
         catch (std::exception& e)
         {
-            Tools::error << "Invalid arguments (use -h for help): " << e.what() << Tools::endl;
+            Tools::error << "Invalid arguments (use -h for help): " << e.what() << std::endl;
             exit(boost::exit_failure);
         }
 
@@ -49,7 +49,7 @@ namespace Server {
 
         if (vm.count("version"))
         {
-            Tools::log << PROJECT_NAME << " - " << PROGRAM_NAME << " - Version " << GIT_VERSION << Tools::endl;
+            Tools::log << PROJECT_NAME << " - " << PROGRAM_NAME << " - Version " << GIT_VERSION << std::endl;
             exit(boost::exit_success);
         }
 
@@ -58,7 +58,7 @@ namespace Server {
         this->udpPort = vm["udpport"].as<std::string>();
         this->worldFile = vm["world"].as<std::string>();
         this->worldDir = this->worldFile.parent_path();
-        Tools::log << "World directory: " << this->worldDir.string() << Tools::endl;
+        Tools::log << "World directory: " << this->worldDir.string() << std::endl;
     }
 
 }
