@@ -1,6 +1,8 @@
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/database/sqlite/Connection.hpp"
+#include "server/game/map/Map.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -23,6 +25,19 @@ namespace Server { namespace Game { namespace Engine {
             auto itTypeEnd = itPlugin->second.end();
             for (; itType != itTypeEnd; ++itType)
                 Tools::Delete(itType->second);
+        }
+    }
+
+    void EntityManager::Save(Tools::Database::IConnection& conn)
+    {
+        auto& curs = conn.GetCursor();
+        curs.Execute("DELETE FROM ?").Bind(this->_engine.GetMap().GetName() + "_entity");
+        auto it = this->_entities.begin();
+        auto itEnd = this->_entities.end();
+        for (; it != itEnd; ++it)
+        {
+            curs.Execute("INSERT INTO ? (id, type, storage) VALUES (?, ?, ?)")
+                .Bind(this->_engine.GetMap().GetName() + "_entity").Bind(it->first).Bind(it->second->type->name).Bind(this->_engine.GetInterpreter().Serialize(it->second->self["storage"]));
         }
     }
 

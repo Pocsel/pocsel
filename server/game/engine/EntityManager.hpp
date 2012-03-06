@@ -3,6 +3,10 @@
 
 #include "tools/lua/Ref.hpp"
 
+namespace Tools { namespace Database {
+    class IConnection;
+}}
+
 namespace Server { namespace Game { namespace Engine {
 
     class Engine;
@@ -41,6 +45,7 @@ namespace Server { namespace Game { namespace Engine {
     public:
         EntityManager(Engine& engine);
         ~EntityManager();
+        void Save(Tools::Database::IConnection& conn);
         void BeginPluginRegistering(Uint32 pluginId);
         void EndPluginRegistering();
         void CallEntityFunction(int entityId, std::string function, Tools::Lua::Ref const& args);

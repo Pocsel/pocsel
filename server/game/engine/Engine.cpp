@@ -5,8 +5,8 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Engine::Engine() :
-        _currentTime(0)
+    Engine::Engine(Map::Map& map) :
+        _map(map), _currentTime(0)
     {
         Tools::debug << "Engine::Engine()\n";
         this->_interpreter = new Tools::Lua::Interpreter();
@@ -35,7 +35,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void Engine::Save(Tools::Database::IConnection& conn)
     {
-        //TODO
+        this->_entityManager->Save(conn);
     }
 
 }}}
