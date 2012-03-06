@@ -120,7 +120,7 @@ namespace Common {
             Common::BaseChunk::CoordsType world;
             Tools::Vector3u chunk;
 
-            std::vector<Common::CubePosition> res;
+            std::vector<Common::CubePosition> res(preRes.size());
 
             for (auto mit = preRes.begin(), mite = preRes.end(); mit != mite; ++mit)
             {
@@ -188,6 +188,7 @@ namespace Common {
         {
             double sqdist = (double)distance * (double)distance;
 
+            res.reserve((std::size_t)(distance*distance*distance*boost::math::constants::pi<double>()*4.0/3.0));
             for (double x = -distance; x < distance; x += 1)
             {
                 for (double y = -distance; y < distance; y += 1)
@@ -204,6 +205,7 @@ namespace Common {
         void __CubeArea(Common::Position const& pos, float distance,
                     std::vector<Tools::Vector3i>& res)
         {
+            res.reserve((std::size_t)(distance*distance*distance*8));
             for (double x = -distance; x < distance; x += 1)
             {
                 for (double y = -distance; y < distance; y += 1)
@@ -218,7 +220,7 @@ namespace Common {
 
         std::vector<Common::CubePosition> __TabToTab(std::vector<Tools::Vector3i> const& preRes, Common::Position const& pos)
         {
-            std::vector<Common::CubePosition> res;
+            std::vector<Common::CubePosition> res(preRes.size());
 
             Common::BaseChunk::CoordsType world;
             Tools::Vector3u chunk;

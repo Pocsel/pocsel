@@ -46,7 +46,15 @@ namespace Tools { namespace Lua {
 
     public:
         template<class T>
-        MetaTable(Interpreter& interpreter, T)
+        static MetaTable Create(Interpreter& interpreter)
+        {
+            MetaTable tmp(interpreter);
+            tmp.SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
+            interpreter.GetState().RegisterMetaTable(tmp._metaTable, typeid(T).hash_code());
+            return tmp;
+        }
+        template<class T>
+        MetaTable(Interpreter& interpreter, T&&)
             : _interpreter(interpreter),
             _prototype(interpreter.MakeTable()),
             _metaTable(interpreter.MakeTable())
@@ -65,6 +73,8 @@ namespace Tools { namespace Lua {
         Ref& GetMetaTable() { return this->_metaTable; }
         Ref const& GetPrototype() const { return this->_prototype; }
         Ref const& GetMetaTable() const { return this->_metaTable; }
+    private:
+        MetaTable(Interpreter& interpreter);
     };
 
 }}
