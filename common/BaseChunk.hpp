@@ -3,20 +3,14 @@
 
 #include "common/constants.hpp"
 #include "tools/Vector3.hpp"
+#include "common/NChunk.hpp"
 
 namespace Common {
 
-    struct BaseChunk
+    struct BaseChunk : public NChunk<0>
     {
     public:
         typedef Uint16 CubeType;
-        typedef Int64 IdType;
-        typedef Uint32 CoordType;
-        typedef Tools::Vector3<CoordType> CoordsType;
-
-    public:
-        IdType const id;
-        CoordsType const coords;      // ChunkSize unit
 
     private:
         std::shared_ptr<CubeType> _sharedCubes;
@@ -24,30 +18,19 @@ namespace Common {
 
     public:
         BaseChunk(IdType id) :
-            id(id), coords(IdToCoords(id)), _cubes(0)
+            NChunk<0>(id),
+            _cubes(0)
         {
-            assert(this->coords.x < (1 << 23));
-            assert(this->coords.y < (1 << 21));
-            assert(this->coords.z < (1 << 23));
-    //        assert(this->coords.x < (1 << 21) && this->coords.x > -(1 << 21) - 1);
-    //        assert(this->coords.y < (1 << 19) && this->coords.y > -(1 << 19) - 1);
-    //        assert(this->coords.z < (1 << 21) && this->coords.z > -(1 << 21) - 1);
         }
 
         BaseChunk(CoordsType const& c) :
-            id(CoordsToId(c)), coords(c), _cubes(0)
+            NChunk<0>(c),
+            _cubes(0)
         {
-            assert(this->coords.x < (1 << 23));
-            assert(this->coords.y < (1 << 21));
-            assert(this->coords.z < (1 << 23));
-    //        assert(this->coords.x < (1 << 21) && this->coords.x > -(1 << 21) - 1);
-    //        assert(this->coords.y < (1 << 19) && this->coords.y > -(1 << 19) - 1);
-    //        assert(this->coords.z < (1 << 21) && this->coords.z > -(1 << 21) - 1);
         }
 
         ~BaseChunk() // XXX destructor is not virtual
         {
-//            Tools::DeleteTab(this->_cubes);
         }
 
         inline bool IsEmpty() const
@@ -120,40 +103,6 @@ namespace Common {
             this->_sharedCubes.reset();
             this->_cubes = 0;
             return ret;
-        }
-
-
-#ifdef _WIN32
-# pragma warning(disable: 4244)
-#endif
-
-        static inline void IdToCoords(IdType id, BaseChunk::CoordsType& coords)
-        {
-            static_assert(sizeof(BaseChunk::IdType) == 8, "sizeof id type is 8");
-            coords.x = (id                & ((1 << 22) - 1))/* - (1 << 21)*/;
-            coords.y = ((id >> 22)        & ((1 << 20) - 1))/* - (1 << 19)*/;
-            coords.z = ((id >> (22 + 20)) & ((1 << 22) - 1))/* - (1 << 21)*/;
-        }
-
-        static inline CoordsType IdToCoords(IdType id)
-        {
-            BaseChunk::CoordsType coords;
-            BaseChunk::IdToCoords(id, coords);
-            return coords;
-        }
-
-        static inline IdType CoordsToId(CoordType x, CoordType y, CoordType z)
-        {
-            return (
-                    ((BaseChunk::IdType)  (x /*+ (1LL << 21)*/)) +
-                    (((BaseChunk::IdType) (y /*+ (1LL << 19)*/)) << 22) +
-                    (((BaseChunk::IdType) (z /*+ (1LL << 21)*/)) << (22 + 20))
-                   );
-        }
-
-        static inline IdType CoordsToId(CoordsType const& coord)
-        {
-            return BaseChunk::CoordsToId(coord.x, coord.y, coord.z);
         }
 
     private:
