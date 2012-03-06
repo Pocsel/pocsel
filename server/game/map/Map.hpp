@@ -15,6 +15,10 @@ namespace Tools {
     class SimpleMessageQueue;
 }
 
+namespace Tools { namespace Database {
+    class IConnection;
+}}
+
 namespace Server { namespace Game {
     class Game;
     class Player;
@@ -55,7 +59,7 @@ namespace Server { namespace Game { namespace Map {
         Uint64 _currentTime;
 
     public:
-        Map(Conf const& conf, Uint64 currentTime, Game& game);
+        Map(Conf const& conf, Uint64 currentTime, Game& game, std::vector<Chunk::IdType> const& existingChunks);
         ~Map();
 
         void Start();
@@ -64,6 +68,9 @@ namespace Server { namespace Game { namespace Map {
 
         std::string const& GetName() const { return this->_conf.name; }
         Engine::Engine& GetEngine() { return *this->_engine; }
+        Game& GetGame() { return this->_game; }
+
+        std::shared_ptr<Tools::Database::IConnection> GetConnection();
 
         // threadsafe
         void HandleNewChunk(Chunk* chunk);
