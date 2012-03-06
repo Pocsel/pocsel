@@ -25,7 +25,6 @@ namespace Tools { namespace Meta {
     {
     };
 
-
     /////////////////////////////////////////////////////////////////////////////
     // Ret(void)
     template<typename Ret, typename Class>
