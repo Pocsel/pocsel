@@ -78,11 +78,11 @@ def installPlugin(worldconn, pluginconn, server_version):
         for name, lua in maps:
             fullname = "%s_%s" % (plugin_infos['identifier'], name)
             wcurs.execute(
-                "INSERT INTO map (name, plugin_id, lua, current_time) VALUES (?, ?, ?, 0)",
+                "INSERT INTO map (name, plugin_id, lua, tick) VALUES (?, ?, ?, 0)",
                 (fullname, plugin_id, lua)
             )
             tools.createTable(wconn, "%s_chunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
-            tools.createTable(wconn, "%s_entity" % (fullname), ["id INTEGER", "type_id INTEGER", "storage TEXT"])
+            tools.createTable(wconn, "%s_entity" % (fullname), ["id INTEGER", "type TEXT", "storage TEXT"])
             tools.createTable(wconn, "%s_event" % (fullname), ["time INTEGER", "entity_id INTEGER", "function TEXT", "args TEXT"])
 
 

@@ -24,6 +24,7 @@ namespace Tools { namespace Lua {
             "__newindex",
             "__call",
             "__gc",
+            "__serialize",
         };
     }
 

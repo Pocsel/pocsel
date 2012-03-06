@@ -9,17 +9,23 @@ namespace Tools { namespace Database {
 }}
 
 namespace Server { namespace Game { namespace Map {
+    class Map;
+}}}
+
+namespace Server { namespace Game { namespace Map {
 
     class ChunkManager :
         private boost::noncopyable
     {
     private:
+        Map& _map;
         std::unordered_map<Chunk::IdType, Tools::ByteArray*> _inflatedChunks;
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
         std::list<std::pair<float, Chunk::IdType>> _priorities;
+        std::unordered_set<Chunk::IdType> _dbChunks;
 
     public:
-        ChunkManager();
+        ChunkManager(Map& map, std::vector<Chunk::IdType> const& existingChunks);
         ~ChunkManager();
 
         void Save(Tools::Database::IConnection& conn);
@@ -32,6 +38,7 @@ namespace Server { namespace Game { namespace Map {
     private:
         void _InflateChunk(Chunk::IdType id);
         void _DeflateChunk(Chunk::IdType id);
+        void _ExtractFromDb(Chunk::IdType id);
     };
 
 }}}

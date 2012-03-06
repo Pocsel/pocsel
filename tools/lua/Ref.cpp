@@ -292,7 +292,7 @@ namespace Tools { namespace Lua {
 
     bool Ref::Exists() const throw()
     {
-        return this->IsNoneOrNil();
+        return !this->IsNoneOrNil();
     }
 
 #define MAKE_ISMETHOD(name, lua_func) \
