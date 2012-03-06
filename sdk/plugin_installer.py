@@ -67,6 +67,7 @@ world_tables = [
             "name TEXT PRIMARY KEY",
             "plugin_id INTEGER",
             "lua TEXT",
+            "tick INTEGER",
         ]
     ),
 ]

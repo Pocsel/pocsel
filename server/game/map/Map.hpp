@@ -55,7 +55,7 @@ namespace Server { namespace Game { namespace Map {
         Uint64 _currentTime;
 
     public:
-        Map(Conf const& conf, Game& game);
+        Map(Conf const& conf, Uint64 currentTime, Game& game);
         ~Map();
 
         void Start();
