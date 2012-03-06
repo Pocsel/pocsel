@@ -103,8 +103,8 @@ namespace Tools { namespace Lua {
                 [oldGetmetatable](CallHelper& helper)
                 {
                     auto obj = helper.GetArgList().front();
-                    if (obj.IsUserData() || obj.IsLightUserData())
-                        throw std::runtime_error("getmetatable can be used only on \"Table\"");
+                    if (obj.IsUserData())
+                        throw std::runtime_error("Lua::Interpreter: getmetatable: expected table");
                     oldGetmetatable(helper);
                 }));
         }
