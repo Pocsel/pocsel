@@ -174,6 +174,13 @@ namespace Tools { namespace Lua {
             return this->_SerializeString(ref.ToString());
         else if (ref.IsNil())
             return "nil";
+        else if (ref.IsUserData())
+        {
+            auto serialize = ref.GetMetaTable()["__serialize"];
+            if (!serialize.Exists())
+                throw std::runtime_error("Lua::Interpreter: Cannot serialize this user data");
+            return "(function() " + serialize(ref).CheckString() + " end)()";
+        }
         throw std::runtime_error("Lua::Interpreter: Type " + ref.GetTypeName() + " is not serializable");
     }
 

@@ -37,6 +37,7 @@ namespace Tools { namespace Lua {
             NewIndex,
             Call,
             Collect,
+            Serialize,
         };
 
     private:
