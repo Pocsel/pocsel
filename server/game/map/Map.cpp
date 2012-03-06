@@ -27,18 +27,17 @@
 
 namespace Server { namespace Game { namespace Map {
 
-    Map::Map(Conf const& conf, Uint64 currentTime, Game& game) :
+    Map::Map(Conf const& conf, Uint64 currentTime, Game& game, std::vector<Chunk::IdType> const& existingChunks) :
         _conf(conf),
         _game(game),
         _messageQueue(new Tools::SimpleMessageQueue(1)),
         _spawnPosition(0),
         _currentTime(currentTime)
     {
-        std::cout << "CURENTTIME" << currentTime << "\n";
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
         this->_engine = new Engine::Engine();
-        this->_chunkManager = new ChunkManager(*this);
+        this->_chunkManager = new ChunkManager(*this, existingChunks);
     }
 
     Map::~Map()
@@ -48,6 +47,7 @@ namespace Server { namespace Game { namespace Map {
         Tools::Delete(this->_engine);
         Tools::Delete(this->_messageQueue);
         Tools::Delete(this->_chunkManager);
+        Tools::Delete(this->_spawnPosition);
     }
 
     void Map::Start()
@@ -89,6 +89,11 @@ namespace Server { namespace Game { namespace Map {
 
         this->_chunkManager->Save(*conn);
         this->_engine->Save(*conn);
+    }
+
+    std::shared_ptr<Tools::Database::IConnection> Map::GetConnection()
+    {
+        return this->_game.GetServer().GetResourceManager().GetConnectionPool().GetConnection();
     }
 
     void Map::HandleNewChunk(Chunk* chunk)

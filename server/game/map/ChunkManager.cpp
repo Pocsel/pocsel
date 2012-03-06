@@ -8,9 +8,18 @@
 
 namespace Server { namespace Game { namespace Map {
 
-    ChunkManager::ChunkManager(Map& map) :
-        _map(map)
+    ChunkManager::ChunkManager(Map& map, std::vector<Chunk::IdType> const& existingChunks) :
+        _map(map),
+        _inflatedChunks(20000),
+        _chunks(5000),
+        _dbChunks(100000)
     {
+        Tools::debug << existingChunks.size() << " existing chunks in " << map.GetName() << "\n";
+
+        std::for_each(existingChunks.begin(), existingChunks.end(), [this](Chunk::IdType const& id)
+                {
+                    this->_dbChunks.insert(id);
+                });
     }
 
     ChunkManager::~ChunkManager()
@@ -27,49 +36,41 @@ namespace Server { namespace Game { namespace Map {
 
         std::string query = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
             "_chunk (id, data) VALUES (?, ?)";
+
+        curs.Execute("BEGIN");
         for (auto it = this->_inflatedChunks.begin(), ite = this->_inflatedChunks.end(); it != ite; ++it)
         {
             Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
             curs.Execute(
                     query.c_str())
-//                    "REPLACE INTO ? (id, data) VALUES (?, ?)")
-//                .Bind(this->_map.GetName() + "_chunk")
                 .Bind(it->first)
                 .Bind(blob);
         }
 
+        curs.Execute("COMMIT");
     }
-
-    struct Blob
-    {
-        size_t const size;
-        void const* data;
-
-        Blob(void const* d, size_t s) :
-            size(s), data(d)
-        {
-        }
-        Blob(Blob const& b) :
-            size(b.size), data(b.data)
-        {
-        }
-    private:
-        Blob& operator =(Blob const& b);
-    };
 
     Chunk* ChunkManager::GetChunk(Chunk::IdType id)
     {
         Chunk* chunk;
 
         {
+            // cherche dans les chunks decompresses
             auto cit = this->_chunks.find(id);
             if (cit != this->_chunks.end())
                 chunk = cit->second;
             else
             {
+                // cherche dans les chunks compresses
                 auto ccit = this->_inflatedChunks.find(id);
                 if (ccit == this->_inflatedChunks.end())
-                    return 0;
+                {
+                    // cherche dans la db
+                    if (this->_dbChunks.count(id) == 0)
+                        return 0;
+
+                    this->_ExtractFromDb(id);
+                }
 
                 this->_DeflateChunk(id);
 
@@ -105,6 +106,7 @@ namespace Server { namespace Game { namespace Map {
     {
         assert(this->_chunks.find(id) != this->_chunks.end());
         assert(this->_inflatedChunks.find(id) == this->_inflatedChunks.end());
+        assert(this->_dbChunks.count(id) == 0);
 
         Chunk* chunk = this->_chunks[id];
 
@@ -121,6 +123,7 @@ namespace Server { namespace Game { namespace Map {
     {
         assert(this->_chunks.find(id) == this->_chunks.end());
         assert(this->_inflatedChunks.find(id) != this->_inflatedChunks.end());
+        assert(this->_dbChunks.count(id) == 0);
 
         Tools::ByteArray* array = this->_inflatedChunks[id];
 
@@ -129,6 +132,32 @@ namespace Server { namespace Game { namespace Map {
         this->_chunks[id] = chunk;
         this->_inflatedChunks.erase(id);
         Tools::Delete(array);
+    }
+
+    void ChunkManager::_ExtractFromDb(Chunk::IdType id)
+    {
+        assert(this->_chunks.find(id) == this->_chunks.end());
+        assert(this->_inflatedChunks.find(id) == this->_inflatedChunks.end());
+        assert(this->_dbChunks.count(id) == 1);
+
+        auto conn = this->_map.GetConnection();
+
+        auto& curs = conn->GetCursor();
+
+        std::string query = "SELECT data FROM ";
+        query += this->_map.GetName() + "_chunk";
+        query += " WHERE id = ?";
+        curs.Execute(query.c_str()).Bind(id);
+
+        auto& row = curs.FetchOne();
+
+        Tools::Database::Blob b = row[0].GetBlob();
+
+        Tools::ByteArray* inflatedChunk = new Tools::ByteArray();
+        inflatedChunk->SetData((char*)b.data, b.size);
+
+        this->_inflatedChunks[id] = inflatedChunk;
+        this->_dbChunks.erase(id);
     }
 
 }}}
