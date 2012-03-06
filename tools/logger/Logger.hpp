@@ -92,11 +92,4 @@ namespace Tools {
     using Tools::Logger::debug;
 }
 
-namespace std {
-    void _()
-    {
-        std::cout << std::endl;
-    }
-}
-
 #endif
