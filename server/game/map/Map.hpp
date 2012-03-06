@@ -86,6 +86,7 @@ namespace Server { namespace Game { namespace Map {
         void _HandleNewChunk(Chunk* newChunk);
         void _GetSpawnPosition(SpawnCallback& response);
         void _GetChunk(Chunk::IdType id, ChunkCallback& response);
+        void _Get3Chunk(Chunk::IdType id);
         void _SendChunkPacket(Chunk* chunk, ChunkPacketCallback& response);
         void _FindSpawnPosition(Chunk* chunk);
         void _AddPlayer(std::shared_ptr<Player> p);

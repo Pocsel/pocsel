@@ -167,17 +167,26 @@ namespace Server { namespace Game { namespace Map {
         if (chunk == 0)
         {
             if (this->_chunkRequests.find(id) == this->_chunkRequests.end())
-            {
-                this->_chunkRequests[id].push_back(response);
-                Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
-                this->_gen->GetChunk(id, cb);
-            }
-            else
-                this->_chunkRequests[id].push_back(response);
+                this->_Get3Chunk(id);
+
+            this->_chunkRequests[id].push_back(response);
         }
         else
         {
             response(chunk);
+        }
+    }
+
+    void Map::_Get3Chunk(Chunk::IdType id)
+    {
+        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
+
+        auto ids = Common::NChunk<3>::GetContainedIds<0>(id);
+
+        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
+        {
+            this->_chunkRequests[*it].push_back(0);
+            this->_gen->GetChunk(*it, cb);
         }
     }
 
@@ -192,7 +201,8 @@ namespace Server { namespace Game { namespace Map {
         auto& requests = this->_chunkRequests[chunk->id];
         for (auto it = requests.begin(), ite = requests.end(); it != ite; ++it)
         {
-            (*it)(chunk);
+            if (*it != 0)
+                (*it)(chunk);
         }
         requests.clear();
         this->_chunkRequests.erase(chunk->id);
