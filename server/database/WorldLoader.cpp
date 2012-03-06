@@ -64,7 +64,21 @@ namespace Server { namespace Database {
                 WorldLoader::_LoadMapConf(conf, row[0].GetString(), row[1].GetString(), world);
                 conf.cubeTypes = &world._cubeTypes;
                 Uint64 curTime = row[2].GetUint64();
-                world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game);
+
+                std::vector<Chunk::IdType> existingChunks;
+
+                {
+                    auto coconn = manager.GetConnectionPool().GetConnection();
+                    auto& cucurs = coconn->GetCursor();
+                    cucurs.Execute((Tools::ToString("SELECT id FROM ") + row[0].GetString() + "_chunk").c_str());
+                    while (cucurs.HasData())
+                    {
+                        auto& rorow = cucurs.FetchOne();
+                        existingChunks.push_back(rorow[0].GetUint64());
+                    }
+                }
+
+                world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game, existingChunks);
                 if (conf.is_default) {
                     world._defaultMap = world._maps[conf.name];
                 }
