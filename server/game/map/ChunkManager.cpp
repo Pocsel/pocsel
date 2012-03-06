@@ -27,6 +27,8 @@ namespace Server { namespace Game { namespace Map {
 
         std::string query = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
             "_chunk (id, data) VALUES (?, ?)";
+
+        curs.Execute("BEGIN");
         for (auto it = this->_inflatedChunks.begin(), ite = this->_inflatedChunks.end(); it != ite; ++it)
         {
             Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
@@ -38,6 +40,7 @@ namespace Server { namespace Game { namespace Map {
                 .Bind(blob);
         }
 
+        curs.Execute("COMMIT");
     }
 
     struct Blob
