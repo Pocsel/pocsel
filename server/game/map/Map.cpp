@@ -47,6 +47,7 @@ namespace Server { namespace Game { namespace Map {
         Tools::Delete(this->_engine);
         Tools::Delete(this->_messageQueue);
         Tools::Delete(this->_chunkManager);
+        Tools::Delete(this->_spawnPosition);
     }
 
     void Map::Start()
