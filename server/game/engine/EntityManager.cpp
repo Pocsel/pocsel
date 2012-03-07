@@ -33,7 +33,7 @@ namespace Server { namespace Game { namespace Engine {
         auto& curs = conn.GetCursor();
         Tools::log << this->_engine.GetMap().GetName() << "_entity\n";
         curs.Execute("DELETE FROM " + this->_engine.GetMap().GetName() + "_entity");
-        curs.Execute("BEGIN");
+        //curs.Execute("BEGIN");
         auto it = this->_entities.begin();
         auto itEnd = this->_entities.end();
         for (; it != itEnd; ++it)
@@ -46,10 +46,10 @@ namespace Server { namespace Game { namespace Engine {
             catch (std::exception& e)
             {
                 Tools::error << "EntityManager::Save: Could not save entity " << it->first << " (of type \""
-                    << it->second->type->name << "\"): " << e.what() << Tools::endl;
+                    << it->second->type->name << "\"): " << e.what() << std::endl;
             }
         }
-        curs.Execute("COMMIT");
+        //curs.Execute("COMMIT");
     }
 
     void EntityManager::BeginPluginRegistering(Uint32 pluginId)

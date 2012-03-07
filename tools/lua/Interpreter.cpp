@@ -159,7 +159,7 @@ namespace Tools { namespace Lua {
             default:
                 ;
             }
-            Tools::log << "\n";
+            Tools::log << "" << std::endl;
         }
         Tools::log << "------------------------------\n";
     }
