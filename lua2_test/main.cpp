@@ -34,8 +34,8 @@ void Init(Interpreter& i)
             auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
             std::stringstream tmp;
             tmp << m->mm[0];
-            for (int i = 1; i < 16; ++i)
-                tmp << ", " << m->mm[i];
+            for (int j = 1; j < 16; ++j)
+                tmp << ", " << m->mm[j];
             helper.PushRet(i.MakeString("return Matrix4f.New16(" + tmp.str() + ")"));
         });
     m.SetMethod("Rotate", [](CallHelper&) { });
