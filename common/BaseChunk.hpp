@@ -2,7 +2,6 @@
 #define __COMMON_BASECHUNK_HPP__
 
 #include "common/constants.hpp"
-#include "tools/Vector3.hpp"
 #include "common/NChunk.hpp"
 
 namespace Common {

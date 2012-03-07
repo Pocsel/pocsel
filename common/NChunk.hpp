@@ -1,7 +1,7 @@
 #ifndef __COMMON_NCHUNK_HPP__
 #define __COMMON_NCHUNK_HPP__
 
-#include "common/BaseChunk.hpp"
+#include "tools/Vector3.hpp"
 
 namespace Common {
 
@@ -19,9 +19,6 @@ namespace Common {
                 typedef Int64 IdType;
                 typedef Uint32 CoordType;
                 typedef Tools::Vector3<CoordType> CoordsType;
-//                typedef BaseChunk::IdType IdType;
-//                typedef BaseChunk::CoordType CoordType;
-//                typedef BaseChunk::CoordsType CoordsType;
 
                 enum
                 {
@@ -118,7 +115,7 @@ namespace Common {
                     {
                         static_assert(N > Nother, "Cannot contain something bigger.");
 
-                        unsigned int count = chunkCount - (NChunk<Nother>::chunkCount - 1);
+                        unsigned int count = chunkCount / NChunk<Nother>::chunkCount;
 
                         std::vector<IdType> res(count * count * count);
 
@@ -142,6 +139,11 @@ namespace Common {
 
                         return res;
                     }
+
+                static IdType GetId(IdType id)
+                {
+                    return id & idMask;
+                }
 
         };
 
