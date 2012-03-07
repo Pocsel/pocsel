@@ -127,12 +127,12 @@ namespace Server { namespace Network {
         if (!e)
         {
             std::unique_ptr<Common::Packet> packet(new Common::Packet());
-            packet->SetData((char*)this->_data, transferredBytes);
+            packet->SetData((char*)this->_data, (Uint16)transferredBytes);
             this->_udpPacketHandler(packet);
         }
         else
         {
-            Tools::error << "UPD read failure: " << e.message() << "\n";
+            Tools::error << "UDP read failure: " << e.message() << "\n";
         }
 
         this->_ConnectUdpRead();

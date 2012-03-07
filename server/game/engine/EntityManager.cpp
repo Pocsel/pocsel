@@ -91,7 +91,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::log << "EntityManager::StartPlugin: Error: " << e.what() << Tools::endl;
+            Tools::log << "EntityManager::StartPlugin: Error: " << e.what() << std::endl;
         }
     }
 
@@ -110,7 +110,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::CallEntityFunction: Call to \"" << function << "\" for entity " << entityId << " failed: " << e.what() << Tools::endl;
+            Tools::error << "EntityManager::CallEntityFunction: Call to \"" << function << "\" for entity " << entityId << " failed: " << e.what() << std::endl;
             return;
         }
         Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << entityId << ".\n";
@@ -128,7 +128,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::_Register: " << e.what() << Tools::endl;
+            Tools::error << "EntityManager::_Register: " << e.what() << std::endl;
             return;
         }
         std::string name;
@@ -140,7 +140,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::_Register: Invalid entity name: " << e.what() << Tools::endl;
+            Tools::error << "EntityManager::_Register: Invalid entity name: " << e.what() << std::endl;
             return;
         }
         EntityType* type = new EntityType(name, this->_pluginIdForRegistering, t);

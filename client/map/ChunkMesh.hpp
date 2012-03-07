@@ -60,6 +60,15 @@ namespace Client { namespace Map {
         bool RefreshGraphics(Tools::IRenderer& renderer);
         void Render(Uint32 textureId, Tools::IRenderer& renderer);
         Uint32 GetTriangleCount() const { return this->_triangleCount; }
+        Uint32 GetTriangleCount(Uint32 textureId) const
+        {
+            if (this->_triangleCount == 0)
+                return 0;
+            auto it = this->_meshes.find(textureId);
+            if (it == this->_meshes.end())
+                return 0;
+            return it->second.nbIndices * 4 / 3;
+        }
         bool HasTransparentCube() const { return this->_hasTransparentCube; }
         bool HasCubeType(int cubeType) const
         {

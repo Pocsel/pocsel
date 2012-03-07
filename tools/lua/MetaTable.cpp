@@ -24,6 +24,7 @@ namespace Tools { namespace Lua {
             "__newindex",
             "__call",
             "__gc",
+            "__serialize",
         };
     }
 
@@ -49,6 +50,14 @@ namespace Tools { namespace Lua {
     {
         this->_metaTable.Set(operators[(int)type], method);
         return *this;
+    }
+
+    MetaTable::MetaTable(Interpreter& interpreter)
+        : _interpreter(interpreter),
+        _prototype(interpreter.MakeTable()),
+        _metaTable(interpreter.MakeTable())
+    {
+        this->_metaTable.Set("__index", this->_prototype);
     }
 
 }}

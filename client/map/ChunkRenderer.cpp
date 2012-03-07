@@ -69,7 +69,7 @@ namespace Client { namespace Map {
                 this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
                     [&](Chunk& chunk)
                     {
-                        if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount() == 0)
+                        if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount(texturesIt->first) == 0)
                             return;
                         if (chunk.GetMesh()->HasTransparentCube())
                         {

@@ -10,10 +10,10 @@ void f(Tools::Lua::CallHelper& call)
     auto it = args.begin();
     auto itEnd = args.end();
     for (; it != itEnd; ++it)
-        Tools::log << "arg: " << it->ToNumber() << Tools::endl;
-    Tools::log << call.PopArg().CheckBoolean() << Tools::endl;
-    Tools::log << call.PopArg().CheckString() << Tools::endl;
-    Tools::log << "f()" << Tools::endl;
+        Tools::log << "arg: " << it->ToNumber() << std::endl;
+    Tools::log << call.PopArg().CheckBoolean() << std::endl;
+    Tools::log << call.PopArg().CheckString() << std::endl;
+    Tools::log << "f()" << std::endl;
     call.PushRet(call.GetInterpreter().MakeNumber(1.5));
     call.PushRet(call.GetInterpreter().MakeNumber(2.6));
 }
@@ -28,13 +28,23 @@ void TestFunction(int test)
 void Init(Interpreter& i)
 {
     MetaTable m(i, Tools::Matrix4<float>());
+    m.SetMetaMethod(MetaTable::Serialize,
+        [&i](CallHelper& helper)
+        {
+            auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
+            std::stringstream tmp;
+            tmp << m->mm[0];
+            for (int i = 1; i < 16; ++i)
+                tmp << ", " << m->mm[i];
+            helper.PushRet(i.MakeString("return Matrix4f.New16(" + tmp.str() + ")"));
+        });
     m.SetMethod("Rotate", [](CallHelper&) { });
     m.SetMethod("Dump",
         [](CallHelper& helper)
         {
             auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
             for (int i = 0; i < 4; ++i)
-                Tools::log << m->m[i][0] << ", " << m->m[i][1] << ", " << m->m[i][2] << ", " << m->m[i][3] << "\n";
+                Tools::log << m->m[i][0] << ", " << m->m[i][1] << ", " << m->m[i][2] << ", " << m->m[i][3] << std::endl;
         });
     m.SetMetaMethod(MetaTable::Call, [](CallHelper&) { Tools::log << "call !\n"; });
     m.SetMetaMethod(
@@ -52,6 +62,14 @@ void Init(Interpreter& i)
         [](CallHelper& helper)
         {
             helper.PushRet(helper.GetInterpreter().Make(Tools::Matrix4<float>::identity));
+        }));
+    n.Set("New16", i.MakeFunction(
+        [](CallHelper& helper)
+        {
+            Tools::Matrix4<float> m;
+            for (int i = 0; i < 16; ++i)
+                m.mm[i] = (float)helper.PopArg().CheckNumber();
+            helper.PushRet(helper.GetInterpreter().Make(m));
         }));
     i.Globals().Set("Matrix4f", n);
 }
@@ -79,11 +97,11 @@ int main(int, char**)
 
         try
         {
-            Tools::log << bite(1, 2).ToNumber() << " jksdfgjk " << sizeof(Tools::Lua::Ref) << Tools::endl;
+            Tools::log << bite(1, 2).ToNumber() << " jksdfgjk " << sizeof(Tools::Lua::Ref) << std::endl;
         }
         catch (std::exception& e)
         {
-            Tools::log << "from c++: " << e.what() << Tools::endl;
+            Tools::log << "from c++: " << e.what() << std::endl;
         }
 
         i.Globals().Set(std::string("bite"), bite);
@@ -94,7 +112,7 @@ int main(int, char**)
         }
         catch (std::exception& e)
         {
-            Tools::log << "from lua: " << e.what() << Tools::endl;
+            Tools::log << "from lua: " << e.what() << std::endl;
         }
 
         {
@@ -106,9 +124,9 @@ int main(int, char**)
             auto it = rets.begin();
             auto itEnd = rets.end();
             for (; it != itEnd; ++it)
-                Tools::log << "ret: " << it->ToString() << Tools::endl;
+                Tools::log << "ret: " << it->ToString() << std::endl;
             i.DoString("ret1, ret2 = bite(false, \"ZOB\")");
-            Tools::log << "ret1: " << i.Globals()["ret1"].ToString() << ", ret2: " << i.Globals()["ret2"].ToString() << Tools::endl;
+            Tools::log << "ret1: " << i.Globals()["ret1"].ToString() << ", ret2: " << i.Globals()["ret2"].ToString() << std::endl;
         }
 
         i.DoString("test = \"sjkldg\\nlkéhsdfg\" g = 323.4 jdsk = {} iwer = {} jkd = function() end");
@@ -117,7 +135,7 @@ int main(int, char**)
         Tools::Lua::Iterator itEnd = i.Globals().End();
         for (; it != itEnd; ++it)
         {
-            Tools::log << it.GetValue().GetTypeName() << ": " << it.GetValue().ToString() << " (key " << it.GetKey().GetTypeName() << " " << it.GetKey().ToString() << ")" << Tools::endl;
+            Tools::log << it.GetValue().GetTypeName() << ": " << it.GetValue().ToString() << " (key " << it.GetKey().GetTypeName() << " " << it.GetKey().ToString() << ")" << std::endl;
         }
 
         i.DoString("FUCK = function() print \"FUCK\" end");
@@ -125,8 +143,8 @@ int main(int, char**)
         meta.Set("__index", i.Globals()["FUCK"]);
         meta.Set(1, "test");
         meta.Set(2, "tests2");
-        Tools::log << "Type of FUCK: " << meta["__index"].GetTypeName() << Tools::endl;
-        Tools::log << "size of metatable: " << meta.GetLength() << Tools::endl;
+        Tools::log << "Type of FUCK: " << meta["__index"].GetTypeName() << std::endl;
+        Tools::log << "size of metatable: " << meta.GetLength() << std::endl;
         Tools::Lua::Ref metaTest = i.MakeTable();
         metaTest.SetMetaTable(meta);
         i.Globals().Set("metaTest", metaTest);
@@ -144,7 +162,7 @@ int main(int, char**)
         }
         catch (std::exception& e)
         {
-            Tools::log << "serialize fail: " << e.what() << Tools::endl;
+            Tools::log << "serialize fail: " << e.what() << std::endl;
         }
         Tools::log << "serialize3: \"\"\"" << i.Serialize(i.Globals()["test"]) << "\"\"\"\n";
         Tools::log << "Deserialize: \"\"\"" << i.Serialize(i.Deserialize(serialized)) << "\"\"\"\n";
@@ -182,25 +200,41 @@ int main(int, char**)
         auto r = i.Globals().Set("A", i.Bind(&A::Print, std::placeholders::_1, std::placeholders::_2));
         r(A(), 50);
 
-		//// Vector2d - MetaTable
+        //// Vector2d - MetaTable
         MetaTable mVector2d(i, Tools::Vector2d());
         mVector2d.SetMethod("Normalize", i.Bind(&Tools::Vector2d::Normalize, std::placeholders::_1));
         mVector2d.SetMethod("Dot", i.Bind(&Tools::Vector2d::Dot, std::placeholders::_1, std::placeholders::_2));
-		mVector2d.SetMethod("Dump",
-			[](CallHelper& helper)
-			{
-				auto v = helper.PopArg().Check<Tools::Vector2d*>();
-				Tools::log << "(" << v->x << ";" << v->y << ")\n";
-			});
-		// Namespace
-		auto n = i.MakeTable();
-		n.Set("New", i.MakeFunction([&i](CallHelper& helper) { helper.PushRet(i.Make(Tools::Vector2d(helper.PopArg().Check<double>(), helper.PopArg().Check<double>()))); }));
-		i.Globals().Set("Vector2d", n);
-		i.DoString(
-			"v = Vector2d.New(2, 3)"
-			"v:Dump()"
-			"v:Normalize()"
-			"v:Dump()");
+        mVector2d.SetMetaMethod(MetaTable::Serialize,
+            [&i](CallHelper& helper)
+            {
+                auto v = helper.PopArg().Check<Tools::Vector2d*>();
+                helper.PushRet(i.MakeString("return Vector2d.New(" + Tools::ToString(v->x) + ", " + Tools::ToString(v->y) + ")"));
+            });
+        mVector2d.SetMethod("Dump",
+            [](CallHelper& helper)
+            {
+                auto v = helper.PopArg().Check<Tools::Vector2d*>();
+                Tools::log << "(" << v->x << ";" << v->y << ")\n";
+            });
+        // Namespace
+        auto n = i.MakeTable();
+        n.Set("New", i.MakeFunction(
+            [&i](CallHelper& helper)
+            {
+                auto x = helper.PopArg().Check<double>();
+                auto y = helper.PopArg().Check<double>();
+                helper.PushRet(i.Make(Tools::Vector2d(x, y)));
+            }));
+        i.Globals().Set("Vector2d", n);
+        i.DoString(
+            "v = Vector2d.New(2, 3)"
+            "v:Dump()"
+            "v:Normalize()"
+            "v:Dump()");
+
+        i.DoString("tab = { [v] = m, [2] = m1, ['toto'] = m2 }");
+        Tools::log << "first: " << i.Serialize(i.Globals()["tab"]) << std::endl;
+        Tools::log << "second: " << i.Serialize(i.Deserialize(i.Serialize(i.Globals()["tab"]))) << std::endl;
 
         i.DumpStack();
     }

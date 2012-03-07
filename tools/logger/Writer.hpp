@@ -1,19 +1,16 @@
 #ifndef __TOOLS_LOGGER_WRITER_HPP__
 #define __TOOLS_LOGGER_WRITER_HPP__
 
-#include "tools/logger/Token.hpp"
-
 namespace Tools { namespace Logger {
 
     template<class T> struct Writer;
 
     namespace {
         template<class TWriter>
-        struct Buffer
+        struct Buffer : public std::stringstream
         {
         private:
             TWriter& _writer;
-            std::stringstream _stream;
 
         public:
             template<class T>
@@ -24,72 +21,55 @@ namespace Tools { namespace Logger {
 
             template<class T>
             Buffer(TWriter& writer, T value)
-                : _writer(writer)
+                : std::stringstream(),
+                _writer(writer)
             {
-                this->_stream << ToString(value);
+                *this << value;
             }
 
-            Buffer(Buffer&& buffer)
-                : _writer(buffer._writer),
+            Buffer(Buffer&& buffer) :
 #ifdef _MSC_VER
-                _stream(std::move(buffer._stream))
+                std::stringstream(std::move(buffer)),
 #else
-                _stream((buffer._stream.str()))
+                std::stringstream(buffer.str()),
 #endif
+                _writer(buffer._writer)
             {
-            }
-
-            Buffer(Buffer& buffer)
-                : _writer(buffer._writer),
-#ifdef _MSC_VER
-                _stream(std::move(buffer._stream))
-#else
-                _stream((buffer._stream.str()))
+#ifndef _MSC_VER
+                this->flags(buffer.flags());
+                this->precision(buffer.precision());
+                this->width(buffer.width());
+                buffer.str("");
 #endif
-            {
             }
 
             ~Buffer()
             {
-                this->_writer.Write(this->_stream.str());
+                this->_writer.Write(this->str());
             }
 
-            Buffer& operator <<(Token const& t)
+            Buffer& operator <<(std::basic_ostream<char>& (*manip)(std::basic_ostream<char>&))
             {
-#ifdef _MSC_VER
-                if (&t == &flush)
-                {
-                    this->_writer.Write(this->_stream.str());
-                    this->_stream = std::stringstream();
-                }
-#endif
-                if (&t == &endl)
-                    this->_stream << std::endl;
+                manip(*this);
                 return *this;
             }
 
-            Buffer& operator <<(Int8 value)
+            Buffer& operator <<(std::basic_ios<char>& (*manip)(std::basic_ios<char>&))
             {
-                this->_stream << ToString(value);
+                manip(*this);
                 return *this;
             }
 
-            Buffer& operator <<(Uint8 value)
+            Buffer& operator <<(std::ios_base& (*manip)(std::ios_base&))
             {
-                this->_stream << ToString(value);
-                return *this;
-            }
-
-            Buffer& operator <<(int value)
-            {
-                this->_stream << value;
+                manip(*this);
                 return *this;
             }
 
             template<class T>
-            Buffer& operator <<(T value)
+            Buffer& operator <<(T&& value)
             {
-                this->_stream << ToString(value);
+                *(std::stringstream*)this << value;
                 return *this;
             }
         };
@@ -150,6 +130,14 @@ namespace Tools { namespace Logger {
         {
             return Buffer<thisType>(*this, value);
         }
+
+        template<class T>
+        Buffer<thisType> operator<<(T& (*manip)(T&))
+        {
+            Buffer<thisType> tmp(*this);
+            tmp << manip;
+            return tmp;
+        }
     };
 
 
@@ -207,6 +195,14 @@ namespace Tools { namespace Logger {
         Buffer<Writer<void>> operator <<(T value)
         {
             return Buffer<Writer<void>>(*this, value);
+        }
+
+        template<class T>
+        Buffer<Writer<void>> operator<<(T& (*manip)(T&))
+        {
+            Buffer<Writer<void>> tmp(*this);
+            tmp << manip;
+            return tmp;
         }
     };
 
