@@ -48,6 +48,7 @@ namespace Tools { namespace Database { namespace Sqlite {
     Tools::Database::IStatement* Cursor::Prepare(char const* req)
     {
         assert(req != 0 && "Given request is null!");
+        Tools::debug << req << std::endl;
         ::sqlite3_stmt* stmt;
         int res = ::sqlite3_prepare_v2(
             this->_db,     // Database handle
