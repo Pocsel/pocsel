@@ -25,7 +25,7 @@ namespace Server { namespace Game { namespace Map {
     {
         auto& curs = conn.GetCursor();
 
-        std::string query = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
+        std::string query = std::string("REPLACE INTO ") + this->_map.GetName() +
             "_chunk (id, data) VALUES (?, ?)";
 
         curs.Execute("BEGIN");
@@ -33,7 +33,7 @@ namespace Server { namespace Game { namespace Map {
         {
             Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
             curs.Execute(
-                    query.c_str())
+                    query)
 //                    "REPLACE INTO ? (id, data) VALUES (?, ?)")
 //                .Bind(this->_map.GetName() + "_chunk")
                 .Bind(it->first)

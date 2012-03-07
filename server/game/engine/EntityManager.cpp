@@ -31,14 +31,25 @@ namespace Server { namespace Game { namespace Engine {
     void EntityManager::Save(Tools::Database::IConnection& conn)
     {
         auto& curs = conn.GetCursor();
-        curs.Execute("DELETE FROM ?").Bind(this->_engine.GetMap().GetName() + "_entity");
+        Tools::log << this->_engine.GetMap().GetName() << "_entity\n";
+        curs.Execute("DELETE FROM " + this->_engine.GetMap().GetName() + "_entity");
+        curs.Execute("BEGIN");
         auto it = this->_entities.begin();
         auto itEnd = this->_entities.end();
         for (; it != itEnd; ++it)
         {
-            curs.Execute("INSERT INTO ? (id, type, storage) VALUES (?, ?, ?)")
-                .Bind(this->_engine.GetMap().GetName() + "_entity").Bind(it->first).Bind(it->second->type->name).Bind(this->_engine.GetInterpreter().Serialize(it->second->self["storage"]));
+            try
+            {
+                curs.Execute("INSERT INTO " + this->_engine.GetMap().GetName() + "_entity (id, type, storage) VALUES (?, ?, ?)")
+                    .Bind(it->first).Bind(it->second->type->name).Bind(this->_engine.GetInterpreter().Serialize(it->second->self["storage"]));
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "EntityManager::Save: Could not save entity " << it->first << " (of type \""
+                    << it->second->type->name << "\"): " << e.what() << Tools::endl;
+            }
         }
+        curs.Execute("COMMIT");
     }
 
     void EntityManager::BeginPluginRegistering(Uint32 pluginId)

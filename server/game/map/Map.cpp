@@ -37,7 +37,7 @@ namespace Server { namespace Game { namespace Map {
         std::cout << "CURENTTIME" << currentTime << "\n";
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
-        this->_engine = new Engine::Engine();
+        this->_engine = new Engine::Engine(*this);
         this->_chunkManager = new ChunkManager(*this);
     }
 
