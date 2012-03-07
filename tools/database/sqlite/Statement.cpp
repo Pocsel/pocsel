@@ -1,5 +1,6 @@
-#include "tools/database/DatabaseError.hpp"
+#include "tools/precompiled.hpp"
 
+#include "tools/database/DatabaseError.hpp"
 #include "tools/database/sqlite/Statement.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {
@@ -108,6 +109,11 @@ namespace Tools { namespace Database { namespace Sqlite {
         }
         this->_index += 1;
         return *this;
+    }
+
+    void Statement::Reset()
+    {
+        ::sqlite3_reset(this->_stmt);
     }
 
     Tools::Database::Status::Type Statement::Step()
