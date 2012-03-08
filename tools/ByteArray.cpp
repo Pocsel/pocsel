@@ -32,7 +32,7 @@ namespace Tools {
         return (*this);
     }
 
-    Uint16 ByteArray::GetBytesLeft() const
+    Uint32 ByteArray::GetBytesLeft() const
     {
         return this->_size - this->_offset;
     }
@@ -119,7 +119,7 @@ namespace Tools {
         this->_offset += size;
     }
 
-    void ByteArray::WriteRawData(void const* data, Uint16 size)
+    void ByteArray::WriteRawData(void const* data, Uint32 size)
     {
         this->_PrepareWrite(size);
         ::memcpy(this->_data + this->_offset, data, size);
@@ -222,7 +222,7 @@ namespace Tools {
         return data;
     }
 
-    char const* ByteArray::ReadRawData(Uint16 size) const
+    char const* ByteArray::ReadRawData(Uint32 size) const
     {
         if (this->_offset + size <= this->_size)
         {
@@ -244,7 +244,7 @@ namespace Tools {
         this->_offset = 0;
     }
 
-    void ByteArray::SetData(char const* data, Uint16 size)
+    void ByteArray::SetData(char const* data, Uint32 size)
     {
         if (this->_allocSize < size)
             this->_Resize(size);
@@ -253,33 +253,14 @@ namespace Tools {
         this->_offset = 0;
     }
 
-    void ByteArray::_Resize(Uint16 target)
+    void ByteArray::_Resize(Uint32 target)
     {
         assert(this->_allocSize < target);
         char* tmp = this->_data;
         this->_data = new char[target];
         std::memcpy(this->_data, tmp, this->_allocSize);
-    //    std::memset(this->_data + this->_allocSize, 42, target - this->_allocSize);
         this->_allocSize = target;
         delete [] tmp;
-    }
-
-    void ByteArray::_PrepareWrite(Uint16 bytesCount)
-    {
-        if (this->_offset + bytesCount >= this->_allocSize)
-            this->_Resize(this->_allocSize + ((bytesCount / SIZESTEP + 1) * SIZESTEP));
-        if (this->_offset + bytesCount > this->_size)
-            this->_size = this->_offset + bytesCount;
-    }
-
-    char const* ByteArray::GetData() const
-    {
-        return this->_data;
-    }
-
-    Uint16 ByteArray::GetSize() const
-    {
-        return this->_size;
     }
 
 }

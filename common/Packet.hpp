@@ -19,14 +19,12 @@ namespace Common {
         explicit Packet(Packet const& packet);
         virtual ~Packet();
 
-//        void Dump() const;
-
         Uint16 GetCompleteSize() const;
         char const* GetCompleteData() const;
 
     protected:
         void _WriteSize();
-        virtual void _Resize(Uint16 target);
+        virtual void _Resize(Uint32 target);
     };
 
 }

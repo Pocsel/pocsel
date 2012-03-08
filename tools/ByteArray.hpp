@@ -26,9 +26,9 @@ namespace Tools {
 
     protected:
         char* _data;
-        Uint16 _size;
-        Uint16 _allocSize;
-        mutable Uint16 _offset;
+        Uint32 _size;
+        Uint32 _allocSize;
+        mutable Uint32 _offset;
 
     public:
         explicit ByteArray();
@@ -36,10 +36,10 @@ namespace Tools {
         virtual ~ByteArray();
 
         ByteArray& operator =(ByteArray const& ByteArray);
-        Uint16 GetBytesLeft() const;
+        Uint32 GetBytesLeft() const;
         void Clear();
         void ResetOffset();
-        void SetData(char const* data, Uint16 size);
+        void SetData(char const* data, Uint32 size);
         void Write8(Uint8 val);
         void Write16(Uint16 val);
         void Write32(Uint32 val);
@@ -50,7 +50,7 @@ namespace Tools {
         void WriteString(std::string const& val);
         void WriteData(std::vector<char> const& val);
         void WriteData(void const* data, Uint16 size);
-        void WriteRawData(void const* data, Uint16 size);
+        void WriteRawData(void const* data, Uint32 size);
         Uint8 Read8() const;
         Uint16 Read16() const;
         Uint32 Read32() const;
@@ -60,9 +60,9 @@ namespace Tools {
         double ReadDouble() const;
         std::string ReadString() const;
         std::vector<char> ReadData() const;
-        char const* ReadRawData(Uint16 size) const;
-        Uint16 GetSize() const;
-        char const* GetData() const;
+        char const* ReadRawData(Uint32 size) const;
+        Uint32 GetSize() const { return this->_size; }
+        char const* GetData() const { return this->_data; }
 
         template<typename T>
         inline void Write(T const& o)
@@ -100,8 +100,14 @@ namespace Tools {
 #undef BYTEARRAY_GEN_METHODS
 
     protected:
-        virtual void _Resize(Uint16 target);
-        void _PrepareWrite(Uint16 bytesCount);
+        virtual void _Resize(Uint32 target);
+        void _PrepareWrite(Uint32 bytesCount)
+        {
+            if (this->_offset + bytesCount >= this->_allocSize)
+                this->_Resize(this->_allocSize + ((bytesCount / SIZESTEP + 1) * SIZESTEP));
+            if (this->_offset + bytesCount > this->_size)
+                this->_size = this->_offset + bytesCount;
+        }
     };
 
 }

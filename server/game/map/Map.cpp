@@ -13,6 +13,7 @@
 
 #include "tools/database/sqlite/Connection.hpp"
 
+#include "server/constants.hpp"
 #include "server/Server.hpp"
 #include "server/clientmanagement/ClientManager.hpp"
 #include "server/game/Game.hpp"
@@ -167,7 +168,7 @@ namespace Server { namespace Game { namespace Map {
         if (chunk == 0)
         {
             if (this->_chunkRequests.find(id) == this->_chunkRequests.end())
-                this->_Get3Chunk(id);
+                this->_GetBigChunk(id);
 
             this->_chunkRequests[id].push_back(response);
         }
@@ -177,11 +178,11 @@ namespace Server { namespace Game { namespace Map {
         }
     }
 
-    void Map::_Get3Chunk(Chunk::IdType id)
+    void Map::_GetBigChunk(Chunk::IdType id)
     {
         Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
 
-        auto ids = Common::NChunk<3>::GetContainedIds<0>(id);
+        auto ids = Common::NChunk<BigChunkSize>::GetContainedIds<0>(id);
 
         for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
         {
