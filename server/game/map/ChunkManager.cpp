@@ -53,9 +53,11 @@ namespace Server { namespace Game { namespace Map {
                 ids.push_back(it->first);
             else
             {
-                Tools::log << "---\n---\n---\n---\n";
+                Tools::log << "-\n---\nTODO PLG\n-----\n-------\n";
                 Tools::log << "WARNING: 3-Chunk " << it->first << " is not full, it will not be saved.\n";
-                Tools::log << "---\n---\n---\n---\n";
+                Tools::log << "-------\n-----\nTODO PLG\n---\n-\n";
+
+                it->second.Dump();
             }
         }
 
@@ -100,8 +102,8 @@ namespace Server { namespace Game { namespace Map {
 
                     this->_ExtractFromDb(id);
                 }
-
-                this->_DeflateChunk(id);
+                else
+                    this->_DeflateChunk(id);
 
                 chunk = this->_chunks[id];
             }
@@ -146,6 +148,16 @@ namespace Server { namespace Game { namespace Map {
         this->_inflatedChunks[id] = array;
         this->_chunks.erase(id);
         Tools::Delete(chunk);
+
+        BigChunk::IdType bigId = BigChunk::GetId(id);
+        if (this->_inflatedChunksContainers.count(bigId) == 0)
+            this->_inflatedChunksContainers.insert(
+                    std::pair<BigChunk::IdType, BigChunk>(bigId, BigChunk(bigId)));
+
+        BigChunk& bigChunk = this->_inflatedChunksContainers.find(bigId)->second;
+        bigChunk.AddChunk(id);
+//        if (bigChunk.IsFull())
+//            this->_inflatedChunksContainers.erase(BigChunk::GetId(id));
     }
 
     void ChunkManager::_DeflateChunk(Chunk::IdType id)
@@ -161,10 +173,35 @@ namespace Server { namespace Game { namespace Map {
         this->_chunks[id] = chunk;
         this->_inflatedChunks.erase(id);
         Tools::Delete(array);
+
+        BigChunk& bigChunk = this->_inflatedChunksContainers.find(BigChunk::GetId(id))->second;
+        bigChunk.RemoveChunk(id);
+        if (bigChunk.IsEmpty())
+            this->_inflatedChunksContainers.erase(BigChunk::GetId(id));
     }
 
-    void ChunkManager::_InflateBigChunk(BigChunk::IdType id)
+    void ChunkManager::_InflateBigChunk(BigChunk::IdType bigId)
     {
+
+        Tools::ByteArray* inflatedBigChunk = new Tools::ByteArray();
+
+        auto ids = BigChunk::GetContainedIds<0>(bigId);
+
+        Tools::ByteArray* inflatedChunk;
+
+        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
+        {
+            inflatedChunk = this->_inflatedChunks[*it];
+
+            inflatedBigChunk->WriteRawData(inflatedChunk->GetData(), inflatedChunk->GetSize());
+
+
+            this->_inflatedChunks.erase(*it);
+            Tools::Delete(inflatedChunk);
+        }
+
+        this->_inflatedBigChunks[bigId] = inflatedBigChunk;
+        this->_inflatedChunksContainers.erase(bigId);
     }
 
     // extract totalement tous les chunks
@@ -192,6 +229,7 @@ namespace Server { namespace Game { namespace Map {
         inflatedBigChunk->SetData((char*)b.data, b.size);
 
         Chunk* chunk;
+
 
         for (unsigned int i = 0; i < BigChunk::chunkCount3; ++i)
         {

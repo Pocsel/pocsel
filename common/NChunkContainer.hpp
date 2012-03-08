@@ -26,7 +26,7 @@ namespace Common {
                 };
 
             private:
-                Uint8 _contained[countMax3];
+                bool _contained[countMax3];
                 unsigned int _containedCount;
 
             public:
@@ -37,6 +37,8 @@ namespace Common {
                     std::memset(_contained, full, sizeof(_contained));
                     if (full)
                         _containedCount = countMax3;
+                    else
+                        _containedCount = 0;
                 }
 
                 NChunkContainer(CoordsType const& c, bool full = false) :
@@ -46,6 +48,13 @@ namespace Common {
                     std::memset(_contained, full, sizeof(_contained));
                     if (full)
                         _containedCount = countMax3;
+                    else
+                        _containedCount = 0;
+                }
+
+                void Dump()
+                {
+                    std::cout << this->_containedCount << " a la place de " << countMax3 << "\n";
                 }
 
                 ~NChunkContainer()
@@ -56,20 +65,20 @@ namespace Common {
                 {
                     unsigned int index = _GetIndex(id);
 
-                    assert(this->_contained[index] == 0 && "chunk already here !");
-                    this->_contained[index] = 1;
+                    assert(this->_contained[index] == false && "chunk already here");
+                    this->_contained[index] = true;
                     ++this->_containedCount;
                 }
 
                 void RemoveChunk(IdType id)
                 {
-                    assert((id & idMask) == this->id && "This chunk does not fit here!");
+                    assert((id & idMask) == this->id && "This chunk does not fit here");
 
                     unsigned int index = _GetIndex(id);
 
-                    assert(this->_contained[index] == 0 && "chunk already here !");
-                    this->_contained[index] = 1;
-                    ++this->_containedCount;
+                    assert(this->_contained[index] == true && "chunk already gone");
+                    this->_contained[index] = false;
+                    --this->_containedCount;
                 }
 
                 bool IsEmpty()
