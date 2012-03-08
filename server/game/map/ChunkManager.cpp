@@ -37,7 +37,6 @@ namespace Server { namespace Game { namespace Map {
     {
         auto& curs = conn.GetCursor();
 
-        for (auto it = this->_inflatedChunks.begin(), ite = this->_inflatedChunks.end(); it != ite; ++it)
         std::vector<Chunk::IdType> ids;
 
         for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite; ++it)
@@ -65,9 +64,8 @@ namespace Server { namespace Game { namespace Map {
         for (auto it = this->_inflatedBigChunks.begin(), ite = this->_inflatedBigChunks.end(); it != ite; ++it)
         {
             Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
-            curs.Execute(query)
-//                    "REPLACE INTO ? (id, data) VALUES (?, ?)")
-//                .Bind(this->_map.GetName() + "_chunk")
+            curs.Execute(
+                    query.c_str())
                 .Bind(it->first)
                 .Bind(blob);
         }
