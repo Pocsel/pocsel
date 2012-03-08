@@ -51,21 +51,13 @@ namespace Server { namespace Game { namespace Map {
         {
             if (it->second.IsFull())
                 ids.push_back(it->first);
-            else
-            {
-                Tools::log << "-\n---\nTODO PLG\n-----\n-------\n";
-                Tools::log << "WARNING: 3-Chunk " << it->first << " is not full, it will not be saved.\n";
-                Tools::log << "-------\n-----\nTODO PLG\n---\n-\n";
-
-                it->second.Dump();
-            }
         }
 
         for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
             this->_InflateBigChunk(*it);
 
         std::string query = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
-            "_chunk (id, data) VALUES (?, ?)";
+            "_bigchunk (id, data) VALUES (?, ?)";
 
         curs.Execute("BEGIN");
 
@@ -79,6 +71,57 @@ namespace Server { namespace Game { namespace Map {
         }
 
         curs.Execute("COMMIT");
+
+        std::string query2 = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
+            "_chunk (id, data) VALUES (?, ?)";
+
+        curs.Execute("BEGIN");
+        for (auto it = this->_inflatedChunks.begin(), ite = this->_inflatedChunks.end(); it != ite; ++it)
+        {
+
+            Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
+            curs.Execute(
+                    query2.c_str())
+                .Bind(it->first)
+                .Bind(blob);
+        }
+        curs.Execute("COMMIT");
+    }
+
+    void ChunkManager::LoadExistingChunks(std::vector<Chunk::IdType> const& ids)
+    {
+        auto conn = this->_map.GetConnection();
+
+        auto& curs = conn->GetCursor();
+
+        std::string query = "SELECT data FROM ";
+        query += this->_map.GetName() + "_chunk";
+        query += " WHERE id = ?";
+
+        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
+        {
+            curs.Execute(query.c_str()).Bind(*it);
+
+            auto& row = curs.FetchOne();
+            Tools::Database::Blob b = row[0].GetBlob();
+
+            Tools::ByteArray* inflatedChunk = new Tools::ByteArray();
+            inflatedChunk->SetData((char*)b.data, b.size);
+
+            this->_inflatedChunks[*it] = inflatedChunk;
+
+            BigChunk::IdType bigId = BigChunk::GetId(*it);
+            if (this->_inflatedChunksContainers.count(bigId) == 0)
+                this->_inflatedChunksContainers.insert(
+                        std::pair<BigChunk::IdType, BigChunk>(bigId, BigChunk(bigId)));
+
+            BigChunk& bigChunk = this->_inflatedChunksContainers.find(bigId)->second;
+            bigChunk.AddChunk(*it);
+            //        if (bigChunk.IsFull())
+            //            this->_inflatedChunksContainers.erase(BigChunk::GetId(id));
+        }
+
+        curs.Execute((std::string("DELETE FROM ") + this->_map.GetName() + "_chunk").c_str());
     }
 
     Chunk* ChunkManager::GetChunk(Chunk::IdType id)
@@ -182,7 +225,6 @@ namespace Server { namespace Game { namespace Map {
 
     void ChunkManager::_InflateBigChunk(BigChunk::IdType bigId)
     {
-
         Tools::ByteArray* inflatedBigChunk = new Tools::ByteArray();
 
         auto ids = BigChunk::GetContainedIds<0>(bigId);
@@ -200,11 +242,15 @@ namespace Server { namespace Game { namespace Map {
             Tools::Delete(inflatedChunk);
         }
 
+        std::cout << "3Chunk before compression: " << inflatedBigChunk->GetSize() << " bytes\n";
+
+        std::cout << "3Chunk after compression: " << inflatedBigChunk->GetSize() << " bytes\n";
+
         this->_inflatedBigChunks[bigId] = inflatedBigChunk;
         this->_inflatedChunksContainers.erase(bigId);
     }
 
-    // extract totalement tous les chunks
+    // extract 1 gros chunks
     void ChunkManager::_ExtractFromDb(Chunk::IdType id)
     {
         assert(this->_chunks.find(id) == this->_chunks.end());
@@ -218,7 +264,7 @@ namespace Server { namespace Game { namespace Map {
         auto& curs = conn->GetCursor();
 
         std::string query = "SELECT data FROM ";
-        query += this->_map.GetName() + "_chunk";
+        query += this->_map.GetName() + "_bigchunk";
         query += " WHERE id = ?";
         curs.Execute(query.c_str()).Bind(id);
 

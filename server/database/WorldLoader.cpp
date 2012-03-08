@@ -78,7 +78,20 @@ namespace Server { namespace Database {
                     }
                 }
 
-                world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game, existingChunks);
+                std::vector<Chunk::IdType> existingBigChunks;
+
+                {
+                    auto coconn = manager.GetConnectionPool().GetConnection();
+                    auto& cucurs = coconn->GetCursor();
+                    cucurs.Execute((Tools::ToString("SELECT id FROM ") + row[0].GetString() + "_bigchunk").c_str());
+                    while (cucurs.HasData())
+                    {
+                        auto& rorow = cucurs.FetchOne();
+                        existingBigChunks.push_back(rorow[0].GetUint64());
+                    }
+                }
+
+                world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game, existingBigChunks, existingChunks);
                 if (conf.is_default) {
                     world._defaultMap = world._maps[conf.name];
                 }
