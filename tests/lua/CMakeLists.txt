@@ -1,7 +1,7 @@
-file(GLOB_RECURSE lua2_test_src "*.[ch]pp")
+file(GLOB_RECURSE test_lua_src "*.[ch]pp")
 
 set(src
-    ${lua2_test_src}
+    ${test_lua_src}
     ${common_src}
     ${tools_base_src}
     ${tools_lua_src}
@@ -9,14 +9,14 @@ set(src
 )
 
 CreateGroups("${src}")
-add_executable(lua2_test ${src})
+add_executable(test_lua ${src})
 
-enable_pch(lua2_test src)
+enable_pch(test_lua src)
 
-target_link_libraries(lua2_test
+target_link_libraries(test_lua
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}
 )
 
-SetProgramInfo(lua2_test)
+SetProgramInfo(test_lua)
