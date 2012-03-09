@@ -227,7 +227,7 @@ namespace Server { namespace Game { namespace Map {
 
     void ChunkManager::_DeflateBigChunk(BigChunk::IdType bigId)
     {
-        Tools::ByteArray* deflatedBigChunk = new Tools::ByteArray();
+        Tools::ByteArray bigChunk;
 
         auto ids = BigChunk::GetContainedIds<0>(bigId);
 
@@ -237,23 +237,28 @@ namespace Server { namespace Game { namespace Map {
         {
             deflatedChunk = this->_deflatedChunks[*it];
 
-            deflatedBigChunk->WriteRawData(deflatedChunk->GetData(), deflatedChunk->GetSize());
+            bigChunk.WriteRawData(deflatedChunk->GetData(), deflatedChunk->GetSize());
 
 
             this->_deflatedChunks.erase(*it);
             Tools::Delete(deflatedChunk);
         }
 
-        std::cout << "3Chunk before compression: " << deflatedBigChunk->GetSize() << " bytes\n";
+        std::cout << "3Chunk before compression: " << bigChunk.GetSize() << " bytes\n";
 
 
-        void* newDef;
+        char* newDef;
         unsigned int newDefSize;
 
         Tools::Zlib::Worker w(6);
 
-        w.Deflate(deflatedBigChunk->GetData(), deflatedBigChunk->GetSize(), newDef, newDefSize);
+        w.Deflate(bigChunk.GetData(), bigChunk.GetSize(), (void*&)newDef, newDefSize);
 
+        Tools::ByteArray* deflatedBigChunk = new Tools::ByteArray();
+
+        deflatedBigChunk->SetData(newDef, newDefSize);
+
+        Tools::Delete(newDef);
 
         std::cout << "3Chunk after compression: " << newDefSize << " bytes\n";
 
@@ -282,19 +287,32 @@ namespace Server { namespace Game { namespace Map {
         auto& row = curs.FetchOne();
         Tools::Database::Blob b = row[0].GetBlob();
 
-        Tools::ByteArray* deflatedBigChunk = new Tools::ByteArray();
-        deflatedBigChunk->SetData((char*)b.data, b.size);
+
+        char* inflatedData;
+        unsigned int inflatedDataSize;
+
+        Tools::Zlib::Worker w(6);
+
+        w.Inflate(b.data, b.size, (void*&)inflatedData, inflatedDataSize);
+
+
+        Tools::ByteArray bigChunk;
+        bigChunk.SetData(inflatedData, inflatedDataSize);
+
+        std::cout << inflatedDataSize << "\n";
+
+        Tools::Delete(inflatedData);
+
 
         Chunk* chunk;
 
 
         for (unsigned int i = 0; i < BigChunk::chunkCount3; ++i)
         {
-            chunk = deflatedBigChunk->Read<Chunk>().release();
+            chunk = bigChunk.Read<Chunk>().release();
             this->_chunks[chunk->id] = chunk;
         }
 
-        Tools::Delete(deflatedBigChunk);
         this->_dbBigChunks.erase(id);
     }
 
