@@ -65,7 +65,7 @@ namespace Server { namespace Game { namespace Map {
         {
             Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
             curs.Execute(
-                    query.c_str())
+                    query)
                 .Bind(it->first)
                 .Bind(blob);
         }
@@ -81,7 +81,7 @@ namespace Server { namespace Game { namespace Map {
 
             Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
             curs.Execute(
-                    query2.c_str())
+                    query2)
                 .Bind(it->first)
                 .Bind(blob);
         }
