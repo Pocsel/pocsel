@@ -1,9 +1,11 @@
 #ifndef __SERVER_GAME_ENGINE_EVENTMANAGER_HPP__
 #define __SERVER_GAME_ENGINE_EVENTMANAGER_HPP__
 
-namespace Tools { namespace Lua {
-    class CallHelper;
-}}
+#include "tools/lua/Ref.hpp"
+
+//namespace Tools { namespace Lua {
+//    class CallHelper;
+//}}
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -15,9 +17,13 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct Event
         {
+            Event(int entityId, std::string function, Tools::Lua::Ref const& copiedArgs) :
+                entityId(entityId), function(function), copiedArgs(copiedArgs)
+            {
+            }
             int entityId;
             std::string function;
-            std::string args;
+            Tools::Lua::Ref copiedArgs;
         };
 
     private:

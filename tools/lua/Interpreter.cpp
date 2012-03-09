@@ -5,7 +5,8 @@
 
 namespace Tools { namespace Lua {
 
-    Interpreter::Interpreter() throw(std::runtime_error)
+    Interpreter::Interpreter() throw(std::runtime_error) :
+        _serializer(*this)
     {
         this->_state = new State(*this);
         this->_globals = new Ref(*this->_state);
@@ -17,19 +18,6 @@ namespace Tools { namespace Lua {
     {
         Tools::Delete(this->_globals);
         Tools::Delete(this->_state);
-    }
-
-    std::string Interpreter::Serialize(Ref const& ref) const throw(std::runtime_error)
-    {
-        std::list<Ref> tables;
-        return "return " + this->_Serialize(ref, tables, 1);
-    }
-
-    Ref Interpreter::Deserialize(std::string const& string) const throw(std::runtime_error)
-    {
-        if (string.empty())
-            return Ref(*this->_state);
-        return this->LoadString(string)();
     }
 
     Ref Interpreter::LoadString(std::string const& code) const throw(std::runtime_error)
@@ -162,77 +150,6 @@ namespace Tools { namespace Lua {
             Tools::log << "" << std::endl;
         }
         Tools::log << "------------------------------\n";
-    }
-
-    std::string Interpreter::_SerializeSimpleValue(Ref const& ref) const throw(std::runtime_error)
-    {
-        if (ref.IsNumber())
-            return Tools::ToString(ref.ToNumber());
-        else if (ref.IsBoolean())
-            return ref.ToBoolean() ? "true" : "false";
-        else if (ref.IsString())
-            return this->_SerializeString(ref.ToString());
-        else if (ref.IsNil())
-            return "nil";
-        else if (ref.IsUserData())
-        {
-            auto serialize = ref.GetMetaTable()["__serialize"];
-            if (!serialize.Exists())
-                throw std::runtime_error("Lua::Interpreter: Cannot serialize this user data");
-            return "(function() " + serialize(ref).CheckString() + " end)()";
-        }
-        throw std::runtime_error("Lua::Interpreter: Type " + ref.GetTypeName() + " is not serializable");
-    }
-
-    std::string Interpreter::_SerializeString(std::string const& string) const
-    {
-        std::string ret;
-        ret += '"';
-        auto it = string.begin();
-        auto itEnd = string.end();
-        for (; it != itEnd; ++it)
-        {
-            unsigned char c = *it;
-            if (c < ' ' || c > '~' || c == '"' || c == '\\')
-            {
-                ret += '\\';
-                if (c < 100)
-                    ret += '0';
-                if (c < 10)
-                    ret += '0';
-                ret += Tools::ToString(static_cast<unsigned int>(c));
-            }
-            else
-                ret += c;
-        }
-        ret += '"';
-        return ret;
-    }
-
-    std::string Interpreter::_Serialize(Ref const& ref, std::list<Ref>& tables, unsigned int level) const throw(std::runtime_error)
-    {
-        if (ref.IsTable())
-        {
-            auto findIt = std::find(tables.begin(), tables.end(), ref);
-            if (findIt != tables.end())
-                throw std::runtime_error("Lua::Interpreter: Cyclic or shared table(s) found in table to serialize");
-            tables.push_front(ref);
-            std::string ret = "{\n";
-            auto it = ref.Begin();
-            auto itEnd = ref.End();
-            for (; it != itEnd; ++it)
-            {
-                for (unsigned int i = 0; i < level; ++i)
-                    ret += "\t";
-                ret += "[" + this->_SerializeSimpleValue(it.GetKey()) + "] = " + this->_Serialize(it.GetValue(), tables, level + 1) + ",\n";
-            }
-            for (unsigned int i = 0; i < level - 1; ++i)
-                ret += "\t";
-            ret += "}";
-            return ret;
-        }
-        else
-            return this->_SerializeSimpleValue(ref);
     }
 
 }}
