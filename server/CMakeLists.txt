@@ -7,6 +7,7 @@ set(src
     ${tools_database_src}
     ${tools_logger_src}
     ${tools_lua_src}
+    ${tools_zlib_src}
 )
 
 CreateGroups("${src}")
@@ -19,6 +20,7 @@ target_link_libraries(server
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}
     ${SQLITE3_LIBRARIES}
+    ${ZLIB_LIBRARIES}
 )
 
 SetProgramInfo(server)

@@ -4,6 +4,8 @@
 #include "tools/database/IConnection.hpp"
 #include "tools/database/IValue.hpp"
 
+#include "tools/zlib/Worker.hpp"
+
 #include "server/network/ChunkSerializer.hpp"
 
 namespace Server { namespace Game { namespace Map {
@@ -244,7 +246,16 @@ namespace Server { namespace Game { namespace Map {
 
         std::cout << "3Chunk before compression: " << deflatedBigChunk->GetSize() << " bytes\n";
 
-        std::cout << "3Chunk after compression: " << deflatedBigChunk->GetSize() << " bytes\n";
+
+        void* newDef;
+        unsigned int newDefSize;
+
+        Tools::Zlib::Worker w(6);
+
+        w.Deflate(deflatedBigChunk->GetData(), deflatedBigChunk->GetSize(), newDef, newDefSize);
+
+
+        std::cout << "3Chunk after compression: " << newDefSize << " bytes\n";
 
         this->_deflatedBigChunks[bigId] = deflatedBigChunk;
         this->_deflatedChunksContainers.erase(bigId);
