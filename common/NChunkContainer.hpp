@@ -22,8 +22,8 @@ namespace Common {
                     countMax1 = countMax,
                     countMax2 = countMax * countMax,
                     countMax3 = countMax * countMax * countMax,
-                    idMask = Container::idMask
                 };
+                static const IdType idMask = Container::idMask;
 
             private:
                 bool _contained[countMax3];
@@ -94,7 +94,7 @@ namespace Common {
             private:
                 unsigned int _GetIndex(IdType id)
                 {
-                    assert((id & idMask) == this->id && "This chunk does not fit here!");
+                    assert((id & NChunk<bigN>::idMask) == this->id && "This chunk does not fit here!");
 
                     id &= ~idMask;
 

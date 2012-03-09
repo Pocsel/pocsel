@@ -22,6 +22,7 @@ find_package(SDL REQUIRED)
 find_package(Cg REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(Sqlite3 REQUIRED)
+find_package(ZLIB REQUIRED)
 
 if (UNIX)
     add_definitions(-std=c++0x) #Enable C++0x mode
@@ -59,6 +60,7 @@ set(ALL_INCLUDES
 
     ${SQLITE3_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}
+    ${ZLIB_INCLUDE_DIR}
 )
 include_directories(
     ${ALL_INCLUDES}
@@ -72,6 +74,7 @@ file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
 file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
 file(GLOB_RECURSE tools_thread_src "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE tools_logger_src "tools/logger/*.[ch]pp")
+file(GLOB_RECURSE tools_zlib_src "tools/zlib/*.[ch]pp")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 

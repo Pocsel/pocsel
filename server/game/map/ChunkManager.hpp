@@ -27,10 +27,10 @@ namespace Server { namespace Game { namespace Map {
 
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
 
-        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _inflatedChunks;
-        std::unordered_map<BigChunk::IdType, BigChunk> _inflatedChunksContainers;
+        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedChunks;
+        std::unordered_map<BigChunk::IdType, BigChunk> _deflatedChunksContainers;
 
-        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _inflatedBigChunks;
+        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedBigChunks;
 
         std::unordered_set<Chunk::IdType> _dbBigChunks;
 
@@ -49,10 +49,10 @@ namespace Server { namespace Game { namespace Map {
         void AddChunk(std::unique_ptr<Chunk> chunk);
 
     private:
-        void _InflateChunk(Chunk::IdType id);
         void _DeflateChunk(Chunk::IdType id);
+        void _InflateChunk(Chunk::IdType id);
         void _ExtractFromDb(Chunk::IdType id);
-        void _InflateBigChunk(BigChunk::IdType id);
+        void _DeflateBigChunk(BigChunk::IdType id);
     };
 
 }}}

@@ -29,6 +29,7 @@ namespace Server {
     Server::~Server()
     {
         Tools::debug << "Server::~Server()\n";
+        this->_game->Save();
         Tools::Delete(this->_game);
         Tools::Delete(this->_clientManager);
         Tools::Delete(this->_resourceManager);
@@ -56,8 +57,6 @@ namespace Server {
         this->_game->Stop();
         this->_admMessageQueue->Stop();
         this->_network->Stop();
-
-        this->_game->Save();
     }
 
 }
