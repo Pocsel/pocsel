@@ -51,7 +51,7 @@ namespace Server { namespace Game { namespace Map {
 
         for (auto it = this->_deflatedChunksContainers.begin(), ite = this->_deflatedChunksContainers.end(); it != ite; ++it)
         {
-            if (it->second.IsFull())
+//            if (it->second.IsFull())
                 ids.push_back(it->first);
         }
 
@@ -72,59 +72,59 @@ namespace Server { namespace Game { namespace Map {
                 .Bind(blob);
         }
 
-        curs.Execute("COMMIT");
+//        curs.Execute("COMMIT");
 
-        std::string query2 = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
-            "_chunk (id, data) VALUES (?, ?)";
+//        std::string query2 = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
+//            "_chunk (id, data) VALUES (?, ?)";
 
-        curs.Execute("BEGIN");
-        for (auto it = this->_deflatedChunks.begin(), ite = this->_deflatedChunks.end(); it != ite; ++it)
-        {
-
-            Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
-            curs.Execute(
-                    query2)
-                .Bind(it->first)
-                .Bind(blob);
-        }
+//        curs.Execute("BEGIN");
+//        for (auto it = this->_deflatedChunks.begin(), ite = this->_deflatedChunks.end(); it != ite; ++it)
+//        {
+//
+//            Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
+//            curs.Execute(
+//                    query2)
+//                .Bind(it->first)
+//                .Bind(blob);
+//        }
         curs.Execute("COMMIT");
     }
 
-    void ChunkManager::LoadExistingChunks(std::vector<Chunk::IdType> const& ids)
-    {
-        auto conn = this->_map.GetConnection();
-
-        auto& curs = conn->GetCursor();
-
-        std::string query = "SELECT data FROM ";
-        query += this->_map.GetName() + "_chunk";
-        query += " WHERE id = ?";
-
-        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
-        {
-            curs.Execute(query.c_str()).Bind(*it);
-
-            auto& row = curs.FetchOne();
-            Tools::Database::Blob b = row[0].GetBlob();
-
-            Tools::ByteArray* deflatedChunk = new Tools::ByteArray();
-            deflatedChunk->SetData((char*)b.data, b.size);
-
-            this->_deflatedChunks[*it] = deflatedChunk;
-
-            BigChunk::IdType bigId = BigChunk::GetId(*it);
-            if (this->_deflatedChunksContainers.count(bigId) == 0)
-                this->_deflatedChunksContainers.insert(
-                        std::pair<BigChunk::IdType, BigChunk>(bigId, BigChunk(bigId)));
-
-            BigChunk& bigChunk = this->_deflatedChunksContainers.find(bigId)->second;
-            bigChunk.AddChunk(*it);
-            //        if (bigChunk.IsFull())
-            //            this->_deflatedChunksContainers.erase(BigChunk::GetId(id));
-        }
-
-        curs.Execute((std::string("DELETE FROM ") + this->_map.GetName() + "_chunk").c_str());
-    }
+//    void ChunkManager::LoadExistingChunks(std::vector<Chunk::IdType> const& ids)
+//    {
+//        auto conn = this->_map.GetConnection();
+//
+//        auto& curs = conn->GetCursor();
+//
+//        std::string query = "SELECT data FROM ";
+//        query += this->_map.GetName() + "_chunk";
+//        query += " WHERE id = ?";
+//
+//        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
+//        {
+//            curs.Execute(query.c_str()).Bind(*it);
+//
+//            auto& row = curs.FetchOne();
+//            Tools::Database::Blob b = row[0].GetBlob();
+//
+//            Tools::ByteArray* deflatedChunk = new Tools::ByteArray();
+//            deflatedChunk->SetData((char*)b.data, b.size);
+//
+//            this->_deflatedChunks[*it] = deflatedChunk;
+//
+//            BigChunk::IdType bigId = BigChunk::GetId(*it);
+//            if (this->_deflatedChunksContainers.count(bigId) == 0)
+//                this->_deflatedChunksContainers.insert(
+//                        std::pair<BigChunk::IdType, BigChunk>(bigId, BigChunk(bigId)));
+//
+//            BigChunk& bigChunk = this->_deflatedChunksContainers.find(bigId)->second;
+//            bigChunk.AddChunk(*it);
+//            //        if (bigChunk.IsFull())
+//            //            this->_deflatedChunksContainers.erase(BigChunk::GetId(id));
+//        }
+//
+//        curs.Execute((std::string("DELETE FROM ") + this->_map.GetName() + "_chunk").c_str());
+//    }
 
     Chunk* ChunkManager::GetChunk(Chunk::IdType id)
     {
@@ -235,6 +235,8 @@ namespace Server { namespace Game { namespace Map {
 
         for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
         {
+            if (this->_deflatedChunks.find(*it) == this->_deflatedChunks.end())
+                continue;
             deflatedChunk = this->_deflatedChunks[*it];
 
             bigChunk.WriteRawData(deflatedChunk->GetData(), deflatedChunk->GetSize());
@@ -307,7 +309,8 @@ namespace Server { namespace Game { namespace Map {
         Chunk* chunk;
 
 
-        for (unsigned int i = 0; i < BigChunk::chunkCount3; ++i)
+//        for (unsigned int i = 0; i < BigChunk::chunkCount3; ++i)
+        while (bigChunk.GetBytesLeft() > 0)
         {
             chunk = bigChunk.Read<Chunk>().release();
             this->_chunks[chunk->id] = chunk;

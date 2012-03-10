@@ -2,9 +2,8 @@
 #define __SERVER_GAME_MAP_CHUNKMANAGER_HPP__
 
 #include "tools/ByteArray.hpp"
-#include "common/NChunkContainer.hpp"
 #include "server/Chunk.hpp"
-#include "server/constants.hpp"
+#include "server/game/map/BigChunk.hpp"
 
 namespace Tools { namespace Database {
     class IConnection;
@@ -19,9 +18,6 @@ namespace Server { namespace Game { namespace Map {
     class ChunkManager :
         private boost::noncopyable
     {
-    private:
-        typedef Common::NChunkContainer<BigChunkSize, 0> BigChunk;
-
     private:
         Map& _map;
 
@@ -41,7 +37,7 @@ namespace Server { namespace Game { namespace Map {
         ~ChunkManager();
 
         void Save(Tools::Database::IConnection& conn);
-        void LoadExistingChunks(std::vector<Chunk::IdType> const& ids);
+//        void LoadExistingChunks(std::vector<Chunk::IdType> const& ids);
 
         Chunk* GetChunk(Chunk::IdType id);
         std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);
