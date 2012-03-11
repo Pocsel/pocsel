@@ -21,17 +21,22 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityStorage::Index(Tools::Lua::CallHelper& helper)
     {
-        helper.PushRet((*this->_table)[helper.PopArg()]);
+        helper.PushRet(helper.GetInterpreter().GetSerializer().MakeSerializableCopy((*this->_table)[helper.PopArg()]));
     }
 
     void EntityStorage::NewIndex(Tools::Lua::CallHelper& helper)
     {
         auto index = helper.PopArg();
-        auto value = helper.PopArg();
+        if (!index.IsNumber() && !index.IsString() && !index.IsBoolean())
+            throw std::runtime_error("Engine::EntityStorage: Storage is not indexable with " + index.GetTypeName() + " types");
+        auto value = helper.GetInterpreter().GetSerializer().MakeSerializableCopy(helper.PopArg());
+        this->_table->Set(index, value);
+        // TODO ret?
     }
 
     void EntityStorage::Serialize(Tools::Lua::CallHelper& helper)
     {
+        helper.PushRet(helper.GetInterpreter().MakeString("return " + helper.GetInterpreter().GetSerializer().Serialize(*this->_table)));
     }
 
 }}}
