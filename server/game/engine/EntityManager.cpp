@@ -60,7 +60,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         this->_pluginIdForRegistering = pluginId;
         this->_engine.GetInterpreter().Globals()["Server"]["Entity"].Set("Register",
-                this->_engine.GetInterpreter().MakeFunction(std::bind(&EntityManager::_Register, this, std::placeholders::_1)));
+                this->_engine.GetInterpreter().MakeFunction(std::bind(&EntityManager::_ApiRegister, this, std::placeholders::_1)));
     }
 
     void EntityManager::EndPluginRegistering()
@@ -120,7 +120,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << entityId << ".\n";
     }
 
-    void EntityManager::_Register(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiRegister(Tools::Lua::CallHelper& helper)
     {
         assert(this->_pluginIdForRegistering != 0 && "_Register ne doit pas etre accessible en dehors de la phase d'enregistrement des entites");
         Tools::Lua::Ref t(this->_engine.GetInterpreter().GetState());

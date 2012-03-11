@@ -52,7 +52,7 @@ namespace Server { namespace Game { namespace Engine {
         int SpawnEntity(std::string name, Uint32 pluginId, Tools::Lua::Ref const& args) throw(std::runtime_error);
         void BootstrapPlugin(Uint32 pluginId);
     private:
-        void _Register(Tools::Lua::CallHelper& helper);
+        void _ApiRegister(Tools::Lua::CallHelper& helper);
     };
 
 }}}
