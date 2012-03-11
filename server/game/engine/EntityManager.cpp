@@ -1,6 +1,10 @@
 #include "server/game/engine/EntityManager.hpp"
+#include "server/game/engine/EntityStorage.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/lua/MetaTable.hpp"
+#include "tools/database/sqlite/Connection.hpp"
+#include "server/game/map/Map.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -9,6 +13,8 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::debug << "EntityManager::EntityManager()\n";
         this->_engine.GetInterpreter().Globals()["Server"].Set("Entity", this->_engine.GetInterpreter().MakeTable());
+        Tools::Lua::MetaTable storageMetaTable(this->_engine.GetInterpreter(), EntityStorage(this->_engine.GetInterpreter()));
+        //storageMetaTable.SetMetaMethod(Tools::Lua::MetaTable::Length, this->_engine.GetInterpreter().Bind(
     }
 
     EntityManager::~EntityManager()
@@ -24,6 +30,30 @@ namespace Server { namespace Game { namespace Engine {
             for (; itType != itTypeEnd; ++itType)
                 Tools::Delete(itType->second);
         }
+    }
+
+    void EntityManager::Save(Tools::Database::IConnection& conn)
+    {
+        auto& curs = conn.GetCursor();
+        Tools::log << this->_engine.GetMap().GetName() << "_entity\n";
+        curs.Execute("DELETE FROM " + this->_engine.GetMap().GetName() + "_entity");
+        //curs.Execute("BEGIN");
+        auto it = this->_entities.begin();
+        auto itEnd = this->_entities.end();
+        for (; it != itEnd; ++it)
+        {
+            try
+            {
+                curs.Execute("INSERT INTO " + this->_engine.GetMap().GetName() + "_entity (id, type, storage) VALUES (?, ?, ?)")
+                    .Bind(it->first).Bind(it->second->type->name).Bind(this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->self["storage"]));
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "EntityManager::Save: Could not save entity " << it->first << " (of type \""
+                    << it->second->type->name << "\"): " << e.what() << std::endl;
+            }
+        }
+        //curs.Execute("COMMIT");
     }
 
     void EntityManager::BeginPluginRegistering(Uint32 pluginId)
@@ -65,7 +95,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::log << "EntityManager::StartPlugin: Error: " << e.what() << Tools::endl;
+            Tools::log << "EntityManager::StartPlugin: Error: " << e.what() << std::endl;
         }
     }
 
@@ -84,7 +114,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::CallEntityFunction: Call to \"" << function << "\" for entity " << entityId << " failed: " << e.what() << Tools::endl;
+            Tools::error << "EntityManager::CallEntityFunction: Call to \"" << function << "\" for entity " << entityId << " failed: " << e.what() << std::endl;
             return;
         }
         Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << entityId << ".\n";
@@ -102,7 +132,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::_Register: " << e.what() << Tools::endl;
+            Tools::error << "EntityManager::_Register: " << e.what() << std::endl;
             return;
         }
         std::string name;
@@ -114,7 +144,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::_Register: Invalid entity name: " << e.what() << Tools::endl;
+            Tools::error << "EntityManager::_Register: Invalid entity name: " << e.what() << std::endl;
             return;
         }
         EntityType* type = new EntityType(name, this->_pluginIdForRegistering, t);

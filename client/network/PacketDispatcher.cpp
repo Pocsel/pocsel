@@ -89,7 +89,7 @@ namespace Client { namespace Network {
         Common::BaseChunk::CubeType nbCubeTypes;
         PacketExtractor::ExtractLogin(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes, worldBuildHash);
 
-        Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << major << "." << minor << "\n";
+        Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << (int)major << "." << (int)minor << "\n";
         if (status)
         {
             Tools::debug << "World: " << worldName << " (identifier: \"" << worldId << "\", version: " << worldVersion << ", build hash: \"" << worldBuildHash << "\")\n";

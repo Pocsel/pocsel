@@ -52,4 +52,12 @@ namespace Tools { namespace Lua {
         return *this;
     }
 
+    MetaTable::MetaTable(Interpreter& interpreter)
+        : _interpreter(interpreter),
+        _prototype(interpreter.MakeTable()),
+        _metaTable(interpreter.MakeTable())
+    {
+        this->_metaTable.Set("__index", this->_prototype);
+    }
+
 }}

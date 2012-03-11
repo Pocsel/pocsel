@@ -5,8 +5,8 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Engine::Engine() :
-        _currentTime(0)
+    Engine::Engine(Map::Map& map) :
+        _map(map), _currentTime(0)
     {
         Tools::debug << "Engine::Engine()\n";
         this->_interpreter = new Tools::Lua::Interpreter();
@@ -14,7 +14,8 @@ namespace Server { namespace Game { namespace Engine {
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
-        this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
+        auto serverNamespace = this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
+        this->_interpreter->Globals().Set("S", serverNamespace);
         this->_entityManager = new EntityManager(*this);
         this->_eventManager = new EventManager(*this);
     }
@@ -35,7 +36,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void Engine::Save(Tools::Database::IConnection& conn)
     {
-        //TODO
+        this->_entityManager->Save(conn);
     }
 
 }}}

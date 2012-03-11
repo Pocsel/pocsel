@@ -24,17 +24,6 @@ namespace Common {
         this->_data -= 2;
     }
 
-//    void Packet::Dump() const
-//    {
-//        std::cout << "Packet dump (" << this->_size + 2 << " bytes total):" << std::endl;
-//        for (Uint16 i = 0; i < this->_size + 2; ++i)
-//        {
-//            std::cout << std::setfill('0') << std::setw(2) << std::hex << static_cast<Uint32>(this->_data[i - 2]);
-//            std::cout << " ";
-//        }
-//        std::cout << std::endl;
-//    }
-
     char const* Packet::GetCompleteData() const
     {
         const_cast<Packet*>(this)->_WriteSize();
@@ -46,8 +35,11 @@ namespace Common {
         return this->_size + 2;
     }
 
-    void Packet::_Resize(Uint16 target)
+    void Packet::_Resize(Uint32 target)
     {
+        if (target > 0xffff - 2)
+            throw std::runtime_error("Trying to create a too big packet");
+
         char* tmp = this->_data - 2;
         this->_data = new char[target + 2];
         std::memcpy(this->_data, tmp, this->_allocSize + 2);
@@ -58,6 +50,7 @@ namespace Common {
 
     void Packet::_WriteSize()
     {
+        assert(this->_size <= 0xffff - 2);
         char* tmp = this->_data - 2;
         tmp[0] = (this->_size & 0xFF00) >> 8;
         tmp[1] = this->_size & 0x00FF;

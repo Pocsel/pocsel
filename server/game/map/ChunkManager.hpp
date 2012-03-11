@@ -1,8 +1,9 @@
 #ifndef __SERVER_GAME_MAP_CHUNKMANAGER_HPP__
 #define __SERVER_GAME_MAP_CHUNKMANAGER_HPP__
 
-#include "server/Chunk.hpp"
 #include "tools/ByteArray.hpp"
+#include "server/Chunk.hpp"
+#include "server/game/map/BigChunk.hpp"
 
 namespace Tools { namespace Database {
     class IConnection;
@@ -19,16 +20,24 @@ namespace Server { namespace Game { namespace Map {
     {
     private:
         Map& _map;
-        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _inflatedChunks;
+
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
+
+        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedChunks;
+        std::unordered_map<BigChunk::IdType, BigChunk> _deflatedChunksContainers;
+
+        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedBigChunks;
+
+        std::unordered_set<Chunk::IdType> _dbBigChunks;
+
         std::list<std::pair<float, Chunk::IdType>> _priorities;
-        std::unordered_set<Chunk::IdType> _dbChunks;
 
     public:
         ChunkManager(Map& map, std::vector<Chunk::IdType> const& existingChunks);
         ~ChunkManager();
 
         void Save(Tools::Database::IConnection& conn);
+//        void LoadExistingChunks(std::vector<Chunk::IdType> const& ids);
 
         Chunk* GetChunk(Chunk::IdType id);
         std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);
@@ -36,9 +45,10 @@ namespace Server { namespace Game { namespace Map {
         void AddChunk(std::unique_ptr<Chunk> chunk);
 
     private:
-        void _InflateChunk(Chunk::IdType id);
         void _DeflateChunk(Chunk::IdType id);
+        void _InflateChunk(Chunk::IdType id);
         void _ExtractFromDb(Chunk::IdType id);
+        void _DeflateBigChunk(BigChunk::IdType id);
     };
 
 }}}

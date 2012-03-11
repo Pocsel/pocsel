@@ -8,6 +8,8 @@ namespace Tools { namespace Database {
     class IStatement
     {
     public:
+        virtual ~IStatement() {}
+
         virtual IStatement& Bind(int val) = 0;
         virtual IStatement& Bind(unsigned int val) = 0;
         virtual IStatement& Bind(Int64 val) = 0;
@@ -18,9 +20,7 @@ namespace Tools { namespace Database {
         virtual IStatement& Bind(std::string const& s) = 0;
         virtual IStatement& Bind(const char* s) = 0;
         virtual IStatement& Bind(Blob& val) = 0;
-        virtual ~IStatement()
-        {
-        }
+        virtual void Reset() = 0;
     };
 
 }}

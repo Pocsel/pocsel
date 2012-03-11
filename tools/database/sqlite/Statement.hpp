@@ -27,6 +27,7 @@ namespace Tools { namespace Database { namespace Sqlite {
         virtual Tools::Database::IStatement& Bind(std::string const& s);
         virtual Tools::Database::IStatement& Bind(const char* s);
         virtual Tools::Database::IStatement& Bind(Tools::Database::Blob& val);
+        virtual void Reset();
         Tools::Database::Status::Type Step();
         ::sqlite3_stmt* getSqlite3Stmt() { return this->_stmt; }
 

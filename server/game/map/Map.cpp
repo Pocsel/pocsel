@@ -13,6 +13,7 @@
 
 #include "tools/database/sqlite/Connection.hpp"
 
+#include "server/constants.hpp"
 #include "server/Server.hpp"
 #include "server/clientmanagement/ClientManager.hpp"
 #include "server/game/Game.hpp"
@@ -27,7 +28,10 @@
 
 namespace Server { namespace Game { namespace Map {
 
-    Map::Map(Conf const& conf, Uint64 currentTime, Game& game, std::vector<Chunk::IdType> const& existingChunks) :
+    Map::Map(Conf const& conf,
+            Uint64 currentTime,
+            Game& game,
+            std::vector<Chunk::IdType> const& existingBigChunks) :
         _conf(conf),
         _game(game),
         _messageQueue(new Tools::SimpleMessageQueue(1)),
@@ -36,8 +40,8 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
-        this->_engine = new Engine::Engine();
-        this->_chunkManager = new ChunkManager(*this, existingChunks);
+        this->_engine = new Engine::Engine(*this);
+        this->_chunkManager = new ChunkManager(*this, existingBigChunks);
     }
 
     Map::~Map()
@@ -61,6 +65,8 @@ namespace Server { namespace Game { namespace Map {
         auto itEnd = plugins.end();
         for (; it != itEnd; ++it)
             this->_engine->GetEntityManager().BootstrapPlugin(it->first);
+
+//        this->_GenerateUncompleteBigChunks();
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
@@ -168,18 +174,31 @@ namespace Server { namespace Game { namespace Map {
         {
             if (this->_chunkRequests.find(id) == this->_chunkRequests.end())
             {
-                this->_chunkRequests[id].push_back(response);
                 Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
                 this->_gen->GetChunk(id, cb);
             }
-            else
-                this->_chunkRequests[id].push_back(response);
+//                this->_GenerateBigChunk(id);
+
+            this->_chunkRequests[id].push_back(response);
         }
         else
         {
             response(chunk);
         }
     }
+
+//    void Map::_GenerateBigChunk(Chunk::IdType id)
+//    {
+//        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
+//
+//        auto ids = BigChunk::GetContainedIds<0>(id);
+//
+//        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
+//        {
+//            this->_chunkRequests[*it].push_back(0);
+//            this->_gen->GetChunk(*it, cb);
+//        }
+//    }
 
     void Map::_SendChunkPacket(Chunk* chunk, ChunkPacketCallback& response)
     {
@@ -192,7 +211,8 @@ namespace Server { namespace Game { namespace Map {
         auto& requests = this->_chunkRequests[chunk->id];
         for (auto it = requests.begin(), ite = requests.end(); it != ite; ++it)
         {
-            (*it)(chunk);
+            if (*it != 0)
+                (*it)(chunk);
         }
         requests.clear();
         this->_chunkRequests.erase(chunk->id);
@@ -314,5 +334,37 @@ namespace Server { namespace Game { namespace Map {
         this->_currentTime = currentTime;
         this->_engine->Tick(currentTime);
     }
+
+//    void Map::_GenerateUncompleteBigChunks()
+//    {
+//        std::set<Chunk::IdType> ids;
+//        std::set<Chunk::IdType> bigIds;
+//
+//        for (auto it = this->_existingChunks.begin(), ite = this->_existingChunks.end(); it != ite; ++it)
+//        {
+//            ids.insert(*it);
+//            bigIds.insert(BigChunk::GetId(*it));
+//        }
+//
+//        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
+//
+//        for (auto it = bigIds.begin(), ite = bigIds.end(); it != ite; ++it)
+//        {
+//            auto containedIds = BigChunk::GetContainedIds<0>(*it);
+//
+//            for (auto cit = containedIds.begin(), cite = containedIds.end(); cit != cite; ++cit)
+//            {
+//                if (ids.count(*cit) == 0)
+//                {
+//                    this->_chunkRequests[*cit].push_back(0);
+//                    this->_gen->GetChunk(*cit, cb);
+//                }
+//            }
+//        }
+//
+//        this->_chunkManager->LoadExistingChunks(this->_existingChunks);
+//        this->_existingChunks.clear();
+//        this->_existingChunks.resize(0);
+//    }
 
 }}}

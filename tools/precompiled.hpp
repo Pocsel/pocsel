@@ -52,6 +52,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/ref.hpp>
 #include <boost/thread.hpp>
+#include <boost/math/constants/constants.hpp>
 #include "tools/filesystem.hpp"
 
 // Others
