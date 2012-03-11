@@ -26,11 +26,16 @@ namespace {
         }
         catch (std::exception& e)
         {
-            Tools::debug << "_LuaCall error: " << e.what() << ".\n"; // Lors du lua_close, les erreurs sont ignorées
+            Tools::debug << "_RealLuaCall error: " << e.what() << ".\n"; // Lors du lua_close, les erreurs sont ignorées
             lua_pushstring(state, e.what());
             return -1;
         }
         auto const& rets = callHelper.GetRetList();
+        if (!lua_checkstack(env->i->GetState(), rets.size()))
+        {
+            lua_pushstring(state, "Lua::State: Call error: insufficient Lua stack size for return values");
+            return -1;
+        }
         auto it = rets.rbegin();
         auto itEnd = rets.rend();
         for (; it != itEnd; ++it)

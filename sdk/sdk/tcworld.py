@@ -82,7 +82,7 @@ def installPlugin(worldconn, pluginconn, server_version):
                 (fullname, plugin_id, lua)
             )
             tools.createTable(wconn, "%s_bigchunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
-            tools.createTable(wconn, "%s_chunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
+#            tools.createTable(wconn, "%s_chunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
             tools.createTable(wconn, "%s_entity" % (fullname), ["id INTEGER", "type TEXT", "storage TEXT"])
             tools.createTable(wconn, "%s_event" % (fullname), ["time INTEGER", "entity_id INTEGER", "function TEXT", "args TEXT"])
 

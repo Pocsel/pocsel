@@ -14,7 +14,8 @@ namespace Server { namespace Game { namespace Engine {
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
-        this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
+        auto serverNamespace = this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
+        this->_interpreter->Globals().Set("S", serverNamespace);
         this->_entityManager = new EntityManager(*this);
         this->_eventManager = new EventManager(*this);
     }

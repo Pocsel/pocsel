@@ -1,6 +1,8 @@
 #include "server/game/engine/EntityManager.hpp"
+#include "server/game/engine/EntityStorage.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/lua/MetaTable.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 #include "server/game/map/Map.hpp"
 
@@ -11,6 +13,8 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::debug << "EntityManager::EntityManager()\n";
         this->_engine.GetInterpreter().Globals()["Server"].Set("Entity", this->_engine.GetInterpreter().MakeTable());
+        Tools::Lua::MetaTable storageMetaTable(this->_engine.GetInterpreter(), EntityStorage(this->_engine.GetInterpreter()));
+        //storageMetaTable.SetMetaMethod(Tools::Lua::MetaTable::Length, this->_engine.GetInterpreter().Bind(
     }
 
     EntityManager::~EntityManager()
@@ -41,7 +45,7 @@ namespace Server { namespace Game { namespace Engine {
             try
             {
                 curs.Execute("INSERT INTO " + this->_engine.GetMap().GetName() + "_entity (id, type, storage) VALUES (?, ?, ?)")
-                    .Bind(it->first).Bind(it->second->type->name).Bind(this->_engine.GetInterpreter().Serialize(it->second->self["storage"]));
+                    .Bind(it->first).Bind(it->second->type->name).Bind(this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->self["storage"]));
             }
             catch (std::exception& e)
             {

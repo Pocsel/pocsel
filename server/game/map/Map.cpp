@@ -31,8 +31,7 @@ namespace Server { namespace Game { namespace Map {
     Map::Map(Conf const& conf,
             Uint64 currentTime,
             Game& game,
-            std::vector<Chunk::IdType> const& existingBigChunks,
-            std::vector<Chunk::IdType> const& existingChunks) :
+            std::vector<Chunk::IdType> const& existingBigChunks) :
         _conf(conf),
         _game(game),
         _messageQueue(new Tools::SimpleMessageQueue(1)),
@@ -43,8 +42,6 @@ namespace Server { namespace Game { namespace Map {
         this->_gen = new Gen::ChunkGenerator(this->_conf);
         this->_engine = new Engine::Engine(*this);
         this->_chunkManager = new ChunkManager(*this, existingBigChunks);
-
-        this->_existingChunks = existingChunks;
     }
 
     Map::~Map()
@@ -69,7 +66,7 @@ namespace Server { namespace Game { namespace Map {
         for (; it != itEnd; ++it)
             this->_engine->GetEntityManager().BootstrapPlugin(it->first);
 
-        this->_GenerateUncompleteBigChunks();
+//        this->_GenerateUncompleteBigChunks();
 
         Tools::SimpleMessageQueue::TimerLoopMessage
             m(std::bind(&Map::_Tick, this, std::placeholders::_1));
@@ -176,7 +173,11 @@ namespace Server { namespace Game { namespace Map {
         if (chunk == 0)
         {
             if (this->_chunkRequests.find(id) == this->_chunkRequests.end())
-                this->_GenerateBigChunk(id);
+            {
+                Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
+                this->_gen->GetChunk(id, cb);
+            }
+//                this->_GenerateBigChunk(id);
 
             this->_chunkRequests[id].push_back(response);
         }
@@ -186,18 +187,18 @@ namespace Server { namespace Game { namespace Map {
         }
     }
 
-    void Map::_GenerateBigChunk(Chunk::IdType id)
-    {
-        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
-
-        auto ids = Common::NChunk<BigChunkSize>::GetContainedIds<0>(id);
-
-        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
-        {
-            this->_chunkRequests[*it].push_back(0);
-            this->_gen->GetChunk(*it, cb);
-        }
-    }
+//    void Map::_GenerateBigChunk(Chunk::IdType id)
+//    {
+//        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
+//
+//        auto ids = BigChunk::GetContainedIds<0>(id);
+//
+//        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
+//        {
+//            this->_chunkRequests[*it].push_back(0);
+//            this->_gen->GetChunk(*it, cb);
+//        }
+//    }
 
     void Map::_SendChunkPacket(Chunk* chunk, ChunkPacketCallback& response)
     {
@@ -334,36 +335,36 @@ namespace Server { namespace Game { namespace Map {
         this->_engine->Tick(currentTime);
     }
 
-    void Map::_GenerateUncompleteBigChunks()
-    {
-        std::set<Chunk::IdType> ids;
-        std::set<Chunk::IdType> bigIds;
-
-        for (auto it = this->_existingChunks.begin(), ite = this->_existingChunks.end(); it != ite; ++it)
-        {
-            ids.insert(*it);
-            bigIds.insert(Common::NChunk<BigChunkSize>::GetId(*it));
-        }
-
-        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
-
-        for (auto it = bigIds.begin(), ite = bigIds.end(); it != ite; ++it)
-        {
-            auto containedIds = Common::NChunk<BigChunkSize>::GetContainedIds<0>(*it);
-
-            for (auto cit = containedIds.begin(), cite = containedIds.end(); cit != cite; ++cit)
-            {
-                if (ids.count(*cit) == 0)
-                {
-                    this->_chunkRequests[*cit].push_back(0);
-                    this->_gen->GetChunk(*cit, cb);
-                }
-            }
-        }
-
-        this->_chunkManager->LoadExistingChunks(this->_existingChunks);
-        this->_existingChunks.clear();
-        this->_existingChunks.resize(0);
-    }
+//    void Map::_GenerateUncompleteBigChunks()
+//    {
+//        std::set<Chunk::IdType> ids;
+//        std::set<Chunk::IdType> bigIds;
+//
+//        for (auto it = this->_existingChunks.begin(), ite = this->_existingChunks.end(); it != ite; ++it)
+//        {
+//            ids.insert(*it);
+//            bigIds.insert(BigChunk::GetId(*it));
+//        }
+//
+//        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
+//
+//        for (auto it = bigIds.begin(), ite = bigIds.end(); it != ite; ++it)
+//        {
+//            auto containedIds = BigChunk::GetContainedIds<0>(*it);
+//
+//            for (auto cit = containedIds.begin(), cite = containedIds.end(); cit != cite; ++cit)
+//            {
+//                if (ids.count(*cit) == 0)
+//                {
+//                    this->_chunkRequests[*cit].push_back(0);
+//                    this->_gen->GetChunk(*cit, cb);
+//                }
+//            }
+//        }
+//
+//        this->_chunkManager->LoadExistingChunks(this->_existingChunks);
+//        this->_existingChunks.clear();
+//        this->_existingChunks.resize(0);
+//    }
 
 }}}

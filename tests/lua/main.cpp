@@ -154,18 +154,18 @@ int main(int, char**)
 
         i.DoString("sharedTable = { 213, 23, \"sdfg\" }");
         i.DoString("serializeTest = { bite = { 1, 3, 4, sharedTable }, test = \"HEY\", allo = false }");
-        std::string serialized = i.Serialize(i.Globals()["serializeTest"]);
+        std::string serialized = i.GetSerializer().Serialize(i.Globals()["serializeTest"]);
         Tools::log << "serialize1: \"\"\"" << serialized << "\"\"\"\n";
         try
         {
-            Tools::log << "serialize2: \"\"\"" << i.Serialize(i.Globals()["FUCK"]) << "\"\"\"\n";
+            Tools::log << "serialize2: \"\"\"" << i.GetSerializer().Serialize(i.Globals()["FUCK"]) << "\"\"\"\n";
         }
         catch (std::exception& e)
         {
             Tools::log << "serialize fail: " << e.what() << std::endl;
         }
-        Tools::log << "serialize3: \"\"\"" << i.Serialize(i.Globals()["test"]) << "\"\"\"\n";
-        Tools::log << "Deserialize: \"\"\"" << i.Serialize(i.Deserialize(serialized)) << "\"\"\"\n";
+        Tools::log << "serialize3: \"\"\"" << i.GetSerializer().Serialize(i.Globals()["test"]) << "\"\"\"\n";
+        Tools::log << "Deserialize: \"\"\"" << i.GetSerializer().Serialize(i.GetSerializer().Deserialize(serialized)) << "\"\"\"\n";
 
         Init(i);
         i.DoString("m = Matrix4f.New()");
@@ -233,8 +233,8 @@ int main(int, char**)
             "v:Dump()");
 
         i.DoString("tab = { [v] = m, [2] = m1, ['toto'] = m2 }");
-        Tools::log << "first: " << i.Serialize(i.Globals()["tab"]) << std::endl;
-        Tools::log << "second: " << i.Serialize(i.Deserialize(i.Serialize(i.Globals()["tab"]))) << std::endl;
+        Tools::log << "first: " << i.GetSerializer().Serialize(i.Globals()["tab"]) << std::endl;
+        Tools::log << "second: " << i.GetSerializer().Serialize(i.GetSerializer().Deserialize(i.GetSerializer().Serialize(i.Globals()["tab"]))) << std::endl;
 
         i.DumpStack();
     }

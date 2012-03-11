@@ -67,16 +67,16 @@ namespace Server { namespace Database {
 
                 std::vector<Chunk::IdType> existingChunks;
 
-                {
-                    auto coconn = manager.GetConnectionPool().GetConnection();
-                    auto& cucurs = coconn->GetCursor();
-                    cucurs.Execute((Tools::ToString("SELECT id FROM ") + row[0].GetString() + "_chunk").c_str());
-                    while (cucurs.HasData())
-                    {
-                        auto& rorow = cucurs.FetchOne();
-                        existingChunks.push_back(rorow[0].GetUint64());
-                    }
-                }
+//                {
+//                    auto coconn = manager.GetConnectionPool().GetConnection();
+//                    auto& cucurs = coconn->GetCursor();
+//                    cucurs.Execute((Tools::ToString("SELECT id FROM ") + row[0].GetString() + "_chunk").c_str());
+//                    while (cucurs.HasData())
+//                    {
+//                        auto& rorow = cucurs.FetchOne();
+//                        existingChunks.push_back(rorow[0].GetUint64());
+//                    }
+//                }
 
                 std::vector<Chunk::IdType> existingBigChunks;
 
@@ -91,7 +91,7 @@ namespace Server { namespace Database {
                     }
                 }
 
-                world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game, existingBigChunks, existingChunks);
+                world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game, existingBigChunks);
                 if (conf.is_default) {
                     world._defaultMap = world._maps[conf.name];
                 }

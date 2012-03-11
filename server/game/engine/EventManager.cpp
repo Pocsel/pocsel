@@ -39,7 +39,7 @@ namespace Server { namespace Game { namespace Engine {
                 this->_engine.GetEntityManager().CallEntityFunction(
                         (*itEvent)->entityId,
                         (*itEvent)->function,
-                        this->_engine.GetInterpreter().Deserialize((*itEvent)->args));
+                        (*itEvent)->copiedArgs);
                 Tools::Delete(*itEvent);
             }
         }
@@ -53,13 +53,10 @@ namespace Server { namespace Game { namespace Engine {
             seconds = 0;
         int entityId = helper.PopArg().CheckInteger();
         std::string function = helper.PopArg().CheckString();
-        std::string args;
+        Tools::Lua::Ref copiedArgs(this->_engine.GetInterpreter().GetState());
         if (helper.GetNbArgs() > 0)
-            args = this->_engine.GetInterpreter().Serialize(helper.PopArg());
-        Event* e = new Event;
-        e->entityId = entityId;
-        e->function = function;
-        e->args = args;
+            copiedArgs = this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(helper.PopArg());
+        Event* e = new Event(entityId, function, copiedArgs);
         this->_events[this->_engine.GetCurrentTime() + seconds * 1000000.0].push_back(e);
     }
 
