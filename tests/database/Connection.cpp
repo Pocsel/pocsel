@@ -8,21 +8,24 @@ namespace Tools { namespace Database { namespace Sqlite {
 
     Connection::Connection(std::string const& settings)
     {
-        if (sqlite3_open(settings.c_str(), &this->_sqliteDb) != 0)
+        if (sqlite3_open(settings.c_str(), &this->_sqliteDb) != SQLITE_OK)
         {
             std::string msg(sqlite3_errmsg(this->_sqliteDb));
             sqlite3_close(this->_sqliteDb);
             this->_sqliteDb = 0;
             throw std::runtime_error("Cannot open sqlite database (settings: '" + settings + "'): " + msg);
         }
-        this->_beginTransaction = this->CreateQuery("BEGIN");
-        this->_endTransaction = this->CreateQuery("COMMIT");
+        this->_beginTransaction = this->CreateQuery("BEGIN").release();
+        this->_endTransaction = this->CreateQuery("COMMIT").release();
     }
 
     Connection::~Connection()
     {
+        Tools::Delete(this->_beginTransaction);
+        Tools::Delete(this->_endTransaction);
         if (this->_sqliteDb != 0)
-            sqlite3_close(this->_sqliteDb);
+            if (sqlite3_close(this->_sqliteDb) != SQLITE_OK)
+                throw std::runtime_error("Cannot close sqlite database");
         this->_sqliteDb = 0;
     }
 

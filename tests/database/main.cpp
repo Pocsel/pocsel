@@ -42,6 +42,7 @@ int main(int ac, char *av[])
     {
         Tools::error << e.what() << std::endl;
     }
+
 #ifdef _WIN32
     std::cout << "Press enter\n";
     std::cin.get();

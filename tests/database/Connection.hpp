@@ -11,8 +11,8 @@ namespace Tools { namespace Database { namespace Sqlite {
     {
     private:
         sqlite3* _sqliteDb;
-        std::unique_ptr<IQuery> _beginTransaction;
-        std::unique_ptr<IQuery> _endTransaction;
+        IQuery* _beginTransaction;
+        IQuery* _endTransaction;
 
     public:
         Connection(std::string const& settings);
