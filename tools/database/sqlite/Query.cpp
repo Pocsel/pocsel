@@ -1,7 +1,7 @@
 #include "tools/precompiled.hpp"
 
-#include "Query.hpp"
-#include "Row.hpp"
+#include "tools/database/sqlite/Query.hpp"
+#include "tools/database/sqlite/Row.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {
 

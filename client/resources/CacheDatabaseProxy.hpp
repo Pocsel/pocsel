@@ -7,7 +7,7 @@ namespace Common {
 }
 
 namespace Tools { namespace Database {
-    class IConnectionPool;
+    class IConnection;
 }}
 
 namespace Client { namespace Resources {
@@ -26,7 +26,7 @@ namespace Client { namespace Resources {
         private:
             Uint32 _worldVersion;
             std::string _worldName;
-            Tools::Database::IConnectionPool* _connectionPool;
+            Tools::Database::IConnection* _connection;
             Uint32 _cacheVersion;
             std::string _worldBuildHash;
 

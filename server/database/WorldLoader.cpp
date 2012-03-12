@@ -1,7 +1,9 @@
+#include "server/precompiled.hpp"
+
 #include "server/database/WorldLoader.hpp"
 #include "server/database/ResourceManager.hpp"
 
-#include "tools/database/IConnectionPool.hpp"
+#include "tools/database/IConnection.hpp"
 
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Iterator.hpp"
@@ -20,50 +22,47 @@ namespace Server { namespace Database {
 
     void WorldLoader::Load(Game::World& world, ResourceManager& manager)
     {
-        auto conn = manager.GetConnectionPool().GetConnection();
-        auto& curs = conn->GetCursor();
+        auto& conn = manager.GetConnection();
 
         // Meta data
-        curs.Execute("SELECT identifier, fullname, version, build_hash FROM world");
-        if (curs.HasData())
+        auto query = conn.CreateQuery("SELECT identifier, fullname, version, build_hash FROM world");
+        if (query)
         {
-            auto& row = curs.FetchOne();
-            world._identifier = row[0].GetString();
-            world._fullname = row[1].GetString();
-            world._version = row[2].GetInt();
-            world._buildHash = row[3].GetString();
+            auto row = query->Fetch();
+            world._identifier = row->GetString(0);
+            world._fullname = row->GetString(1);
+            world._version = row->GetInt(2);
+            world._buildHash = row->GetString(3);
         }
         else
             throw std::runtime_error("World file missing metadata.");
 
         // Cube types
-        curs.Execute("SELECT id, plugin_id, name, lua FROM cube_type");
-        while (curs.HasData())
+        query = conn.CreateQuery("SELECT id, plugin_id, name, lua FROM cube_type");
+        while (auto row = query->Fetch())
         {
-            auto& row = curs.FetchOne();
-            Uint32 id = row[0].GetUint64();
-            std::string name = row[2].GetString();
+            Uint32 id = row->GetUint(0);
+            std::string name = row->GetString(2);
             Log::load << "Load cube type id: " << id <<
-                          ", plugin_id: " << row[1].GetUint64() <<
-                          ", name: " << row[2].GetString() << "\n";
+                          ", plugin_id: " << row->GetUint64(1) <<
+                          ", name: " << name << "\n";
             if (world._cubeTypes.size() < id)
                 world._cubeTypes.resize(id);
             world._cubeTypes[id - 1].id = id;
             world._cubeTypes[id - 1].name = name;
-            WorldLoader::_LoadCubeType(world._cubeTypes[id - 1], row[3].GetString(), manager);
+            WorldLoader::_LoadCubeType(world._cubeTypes[id - 1], row->GetString(3), manager);
         }
 
         // Maps
-        curs.Execute("SELECT name, lua, tick FROM map");
-        while (curs.HasData())
+        query = conn.CreateQuery("SELECT name, lua, tick FROM map");
+        while (auto row = query->Fetch())
         {
-            auto& row = curs.FetchOne();
             try
             {
                 Game::Map::Conf conf;
-                WorldLoader::_LoadMapConf(conf, row[0].GetString(), row[1].GetString(), world);
+                WorldLoader::_LoadMapConf(conf, row->GetString(0), row->GetString(1), world);
                 conf.cubeTypes = &world._cubeTypes;
-                Uint64 curTime = row[2].GetUint64();
+                Uint64 curTime = row->GetUint64(2);
 
                 std::vector<Chunk::IdType> existingChunks;
 
@@ -80,16 +79,9 @@ namespace Server { namespace Database {
 
                 std::vector<Chunk::IdType> existingBigChunks;
 
-                {
-                    auto coconn = manager.GetConnectionPool().GetConnection();
-                    auto& cucurs = coconn->GetCursor();
-                    cucurs.Execute((Tools::ToString("SELECT id FROM ") + row[0].GetString() + "_bigchunk").c_str());
-                    while (cucurs.HasData())
-                    {
-                        auto& rorow = cucurs.FetchOne();
-                        existingBigChunks.push_back(rorow[0].GetUint64());
-                    }
-                }
+                auto q = conn.CreateQuery("SELECT id FROM " + row->GetString(0) + "_bigchunk");
+                while (auto r = q->Fetch())
+                    existingBigChunks.push_back(r->GetUint64(0));
 
                 world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game, existingBigChunks);
                 if (conf.is_default) {
@@ -98,49 +90,47 @@ namespace Server { namespace Database {
             }
             catch (std::exception& e)
             {
-                Log::load << "WorldLoader: Failed to load map \"" << row[0].GetString() << "\": " << e.what() << std::endl;
-                Tools::error << "WorldLoader: Failed to load map \"" << row[0].GetString() << "\": " << e.what() << std::endl;
+                Log::load << "WorldLoader: Failed to load map \"" << row->GetString(0) << "\": " << e.what() << std::endl;
+                Tools::error << "WorldLoader: Failed to load map \"" << row->GetString(0) << "\": " << e.what() << std::endl;
             }
         }
         if (world._defaultMap == 0)
             throw std::runtime_error("Cannot find default map");
 
         // Plugins
-        curs.Execute("SELECT id, fullname, identifier FROM plugin");
-        while (curs.HasData())
+        query = conn.CreateQuery("SELECT id, fullname, identifier FROM plugin");
+        while (auto row = query->Fetch())
         {
-            auto& row = curs.FetchOne();
             try
             {
-                world.GetPluginManager().AddPlugin(row[0].GetUint32(), row[1].GetString(), row[2].GetString());
+                world.GetPluginManager().AddPlugin(row->GetUint(0), row->GetString(1), row->GetString(2));
             }
             catch (std::exception& e)
             {
-                Log::load << "WorldLoader: Failed to load plugin \"" << row[1].GetString() << "\": " << e.what() << std::endl;
-                Tools::error << "WorldLoader: Failed to load plugin \"" << row[1].GetString() << "\": " << e.what() << std::endl;
+                Log::load << "WorldLoader: Failed to load plugin \"" << row->GetString(1) << "\": " << e.what() << std::endl;
+                Tools::error << "WorldLoader: Failed to load plugin \"" << row->GetString(1) << "\": " << e.what() << std::endl;
             }
         }
 
         // Entity types
-        curs.Execute("SELECT plugin_id, name, lua FROM entity_type");
-        while (curs.HasData())
+        query = conn.CreateQuery("SELECT plugin_id, name, lua FROM entity_type");
+        while (auto row = query->Fetch())
         {
-            auto& row = curs.FetchOne();
             try
             {
                 auto itMap = world._maps.begin();
                 auto itMapEnd = world._maps.end();
                 for (; itMap != itMapEnd; ++itMap)
                 {
-                    itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row[0].GetUint32());
-                    itMap->second->GetEngine().GetInterpreter().DoString(row[2].GetString());
+                    itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row->GetUint(0));
+                    itMap->second->GetEngine().GetInterpreter().DoString(row->GetString(2));
                     itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
                 }
             }
             catch (std::exception& e)
             {
-                Log::load << "WorldLoader: Failed to load entity file \"" << row[1].GetString() << "\": " << e.what() << std::endl;
-                Tools::error << "WorldLoader: Failed to load entity file \"" << row[1].GetString() << "\": " << e.what() << std::endl;
+                Log::load << "WorldLoader: Failed to load entity file \"" << row->GetString(1) << "\": " << e.what() << std::endl;
+                Tools::error << "WorldLoader: Failed to load entity file \"" << row->GetString(1) << "\": " << e.what() << std::endl;
             }
         }
     }

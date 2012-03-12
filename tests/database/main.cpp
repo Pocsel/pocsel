@@ -1,8 +1,9 @@
 #include "tests/database/precompiled.hpp"
 
-#include "Connection.hpp"
+#include "tools/database/IConnection.hpp"
+#include "tools/database/sqlite/Connection.hpp"
 
-int main(int ac, char *av[])
+int main()
 {
     try
     {

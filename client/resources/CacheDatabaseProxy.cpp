@@ -2,7 +2,6 @@
 
 #include "common/Packet.hpp"
 #include "common/Resource.hpp"
-#include "tools/database/ConnectionPool.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 
 #include "client/resources/CacheDatabaseProxy.hpp"
@@ -20,7 +19,7 @@ namespace Client { namespace Resources {
                                            Uint32 worldVersion,
                                            std::string const& worldBuildHash) :
         _worldVersion(0),
-        _connectionPool(0),
+        _connection(0),
         _cacheVersion(0)
     {
         this->_worldVersion = worldVersion;
@@ -29,28 +28,26 @@ namespace Client { namespace Resources {
         std::string cacheFile = (cacheDir / (host + "-" + worldIdentifier + "." + Common::CacheFileExt)).string();
         this->_CheckCacheFile(cacheFile);
 
-        this->_connectionPool = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(cacheFile);
-        auto conn = this->_connectionPool->GetConnection();
-        auto& curs = conn->GetCursor();
-        if (conn->HasTable("cache"))
+        this->_connection = new Tools::Database::Sqlite::Connection(cacheFile);
+        if (this->_connection->HasTable("cache"))
         {
-            curs.Execute("SELECT version FROM cache");
-            if (curs.HasData())
-                this->_cacheVersion = curs.FetchOne()[0].GetInt();
+            auto query = this->_connection->CreateQuery("SELECT version FROM cache");
+            if (auto ptr = query->Fetch())
+                this->_cacheVersion = ptr->GetInt(0);
             else
                 throw std::runtime_error("Corrupted cache");
         }
         else
         {
-            curs.Execute("CREATE TABLE cache (version INTEGER, format_version INTEGER, world_name TEXT, world_build_hash TEXT)");
-            curs.Execute("INSERT INTO cache (version, format_version) VALUES (0, ?)").Bind(CacheFormatVersion);
-            curs.Execute("CREATE TABLE resource (id INTEGER, type TEXT, data BLOB, plugin_id INTEGER, filename TEXT)");
+            this->_connection->CreateQuery("CREATE TABLE cache (version INTEGER, format_version INTEGER, world_name TEXT, world_build_hash TEXT)")->ExecuteNonSelect();
+            this->_connection->CreateQuery("INSERT INTO cache (version, format_version) VALUES (0, ?)")->Bind(CacheFormatVersion).ExecuteNonSelect();
+            this->_connection->CreateQuery("CREATE TABLE resource (id INTEGER, type TEXT, data BLOB, plugin_id INTEGER, filename TEXT)")->ExecuteNonSelect();
         }
     }
 
     CacheDatabaseProxy::~CacheDatabaseProxy()
     {
-        Tools::Delete(this->_connectionPool);
+        Tools::Delete(this->_connection);
     }
 
     void CacheDatabaseProxy::_CheckCacheFile(std::string const& file)
@@ -59,18 +56,15 @@ namespace Client { namespace Resources {
             return;
         try
         {
-            Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection> pool(file);
-            auto conn = pool.GetConnection();
-            auto& curs = conn->GetCursor();
-            if (conn->HasTable("cache"))
+            Tools::Database::Sqlite::Connection conn(file);
+            if (conn.HasTable("cache"))
             {
-                curs.Execute("SELECT format_version, world_build_hash FROM cache");
-                if (curs.HasData())
+                auto query = conn.CreateQuery("SELECT format_version, world_build_hash FROM cache");
+                if (auto row = query->Fetch())
                 {
-                    auto& row = curs.FetchOne();
-                    if (row[0].GetInt() != CacheFormatVersion)
+                    if (row->GetInt(0) != CacheFormatVersion)
                         throw std::runtime_error("bad version");
-                    else if (row[1].GetString() != this->_worldBuildHash)
+                    else if (row->GetString(1) != this->_worldBuildHash)
                         throw std::runtime_error("server rebuilt world");
                 }
                 else
@@ -78,7 +72,7 @@ namespace Client { namespace Resources {
             }
             else
                 throw std::runtime_error("no metadata table");
-            if (!conn->HasTable("resource"))
+            if (!conn.HasTable("resource"))
                 throw std::runtime_error("no resource table");
         }
         catch (std::exception& e)
@@ -92,38 +86,34 @@ namespace Client { namespace Resources {
 
     void CacheDatabaseProxy::AddResource(Common::Resource& res)
     {
-        if (!this->_connectionPool)
+        if (this->_connection == 0)
         {
             Tools::error << "CacheDatabaseProxy::AddResource: Adding resource to an unloaded cache.\n";
             return;
         }
-        auto conn = this->_connectionPool->GetConnection();
-        auto& curs = conn->GetCursor();
-        curs.Execute("DELETE FROM resource WHERE id = ?").Bind(res.id);
-        Tools::Database::Blob b(res.data, res.size);
-        curs.Execute(
-            "INSERT INTO resource (id, type, data, plugin_id, filename) "
-            "VALUES (?, ?, ?, ?, ?)"
-        ).Bind(res.id).Bind(res.type).Bind(b).Bind(res.pluginId).Bind(res.filename);
+        this->_connection->BeginTransaction();
+        this->_connection->CreateQuery("DELETE FROM resource WHERE id = ?")->Bind(res.id).ExecuteNonSelect();
+        this->_connection->CreateQuery("INSERT INTO resource (id, type, data, plugin_id, filename) VALUES (?, ?, ?, ?, ?)")->
+            Bind(res.id).Bind(res.type).Bind(res.data, res.size).Bind(res.pluginId).Bind(res.filename).ExecuteNonSelect();
+        this->_connection->EndTransaction();
     }
 
     std::unique_ptr<Common::Resource> CacheDatabaseProxy::GetResource(Uint32 id)
     {
         try
         {
-            auto conn = this->_connectionPool->GetConnection();
-            auto& curs = conn->GetCursor();
-            curs.Execute("SELECT id, plugin_id, type, filename, data FROM resource WHERE id = ?").Bind(id);
-            if (curs.HasData())
+            auto query = this->_connection->CreateQuery("SELECT id, plugin_id, type, filename, data FROM resource WHERE id = ?");
+            query->Bind(id);
+            if (auto row = query->Fetch())
             {
-                auto& row = curs.FetchOne();
+                auto arr = row->GetArray(4);
                 return std::unique_ptr<Common::Resource>(new Common::Resource(
-                        row[0].GetInt(),
-                        row[1].GetInt(),
-                        row[2].GetString(),
-                        row[3].GetString(),
-                        row[4].GetBlob().data,
-                        (Uint32)row[4].GetBlob().size));
+                        row->GetInt(0),
+                        row->GetInt(1),
+                        row->GetString(2),
+                        row->GetString(3),
+                        arr.data(),
+                        (Uint32)arr.size()));
             }
             else
                 return 0;
@@ -139,14 +129,10 @@ namespace Client { namespace Resources {
     {
         try
         {
-            auto conn = this->_connectionPool->GetConnection();
-            auto& curs = conn->GetCursor();
-            curs.Execute("SELECT id FROM resource WHERE plugin_id = ? AND filename = ?").Bind(pluginId).Bind(filename);
-            if (curs.HasData())
-            {
-                auto& row = curs.FetchOne();
-                return row[0].GetInt();
-            }
+            auto query = this->_connection->CreateQuery("SELECT id FROM resource WHERE plugin_id = ? AND filename = ?");
+            query->Bind(pluginId).Bind(filename);
+            if (auto row = query->Fetch())
+                return row->GetInt(0);
             else
                 return 0;
         }
@@ -159,9 +145,8 @@ namespace Client { namespace Resources {
 
     void CacheDatabaseProxy::ValidateUpdate()
     {
-        auto conn = this->_connectionPool->GetConnection();
-        auto& curs = conn->GetCursor();
-        curs.Execute("UPDATE cache SET version = ?, world_name = ?, world_build_hash = ?").Bind(this->_worldVersion).Bind(this->_worldName).Bind(this->_worldBuildHash);
+        this->_connection->CreateQuery("UPDATE cache SET version = ?, world_name = ?, world_build_hash = ?")->
+            Bind(this->_worldVersion).Bind(this->_worldName).Bind(this->_worldBuildHash).ExecuteNonSelect();
         Tools::log << "Cache validated for version " << this->_worldVersion << " \"" << this->_worldName << "\" (build hash \"" << this->_worldBuildHash << "\").\n";
     }
 

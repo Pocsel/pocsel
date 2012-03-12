@@ -1,8 +1,7 @@
 #ifndef __TOOLS_DATABASE_SQLITE_QUERY_HPP__
 #define __TOOLS_DATABASE_SQLITE_QUERY_HPP__
 
-//#include "tools/database/sqlite/Connection.hpp"
-#include "Connection.hpp"
+#include "tools/database/sqlite/Connection.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {
 
