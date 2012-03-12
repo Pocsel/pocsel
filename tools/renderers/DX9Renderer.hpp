@@ -76,6 +76,11 @@ namespace Tools { namespace Renderers {
         virtual void SetViewMatrix(Matrix4<float> const& matrix);
         virtual void SetProjectionMatrix(Matrix4<float> const& matrix);
 
+        Matrix4<float> const& GetModelViewProjectionMatrix() const { return this->_modelViewProjection; }
+        Matrix4<float> const& GetModelMatrix() const { return this->_model; }
+        Matrix4<float> const& GetViewMatrix() const { return this->_view; }
+        Matrix4<float> const& GetProjectionMatrix() const { return this->_projection; }
+
         // States
         virtual void SetScreenSize(Vector2u const& size);
         virtual void SetClearColor(Color4f const& color) { this->_clearColor = color; }

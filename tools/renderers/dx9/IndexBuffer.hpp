@@ -8,7 +8,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     class IndexBuffer : public IIndexBuffer
     {
     private:
-        GLuint _id;
+        DX9Renderer& _renderer;
 
     public:
         IndexBuffer(DX9Renderer& renderer);

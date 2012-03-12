@@ -2,14 +2,14 @@
 
 #include "tools/precompiled.hpp"
 
-#include "tools/renderers/GLRenderer.hpp"
-#include "tools/renderers/opengl/opengl.hpp"
-#include "tools/renderers/opengl/ShaderProgramCg.hpp"
-#include "tools/renderers/opengl/ShaderParameterCg.hpp"
+#include "tools/renderers/DX9Renderer.hpp"
+#include "tools/renderers/dx9/directx.hpp"
+#include "tools/renderers/dx9/ShaderProgramCg.hpp"
+#include "tools/renderers/dx9/ShaderParameterCg.hpp"
 
-namespace Tools { namespace Renderers { namespace OpenGL {
+namespace Tools { namespace Renderers { namespace DX9 {
 
-    ShaderProgramCg::ShaderProgramCg(GLRenderer& renderer, std::string const& effect) :
+    ShaderProgramCg::ShaderProgramCg(DX9Renderer& renderer, std::string const& effect) :
         _renderer(renderer),
         _ctx(_renderer.GetCgContext()),
         _nbTextures(0),

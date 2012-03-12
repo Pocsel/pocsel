@@ -14,8 +14,6 @@ namespace Tools { namespace Renderers {
     {
     private:
         DX9Renderer& _renderer;
-        GLuint _id;
-        int _bindId;
         Vector2u _size;
         bool _hasAlpha;
 
@@ -26,9 +24,6 @@ namespace Tools { namespace Renderers {
 
         virtual void Bind();
         virtual void Unbind();
-
-        GLuint GetID() const { return this->_id; }
-        int GetBindID() const { return this->_bindId; }
 
         virtual Vector2u const& GetSize() const { return this->_size; }
         virtual bool HasAlpha() const { return this->_hasAlpha; }

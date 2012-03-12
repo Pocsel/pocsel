@@ -310,6 +310,11 @@ namespace Tools { namespace Renderers {
         }
     }
 
+    void DX9Renderer::Present()
+    {
+        this->_device->Present(0, 0, 0, 0);
+    }
+
 }}
 
 #endif

@@ -6,12 +6,12 @@
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
 
-#include "tools/renderers/opengl/opengl.hpp"
-#include "tools/renderers/opengl/Texture2D.hpp"
-#include "tools/renderers/opengl/ShaderProgramCg.hpp"
-#include "tools/renderers/opengl/ShaderParameterCg.hpp"
+#include "tools/renderers/dx9/directx.hpp"
+#include "tools/renderers/dx9/Texture2D.hpp"
+#include "tools/renderers/dx9/ShaderProgramCg.hpp"
+#include "tools/renderers/dx9/ShaderParameterCg.hpp"
 
-namespace Tools { namespace Renderers { namespace OpenGL {
+namespace Tools { namespace Renderers { namespace DX9 {
 
     ShaderParameterCg::ShaderParameterCg(ShaderProgramCg& program, std::string const& identifier)
     {
@@ -67,7 +67,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
         Texture2D& tex = reinterpret_cast<Texture2D&>(texture);
         //assert(tex.GetBindID() >= 0 && "Faut bind la texture avant.");
-        cgGLSetTextureParameter(this->_param, tex.GetID());
+        //cgGLSetTextureParameter(this->_param, tex.GetID());
         cgSetSamplerState(this->_param);
     }
 

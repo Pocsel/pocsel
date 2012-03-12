@@ -8,25 +8,24 @@ namespace Tools { namespace Renderers { namespace DX9 {
     class VertexBuffer : public IVertexBuffer
     {
     private:
-        enum
-        {
-            MaxAttributes = 8
-        };
+        //enum
+        //{
+        //    MaxAttributes = 8
+        //};
 
-        struct VertexAttribute
-        {
-            GLint location;
-            GLint nbElements;
-            GLint type;
-            GLvoid* offset;
-        };
+        //struct VertexAttribute
+        //{
+        //    GLint location;
+        //    GLint nbElements;
+        //    GLint type;
+        //    GLvoid* offset;
+        //};
 
     private:
-        GLuint _id;
-        GLuint _stride;
+        DX9Renderer& _renderer;
 
         int _nbAttrib;
-        VertexAttribute _attributes[MaxAttributes];
+        //VertexAttribute _attributes[MaxAttributes];
 
     public:
         VertexBuffer(DX9Renderer& renderer);
