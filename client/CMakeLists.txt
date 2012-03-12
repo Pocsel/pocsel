@@ -29,6 +29,8 @@ target_link_libraries(client
     ${SDL_LIBRARY}
     ${CG_LIBRARY}
     ${CGGL_LIBRARY}
+	${CGDX9_LIBRARY}
+	${DirectX_D3D9_LIBRARY}
 )
 
 SetProgramInfo(client)

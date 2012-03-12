@@ -14,6 +14,7 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost COMPONENTS system filesystem thread date_time regex program_options REQUIRED)
 find_package(Threads)
+find_package(DirectX REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
@@ -57,6 +58,7 @@ set(ALL_INCLUDES
     ${FREETYPE_INCLUDE_DIRS}
     ${SDL_INCLUDE_DIR}
     ${CG_INCLUDE_DIR}
+	${DirectX_D3DX9_INCLUDE_DIR}
 
     ${SQLITE3_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}

@@ -18,9 +18,12 @@ namespace Client { namespace Window { namespace Sdl {
         SDL_Surface* _screen;
         Tools::Vector2u _size;
         Tools::Vector2u _targetSize;
+#ifdef _WIN32
+        bool _directX;
+#endif
 
     public:
-        Window(Tools::Vector2u const& size = Tools::Vector2u(800, 600), bool fullscreen = false, bool useShaders = true);
+        Window(bool directX = false, Tools::Vector2u const& size = Tools::Vector2u(800, 600), bool fullscreen = false, bool useShaders = true);
         ~Window();
         virtual void Render();
         virtual Tools::IRenderer& GetRenderer() { return *this->_renderer; }
