@@ -17,13 +17,14 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct Event
         {
-            Event(int entityId, std::string function, Tools::Lua::Ref const& copiedArgs) :
-                entityId(entityId), function(function), copiedArgs(copiedArgs)
+            Event(int targetId, std::string function, Tools::Lua::Ref const& copiedArgs, int callerId) :
+                targetId(targetId), function(function), copiedArgs(copiedArgs), callerId(callerId)
             {
             }
-            int entityId;
+            int targetId;
             std::string function;
             Tools::Lua::Ref copiedArgs;
+            int callerId;
         };
 
     private:
@@ -35,7 +36,7 @@ namespace Server { namespace Game { namespace Engine {
         ~EventManager();
         void DispatchEvents();
     private:
-        void _CallLater(Tools::Lua::CallHelper& helper);
+        void _ApiCallLater(Tools::Lua::CallHelper& helper);
     };
 
 }}}

@@ -12,7 +12,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::debug << "EventManager::EventManager()\n";
         auto& i = this->_engine.GetInterpreter();
         auto eventTable = i.Globals()["Server"].Set("Event", i.MakeTable());
-        eventTable.Set("CallLater", i.MakeFunction(std::bind(&EventManager::_CallLater, this, std::placeholders::_1)));
+        eventTable.Set("CallLater", i.MakeFunction(std::bind(&EventManager::_ApiCallLater, this, std::placeholders::_1)));
     }
 
     EventManager::~EventManager()
@@ -37,16 +37,17 @@ namespace Server { namespace Game { namespace Engine {
             for (; itEvent != itEventEnd; ++itEvent)
             {
                 this->_engine.GetEntityManager().CallEntityFunction(
-                        (*itEvent)->entityId,
+                        (*itEvent)->targetId,
                         (*itEvent)->function,
                         (*itEvent)->copiedArgs);
+                        // (*itEvent)->callerId); TODO paps
                 Tools::Delete(*itEvent);
             }
         }
         this->_events.erase(this->_events.begin(), it);
     }
 
-    void EventManager::_CallLater(Tools::Lua::CallHelper& helper)
+    void EventManager::_ApiCallLater(Tools::Lua::CallHelper& helper)
     {
         double seconds = helper.PopArg().CheckNumber();
         if (seconds < 0)
@@ -56,7 +57,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Ref copiedArgs(this->_engine.GetInterpreter().GetState());
         if (helper.GetNbArgs() > 0)
             copiedArgs = this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(helper.PopArg());
-        Event* e = new Event(entityId, function, copiedArgs);
+        Event* e = new Event(entityId, function, copiedArgs, this->_engine.GetEntityManager().GetLastCalledEntityId());
         this->_events[this->_engine.GetCurrentTime() + seconds * 1000000.0].push_back(e);
     }
 

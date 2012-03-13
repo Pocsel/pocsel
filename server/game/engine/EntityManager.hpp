@@ -41,6 +41,7 @@ namespace Server { namespace Game { namespace Engine {
         std::map<int, Entity*> _entities;
         Uint32 _pluginIdForRegistering;
         int _currentEntityId;
+        int _lastCalledEntityId;
 
     public:
         EntityManager(Engine& engine);
@@ -51,8 +52,10 @@ namespace Server { namespace Game { namespace Engine {
         void CallEntityFunction(int entityId, std::string function, Tools::Lua::Ref const& args);
         int SpawnEntity(std::string name, Uint32 pluginId, Tools::Lua::Ref const& args) throw(std::runtime_error);
         void BootstrapPlugin(Uint32 pluginId);
+        int GetLastCalledEntityId() const;
     private:
         void _ApiRegister(Tools::Lua::CallHelper& helper);
+        void _ApiSpawn(Tools::Lua::CallHelper& helper);
     };
 
 }}}
