@@ -23,9 +23,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     private:
         DX9Renderer& _renderer;
-
-        int _nbAttrib;
+        IDirect3DVertexBuffer9* _vertexBuffer;
         //VertexAttribute _attributes[MaxAttributes];
+        std::size_t _size;
 
     public:
         VertexBuffer(DX9Renderer& renderer);

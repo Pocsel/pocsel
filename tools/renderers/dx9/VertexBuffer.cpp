@@ -1,4 +1,5 @@
 #ifdef _WIN32
+#include "tools/precompiled.hpp"
 
 #include "tools/renderers/dx9/directx.hpp"
 #include "tools/renderers/dx9/VertexBuffer.hpp"
@@ -6,12 +7,16 @@
 namespace Tools { namespace Renderers { namespace DX9 {
 
     VertexBuffer::VertexBuffer(DX9Renderer& renderer) :
-        _renderer(renderer)
+        _renderer(renderer),
+        _vertexBuffer(0),
+        _size(0)
     {
     }
 
     VertexBuffer::~VertexBuffer()
     {
+        if (this->_vertexBuffer)
+            this->_vertexBuffer->Release();
     }
 
     void VertexBuffer::PushVertexAttribute(DataType::Type type, VertexAttributeUsage::Type usage, Uint32 nbElements)
@@ -27,10 +32,28 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     void VertexBuffer::SetData(std::size_t size, void const* data, VertexBufferUsage::Type usage)
     {
+        if (this->_size < size || this->_size * 80 / 100 > size)
+        {
+            if (this->_vertexBuffer)
+                this->_vertexBuffer->Release();
+            HRESULT ret = this->_renderer.GetDevice()->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &this->_vertexBuffer, 0);
+            if (ret < 0)
+                throw std::runtime_error("DirectX: Could not create a vertex buffer");
+            this->_size = size;
+        }
+        if (data == 0)
+            return;
+        this->SetSubData(0, size, data);
     }
 
     void VertexBuffer::SetSubData(std::size_t offset, std::size_t size, void const* data)
     {
+        void* ptr;
+        HRESULT ret = this->_vertexBuffer->Lock(offset, size, &ptr, 0); // TODO Check
+        if (ret < 0)
+            throw std::runtime_error("DirectX: Could not create a vertex buffer");
+        std::memcpy(ptr, data, size);
+        this->_vertexBuffer->Unlock();
     }
 
     static int nbTexCoordActive = 0;

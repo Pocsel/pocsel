@@ -68,14 +68,14 @@ namespace Tools { namespace Renderers {
 
         D3DPRESENT_PARAMETERS present_parameters;
         std::memset(&present_parameters, 0, sizeof(present_parameters));
-        present_parameters.Windowed = false;
+        present_parameters.Windowed = true;
         present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
         present_parameters.EnableAutoDepthStencil = true;
-        present_parameters.AutoDepthStencilFormat = D3DFMT_D16;
+        present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
         present_parameters.hDeviceWindow = GetActiveWindow();
-        present_parameters.BackBufferWidth = this->_screenSize.w;
-        present_parameters.BackBufferHeight = this->_screenSize.h;
-        present_parameters.BackBufferFormat = D3DFMT_A8B8G8R8;
+        //present_parameters.BackBufferWidth = this->_screenSize.w;
+        //present_parameters.BackBufferHeight = this->_screenSize.h;
+        present_parameters.BackBufferFormat = D3DFMT_UNKNOWN;
         present_parameters.MultiSampleType = D3DMULTISAMPLE_NONE;
 
         if (FAILED(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_SOFTWARE_VERTEXPROCESSING, &present_parameters, &this->_device)))
