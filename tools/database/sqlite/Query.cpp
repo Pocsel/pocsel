@@ -21,40 +21,37 @@ namespace Tools { namespace Database { namespace Sqlite {
             throw std::runtime_error(std::string("Sqlite: ~Query error: ") + sqlite3_errmsg(this->_connection.GetSqliteHandler()));
     }
 
-    IQuery& Query::Bind(char val)
+    IQuery& Query::Bind(Int8 val)
     {
-        return this->Bind((int)val);
+        return this->Bind((Int64)val);
     }
 
-    IQuery& Query::Bind(unsigned char val)
+    IQuery& Query::Bind(Uint8 val)
     {
-        return this->Bind((int)val);
+        return this->Bind((Int64)val);
     }
 
-    IQuery& Query::Bind(short val)
+    IQuery& Query::Bind(Int16 val)
     {
-        return this->Bind((int)val);
+        return this->Bind((Int64)val);
     }
 
-    IQuery& Query::Bind(unsigned short val)
+    IQuery& Query::Bind(Uint16 val)
     {
-        return this->Bind((int)val);
+        return this->Bind((Int64)val);
     }
 
-    IQuery& Query::Bind(int val)
+    IQuery& Query::Bind(Int32 val)
     {
-        int ret = sqlite3_bind_int(this->_stmt, this->_bindIdx++, val);
-        if (ret != SQLITE_OK)
-            throw std::runtime_error(std::string("Sqlite: Bind error: ") + sqlite3_errmsg(this->_connection.GetSqliteHandler()));
-        return *this;
+        return this->Bind((Int64)val);
     }
 
-    IQuery& Query::Bind(unsigned int val)
+    IQuery& Query::Bind(Uint32 val)
     {
-        return this->Bind((int)val);
+        return this->Bind((Int64)val);
     }
 
-    IQuery& Query::Bind(long long val)
+    IQuery& Query::Bind(Int64 val)
     {
         int ret = sqlite3_bind_int64(this->_stmt, this->_bindIdx++, val);
         if (ret != SQLITE_OK)
@@ -62,9 +59,9 @@ namespace Tools { namespace Database { namespace Sqlite {
         return *this;
     }
 
-    IQuery& Query::Bind(unsigned long long val)
+    IQuery& Query::Bind(Uint64 val)
     {
-        return this->Bind((long long)val);
+        return this->Bind((Int64)val);
     }
 
     IQuery& Query::Bind(float val)

@@ -7,14 +7,14 @@ namespace Tools { namespace Database {
     {
     public:
         virtual ~IRow() {}
-        virtual char GetChar(int colomn) const = 0;
-        virtual unsigned char GetUchar(int colomn) const = 0;
-        virtual short GetInt16(int colomn) const = 0;
-        virtual unsigned short GetUint16(int colomn) const = 0;
-        virtual int GetInt(int colomn) const = 0;
-        virtual unsigned int GetUint(int colomn) const = 0;
-        virtual long long GetInt64(int colomn) const = 0;
-        virtual unsigned long long GetUint64(int colomn) const = 0;
+        virtual Int8 GetInt8(int colomn) const = 0;
+        virtual Uint8 GetUint8(int colomn) const = 0;
+        virtual Int16 GetInt16(int colomn) const = 0;
+        virtual Uint16 GetUint16(int colomn) const = 0;
+        virtual Int32 GetInt32(int colomn) const = 0;
+        virtual Uint32 GetUint32(int colomn) const = 0;
+        virtual Int64 GetInt64(int colomn) const = 0;
+        virtual Uint64 GetUint64(int colomn) const = 0;
         virtual float GetFloat(int colomn) const = 0;
         virtual double GetDouble(int colomn) const = 0;
         virtual std::string GetString(int colomn) const = 0;
