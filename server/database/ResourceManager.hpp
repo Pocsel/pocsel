@@ -9,7 +9,7 @@ namespace Common {
 
 namespace Tools { namespace Database {
 
-    class IConnectionPool;
+    class IConnection;
 
 }}
 
@@ -26,7 +26,7 @@ namespace Server { namespace Database {
     {
     private:
         Server& _server;
-        Tools::Database::IConnectionPool* _connectionPool;
+        Tools::Database::IConnection* _connection;
         std::unordered_map<std::string, Uint32> _ids;
         std::vector<Common::Resource*> _resources;
         std::map<Uint32, std::vector<Uint32>> _idsByVersion;
@@ -44,7 +44,7 @@ namespace Server { namespace Database {
         std::vector<Uint32> GetNeededResourceIds(Uint32 fromVersion) const;
 
         // Réservé à la construction des merdes de base, et au thread clientManagement
-        Tools::Database::IConnectionPool& GetConnectionPool() { return *this->_connectionPool; }
+        Tools::Database::IConnection& GetConnection() { return *this->_connection; }
     };
 
 }}

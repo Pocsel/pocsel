@@ -1,3 +1,5 @@
+#include "server/precompiled.hpp"
+
 #include "server/game/map/Map.hpp"
 #include "server/game/map/ChunkManager.hpp"
 
@@ -8,9 +10,7 @@
 
 #include "tools/SimpleMessageQueue.hpp"
 
-#include "tools/database/IConnectionPool.hpp"
 #include "tools/database/IConnection.hpp"
-
 #include "tools/database/sqlite/Connection.hpp"
 
 #include "server/constants.hpp"
@@ -84,22 +84,16 @@ namespace Server { namespace Game { namespace Map {
     {
         std::cout << "MapSave\n";
 
-        auto conn = this->_game.GetServer().GetResourceManager().GetConnectionPool().GetConnection();
-        {
-            auto& curs = conn->GetCursor();
+        auto& conn = this->_game.GetServer().GetResourceManager().GetConnection();
+        conn.CreateQuery("UPDATE map SET tick = ? WHERE name = ?")->Bind(this->_currentTime).Bind(this->_conf.name).ExecuteNonSelect();
 
-            curs.Execute(
-                    "UPDATE map SET tick = ? WHERE name = ?"
-                    ).Bind(this->_currentTime).Bind(this->_conf.name);
-        }
-
-        this->_chunkManager->Save(*conn);
-        this->_engine->Save(*conn);
+        this->_chunkManager->Save(conn);
+        this->_engine->Save(conn);
     }
 
-    std::shared_ptr<Tools::Database::IConnection> Map::GetConnection()
+    Tools::Database::IConnection& Map::GetConnection()
     {
-        return this->_game.GetServer().GetResourceManager().GetConnectionPool().GetConnection();
+        return this->_game.GetServer().GetResourceManager().GetConnection();
     }
 
     void Map::HandleNewChunk(Chunk* chunk)

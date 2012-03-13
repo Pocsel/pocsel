@@ -1,8 +1,9 @@
+#include "server/precompiled.hpp"
+
 #include "server/game/map/ChunkManager.hpp"
 #include "server/game/map/Map.hpp"
 
 #include "tools/database/IConnection.hpp"
-#include "tools/database/IValue.hpp"
 
 #include "tools/zlib/Worker.hpp"
 
@@ -37,8 +38,6 @@ namespace Server { namespace Game { namespace Map {
 
     void ChunkManager::Save(Tools::Database::IConnection& conn)
     {
-        auto& curs = conn.GetCursor();
-
         std::vector<Chunk::IdType> ids;
 
         for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite; ++it)
@@ -58,19 +57,12 @@ namespace Server { namespace Game { namespace Map {
         for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
             this->_DeflateBigChunk(*it);
 
-        std::string query = Tools::ToString("REPLACE INTO ") + this->_map.GetName() +
-            "_bigchunk (id, data) VALUES (?, ?)";
+        auto query = conn.CreateQuery(Tools::ToString("REPLACE INTO ") + this->_map.GetName() + "_bigchunk (id, data) VALUES (?, ?)");
 
-        curs.Execute("BEGIN");
+        conn.BeginTransaction();
 
         for (auto it = this->_deflatedBigChunks.begin(), ite = this->_deflatedBigChunks.end(); it != ite; ++it)
-        {
-            Tools::Database::Blob blob(it->second->GetData(), it->second->GetSize());
-            curs.Execute(
-                    query)
-                .Bind(it->first)
-                .Bind(blob);
-        }
+            query->Bind(it->first).Bind((void const*)it->second->GetData(), it->second->GetSize()).ExecuteNonSelect().Reset();
 
 //        curs.Execute("COMMIT");
 
@@ -87,7 +79,7 @@ namespace Server { namespace Game { namespace Map {
 //                .Bind(it->first)
 //                .Bind(blob);
 //        }
-        curs.Execute("COMMIT");
+        conn.EndTransaction();
     }
 
 //    void ChunkManager::LoadExistingChunks(std::vector<Chunk::IdType> const& ids)
@@ -277,17 +269,13 @@ namespace Server { namespace Game { namespace Map {
 
         id = BigChunk::GetId(id);
 
-        auto conn = this->_map.GetConnection();
+        auto& conn = this->_map.GetConnection();
 
-        auto& curs = conn->GetCursor();
+        auto query = conn.CreateQuery("SELECT data FROM " + this->_map.GetName() + "_bigchunk WHERE id = ?");
+        query->Bind(id);
 
-        std::string query = "SELECT data FROM ";
-        query += this->_map.GetName() + "_bigchunk";
-        query += " WHERE id = ?";
-        curs.Execute(query.c_str()).Bind(id);
-
-        auto& row = curs.FetchOne();
-        Tools::Database::Blob b = row[0].GetBlob();
+        auto row = query->Fetch();
+        auto b = row->GetArray(0);
 
 
         char* inflatedData;
@@ -295,7 +283,7 @@ namespace Server { namespace Game { namespace Map {
 
         Tools::Zlib::Worker w(6);
 
-        w.Inflate(b.data, b.size, (void*&)inflatedData, inflatedDataSize);
+        w.Inflate((void const*)b.data(), b.size(), (void*&)inflatedData, inflatedDataSize);
 
 
         Tools::ByteArray bigChunk;

@@ -73,7 +73,7 @@ namespace Server { namespace Game { namespace Map {
         Engine::Engine& GetEngine() { return *this->_engine; }
         Game& GetGame() { return this->_game; }
 
-        std::shared_ptr<Tools::Database::IConnection> GetConnection();
+        Tools::Database::IConnection& GetConnection();
 
         // threadsafe
         void HandleNewChunk(Chunk* chunk);

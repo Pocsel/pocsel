@@ -1,3 +1,5 @@
+#include "server/precompiled.hpp"
+
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/EntityStorage.hpp"
 #include "server/game/engine/Engine.hpp"
@@ -34,18 +36,18 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::Save(Tools::Database::IConnection& conn)
     {
-        auto& curs = conn.GetCursor();
         Tools::log << this->_engine.GetMap().GetName() << "_entity\n";
-        curs.Execute("DELETE FROM " + this->_engine.GetMap().GetName() + "_entity");
-        //curs.Execute("BEGIN");
+        conn.CreateQuery("DELETE FROM " + this->_engine.GetMap().GetName() + "_entity")->ExecuteNonSelect();
+
+        conn.BeginTransaction();
+        auto query = conn.CreateQuery("INSERT INTO " + this->_engine.GetMap().GetName() + "_entity (id, type, storage) VALUES (?, ?, ?)");
         auto it = this->_entities.begin();
         auto itEnd = this->_entities.end();
         for (; it != itEnd; ++it)
         {
             try
             {
-                curs.Execute("INSERT INTO " + this->_engine.GetMap().GetName() + "_entity (id, type, storage) VALUES (?, ?, ?)")
-                    .Bind(it->first).Bind(it->second->type->name).Bind(this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->self["storage"]));
+                query->Bind(it->first).Bind(it->second->type->name).Bind(this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->self["storage"])).ExecuteNonSelect().Reset();
             }
             catch (std::exception& e)
             {
@@ -53,7 +55,7 @@ namespace Server { namespace Game { namespace Engine {
                     << it->second->type->name << "\"): " << e.what() << std::endl;
             }
         }
-        //curs.Execute("COMMIT");
+        conn.EndTransaction();
     }
 
     void EntityManager::BeginPluginRegistering(Uint32 pluginId)

@@ -1,62 +1,54 @@
-#include "tools/database/DatabaseError.hpp"
+#include "tools/precompiled.hpp"
+
+#include <sqlite3.h>
 #include "tools/database/sqlite/Connection.hpp"
-#include "tools/database/sqlite/Cursor.hpp"
+#include "tools/database/sqlite/Query.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {
 
-    Connection::Connection(const char* filename) : _db(0), _cursors()
+    Connection::Connection(std::string const& settings)
     {
-        int res = ::sqlite3_open(filename, &this->_db);
-        if (res != 0)
+        if (sqlite3_open(settings.c_str(), &this->_sqliteDb) != SQLITE_OK)
         {
-            std::string msg(::sqlite3_errmsg(this->_db));
-            ::sqlite3_close(this->_db);
-            this->_db = 0;
-            throw Tools::Database::DatabaseError(
-                "Cannot open '" + std::string(filename) + "': " + msg
-            );
+            std::string msg(sqlite3_errmsg(this->_sqliteDb));
+            sqlite3_close(this->_sqliteDb);
+            this->_sqliteDb = 0;
+            throw std::runtime_error("Cannot open sqlite database (settings: '" + settings + "'): " + msg);
         }
-    }
-
-    Connection::Connection(Connection const& conn) : _db(conn._db), _cursors() {}
-
-    Connection& Connection::operator =(Connection const& conn)
-    {
-        if (this != &conn)
-        {
-            this->_db = conn._db;
-            // We do not copy cursors, since life of first connection object matters
-        }
-        return *this;
+        this->_beginTransaction = this->CreateQuery("BEGIN").release();
+        this->_endTransaction = this->CreateQuery("COMMIT").release();
     }
 
     Connection::~Connection()
     {
-        this->Close();
+        Tools::Delete(this->_beginTransaction);
+        Tools::Delete(this->_endTransaction);
+        if (this->_sqliteDb != 0)
+            if (sqlite3_close(this->_sqliteDb) != SQLITE_OK)
+                throw std::runtime_error("Cannot close sqlite database");
+        this->_sqliteDb = 0;
     }
 
-    void Connection::Close()
+    std::unique_ptr<IQuery> Connection::CreateQuery(std::string const& request)
     {
-        std::list<Tools::Database::ICursor*>::iterator it = this->_cursors.begin(),
-                                          end = this->_cursors.end();
-        for (; it != end; ++it)
-            delete (*it);
-        this->_cursors.clear();
-        if (this->_db != 0)
-            ::sqlite3_close(this->_db);
-        this->_db = 0;
+        return std::unique_ptr<IQuery>(new Query(*this, request));
     }
 
-    ::Tools::Database::ICursor& Connection::GetCursor()
+    void Connection::BeginTransaction()
     {
-        ::Tools::Database::ICursor* curs = new Cursor(this->_db);
-        this->_cursors.push_back(curs);
-        return *curs;
+        this->_beginTransaction->ExecuteNonSelect();
     }
 
-    void Connection::Commit()
+    void Connection::EndTransaction()
     {
+        this->_endTransaction->ExecuteNonSelect();
+    }
 
+    bool Connection::HasTable(std::string const& table)
+    {
+        auto query = this->CreateQuery("SELECT 1 FROM sqlite_master WHERE name = ?");
+        query->Bind(table);
+        return query->Fetch().get() != 0;
     }
 
 }}}
