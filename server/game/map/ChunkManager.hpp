@@ -45,10 +45,51 @@ namespace Server { namespace Game { namespace Map {
         void AddChunk(std::unique_ptr<Chunk> chunk);
 
     private:
-        void _DeflateChunk(Chunk::IdType id);
-        void _InflateChunk(Chunk::IdType id);
-        void _ExtractFromDb(Chunk::IdType id);
-        void _DeflateBigChunk(BigChunk::IdType id);
+        // _chunks
+        // \/
+        void _MoveInflatedToDeflated(Chunk::IdType id);
+        // \/
+        // _deflatedChunks
+        // \/
+        void _MoveDeflatedToDeflatedBig(BigChunk::IdType id);
+        // \/
+        // _deflatedBigChunks
+        // \/
+        void _MoveDeflatedBigToDb(BigChunk::IdType id);
+        // \/
+        // _dbBigChunks
+
+        // _chunks
+        // ./\.
+        void _MoveDeflatedToInflated(Chunk::IdType id);
+        // ./\.
+        // _deflatedChunks
+        // ./\.
+        void _MoveDeflatedBigToDeflated(BigChunk::IdType id);
+        // ./\.
+        // _deflatedBigChunks
+        // ./\.
+        void _MoveDbToDeflatedBig(BigChunk::IdType id);
+        // ./\.
+        // _dbBigChunks
+
+        static Tools::ByteArray* _DeflateChunk(Chunk const& chunk);
+        static Chunk* _InflateChunk(Tools::ByteArray const& array);
+
+        static Tools::ByteArray* _DeflateBigChunk(Tools::ByteArray const& bigChunk);
+        static Tools::ByteArray* _InflateBigChunk(Tools::ByteArray const& array);
+
+        void _PushInflated(Chunk* chunk);
+        Chunk* _PopInflated(Chunk::IdType id);
+
+        void _PushDeflated(Chunk::IdType, Tools::ByteArray* array);
+        Tools::ByteArray* _PopDeflated(Chunk::IdType id);
+
+        void _PushDeflatedBig(BigChunk::IdType, Tools::ByteArray* array);
+        Tools::ByteArray* _PopDeflatedBig(BigChunk::IdType);
+
+        void _PushDb(BigChunk::IdType, Tools::ByteArray* array);
+        Tools::ByteArray* _PopDb(BigChunk::IdType);
     };
 
 }}}

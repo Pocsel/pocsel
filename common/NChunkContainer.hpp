@@ -15,6 +15,9 @@ namespace Common {
                 typedef typename Container::IdType IdType;
                 typedef typename Container::CoordType CoordType;
                 typedef typename Container::CoordsType CoordsType;
+                typedef typename Contained::IdType LittleIdType;
+                typedef typename Contained::CoordType LittleCoordType;
+                typedef typename Contained::CoordsType LittleCoordsType;
 
                 enum
                 {
@@ -90,6 +93,31 @@ namespace Common {
                 {
                     return this->_containedCount == countMax3;
                 }
+
+                std::vector<LittleIdType> GetContained()
+                {
+                    std::vector<LittleIdType> ids(this->_containedCount);
+
+                    IdType* resPtr = ids.data();
+
+                    for (IdType x = 0; x < countMax ; ++x)
+                    {
+                        for (IdType y = 0; y < countMax ; ++y)
+                        {
+                            for (IdType z = 0; z < countMax ; ++z)
+                            {
+                                if (this->_contained[x + y * countMax1 + z * countMax2])
+                                    *resPtr++ = this->id |
+                                        ((x) << (littleN)) |
+                                        ((y) << (Contained::pxMax + (littleN) * 2)) |
+                                        ((z) << (Contained::pxMax + Contained::pyMax + (littleN) * 3));
+                            }
+                        }
+                    }
+
+                    return ids;
+                }
+
 
             private:
                 unsigned int _GetIndex(IdType id)
