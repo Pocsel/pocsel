@@ -23,13 +23,13 @@ namespace Server { namespace Network {
     }
 
     void PacketExtractor::NeedChunks(Common::Packet const& p,
-                                     std::vector<Chunk::IdType>& ids)
+                                     std::vector<Game::Map::Chunk::IdType>& ids)
     {
-        unsigned int size = p.GetBytesLeft() / sizeof(Chunk::IdType);
+        unsigned int size = p.GetBytesLeft() / sizeof(Game::Map::Chunk::IdType);
 
         ids.resize(size);
 
-        Chunk::IdType* id = &ids[0];
+        Game::Map::Chunk::IdType* id = &ids[0];
 
         while (size)
         {
@@ -52,7 +52,7 @@ namespace Server { namespace Network {
         p.Read(offset);
     }
 
-    void PacketExtractor::GetCubeType(Common::Packet const& p, Chunk::CubeType& id)
+    void PacketExtractor::GetCubeType(Common::Packet const& p, Game::Map::Chunk::CubeType& id)
     {
         p.Read(id);
     }

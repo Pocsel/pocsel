@@ -3,7 +3,7 @@
 
 #include "common/BaseChunk.hpp"
 
-namespace Server {
+namespace Server { namespace Game { namespace Map {
 
     struct Chunk : public Common::BaseChunk
     {
@@ -11,6 +11,6 @@ namespace Server {
         explicit Chunk(CoordsType const& coords) : BaseChunk(coords) {}
     };
 
-}
+}}}
 
 #endif

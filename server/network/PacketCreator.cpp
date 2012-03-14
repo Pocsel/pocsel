@@ -19,7 +19,7 @@ namespace Server { namespace Network {
                                             std::string const& worldIdentifier /* = "" */,
                                             std::string const& worldName /* = "" */,
                                             Uint32 worldVersion /* = 0 */,
-                                            Chunk::CubeType nbCubeTypes /* = 0 */,
+                                            Game::Map::Chunk::CubeType nbCubeTypes /* = 0 */,
                                             std::string const& worldBuildHash /* = 0 */)
     {
         Common::Packet* p(new Common::Packet);
@@ -53,7 +53,7 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(p);
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::Chunk(::Server::Chunk const& chunk)
+    std::unique_ptr<Common::Packet> PacketCreator::Chunk(::Server::Game::Map::Chunk const& chunk)
     {
         Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::Chunk);

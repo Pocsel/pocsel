@@ -125,7 +125,7 @@ namespace Server { namespace ClientManagement {
         Tools::log << "Client logged in: " << login2 << "\n";
     }
 
-    void ClientManager::ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids)
+    void ClientManager::ClientNeedChunks(Client& client, std::vector<Game::Map::Chunk::IdType> const& ids)
     {
         Game::Game::ChunkPacketCallback
             callback(std::bind(&ClientManager::SendPacket, this, client.id, std::placeholders::_1));

@@ -1,7 +1,7 @@
 #ifndef __SERVER_NETWORK_PACKETCREATOR_HPP__
 #define __SERVER_NETWORK_PACKETCREATOR_HPP__
 
-#include "server/Chunk.hpp"
+#include "server/game/map/Chunk.hpp"
 
 namespace Common{
 
@@ -23,12 +23,12 @@ namespace Server { namespace Network {
                                         std::string const& worldIdentifier = "",
                                         std::string const& worldName = "",
                                         Uint32 worldVersion = 0,
-                                        Chunk::CubeType nbCubeTypes = 0,
+                                        Game::Map::Chunk::CubeType nbCubeTypes = 0,
                                         std::string const& worldBuildHash = "");
 
         static std::unique_ptr<Common::Packet> Ping(Uint64 timestamp);
 
-        static std::unique_ptr<Common::Packet> Chunk(::Server::Chunk const& chunk);
+        static std::unique_ptr<Common::Packet> Chunk(::Server::Game::Map::Chunk const& chunk);
 
         static std::unique_ptr<Common::Packet> NeededResourceIds(std::vector<Uint32>& ids,
                                                  Uint32& offset);

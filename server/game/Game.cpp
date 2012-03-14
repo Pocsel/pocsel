@@ -108,7 +108,7 @@ namespace Server { namespace Game {
         this->_messageQueue.PushMessage(m);
     }
 
-    void Game::GetChunkPacket(Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback)
+    void Game::GetChunkPacket(Map::Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Game::_GetChunkPacket, this, id, clientId, callback));
@@ -156,7 +156,7 @@ namespace Server { namespace Game {
         this->_server.GetClientManager().ClientTeleport(id, std::cref(map->GetName()), position);
     }
 
-    void Game::_GetChunkPacket(Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback)
+    void Game::_GetChunkPacket(Map::Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback)
     {
         auto it = this->_players.find(clientId);
         if (it == this->_players.end())

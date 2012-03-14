@@ -64,7 +64,7 @@ namespace Server { namespace Database {
                 conf.cubeTypes = &world._cubeTypes;
                 Uint64 curTime = row->GetUint64(2);
 
-                std::vector<Chunk::IdType> existingChunks;
+                std::vector<Game::Map::Chunk::IdType> existingChunks;
 
 //                {
 //                    auto coconn = manager.GetConnectionPool().GetConnection();
@@ -77,7 +77,7 @@ namespace Server { namespace Database {
 //                    }
 //                }
 
-                std::vector<Chunk::IdType> existingBigChunks;
+                std::vector<Game::Map::Chunk::IdType> existingBigChunks;
 
                 auto q = conn.CreateQuery("SELECT id FROM " + row->GetString(0) + "_bigchunk");
                 while (auto r = q->Fetch())

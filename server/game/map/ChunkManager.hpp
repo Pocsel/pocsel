@@ -2,7 +2,7 @@
 #define __SERVER_GAME_MAP_CHUNKMANAGER_HPP__
 
 #include "tools/ByteArray.hpp"
-#include "server/Chunk.hpp"
+#include "server/game/map/Chunk.hpp"
 #include "server/game/map/BigChunk.hpp"
 
 namespace Tools { namespace Database {

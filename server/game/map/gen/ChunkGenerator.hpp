@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_MAP_GEN_CHUNKGENERATOR_HPP__
 #define __SERVER_GAME_MAP_GEN_CHUNKGENERATOR_HPP__
 
-#include "server/Chunk.hpp"
+#include "server/game/map/Chunk.hpp"
 
 namespace Tools {
 
