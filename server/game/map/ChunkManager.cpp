@@ -85,6 +85,8 @@ namespace Server { namespace Game { namespace Map {
                     }
                     this->_MoveDeflatedBigToDeflated(BigChunk::GetId(id));
                 }
+                if (this->_deflatedChunks.count(id) == 0)
+                    return 0;
                 this->_MoveDeflatedToInflated(id);
             }
         }

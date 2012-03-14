@@ -37,7 +37,6 @@ namespace Server { namespace Game { namespace Map {
         ~ChunkManager();
 
         void Save(Tools::Database::IConnection& conn);
-//        void LoadExistingChunks(std::vector<Chunk::IdType> const& ids);
 
         Chunk* GetChunk(Chunk::IdType id);
         std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);
