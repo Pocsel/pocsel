@@ -17,6 +17,7 @@ namespace Server { namespace Game { namespace Engine {
 
     class EventManager;
     class EntityManager;
+    class CallbackManager;
 
     class Engine :
         private boost::noncopyable
@@ -26,6 +27,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Interpreter* _interpreter;
         EventManager* _eventManager;
         EntityManager* _entityManager;
+        CallbackManager* _callbackManager;
         Uint64 _currentTime;
 
     public:
@@ -35,6 +37,7 @@ namespace Server { namespace Game { namespace Engine {
         void Save(Tools::Database::IConnection& conn);
         EventManager& GetEventManager() { return *this->_eventManager; }
         EntityManager& GetEntityManager() { return *this->_entityManager; }
+        CallbackManager& GetCallbackManager() { return *this->_callbackManager; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }

@@ -101,6 +101,10 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
+    void EntityManager::TriggerCallback(CallbackManager::Callback const& callback)
+    {
+    }
+
     void EntityManager::CallEntityFunction(int entityId, std::string function, Tools::Lua::Ref const& args)
     {
         auto it = this->_entities.find(entityId);

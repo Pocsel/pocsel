@@ -19,14 +19,33 @@ namespace Server { namespace Game { namespace Map {
         private boost::noncopyable
     {
     private:
+        struct ChunkValue
+        {
+            float value;
+            Chunk::IdType id;
+
+            ChunkValue(float v, Chunk::IdType i) :
+                value(v), id(i)
+            {
+            }
+            bool operator< (ChunkValue const& right)
+            {
+                return this->value < right.value;
+            }
+        };
+    private:
         Map& _map;
 
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
+        std::unordered_map<BigChunk::IdType, BigChunk> _inflatedChunksContainers;
+        std::list<Chunk::IdType> _inflatedValues;
 
         std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedChunks;
         std::unordered_map<BigChunk::IdType, BigChunk> _deflatedChunksContainers;
+        std::list<BigChunk::IdType> _deflatedValues;
 
         std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedBigChunks;
+        std::list<BigChunk::IdType> _deflatedBigValues;
 
         std::unordered_set<Chunk::IdType> _dbBigChunks;
 
@@ -37,7 +56,6 @@ namespace Server { namespace Game { namespace Map {
         ~ChunkManager();
 
         void Save(Tools::Database::IConnection& conn);
-//        void LoadExistingChunks(std::vector<Chunk::IdType> const& ids);
 
         Chunk* GetChunk(Chunk::IdType id);
         std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);
