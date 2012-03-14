@@ -55,7 +55,7 @@ namespace Server { namespace ClientManagement {
         void _HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet const& packet)
         {
             Tools::debug << "_HandleNeedChunks (client " << client.id << ")\n";
-            std::vector<Chunk::IdType> ids;
+            std::vector<Game::Map::Chunk::IdType> ids;
             Network::PacketExtractor::NeedChunks(packet, ids);
 
             manager.ClientNeedChunks(client, ids);
@@ -92,7 +92,7 @@ namespace Server { namespace ClientManagement {
         void _HandleGetCubeType(ClientManager& manager, Client& client, Common::Packet const& packet)
         {
             Tools::debug << "_HandleGetCubeType (client " << client.id << ")\n";
-            Chunk::CubeType id;
+            Game::Map::Chunk::CubeType id;
             Network::PacketExtractor::GetCubeType(packet, id);
 
             Game::World const& world = manager.GetServer().GetGame().GetWorld();

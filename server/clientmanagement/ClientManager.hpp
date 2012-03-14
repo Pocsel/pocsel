@@ -1,7 +1,7 @@
 #ifndef __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 #define __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 
-#include "server/Chunk.hpp"
+#include "server/game/map/Chunk.hpp"
 
 namespace Common {
 
@@ -72,7 +72,7 @@ namespace Server { namespace ClientManagement {
         Database::ResourceManager const& GetResourceManager() const;
         Server& GetServer() { return this->_server; }
         void ClientLogin(Client& client, std::string const& login);
-        void ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids);
+        void ClientNeedChunks(Client& client, std::vector<Game::Map::Chunk::IdType> const& ids);
         void ClientSpawn(Client& client, Uint32 viewDistance, std::string const& playerName);
         void ClientTeleportOk(Client& client);
 

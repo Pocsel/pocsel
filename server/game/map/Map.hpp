@@ -3,7 +3,7 @@
 
 #include "server/game/map/Conf.hpp"
 
-#include "server/Chunk.hpp"
+#include "server/game/map/Chunk.hpp"
 #include "server/game/map/BigChunk.hpp"
 
 namespace Common {

@@ -15,6 +15,9 @@ namespace Common {
                 typedef typename Container::IdType IdType;
                 typedef typename Container::CoordType CoordType;
                 typedef typename Container::CoordsType CoordsType;
+                typedef typename Contained::IdType LittleIdType;
+                typedef typename Contained::CoordType LittleCoordType;
+                typedef typename Contained::CoordsType LittleCoordsType;
 
                 enum
                 {
@@ -61,7 +64,7 @@ namespace Common {
                 {
                 }
 
-                void AddChunk(IdType id)
+                void AddChunk(LittleIdType id)
                 {
                     unsigned int index = _GetIndex(id);
 
@@ -70,7 +73,7 @@ namespace Common {
                     ++this->_containedCount;
                 }
 
-                void RemoveChunk(IdType id)
+                void RemoveChunk(LittleIdType id)
                 {
                     assert((id & idMask) == this->id && "This chunk does not fit here");
 
@@ -91,8 +94,38 @@ namespace Common {
                     return this->_containedCount == countMax3;
                 }
 
+                bool HasChunk(LittleIdType id)
+                {
+                    return this->_contained[_GetIndex(id)];
+                }
+
+                std::vector<LittleIdType> GetContained()
+                {
+                    std::vector<LittleIdType> ids(this->_containedCount);
+
+                    IdType* resPtr = ids.data();
+
+                    for (LittleIdType x = 0; x < countMax ; ++x)
+                    {
+                        for (LittleIdType y = 0; y < countMax ; ++y)
+                        {
+                            for (LittleIdType z = 0; z < countMax ; ++z)
+                            {
+                                if (this->_contained[x + y * countMax1 + z * countMax2])
+                                    *resPtr++ = this->id |
+                                        ((x) << (littleN)) |
+                                        ((y) << (Contained::pxMax + (littleN) * 2)) |
+                                        ((z) << (Contained::pxMax + Contained::pyMax + (littleN) * 3));
+                            }
+                        }
+                    }
+
+                    return ids;
+                }
+
+
             private:
-                unsigned int _GetIndex(IdType id)
+                unsigned int _GetIndex(LittleIdType id)
                 {
                     assert((id & NChunk<bigN>::idMask) == this->id && "This chunk does not fit here!");
 

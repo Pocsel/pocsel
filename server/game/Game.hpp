@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_GAME_HPP__
 #define __SERVER_GAME_GAME_HPP__
 
-#include "server/Chunk.hpp"
+#include "server/game/map/Chunk.hpp"
 
 namespace Common {
     struct Position;
@@ -55,13 +55,13 @@ namespace Server { namespace Game {
         // Thread safe
         void SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);
         void PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
-        void GetChunkPacket(Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback);
+        void GetChunkPacket(Map::Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback);
         void RemovePlayer(Uint32 clientId);
 
     private:
         void _SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);
         void _PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
-        void _GetChunkPacket(Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback);
+        void _GetChunkPacket(Map::Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback);
         void _RemovePlayer(Uint32 clientId);
     };
 

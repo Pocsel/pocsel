@@ -16,13 +16,13 @@ namespace Common {
         CubeType* _cubes;
 
     public:
-        BaseChunk(IdType id) :
+        explicit BaseChunk(IdType id) :
             NChunk<0>(id),
             _cubes(0)
         {
         }
 
-        BaseChunk(CoordsType const& c) :
+        explicit BaseChunk(CoordsType const& c) :
             NChunk<0>(c),
             _cubes(0)
         {

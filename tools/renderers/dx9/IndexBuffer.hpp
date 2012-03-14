@@ -9,12 +9,13 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
     private:
         DX9Renderer& _renderer;
+        IDirect3DIndexBuffer9* _indexBuffer;
 
     public:
         IndexBuffer(DX9Renderer& renderer);
         virtual ~IndexBuffer();
 
-        virtual void SetData(std::size_t size, void const* data);
+        virtual void SetData(DataType::Type indicesType, std::size_t size, void const* data);
         virtual void SetSubData(std::size_t offset, std::size_t size, void const* data);
 
         virtual void Bind();

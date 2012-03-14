@@ -1,7 +1,7 @@
 #ifndef __SERVER_NETWORK_PACKETEXTRACTOR_HPP__
 #define __SERVER_NETWORK_PACKETEXTRACTOR_HPP__
 
-#include "server/Chunk.hpp"
+#include "server/game/map/Chunk.hpp"
 #include "protocol/protocol.hpp"
 
 namespace Common {
@@ -24,7 +24,7 @@ namespace Server { namespace Network {
                          Uint64& timestamp);
 
         static void NeedChunks(Common::Packet const& p,
-                               std::vector<Chunk::IdType>& ids);
+                               std::vector<Game::Map::Chunk::IdType>& ids);
 
         static void GetNeededResourceIds(Common::Packet const& p,
                                          Uint32& version);
@@ -34,7 +34,7 @@ namespace Server { namespace Network {
                                      Uint32& offset);
 
         static void GetCubeType(Common::Packet const& p,
-                                Chunk::CubeType& id);
+                                Game::Map::Chunk::CubeType& id);
 
         static void Settings(Common::Packet const& p,
                              Uint32& viewDistance,

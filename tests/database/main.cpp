@@ -28,13 +28,13 @@ int main()
         conn->EndTransaction();
 
         auto it = conn->CreateQuery("SELECT id, login, password, (SELECT 1) FROM users");
-        //while (auto ptr = it->Fetch())
-        //    Tools::log
-        //        << std::setw(2) << ptr->GetInt(0)
-        //        << std::setw(6) << ptr->GetString(1)
-        //        << std::setw(6) << ptr->GetString(2)
-        //        << std::setw(2) << ptr->GetInt(3)
-        //        << std::endl;
+        while (auto ptr = it->Fetch())
+            Tools::log
+                << std::setw(2) << ptr->GetInt32(0)
+                << std::setw(6) << ptr->GetString(1)
+                << std::setw(6) << ptr->GetString(2)
+                << std::setw(2) << ptr->GetInt32(3)
+                << std::endl;
 
         for (int i = 0; i < 50; ++i)
             query2->Bind(std::rand()).Bind(Tools::ToString(std::rand())).ExecuteNonSelect().Reset();
