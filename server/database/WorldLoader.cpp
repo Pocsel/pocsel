@@ -31,7 +31,7 @@ namespace Server { namespace Database {
             auto row = query->Fetch();
             world._identifier = row->GetString(0);
             world._fullname = row->GetString(1);
-            world._version = row->GetInt(2);
+            world._version = row->GetUint32(2);
             world._buildHash = row->GetString(3);
         }
         else
@@ -41,7 +41,7 @@ namespace Server { namespace Database {
         query = conn.CreateQuery("SELECT id, plugin_id, name, lua FROM cube_type");
         while (auto row = query->Fetch())
         {
-            Uint32 id = row->GetUint(0);
+            Uint32 id = row->GetUint32(0);
             std::string name = row->GetString(2);
             Log::load << "Load cube type id: " << id <<
                           ", plugin_id: " << row->GetUint64(1) <<
@@ -103,7 +103,7 @@ namespace Server { namespace Database {
         {
             try
             {
-                world.GetPluginManager().AddPlugin(row->GetUint(0), row->GetString(1), row->GetString(2));
+                world.GetPluginManager().AddPlugin(row->GetUint32(0), row->GetString(1), row->GetString(2));
             }
             catch (std::exception& e)
             {
@@ -122,7 +122,7 @@ namespace Server { namespace Database {
                 auto itMapEnd = world._maps.end();
                 for (; itMap != itMapEnd; ++itMap)
                 {
-                    itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row->GetUint(0));
+                    itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row->GetUint32(0));
                     itMap->second->GetEngine().GetInterpreter().DoString(row->GetString(2));
                     itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
                 }

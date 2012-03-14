@@ -18,16 +18,16 @@ namespace Server { namespace Database {
     {
         this->_connection = new Tools::Database::Sqlite::Connection(server.GetSettings().worldFile.string());
 
-        size_t nbResources = this->_connection->CreateQuery("SELECT count(*) FROM resource")->Fetch()->GetInt(0) + 1;
-        if (nbResources <= 1)
+        Uint32 nbResources = this->_connection->CreateQuery("SELECT count(*) FROM resource")->Fetch()->GetUint32(0);
+        if (nbResources == 0)
             Tools::error << "No resource found on the server !\n";
-        this->_resources.resize(nbResources);
+        this->_resources.resize(nbResources + 1);
         auto query = this->_connection->CreateQuery("SELECT id, plugin_id, version, type, filename, data FROM resource");
         while (auto row = query->Fetch())
         {
-            Uint32 id = row->GetInt(0);
-            Uint32 plugin_id = row->GetInt(1);
-            Uint32 version = row->GetInt(2);
+            Uint32 id = row->GetUint32(0);
+            Uint32 plugin_id = row->GetUint32(1);
+            Uint32 version = row->GetUint32(2);
             std::string type = row->GetString(3);
             std::string filename = row->GetString(4);
             auto data = row->GetArray(5);

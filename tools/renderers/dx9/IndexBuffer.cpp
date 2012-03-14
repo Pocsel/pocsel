@@ -14,7 +14,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
     }
 
-    void IndexBuffer::SetData(std::size_t size, void const* data)
+    void IndexBuffer::SetData(DataType::Type indicesType, std::size_t size, void const* data)
     {
     }
 

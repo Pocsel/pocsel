@@ -16,14 +16,14 @@ namespace Tools { namespace Database { namespace Sqlite {
         Query(Connection& connection, std::string const& request);
         virtual ~Query();
 
-        virtual IQuery& Bind(char val);
-        virtual IQuery& Bind(unsigned char val);
-        virtual IQuery& Bind(short val);
-        virtual IQuery& Bind(unsigned short val);
-        virtual IQuery& Bind(int val);
-        virtual IQuery& Bind(unsigned int val);
-        virtual IQuery& Bind(long long val);
-        virtual IQuery& Bind(unsigned long long val);
+        virtual IQuery& Bind(Int8 val);
+        virtual IQuery& Bind(Uint8 val);
+        virtual IQuery& Bind(Int16 val);
+        virtual IQuery& Bind(Uint16 val);
+        virtual IQuery& Bind(Int32 val);
+        virtual IQuery& Bind(Uint32 val);
+        virtual IQuery& Bind(Int64 val);
+        virtual IQuery& Bind(Uint64 val);
         virtual IQuery& Bind(float val);
         virtual IQuery& Bind(double val);
         virtual IQuery& Bind(std::string const& val);

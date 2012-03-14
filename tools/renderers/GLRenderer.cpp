@@ -103,7 +103,7 @@ namespace Tools { namespace Renderers {
 
     std::unique_ptr<IIndexBuffer> GLRenderer::CreateIndexBuffer()
     {
-        return std::unique_ptr<IIndexBuffer>(new OpenGL::IndexBuffer());
+        return std::unique_ptr<IIndexBuffer>(new OpenGL::IndexBuffer(*this));
     }
 
     std::unique_ptr<ITexture2D> GLRenderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData)
@@ -194,6 +194,8 @@ namespace Tools { namespace Renderers {
     void GLRenderer::DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode)
     {
         this->UpdateCurrentParameters();
+        if (indices == 0 && this->bindedIndexBuffer != 0)
+            indicesType = this->bindedIndexBuffer->GetType();
         GLCHECK(::glDrawElements(OpenGL::GetDrawingMode(mode), count, OpenGL::GetTypeFromDataType(indicesType), indices));
     }
 

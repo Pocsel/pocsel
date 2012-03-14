@@ -15,14 +15,14 @@ namespace Tools { namespace Database { namespace Sqlite {
     public:
         Row(Connection& connection, Query& query);
 
-        virtual char GetChar(int colomn) const;
-        virtual unsigned char GetUchar(int colomn) const;
-        virtual short GetInt16(int colomn) const;
-        virtual unsigned short GetUint16(int colomn) const;
-        virtual int GetInt(int colomn) const;
-        virtual unsigned int GetUint(int colomn) const;
-        virtual long long GetInt64(int colomn) const;
-        virtual unsigned long long GetUint64(int colomn) const;
+        virtual Int8 GetInt8(int colomn) const;
+        virtual Uint8 GetUint8(int colomn) const;
+        virtual Int16 GetInt16(int colomn) const;
+        virtual Uint16 GetUint16(int colomn) const;
+        virtual Int32 GetInt32(int colomn) const;
+        virtual Uint32 GetUint32(int colomn) const;
+        virtual Int64 GetInt64(int colomn) const;
+        virtual Uint64 GetUint64(int colomn) const;
         virtual float GetFloat(int colomn) const;
         virtual double GetDouble(int colomn) const;
         virtual std::string GetString(int colomn) const;

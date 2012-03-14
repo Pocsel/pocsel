@@ -33,7 +33,7 @@ namespace Client { namespace Resources {
         {
             auto query = this->_connection->CreateQuery("SELECT version FROM cache");
             if (auto ptr = query->Fetch())
-                this->_cacheVersion = ptr->GetInt(0);
+                this->_cacheVersion = ptr->GetUint32(0);
             else
                 throw std::runtime_error("Corrupted cache");
         }
@@ -62,7 +62,7 @@ namespace Client { namespace Resources {
                 auto query = conn.CreateQuery("SELECT format_version, world_build_hash FROM cache");
                 if (auto row = query->Fetch())
                 {
-                    if (row->GetInt(0) != CacheFormatVersion)
+                    if (row->GetUint32(0) != CacheFormatVersion)
                         throw std::runtime_error("bad version");
                     else if (row->GetString(1) != this->_worldBuildHash)
                         throw std::runtime_error("server rebuilt world");
@@ -108,8 +108,8 @@ namespace Client { namespace Resources {
             {
                 auto arr = row->GetArray(4);
                 return std::unique_ptr<Common::Resource>(new Common::Resource(
-                        row->GetInt(0),
-                        row->GetInt(1),
+                        row->GetUint32(0),
+                        row->GetUint32(1),
                         row->GetString(2),
                         row->GetString(3),
                         arr.data(),
@@ -132,7 +132,7 @@ namespace Client { namespace Resources {
             auto query = this->_connection->CreateQuery("SELECT id FROM resource WHERE plugin_id = ? AND filename = ?");
             query->Bind(pluginId).Bind(filename);
             if (auto row = query->Fetch())
-                return row->GetInt(0);
+                return row->GetUint32(0);
             else
                 return 0;
         }

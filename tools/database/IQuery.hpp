@@ -9,14 +9,14 @@ namespace Tools { namespace Database {
     {
     public:
         virtual ~IQuery() {}
-        virtual IQuery& Bind(char val) = 0;
-        virtual IQuery& Bind(unsigned char val) = 0;
-        virtual IQuery& Bind(short val) = 0;
-        virtual IQuery& Bind(unsigned short val) = 0;
-        virtual IQuery& Bind(int val) = 0;
-        virtual IQuery& Bind(unsigned int val) = 0;
-        virtual IQuery& Bind(long long val) = 0;
-        virtual IQuery& Bind(unsigned long long val) = 0;
+        virtual IQuery& Bind(Int8 val) = 0;
+        virtual IQuery& Bind(Uint8 val) = 0;
+        virtual IQuery& Bind(Int16 val) = 0;
+        virtual IQuery& Bind(Uint16 val) = 0;
+        virtual IQuery& Bind(Int32 val) = 0;
+        virtual IQuery& Bind(Uint32 val) = 0;
+        virtual IQuery& Bind(Int64 val) = 0;
+        virtual IQuery& Bind(Uint64 val) = 0;
         virtual IQuery& Bind(float val) = 0;
         virtual IQuery& Bind(double val) = 0;
         virtual IQuery& Bind(std::string const& val) = 0;

@@ -10,42 +10,42 @@ namespace Tools { namespace Database { namespace Sqlite {
     {
     }
 
-    char Row::GetChar(int colomn) const
+    Int8 Row::GetInt8(int colomn) const
     {
         return sqlite3_column_int(this->_stmt, colomn);
     }
 
-    unsigned char Row::GetUchar(int colomn) const
+    Uint8 Row::GetUint8(int colomn) const
     {
         return sqlite3_column_int(this->_stmt, colomn);
     }
 
-    short Row::GetInt16(int colomn) const
+    Int16 Row::GetInt16(int colomn) const
     {
         return sqlite3_column_int(this->_stmt, colomn);
     }
 
-    unsigned short Row::GetUint16(int colomn) const
+    Uint16 Row::GetUint16(int colomn) const
     {
         return sqlite3_column_int(this->_stmt, colomn);
     }
 
-    int Row::GetInt(int colomn) const
+    Int32 Row::GetInt32(int colomn) const
     {
         return sqlite3_column_int(this->_stmt, colomn);
     }
 
-    unsigned int Row::GetUint(int colomn) const
+    Uint32 Row::GetUint32(int colomn) const
     {
         return sqlite3_column_int(this->_stmt, colomn);
     }
 
-    long long Row::GetInt64(int colomn) const
+    Int64 Row::GetInt64(int colomn) const
     {
         return sqlite3_column_int64(this->_stmt, colomn);
     }
 
-    unsigned long long Row::GetUint64(int colomn) const
+    Uint64 Row::GetUint64(int colomn) const
     {
         return sqlite3_column_int64(this->_stmt, colomn);
     }

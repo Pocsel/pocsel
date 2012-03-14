@@ -300,7 +300,7 @@ namespace Client { namespace Map {
                 continue;
             Mesh m;
             m.indices = renderer.CreateIndexBuffer().release();
-            m.indices->SetData(sizeof(unsigned int) * it->second.size(), it->second.data());
+            m.indices->SetData(Tools::Renderers::DataType::UnsignedInt, sizeof(unsigned int) * it->second.size(), it->second.data());
             m.nbIndices = (Uint32)it->second.size();
             this->_triangleCount += m.nbIndices / 3;
             this->_meshes[it->first] = std::move(m);
@@ -321,7 +321,7 @@ namespace Client { namespace Map {
             return;
         this->_vertices->Bind();
         m.indices->Bind();
-        renderer.DrawElements(m.nbIndices, Tools::Renderers::DataType::UnsignedInt, 0);
+        renderer.DrawElements(m.nbIndices);
         m.indices->Unbind();
         this->_vertices->Unbind();
     }

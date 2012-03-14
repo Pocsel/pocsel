@@ -11,7 +11,7 @@
 namespace Server { namespace Game { namespace Engine {
 
     EntityManager::EntityManager(Engine& engine) :
-        _engine(engine), _pluginIdForRegistering(0), _currentEntityId(0)
+        _engine(engine), _pluginIdForRegistering(0), _currentEntityId(0), _lastCalledEntityId(0)
     {
         Tools::debug << "EntityManager::EntityManager()\n";
         this->_engine.GetInterpreter().Globals()["Server"].Set("Entity", this->_engine.GetInterpreter().MakeTable());
@@ -62,7 +62,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         this->_pluginIdForRegistering = pluginId;
         this->_engine.GetInterpreter().Globals()["Server"]["Entity"].Set("Register",
-                this->_engine.GetInterpreter().MakeFunction(std::bind(&EntityManager::_Register, this, std::placeholders::_1)));
+                this->_engine.GetInterpreter().MakeFunction(std::bind(&EntityManager::_ApiRegister, this, std::placeholders::_1)));
     }
 
     void EntityManager::EndPluginRegistering()
@@ -111,6 +111,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         try
         {
+            this->_lastCalledEntityId = entityId;
             it->second->self.Set("id", entityId);
             it->second->type->type[function](it->second->type->type, it->second->self, args);
         }
@@ -122,9 +123,19 @@ namespace Server { namespace Game { namespace Engine {
         Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << entityId << ".\n";
     }
 
-    void EntityManager::_Register(Tools::Lua::CallHelper& helper)
+    int EntityManager::GetLastCalledEntityId() const
     {
-        assert(this->_pluginIdForRegistering != 0 && "_Register ne doit pas etre accessible en dehors de la phase d'enregistrement des entites");
+        return this->_lastCalledEntityId;
+    }
+
+    void EntityManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
+    {
+        // TODO paps
+    }
+
+    void EntityManager::_ApiRegister(Tools::Lua::CallHelper& helper)
+    {
+        assert(this->_pluginIdForRegistering != 0 && "_ApiRegister ne doit pas etre accessible en dehors de la phase d'enregistrement des entites");
         Tools::Lua::Ref t(this->_engine.GetInterpreter().GetState());
         try
         {
@@ -134,7 +145,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::_Register: " << e.what() << std::endl;
+            Tools::error << "EntityManager::_ApiRegister: " << e.what() << std::endl;
             return;
         }
         std::string name;
@@ -146,12 +157,12 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::_Register: Invalid entity name: " << e.what() << std::endl;
+            Tools::error << "EntityManager::_ApiRegister: Invalid entity name: " << e.what() << std::endl;
             return;
         }
         EntityType* type = new EntityType(name, this->_pluginIdForRegistering, t);
         this->_entityTypes[this->_pluginIdForRegistering][name] = type;
-        Tools::debug << "EntityManager::_Register: New entity type \"" << type->name << "\" registered (plugin " << type->pluginId << ").\n";
+        Tools::debug << "EntityManager::_ApiRegister: New entity type \"" << type->name << "\" registered (plugin " << type->pluginId << ").\n";
     }
 
 }}}
