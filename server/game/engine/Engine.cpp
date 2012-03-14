@@ -1,6 +1,7 @@
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EventManager.hpp"
 #include "server/game/engine/EntityManager.hpp"
+#include "server/game/engine/CallbackManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -16,6 +17,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
         auto serverNamespace = this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
         this->_interpreter->Globals().Set("S", serverNamespace);
+        this->_callbackManager = new CallbackManager(*this);
         this->_entityManager = new EntityManager(*this);
         this->_eventManager = new EventManager(*this);
     }
@@ -25,6 +27,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::debug << "Engine::~Engine()\n";
         Tools::Delete(this->_eventManager);
         Tools::Delete(this->_entityManager);
+        Tools::Delete(this->_callbackManager);
         Tools::Delete(this->_interpreter);
     }
 
