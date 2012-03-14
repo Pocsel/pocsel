@@ -96,15 +96,16 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Shutdown()
     {
+        if (this->_useShaders && --_cgGlobalNbReferences == 0)
+        {
+            cgDestroyContext(this->_cgContext);
+            cgD3D9SetDevice(0);
+            _cgGlobalContext = 0;
+        }
         if (this->_device != 0)
             this->_device->Release();
         if (this->_object != 0)
             this->_object->Release();
-        if (this->_useShaders && --_cgGlobalNbReferences == 0)
-        {
-            cgDestroyContext(this->_cgContext);
-            _cgGlobalContext = 0;
-        }
     }
 
     std::unique_ptr<IVertexBuffer> DX9Renderer::CreateVertexBuffer()

@@ -3,31 +3,45 @@
 
 #include "tools/renderers/dx9/directx.hpp"
 #include "tools/renderers/dx9/VertexBuffer.hpp"
+#include "tools/renderers/DX9Renderer.hpp"
 
 namespace Tools { namespace Renderers { namespace DX9 {
 
     VertexBuffer::VertexBuffer(DX9Renderer& renderer) :
         _renderer(renderer),
         _vertexBuffer(0),
-        _size(0)
+        _size(0),
+        _nbAttrib(0),
+        _stride(0),
+        _vertexDeclaration(0)
     {
     }
 
     VertexBuffer::~VertexBuffer()
     {
+        if (this->_vertexDeclaration)
+            this->_vertexDeclaration->Release();
         if (this->_vertexBuffer)
             this->_vertexBuffer->Release();
     }
 
     void VertexBuffer::PushVertexAttribute(DataType::Type type, VertexAttributeUsage::Type usage, Uint32 nbElements)
     {
-        //assert(this->_nbAttrib < MaxAttributes && "Too many vertex attributes");
-        //this->_attributes[this->_nbAttrib].location = usage;
-        //this->_attributes[this->_nbAttrib].offset = reinterpret_cast<GLvoid*>(this->_stride);
+        static D3DVERTEXELEMENT9 end = D3DDECL_END();
+        assert(this->_nbAttrib < MaxAttributes && "Too many vertex attributes");
+        //this->_attributes[this->_nbAttrib].usage = usage;
+        //this->_attributes[this->_nbAttrib].offset = this->_stride;
         //this->_attributes[this->_nbAttrib].nbElements = nbElements;
-        //this->_attributes[this->_nbAttrib].type = GetTypeFromDataType(type);
-        //this->_stride += this->_attributes[this->_nbAttrib].nbElements * static_cast<GLuint>(DataType::GetSize(type));
-        //this->_nbAttrib++;
+        //this->_attributes[this->_nbAttrib].type = GetTypeFromDataTypeAndNbElements(type, nbElements);
+        this->_attributes[this->_nbAttrib].Stream = 0;
+        this->_attributes[this->_nbAttrib].Offset = this->_stride;
+        this->_attributes[this->_nbAttrib].Type = GetTypeFromDataTypeAndNbElements(type, nbElements);
+        this->_attributes[this->_nbAttrib].Method = D3DDECLMETHOD_DEFAULT;
+        this->_attributes[this->_nbAttrib].Usage = GetVertexAttributeUsage(usage);
+        this->_attributes[this->_nbAttrib].UsageIndex = GetVertexAttributeUsageIndex(usage);
+        this->_stride += nbElements * DataType::GetSize(type);
+        this->_nbAttrib++;
+        std::memcpy(&(this->_attributes[this->_nbAttrib]), &end, sizeof(end));
     }
 
     void VertexBuffer::SetData(std::size_t size, void const* data, VertexBufferUsage::Type usage)
@@ -59,72 +73,15 @@ namespace Tools { namespace Renderers { namespace DX9 {
     static int nbTexCoordActive = 0;
     void VertexBuffer::Bind()
     {
-        //GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, this->_id));
-
-        //auto it = this->_attributes,
-        //    itEnd = this->_attributes + this->_nbAttrib;
-        //for (; it != itEnd; ++it)
-        //{
-        //    switch (it->location)
-        //    {
-        //    case VertexAttributeUsage::Position:
-        //        GLCHECK(glVertexPointer(it->nbElements, it->type, this->_stride, it->offset));
-        //        GLCHECK(glEnableClientState(GL_VERTEX_ARRAY));
-        //        break;
-
-        //    case VertexAttributeUsage::Normal:
-        //        GLCHECK(glNormalPointer(it->type, this->_stride, it->offset));
-        //        GLCHECK(glEnableClientState(GL_NORMAL_ARRAY));
-        //        break;
-
-        //    case VertexAttributeUsage::Color:
-        //        GLCHECK(glColorPointer(it->nbElements, it->type, this->_stride, it->offset));
-        //        GLCHECK(glEnableClientState(GL_COLOR_ARRAY));
-        //        break;
-
-        //    case VertexAttributeUsage::TexCoord:
-        //        GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-        //        GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
-        //        break;
-
-        //    default:
-        //        GLCHECK(glVertexAttribPointerARB(it->location, it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
-        //        GLCHECK(glEnableVertexAttribArrayARB(it->location));
-        //        break;
-        //    }
-        //}
+        if (this->_vertexDeclaration == 0)
+            this->_renderer.GetDevice()->CreateVertexDeclaration(this->_attributes, &this->_vertexDeclaration);
+        this->_renderer.GetDevice()->SetVertexDeclaration(this->_vertexDeclaration);
+        this->_renderer.GetDevice()->SetStreamSource(0, this->_vertexBuffer, 0, this->_stride);
     }
 
     void VertexBuffer::Unbind()
     {
-        //GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0));
-        //auto it = this->_attributes,
-        //    itEnd = this->_attributes + this->_nbAttrib;
-        //for (; it != itEnd; ++it)
-        //{
-        //    switch (it->location)
-        //    {
-        //    case VertexAttributeUsage::Position:
-        //        GLCHECK(glDisableClientState(GL_VERTEX_ARRAY));
-        //        break;
-
-        //    case VertexAttributeUsage::Normal:
-        //        GLCHECK(glDisableClientState(GL_NORMAL_ARRAY));
-        //        break;
-
-        //    case VertexAttributeUsage::Color:
-        //        GLCHECK(glDisableClientState(GL_COLOR_ARRAY));
-        //        break;
-
-        //    case VertexAttributeUsage::TexCoord:
-        //        GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-        //        break;
-
-        //    default:
-        //        GLCHECK(glDisableVertexAttribArrayARB(it->location));
-        //        break;
-        //    }
-        //}
+        this->_renderer.GetDevice()->SetStreamSource(0, 0, 0, 0);
     }
 
 }}}

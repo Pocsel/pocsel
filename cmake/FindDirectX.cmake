@@ -55,8 +55,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 			DOC "The directory where d3dx9 resides")
 	endif()
 
-	message(${CMAKE_CL_64})
-	message(${DirectX_D3D9_LIBRARY})
 	if (DirectX_D3D9_INCLUDE_DIR AND DirectX_D3D9_LIBRARY)
 		set (DirectX_D3D9_FOUND 1)
 		if (DirectX_D3DX9_INCLUDE_DIR AND DirectX_D3DX9_LIBRARY)
