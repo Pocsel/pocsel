@@ -9,6 +9,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
     private:
         DX9Renderer& _renderer;
+        IDirect3DIndexBuffer9* _indexBuffer;
 
     public:
         IndexBuffer(DX9Renderer& renderer);

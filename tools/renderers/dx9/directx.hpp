@@ -49,6 +49,23 @@ namespace Tools { namespace Renderers { namespace DX9 {
     //    }
     //    throw std::runtime_error("Bad DataType ?!");
     //}
+    inline D3DFORMAT GetIndexBufferFormat(DataType::Type type)
+    {
+        switch (type)
+        {
+        case DataType::Short:
+        case DataType::UnsignedShort:
+            return D3DFMT_INDEX16;
+        case DataType::Int:
+        case DataType::UnsignedInt:
+            return D3DFMT_INDEX32;
+        case DataType::Byte:
+        case DataType::UnsignedByte:
+        case DataType::Float:
+            break;
+        }
+        throw std::runtime_error("Bad DataType ?!");
+    }
 
     inline D3DDECLTYPE GetTypeFromDataTypeAndNbElements(DataType::Type type, int nbElements)
     {
