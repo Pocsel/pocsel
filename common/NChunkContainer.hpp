@@ -64,7 +64,7 @@ namespace Common {
                 {
                 }
 
-                void AddChunk(IdType id)
+                void AddChunk(LittleIdType id)
                 {
                     unsigned int index = _GetIndex(id);
 
@@ -73,7 +73,7 @@ namespace Common {
                     ++this->_containedCount;
                 }
 
-                void RemoveChunk(IdType id)
+                void RemoveChunk(LittleIdType id)
                 {
                     assert((id & idMask) == this->id && "This chunk does not fit here");
 
@@ -94,17 +94,22 @@ namespace Common {
                     return this->_containedCount == countMax3;
                 }
 
+                bool HasChunk(LittleIdType id)
+                {
+                    return this->_contained[_GetIndex(id)];
+                }
+
                 std::vector<LittleIdType> GetContained()
                 {
                     std::vector<LittleIdType> ids(this->_containedCount);
 
                     IdType* resPtr = ids.data();
 
-                    for (IdType x = 0; x < countMax ; ++x)
+                    for (LittleIdType x = 0; x < countMax ; ++x)
                     {
-                        for (IdType y = 0; y < countMax ; ++y)
+                        for (LittleIdType y = 0; y < countMax ; ++y)
                         {
-                            for (IdType z = 0; z < countMax ; ++z)
+                            for (LittleIdType z = 0; z < countMax ; ++z)
                             {
                                 if (this->_contained[x + y * countMax1 + z * countMax2])
                                     *resPtr++ = this->id |
@@ -120,7 +125,7 @@ namespace Common {
 
 
             private:
-                unsigned int _GetIndex(IdType id)
+                unsigned int _GetIndex(LittleIdType id)
                 {
                     assert((id & NChunk<bigN>::idMask) == this->id && "This chunk does not fit here!");
 
