@@ -85,6 +85,8 @@ namespace Server { namespace Game { namespace Map {
                     }
                     this->_MoveDeflatedBigToDeflated(BigChunk::GetId(id));
                 }
+                if (this->_deflatedChunks.count(id) == 0)
+                    return 0;
                 this->_MoveDeflatedToInflated(id);
             }
         }
@@ -108,13 +110,11 @@ namespace Server { namespace Game { namespace Map {
 
     void ChunkManager::AddChunk(std::unique_ptr<Chunk> chunk)
     {
-        Chunk::IdType id = chunk->id;
+//        Chunk::IdType id = chunk->id;
+        this->_PushInflated(chunk.release());
+//        this->_MoveInflatedToDeflated(id);
 
-        //std::cout << chunk->IsEmpty() << "\n";
-
-        this->_chunks[id] = chunk.release();
-
-        this->_MoveInflatedToDeflated(id);
+//        if (this->_
     }
 
     void ChunkManager::_MoveInflatedToDeflated(Chunk::IdType id)
@@ -128,6 +128,10 @@ namespace Server { namespace Game { namespace Map {
         Chunk* chunk = this->_PopInflated(id);
         this->_PushDeflated(id, this->_DeflateChunk(*chunk));
         Tools::Delete(chunk);
+
+//        BigChunk::IdType bigId = BigChunk::GetId(id);
+//        if (this->_deflatedChunksContainers.find(bigId)->second.IsFull())
+//            this->_MoveDeflatedToDeflatedBig(bigId);
     }
 
     void ChunkManager::_MoveDeflatedToDeflatedBig(BigChunk::IdType bigId)
@@ -211,8 +215,6 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::ByteArray* deflatedChunk = new Tools::ByteArray();
 
-        //std::cout << chunk.IsEmpty() << "\n";
-
 
         deflatedChunk->Write(chunk);
 
@@ -262,56 +264,105 @@ namespace Server { namespace Game { namespace Map {
 
     void ChunkManager::_PushInflated(Chunk* chunk)
     {
+        // chunk
         assert(this->_chunks.count(chunk->id) == 0);
+//        assert(this->_inflatedChunksContainers.count(BigChunk::GetId(chunk->id)) == 0
+//                || this->_inflatedChunksContainers.count(BigChunk::GetId(id)) == 0);
 
         this->_chunks[chunk->id] = chunk;
+
+        // container
+        BigChunk::IdType bigId = BigChunk::GetId(chunk->id);
+        if (this->_inflatedChunksContainers.count(bigId) == 0)
+            this->_inflatedChunksContainers.insert(
+                    std::pair<BigChunk::IdType, BigChunk>(bigId, BigChunk(bigId)));
+
+        BigChunk& bigChunk = this->_inflatedChunksContainers.find(bigId)->second;
+        bigChunk.AddChunk(chunk->id);
+
+        // value
+        this->_inflatedValues.push_front(chunk->id);
     }
 
     Chunk* ChunkManager::_PopInflated(Chunk::IdType id)
     {
         assert(this->_chunks.count(id) == 1);
+//        assert(this->_inflatedChunksContainers.count(BigChunk::GetId(id)) == 1);
 
+        // chunk
         Chunk* chunk = this->_chunks[id];
         this->_chunks.erase(id);
 
-        //std::cout << chunk->IsEmpty() << "-\n";
+        // container
+        BigChunk::IdType bigId = BigChunk::GetId(id);
+        BigChunk& bigChunk = this->_inflatedChunksContainers.find(bigId)->second;
+        bigChunk.RemoveChunk(id);
+        if (bigChunk.IsEmpty())
+            this->_inflatedChunksContainers.erase(bigId);
+
+        // value
+        auto it = this->_inflatedValues.begin();
+        while (*it != id)
+            ++it;
+        this->_inflatedValues.erase(it);
+
         return chunk;
     }
 
     void ChunkManager::_PushDeflated(Chunk::IdType id, Tools::ByteArray* array)
     {
         assert(this->_deflatedChunks.count(id) == 0);
+//        assert(this->_deflatedChunksContainers.count(id) == 0 || this->_deflatedChunksContainers.count(BigChunk::GetId(id)) == 0);
 
+        // chunk
         this->_deflatedChunks[id] = array;
 
+        // container
+        bool isNu = false;
         BigChunk::IdType bigId = BigChunk::GetId(id);
         if (this->_deflatedChunksContainers.count(bigId) == 0)
+        {
             this->_deflatedChunksContainers.insert(
                     std::pair<BigChunk::IdType, BigChunk>(bigId, BigChunk(bigId)));
-
+            isNu = true;
+        }
         BigChunk& bigChunk = this->_deflatedChunksContainers.find(bigId)->second;
         bigChunk.AddChunk(id);
 
-        //if (bigChunk.IsFull())
-        //    this->_MoveDeflatedToDeflatedBig(bigId);
+        // value
+        if (!isNu)
+        {
+            auto it = this->_deflatedValues.begin();
+            while (*it != bigId)
+                ++it;
+            this->_deflatedValues.erase(it);
+        }
+        this->_deflatedValues.push_front(bigId);
     }
 
     Tools::ByteArray* ChunkManager::_PopDeflated(Chunk::IdType id)
     {
         assert(this->_deflatedChunks.count(id) == 1);
-        assert(this->_deflatedChunksContainers.count(BigChunk::GetId(id)) == 1);
+//        assert(this->_deflatedChunksContainers.count(BigChunk::GetId(id)) == 1);
 
+        // chunk
         Tools::ByteArray* array = this->_deflatedChunks[id];
-
         this->_deflatedChunks.erase(id);
 
+        // container
         BigChunk::IdType bigId = BigChunk::GetId(id);
-
         BigChunk& bigChunk = this->_deflatedChunksContainers.find(bigId)->second;
         bigChunk.RemoveChunk(id);
-
         if (bigChunk.IsEmpty())
+        {
             this->_deflatedChunksContainers.erase(bigId);
+
+            //value
+            auto it = this->_deflatedValues.begin();
+            while (*it != bigId)
+                ++it;
+            this->_deflatedValues.erase(it);
+        }
 
         return array;
     }
@@ -320,16 +371,23 @@ namespace Server { namespace Game { namespace Map {
     {
         assert(this->_deflatedBigChunks.count(bigId) == 0);
 
+        // chunk
         this->_deflatedBigChunks[bigId] = array;
+
+        // value
+        this->_deflatedBigValues.push_front(bigId);
     }
 
     Tools::ByteArray* ChunkManager::_PopDeflatedBig(BigChunk::IdType bigId)
     {
         assert(this->_deflatedBigChunks.count(bigId) == 1);
 
+        // chunk
         Tools::ByteArray* deflatedBigChunk = this->_deflatedBigChunks[bigId];
         this->_deflatedBigChunks.erase(bigId);
         return deflatedBigChunk;
+
+        // XXX TODO JENSUISLA
     }
 
     void ChunkManager::_PushDb(BigChunk::IdType bigId, Tools::ByteArray* array)
