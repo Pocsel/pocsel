@@ -7,8 +7,8 @@ namespace Server {
 
     struct Chunk : public Common::BaseChunk
     {
-        Chunk(IdType id) : BaseChunk(id) {}
-        Chunk(CoordsType const& coords) : BaseChunk(coords) {}
+        explicit Chunk(IdType id) : BaseChunk(id) {}
+        explicit Chunk(CoordsType const& coords) : BaseChunk(coords) {}
     };
 
 }

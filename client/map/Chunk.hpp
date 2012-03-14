@@ -21,8 +21,8 @@ namespace Client { namespace Map {
         ChunkMesh* _mesh;
 
     public:
-        Chunk(IdType id);
-        Chunk(CoordsType const& c);
+        explicit Chunk(IdType id);
+        explicit Chunk(CoordsType const& c);
         ~Chunk();
 
         ChunkMesh* GetMesh() { return this->_mesh; }
