@@ -2,6 +2,7 @@
 #pragma once // include guard non standard
 
 #include "tools/renderers/dx9/directx.hpp"
+#include "tools/renderers/dx9/VertexBuffer.hpp"
 
 #include "tools/IRenderer.hpp"
 #include "tools/Vector2.hpp"
@@ -17,6 +18,11 @@ namespace Tools { namespace Renderers {
             DrawNone = 0,
             Draw2D,
             Draw3D
+        };
+
+        enum
+        {
+            MaxVertexElements = 8
         };
 
     private:

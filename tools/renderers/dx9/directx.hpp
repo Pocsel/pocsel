@@ -49,17 +49,93 @@ namespace Tools { namespace Renderers { namespace DX9 {
     //    }
     //    throw std::runtime_error("Bad DataType ?!");
     //}
+    inline D3DFORMAT GetIndexBufferFormat(DataType::Type type)
+    {
+        switch (type)
+        {
+        case DataType::Short:
+        case DataType::UnsignedShort:
+            return D3DFMT_INDEX16;
+        case DataType::Int:
+        case DataType::UnsignedInt:
+            return D3DFMT_INDEX32;
+        case DataType::Byte:
+        case DataType::UnsignedByte:
+        case DataType::Float:
+            break;
+        }
+        throw std::runtime_error("Bad DataType ?!");
+    }
 
-    //inline GLint GetVertexBufferUsage(VertexBufferUsage::Type type)
-    //{
-    //    switch (type)
-    //    {
-    //    case VertexBufferUsage::Stream: return GL_STREAM_DRAW;
-    //    case VertexBufferUsage::Static: return GL_STATIC_DRAW;
-    //    case VertexBufferUsage::Dynamic: return GL_DYNAMIC_DRAW;
-    //    }
-    //    throw std::runtime_error("Bad VertexBufferUsage ?!");
-    //}
+    inline D3DDECLTYPE GetTypeFromDataTypeAndNbElements(DataType::Type type, int nbElements)
+    {
+        switch (type)
+        {
+        case DataType::UnsignedByte:
+            switch (nbElements)
+            {
+            case 4: return D3DDECLTYPE_UBYTE4;
+            }
+            break;
+        case DataType::Short:
+            switch (nbElements)
+            {
+            case 2: return D3DDECLTYPE_SHORT2;
+            case 4: return D3DDECLTYPE_SHORT4;
+            }
+            break;
+        case DataType::Float:
+            switch (nbElements)
+            {
+            case 1: return D3DDECLTYPE_FLOAT1;
+            case 2: return D3DDECLTYPE_FLOAT2;
+            case 3: return D3DDECLTYPE_FLOAT3;
+            case 4: return D3DDECLTYPE_FLOAT4;
+            }
+            break;
+
+        case DataType::Byte:
+        case DataType::UnsignedShort:
+        case DataType::Int:
+        case DataType::UnsignedInt:
+            break;
+        }
+        throw std::runtime_error("Bad DataType ?!");
+    }
+
+    inline BYTE GetVertexAttributeUsage(VertexAttributeUsage::Type type)
+    {
+        switch (type)
+        {
+        case VertexAttributeUsage::Position: return D3DDECLUSAGE_POSITION;
+        case VertexAttributeUsage::Normal: return D3DDECLUSAGE_NORMAL;
+        case VertexAttributeUsage::Color: return D3DDECLUSAGE_COLOR;
+        case VertexAttributeUsage::TexCoord:
+        case VertexAttributeUsage::Custom1:
+        case VertexAttributeUsage::Custom2:
+        case VertexAttributeUsage::Custom3:
+        case VertexAttributeUsage::Custom4:
+            return D3DDECLUSAGE_TEXCOORD;
+        }
+        throw std::runtime_error("Bad VertexAttributeUsage ?!");
+    }
+
+    inline BYTE GetVertexAttributeUsageIndex(VertexAttributeUsage::Type type)
+    {
+        switch (type)
+        {
+        case VertexAttributeUsage::Position:
+        case VertexAttributeUsage::Normal:
+        case VertexAttributeUsage::Color:
+        case VertexAttributeUsage::TexCoord:
+            return 0;
+        case VertexAttributeUsage::Custom1: return 1;
+        case VertexAttributeUsage::Custom2: return 2;
+        case VertexAttributeUsage::Custom3: return 3;
+        case VertexAttributeUsage::Custom4: return 4;
+        }
+        throw std::runtime_error("Bad VertexAttributeUsage ?!");
+    }
 
     inline D3DPRIMITIVETYPE GetDrawingMode(DrawingMode::Type type)
     {
