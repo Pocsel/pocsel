@@ -30,6 +30,7 @@ target_link_libraries(client
     ${CG_LIBRARY}
     ${CGGL_LIBRARY}
 	${CGDX9_LIBRARY}
+	${DirectX_ERROR_LIBRARY}
 	${DirectX_D3D9_LIBRARY}
 )
 

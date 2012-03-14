@@ -52,9 +52,10 @@ namespace Client { namespace Menu {
             this->_renderer.SetModelMatrix(this->_backRectMatrix);
             this->_backRect->Render();
             this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateScale((this->_client.GetWindow().GetSize().w / 2) * progress, 10, 1)
-                    * Tools::Matrix4<float>::CreateTranslation((this->_client.GetWindow().GetSize().w / 2) * progress, this->_client.GetWindow().GetSize().h - 10, 0));
+                * Tools::Matrix4<float>::CreateTranslation((this->_client.GetWindow().GetSize().w / 2) * progress, this->_client.GetWindow().GetSize().h - 10, 0));
             this->_barRect->Render();
         } while (this->_menu.GetRectShader().EndPass());
+
         do
         {
             this->_menu.GetFontShader().BeginPass();

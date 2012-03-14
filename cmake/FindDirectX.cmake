@@ -34,6 +34,11 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		DOC "The directory where d3dx9.h resides")
 
 	if (CMAKE_CL_64)
+		find_library (DirectX_ERROR_LIBRARY dxerr
+			PATHS
+			"${DirectX_ROOT_DIR}/Lib/x64"
+			DOC "The directory where dxerr resides")
+			
 		find_library (DirectX_D3D9_LIBRARY d3d9
 			PATHS
 			"${DirectX_ROOT_DIR}/Lib/x64"
@@ -44,6 +49,11 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 			"${DirectX_ROOT_DIR}/Lib/x64"
 			DOC "The directory where d3dx9 resides")
 	else()
+		find_library (DirectX_ERROR_LIBRARY dxerr
+			PATHS
+			"${DirectX_ROOT_DIR}/Lib/x86"
+			DOC "The directory where dxerr resides")
+			
 		find_library (DirectX_D3D9_LIBRARY d3d9
 			PATHS
 			"${DirectX_ROOT_DIR}/Lib/x86"
@@ -63,6 +73,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	endif (DirectX_D3D9_INCLUDE_DIR AND DirectX_D3D9_LIBRARY)
 
 	mark_as_advanced(
+		DirectX_ERROR_LIBRARY
 		DirectX_D3D9_INCLUDE_DIR
 		DirectX_D3D9_LIBRARY
 		DirectX_D3DX9_INCLUDE_DIR

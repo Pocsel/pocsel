@@ -22,26 +22,26 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
         if (this->_indexBuffer)
             this->_indexBuffer->Release();
-        this->_renderer.GetDevice()->CreateIndexBuffer(size, D3DUSAGE_WRITEONLY, GetIndexBufferFormat(indicesType), D3DPOOL_DEFAULT, &this->_indexBuffer, 0);
+        DXCHECKERROR(this->_renderer.GetDevice()->CreateIndexBuffer(size, D3DUSAGE_WRITEONLY, GetIndexBufferFormat(indicesType), D3DPOOL_MANAGED, &this->_indexBuffer, 0));
         this->SetSubData(0, size, data);
     }
 
     void IndexBuffer::SetSubData(std::size_t offset, std::size_t size, void const* data)
     {
         void* ptr;
-        this->_indexBuffer->Lock(offset, size, &ptr, 0);
+        DXCHECKERROR(this->_indexBuffer->Lock(offset, size, &ptr, 0));
         std::memcpy(ptr, data, size);
-        this->_indexBuffer->Unlock();
+        DXCHECKERROR(this->_indexBuffer->Unlock());
     }
 
     void IndexBuffer::Bind()
     {
-        this->_renderer.GetDevice()->SetIndices(this->_indexBuffer);
+        DXCHECKERROR(this->_renderer.GetDevice()->SetIndices(this->_indexBuffer));
     }
 
     void IndexBuffer::Unbind()
     {
-        this->_renderer.GetDevice()->SetIndices(0);
+        DXCHECKERROR(this->_renderer.GetDevice()->SetIndices(0));
     }
 
 }}}

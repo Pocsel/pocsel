@@ -29,6 +29,7 @@ namespace Tools { namespace Renderers {
                 return;
             if (error == CG_COMPILER_ERROR)
                 Tools::error << "Cg compiler:\n" << cgGetLastListing(_cgGlobalContext) << "\n";
+            Tools::debug << "An internal Cg call failed (Code: " + ToString(error) + "): " + cgGetErrorString(cgGetError()) << std::endl;
             throw std::runtime_error(
                 "An internal Cg call failed (Code: "
                 + ToString(error) + "): "
@@ -78,8 +79,7 @@ namespace Tools { namespace Renderers {
         present_parameters.BackBufferFormat = D3DFMT_UNKNOWN;
         present_parameters.MultiSampleType = D3DMULTISAMPLE_NONE;
 
-        if (FAILED(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_SOFTWARE_VERTEXPROCESSING, &present_parameters, &this->_device)))
-            throw std::runtime_error("DirectX: Could not create Direct3D Device");
+        DXCHECKERROR(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &present_parameters, &this->_device));
 
         if (_cgGlobalContext == 0)
             _cgGlobalContext = cgCreateContext();
@@ -92,6 +92,10 @@ namespace Tools { namespace Renderers {
         cgD3D9SetManageTextureParameters(this->_cgContext, CG_TRUE);
 
         InitDevIL();
+
+        this->_clearColor = Color4f(0, 0, 0, 1);
+        this->_clearDepth = 1.0f;
+        this->_clearStencil = 0;
     }
 
     void DX9Renderer::Shutdown()
@@ -142,11 +146,11 @@ namespace Tools { namespace Renderers {
     // Drawing
     void DX9Renderer::Clear(int clearFlags)
     {
-        this->_device->Clear(0, 0,
+        DXCHECKERROR(this->_device->Clear(0, 0,
             (clearFlags & ClearFlags::Color ? D3DCLEAR_TARGET : 0) |
             (clearFlags & ClearFlags::Depth ? D3DCLEAR_ZBUFFER : 0) |
             (clearFlags & ClearFlags::Stencil ? D3DCLEAR_STENCIL : 0),
-            D3DCOLOR_COLORVALUE(this->_clearColor.r, this->_clearColor.g, this->_clearColor.b, this->_clearColor.a), this->_clearDepth, this->_clearStencil);
+            D3DCOLOR_COLORVALUE(this->_clearColor.r, this->_clearColor.g, this->_clearColor.b, this->_clearColor.a), this->_clearDepth, this->_clearStencil));
     }
 
     void DX9Renderer::BeginDraw2D(IRenderTarget* target)
@@ -165,12 +169,14 @@ namespace Tools { namespace Renderers {
                 float(this->_viewport.size.w));
         this->_modelViewProjection = this->_model * this->_view * this->_projection;
 
-        this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-        this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
+        DXCHECKERROR(this->_device->BeginScene());
     }
 
     void DX9Renderer::EndDraw2D()
     {
+        DXCHECKERROR(this->_device->EndScene());
         this->_state = DrawNone;
         this->_currentProgram = 0;
     }
@@ -180,12 +186,14 @@ namespace Tools { namespace Renderers {
         assert(this->_state == 0 && "Operation invalide");
         this->_state = Draw3D;
 
-        this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-        this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW));
+        DXCHECKERROR(this->_device->BeginScene());
     }
 
     void DX9Renderer::EndDraw()
     {
+        DXCHECKERROR(this->_device->EndScene());
         this->_state = DrawNone;
         this->_currentProgram = 0;
     }
@@ -204,17 +212,21 @@ namespace Tools { namespace Renderers {
         this->UpdateCurrentParameters();
         if (indices)
         {
-            // TODO !
+            DX9::IndexBuffer ib(*this);
+            ib.SetData(indicesType, count * DataType::GetSize(indicesType), indices);
+            ib.Bind();
+            // TODO
+            ib.Unbind();
         }
         else
-            this->_device->DrawIndexedPrimitive(DX9::GetDrawingMode(mode), 0, 0, count, 0, DX9::GetPrimitiveCount(mode, count));
+            DXCHECKERROR(this->_device->DrawIndexedPrimitive(DX9::GetDrawingMode(mode), 0, 0, count, 0, DX9::GetPrimitiveCount(mode, count)));
         //GLCHECK(::glDrawElements(DX9::GetDrawingMode(mode), count, DX9::GetTypeFromDataType(indicesType), indices));
     }
 
     void DX9Renderer::DrawVertexBuffer(Uint32 offset, Uint32 count, DrawingMode::Type mode)
     {
         this->UpdateCurrentParameters();
-        this->_device->DrawPrimitive(DX9::GetDrawingMode(mode), offset, count);
+        DXCHECKERROR(this->_device->DrawPrimitive(DX9::GetDrawingMode(mode), offset, count));
     }
 
     // Matrices
@@ -263,7 +275,7 @@ namespace Tools { namespace Renderers {
         vp.Y = viewport.pos.y;
         vp.MinZ = 0.0f;
         vp.MaxZ = 1.0f;
-        this->_device->SetViewport(&vp);
+        DXCHECKERROR(this->_device->SetViewport(&vp));
         this->_viewport = viewport;
         if (this->_state == Draw2D)
         {
@@ -280,17 +292,17 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::SetNormaliseNormals(bool normalise)
     {
-        this->_device->SetRenderState(D3DRS_NORMALIZENORMALS, normalise ? TRUE : FALSE);
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_NORMALIZENORMALS, normalise ? TRUE : FALSE));
     }
 
     void DX9Renderer::SetDepthTest(bool enabled)
     {
-        this->_device->SetRenderState(D3DRS_ZENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE);
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
     }
 
     void DX9Renderer::SetCullFace(bool enabled)
     {
-        this->_device->SetRenderState(D3DRS_CULLMODE, enabled ? D3DCULL_CCW : D3DCULL_NONE);
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, enabled ? D3DCULL_CCW : D3DCULL_NONE));
     }
 
     void DX9Renderer::SetRasterizationMode(RasterizationMode::Type rasterizationMode)
@@ -298,22 +310,23 @@ namespace Tools { namespace Renderers {
         switch (rasterizationMode)
         {
         case RasterizationMode::Point:
-            this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_POINT);
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_POINT));
             break;
 
         case RasterizationMode::Line:
-            this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME));
             break;
 
         case RasterizationMode::Fill:
-            this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID));
             break;
         }
     }
 
     void DX9Renderer::Present()
     {
-        this->_device->Present(0, 0, 0, 0);
+        DXCHECKERROR(this->_device->Present(0, 0, 0, 0));
+        DXCHECKERROR(this->_device->TestCooperativeLevel());
     }
 
 }}

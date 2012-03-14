@@ -50,9 +50,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         {
             if (this->_vertexBuffer)
                 this->_vertexBuffer->Release();
-            HRESULT ret = this->_renderer.GetDevice()->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &this->_vertexBuffer, 0);
-            if (ret < 0)
-                throw std::runtime_error("DirectX: Could not create a vertex buffer");
+            DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &this->_vertexBuffer, 0));
             this->_size = size;
         }
         if (data == 0)
@@ -63,25 +61,23 @@ namespace Tools { namespace Renderers { namespace DX9 {
     void VertexBuffer::SetSubData(std::size_t offset, std::size_t size, void const* data)
     {
         void* ptr;
-        HRESULT ret = this->_vertexBuffer->Lock(offset, size, &ptr, 0); // TODO Check
-        if (ret < 0)
-            throw std::runtime_error("DirectX: Could not create a vertex buffer");
+        DXCHECKERROR(this->_vertexBuffer->Lock(offset, size, &ptr, D3DLOCK_DISCARD));
         std::memcpy(ptr, data, size);
-        this->_vertexBuffer->Unlock();
+        DXCHECKERROR(this->_vertexBuffer->Unlock());
     }
 
     static int nbTexCoordActive = 0;
     void VertexBuffer::Bind()
     {
         if (this->_vertexDeclaration == 0)
-            this->_renderer.GetDevice()->CreateVertexDeclaration(this->_attributes, &this->_vertexDeclaration);
-        this->_renderer.GetDevice()->SetVertexDeclaration(this->_vertexDeclaration);
-        this->_renderer.GetDevice()->SetStreamSource(0, this->_vertexBuffer, 0, this->_stride);
+            DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexDeclaration(this->_attributes, &this->_vertexDeclaration));
+        DXCHECKERROR(this->_renderer.GetDevice()->SetVertexDeclaration(this->_vertexDeclaration));
+        DXCHECKERROR(this->_renderer.GetDevice()->SetStreamSource(0, this->_vertexBuffer, 0, this->_stride));
     }
 
     void VertexBuffer::Unbind()
     {
-        this->_renderer.GetDevice()->SetStreamSource(0, 0, 0, 0);
+        DXCHECKERROR(this->_renderer.GetDevice()->SetStreamSource(0, 0, 0, 0));
     }
 
 }}}

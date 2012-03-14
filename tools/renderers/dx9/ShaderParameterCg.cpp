@@ -68,6 +68,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         Texture2D& tex = reinterpret_cast<Texture2D&>(texture);
         //assert(tex.GetBindID() >= 0 && "Faut bind la texture avant.");
         //cgGLSetTextureParameter(this->_param, tex.GetID());
+        cgD3D9SetTextureParameter(this->_param, tex.GetTexture());
         cgSetSamplerState(this->_param);
     }
 

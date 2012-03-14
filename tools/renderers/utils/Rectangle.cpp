@@ -20,14 +20,19 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Color, 4); // color
         Rectangle::_vertexBuffer->SetData(4*3*sizeof(float) + 4*4*sizeof(float), 0, VertexBufferUsage::Static);
         this->_RefreshVertexBuffer();
+
+        static const unsigned short indices[] = { 2, 1, 3, 0 };
+        this->_indexBuffer = this->_renderer.CreateIndexBuffer();
+        this->_indexBuffer->SetData(DataType::UnsignedShort, sizeof(indices), indices);
     }
 
     void Rectangle::Render()
     {
-        static const unsigned char indices[] = { 2, 1, 3, 0 };
+        this->_indexBuffer->Bind();
         this->_vertexBuffer->Bind();
-        this->_renderer.DrawElements(sizeof(indices), Renderers::DataType::UnsignedByte, indices, Renderers::DrawingMode::TrianglesStrip);
+        this->_renderer.DrawElements(4, Renderers::DataType::UnsignedShort, 0, Renderers::DrawingMode::TrianglesStrip);
         this->_vertexBuffer->Unbind();
+        this->_indexBuffer->Unbind();
     }
 
     void Rectangle::_RefreshVertexBuffer()
@@ -44,6 +49,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             this->_point4Color.r, this->_point4Color.g, this->_point4Color.b, this->_point4Color.a
         };
         this->_vertexBuffer->SetSubData(0, sizeof(vertices), vertices);
+
     }
 
 }}}

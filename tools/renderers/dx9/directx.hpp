@@ -3,6 +3,8 @@
 #include <Cg/cg.h>
 #include <Cg/cgD3D9.h>
 
+#include "DxErr.h"
+
 #include "tools/IRenderer.hpp"
 
 namespace Tools { namespace Renderers { namespace DX9 {
@@ -177,6 +179,16 @@ namespace Tools { namespace Renderers { namespace DX9 {
     //    throw std::runtime_error("Bad TextureFilter ?!");
     //}
 
-    //void GLCheckError(std::string const& file, unsigned int line, char const* function);
+#define DXCHECKERROR(result) Tools::Renderers::DX9::_DXCHECKERROR(#result, result)
+
+    inline void _DXCHECKERROR(const char* code, HRESULT result)
+    {
+        if (result < 0)
+        {
+            std::string err = DXGetErrorString(result);
+            Tools::debug << "DirectX: " << code << ":\n" << err << std::endl;
+            throw std::runtime_error("DirectX: " + err);
+        }
+    }
 
 }}}
