@@ -20,6 +20,9 @@ Server.Entity.Register{
 --        S.Event.SelfCall("_EventTest", { sdfg = 12 })
 --        entity._EventTest(entity, this, {}, this.id)
 --        S.Event.SelfCallLater(60, "_EventTest", { sdgffff = 14 })
+--        entity.maxiTable = {}
+--
+--        entity.storage.maxiTable = entity.maxiTable
 --    end,
 --
 --    Save = function(entity, this)
@@ -49,3 +52,28 @@ Server.Entity.Register{
 --    _KillCallback = function(entity, this, args)
 --    end,
 --}
+--
+--
+--Server.Entity.Register{
+--    name = "Bite",
+--    Spawn = function(self)
+--        self:_Method()
+--        self.type.name
+--        self.bite = 12
+--    end,
+--    _Method = function(self)
+--    end,
+--}
+--
+--Server.Entity.Register{
+--    name = "Bite",
+--    Spawn = function()
+--        self.type._Method()
+--    end,
+--    _Method = function()
+--    end,
+--}
+--
+--function Account:Deposit(amount)
+--    self.balance = self.balance + amount
+--end
