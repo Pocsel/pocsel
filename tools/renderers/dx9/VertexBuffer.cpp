@@ -13,7 +13,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
         _size(0),
         _nbAttrib(0),
         _stride(0),
-        _vertexDeclaration(0)
+        _vertexDeclaration(0),
+        _count(0)
     {
     }
 
@@ -55,6 +56,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         }
         if (data == 0)
             return;
+        this->_count = size / (this->_stride == 0 ? 1 : this->_stride);
         this->SetSubData(0, size, data);
     }
 
@@ -73,6 +75,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
             DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexDeclaration(this->_attributes, &this->_vertexDeclaration));
         DXCHECKERROR(this->_renderer.GetDevice()->SetVertexDeclaration(this->_vertexDeclaration));
         DXCHECKERROR(this->_renderer.GetDevice()->SetStreamSource(0, this->_vertexBuffer, 0, this->_stride));
+        this->_renderer.SetVertexBuffer(*this);
     }
 
     void VertexBuffer::Unbind()

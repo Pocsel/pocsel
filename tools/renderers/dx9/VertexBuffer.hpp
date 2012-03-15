@@ -24,6 +24,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         LPDIRECT3DVERTEXDECLARATION9 _vertexDeclaration;
         int _nbAttrib;
         UINT _stride;
+        UINT _count;
 
     public:
         VertexBuffer(DX9Renderer& renderer);
@@ -39,6 +40,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         //VertexAttribute const* GetAttributes() const { return this->_attributes; }
         //int GetNbAttributes() const { return this->_nbAttrib; }
         //UINT GetStride() const { return this->_stride; }
+        UINT GetVerticesCount() const { return this->_count; }
         IDirect3DVertexBuffer9* GetVertexBuffer() const { return this->_vertexBuffer; }
     };
 

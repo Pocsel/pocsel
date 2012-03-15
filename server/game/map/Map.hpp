@@ -73,8 +73,6 @@ namespace Server { namespace Game { namespace Map {
         Engine::Engine& GetEngine() { return *this->_engine; }
         Game& GetGame() { return this->_game; }
 
-        Tools::Database::IConnection& GetConnection();
-
         // threadsafe
         void HandleNewChunk(Chunk* chunk);
         void GetSpawnPosition(SpawnCallback& response);

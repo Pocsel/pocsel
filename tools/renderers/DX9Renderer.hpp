@@ -41,6 +41,7 @@ namespace Tools { namespace Renderers {
         LPDIRECT3DDEVICE9 _device;
 
         IShaderProgram* _currentProgram;
+        DX9::VertexBuffer* _vertexBuffer;
 
         Color4f _clearColor;
         float _clearDepth;
@@ -104,6 +105,7 @@ namespace Tools { namespace Renderers {
             this->_currentProgram = &program;
             this->_modelViewProjection = this->_model * this->_view * this->_projection;
         }
+        void SetVertexBuffer(DX9::VertexBuffer& vb) { this->_vertexBuffer = &vb; }
         CGcontext GetCgContext() const { return this->_cgContext; }
         LPDIRECT3DDEVICE9 GetDevice() const { return this->_device; }
         void Present();

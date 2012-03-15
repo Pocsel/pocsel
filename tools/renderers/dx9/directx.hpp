@@ -1,5 +1,7 @@
 #pragma once
 
+#define D3D_DEBUG_INFO
+
 #include <Cg/cg.h>
 #include <Cg/cgD3D9.h>
 

@@ -36,7 +36,7 @@ namespace Tools { namespace Renderers {
 
     private:
         void _FinishLoading(unsigned int ilID);
-        void _FinishLoading(GLint internalFormat, GLenum format, GLvoid const* data, int pixelSize, void const* mipmapData);
+        void _FinishLoading(GLint internalFormat, GLenum format, Uint32 size, GLvoid const* data, int pixelSize, void const* mipmapData);
     };
 
 }}}

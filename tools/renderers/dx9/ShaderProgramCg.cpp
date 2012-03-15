@@ -31,6 +31,14 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_model = cgGetEffectParameterBySemantic(this->_effect, "World");
         this->_view = cgGetEffectParameterBySemantic(this->_effect, "View");
         this->_projection = cgGetEffectParameterBySemantic(this->_effect, "Projection");
+
+        //this->_pass = cgGetFirstPass(this->_technique);
+        //while (this->_pass != 0)
+        //{
+        //    CGprogram prog = cgGetPassProgram(this->_pass, CG_VERTEX_DOMAIN);
+        //    cgD3D9EnableParameterShadowing(prog, false);
+        //    this->_pass = cgGetNextPass(this->_pass);
+        //}
     }
 
     ShaderProgramCg::~ShaderProgramCg()
@@ -124,7 +132,10 @@ namespace Tools { namespace Renderers { namespace DX9 {
     void ShaderProgramCg::UpdateCurrentPass()
     {
         if (this->_pass != 0)
+        {
             cgUpdatePassParameters(this->_pass);
+            cgSetPassState(this->_pass);
+        }
     }
 
     void ShaderProgramCg::BeginPass()

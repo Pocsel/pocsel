@@ -41,7 +41,7 @@ namespace Server { namespace Game { namespace Map {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator(this->_conf);
         this->_engine = new Engine::Engine(*this);
-        this->_chunkManager = new ChunkManager(*this, existingBigChunks);
+        this->_chunkManager = new ChunkManager(*this, this->_game.GetServer().GetResourceManager().GetConnection(), existingBigChunks);
     }
 
     Map::~Map()
@@ -89,11 +89,6 @@ namespace Server { namespace Game { namespace Map {
 
         this->_chunkManager->Save(conn);
         this->_engine->Save(conn);
-    }
-
-    Tools::Database::IConnection& Map::GetConnection()
-    {
-        return this->_game.GetServer().GetResourceManager().GetConnection();
     }
 
     void Map::HandleNewChunk(Chunk* chunk)
