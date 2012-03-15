@@ -66,11 +66,15 @@ namespace Server { namespace Game { namespace Map {
         for (; it != itEnd; ++it)
             this->_engine->GetEntityManager().BootstrapPlugin(it->first);
 
-//        this->_GenerateUncompleteBigChunks();
-
+        // tick toutes les 10 ms
         Tools::SimpleMessageQueue::TimerLoopMessage
-            m(std::bind(&Map::_Tick, this, std::placeholders::_1));
-        this->_messageQueue->SetLoopTimer(10000, m, this->_currentTime);
+            tlm(std::bind(&Map::_Tick, this, std::placeholders::_1));
+        this->_messageQueue->SetLoopTimer(10000, tlm, this->_currentTime);
+
+        // sauvegarde dans 33 secondes
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_TimedSave, this));
+        this->_messageQueue->PushTimedMessage(33000000, m);
     }
 
     void Map::Stop()
@@ -166,8 +170,6 @@ namespace Server { namespace Game { namespace Map {
                 Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
                 this->_gen->GetChunk(id, cb);
             }
-//                this->_GenerateBigChunk(id);
-
             this->_chunkRequests[id].push_back(response);
         }
         else
@@ -175,19 +177,6 @@ namespace Server { namespace Game { namespace Map {
             response(chunk);
         }
     }
-
-//    void Map::_GenerateBigChunk(Chunk::IdType id)
-//    {
-//        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
-//
-//        auto ids = BigChunk::GetContainedIds<0>(id);
-//
-//        for (auto it = ids.begin(), ite = ids.end(); it != ite; ++it)
-//        {
-//            this->_chunkRequests[*it].push_back(0);
-//            this->_gen->GetChunk(*it, cb);
-//        }
-//    }
 
     void Map::_SendChunkPacket(Chunk* chunk, ChunkPacketCallback& response)
     {
@@ -324,36 +313,26 @@ namespace Server { namespace Game { namespace Map {
         this->_engine->Tick(currentTime);
     }
 
-//    void Map::_GenerateUncompleteBigChunks()
-//    {
-//        std::set<Chunk::IdType> ids;
-//        std::set<Chunk::IdType> bigIds;
-//
-//        for (auto it = this->_existingChunks.begin(), ite = this->_existingChunks.end(); it != ite; ++it)
-//        {
-//            ids.insert(*it);
-//            bigIds.insert(BigChunk::GetId(*it));
-//        }
-//
-//        Gen::ChunkGenerator::Callback cb(std::bind(&Map::HandleNewChunk, this, std::placeholders::_1));
-//
-//        for (auto it = bigIds.begin(), ite = bigIds.end(); it != ite; ++it)
-//        {
-//            auto containedIds = BigChunk::GetContainedIds<0>(*it);
-//
-//            for (auto cit = containedIds.begin(), cite = containedIds.end(); cit != cite; ++cit)
-//            {
-//                if (ids.count(*cit) == 0)
-//                {
-//                    this->_chunkRequests[*cit].push_back(0);
-//                    this->_gen->GetChunk(*cit, cb);
-//                }
-//            }
-//        }
-//
-//        this->_chunkManager->LoadExistingChunks(this->_existingChunks);
-//        this->_existingChunks.clear();
-//        this->_existingChunks.resize(0);
-//    }
+    void Map::_TimedSave()
+    {
+        boost::mutex& mutex = this->_game.GetWorld().saveMutex;
+        if (!mutex.try_lock())
+        {
+            // on reessaie dans 7 secondes
+            Tools::log << this->GetName() << ": could not save, retry in 7 seconds.\n";
+            Tools::SimpleMessageQueue::Message
+                m(std::bind(&Map::_TimedSave, this));
+            this->_messageQueue->PushTimedMessage(7000000, m);
+            return;
+        }
+        boost::lock_guard<boost::mutex> lock(mutex, boost::adopt_lock);
+        Tools::log << this->GetName() << ": Saving.\n";
+        this->Save();
+
+        // resave dans 33 secondes
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_TimedSave, this));
+        this->_messageQueue->PushTimedMessage(33000000, m);
+    }
 
 }}}
