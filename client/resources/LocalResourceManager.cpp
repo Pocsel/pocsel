@@ -109,7 +109,7 @@ namespace Client { namespace Resources {
             255, 0, 255, 255,
             0, 0, 0, 255
         };
-        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, Tools::Vector2u(2, 2)).release();
+        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 16, toto, Tools::Vector2u(2, 2)).release();
     }
 
 }}

@@ -30,11 +30,13 @@ namespace Tools { namespace Renderers { namespace DX9 {
             }
             this->_FinishLoading(ilID);
         }
-        else
+        else if (format == PixelFormat::Rgba8)
         {
             this->_size = imgSize;
-            //this->_FinishLoading(GetInternalFormatFromPixelFormat(format), GetFormatFromPixelFormat(format), data, (format >> 24) & 0xFF, mipmapData);
+            this->_FinishLoading(reinterpret_cast<Color4<Uint8> const*>(data), size / 4, mipmapData);
         }
+        else
+            throw std::runtime_error("Unsupported texture format");
     }
 
     Texture2D::Texture2D(DX9Renderer& renderer, std::string const& imagePath) :
@@ -73,27 +75,27 @@ namespace Tools { namespace Renderers { namespace DX9 {
         ilBindImage(0);
         ilDeleteImage(ilID);
 
-        this->_FinishLoading(D3DFMT_A8R8G8B8, pixmap, size, 0);
+        this->_FinishLoading(pixmap, size, 0);
         delete [] pixmap;
     }
 
-    void Texture2D::_FinishLoading(D3DFORMAT format, Color4<Uint8> const* data, std::size_t size, void const* mipmapData)
+    void Texture2D::_FinishLoading(Color4<Uint8> const* data, std::size_t size, void const* mipmapData)
     {
-        DXCHECKERROR(this->_renderer.GetDevice()->CreateTexture(this->_size.w, this->_size.h, 1, D3DUSAGE_DYNAMIC, format, D3DPOOL_DEFAULT, &this->_texture, 0));
+        DXCHECKERROR(this->_renderer.GetDevice()->CreateTexture(this->_size.w, this->_size.h, 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &this->_texture, 0));
         D3DLOCKED_RECT lockRect;
-        DXCHECKERROR(this->_texture->LockRect(0, &lockRect, 0, D3DLOCK_DISCARD));
+        DXCHECKERROR(this->_texture->LockRect(0, &lockRect, 0, 0));
         Uint8* ptr = reinterpret_cast<Uint8*>(lockRect.pBits);
-        for (int i = 0, j = 0; i < size / 4; ++i, j += 4)
+        for (int i = 0, j = 0; i < size; ++i, j += 4)
         {
             this->_hasAlpha = this->_hasAlpha || (data[i].a != 255);
-            ptr[j + 0] = data[i].a;
-            ptr[j + 1] = data[i].r;
-            ptr[j + 2] = data[i].g;
-            ptr[j + 3] = data[i].b;
+            ptr[j + 0] = data[i].b;
+            ptr[j + 1] = data[i].g;
+            ptr[j + 2] = data[i].r;
+            ptr[j + 3] = data[i].a;
         }
         DXCHECKERROR(this->_texture->UnlockRect(0));
 
-        if (false && mipmapData != 0)
+        if (mipmapData != 0)
         {
             int level = 1;
             Color4<Uint8> const* idx = reinterpret_cast<Color4<Uint8> const*>(mipmapData);
@@ -103,11 +105,10 @@ namespace Tools { namespace Renderers { namespace DX9 {
                 Uint8* ptr = reinterpret_cast<Uint8*>(lockRect.pBits);
                 for (int i = 0; i < vsize.w*vsize.h; ++i)
                 {
-                    this->_hasAlpha = this->_hasAlpha || (data[i].a != 255);
-                    ptr[i*4 + 0] = idx[i].a;
-                    ptr[i*4 + 1] = idx[i].r;
-                    ptr[i*4 + 2] = idx[i].g;
-                    ptr[i*4 + 3] = idx[i].b;
+                    ptr[i*4 + 0] = idx[i].b;
+                    ptr[i*4 + 1] = idx[i].g;
+                    ptr[i*4 + 2] = idx[i].r;
+                    ptr[i*4 + 3] = idx[i].a;
                 }
                 DXCHECKERROR(this->_texture->UnlockRect(level));
                 ++level;

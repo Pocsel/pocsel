@@ -33,7 +33,7 @@ namespace Tools { namespace Renderers {
 
     private:
         void _FinishLoading(unsigned int ilID);
-        void _FinishLoading(D3DFORMAT format, Color4<Uint8> const* data, std::size_t size, void const* mipmapData);
+        void _FinishLoading(Color4<Uint8> const* data, std::size_t size, void const* mipmapData);
     };
 
 }}}

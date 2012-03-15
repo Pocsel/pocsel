@@ -90,6 +90,16 @@ namespace Tools { namespace Renderers {
         cgD3D9SetDevice(this->_device);
         cgD3D9RegisterStates(this->_cgContext);
         cgD3D9SetManageTextureParameters(this->_cgContext, CG_TRUE);
+        cgD3D9EnableDebugTracing(true);
+
+        this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        //this->_device->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+        //this->_device->SetRenderState(D3DRS_ALPHAREF, 8);
+        this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+
+        this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+        this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+        this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 
         InitDevIL();
 
@@ -187,7 +197,7 @@ namespace Tools { namespace Renderers {
         this->_state = Draw3D;
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW));
         DXCHECKERROR(this->_device->BeginScene());
     }
 
@@ -203,8 +213,7 @@ namespace Tools { namespace Renderers {
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
-        if (this->_currentProgram != 0)
-            this->_currentProgram->UpdateCurrentPass();
+        this->_currentProgram->UpdateCurrentPass();
     }
 
     void DX9Renderer::DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode)
@@ -215,11 +224,11 @@ namespace Tools { namespace Renderers {
             DX9::IndexBuffer ib(*this);
             ib.SetData(indicesType, count * DataType::GetSize(indicesType), indices);
             ib.Bind();
-            // TODO
+            DXCHECKERROR(this->_device->DrawIndexedPrimitive(DX9::GetDrawingMode(mode), 0, 0, this->_vertexBuffer->GetVerticesCount(), 0, DX9::GetPrimitiveCount(mode, count)));
             ib.Unbind();
         }
         else
-            DXCHECKERROR(this->_device->DrawIndexedPrimitive(DX9::GetDrawingMode(mode), 0, 0, count, 0, DX9::GetPrimitiveCount(mode, count)));
+            DXCHECKERROR(this->_device->DrawIndexedPrimitive(DX9::GetDrawingMode(mode), 0, 0, this->_vertexBuffer->GetVerticesCount(), 0, DX9::GetPrimitiveCount(mode, count)));
         //GLCHECK(::glDrawElements(DX9::GetDrawingMode(mode), count, DX9::GetTypeFromDataType(indicesType), indices));
     }
 
