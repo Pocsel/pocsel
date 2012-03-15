@@ -18,13 +18,13 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct EntityType
         {
-            EntityType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& type) :
-                name(name), pluginId(pluginId), type(type)
+            EntityType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype) :
+                name(name), pluginId(pluginId), prototype(prototype)
             {
             }
-            std::string name;
+            std::string entityName;
             Uint32 pluginId;
-            Tools::Lua::Ref type;
+            Tools::Lua::Ref prototype;
         };
         struct Entity
         {
@@ -50,9 +50,9 @@ namespace Server { namespace Game { namespace Engine {
         void Save(Tools::Database::IConnection& conn);
         void BeginPluginRegistering(Uint32 pluginId);
         void EndPluginRegistering();
-        void CallEntityFunction(int entityId, std::string function, Tools::Lua::Ref const& args);
-        void TriggerCallback(CallbackManager::Callback const& callback);
-        int SpawnEntity(std::string name, Uint32 pluginId, Tools::Lua::Ref const& args) throw(std::runtime_error);
+        // retourne false uniquement si l'entité n'a pas été trouvée (retu
+        bool TriggerCallback(CallbackManager::Callback const& callback);
+        int SpawnEntity(std::string name, Uint32 pluginId, Tools::Lua::Ref const& args, int spawerId) throw(std::runtime_error);
         void BootstrapPlugin(Uint32 pluginId);
         int GetLastCalledEntityId() const;
     private:
