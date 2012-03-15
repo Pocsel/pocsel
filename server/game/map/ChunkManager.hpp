@@ -35,6 +35,7 @@ namespace Server { namespace Game { namespace Map {
         };
     private:
         Map& _map;
+        Tools::Database::IConnection& _conn;
 
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
         std::unordered_map<BigChunk::IdType, BigChunk> _inflatedChunksContainers;
@@ -52,7 +53,9 @@ namespace Server { namespace Game { namespace Map {
         std::list<std::pair<float, Chunk::IdType>> _priorities;
 
     public:
-        ChunkManager(Map& map, std::vector<Chunk::IdType> const& existingChunks);
+        ChunkManager(Map& map,
+                Tools::Database::IConnection& conn,
+                std::vector<Chunk::IdType> const& existingChunks);
         ~ChunkManager();
 
         void Save(Tools::Database::IConnection& conn);
@@ -73,7 +76,7 @@ namespace Server { namespace Game { namespace Map {
         // \/
         // _deflatedBigChunks
         // \/
-        void _MoveDeflatedBigToDb(BigChunk::IdType id);
+        void _MoveDeflatedBigToDb(BigChunk::IdType id); // does not push in db
         // \/
         // _dbBigChunks
 
@@ -106,7 +109,7 @@ namespace Server { namespace Game { namespace Map {
         void _PushDeflatedBig(BigChunk::IdType, Tools::ByteArray* array);
         Tools::ByteArray* _PopDeflatedBig(BigChunk::IdType);
 
-        void _PushDb(BigChunk::IdType, Tools::ByteArray* array);
+        void _PushDb(BigChunk::IdType); // does not push in db
         Tools::ByteArray* _PopDb(BigChunk::IdType);
     };
 
