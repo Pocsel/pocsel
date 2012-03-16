@@ -56,7 +56,7 @@ namespace {
         for (unsigned int y = 0, i = 0; y < size.h; y += size.w, ++i)
         {
             ilCopyPixels(0, y, 0, frameSize.w, frameSize.h, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
-            frames[i] = renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, frameSize.w * frameSize.h, pixmap, frameSize, 0).release();
+            frames[i] = renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, frameSize.w * frameSize.h * 4, pixmap, frameSize, 0).release();
         }
         delete pixmap;
         ilBindImage(0);
