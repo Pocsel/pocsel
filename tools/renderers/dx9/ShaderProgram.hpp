@@ -10,26 +10,26 @@ namespace Tools { namespace Renderers {
 
     namespace DX9 {
 
-        class ShaderProgramCg : public IShaderProgram
+        class ShaderProgram : public IShaderProgram
         {
         private:
             DX9Renderer& _renderer;
-            CGcontext _ctx;
-            CGeffect _effect;
-            CGtechnique _technique;
+            ID3DXEffect* _effect;
+            D3DXHANDLE _technique;
             int _nbTextures;
 
-            CGparameter _mvp;
-            CGparameter _mv;
-            CGparameter _model;
-            CGparameter _view;
-            CGparameter _projection;
+            D3DXHANDLE _mvp;
+            D3DXHANDLE _mv;
+            D3DXHANDLE _model;
+            D3DXHANDLE _view;
+            D3DXHANDLE _projection;
 
-            CGpass _pass;
+            UINT _pass;
+            UINT _passCount;
 
         public:
-            ShaderProgramCg(DX9Renderer& renderer, std::string const& effect);
-            virtual ~ShaderProgramCg();
+            ShaderProgram(DX9Renderer& renderer, std::string const& effect);
+            virtual ~ShaderProgram();
 
             virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier);
             virtual std::unique_ptr<IShaderParameter> GetParameterFromSemantic(std::string const& semantic);
@@ -39,8 +39,7 @@ namespace Tools { namespace Renderers {
             virtual void BeginPass();
             virtual bool EndPass();
 
-            CGcontext GetContext() const { return this->_ctx; }
-            CGeffect GetEffect() const { return this->_effect; }
+            ID3DXEffect* GetEffect() const { return this->_effect; }
         };
 
 }}}

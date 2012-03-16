@@ -32,8 +32,8 @@ namespace Tools { namespace Renderers {
         virtual void SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter);
 
     private:
-        void _FinishLoading(unsigned int ilID);
         void _FinishLoading(Color4<Uint8> const* data, std::size_t size, void const* mipmapData);
+        void _FinishLoading(unsigned int ilID);
     };
 
 }}}

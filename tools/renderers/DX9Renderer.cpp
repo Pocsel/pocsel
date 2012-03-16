@@ -6,7 +6,7 @@
 
 #include "tools/renderers/dx9/directx.hpp"
 #include "tools/renderers/dx9/IndexBuffer.hpp"
-#include "tools/renderers/dx9/ShaderProgramCg.hpp"
+#include "tools/renderers/dx9/ShaderProgram.hpp"
 #include "tools/renderers/dx9/Texture2D.hpp"
 #include "tools/renderers/dx9/VertexBuffer.hpp"
 #include "tools/renderers/DX9Renderer.hpp"
@@ -19,23 +19,6 @@
 namespace Tools { namespace Renderers {
 
     namespace {
-        CGcontext _cgGlobalContext = 0;
-        int _cgGlobalNbReferences = 0;
-
-        void ErrCallback()
-        {
-            auto error = cgGetError();
-            if (error == CG_NO_ERROR || error == CG_CANNOT_DESTROY_PARAMETER_ERROR)
-                return;
-            if (error == CG_COMPILER_ERROR)
-                Tools::error << "Cg compiler:\n" << cgGetLastListing(_cgGlobalContext) << "\n";
-            Tools::debug << "An internal Cg call failed (Code: " + ToString(error) + "): " + cgGetErrorString(cgGetError()) << std::endl;
-            throw std::runtime_error(
-                "An internal Cg call failed (Code: "
-                + ToString(error) + "): "
-                + cgGetErrorString(cgGetError()));
-        }
-
         void InitDevIL()
         {
             static bool initialized = false;
@@ -65,7 +48,7 @@ namespace Tools { namespace Renderers {
         if (this->_object == 0)
             throw std::runtime_error("DirectX: Could not create Direct3D Object");
 
-        Tools::log << "DirectX 9\n";
+        Tools::log << "Renderer: DirectX 9\n";
 
         D3DPRESENT_PARAMETERS present_parameters;
         std::memset(&present_parameters, 0, sizeof(present_parameters));
@@ -81,25 +64,12 @@ namespace Tools { namespace Renderers {
 
         DXCHECKERROR(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &present_parameters, &this->_device));
 
-        if (_cgGlobalContext == 0)
-            _cgGlobalContext = cgCreateContext();
-        this->_cgContext = _cgGlobalContext;
-        ++_cgGlobalNbReferences;
-        cgSetErrorCallback(&ErrCallback);
-        cgSetParameterSettingMode(this->_cgContext, CG_DEFERRED_PARAMETER_SETTING);
-        cgD3D9SetDevice(this->_device);
-        cgD3D9RegisterStates(this->_cgContext);
-        cgD3D9SetManageTextureParameters(this->_cgContext, CG_TRUE);
-        cgD3D9EnableDebugTracing(true);
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));
 
-        this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-        //this->_device->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-        //this->_device->SetRenderState(D3DRS_ALPHAREF, 8);
-        this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-
-        this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-        this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-        this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
 
         InitDevIL();
 
@@ -110,12 +80,6 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Shutdown()
     {
-        if (this->_useShaders && --_cgGlobalNbReferences == 0)
-        {
-            cgDestroyContext(this->_cgContext);
-            cgD3D9SetDevice(0);
-            _cgGlobalContext = 0;
-        }
         if (this->_device != 0)
             this->_device->Release();
         if (this->_object != 0)
@@ -144,7 +108,7 @@ namespace Tools { namespace Renderers {
 
     std::unique_ptr<IShaderProgram> DX9Renderer::CreateProgram(std::string const& effect)
     {
-        return std::unique_ptr<IShaderProgram>(new DX9::ShaderProgramCg(*this, effect));
+        return std::unique_ptr<IShaderProgram>(new DX9::ShaderProgram(*this, effect));
     }
 
     /*
@@ -229,7 +193,6 @@ namespace Tools { namespace Renderers {
         }
         else
             DXCHECKERROR(this->_device->DrawIndexedPrimitive(DX9::GetDrawingMode(mode), 0, 0, this->_vertexBuffer->GetVerticesCount(), 0, DX9::GetPrimitiveCount(mode, count)));
-        //GLCHECK(::glDrawElements(DX9::GetDrawingMode(mode), count, DX9::GetTypeFromDataType(indicesType), indices));
     }
 
     void DX9Renderer::DrawVertexBuffer(Uint32 offset, Uint32 count, DrawingMode::Type mode)

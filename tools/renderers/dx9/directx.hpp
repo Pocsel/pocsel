@@ -2,8 +2,7 @@
 
 #define D3D_DEBUG_INFO
 
-#include <Cg/cg.h>
-#include <Cg/cgD3D9.h>
+#include <d3dx9.h>
 
 #include "DxErr.h"
 

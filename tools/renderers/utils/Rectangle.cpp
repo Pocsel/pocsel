@@ -48,8 +48,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             this->_point4.x, this->_point4.y, this->_point4.z,
             this->_point4Color.r, this->_point4Color.g, this->_point4Color.b, this->_point4Color.a
         };
-        this->_vertexBuffer->SetSubData(0, sizeof(vertices), vertices);
-
+        this->_vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
     }
 
 }}}
