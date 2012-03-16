@@ -12,7 +12,7 @@ namespace Client { namespace Menu {
     Menu::Menu(Client& client) :
         _client(client)
     {
-        this->_font = &client.GetLocalResourceManager().GetFont("Acme_7_Wide.ttf", 10);
+        this->_font = &client.GetLocalResourceManager().GetFont("Acme_7_Wide.ttf", 20);
         this->_fontShader = &client.GetLocalResourceManager().GetShader("Fonts.cgfx");
         this->_fontColor = this->_fontShader->GetParameter("color").release();
         this->_fontTexture = this->_fontShader->GetParameter("fontTex").release();

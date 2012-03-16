@@ -198,7 +198,7 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::DrawVertexBuffer(Uint32 offset, Uint32 count, DrawingMode::Type mode)
     {
         this->UpdateCurrentParameters();
-        DXCHECKERROR(this->_device->DrawPrimitive(DX9::GetDrawingMode(mode), offset, count));
+        DXCHECKERROR(this->_device->DrawPrimitive(DX9::GetDrawingMode(mode), offset, DX9::GetPrimitiveCount(mode, count)));
     }
 
     // Matrices

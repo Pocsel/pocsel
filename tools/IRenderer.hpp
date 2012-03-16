@@ -146,7 +146,6 @@ namespace Tools {
             virtual ~ITexture2D() {}
             virtual Vector2u const& GetSize() const = 0;
             virtual bool HasAlpha() const = 0;
-            virtual void SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter) = 0;
             virtual void Bind() = 0;
             virtual void Unbind() = 0;
 
