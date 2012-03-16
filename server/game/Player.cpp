@@ -39,4 +39,9 @@ namespace Server { namespace Game {
             this->_currentMap->RemovePlayer(this->id);
     }
 
+    void Player::Move(Common::Camera const& cam, Tools::Vector3f const& movement)
+    {
+
+    }
+
 }}

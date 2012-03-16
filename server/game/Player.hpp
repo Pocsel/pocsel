@@ -25,7 +25,7 @@ namespace Server { namespace Game {
         Uint32 _viewDistance;
         Map::Map* _currentMap;
         bool _inGame;
-        Common::Position _position;
+        Common::MovingCamera _position;
 
     public:
         Player(Game& game, Uint32 id, std::string const& playerName, Uint32 viewDistance);
@@ -39,6 +39,7 @@ namespace Server { namespace Game {
         void Teleport(Map::Map& map, Common::Position const& position);
         void TeleportOk();
         void RemoveFromMap();
+        void Player::Move(Common::Camera const& cam, Tools::Vector3f const& movement);
     };
 
 }}

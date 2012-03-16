@@ -130,10 +130,11 @@ namespace Server { namespace ClientManagement {
 //            Tools::debug << "_HandleMove (client " << client.id << ")\n";
 
             Common::Camera cam;
+            Tools::Vector3f movement;
 
-            Network::PacketExtractor::Move(packet, cam);
+            Network::PacketExtractor::Move(packet, cam, movement);
 
-//            manager.GetServer().GetGame().PlayerMove(client.id, cam);
+            manager.GetServer().GetGame().PlayerMove(client.id, cam, movement);
         }
 
         void _HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)

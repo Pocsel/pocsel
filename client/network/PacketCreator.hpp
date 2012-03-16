@@ -28,7 +28,9 @@ namespace Client { namespace Network {
         static std::unique_ptr<Common::Packet> Settings(Settings const& settings);
         static std::unique_ptr<Common::Packet> TeleportOk();
 
-        static std::unique_ptr<UdpPacket> Move(Uint32 id, Common::Camera const& cam);
+        static std::unique_ptr<UdpPacket> Move(Uint32 id,
+                                               Common::Camera const& cam,
+                                               Tools::Vector3f const& movement);
         static std::unique_ptr<UdpPacket> Action(Uint32 id,
                                                  Common::Camera const& cam,
                                                  Common::CubePosition const& target,

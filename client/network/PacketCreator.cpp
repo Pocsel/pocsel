@@ -86,12 +86,15 @@ namespace Client { namespace Network {
     }
 
 
-    std::unique_ptr<UdpPacket> PacketCreator::Move(Uint32 id, Common::Camera const& cam)
+    std::unique_ptr<UdpPacket> Move(Uint32 id,
+                                    Common::Camera const& cam,
+                                    Tools::Vector3f const& movement)
     {
         std::unique_ptr<UdpPacket> p(new UdpPacket(id));
         p->Write(Protocol::ClientToServer::Move);
 
         p->Write(cam);
+        p->Write(movement);
         return p;
     }
 

@@ -59,6 +59,19 @@ namespace Server { namespace Game {
         player->TeleportOk();
     }
 
+    void Game::PlayerMove(Uint32 id, Common::Camera const& cam, Tools::Vector3f const& movement)
+    {
+        auto it = this->_players.find(id);
+        if (it == this->_players.end())
+            return;
+        Player* player = it->second.get();
+
+        if (!player->IsInGame())
+            return;
+
+        player->GetCurrentMap().MovePlayer(id, cam, movement);
+    }
+
     void Game::PlayerAction(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos)
     {
         auto it = this->_players.find(id);

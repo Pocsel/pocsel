@@ -69,9 +69,10 @@ namespace Server { namespace Network {
     {
     }
 
-    void PacketExtractor::Move(Common::Packet const& p, Common::Camera& cam)
+    void PacketExtractor::Move(Common::Packet const& p, Common::Camera& cam, Tools::Vector3f& movement)
     {
         p.Read(cam);
+        p.Read(movement);
     }
 
     void PacketExtractor::Action(Common::Packet const& p, Common::Camera& cam, Common::CubePosition& cubePos, Uint32& actionId)

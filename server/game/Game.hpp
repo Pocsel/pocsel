@@ -49,6 +49,7 @@ namespace Server { namespace Game {
         Server& GetServer() { return this->_server; }
 
         void PlayerTeleportOk(Uint32 id);
+        void PlayerMove(Uint32 id, Common::Camera const& cam, Tools::Vector3f const& movement);
         void PlayerAction(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos);
         void PlayerAction2(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos);
 

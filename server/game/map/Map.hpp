@@ -82,6 +82,7 @@ namespace Server { namespace Game { namespace Map {
         void DestroyCubes(std::vector<Common::CubePosition> const& pos);
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
+        void MovePlayer(Uint32 id,
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
