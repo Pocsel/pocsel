@@ -19,29 +19,34 @@ float4 fs(in VSout v) : COLOR
    return v.color;
 }
 
+#ifndef DIRECTX
+
+technique tech_glsl
+{
+	pass p0
+	{
+		VertexProgram = compile glslv vs();
+        FragmentProgram = compile glslf fs();
+	}
+}
+technique tech
+{
+	pass p0
+	{
+		VertexProgram = compile arbvp1 vs();
+        FragmentProgram = compile arbfp1 fs();
+	}
+}
+
+#else
+
 technique tech
 {
    pass p0
    {
-       VertexProgram = compile glslv vs();
-       FragmentProgram = compile glslf fs();
+       VertexShader = compile vs_2_0 vs();
+       PixelShader = compile ps_2_0 fs();
    }
 }
 
-technique tech_arb
-{
-   pass p0
-   {
-       VertexProgram = compile arbvp1 vs();
-       FragmentProgram = compile arbfp1 fs();
-   }
-}
-
-technique tech_dx9
-{
-   pass p0
-   {
-       VertexProgram = compile vs_2_0 vs();
-       FragmentProgram = compile ps_2_0 fs();
-   }
-}
+#endif

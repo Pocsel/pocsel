@@ -36,7 +36,6 @@ namespace Tools { namespace Renderers {
         bool _useShaders;
         DrawState _state;
 
-        CGcontext _cgContext;
         LPDIRECT3D9 _object;
         LPDIRECT3DDEVICE9 _device;
 
@@ -106,7 +105,6 @@ namespace Tools { namespace Renderers {
             this->_modelViewProjection = this->_model * this->_view * this->_projection;
         }
         void SetVertexBuffer(DX9::VertexBuffer& vb) { this->_vertexBuffer = &vb; }
-        CGcontext GetCgContext() const { return this->_cgContext; }
         LPDIRECT3DDEVICE9 GetDevice() const { return this->_device; }
         void Present();
     };

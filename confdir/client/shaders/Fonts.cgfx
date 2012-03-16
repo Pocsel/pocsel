@@ -24,7 +24,9 @@ float4 fs(in float2 texCoord : TEXCOORD0) : COLOR
 	return c;
 }
 
-technique tech
+#ifndef DIRECTX
+
+technique tech_glsl
 {
 	pass p0
 	{
@@ -32,12 +34,24 @@ technique tech
         FragmentProgram = compile glslf fs();
 	}
 }
+technique tech
+{
+	pass p0
+	{
+		VertexProgram = compile arbvp1 vs();
+        FragmentProgram = compile arbfp1 fs();
+	}
+}
 
-technique tech_dx9
+#else
+
+technique tech
 {
    pass p0
    {
-       VertexProgram = compile vs_2_0 vs();
-       FragmentProgram = compile ps_2_0 fs();
+       VertexShader = compile vs_2_0 vs();
+       PixelShader = compile ps_2_0 fs();
    }
 }
+
+#endif

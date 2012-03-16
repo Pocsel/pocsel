@@ -5,17 +5,18 @@
 
 namespace Tools { namespace Renderers { namespace DX9 {
 
-    class ShaderProgramCg;
+    class ShaderProgram;
 
-    class ShaderParameterCg : public IShaderParameter
+    class ShaderParameter : public IShaderParameter
     {
     private:
-        CGparameter _param;
+        ID3DXEffect* _effect;
+        D3DXHANDLE _param;
 
     public:
-        ShaderParameterCg(ShaderProgramCg& program, std::string const& identifier);
-        ShaderParameterCg(ShaderProgramCg& program, CGparameter parameter);
-        virtual ~ShaderParameterCg();
+        ShaderParameter(ShaderProgram& program, std::string const& identifier);
+        ShaderParameter(ShaderProgram& program, D3DXHANDLE parameter);
+        virtual ~ShaderParameter();
 
         virtual void Set(bool value);
         virtual void Set(int value);
