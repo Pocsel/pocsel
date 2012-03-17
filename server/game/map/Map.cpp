@@ -287,7 +287,12 @@ namespace Server { namespace Game { namespace Map {
 
         this->_players[id]->SetPosition(pos);
 
-        // TODO trucs
+        // XXX
+        //for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+        //{
+        //    auto toto = Network::PacketCreator::Chunk(*chunk);
+        //    this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
+        //}
     }
 
     void Map::_DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos)
@@ -319,9 +324,10 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_SendChunkToPlayers(Chunk* chunk)
     {
+        auto packet = Network::PacketCreator::Chunk(*chunk);
         for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
         {
-            auto toto = Network::PacketCreator::Chunk(*chunk);
+            auto toto = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
             this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
         }
     }
