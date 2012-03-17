@@ -6,6 +6,7 @@
 #include "tools/database/IConnection.hpp"
 
 #include "tools/zlib/Worker.hpp"
+#include "tools/Timer.hpp"
 
 #include "server/network/ChunkSerializer.hpp"
 
@@ -61,8 +62,24 @@ namespace Server { namespace Game { namespace Map {
 
         std::unordered_map<BigChunk::IdType, Tools::ByteArray*> deflatedBigChunks;
 
+        float totalInflatedSize = 0;
+        float totalDeflatedSize = 0;
+        Tools::Timer t;
+
         for (auto it = bigChunks.begin(), ite = bigChunks.end(); it != ite; ++it)
+        {
+            totalInflatedSize += it->second->GetSize();
             deflatedBigChunks[it->first] = this->_DeflateBigChunk(*it->second);
+            totalDeflatedSize += deflatedBigChunks[it->first]->GetSize();
+        }
+
+        std::cout << "TOTAL INFLATED SIZE: " << totalInflatedSize << "\n";
+        std::cout << "TOTAL DEFLATED SIZE: " << totalDeflatedSize << "\n";
+        std::cout << "TOTAL SIZE LEFT: " << (totalDeflatedSize / totalInflatedSize) * 100.0f << "%\n";
+        float time = (float)t.GetPreciseElapsedTime() / 1000000.0f;
+        std::cout << "TOTAL TIME: " << time << "s\n";
+        std::cout << "OCTETS PAR SECONDE: " << totalInflatedSize / time << "o.s-1\n";
+        std::cout << "TAUX DE COMPRESSION PAR OCTETS PAR SECONDE: " << ((totalInflatedSize - totalDeflatedSize) / totalInflatedSize) * (totalInflatedSize / time) << "zlarg\n";
 
         auto query = conn.CreateQuery(std::string("REPLACE INTO ") + this->_map.GetName() + "_bigchunk (id, data) VALUES (?, ?)");
 
@@ -280,7 +297,7 @@ namespace Server { namespace Game { namespace Map {
         char* deflatedData;
         unsigned int deflatedDataSize;
 
-        Tools::Zlib::Worker w(6);
+        Tools::Zlib::Worker w(_deflateLevel);
         w.Deflate(bigChunk.GetData(), bigChunk.GetSize(), (void*&)deflatedData, deflatedDataSize);
 
         Tools::ByteArray* deflatedBigChunk = new Tools::ByteArray();
@@ -288,8 +305,9 @@ namespace Server { namespace Game { namespace Map {
 
         Tools::Delete(deflatedData);
 
-        std::cout << "3Chunk before compression: " << bigChunk.GetSize() << " bytes, "
-            "3Chunk after compression: " << deflatedDataSize << " bytes\n";
+
+        float size = (float)deflatedDataSize / (float)bigChunk.GetSize();
+        std::cout << "3Chunk Compression: " << size * 100.0f << "%\n";
 
         return deflatedBigChunk;
     }
@@ -299,7 +317,7 @@ namespace Server { namespace Game { namespace Map {
         char* inflatedData;
         unsigned int inflatedDataSize;
 
-        Tools::Zlib::Worker w(6);
+        Tools::Zlib::Worker w(_deflateLevel);
         w.Inflate(deflatedBigChunk.GetData(), deflatedBigChunk.GetSize(), (void*&)inflatedData, inflatedDataSize);
 
         Tools::ByteArray* bigChunk = new Tools::ByteArray();

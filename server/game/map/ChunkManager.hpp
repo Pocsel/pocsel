@@ -52,6 +52,8 @@ namespace Server { namespace Game { namespace Map {
 
         std::list<std::pair<float, Chunk::IdType>> _priorities;
 
+        static const int _deflateLevel = 9;
+
     public:
         ChunkManager(Map& map,
                 Tools::Database::IConnection& conn,
