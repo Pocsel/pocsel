@@ -287,7 +287,6 @@ namespace Server { namespace Game { namespace Map {
 
         this->_players[id]->SetPosition(pos);
 
-        // XXX
         //for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
         //{
         //    auto toto = Network::PacketCreator::Chunk(*chunk);

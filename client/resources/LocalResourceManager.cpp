@@ -22,14 +22,14 @@ namespace Client { namespace Resources {
     LocalResourceManager::~LocalResourceManager()
     {
         std::for_each(this->_textures.begin(), this->_textures.end(),
-            [](std::pair<std::string, Tools::Renderers::ITexture2D*> const& pair)
+            [](std::pair<std::string, Tools::Renderers::ITexture2D*>&& pair)
             {
-                delete pair.second;
+                Tools::Delete(pair.second);
             });
         std::for_each(this->_shaders.begin(), this->_shaders.end(),
-            [](std::pair<std::string, Tools::Renderers::IShaderProgram*> const& pair)
+            [](std::pair<std::string, Tools::Renderers::IShaderProgram*>&& pair)
             {
-                delete pair.second;
+                Tools::Delete(pair.second);
             });
     }
 

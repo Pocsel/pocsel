@@ -40,7 +40,7 @@ namespace Client { namespace Game {
         this->_player->SetPosition(position);
         if (this->_map != 0 && this->_map->GetName() != map)
         {
-            delete this->_map;
+            Tools::Delete(this->_map);
             this->_map = 0;
         }
         if (this->_map == 0)

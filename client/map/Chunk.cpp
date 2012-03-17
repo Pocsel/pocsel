@@ -24,7 +24,7 @@ namespace Client { namespace Map {
     void Chunk::SetMesh(std::unique_ptr<ChunkMesh> mesh)
     {
         if (this->_mesh != 0)
-            delete this->_mesh;
+            Tools::Delete(this->_mesh);
         this->_mesh = mesh.release();
     }
 }}

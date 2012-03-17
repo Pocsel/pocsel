@@ -140,7 +140,7 @@ namespace Client {
         this->_clientId = clientId;
         this->_state = LoadingResources;
         if (this->_game)
-            delete this->_game;
+            Tools::Delete(this->_game);
         this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes, worldBuildHash);
     }
 
@@ -162,7 +162,7 @@ namespace Client {
         if (this->_network.IsRunning())
             this->_network.Stop();
         this->_menu->GetDisconnectedScreen().SetMessage(reason);
-        delete this->_game;
+        Tools::Delete(this->_game);
         this->_game = 0;
         this->_state = Disconnected;
     }
