@@ -1,41 +1,62 @@
 #include "server/game/engine/CallbackManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
+#include "tools/lua/Interpreter.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
     CallbackManager::CallbackManager(Engine& engine) :
-        _engine(engine), _currentCallbackId(0)
+        _engine(engine),
+        _nextCallbackId(1) // la première callback sera la 1, 0 est la valeur spéciale "pas de callback"
     {
     }
 
     CallbackManager::~CallbackManager()
     {
+        auto it = this->_callbacks.begin();
+        auto itEnd = this->_callbacks.end();
+        for (; it != itEnd; ++it)
+            Tools::Delete(it->second);
     }
 
-    Uint32 CallbackManager::MakeCallback(int targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg)
+    Uint32 CallbackManager::MakeCallback(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, bool serialize /* = true */)
     {
-        while (this->_callbacks.count(this->_currentCallbackId))
-            ++this->_currentCallbackId;
-        this->_callbacks[this->_currentCallbackId] = new Callback(targetId, function, arg, bonusArg);
-        return this->_currentCallbackId++;
+        while (!this->_nextCallbackId // 0 est la valeur spéciale "pas de callback", on la saute
+                && this->_callbacks.count(this->_nextCallbackId))
+            ++this->_nextCallbackId;
+        this->_callbacks[this->_nextCallbackId] = new Callback(targetId, function,
+                serialize ? this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(arg, true) : arg);
+        return this->_nextCallbackId++;
     }
 
-    bool CallbackManager::TriggerCallback(Uint32 callbackId)
+    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, bool keepCallback /* = false */)
     {
+        return this->TriggerCallback(callbackId, this->_engine.GetInterpreter().MakeNil(), keepCallback);
+    }
+
+    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, bool keepCallback /* = false */)
+    {
+        if (!callbackId)
+            return Ok;
         auto it = this->_callbacks.find(callbackId);
         if (it != this->_callbacks.end())
         {
-            this->_engine.GetEntityManager().TriggerCallback(*it->second);
-            delete it->second;
-            this->_callbacks.erase(it);
-            return true;
+            Result ret = this->_engine.GetEntityManager().LuaFunctionCall(it->second->targetId, it->second->function, it->second->arg, bonusArg);
+            if (!keepCallback)
+            {
+                delete it->second;
+                this->_callbacks.erase(it);
+            }
+            return ret;
         }
-        return false;
+        Tools::error << "CallbackManager::TriggerCallback: Callback " << callbackId << " not found.\n";
+        return CallbackNotFound;
     }
 
     bool CallbackManager::CancelCallback(Uint32 callbackId)
     {
+        if (!callbackId)
+            return true;
         auto it = this->_callbacks.find(callbackId);
         if (it != this->_callbacks.end())
         {
@@ -43,6 +64,7 @@ namespace Server { namespace Game { namespace Engine {
             this->_callbacks.erase(it);
             return true;
         }
+        Tools::error << "CallbackManager::CancelCallback: Callback " << callbackId << " not found.\n";
         return false;
     }
 

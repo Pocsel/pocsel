@@ -122,6 +122,11 @@ namespace Tools { namespace Lua {
             throw std::runtime_error("Lua::Ref: Indexing a value that is not a table");
         }
         index.ToStack();
+        if (lua_isnoneornil(this->_state, -1))
+        {
+            lua_pop(this->_state, 2);
+            throw std::runtime_error("Lua::Ref: Using nil as an index");
+        }
         lua_rawget(this->_state, -2);
         Ref ret(this->_state);
         ret.FromStack();
@@ -138,6 +143,11 @@ namespace Tools { namespace Lua {
             throw std::runtime_error("Lua::Ref: Indexing a value that is not a table");
         }
         key.ToStack();
+        if (lua_isnoneornil(this->_state, -1))
+        {
+            lua_pop(this->_state, 2);
+            throw std::runtime_error("Lua::Ref: Using nil as an index");
+        }
         value.ToStack();
         lua_rawset(this->_state, -3);
         lua_pop(this->_state, 1);

@@ -2,44 +2,44 @@
 
 namespace Common {
 
-    static bool FieldValidator::IsAlNum(std::string const& str)
+    bool FieldValidator::IsAlNum(std::string const& str)
     {
-        return this->_IsAlNum(str, "");
+        return FieldValidator::_IsAlNum(str, "");
     }
 
-    static bool FieldValidator::IsAlNumDash(std::string const& str)
+    bool FieldValidator::IsAlNumDash(std::string const& str)
     {
-        return this->_IsAlNum(str, "-");
+        return FieldValidator::_IsAlNum(str, "-");
     }
 
-    static bool FieldValidator::IsAlNumUnderscore(std::string const& str)
+    bool FieldValidator::IsAlNumUnderscore(std::string const& str)
     {
-        return this->_IsAlNum(str, "_");
+        return FieldValidator::_IsAlNum(str, "_");
     }
 
-    static bool FieldValidator::IsAlNumDashUnderscore(std::string const& str)
+    bool FieldValidator::IsAlNumDashUnderscore(std::string const& str)
     {
-        return this->_IsAlNum(str, "-_");
+        return FieldValidator::_IsAlNum(str, "-_");
     }
 
-    static bool FieldValidator::IsPluginIdentifier(std::string const& str)
+    bool FieldValidator::IsPluginIdentifier(std::string const& str)
     {
-        return this->IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
+        return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
-    static bool FieldValidator::IsPluginFullname(std::string const& str)
+    bool FieldValidator::IsPluginFullname(std::string const& str)
     {
         return str.size() <= 100;
     }
 
-    static bool FieldValidator::IsEntityType(std::string const& str)
+    bool FieldValidator::IsEntityType(std::string const& str)
     {
-        return this->IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
+        return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
-    static bool FieldValidator::IsMapName(std::string const& str)
+    bool FieldValidator::IsMapName(std::string const& str)
     {
-        return this->IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
+        return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
     bool FieldValidator::_IsAlNum(std::string const& str, std::string const& allowed)

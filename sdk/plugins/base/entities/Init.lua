@@ -1,12 +1,20 @@
 Server.Entity.Register{
-    name = "Init",
-    Spawn = function(entity, this)
-        print("Entity Init du plugin base.")
-        S.Event.CallLater(2, this.id, "_EventTest", { biteBite = "sdfgsdfg" })
+    entityName = "Init",
+    Spawn = function(self)
+        self:Method()
+        Server.Call.Later(5, self.id, "EventTest", 1)
     end,
-    _EventTest = function(entity, this, args)
-        print(args.biteBite);
-        S.Event.CallLater(2, this.id, "_EventTest", { biteBite = args.biteBite .. "TEST" })
+    Method = function(self)
+        print("hey from " .. self.entityName)
+        print("prototype " .. self.prototype.entityName, self.prototype.id)
+    end,
+    EventTest = function(self, nbCalls)
+        print(nbCalls)
+        Server.Call.Later(5, self.id, "EventTest", nbCalls, self.id, "Notify", "Test!")
+    end,
+    Notify = function(self, arg)
+        print(arg)
+        Server.Call.Now(self.id, function() end)
     end,
 }
 
