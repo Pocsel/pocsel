@@ -6,7 +6,6 @@
 #include "common/BaseChunk.hpp"
 
 namespace Common {
-    struct Camera;
     struct CubeType;
 }
 

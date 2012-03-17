@@ -23,6 +23,9 @@ namespace Server { namespace Game {
     class World :
         private boost::noncopyable
     {
+    public:
+        boost::mutex saveMutex;
+
     private:
         Game& _game;
         Tools::SimpleMessageQueue& _messageQueue;

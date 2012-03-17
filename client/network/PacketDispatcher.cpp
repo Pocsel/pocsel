@@ -68,7 +68,7 @@ namespace Client { namespace Network {
         for (auto it = packets.begin(), ite = packets.end(); it != ite; ++it)
         {
             this->_ProcessPacket(**it);
-            delete *it;
+            Tools::Delete(*it);
         }
     }
 

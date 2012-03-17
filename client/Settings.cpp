@@ -147,6 +147,7 @@ namespace Client {
             this->res.y = _LuaGetGlobal<unsigned int>(i, "resY", 600);
             this->fullscreen = _LuaGetGlobal<bool>(i, "fullscreen", false);
             this->useShaders = _LuaGetGlobal<bool>(i, "useShaders", true);
+            this->useDirect3D9 = _LuaGetGlobal<bool>(i, "useDirect3D9", true);
             this->mouseSensitivity = _LuaGetGlobal<float>(i, "mouseSensitivity", 0.707f);
             if (this->mouseSensitivity > 1)
                 this->mouseSensitivity = 1;

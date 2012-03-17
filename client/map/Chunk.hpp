@@ -4,9 +4,6 @@
 #include "common/BaseChunk.hpp"
 #include "client/map/ChunkMesh.hpp"
 
-namespace Common {
-    struct Camera;
-}
 namespace Client { namespace Map {
     class Map;
 }}

@@ -15,6 +15,8 @@ namespace Common {
     class Packet : public Tools::ByteArray
     {
     public:
+        static const size_t maxSize = (1 << 16) - 2;
+    public:
         explicit Packet();
         explicit Packet(Packet const& packet);
         virtual ~Packet();

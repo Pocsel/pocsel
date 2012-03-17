@@ -1,9 +1,7 @@
 #ifndef __CLIENT_NETWORK_NETWORK_HPP__
 #define __CLIENT_NETWORK_NETWORK_HPP__
 
-namespace Common {
-    class Packet;
-}
+#include "common/Packet.hpp"
 
 namespace Client { namespace Network {
 
@@ -13,30 +11,53 @@ namespace Client { namespace Network {
         private boost::noncopyable
     {
     private:
+        struct InQueue
+        {
+        private:
+            std::list<Common::Packet*> _list;
+            boost::mutex _mutex;
+        public:
+            void PushPacket(Common::Packet* p)
+            {
+                boost::lock_guard<boost::mutex> lock(_mutex);
+                _list.push_back(p);
+            }
+            std::list<Common::Packet*> StealPackets()
+            {
+                boost::lock_guard<boost::mutex> lock(_mutex);
+                return std::move(_list);
+            }
+            void Clear()
+            {
+                std::for_each(this->_list.begin(), this->_list.end(), [](Common::Packet* p) { Tools::Delete(p); });
+                this->_list.clear();
+            }
+            ~InQueue()
+            {
+                this->Clear();
+            }
+        };
+    private:
         boost::asio::io_service _ioService;
         boost::asio::ip::tcp::socket _socket;
         boost::asio::ip::udp::socket _udpSocket;
         boost::thread* _thread;
         std::vector<char> _sizeBuffer;
         std::vector<char> _dataBuffer;
-        std::list<Common::Packet*> _outQueue; // protected by _outMutex
-        std::list<Common::Packet*> _inQueue; // protected by _inMutex
-        boost::mutex _outMutex;
-        boost::mutex _inMutex;
-        mutable boost::mutex _metaMutex;
-        bool _sending; // protected by _outMutex
+        std::list<Common::Packet*> _outQueue;
+        InQueue _inQueue;
+        bool _sending;
         std::string _host;
         std::string _port;
-        bool _isConnected; // protected by _metaMutex
-        bool _isRunning; // protected by _metaMutex
-        std::string _lastError; // protected by _metaMutex
+        bool _isConnected;
+        bool _isRunning;
+        std::string _lastError;
         float _loading;
 
         std::vector<char> _dataBufferUdp;
-        std::list<UdpPacket*> _outQueueUdp; // protected by _outMutexUdp
-        boost::mutex _outMutexUdp;
-        bool _sendingUdp; // protected by _outMutexUdp
-        bool _udp; // protected by _metaMutex
+        std::list<UdpPacket*> _outQueueUdp;
+        bool _sendingUdp;
+        bool _udp;
 
     public:
         Network();
@@ -49,10 +70,13 @@ namespace Client { namespace Network {
         std::list<Common::Packet*> GetInPackets();
         std::string const& GetHost() const { return this->_host; }
         std::string const& GetPort() const { return this->_port; }
-        bool IsRunning() const { boost::lock_guard<boost::mutex> lock(this->_metaMutex); return this->_isRunning; }
-        bool IsConnected() const { boost::lock_guard<boost::mutex> lock(this->_metaMutex); return this->_isConnected; }
-        std::string GetLastError() const { boost::lock_guard<boost::mutex> lock(this->_metaMutex); return this->_lastError; }
+        bool IsRunning() const { return this->_isRunning; }
+        bool IsConnected() const { return this->_isConnected; }
+        std::string GetLastError() const { return this->_lastError; }
+
     private:
+        void _SendPacket(std::shared_ptr<Common::Packet> p);
+        void _SendUdpPacket(std::shared_ptr<UdpPacket> packet);
         void _Run();
         void _Connect(std::string host, std::string port);
         void _CloseSocket();

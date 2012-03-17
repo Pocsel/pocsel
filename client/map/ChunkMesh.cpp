@@ -143,14 +143,14 @@ namespace Client { namespace Map {
 //            chunkBottom == 0)
 //        {
 //            this->_tmpNbVertices = 0;
-//            delete [] this->_tmpVertices;
+//            Tools::Delete([] this->_tmpVertices);
 //            this->_tmpVertices = 0;
 //            this->_tmpIndices.clear();
 //            return false;
 //        }
 
         this->_tmpNbVertices = 0;
-        delete [] this->_tmpVertices;
+        Tools::DeleteTab(this->_tmpVertices);
         this->_tmpVertices = 0;
         this->_tmpIndices.clear();
 
@@ -282,7 +282,7 @@ namespace Client { namespace Map {
         boost::lock_guard<boost::mutex> lock(this->_refreshMutex, boost::adopt_lock);
         // on clear tout
         this->_meshes.clear();
-        delete this->_vertices;
+        Tools::Delete(this->_vertices);
         this->_vertices = 0;
         this->_triangleCount = 0;
 
@@ -306,7 +306,7 @@ namespace Client { namespace Map {
             this->_meshes[it->first] = std::move(m);
         }
 
-        delete [] this->_tmpVertices;
+        Tools::DeleteTab(this->_tmpVertices);
         this->_tmpVertices = 0;
         this->_tmpIndices.clear();
         return true;

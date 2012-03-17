@@ -17,7 +17,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         _hasAlpha(false),
         _texture(0)
     {
-        if (format == PixelFormat::Png)
+        if (format == PixelFormat::Png && mipmapData == 0)
         {
             ILuint ilID;
             ilGenImages(1, &ilID);
@@ -32,8 +32,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         }
         else if (format == PixelFormat::Rgba8)
         {
+            DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), imgSize.w, imgSize.h, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
             this->_size = imgSize;
-            this->_FinishLoading(reinterpret_cast<Color4<Uint8> const*>(data), size / 4, mipmapData);
+            this->_FinishLoading((Color4<Uint8> const*)data, size, mipmapData);
         }
         else
             throw std::runtime_error("Unsupported texture format");
@@ -44,16 +45,16 @@ namespace Tools { namespace Renderers { namespace DX9 {
         _hasAlpha(false),
         _texture(0)
     {
-        ILuint ilID;
-        ilGenImages(1, &ilID);
-        ilBindImage(ilID);
-        if (!ilLoad(IL_PNG, imagePath.c_str()) && !ilLoad(IL_TYPE_UNKNOWN, imagePath.c_str()))
-        {
-            ilBindImage(0);
-            ilDeleteImage(ilID);
-            throw std::runtime_error("Texture2D::ctor: Can't load image.");
-        }
-        this->_FinishLoading(ilID);
+            ILuint ilID;
+            ilGenImages(1, &ilID);
+            ilBindImage(ilID);
+            if (!ilLoad(IL_PNG, imagePath.c_str()) && !ilLoad(IL_TYPE_UNKNOWN, imagePath.c_str()))
+            {
+                ilBindImage(0);
+                ilDeleteImage(ilID);
+                throw std::runtime_error("Texture2D::ctor: Can't load image file: " + imagePath);
+            }
+            this->_FinishLoading(ilID);
     }
 
     void Texture2D::_FinishLoading(unsigned int ilID)
@@ -75,23 +76,28 @@ namespace Tools { namespace Renderers { namespace DX9 {
         ilBindImage(0);
         ilDeleteImage(ilID);
 
+        DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), this->_size.w, this->_size.h, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
         this->_FinishLoading(pixmap, size, 0);
         delete [] pixmap;
     }
 
     void Texture2D::_FinishLoading(Color4<Uint8> const* data, std::size_t size, void const* mipmapData)
     {
-        DXCHECKERROR(this->_renderer.GetDevice()->CreateTexture(this->_size.w, this->_size.h, 0, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &this->_texture, 0));
         D3DLOCKED_RECT lockRect;
         DXCHECKERROR(this->_texture->LockRect(0, &lockRect, 0, 0));
         Uint8* ptr = reinterpret_cast<Uint8*>(lockRect.pBits);
-        for (int i = 0, j = 0; i < size; ++i, j += 4)
+        for (int y = 0; y < this->_size.h; ++y)
         {
-            this->_hasAlpha = this->_hasAlpha || (data[i].a != 255);
-            ptr[j + 0] = data[i].b;
-            ptr[j + 1] = data[i].g;
-            ptr[j + 2] = data[i].r;
-            ptr[j + 3] = data[i].a;
+            for (int x = 0; x < this->_size.w; ++x)
+            {
+                int i = y * this->_size.w + x;
+                this->_hasAlpha = this->_hasAlpha || (data[i].a != 255);
+                ptr[x * 4 + 0] = data[i].b;
+                ptr[x * 4 + 1] = data[i].g;
+                ptr[x * 4 + 2] = data[i].r;
+                ptr[x * 4 + 3] = data[i].a;
+            }
+            ptr += lockRect.Pitch;
         }
         DXCHECKERROR(this->_texture->UnlockRect(0));
 
@@ -115,6 +121,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
                 idx += vsize.w * vsize.h * 4;
             }
         }
+        else
+            this->_texture->GenerateMipSubLevels();
     }
 
     Texture2D::~Texture2D()

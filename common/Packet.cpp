@@ -12,8 +12,10 @@ namespace Common {
     Packet::Packet(Packet const& packet) :
         Tools::ByteArray()
     {
+        this->_data = this->_data + 2;
+        this->_allocSize -= 2;
         this->_Resize(packet._allocSize);
-        ::memcpy(this->_data - 2, packet._data - 2, packet._allocSize + 2);
+        ::memcpy(this->_data - 2, packet._data - 2, packet._size + 2);
         this->_allocSize = packet._allocSize;
         this->_size = packet._size;
         this->_offset = packet._offset;

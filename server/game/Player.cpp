@@ -23,7 +23,7 @@ namespace Server { namespace Game {
         if (this->_inGame)
             this->_currentMap->RemovePlayer(this->id);
         this->SetCurrentMap(map);
-        this->_position = position;
+        this->_position = Common::MovingOrientedPosition(position);
         this->_inGame = false;
     }
 

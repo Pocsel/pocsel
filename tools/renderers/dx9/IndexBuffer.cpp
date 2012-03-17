@@ -22,7 +22,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
         if (this->_indexBuffer)
             this->_indexBuffer->Release();
-        DXCHECKERROR(this->_renderer.GetDevice()->CreateIndexBuffer(size, D3DUSAGE_WRITEONLY, GetIndexBufferFormat(indicesType), D3DPOOL_MANAGED, &this->_indexBuffer, 0));
+        DXCHECKERROR(this->_renderer.GetDevice()->CreateIndexBuffer((UINT)size, D3DUSAGE_WRITEONLY, GetIndexBufferFormat(indicesType), D3DPOOL_MANAGED, &this->_indexBuffer, 0));
         this->SetSubData(0, size, data);
     }
 
