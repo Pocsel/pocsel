@@ -41,6 +41,7 @@ namespace Client { namespace Network {
         boost::asio::io_service _ioService;
         boost::asio::ip::tcp::socket _socket;
         boost::asio::ip::udp::socket _udpSocket;
+        boost::asio::ip::udp::socket _udpReceiveSocket;
         boost::thread* _thread;
         std::vector<char> _sizeBuffer;
         std::vector<char> _dataBuffer;
@@ -54,10 +55,12 @@ namespace Client { namespace Network {
         std::string _lastError;
         float _loading;
 
-        std::vector<char> _dataBufferUdp;
         std::list<UdpPacket*> _outQueueUdp;
         bool _sendingUdp;
         bool _udp;
+
+        std::vector<char> _udpDataBuffer;
+        bool _udpReceive;
 
     public:
         Network();

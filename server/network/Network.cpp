@@ -52,7 +52,8 @@ namespace Server { namespace Network {
             boost::asio::ip::udp::resolver udpResolver(this->_ioService);
             boost::asio::ip::udp::resolver::query udpQuery(
                     settings.host,
-                    settings.udpPort,
+                    settings.port,
+                    //settings.udpPort,
                     boost::asio::ip::udp::resolver::query::passive
                     );
             boost::asio::ip::udp::endpoint udpEndpoint(*udpResolver.resolve(udpQuery)); // take first
