@@ -32,7 +32,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         }
         else if (format == PixelFormat::Rgba8)
         {
-            DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), imgSize.w, imgSize.h, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
+            DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), imgSize.w, imgSize.h, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
             this->_size = imgSize;
             this->_FinishLoading((Color4<Uint8> const*)data, size, mipmapData);
         }
@@ -48,6 +48,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         DXCHECKERROR(D3DXCreateTextureFromFile(this->_renderer.GetDevice(), imagePath.c_str(), &this->_texture));
         this->_size.w = this->_texture->Width;
         this->_size.h = this->_texture->Height;
+        this->_texture->GenerateMipSubLevels();
     }
 
     void Texture2D::_FinishLoading(unsigned int ilID)
@@ -69,7 +70,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         ilBindImage(0);
         ilDeleteImage(ilID);
 
-        DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), this->_size.w, this->_size.h, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
+        DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), this->_size.w, this->_size.h, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
         this->_FinishLoading(pixmap, size, 0);
         delete [] pixmap;
     }
@@ -114,6 +115,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
                 idx += vsize.w * vsize.h * 4;
             }
         }
+        else
+            this->_texture->GenerateMipSubLevels();
     }
 
     Texture2D::~Texture2D()

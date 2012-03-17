@@ -67,7 +67,7 @@ namespace Client { namespace Menu { namespace Widget {
                     Tools::Color4f(0.43f, 0.1f, 0.1f, 1));
         this->_rectMatrix = Tools::Matrix4<float>::CreateScale(this->_size.w / 2, this->_size.h / 2, 1)
             * Tools::Matrix4<float>::CreateTranslation(this->_size.w / 2 + this->_pos.w, this->_size.h / 2 + this->_pos.h, 0);
-        this->_textMatrix = Tools::Matrix4<float>::CreateTranslation(this->_pos.w + 4, this->_pos.h - 3, 0);
+        this->_textMatrix = Tools::Matrix4<float>::CreateScale(Tools::Vector3f(0.5f)) * Tools::Matrix4<float>::CreateTranslation(this->_pos.w + 4, this->_pos.h - 3, 0);
     }
 
     bool Button::_MouseIsHovering() const
