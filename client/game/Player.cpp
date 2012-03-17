@@ -16,6 +16,7 @@
 
 #include "common/RayCast.hpp"
 #include "common/CubePosition.hpp"
+#include "common/MovingOrientedPosition.hpp"
 
 namespace Client { namespace Game {
 
@@ -77,15 +78,20 @@ namespace Client { namespace Game {
             w.GetInputManager().WarpMouse(Tools::Vector2i(w.GetSize() / 2));
         }
 
+        if (this->_movement != Tools::Vector3f())
+            this->_Move();
+
         this->_movedTime += time;
         if (this->_moved && this->_movedTime > 40)
         {
             this->_game.GetClient().GetNetwork().SendUdpPacket(
-                Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), this->_camera)
+                Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), Common::MovingOrientedPosition(this->_camera, this->_movement * this->_GetSpeed()))
                 );
             this->_moved = false;
             this->_movedTime %= 40;
         }
+
+        this->_movement = Tools::Vector3f();
 
         {
             auto cubes = Common::RayCast::Ray(this->_camera, 50);
@@ -116,12 +122,12 @@ namespace Client { namespace Game {
 
     void Player::MoveForward()
     {
-        this->_Move(this->_camera.direction * this->_GetSpeed());
+        this->_Move(this->_camera.direction);
     }
 
     void Player::MoveBackward()
     {
-        this->_Move(-this->_camera.direction * this->_GetSpeed());
+        this->_Move(-this->_camera.direction);
     }
 
     void Player::StrafeLeft()
@@ -178,9 +184,6 @@ namespace Client { namespace Game {
         else
             target = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
 
-
-        Common::Camera& cam = this->_camera;
-
         this->_game.GetClient().GetNetwork().SendUdpPacket(
             Network::PacketCreator::Action(
                 this->_game.GetClient().GetClientId(),
@@ -199,16 +202,21 @@ namespace Client { namespace Game {
     void Player::_Move(Tools::Vector3f moveVector)
     {
         moveVector.Normalize();
-        moveVector *= this->_GetSpeed();
+        this->_movement += moveVector;
+    }
+
+    void Player::_Move()
+    {
+        this->_movement.Normalize();
         Common::Position p = this->_camera.position;
-        p += moveVector;
+        p += this->_movement * this->_GetSpeed() * (this->_elapsedTime * 0.001f);
         this->SetPosition(p);
         this->_moved = true;
     }
 
     float Player::_GetSpeed()
     {
-        return this->_elapsedTime / (this->_sprint ? 10.0f : 200.0f);
+        return this->_sprint ? 133.3333f : 13.333333f;
     }
 
 }}

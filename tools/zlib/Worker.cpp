@@ -45,7 +45,12 @@ namespace Tools { namespace Zlib {
         strm.zalloc = Z_NULL;
         strm.zfree = Z_NULL;
         strm.opaque = Z_NULL;
-        ret = deflateInit(&strm, this->_compressionLevel);
+        ret = deflateInit2(&strm,
+                           this->_compressionLevel,
+                           Z_DEFLATED,
+                           -15,
+                           9,
+                           Z_DEFAULT_STRATEGY);
         if (ret != Z_OK)
         {
             throw std::runtime_error(std::string("FAIL: ") + this->_GetError(ret) + "\n");;
@@ -122,7 +127,7 @@ namespace Tools { namespace Zlib {
         strm.opaque = Z_NULL;
         strm.avail_in = 0;
         strm.next_in = Z_NULL;
-        ret = inflateInit(&strm);
+        ret = inflateInit2(&strm, -15);
         if (ret != Z_OK)
         {
             throw std::runtime_error(std::string("FAIL: ") + this->_GetError(ret) + "\n");;

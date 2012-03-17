@@ -1,6 +1,6 @@
 #include "common/RayCast.hpp"
 
-#include "common/Camera.hpp"
+#include "common/OrientedPosition.hpp"
 #include "common/CubePosition.hpp"
 
 #define GR_ABS(a) ((a) < 0 ? -(a) : (a))
@@ -17,18 +17,18 @@ namespace Common {
 
     namespace {
 
-        void __Ray(Common::Camera const& cam, float distance,
+        void __Ray(Common::OrientedPosition const& pos, float distance,
                    std::map<double, Tools::Vector3i>& res)
         {
             double x, y, z;
             const double
-                vx = cam.direction.x,
-                vy = cam.direction.y,
-                vz = cam.direction.z;
+                vx = pos.direction.x,
+                vy = pos.direction.y,
+                vz = pos.direction.z;
             const double
-                px = cam.position.chunk.x,
-                pz = cam.position.chunk.z,
-                py = cam.position.chunk.y;
+                px = pos.position.chunk.x,
+                pz = pos.position.chunk.z,
+                py = pos.position.chunk.y;
 
             int sign;
             double dist;
@@ -171,14 +171,14 @@ namespace Common {
 
     }
 
-    std::vector<Common::CubePosition> RayCast::Ray(Common::Camera const& cam, float distance)
+    std::vector<Common::CubePosition> RayCast::Ray(Common::OrientedPosition const& pos, float distance)
     {
         std::map<double, Tools::Vector3i> preRes;
 
-        __Ray(cam, distance, preRes);
+        __Ray(pos, distance, preRes);
 
 
-        return __MapToTab(preRes, cam.position);
+        return __MapToTab(preRes, pos.position);
     }
 
     namespace {

@@ -58,7 +58,7 @@ namespace {
             ilCopyPixels(0, y, 0, frameSize.w, frameSize.h, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
             frames[i] = renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, frameSize.w * frameSize.h * 4, pixmap, frameSize, 0).release();
         }
-        delete pixmap;
+        Tools::Delete(pixmap);
         ilBindImage(0);
         ilDeleteImage(id);
     }
@@ -81,7 +81,7 @@ namespace Client { namespace Resources {
         Tools::Renderers::ITexture2D* errTex = 0;
         if (this->_textures.find(0) != this->_textures.end())
             errTex = this->_textures[0];
-        delete errTex;
+        Tools::Delete(errTex);
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
             if (it->second != errTex)
                 Tools::Delete(it->second);

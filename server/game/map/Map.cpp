@@ -5,6 +5,7 @@
 
 #include "common/CubeType.hpp"
 #include "common/Position.hpp"
+#include "common/MovingOrientedPosition.hpp"
 #include "common/CubePosition.hpp"
 #include "common/Packet.hpp"
 
@@ -160,6 +161,13 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushMessage(m);
     }
 
+    void Map::MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_MovePlayer, this, id, pos));
+        this->_messageQueue->PushMessage(m);
+    }
+
     void Map::_GetChunk(Chunk::IdType id, ChunkCallback& response)
     {
         Chunk* chunk = this->_chunkManager->GetChunk(id);
@@ -271,6 +279,21 @@ namespace Server { namespace Game { namespace Map {
         this->_players.erase(id);
     }
 
+    void Map::_MovePlayer(Uint32 id, Common::MovingOrientedPosition pos)
+    {
+        auto it = this->_players.find(id);
+        if (it == this->_players.end())
+            return;
+
+        this->_players[id]->SetPosition(pos);
+
+        //for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+        //{
+        //    auto toto = Network::PacketCreator::Chunk(*chunk);
+        //    this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
+        //}
+    }
+
     void Map::_DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos)
     {
         if (chunk->GetCube(cubePos) != 0)
@@ -300,9 +323,10 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_SendChunkToPlayers(Chunk* chunk)
     {
+        auto packet = Network::PacketCreator::Chunk(*chunk);
         for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
         {
-            auto toto = Network::PacketCreator::Chunk(*chunk);
+            auto toto = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
             this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
         }
     }

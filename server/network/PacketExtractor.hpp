@@ -6,7 +6,8 @@
 
 namespace Common {
     class Packet;
-    struct Camera;
+    struct OrientedPosition;
+    struct MovingOrientedPosition;
     struct CubePosition;
 }
 
@@ -42,8 +43,8 @@ namespace Server { namespace Network {
 
         static void TeleportOk(Common::Packet const& p);
 
-        static void Move(Common::Packet const& p, Common::Camera& cam);
-        static void Action(Common::Packet const& p, Common::Camera& cam, Common::CubePosition& cubePos, Uint32& actionId);
+        static void Move(Common::Packet const& p, Common::MovingOrientedPosition& pos);
+        static void Action(Common::Packet const& p, Common::OrientedPosition& cam, Common::CubePosition& cubePos, Uint32& actionId);
     };
 
 }}

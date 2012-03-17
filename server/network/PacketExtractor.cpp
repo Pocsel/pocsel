@@ -1,7 +1,8 @@
 #include "server/network/PacketExtractor.hpp"
 
 #include "common/Packet.hpp"
-#include "common/CameraSerializer.hpp"
+#include "common/OrientedPositionSerializer.hpp"
+#include "common/MovingOrientedPositionSerializer.hpp"
 #include "common/CubePositionSerializer.hpp"
 
 namespace Server { namespace Network {
@@ -69,14 +70,14 @@ namespace Server { namespace Network {
     {
     }
 
-    void PacketExtractor::Move(Common::Packet const& p, Common::Camera& cam)
+    void PacketExtractor::Move(Common::Packet const& p, Common::MovingOrientedPosition& pos)
     {
-        p.Read(cam);
+        p.Read(pos);
     }
 
-    void PacketExtractor::Action(Common::Packet const& p, Common::Camera& cam, Common::CubePosition& cubePos, Uint32& actionId)
+    void PacketExtractor::Action(Common::Packet const& p, Common::OrientedPosition& pos, Common::CubePosition& cubePos, Uint32& actionId)
     {
-        p.Read(cam);
+        p.Read(pos);
         p.Read(cubePos);
         p.Read(actionId);
     }

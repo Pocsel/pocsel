@@ -5,7 +5,8 @@
 #include "protocol/protocol.hpp"
 
 #include "common/Packet.hpp"
-#include "common/CameraSerializer.hpp"
+#include "common/OrientedPositionSerializer.hpp"
+#include "common/MovingOrientedPositionSerializer.hpp"
 #include "common/CubePositionSerializer.hpp"
 
 namespace Client { namespace Network {
@@ -35,7 +36,7 @@ namespace Client { namespace Network {
         std::unique_ptr<Common::Packet> p(new Common::Packet());
         p->Write(Protocol::ClientToServer::NeedChunks);
 
-        for (; !chunkIds.empty() && (p->GetSize() + sizeof(Common::BaseChunk::IdType)) < (1 << 16 - 2); chunkIds.pop_back())
+        for (; !chunkIds.empty() && (p->GetSize() + sizeof(Common::BaseChunk::IdType)) < Common::Packet::maxSize; chunkIds.pop_back())
             p->Write(chunkIds.back());
         return p;
     }
@@ -85,25 +86,25 @@ namespace Client { namespace Network {
         return p;
     }
 
-
-    std::unique_ptr<UdpPacket> PacketCreator::Move(Uint32 id, Common::Camera const& cam)
+    std::unique_ptr<UdpPacket> PacketCreator::Move(Uint32 id,
+                                                   Common::MovingOrientedPosition const& pos)
     {
         std::unique_ptr<UdpPacket> p(new UdpPacket(id));
         p->Write(Protocol::ClientToServer::Move);
 
-        p->Write(cam);
+        p->Write(pos);
         return p;
     }
 
     std::unique_ptr<UdpPacket> PacketCreator::Action(Uint32 id,
-                                                     Common::Camera const& cam,
+                                                     Common::OrientedPosition const& pos,
                                                      Common::CubePosition const& target,
                                                      Uint32 actionId)
     {
         std::unique_ptr<UdpPacket> p(new UdpPacket(id));
         p->Write(Protocol::ClientToServer::Action);
 
-        p->Write(cam);
+        p->Write(pos);
         p->Write(target);
         p->Write(actionId);
         return p;

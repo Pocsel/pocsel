@@ -9,6 +9,7 @@
 namespace Common {
     class Packet;
     struct Position;
+    struct MovingOrientedPosition;
     struct CubePosition;
 }
 
@@ -82,6 +83,7 @@ namespace Server { namespace Game { namespace Map {
         void DestroyCubes(std::vector<Common::CubePosition> const& pos);
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
+        void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
@@ -91,6 +93,7 @@ namespace Server { namespace Game { namespace Map {
         void _FindSpawnPosition(Chunk* chunk);
         void _AddPlayer(std::shared_ptr<Player> p);
         void _RemovePlayer(Uint32 id);
+        void _MovePlayer(Uint32 id, Common::MovingOrientedPosition pos);
         void _DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos);
         void _DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos);
         void _SendChunkToPlayers(Chunk* chunk);
