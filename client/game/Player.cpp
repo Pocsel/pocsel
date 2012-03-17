@@ -16,7 +16,7 @@
 
 #include "common/RayCast.hpp"
 #include "common/CubePosition.hpp"
-#include "common/MovingCamera.hpp"
+#include "common/MovingOrientedPosition.hpp"
 
 namespace Client { namespace Game {
 
@@ -85,7 +85,7 @@ namespace Client { namespace Game {
         if (this->_moved && this->_movedTime > 40)
         {
             this->_game.GetClient().GetNetwork().SendUdpPacket(
-                Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), Common::MovingCamera(this->_camera, this->_movement * this->_GetSpeed()))
+                Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), Common::MovingOrientedPosition(this->_camera, this->_movement * this->_GetSpeed()))
                 );
             this->_moved = false;
             this->_movedTime %= 40;
@@ -183,9 +183,6 @@ namespace Client { namespace Game {
             target = *this->_targetedCube;
         else
             target = Common::CubePosition(this->_camera.position.world, this->_camera.position.chunk);
-
-
-        Common::Camera& cam = this->_camera;
 
         this->_game.GetClient().GetNetwork().SendUdpPacket(
             Network::PacketCreator::Action(

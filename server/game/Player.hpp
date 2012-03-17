@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_PLAYER_HPP__
 #define __SERVER_GAME_PLAYER_HPP__
 
-#include "common/Position.hpp"
+#include "common/MovingOrientedPosition.hpp"
 
 namespace Server { namespace Game { namespace Map {
 
@@ -25,7 +25,7 @@ namespace Server { namespace Game {
         Uint32 _viewDistance;
         Map::Map* _currentMap;
         bool _inGame;
-        Common::MovingCamera _position;
+        Common::MovingOrientedPosition _position;
 
     public:
         Player(Game& game, Uint32 id, std::string const& playerName, Uint32 viewDistance);
@@ -34,12 +34,12 @@ namespace Server { namespace Game {
         void SetCurrentMap(Map::Map& map) { this->_currentMap = &map; }
         bool HasMap() const { return this->_currentMap != 0; }
         Map::Map& GetCurrentMap() { assert(this->_currentMap); return *this->_currentMap; }
-        Common::Position const& GetPosition() const { return this->_position; }
         bool IsInGame() const { return this->_inGame; }
         void Teleport(Map::Map& map, Common::Position const& position);
         void TeleportOk();
         void RemoveFromMap();
-        void Player::Move(Common::Camera const& cam, Tools::Vector3f const& movement);
+        void SetPosition(Common::MovingOrientedPosition const& pos) { this->_position = pos; }
+        Common::MovingOrientedPosition const& GetPosition() const { return this->_position; }
     };
 
 }}

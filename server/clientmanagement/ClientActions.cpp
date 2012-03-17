@@ -5,7 +5,8 @@
 #include "protocol/protocol.hpp"
 
 #include "common/Packet.hpp"
-#include "common/Camera.hpp"
+#include "common/OrientedPosition.hpp"
+#include "common/MovingOrientedPosition.hpp"
 #include "common/CubePosition.hpp"
 
 #include "server/Server.hpp"
@@ -129,28 +130,27 @@ namespace Server { namespace ClientManagement {
         {
 //            Tools::debug << "_HandleMove (client " << client.id << ")\n";
 
-            Common::Camera cam;
-            Tools::Vector3f movement;
+            Common::MovingOrientedPosition pos;
 
-            Network::PacketExtractor::Move(packet, cam, movement);
+            Network::PacketExtractor::Move(packet, pos);
 
-            manager.GetServer().GetGame().PlayerMove(client.id, cam, movement);
+            manager.GetServer().GetGame().PlayerMove(client.id, pos);
         }
 
         void _HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
         {
             Tools::debug << "_HandleAction (client " << client.id << ")\n";
 
-            Common::Camera cam;
+            Common::OrientedPosition pos;
             Common::CubePosition cubePos;
             Uint32 actionId;
 
-            Network::PacketExtractor::Action(packet, cam, cubePos, actionId);
+            Network::PacketExtractor::Action(packet, pos, cubePos, actionId);
 
             if (actionId == 1)
-                manager.GetServer().GetGame().PlayerAction(client.id, cam, cubePos);
+                manager.GetServer().GetGame().PlayerAction(client.id, pos, cubePos);
             else if (actionId == 2)
-                manager.GetServer().GetGame().PlayerAction2(client.id, cam, cubePos);
+                manager.GetServer().GetGame().PlayerAction2(client.id, pos, cubePos);
             else
                 Tools::log << "client " << client.id << ": unknown action " << actionId << ".\n";
         }

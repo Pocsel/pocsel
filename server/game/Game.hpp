@@ -5,7 +5,8 @@
 
 namespace Common {
     struct Position;
-    struct Camera;
+    struct OrientedPosition;
+    struct MovingOrientedPosition;
     struct CubePosition;
     class Packet;
 }
@@ -49,9 +50,9 @@ namespace Server { namespace Game {
         Server& GetServer() { return this->_server; }
 
         void PlayerTeleportOk(Uint32 id);
-        void PlayerMove(Uint32 id, Common::Camera const& cam, Tools::Vector3f const& movement);
-        void PlayerAction(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos);
-        void PlayerAction2(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos);
+        void PlayerMove(Uint32 id, Common::MovingOrientedPosition const& cam);
+        void PlayerAction(Uint32 id, Common::OrientedPosition const& cam, Common::CubePosition const& targetPos);
+        void PlayerAction2(Uint32 id, Common::OrientedPosition const& cam, Common::CubePosition const& targetPos);
 
         // Thread safe
         void SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);

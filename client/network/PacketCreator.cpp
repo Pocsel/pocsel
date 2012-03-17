@@ -5,7 +5,8 @@
 #include "protocol/protocol.hpp"
 
 #include "common/Packet.hpp"
-#include "common/CameraSerializer.hpp"
+#include "common/OrientedPositionSerializer.hpp"
+#include "common/MovingOrientedPositionSerializer.hpp"
 #include "common/CubePositionSerializer.hpp"
 
 namespace Client { namespace Network {
@@ -85,28 +86,25 @@ namespace Client { namespace Network {
         return p;
     }
 
-
-    std::unique_ptr<UdpPacket> Move(Uint32 id,
-                                    Common::Camera const& cam,
-                                    Tools::Vector3f const& movement)
+    std::unique_ptr<UdpPacket> PacketCreator::Move(Uint32 id,
+                                                   Common::MovingOrientedPosition const& pos)
     {
         std::unique_ptr<UdpPacket> p(new UdpPacket(id));
         p->Write(Protocol::ClientToServer::Move);
 
-        p->Write(cam);
-        p->Write(movement);
+        p->Write(pos);
         return p;
     }
 
     std::unique_ptr<UdpPacket> PacketCreator::Action(Uint32 id,
-                                                     Common::Camera const& cam,
+                                                     Common::OrientedPosition const& pos,
                                                      Common::CubePosition const& target,
                                                      Uint32 actionId)
     {
         std::unique_ptr<UdpPacket> p(new UdpPacket(id));
         p->Write(Protocol::ClientToServer::Action);
 
-        p->Write(cam);
+        p->Write(pos);
         p->Write(target);
         p->Write(actionId);
         return p;
