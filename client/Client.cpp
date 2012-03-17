@@ -24,7 +24,7 @@ namespace Client {
         _game(0),
         _threadPool(2)
     {
-        this->_window = new Window::Sdl::Window(true, this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
+        this->_window = new Window::Sdl::Window(this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
         this->_menu = new Menu::Menu(*this);

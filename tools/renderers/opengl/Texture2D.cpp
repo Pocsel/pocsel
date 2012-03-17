@@ -44,7 +44,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         {
             ilBindImage(0);
             ilDeleteImage(ilID);
-            throw std::runtime_error("Texture2D::ctor: Can't load image.");
+            throw std::runtime_error("Texture2D::ctor: Can't load image file: " + imagePath);
         }
         this->_FinishLoading(ilID);
     }

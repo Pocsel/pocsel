@@ -21,6 +21,7 @@ namespace Client {
         Tools::Vector2u res;
         bool fullscreen;
         bool useShaders;
+        bool useDirect3D9;
         unsigned int chunkViewDistance;
         unsigned int chunkCacheArea;
         unsigned int chunkMinimumArea;

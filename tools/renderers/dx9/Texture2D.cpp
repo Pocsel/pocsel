@@ -17,7 +17,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         _hasAlpha(false),
         _texture(0)
     {
-        if (format == PixelFormat::Png)
+        if (format == PixelFormat::Png && mipmapData == 0)
         {
             ILuint ilID;
             ilGenImages(1, &ilID);
@@ -45,10 +45,16 @@ namespace Tools { namespace Renderers { namespace DX9 {
         _hasAlpha(false),
         _texture(0)
     {
-        DXCHECKERROR(D3DXCreateTextureFromFile(this->_renderer.GetDevice(), imagePath.c_str(), &this->_texture));
-        this->_size.w = this->_texture->Width;
-        this->_size.h = this->_texture->Height;
-        this->_texture->GenerateMipSubLevels();
+            ILuint ilID;
+            ilGenImages(1, &ilID);
+            ilBindImage(ilID);
+            if (!ilLoad(IL_PNG, imagePath.c_str()) && !ilLoad(IL_TYPE_UNKNOWN, imagePath.c_str()))
+            {
+                ilBindImage(0);
+                ilDeleteImage(ilID);
+                throw std::runtime_error("Texture2D::ctor: Can't load image file: " + imagePath);
+            }
+            this->_FinishLoading(ilID);
     }
 
     void Texture2D::_FinishLoading(unsigned int ilID)

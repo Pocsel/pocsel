@@ -51,7 +51,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         {
             if (this->_vertexBuffer)
                 this->_vertexBuffer->Release();
-            DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &this->_vertexBuffer, 0));
+            DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexBuffer(size, D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &this->_vertexBuffer, 0));
             this->_size = size;
         }
         if (data == 0)
