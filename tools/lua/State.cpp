@@ -26,7 +26,7 @@ namespace {
         }
         catch (std::exception& e)
         {
-            Tools::debug << "_RealLuaCall error: " << e.what() << ".\n"; // Lors du lua_close, les erreurs sont ignorées
+            Tools::debug << "Lua::State: _LuaCall error: " << e.what() << ".\n"; // Lors du lua_close, les erreurs sont ignorées
             lua_pushstring(state, e.what());
             return -1;
         }
@@ -47,7 +47,11 @@ namespace {
     {
         int ret = _RealLuaCall(state);
         if (ret == -1)
-            return lua_error(state);
+        {
+            std::string err(lua_tostring(state, -1));
+            lua_pop(state, 1);
+            return luaL_error(state, "%s", err.c_str());
+        }
         return ret;
     }
 

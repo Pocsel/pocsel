@@ -1,0 +1,107 @@
+- Server
+    Server side API.
+
+    - Entity
+        Entity manager.
+
+        - Register(prototype)
+            Registers a new entity prototype used later for spawning new
+            entities. This can only be done during the entity registering phase
+            of the server (after, the function is deleted).
+            - prototype [table]
+                Must at least contain a string value called "entityName"
+                (alphanumerical + "-" + "_", size 1-20).
+
+        - Spawn(entityName, [arg, [cbTarget, cbFunction, [cbArg]]])
+            Adds an event for spawning a new entity on the next tick.
+            - entityName [string]
+                Type of the new entity.
+            - arg [serializable]
+                Argument to be given to the Spawn() function of the new entity.
+            - cbTarget [number]
+            - cbFunction [string]
+            - cbArg [serializable]
+                Notification callback to be called just after the spawn event
+                is handled. The callback will receive the following parameters
+                (in addition to self): cbArg [serializable], entityId [number].
+                entityId will be set to the newly spawned entity id if the
+                creation was successful, or 0 if there was an error. entityId
+                will still contain an id if the new entity did not have a
+                Spawn() function (that is, arg was not passed to the new
+                entity).
+                If the callback's target is unloaded or destroyed when the
+                callback is triggered, the callback fails silently.
+
+        - SpawnFromPlugin(plugin, entityName,
+                          [arg, [cbTarget, cbFunction, [cbArg]]])
+            Adds an event for spawning a new entity from a different plugin
+            (see Spawn()).
+            - plugin [string]
+                Plugin in which to search for the entity type.
+
+        - Kill(target, [arg, [cbTarget, cbFunction, [cbArg]]])
+            Adds an event for killing an entity on the next tick.
+            - target [number]
+                Id of the entity to kill.
+            - arg [serializable]
+                Argument to be given to the Die() function of the killed entity.
+            - cbTarget [number]
+            - cbFunction [string]
+            - cbArg [serializable]
+                Notification callback to be called just after the kill event is
+                handled. The callback will receive the following parameters (in
+                addition to self): cbArg [serializable], result [table]. result
+                will have the following fields: "entityId" [number], "success"
+                [boolean]. The "entityId" field will be set to the id of the
+                target entity and the "success" field will be set to true if
+                the entity was found (kill successful) or false otherwise.
+                The "success" field will still be set to true if the entity did
+                not have a Die() function (that is, arg was not passed to the
+                killed entity).
+                If the callback's target is unloaded or destroyed when the
+                callback is triggered, the callback fails silently.
+
+        - CallLater(seconds, function, [arg])
+            Adds an event for calling a function of the calling entity. This
+            call is guaranteed to succeed if the function exists.
+            - seconds [number]
+                Number of seconds to wait before calling the function.
+            - function [string]
+                Name of the function to call.
+            - arg [serializable]
+                Argument to pass to the function.
+
+        - Call(function, [arg])
+            Calls CallLater() with the first parameter (seconds) set to 0.
+
+    - Call
+        Messaging system between entities.
+
+        - Later(seconds, target, function,
+                [arg, [cbTarget, cbFunction, [cbArg]]])
+            Adds an event for calling an entity function.
+            - seconds [number]
+                Number of seconds to wait before calling the function.
+            - target [number]
+            - function [string]
+            - arg [serializable]
+                Entity function to call.
+            - cbTarget [number]
+            - cbFunction [string]
+            - cbArg [serializable]
+                Notification callback to be called just after the call event is
+                handled. The callback will receive the following parameters (in
+                addition to self): cbArg [serializable], result [table]. result
+                will have the following fields: "entityId" [number], "success"
+                [boolean]. The "entityId" field will be set to the id of the
+                target entity and the "success" field will be set to true if
+                the entity was found and the function was successfully called
+                or false otherwise.
+                If the callback's target is unloaded or destroyed when the
+                callback is triggered, the callback fails silently.
+
+        - Now(target, function, [arg, [cbTarget, cbFunction, [cbArg]]])
+            Calls Later() with the first parameter (seconds) set to 0.
+
+- Client
+    Client side API.
