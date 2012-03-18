@@ -59,11 +59,11 @@ namespace Tools { namespace Lua {
         template <typename T>
             T To(T const& defaultValue) const throw();
         // unsafe type conversions
-        bool CheckBoolean() const throw(std::runtime_error);
-        int CheckInteger() const throw(std::runtime_error); // en fait, ça vérifie si c'est un number parce que le type integer est un number en interne
-        double CheckNumber() const throw(std::runtime_error);
-        std::string CheckString() const throw(std::runtime_error);
-        void* CheckUserData() const throw(std::runtime_error);
+        bool CheckBoolean(std::string const& e = "") const throw(std::runtime_error);
+        int CheckInteger(std::string const& e = "") const throw(std::runtime_error); // en fait, ça vérifie si c'est un number parce que le type integer est un number en interne
+        double CheckNumber(std::string const& e = "") const throw(std::runtime_error);
+        std::string CheckString(std::string const& e = "") const throw(std::runtime_error);
+        void* CheckUserData(std::string const& e = "") const throw(std::runtime_error);
         template <typename T>
             T Check() const throw(std::runtime_error);
         // type tests

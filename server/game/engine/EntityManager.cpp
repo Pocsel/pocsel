@@ -79,7 +79,7 @@ namespace Server { namespace Game { namespace Engine {
             }
             catch (std::exception& e)
             {
-                Tools::error << "EntityManager::LuaFunctionCall: Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->type->entityName << "\") failed: " << e.what() << " (entity deleted)." << std::endl;
+                Tools::error << "EntityManager::LuaFunctionCall: Fatal (entity deleted): Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->type->entityName << "\") failed: " << e.what() << std::endl;
                 delete it->second;
                 this->_entities.erase(it);
                 this->_runningEntityId = 0;
@@ -183,8 +183,9 @@ namespace Server { namespace Game { namespace Engine {
         conn.EndTransaction();
     }
 
-    void EntityManager::BeginPluginRegistering(Uint32 pluginId)
+    void EntityManager::BeginPluginRegistering(Uint32 pluginId, std::string const& pluginName)
     {
+        this->_pluginNameForRegistering = pluginName;
         this->_pluginIdForRegistering = pluginId;
         this->_engine.GetInterpreter().Globals()["Server"]["Entity"].Set("Register",
                 this->_engine.GetInterpreter().MakeFunction(std::bind(&EntityManager::_ApiRegister, this, std::placeholders::_1)));
@@ -192,6 +193,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::EndPluginRegistering()
     {
+        this->_pluginNameForRegistering.clear();
         this->_pluginIdForRegistering = 0;
         this->_engine.GetInterpreter().Globals()["Server"]["Entity"].Set("Register",
                 this->_engine.GetInterpreter().MakeNil());
@@ -269,17 +271,17 @@ namespace Server { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::_ApiRegister: " << e.what() << " (plugin " << this->_pluginIdForRegistering << ").\n";
+            Tools::error << "EntityManager::_ApiRegister: Failed to register new entity type from \"" << this->_pluginNameForRegistering << "\": " << e.what() << " (plugin " << this->_pluginIdForRegistering << ").\n";
             return;
         }
         EntityType* type = new EntityType(entityName, this->_pluginIdForRegistering, prototype);
         if (this->_entityTypes[type->pluginId].count(type->entityName))
         {
             delete this->_entityTypes[type->pluginId][type->entityName];
-            Tools::log << "EntityManager::_ApiRegister: Replacing entity type \"" << type->entityName << "\" with a newer type (plugin " << type->pluginId << ").\n";
+            Tools::log << "EntityManager::_ApiRegister: Replacing entity type \"" << type->entityName << "\" with a newer type from \"" << this->_pluginNameForRegistering << "\" (plugin " << type->pluginId << ").\n";
         }
         this->_entityTypes[type->pluginId][type->entityName] = type;
-        Tools::debug << "EntityManager::_ApiRegister: New entity type \"" << type->entityName << "\" registered (plugin " << type->pluginId << ").\n";
+        Tools::debug << "EntityManager::_ApiRegister: New entity type \"" << type->entityName << "\" registered from \"" << this->_pluginNameForRegistering << "\" (plugin " << type->pluginId << ").\n";
     }
 
 }}}

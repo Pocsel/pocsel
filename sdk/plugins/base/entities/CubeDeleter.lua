@@ -10,7 +10,7 @@
 -- }
 
 Server.Entity.Register{
-    entityName = "GrosTest",
+    name = "GrosTest",
     Spawn = function(entity, this)
         Server.Event.CallLater(2, this.id, "_TestMethod", { testArg = "ceci est un test" })
     end,

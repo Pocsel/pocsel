@@ -239,13 +239,16 @@ namespace Tools { namespace Lua {
     MAKE_TOTEMPLATEMETHOD(ToString, std::string);
 
 #define MAKE_CHECKMETHOD(name, lua_checkfunc, lua_tofunc, type, error) \
-    type Ref::name() const throw(std::runtime_error) \
+    type Ref::name(std::string const& e) const throw(std::runtime_error) \
     { \
         this->ToStack(); \
         if (!lua_checkfunc(this->_state, -1)) \
         { \
             lua_pop(this->_state, 1); \
-            throw std::runtime_error(error); \
+            if (!e.empty()) \
+                throw std::runtime_error(e); \
+            else \
+                throw std::runtime_error(error); \
         } \
         type ret = lua_tofunc(this->_state, -1); \
         lua_pop(this->_state, 1); \
@@ -257,13 +260,16 @@ namespace Tools { namespace Lua {
     MAKE_CHECKMETHOD(CheckNumber, lua_isnumber, lua_tonumber, double, "Lua::Ref: Value is not of number type");
     MAKE_CHECKMETHOD(CheckUserData, lua_isuserdata, lua_touserdata, void*, "Lua::Ref: Value is not of user data type");
 
-    std::string Ref::CheckString() const throw(std::runtime_error)
+    std::string Ref::CheckString(std::string const& e) const throw(std::runtime_error)
     {
         this->ToStack();
         if (!lua_isstring(this->_state, -1))
         {
             lua_pop(this->_state, 1);
-            throw std::runtime_error("Lua::Ref: Value is not of string type");
+            if (!e.empty())
+                throw std::runtime_error(e);
+            else
+                throw std::runtime_error("Lua::Ref: Value is not of string type");
         }
         char const* str = lua_tostring(this->_state, -1);
         if (str)
