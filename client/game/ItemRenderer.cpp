@@ -23,7 +23,7 @@ namespace Client { namespace Game {
         this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
         this->_shaderTime = this->_shader->GetParameter("time").release();
 
-        this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("CubeTarget.png");
+        this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("test.png");
 
         this->_InitVertexBuffer();
     }

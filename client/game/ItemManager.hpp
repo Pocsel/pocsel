@@ -25,6 +25,7 @@ namespace Client { namespace Game {
         ~ItemManager();
         void MoveItem(Uint32 id, Common::MovingOrientedPosition const& pos);
         void Render();
+        void Update(Uint32 time);
     };
 
 }}

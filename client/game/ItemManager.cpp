@@ -34,4 +34,9 @@ namespace Client { namespace Game {
         this->_renderer->Render(*this->_pos);
     }
 
+    void ItemManager::Update(Uint32 time)
+    {
+        this->_renderer->Update(time);
+    }
+
 }}
