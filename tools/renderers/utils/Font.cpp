@@ -66,8 +66,6 @@ namespace Tools { namespace Renderers { namespace Utils {
     Font::~Font()
     {
         Delete(this->_data);
-        Delete(this->_texture);
-        Delete(this->_vertexBuffer);
     }
 
     // Init textures
@@ -170,9 +168,9 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_texture = this->_renderer.CreateTexture2D(
             Renderers::PixelFormat::Rgba8,
             (Uint32)textureData.size(), textureData.data(),
-            Vector2u(width, height)).release();
+            Vector2u(width, height));
 
-        this->_vertexBuffer = this->_renderer.CreateVertexBuffer().release();
+        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
         this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Position, 3);
         this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::TexCoord, 2);
     }

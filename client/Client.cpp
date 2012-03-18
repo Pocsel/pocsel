@@ -21,10 +21,10 @@ namespace Client {
     Client::Client(Settings& settings) :
         _settings(settings),
         _state(Connecting),
-        _game(0),
-        _threadPool(2)
+        _game(0)
     {
-        this->_window = new Window::Sdl::Window(true, this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
+        this->_window = new Window::Sdl::Window(this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
+        this->_threadPool = new Tools::Thread::ThreadPool(2);
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
         this->_menu = new Menu::Menu(*this);
@@ -40,6 +40,7 @@ namespace Client {
         Tools::Delete(this->_menu);
         Tools::Delete(this->_packetDispatcher);
         Tools::Delete(this->_resourceManager);
+        Tools::Delete(this->_threadPool);
         Tools::Delete(this->_window);
     }
 

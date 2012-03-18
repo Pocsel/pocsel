@@ -30,7 +30,7 @@ namespace Client { namespace Game {
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
         Tools::Renderers::IShaderParameter* _shaderTime;
-        Tools::Renderers::IVertexBuffer* _vertexBuffer;
+        std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;
         Tools::Renderers::ITexture2D* _texture;
         Uint32 _elapsedTime;
 

@@ -51,7 +51,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         {
             if (this->_vertexBuffer)
                 this->_vertexBuffer->Release();
-            DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &this->_vertexBuffer, 0));
+            DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexBuffer(size, D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &this->_vertexBuffer, 0));
             this->_size = size;
         }
         if (data == 0)
@@ -63,7 +63,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     void VertexBuffer::SetSubData(std::size_t offset, std::size_t size, void const* data)
     {
         void* ptr;
-        DXCHECKERROR(this->_vertexBuffer->Lock(offset, size, &ptr, D3DLOCK_DISCARD));
+        DXCHECKERROR(this->_vertexBuffer->Lock(offset, size, &ptr, 0));
         std::memcpy(ptr, data, size);
         DXCHECKERROR(this->_vertexBuffer->Unlock());
     }
