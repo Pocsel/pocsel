@@ -15,18 +15,18 @@ namespace Tools { namespace Database { namespace Sqlite {
     public:
         Row(Connection& connection, Query& query);
 
-        virtual Int8 GetInt8(int colomn) const;
-        virtual Uint8 GetUint8(int colomn) const;
-        virtual Int16 GetInt16(int colomn) const;
-        virtual Uint16 GetUint16(int colomn) const;
-        virtual Int32 GetInt32(int colomn) const;
-        virtual Uint32 GetUint32(int colomn) const;
-        virtual Int64 GetInt64(int colomn) const;
-        virtual Uint64 GetUint64(int colomn) const;
-        virtual float GetFloat(int colomn) const;
-        virtual double GetDouble(int colomn) const;
-        virtual std::string GetString(int colomn) const;
-        virtual std::vector<char> GetArray(int colomn) const;
+        virtual Int8 GetInt8(int column) const;
+        virtual Uint8 GetUint8(int column) const;
+        virtual Int16 GetInt16(int column) const;
+        virtual Uint16 GetUint16(int column) const;
+        virtual Int32 GetInt32(int column) const;
+        virtual Uint32 GetUint32(int column) const;
+        virtual Int64 GetInt64(int column) const;
+        virtual Uint64 GetUint64(int column) const;
+        virtual float GetFloat(int column) const;
+        virtual double GetDouble(int column) const;
+        virtual std::string GetString(int column) const;
+        virtual std::vector<char> GetArray(int column) const;
     };
 
 }}}

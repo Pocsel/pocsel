@@ -43,7 +43,7 @@ world_tables = [
         ]
     ),
     (
-        'entity_type',
+        'entity_file',
         [
             "id INTEGER PRIMARY KEY",
             "plugin_id INTEGER",

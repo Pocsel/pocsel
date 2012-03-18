@@ -113,7 +113,7 @@ namespace Server { namespace Database {
         }
 
         // Entity types
-        query = conn.CreateQuery("SELECT plugin_id, name, lua FROM entity_type");
+        query = conn.CreateQuery("SELECT plugin_id, name, lua FROM entity_file");
         while (auto row = query->Fetch())
         {
             try
