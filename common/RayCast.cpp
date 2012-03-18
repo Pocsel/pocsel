@@ -196,7 +196,7 @@ namespace Common {
                     for (double z = -distance; z < distance; z += 1)
                     {
                         if (x*x+y*y+z*z < sqdist)
-                            res.push_back(Tools::Vector3i(x + pos.chunk.x, y + pos.chunk.y, z + pos.chunk.z));
+                            res.push_back(Tools::Vector3i((int)(x + pos.chunk.x), (int)(y + pos.chunk.y), (int)(z + pos.chunk.z)));
                     }
                 }
             }
@@ -212,7 +212,7 @@ namespace Common {
                 {
                     for (double z = -distance; z < distance; z += 1)
                     {
-                        res.push_back(Tools::Vector3i(x + pos.chunk.x, y + pos.chunk.y, z + pos.chunk.z));
+                        res.push_back(Tools::Vector3i((int)(x + pos.chunk.x), (int)(y + pos.chunk.y), (int)(z + pos.chunk.z)));
                     }
                 }
             }

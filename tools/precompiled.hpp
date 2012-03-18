@@ -15,6 +15,9 @@
 #ifdef LoadString
 #undef LoadString
 #endif
+#ifdef GetCurrentTime
+#undef GetCurrentTime
+#endif
 #else
 // common/Packet.hpp
 #include <arpa/inet.h>

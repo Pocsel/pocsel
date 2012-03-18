@@ -84,8 +84,9 @@ namespace Client { namespace Menu {
                 this->_client.GetWindow().GetSize().h / 2);
     }
 
-    void MainMenu::_Resize(Tools::Vector2u const& size)
+    void MainMenu::_Resize(Tools::Vector2u const& sz)
     {
+        Tools::Vector2f size(sz);
         this->_backRectMatrix = Tools::Matrix4<float>::CreateScale(size.w / 2 + 1, size.h / 2 + 1, 1)
             * Tools::Matrix4<float>::CreateTranslation(size.w / 2, size.h / 2, 0);
         this->_quitButton->SetPos(Tools::Vector2f(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 80));

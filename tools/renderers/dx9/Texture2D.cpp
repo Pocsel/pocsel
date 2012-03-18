@@ -86,9 +86,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         D3DLOCKED_RECT lockRect;
         DXCHECKERROR(this->_texture->LockRect(0, &lockRect, 0, 0));
         Uint8* ptr = reinterpret_cast<Uint8*>(lockRect.pBits);
-        for (int y = 0; y < this->_size.h; ++y)
+        for (unsigned int y = 0; y < this->_size.h; ++y)
         {
-            for (int x = 0; x < this->_size.w; ++x)
+            for (unsigned int x = 0; x < this->_size.w; ++x)
             {
                 int i = y * this->_size.w + x;
                 this->_hasAlpha = this->_hasAlpha || (data[i].a != 255);
@@ -109,7 +109,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
             {
                 DXCHECKERROR(this->_texture->LockRect(level, &lockRect, 0, D3DLOCK_DISCARD));
                 Uint8* ptr = reinterpret_cast<Uint8*>(lockRect.pBits);
-                for (int i = 0; i < vsize.w*vsize.h; ++i)
+                for (unsigned int i = 0; i < vsize.w*vsize.h; ++i)
                 {
                     ptr[i*4 + 0] = idx[i].b;
                     ptr[i*4 + 1] = idx[i].g;
