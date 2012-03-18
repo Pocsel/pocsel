@@ -11,22 +11,24 @@ namespace Tools { namespace Database { namespace Sqlite {
     private:
         Connection& _connection;
         sqlite3_stmt* _stmt;
+        Uint32 _nbColumn;
 
     public:
         Row(Connection& connection, Query& query);
 
-        virtual Int8 GetInt8(int column) const;
-        virtual Uint8 GetUint8(int column) const;
-        virtual Int16 GetInt16(int column) const;
-        virtual Uint16 GetUint16(int column) const;
-        virtual Int32 GetInt32(int column) const;
-        virtual Uint32 GetUint32(int column) const;
-        virtual Int64 GetInt64(int column) const;
-        virtual Uint64 GetUint64(int column) const;
-        virtual float GetFloat(int column) const;
-        virtual double GetDouble(int column) const;
-        virtual std::string GetString(int column) const;
-        virtual std::vector<char> GetArray(int column) const;
+        virtual Uint32 GetColumnCount() const { return this->_nbColumn; }
+        virtual Int8 GetInt8(Uint32 column) const;
+        virtual Uint8 GetUint8(Uint32 column) const;
+        virtual Int16 GetInt16(Uint32 column) const;
+        virtual Uint16 GetUint16(Uint32 column) const;
+        virtual Int32 GetInt32(Uint32 column) const;
+        virtual Uint32 GetUint32(Uint32 column) const;
+        virtual Int64 GetInt64(Uint32 column) const;
+        virtual Uint64 GetUint64(Uint32 column) const;
+        virtual float GetFloat(Uint32 column) const;
+        virtual double GetDouble(Uint32 column) const;
+        virtual std::string GetString(Uint32 column) const;
+        virtual std::vector<char> GetArray(Uint32 column) const;
     };
 
 }}}

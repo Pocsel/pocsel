@@ -108,15 +108,15 @@ def installPlugin(worldconn, pluginconn, server_version):
         else:
             print "File '%s' is up-to-date" % filename
 
-    for obj in ['cube', 'entity']:
+    for obj in ['cube_type', 'entity_file']:
         with pluginconn() as pconn:
             pcurs = pconn.cursor()
-            pcurs.execute("SELECT name, lua FROM %s_type" % obj)
+            pcurs.execute("SELECT name, lua FROM %s" % obj)
             with worldconn() as wconn:
                 wcurs = wconn.cursor()
                 for name, lua in pcurs:
                     wcurs.execute(
-                        "SELECT id FROM %s_type WHERE plugin_id = ? AND name = ?" % obj,
+                        "SELECT id FROM %s WHERE plugin_id = ? AND name = ?" % obj,
                         (plugin_id, name)
                     )
                     res = wcurs.fetchone()
@@ -124,7 +124,7 @@ def installPlugin(worldconn, pluginconn, server_version):
                         print "Insert new %s type %s" % (obj, name)
                         wcurs.execute(
                             """
-                                INSERT INTO %s_type (id, plugin_id, name, lua)
+                                INSERT INTO %s (id, plugin_id, name, lua)
                                 VALUES (NULL, ?, ?, ?)
                             """ % obj,
                             (plugin_id, name, lua)
@@ -133,7 +133,7 @@ def installPlugin(worldconn, pluginconn, server_version):
                         print "Update %s type %s" % (obj, name)
                         wcurs.execute(
                             """
-                                UPDATE %s_type
+                                UPDATE %s
                                     SET lua = ?
                                 WHERE id = ?
                             """ % obj,

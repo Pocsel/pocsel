@@ -29,13 +29,18 @@ namespace Server { namespace Database {
         if (query)
         {
             auto row = query->Fetch();
-            world._identifier = row->GetString(0);
-            world._fullname = row->GetString(1);
-            world._version = row->GetUint32(2);
-            world._buildHash = row->GetString(3);
+            if (row)
+            {
+                world._identifier = row->GetString(0);
+                world._fullname = row->GetString(1);
+                world._version = row->GetUint32(2);
+                world._buildHash = row->GetString(3);
+            }
+            else
+                throw std::runtime_error("WorldLoader::Load: World file is missing metadata (invalid or corrupt world file).");
         }
         else
-            throw std::runtime_error("World file missing metadata.");
+            throw std::runtime_error("WorldLoader::Load: World file is missing metadata (invalid or corrupt world file).");
 
         // Cube types
         query = conn.CreateQuery("SELECT id, plugin_id, name, lua FROM cube_type");
