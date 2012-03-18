@@ -87,8 +87,8 @@ technique tech
 {
    pass p0
    {
-       VertexShader = compile vs_1_1 vs();
-       PixelShader = compile ps_2_a fs();
+       VertexShader = compile vs_2_0 vs();
+       PixelShader = compile ps_2_0 fs();
    }
 }
 

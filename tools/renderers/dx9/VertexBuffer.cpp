@@ -63,7 +63,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     void VertexBuffer::SetSubData(std::size_t offset, std::size_t size, void const* data)
     {
         void* ptr;
-        DXCHECKERROR(this->_vertexBuffer->Lock(offset, size, &ptr, D3DLOCK_DISCARD));
+        DXCHECKERROR(this->_vertexBuffer->Lock(offset, size, &ptr, 0));
         std::memcpy(ptr, data, size);
         DXCHECKERROR(this->_vertexBuffer->Unlock());
     }
