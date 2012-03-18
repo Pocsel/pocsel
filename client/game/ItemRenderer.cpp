@@ -48,7 +48,7 @@ namespace Client { namespace Game {
                 )
                 +
             Tools::Matrix4<float>::CreateYawPitchRollRotation(
-                    pos.theta, 0.0f, pos.phi
+                    -pos.theta, 0.0f, pos.phi
                 )
             );
 
