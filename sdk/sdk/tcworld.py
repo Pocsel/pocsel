@@ -82,9 +82,9 @@ def installPlugin(worldconn, pluginconn, server_version):
                 (fullname, plugin_id, lua)
             )
             tools.createTable(wconn, "%s_bigchunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
-#            tools.createTable(wconn, "%s_chunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
             tools.createTable(wconn, "%s_entity" % (fullname), ["id INTEGER", "type TEXT", "storage TEXT"])
-            tools.createTable(wconn, "%s_event" % (fullname), ["time INTEGER", "entity_id INTEGER", "function TEXT", "args TEXT"])
+            tools.createTable(wconn, "%s_entity_type" % (fullname), ["type TEXT", "storage TEXT"])
+            tools.createTable(wconn, "%s_entity_callback" % (fullname), ["id INTEGER", "target_id INTEGER", "function TEXT", "arg TEXT"])
 
 
 
@@ -116,7 +116,7 @@ def installPlugin(worldconn, pluginconn, server_version):
                 wcurs = wconn.cursor()
                 for name, lua in pcurs:
                     wcurs.execute(
-                        "SELECT id FROM %s WHERE plugin_id = ? AND name = ?" % obj,
+                        "SELECT name FROM %s WHERE plugin_id = ? AND name = ?" % obj,
                         (plugin_id, name)
                     )
                     res = wcurs.fetchone()
@@ -124,8 +124,8 @@ def installPlugin(worldconn, pluginconn, server_version):
                         print "Insert new %s type %s" % (obj, name)
                         wcurs.execute(
                             """
-                                INSERT INTO %s (id, plugin_id, name, lua)
-                                VALUES (NULL, ?, ?, ?)
+                                INSERT INTO %s (plugin_id, name, lua)
+                                VALUES (?, ?, ?)
                             """ % obj,
                             (plugin_id, name, lua)
                         )
@@ -135,9 +135,9 @@ def installPlugin(worldconn, pluginconn, server_version):
                             """
                                 UPDATE %s
                                     SET lua = ?
-                                WHERE id = ?
+                                WHERE plugin_id = ? AND name = ?
                             """ % obj,
-                            (lua, res[0])
+                            (lua, plugin_id, name)
                         )
                 wconn.commit()
 

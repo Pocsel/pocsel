@@ -80,14 +80,13 @@
         - entity_file
             Each row represents a Lua script containing 0 or more calls to
             Server.Entity.Register() for registering 0 or more entities.
-            - id [int primary key]
             - plugin_id [int]
             - name [text]
             - lua [text]
 
         - map
             Each row represents the metadata for a map.
-            - name [text primary key]
+            - name [text]
             - plugin_id [int]
             - lua [text]
             - tick [int]
@@ -103,14 +102,21 @@
             - type [text]
             - storage [text]
 
+        - <plugin>_<map>_entity_type
+            Stores entity types static data.
+            - type [text]
+            - storage [text]
+
         - <plugin>_<map>_entity_callback
             Stores entities' callbacks for a map.
+            - id [int]
             - target_id [int]
             - function [text]
             - arg [text]
 
         - <plugin>_<map>_entity_spawn
             Stores entities' spawn events for a map.
+            - position [int]
             - plugin_id [int]
             - entity_name [text]
             - arg [text]
@@ -119,6 +125,7 @@
 
         - <plugin>_<map>_entity_kill
             Stores entities' kill events for a map.
+            - position [int]
             - target_id [int]
             - arg [text]
             - killer_id [int]
