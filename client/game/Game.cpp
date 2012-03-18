@@ -34,6 +34,7 @@ namespace Client { namespace Game {
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
         Tools::Delete(this->_player);
+        Tools::Delete(this->_itemManager);
         Tools::Delete(this->_resourceManager);
     }
 
