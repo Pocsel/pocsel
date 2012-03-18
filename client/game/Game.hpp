@@ -32,7 +32,7 @@ namespace Client { namespace Game {
         CubeTypeManager _cubeTypeManager;
         Resources::ResourceManager* _resourceManager;
         Map::Map* _map;
-        ItemManager *_itemManager;
+        ItemManager* _itemManager;
         Player* _player;
         int _callbackId;
         Tools::Timer _updateTimer;

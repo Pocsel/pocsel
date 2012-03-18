@@ -24,7 +24,9 @@ namespace Client { namespace Game {
     void ItemManager::Render()
     {
         for (auto it = this->_positions.begin(), ite = this->_positions.end(); it != ite; ++it)
+        {
             this->_renderer->Render(it->second);
+        }
     }
 
     void ItemManager::Update(Uint32 time)

@@ -64,31 +64,31 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                 n = vals.find("n")->second;
             if (vals.find("ip") != vals.end())
             {
-                ip = vals.find("ip")->second;
+                ip = (int)vals.find("ip")->second;
                 if (ip < 0)
                     ip = 0;
             }
             if (vals.find("ipp") != vals.end())
             {
-                ipp = vals.find("ipp")->second;
+                ipp = (int)vals.find("ipp")->second;
                 if (ipp < 0)
                     ipp = 0;
             }
             if (vals.find("ippmx") != vals.end())
             {
-                ippmx = vals.find("ippmx")->second;
+                ippmx = (int)vals.find("ippmx")->second;
                 if (ippmx < 1)
                     ippmx = 1;
             }
             if (vals.find("ippmz") != vals.end())
             {
-                ippmz = vals.find("ippmz")->second;
+                ippmz = (int)vals.find("ippmz")->second;
                 if (ippmz < 1)
                     ippmz = 1;
             }
             if (vals.find("ippmy") != vals.end())
             {
-                ippmy = vals.find("ippmy")->second;
+                ippmy = (int)vals.find("ippmy")->second;
                 if (ippmy < 1)
                     ippmy = 1;
             }
@@ -135,7 +135,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                                                    zz * zn + za,
                                                    alpha,
                                                    beta,
-                                                   n) * mul;
+                                                   (int)n) * mul;
                             res += offset;
                         }
                     }
@@ -191,7 +191,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                                             zz * zn + za,
                                             alpha,
                                             beta,
-                                            n) * mul;
+                                            (int)n) * mul;
                     }
                 }
             }

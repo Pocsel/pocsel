@@ -37,6 +37,7 @@ namespace Common {
 
         OrientedPosition& operator = (Common::OrientedPosition const& right)
         {
+            this->position = right.position;
             const_cast<float&>(this->theta) = right.theta;
             const_cast<float&>(this->phi) = right.phi;
             const_cast<Tools::Vector3f&>(this->direction) = right.direction;

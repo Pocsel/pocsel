@@ -1,3 +1,5 @@
+#include "server/precompiled.hpp"
+
 #include "server/game/Game.hpp"
 #include "server/game/Player.hpp"
 #include "server/game/World.hpp"
@@ -97,9 +99,9 @@ namespace Server { namespace Game {
             return;
 
         Common::Position p0(targetPos.world,
-                            Tools::Vector3f(targetPos.chunk.x + 0.5,
-                                            targetPos.chunk.y + 0.5,
-                                            targetPos.chunk.z + 0.5));
+                            Tools::Vector3f((float)targetPos.chunk.x + 0.5f,
+                                            (float)targetPos.chunk.y + 0.5f,
+                                            (float)targetPos.chunk.z + 0.5f));
 
         float dist = (p0 - pos.position).GetMagnitude();
 
