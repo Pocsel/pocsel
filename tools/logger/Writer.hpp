@@ -13,7 +13,7 @@ namespace Tools { namespace Logger {
             TWriter& _writer;
 
         public:
-            template<class T>
+            //template<class T>
             Buffer(TWriter& writer)
                 : _writer(writer)
             {

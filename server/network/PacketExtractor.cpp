@@ -1,13 +1,14 @@
 #include "server/network/PacketExtractor.hpp"
 
-#include "common/Packet.hpp"
 #include "common/OrientedPositionSerializer.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
 #include "common/CubePositionSerializer.hpp"
 
+#include "tools/ByteArray.hpp"
+
 namespace Server { namespace Network {
 
-    void PacketExtractor::Login(Common::Packet const& p,
+    void PacketExtractor::Login(Tools::ByteArray const& p,
                                 Protocol::Version& major,
                                 Protocol::Version& minor,
                                 std::string& login)
@@ -17,13 +18,13 @@ namespace Server { namespace Network {
         p.Read(login);
     }
 
-    void PacketExtractor::Pong(Common::Packet const& p,
+    void PacketExtractor::Pong(Tools::ByteArray const& p,
                                Uint64& timestamp)
     {
         p.Read(timestamp);
     }
 
-    void PacketExtractor::NeedChunks(Common::Packet const& p,
+    void PacketExtractor::NeedChunks(Tools::ByteArray const& p,
                                      std::vector<Game::Map::Chunk::IdType>& ids)
     {
         unsigned int size = p.GetBytesLeft() / sizeof(Game::Map::Chunk::IdType);
@@ -40,12 +41,12 @@ namespace Server { namespace Network {
         }
     }
 
-    void PacketExtractor::GetNeededResourceIds(Common::Packet const& p, Uint32& version)
+    void PacketExtractor::GetNeededResourceIds(Tools::ByteArray const& p, Uint32& version)
     {
         p.Read(version);
     }
 
-    void PacketExtractor::GetResourceRange(Common::Packet const& p,
+    void PacketExtractor::GetResourceRange(Tools::ByteArray const& p,
                                            Uint32& resourceId,
                                            Uint32& offset)
     {
@@ -53,12 +54,12 @@ namespace Server { namespace Network {
         p.Read(offset);
     }
 
-    void PacketExtractor::GetCubeType(Common::Packet const& p, Game::Map::Chunk::CubeType& id)
+    void PacketExtractor::GetCubeType(Tools::ByteArray const& p, Game::Map::Chunk::CubeType& id)
     {
         p.Read(id);
     }
 
-    void PacketExtractor::Settings(Common::Packet const& p,
+    void PacketExtractor::Settings(Tools::ByteArray const& p,
                                    Uint32& viewDistance,
                                    std::string& playerName)
     {
@@ -66,16 +67,16 @@ namespace Server { namespace Network {
         p.Read(playerName);
     }
 
-    void PacketExtractor::TeleportOk(Common::Packet const&)
+    void PacketExtractor::TeleportOk(Tools::ByteArray const&)
     {
     }
 
-    void PacketExtractor::Move(Common::Packet const& p, Common::MovingOrientedPosition& pos)
+    void PacketExtractor::Move(Tools::ByteArray const& p, Common::MovingOrientedPosition& pos)
     {
         p.Read(pos);
     }
 
-    void PacketExtractor::Action(Common::Packet const& p, Common::OrientedPosition& pos, Common::CubePosition& cubePos, Uint32& actionId)
+    void PacketExtractor::Action(Tools::ByteArray const& p, Common::OrientedPosition& pos, Common::CubePosition& cubePos, Uint32& actionId)
     {
         p.Read(pos);
         p.Read(cubePos);

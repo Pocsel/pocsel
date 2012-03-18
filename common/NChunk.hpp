@@ -107,7 +107,7 @@ namespace Common {
                     {
                         static_assert(N > Nother, "Cannot contain something bigger.");
 
-                        return other.id & idMask == this->id;
+                        return (other.id & idMask) == this->id;
                     }
 
                 template<unsigned int Nother>

@@ -1,8 +1,8 @@
 #ifndef __SERVER_CLIENTMANAGEMENT_CLIENTACTIONS_HPP__
 #define __SERVER_CLIENTMANAGEMENT_CLIENTACTIONS_HPP__
 
-namespace Common {
-    class Packet;
+namespace Tools {
+    class ByteArray;
 }
 
 namespace Server { namespace ClientManagement {
@@ -13,7 +13,7 @@ namespace Server { namespace ClientManagement {
     class ClientActions
     {
     public:
-        static void HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet);
+        static void HandleAction(ClientManager& manager, Client& client, Tools::ByteArray const& packet);
     };
 
 }}

@@ -52,7 +52,8 @@ namespace Server { namespace Network {
             boost::asio::ip::udp::resolver udpResolver(this->_ioService);
             boost::asio::ip::udp::resolver::query udpQuery(
                     settings.host,
-                    settings.udpPort,
+                    settings.port,
+                    //settings.udpPort,
                     boost::asio::ip::udp::resolver::query::passive
                     );
             boost::asio::ip::udp::endpoint udpEndpoint(*udpResolver.resolve(udpQuery)); // take first
@@ -126,7 +127,7 @@ namespace Server { namespace Network {
     {
         if (!e)
         {
-            std::unique_ptr<Common::Packet> packet(new Common::Packet());
+            std::unique_ptr<Tools::ByteArray> packet(new Tools::ByteArray());
             packet->SetData((char*)this->_data, (Uint16)transferredBytes);
             this->_udpPacketHandler(packet);
         }

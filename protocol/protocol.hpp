@@ -19,7 +19,6 @@ namespace Protocol {
          * Int32 Version Major
          * Int32 Version Minor
          * String login
-         * Int16 udp port
          */
         Login = 0,
 
