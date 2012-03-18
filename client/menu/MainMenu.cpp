@@ -76,12 +76,13 @@ namespace Client { namespace Menu {
         this->_menu.EndMenuDrawing();
     }
 
-    void MainMenu::SetVisible(bool visible /* = true */)
+    void MainMenu::SetVisible(bool visible /* = true */, bool warpMouse /* = true */)
     {
+        if (!this->_visible && warpMouse)
+            this->_client.GetWindow().GetInputManager().WarpMouse(
+                    this->_client.GetWindow().GetSize().w / 2,
+                    this->_client.GetWindow().GetSize().h / 2);
         this->_visible = visible;
-        this->_client.GetWindow().GetInputManager().WarpMouse(
-                this->_client.GetWindow().GetSize().w / 2,
-                this->_client.GetWindow().GetSize().h / 2);
     }
 
     void MainMenu::_Resize(Tools::Vector2u const& sz)

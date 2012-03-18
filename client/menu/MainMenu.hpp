@@ -38,7 +38,7 @@ namespace Client { namespace Menu {
     public:
         MainMenu(Client& client, Menu& menu);
         ~MainMenu();
-        void SetVisible(bool visible = true);
+        void SetVisible(bool visible = true, bool warpMouse = true);
         bool IsVisible() const { return this->_visible; }
         void Update();
         void Render();

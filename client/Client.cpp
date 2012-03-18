@@ -117,6 +117,8 @@ namespace Client {
 
             if (this->_menu->GetMainMenu().IsVisible())
                 this->_menu->GetMainMenu().Render();
+            else if (!this->_window->GetInputManager().HasFocus())
+                this->_menu->GetMainMenu().SetVisible(true /* visible */, false /* warpMouse */);
 
             // dispatch actions that were not dispatched
             this->_window->GetInputManager().Dispatch(this->_window->GetInputManager(), true);
