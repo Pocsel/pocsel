@@ -7,31 +7,24 @@ namespace Client { namespace Game {
 
     ItemManager::ItemManager(Game& game) :
         _game(game),
-        _pos(0),
         _renderer(new ItemRenderer(game))
     {
     }
 
     ItemManager::~ItemManager()
     {
-        Tools::Delete(this->_pos);
         Tools::Delete(this->_renderer);
     }
 
     void ItemManager::MoveItem(Uint32 id, Common::MovingOrientedPosition const& pos)
     {
-        if (this->_pos == 0)
-            this->_pos = new Common::OrientedPosition(pos.position);
-
-        this->_pos->SetAngles(pos.position.theta, pos.position.phi);
+        this->_positions[id] = pos.position;
     }
 
     void ItemManager::Render()
     {
-        if (_pos == 0)
-            return;
-
-        this->_renderer->Render(*this->_pos);
+        for (auto it = this->_positions.begin(), ite = this->_positions.end(); it != ite; ++it)
+            this->_renderer->Render(it->second);
     }
 
     void ItemManager::Update(Uint32 time)

@@ -17,7 +17,7 @@ namespace Client { namespace Game {
     {
     private:
         Game& _game;
-        Common::OrientedPosition* _pos;
+        std::map<Uint32, Common::OrientedPosition> _positions;
         ItemRenderer* _renderer;
 
     public:
