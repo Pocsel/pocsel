@@ -1,0 +1,154 @@
+- Server
+    Databases used by the server.
+
+    - Plugin
+        Stores a whole plugin (maps, entities, resources, cubes...) that can be
+        installed at any time in a Pocsel world. This database can be freely
+        distributed to anyone willing to install the plugin.
+
+        - plugin
+            Contains a single row of metadata.
+            - build_hash [text]
+            - fullname [text]
+            - identifier [text]
+            - format_version [int]
+
+        - resource
+            Each row represents a resource with it's data.
+            - filename [text]
+            - type [text]
+            - data_hash [text]
+            - data [blob]
+
+        - cube_type
+            Each row represents a cube type with it's configuration as a Lua
+            script.
+            - name [text]
+            - lua [text]
+
+        - entity_file
+            Each row represents a Lua script containing 0 or more calls to
+            Server.Entity.Register() for registering 0 or more entities.
+            - name [text]
+            - lua [text]
+
+        - map
+            Each row represents a map with it's configuration as a Lua script.
+            - name [text]
+            - lua [text]
+
+    - World
+        Stores a whole world with it's installed plugins. Contains all the
+        saved states of every aspect of a world: chunks, entities, events...
+        This database can be freely distributed to anyone willing to play on a
+        copy of the world.
+
+        - world
+            Contains a single row of metadata. This table is set at the creation
+            of the world and will never be updated.
+            - version [int]
+            - fullname [text]
+            - format_version [int]
+            - identifier [text]
+            - build_hash [text]
+
+        - plugin
+            Each row represents an installed plugin.
+            - id [int primary key]
+            - build_hash [text]
+            - fullname [text]
+            - identifier [text]
+
+        - resource
+            Each row represents a resource with it's data.
+            - id [int primary key]
+            - plugin_id [int]
+            - version [int]
+            - filename [text]
+            - type [text]
+            - data_hash [text]
+            - data [blob]
+
+        - cube_type
+            Each row represents a cube type with it's configuration as a Lua
+            script.
+            - id [int primary key]
+            - plugin_id [int]
+            - name [text]
+            - lua [text]
+
+        - entity_file
+            Each row represents a Lua script containing 0 or more calls to
+            Server.Entity.Register() for registering 0 or more entities.
+            - id [int primary key]
+            - plugin_id [int]
+            - name [text]
+            - lua [text]
+
+        - map
+            Each row represents the metadata for a map.
+            - name [text primary key]
+            - plugin_id [int]
+            - lua [text]
+            - tick [int]
+
+        - <plugin>_<map>_bigchunk
+            Stores chunks for a map.
+            - id [int primary key]
+            - data [blob]
+
+        - <plugin>_<map>_entity
+            Stores entities for a map.
+            - id [int]
+            - type [text]
+            - storage [text]
+
+        - <plugin>_<map>_entity_callback
+            Stores entities' callbacks for a map.
+            - target_id [int]
+            - function [text]
+            - arg [text]
+
+        - <plugin>_<map>_entity_spawn
+            Stores entities' spawn events for a map.
+            - plugin_id [int]
+            - entity_name [text]
+            - arg [text]
+            - spawner_id [int]
+            - notification_callback_id [int]
+
+        - <plugin>_<map>_entity_kill
+            Stores entities' kill events for a map.
+            - target_id [int]
+            - arg [text]
+            - killer_id [int]
+            - notification_callback_id [int]
+
+        - <plugin>_<map>_entity_call
+            Stores entities' pending calls for a map.
+            - time [int]
+            - callback_id [int]
+            - notification_callback_id [int]
+
+- Client
+    Databases used by the client.
+
+    - Cache
+        Stores all the server's resources so that there's no need to download
+        them later.
+
+        - cache
+            Contains a single row of metadata. This table is set at the creation
+            of the cache and will never be updated.
+            - version [int]
+            - format_version [int]
+            - world_name [text]
+            - world_build_hash [text]
+
+        - resource
+            Each row represents a cached resource with it's data.
+            - id [int]
+            - type [text]
+            - data [blob]
+            - plugin_id [int]
+            - filename [text]

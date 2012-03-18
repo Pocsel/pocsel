@@ -122,7 +122,7 @@ namespace Server { namespace Database {
                 auto itMapEnd = world._maps.end();
                 for (; itMap != itMapEnd; ++itMap)
                 {
-                    itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row->GetUint32(0));
+                    itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row->GetUint32(0), row->GetString(1));
                     itMap->second->GetEngine().GetInterpreter().DoString(row->GetString(2));
                     itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
                 }

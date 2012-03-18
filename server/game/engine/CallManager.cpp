@@ -61,11 +61,11 @@ namespace Server { namespace Game { namespace Engine {
 
     void CallManager::_ApiLater(Tools::Lua::CallHelper& helper)
     {
-        double seconds = helper.PopArg().CheckNumber();
+        double seconds = helper.PopArg().CheckNumber("Server.Call.Later: Argument 1 (seconds) must be a number");
         if (seconds < 0)
             seconds = 0;
-        Uint32 targetId = helper.PopArg().CheckNumber();
-        std::string function = helper.PopArg().CheckString();
+        Uint32 targetId = helper.PopArg().CheckNumber("Server.Call.Later: Argument 2 (target) must be a number");
+        std::string function = helper.PopArg().CheckString("Server.Call.Later: Argument 3 (function) must be a string");
         Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;
@@ -75,8 +75,8 @@ namespace Server { namespace Game { namespace Engine {
             arg = helper.PopArg();
             if (helper.GetNbArgs())
             {
-                cbTargetId = helper.PopArg().CheckNumber();
-                cbFunction = helper.PopArg().CheckString();
+                cbTargetId = helper.PopArg().CheckNumber("Server.Call.Later: Argument 5 (cbTarget) must be a number");
+                cbFunction = helper.PopArg().CheckString("Server.Call.Later: Argument 6 (cbFunction) must be a string");
                 if (helper.GetNbArgs())
                     cbArg = helper.PopArg();
             }

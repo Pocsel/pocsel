@@ -65,6 +65,7 @@ namespace Server { namespace Game { namespace Engine {
         std::map<Uint32 /* pluginId */, std::map<std::string /* entityName */, EntityType*>> _entityTypes;
         std::map<Uint32 /* entityId */, Entity*> _entities;
         Uint32 _pluginIdForRegistering;
+        std::string _pluginNameForRegistering;
         Uint32 _nextEntityId;
         Uint32 _runningEntityId;
         std::queue<SpawnEvent*> _spawnEvents;
@@ -83,7 +84,7 @@ namespace Server { namespace Game { namespace Engine {
         void DispatchSpawnEvents();
         void DispatchKillEvents();
         void Save(Tools::Database::IConnection& conn);
-        void BeginPluginRegistering(Uint32 pluginId);
+        void BeginPluginRegistering(Uint32 pluginId, std::string const& pluginName);
         void EndPluginRegistering();
         void BootstrapPlugin(Uint32 pluginId);
     private:

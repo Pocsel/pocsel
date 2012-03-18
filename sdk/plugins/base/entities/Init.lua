@@ -12,9 +12,12 @@ Server.Entity.Register{
         print(nbCalls)
         Server.Call.Later(5, self.id, "EventTest", nbCalls, self.id, "Notify", "Test!")
     end,
-    Notify = function(self, arg)
-        print(arg)
-        Server.Call.Now(self.id, function() end)
+    Notify = function(self, arg, result)
+        print(arg, result.entityId, result.success)
+        Server.Call.Later(5, 12, "ca va pas marcher", nil, self.id, "NotifyError")
+    end,
+    NotifyError = function(self, arg, r)
+        print("NotifyError: " .. tostring(arg) .. ", " .. r.entityId .. ", " .. tostring(r.success))
     end,
 }
 
