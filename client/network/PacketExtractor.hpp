@@ -11,6 +11,7 @@
 namespace Common {
     class Packet;
     struct Position;
+    struct MovingOrientedPosition;
 }
 
 namespace Client { namespace Network {
@@ -18,7 +19,7 @@ namespace Client { namespace Network {
     class PacketExtractor
     {
     public:
-        static void ExtractLogin(Tools::ByteArray const& p,
+        static void Login(Tools::ByteArray const& p,
                 bool& status,
                 Protocol::Version& major,
                 Protocol::Version& minor,
@@ -29,9 +30,9 @@ namespace Client { namespace Network {
                 Uint32& worldVersion,
                 Common::BaseChunk::CubeType& nbCubeTypes,
                 std::string& worldBuildHash);
-        static Uint64 ExtractPing(Tools::ByteArray const& p);
-        static void ExtractNeededResourceIds(Tools::ByteArray const& p, Uint32& nbResourceIds, std::list<Uint32>& ids);
-        static char const* ExtractResourceRange(Tools::ByteArray const& p,
+        static Uint64 Ping(Tools::ByteArray const& p);
+        static void NeededResourceIds(Tools::ByteArray const& p, Uint32& nbResourceIds, std::list<Uint32>& ids);
+        static char const* ResourceRange(Tools::ByteArray const& p,
                 Uint32& id,
                 Uint32& offset,
                 Uint32& pluginId,
@@ -39,10 +40,11 @@ namespace Client { namespace Network {
                 std::string& filename,
                 Uint32& totalSize,
                 Uint32& dataSize);
-        static std::unique_ptr<Map::Chunk> ExtractChunk(Tools::ByteArray const& p);
-        static std::unique_ptr<Common::CubeType> ExtractCubeType(Tools::ByteArray const& p);
+        static std::unique_ptr<Map::Chunk> Chunk(Tools::ByteArray const& p);
+        static std::unique_ptr<Common::CubeType> CubeType(Tools::ByteArray const& p);
 
-        static void ExtractTeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position);
+        static void TeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position);
+        static void ItemMove(Tools::ByteArray const& p, Common::MovingOrientedPosition& pos, Uint32& id);
     };
 
 }}

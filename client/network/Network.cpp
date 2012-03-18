@@ -94,18 +94,9 @@ namespace Client { namespace Network {
         try
         {
             boost::asio::ip::udp::endpoint endpoint(this->_socket.local_endpoint().address(), this->_socket.local_endpoint().port());
-            boost::system::error_code error = boost::asio::error::host_not_found;
             this->_udpReceiveSocket.open(endpoint.protocol());
             this->_udpReceiveSocket.bind(endpoint);
-            if (error)
-            {
-                Tools::error << "Network::Network: Receiving to (UDP) " << host << ":" << port << " failed: " << error.message() << ".\n";
-                this->_udpReceive = false;
-            }
-            else
-            {
-                this->_udpReceive = true;
-            }
+            this->_udpReceive = true;
         }
         catch (std::exception& e)
         {

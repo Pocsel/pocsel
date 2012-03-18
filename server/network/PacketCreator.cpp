@@ -7,6 +7,7 @@
 #include "common/ChunkSerializer.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/PositionSerializer.hpp"
+#include "common/MovingOrientedPositionSerializer.hpp"
 
 #include "server/network/PacketCreator.hpp"
 #include "server/network/ChunkSerializer.hpp"
@@ -24,6 +25,7 @@ namespace Server { namespace Network {
     {
         Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::LoggedIn);
+
         p->WriteBool(success);
         p->Write(Protocol::Version::Major);
         p->Write(Protocol::Version::Minor);
@@ -57,6 +59,7 @@ namespace Server { namespace Network {
     {
         Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::Chunk);
+
         p->Write(chunk);
         return std::unique_ptr<Common::Packet>(p);
     }
@@ -66,6 +69,7 @@ namespace Server { namespace Network {
     {
         Common::Packet* response(new Common::Packet);
         response->Write(Protocol::ServerToClient::NeededResourceIds);
+
         response->Write32(static_cast<Uint32>(ids.size()));
         while (offset < ids.size() && offset < 15000)
         {
@@ -80,6 +84,7 @@ namespace Server { namespace Network {
     {
         std::unique_ptr<Common::Packet> ptr(new Common::Packet());
         ptr->Write(Protocol::ServerToClient::ResourceRange);
+
         ptr->Write32(resource.id);
         ptr->Write32(offset);
         Tools::debug << "PacketCreator::ResourceRange(): " << resource.id <<
@@ -115,6 +120,7 @@ namespace Server { namespace Network {
     {
         Common::Packet* response(new Common::Packet);
         response->Write(Protocol::ServerToClient::CubeType);
+
         response->Write(cubeType);
         return std::unique_ptr<Common::Packet>(response);
     }
@@ -124,9 +130,20 @@ namespace Server { namespace Network {
     {
         Common::Packet* ptr(new Common::Packet);
         ptr->Write(Protocol::ServerToClient::TeleportPlayer);
+
         ptr->Write(map);
         ptr->Write(pos);
         return std::unique_ptr<Common::Packet>(ptr);
     }
 
+    std::unique_ptr<Common::Packet> PacketCreator::ItemMove(Common::MovingOrientedPosition const& pos,
+                                                            Uint32 itemId)
+    {
+        Common::Packet* ptr(new Common::Packet);
+        ptr->Write(Protocol::ServerToClient::ItemMove);
+
+        ptr->Write(pos);
+        ptr->Write(itemId);
+        return std::unique_ptr<Common::Packet>(ptr);
+    }
 }}

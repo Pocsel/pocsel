@@ -5,10 +5,11 @@
 #include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/PositionSerializer.hpp"
+#include "common/MovingOrientedPositionSerializer.hpp"
 
 namespace Client { namespace Network {
 
-    void PacketExtractor::ExtractLogin(Tools::ByteArray const& p,
+    void PacketExtractor::Login(Tools::ByteArray const& p,
             bool& status,
             Protocol::Version& major,
             Protocol::Version& minor,
@@ -38,12 +39,12 @@ namespace Client { namespace Network {
         }
     }
 
-    Uint64 PacketExtractor::ExtractPing(Tools::ByteArray const& p)
+    Uint64 PacketExtractor::Ping(Tools::ByteArray const& p)
     {
         return p.Read64();
     }
 
-    void PacketExtractor::ExtractNeededResourceIds(Tools::ByteArray const& p, Uint32& nbResourceIds, std::list<Uint32>& ids)
+    void PacketExtractor::NeededResourceIds(Tools::ByteArray const& p, Uint32& nbResourceIds, std::list<Uint32>& ids)
     {
         p.Read(nbResourceIds);
         unsigned int nbIds = p.GetBytesLeft() / sizeof(Uint32);
@@ -51,7 +52,7 @@ namespace Client { namespace Network {
             ids.push_back(p.Read32());
     }
 
-    char const* PacketExtractor::ExtractResourceRange(Tools::ByteArray const& p,
+    char const* PacketExtractor::ResourceRange(Tools::ByteArray const& p,
                                                       Uint32& id,
                                                       Uint32& offset,
                                                       Uint32& pluginId,
@@ -73,20 +74,26 @@ namespace Client { namespace Network {
         return p.ReadRawData(dataSize);
     }
 
-    std::unique_ptr<Map::Chunk> PacketExtractor::ExtractChunk(Tools::ByteArray const& p)
+    std::unique_ptr<Map::Chunk> PacketExtractor::Chunk(Tools::ByteArray const& p)
     {
         return p.Read<Map::Chunk>();
     }
 
-    std::unique_ptr<Common::CubeType> PacketExtractor::ExtractCubeType(Tools::ByteArray const& p)
+    std::unique_ptr<Common::CubeType> PacketExtractor::CubeType(Tools::ByteArray const& p)
     {
         return p.Read<Common::CubeType>();
     }
 
-    void PacketExtractor::ExtractTeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position)
+    void PacketExtractor::TeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position)
     {
         p.Read(map);
         p.Read(position);
+    }
+
+    void PacketExtractor::ItemMove(Tools::ByteArray const& p, Common::MovingOrientedPosition& pos, Uint32& id)
+    {
+        p.Read(pos);
+        p.Read(id);
     }
 
 }}

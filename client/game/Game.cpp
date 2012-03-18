@@ -7,6 +7,7 @@
 #include "client/map/Map.hpp"
 #include "client/window/Window.hpp"
 #include "client/game/Player.hpp"
+#include "client/game/ItemManager.hpp"
 
 namespace Client { namespace Game {
 
@@ -18,6 +19,7 @@ namespace Client { namespace Game {
     {
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
         this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
+        this->_itemManager = new ItemManager(*this),
         this->_player = new Player(*this);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](Tools::Vector2u const& size)
@@ -65,6 +67,7 @@ namespace Client { namespace Game {
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
         this->_renderer.BeginDraw();
         this->_map->GetChunkManager().Render();
+        this->_itemManager->Render();
         this->_player->Render();
         this->_renderer.EndDraw();
     }

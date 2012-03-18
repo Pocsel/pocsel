@@ -19,6 +19,7 @@ namespace Server { namespace Network {
         _toRead(0),
         _connected(true),
         _writeConnected(false),
+        _udpWriteConnected(false),
         _errorCallback(0),
         _packetCallback(0),
         _udp(true)

@@ -1,7 +1,9 @@
 #include "client/precompiled.hpp"
+#include "common/MovingOrientedPosition.hpp"
 #include "tools/ByteArray.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/CubeTypeManager.hpp"
+#include "client/game/ItemManager.hpp"
 #include "client/map/Map.hpp"
 #include "client/map/ChunkManager.hpp"
 #include "client/resources/ResourceDownloader.hpp"
@@ -21,7 +23,7 @@ namespace Client { namespace Network {
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Ping] =
             [this](Tools::ByteArray& p)
             {
-                this->_client.GetNetwork().SendPacket(PacketCreator::Pong(PacketExtractor::ExtractPing(p)));
+                this->_client.GetNetwork().SendPacket(PacketCreator::Pong(PacketExtractor::Ping(p)));
             };
 
         // Loading
@@ -38,7 +40,7 @@ namespace Client { namespace Network {
             {
                 if (this->_client.GetState() != Client::LoadingResources)
                     throw std::runtime_error("Bad state for loading a cube type");
-                this->_client.GetGame().GetCubeTypeManager().AddCubeType(PacketExtractor::ExtractCubeType(p));
+                this->_client.GetGame().GetCubeTypeManager().AddCubeType(PacketExtractor::CubeType(p));
             };
 
         // Game
@@ -47,7 +49,7 @@ namespace Client { namespace Network {
             {
                 if (this->_client.GetState() != Client::LoadingChunks && this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for loading a chunk");
-                this->_client.GetGame().GetMap().GetChunkManager().AddChunk(PacketExtractor::ExtractChunk(p));
+                this->_client.GetGame().GetMap().GetChunkManager().AddChunk(PacketExtractor::Chunk(p));
             };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::TeleportPlayer] =
             [this](Tools::ByteArray& p)
@@ -58,8 +60,20 @@ namespace Client { namespace Network {
                     throw std::runtime_error("Bad state for teleporting");
                 std::string map;
                 Common::Position position;
-                PacketExtractor::ExtractTeleportPlayer(p, map, position);
+                PacketExtractor::TeleportPlayer(p, map, position);
                 this->_client.GetGame().TeleportPlayer(map, position);
+            };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::ItemMove] =
+            [this](Tools::ByteArray& p)
+            {
+                if (this->_client.GetState() != Client::LoadingChunks &&
+                    this->_client.GetState() != Client::Running)
+                    throw std::runtime_error("Bad state for item move");
+                Common::MovingOrientedPosition pos;
+                Uint32 id;
+                PacketExtractor::ItemMove(p, pos, id);
+
+                this->_client.GetGame().GetItemManager().MoveItem(id, pos);
             };
     }
 
@@ -87,7 +101,7 @@ namespace Client { namespace Network {
         Uint32 clientId;
         Uint32 worldVersion;
         Common::BaseChunk::CubeType nbCubeTypes;
-        PacketExtractor::ExtractLogin(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes, worldBuildHash);
+        PacketExtractor::Login(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes, worldBuildHash);
 
         Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << (int)major << "." << (int)minor << "\n";
         if (status)
@@ -105,7 +119,7 @@ namespace Client { namespace Network {
             return;
         Uint32 nbNeededResources;
         std::list<Uint32> neededResourceIds;
-        PacketExtractor::ExtractNeededResourceIds(p, nbNeededResources, neededResourceIds);
+        PacketExtractor::NeededResourceIds(p, nbNeededResources, neededResourceIds);
         this->_client.GetGame().GetResourceManager().GetDownloader().AskResources(nbNeededResources, neededResourceIds);
     }
 
