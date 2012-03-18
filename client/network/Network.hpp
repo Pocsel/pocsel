@@ -14,22 +14,22 @@ namespace Client { namespace Network {
         struct InQueue
         {
         private:
-            std::list<Common::Packet*> _list;
+            std::list<Tools::ByteArray*> _list;
             boost::mutex _mutex;
         public:
-            void PushPacket(Common::Packet* p)
+            void PushPacket(Tools::ByteArray* p)
             {
                 boost::lock_guard<boost::mutex> lock(_mutex);
                 _list.push_back(p);
             }
-            std::list<Common::Packet*> StealPackets()
+            std::list<Tools::ByteArray*> StealPackets()
             {
                 boost::lock_guard<boost::mutex> lock(_mutex);
                 return std::move(_list);
             }
             void Clear()
             {
-                std::for_each(this->_list.begin(), this->_list.end(), [](Common::Packet* p) { Tools::Delete(p); });
+                std::for_each(this->_list.begin(), this->_list.end(), [](Tools::ByteArray* p) { Tools::Delete(p); });
                 this->_list.clear();
             }
             ~InQueue()
@@ -70,7 +70,7 @@ namespace Client { namespace Network {
         void Stop();
         void SendPacket(std::unique_ptr<Common::Packet> packet);
         void SendUdpPacket(std::unique_ptr<UdpPacket> packet);
-        std::list<Common::Packet*> GetInPackets();
+        std::list<Tools::ByteArray*> GetInPackets();
         std::string const& GetHost() const { return this->_host; }
         std::string const& GetPort() const { return this->_port; }
         bool IsRunning() const { return this->_isRunning; }
@@ -88,6 +88,8 @@ namespace Client { namespace Network {
         void _SendNextUdp();
         void _HandleWrite(boost::system::error_code const& error);
         void _HandleWriteUdp(boost::system::error_code const& error);
+        void _ReceiveUdpPacket();
+        void _HandleReceiveUdpPacket(boost::system::error_code const& e, std::size_t size);
         void _ReceivePacketSize();
         void _HandleReceivePacketSize(const boost::system::error_code& error);
         void _ReceivePacketContent(unsigned int size);

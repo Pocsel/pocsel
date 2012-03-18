@@ -22,6 +22,7 @@ namespace Client { namespace Network {
         _udp(false)
     {
         this->_sizeBuffer.resize(2);
+        this->_udpDataBuffer.resize(Common::Packet::maxSize);
     }
 
     float Network::GetLoadingProgression()
@@ -138,8 +139,8 @@ namespace Client { namespace Network {
     void Network::_Run()
     {
         this->_ReceivePacketSize();
-//        if (this->_udpReceive)
-//            this->_ReceiveUdpPacket();
+        if (this->_udpReceive)
+            this->_ReceiveUdpPacket();
         this->_ioService.run();
     }
 
@@ -224,7 +225,7 @@ namespace Client { namespace Network {
         }
     }
 
-    std::list<Common::Packet*> Network::GetInPackets()
+    std::list<Tools::ByteArray*> Network::GetInPackets()
     {
         return this->_inQueue.StealPackets();
     }
@@ -308,6 +309,33 @@ namespace Client { namespace Network {
         }
     }
 
+    void Network::_ReceiveUdpPacket()
+    {
+        this->_udpReceiveSocket.async_receive(
+            boost::asio::buffer(this->_udpDataBuffer),
+            boost::bind(
+                &Network::_HandleReceiveUdpPacket, this,
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred)
+            );
+    }
+
+    void Network::_HandleReceiveUdpPacket(boost::system::error_code const& error, std::size_t size)
+    {
+        if (error)
+        {
+            Tools::error << "Network::_HandleReceiveUdpPacket: Read error \"" << error.message() << "\".\n";
+            this->_DisconnectedByNetwork(error.message());
+        }
+        else
+        {
+            auto p = new Tools::ByteArray();
+            p->SetData(this->_udpDataBuffer.data(), (Uint32)size);
+            this->_inQueue.PushPacket(p);
+            this->_ReceiveUdpPacket();
+        }
+    }
+
     void Network::_ReceivePacketSize()
     {
         boost::asio::async_read(this->_socket, boost::asio::buffer(this->_sizeBuffer), boost::bind(&Network::_HandleReceivePacketSize, this, boost::asio::placeholders::error));
@@ -339,8 +367,8 @@ namespace Client { namespace Network {
         }
         else
         {
-            auto p = new Common::Packet();
-            p->SetData(this->_dataBuffer.data(), (Uint16)this->_dataBuffer.size());
+            auto p = new Tools::ByteArray();
+            p->SetData(this->_dataBuffer.data(), (Uint32)this->_dataBuffer.size());
             this->_inQueue.PushPacket(p);
             this->_ReceivePacketSize();
         }

@@ -18,7 +18,7 @@ namespace Client { namespace Network {
     class PacketExtractor
     {
     public:
-        static void ExtractLogin(Common::Packet const& p,
+        static void ExtractLogin(Tools::ByteArray const& p,
                 bool& status,
                 Protocol::Version& major,
                 Protocol::Version& minor,
@@ -29,9 +29,9 @@ namespace Client { namespace Network {
                 Uint32& worldVersion,
                 Common::BaseChunk::CubeType& nbCubeTypes,
                 std::string& worldBuildHash);
-        static Uint64 ExtractPing(Common::Packet const& p);
-        static void ExtractNeededResourceIds(Common::Packet const& p, Uint32& nbResourceIds, std::list<Uint32>& ids);
-        static char const* ExtractResourceRange(Common::Packet const& p,
+        static Uint64 ExtractPing(Tools::ByteArray const& p);
+        static void ExtractNeededResourceIds(Tools::ByteArray const& p, Uint32& nbResourceIds, std::list<Uint32>& ids);
+        static char const* ExtractResourceRange(Tools::ByteArray const& p,
                 Uint32& id,
                 Uint32& offset,
                 Uint32& pluginId,
@@ -39,10 +39,10 @@ namespace Client { namespace Network {
                 std::string& filename,
                 Uint32& totalSize,
                 Uint32& dataSize);
-        static std::unique_ptr<Map::Chunk> ExtractChunk(Common::Packet const& p);
-        static std::unique_ptr<Common::CubeType> ExtractCubeType(Common::Packet const& p);
+        static std::unique_ptr<Map::Chunk> ExtractChunk(Tools::ByteArray const& p);
+        static std::unique_ptr<Common::CubeType> ExtractCubeType(Tools::ByteArray const& p);
 
-        static void ExtractTeleportPlayer(Common::Packet const& p, std::string& map, Common::Position& position);
+        static void ExtractTeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position);
     };
 
 }}

@@ -1,5 +1,7 @@
 #include "server/network/ClientConnection.hpp"
 
+#include "tools/Deleter.hpp"
+
 #ifdef _WIN32
 // Desactive le warning "longueur du nom décoré dépassée, le nom a été tronqué"
 # pragma warning(disable: 4503)
@@ -49,7 +51,9 @@ namespace Server { namespace Network {
     void ClientConnection::SendPacket(std::unique_ptr<Common::Packet> packet)
     {
         std::function<void(void)> fx =
-            std::bind(&ClientConnection::_SendPacket, this->shared_from_this(), packet.release());
+            std::bind(&ClientConnection::_SendPacket,
+                    this->shared_from_this(),
+                    Tools::Deleter<Common::Packet>::CreatePtr(packet.release()));
         this->_ioService.dispatch(fx);
     }
 
@@ -91,7 +95,7 @@ namespace Server { namespace Network {
     void ClientConnection::_HandleRead(boost::system::error_code const error,
                                        std::size_t transferredBytes)
     {
-        std::list<std::unique_ptr<Common::Packet>> packets;
+        std::list<std::unique_ptr<Tools::ByteArray>> packets;
         if (!error)
         {
             assert(transferredBytes >= 2);
@@ -120,8 +124,8 @@ namespace Server { namespace Network {
                 {
                     if (transferredBytes >= this->_toRead)
                     {
-                        Common::Packet* packet = new Common::Packet();
-                        packets.push_back(std::unique_ptr< Common::Packet >(packet));
+                        Tools::ByteArray* packet = new Tools::ByteArray();
+                        packets.push_back(std::unique_ptr<Tools::ByteArray>(packet));
                         this->_offset += this->_toRead;
                         transferredBytes -= this->_toRead;
                         this->_toRead = 0;
@@ -167,15 +171,14 @@ namespace Server { namespace Network {
         );
     }
 
-    void ClientConnection::_SendPacket(Common::Packet* packet_)
+    void ClientConnection::_SendPacket(std::shared_ptr<Common::Packet> packet)
     {
-        std::unique_ptr<Common::Packet> packet(packet_);
         if (!this->_connected || !this->_socket)
         {
             Tools::debug << "Socket already down\n";
             return;
         }
-        this->_toSendPackets.push(std::move(packet));
+        this->_toSendPackets.push(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
         if (!this->_writeConnected)
             this->_ConnectWrite();
     }

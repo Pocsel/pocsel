@@ -26,7 +26,7 @@ namespace Client { namespace Resources {
         this->_CheckDownloadEnd();
     }
 
-    void ResourceDownloader::HandleResourceRange(Common::Packet& p)
+    void ResourceDownloader::HandleResourceRange(Tools::ByteArray& p)
     {
         Uint32 id, offset, pluginId, totalSize, dataSize;
         std::string type, filename;

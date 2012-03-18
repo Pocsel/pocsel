@@ -127,7 +127,7 @@ namespace Server { namespace Network {
     {
         if (!e)
         {
-            std::unique_ptr<Common::Packet> packet(new Common::Packet());
+            std::unique_ptr<Tools::ByteArray> packet(new Tools::ByteArray());
             packet->SetData((char*)this->_data, (Uint16)transferredBytes);
             this->_udpPacketHandler(packet);
         }
