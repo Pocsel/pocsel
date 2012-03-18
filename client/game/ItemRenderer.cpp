@@ -40,15 +40,17 @@ namespace Client { namespace Game {
 
         this->_shader->BeginPass();
 
-        Common::Position const& p = pos.position;
-
         this->_renderer.SetModelMatrix(
             Tools::Matrix4<float>::CreateTranslation(
-                Common::Position(p.world, Tools::Vector3f(p.chunk.x, p.chunk.y, p.chunk.z)) - camera.position
+                Tools::Vector3f(-0.5f, -0.5f, -0.5f)
                 )
-                +
+            *
             Tools::Matrix4<float>::CreateYawPitchRollRotation(
-                    -pos.theta, 0.0f, pos.phi
+                    -pos.theta, 0.0f, -pos.phi
+                )
+            *
+            Tools::Matrix4<float>::CreateTranslation(
+                pos.position - camera.position
                 )
             );
 
