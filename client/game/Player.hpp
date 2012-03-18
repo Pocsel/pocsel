@@ -33,6 +33,7 @@ namespace Client { namespace Game {
             bool _sprint;
             Common::CubePosition* _targetedCube;
             TargetedCubeRenderer* _targetedCubeRenderer;
+            Tools::Vector3f _movement;
 
         public:
             Player(Game& game);
@@ -60,6 +61,7 @@ namespace Client { namespace Game {
 
         private:
             void _Move(Tools::Vector3f moveVector);
+            void _Move();
             float _GetSpeed();
     };
 

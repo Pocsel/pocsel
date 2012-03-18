@@ -6,6 +6,7 @@
 #include "common/Position.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
+#include "tools/Deleter.hpp"
 
 #include "server/Server.hpp"
 
@@ -57,24 +58,42 @@ namespace Server { namespace ClientManagement {
         this->_messageQueue.PushMessage(m);
     }
 
-    void ClientManager::HandlePacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
+    void ClientManager::HandlePacket(Uint32 clientId, std::unique_ptr<Tools::ByteArray>& packet)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&ClientManager::_HandlePacket, this, clientId, packet.release()));
+            m(std::bind(&ClientManager::_HandlePacket,
+                        this,
+                        clientId,
+                        Tools::Deleter<Tools::ByteArray>::CreatePtr(packet.release())));
         this->_messageQueue.PushMessage(m);
     }
 
-    void ClientManager::HandleUdpPacket(std::unique_ptr<Common::Packet>& packet)
+    void ClientManager::HandleUdpPacket(std::unique_ptr<Tools::ByteArray>& packet)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&ClientManager::_HandleUdpPacket, this, packet.release()));
+            m(std::bind(&ClientManager::_HandleUdpPacket,
+                        this,
+                        Tools::Deleter<Tools::ByteArray>::CreatePtr(packet.release())));
         this->_messageQueue.PushMessage(m);
     }
 
     void ClientManager::SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&ClientManager::_SendPacket, this, clientId, packet.release()));
+            m(std::bind(&ClientManager::_SendPacket,
+                        this,
+                        clientId,
+                        Tools::Deleter<Common::Packet>::CreatePtr(packet.release())));
+        this->_messageQueue.PushMessage(m);
+    }
+
+    void ClientManager::SendUdpPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&ClientManager::_SendUdpPacket,
+                        this,
+                        clientId,
+                        Tools::Deleter<Common::Packet>::CreatePtr(packet.release())));
         this->_messageQueue.PushMessage(m);
     }
 
@@ -125,7 +144,7 @@ namespace Server { namespace ClientManagement {
         Tools::log << "Client logged in: " << login2 << "\n";
     }
 
-    void ClientManager::ClientNeedChunks(Client& client, std::vector<Chunk::IdType> const& ids)
+    void ClientManager::ClientNeedChunks(Client& client, std::vector<Game::Map::Chunk::IdType> const& ids)
     {
         Game::Game::ChunkPacketCallback
             callback(std::bind(&ClientManager::SendPacket, this, client.id, std::placeholders::_1));
@@ -193,9 +212,8 @@ namespace Server { namespace ClientManagement {
         Tools::debug << "Removing client " << clientId << " done\n";
     }
 
-    void ClientManager::_HandlePacket(Uint32 clientId, Common::Packet* packet)
+    void ClientManager::_HandlePacket(Uint32 clientId, std::shared_ptr<Tools::ByteArray> packet)
     {
-        std::unique_ptr<Common::Packet> autoDelete(packet);
         if (this->_clients.find(clientId) == this->_clients.end())
         {
             Tools::error << "HandlePacket: Client " << clientId << " not found.\n";
@@ -214,7 +232,7 @@ namespace Server { namespace ClientManagement {
         }
     }
 
-    void ClientManager::_HandleUdpPacket(Common::Packet* packet)
+    void ClientManager::_HandleUdpPacket(std::shared_ptr<Tools::ByteArray> packet)
     {
         bool ok = false;
         Uint32 clientId;
@@ -225,8 +243,7 @@ namespace Server { namespace ClientManagement {
         }
         catch (std::exception&)
         {
-            Tools::log << "Could not read id in UDP packet\n";
-            Tools::Delete(packet);
+            Tools::error << "Could not read id in UDP packet\n";
         }
         if (ok)
         {
@@ -234,16 +251,26 @@ namespace Server { namespace ClientManagement {
         }
     }
 
-    void ClientManager::_SendPacket(Uint32 clientId, Common::Packet* packet)
+    void ClientManager::_SendPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet)
     {
         if (this->_clients.find(clientId) == this->_clients.end())
         {
             Tools::error << "SendPacket: Client " << clientId << " not found.\n";
-            Tools::Delete(packet);
             return ;
         }
 
-        this->_clients[clientId]->SendPacket(std::unique_ptr<Common::Packet>(packet));
+        this->_clients[clientId]->SendPacket(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
+    }
+
+    void ClientManager::_SendUdpPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet)
+    {
+        if (this->_clients.find(clientId) == this->_clients.end())
+        {
+            Tools::error << "SendPacket: Client " << clientId << " not found.\n";
+            return ;
+        }
+
+        this->_clients[clientId]->SendUdpPacket(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
     }
 
     void ClientManager::_ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)

@@ -52,10 +52,11 @@ namespace Client { namespace Menu {
         this->_message = message;
     }
 
-    void DisconnectedScreen::_Resize(Tools::Vector2u const& size)
+    void DisconnectedScreen::_Resize(Tools::Vector2u const& sz)
     {
-        this->_text1Matrix = Tools::Matrix4<float>::CreateTranslation(10, size.h - 80, 0);
-        this->_text2Matrix = Tools::Matrix4<float>::CreateTranslation(10, size.h - 60, 0);
+        Tools::Vector2f size(sz);
+        this->_text1Matrix = Tools::Matrix4<float>::CreateScale(Tools::Vector3f(0.5f)) * Tools::Matrix4<float>::CreateTranslation(10, size.h - 80, 0);
+        this->_text2Matrix = Tools::Matrix4<float>::CreateScale(Tools::Vector3f(0.5f)) * Tools::Matrix4<float>::CreateTranslation(10, size.h - 60, 0);
         this->_backRectMatrix = Tools::Matrix4<float>::CreateScale(size.w / 2 + 1, size.h / 2 + 1, 1)
             * Tools::Matrix4<float>::CreateTranslation(size.w / 2, size.h / 2, 0);
         this->_button->SetPos(Tools::Vector2f(10, size.h - 30));

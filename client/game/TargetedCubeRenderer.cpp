@@ -42,7 +42,7 @@ namespace Client { namespace Game {
 
         this->_renderer.SetModelMatrix(
             Tools::Matrix4<float>::CreateTranslation(
-                Common::Position(pos.world, Tools::Vector3f(pos.chunk.x, pos.chunk.y, pos.chunk.z)) - camera.position
+                Common::Position(pos.world, Tools::Vector3f((float)pos.chunk.x, (float)pos.chunk.y, (float)pos.chunk.z)) - camera.position
                 )
             );
 
@@ -120,7 +120,7 @@ namespace Client { namespace Game {
             -0.001f, 1.001f, 1.001f,  1.0f, 1.0f,
         };
 
-        this->_vertexBuffer = this->_renderer.CreateVertexBuffer().release();
+        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
         this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
         this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // texCoord
         this->_vertexBuffer->SetData(6*6*3*sizeof(float) + 6*6*2*sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);

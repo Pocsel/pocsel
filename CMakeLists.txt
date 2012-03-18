@@ -14,6 +14,7 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost COMPONENTS system filesystem thread date_time regex program_options REQUIRED)
 find_package(Threads)
+find_package(DirectX REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
@@ -57,6 +58,7 @@ set(ALL_INCLUDES
     ${FREETYPE_INCLUDE_DIRS}
     ${SDL_INCLUDE_DIR}
     ${CG_INCLUDE_DIR}
+	${DirectX_D3DX9_INCLUDE_DIR}
 
     ${SQLITE3_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}
@@ -68,7 +70,7 @@ include_directories(
 
 file(GLOB_RECURSE common_src "common/*.[ch]pp")
 file(GLOB tools_base_src "tools/*.[ch]pp" "tools/meta/*.[ch]pp")
-file(GLOB tools_database_src "tools/database/*.[ch]pp" "tools/database/sqlite/*.[ch]pp")
+file(GLOB_RECURSE tools_database_src "tools/database/*.[ch]pp")
 file(GLOB_RECURSE tools_gui_src "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
 file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")

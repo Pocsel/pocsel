@@ -143,14 +143,14 @@ namespace Client { namespace Map {
 //            chunkBottom == 0)
 //        {
 //            this->_tmpNbVertices = 0;
-//            delete [] this->_tmpVertices;
+//            Tools::Delete([] this->_tmpVertices);
 //            this->_tmpVertices = 0;
 //            this->_tmpIndices.clear();
 //            return false;
 //        }
 
         this->_tmpNbVertices = 0;
-        delete [] this->_tmpVertices;
+        Tools::DeleteTab(this->_tmpVertices);
         this->_tmpVertices = 0;
         this->_tmpIndices.clear();
 
@@ -181,7 +181,7 @@ namespace Client { namespace Map {
                         continue;
 
                     auto const& cubeType = cubeTypes[cubes[cubeOffset] - 1];
-                    Tools::Vector3f p(x, y, z);
+                    Tools::Vector3f p((float)x, (float)y, (float)z);
 
                     // Right
                     nearType = 0;
@@ -282,7 +282,7 @@ namespace Client { namespace Map {
         boost::lock_guard<boost::mutex> lock(this->_refreshMutex, boost::adopt_lock);
         // on clear tout
         this->_meshes.clear();
-        delete this->_vertices;
+        Tools::Delete(this->_vertices);
         this->_vertices = 0;
         this->_triangleCount = 0;
 
@@ -300,13 +300,13 @@ namespace Client { namespace Map {
                 continue;
             Mesh m;
             m.indices = renderer.CreateIndexBuffer().release();
-            m.indices->SetData(sizeof(unsigned int) * it->second.size(), it->second.data());
+            m.indices->SetData(Tools::Renderers::DataType::UnsignedInt, sizeof(unsigned int) * it->second.size(), it->second.data());
             m.nbIndices = (Uint32)it->second.size();
             this->_triangleCount += m.nbIndices / 3;
             this->_meshes[it->first] = std::move(m);
         }
 
-        delete [] this->_tmpVertices;
+        Tools::DeleteTab(this->_tmpVertices);
         this->_tmpVertices = 0;
         this->_tmpIndices.clear();
         return true;
@@ -321,7 +321,7 @@ namespace Client { namespace Map {
             return;
         this->_vertices->Bind();
         m.indices->Bind();
-        renderer.DrawElements(m.nbIndices, Tools::Renderers::DataType::UnsignedInt, 0);
+        renderer.DrawElements(m.nbIndices);
         m.indices->Unbind();
         this->_vertices->Unbind();
     }

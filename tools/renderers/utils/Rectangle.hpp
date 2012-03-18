@@ -10,6 +10,7 @@ namespace Tools { namespace Renderers { namespace Utils {
     private:
         IRenderer& _renderer;
         std::unique_ptr<IVertexBuffer> _vertexBuffer;
+        std::unique_ptr<IIndexBuffer> _indexBuffer;
         Vector3<float> _point1, _point2, _point3, _point4;
         Color4f _point1Color, _point2Color, _point3Color, _point4Color;
 

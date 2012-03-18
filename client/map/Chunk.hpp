@@ -4,9 +4,6 @@
 #include "common/BaseChunk.hpp"
 #include "client/map/ChunkMesh.hpp"
 
-namespace Common {
-    struct Camera;
-}
 namespace Client { namespace Map {
     class Map;
 }}
@@ -21,8 +18,8 @@ namespace Client { namespace Map {
         ChunkMesh* _mesh;
 
     public:
-        Chunk(IdType id);
-        Chunk(CoordsType const& c);
+        explicit Chunk(IdType id);
+        explicit Chunk(CoordsType const& c);
         ~Chunk();
 
         ChunkMesh* GetMesh() { return this->_mesh; }

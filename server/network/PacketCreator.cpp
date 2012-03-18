@@ -7,6 +7,7 @@
 #include "common/ChunkSerializer.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/PositionSerializer.hpp"
+#include "common/MovingOrientedPositionSerializer.hpp"
 
 #include "server/network/PacketCreator.hpp"
 #include "server/network/ChunkSerializer.hpp"
@@ -19,11 +20,12 @@ namespace Server { namespace Network {
                                             std::string const& worldIdentifier /* = "" */,
                                             std::string const& worldName /* = "" */,
                                             Uint32 worldVersion /* = 0 */,
-                                            Chunk::CubeType nbCubeTypes /* = 0 */,
+                                            Game::Map::Chunk::CubeType nbCubeTypes /* = 0 */,
                                             std::string const& worldBuildHash /* = 0 */)
     {
         Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::LoggedIn);
+
         p->WriteBool(success);
         p->Write(Protocol::Version::Major);
         p->Write(Protocol::Version::Minor);
@@ -53,10 +55,11 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(p);
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::Chunk(::Server::Chunk const& chunk)
+    std::unique_ptr<Common::Packet> PacketCreator::Chunk(::Server::Game::Map::Chunk const& chunk)
     {
         Common::Packet* p(new Common::Packet);
         p->Write(Protocol::ServerToClient::Chunk);
+
         p->Write(chunk);
         return std::unique_ptr<Common::Packet>(p);
     }
@@ -66,6 +69,7 @@ namespace Server { namespace Network {
     {
         Common::Packet* response(new Common::Packet);
         response->Write(Protocol::ServerToClient::NeededResourceIds);
+
         response->Write32(static_cast<Uint32>(ids.size()));
         while (offset < ids.size() && offset < 15000)
         {
@@ -80,6 +84,7 @@ namespace Server { namespace Network {
     {
         std::unique_ptr<Common::Packet> ptr(new Common::Packet());
         ptr->Write(Protocol::ServerToClient::ResourceRange);
+
         ptr->Write32(resource.id);
         ptr->Write32(offset);
         Tools::debug << "PacketCreator::ResourceRange(): " << resource.id <<
@@ -115,6 +120,7 @@ namespace Server { namespace Network {
     {
         Common::Packet* response(new Common::Packet);
         response->Write(Protocol::ServerToClient::CubeType);
+
         response->Write(cubeType);
         return std::unique_ptr<Common::Packet>(response);
     }
@@ -124,9 +130,20 @@ namespace Server { namespace Network {
     {
         Common::Packet* ptr(new Common::Packet);
         ptr->Write(Protocol::ServerToClient::TeleportPlayer);
+
         ptr->Write(map);
         ptr->Write(pos);
         return std::unique_ptr<Common::Packet>(ptr);
     }
 
+    std::unique_ptr<Common::Packet> PacketCreator::ItemMove(Common::MovingOrientedPosition const& pos,
+                                                            Uint32 itemId)
+    {
+        Common::Packet* ptr(new Common::Packet);
+        ptr->Write(Protocol::ServerToClient::ItemMove);
+
+        ptr->Write(pos);
+        ptr->Write(itemId);
+        return std::unique_ptr<Common::Packet>(ptr);
+    }
 }}

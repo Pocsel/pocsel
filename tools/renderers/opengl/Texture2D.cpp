@@ -31,7 +31,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         else
         {
             this->_size = imgSize;
-            this->_FinishLoading(GetInternalFormatFromPixelFormat(format), GetFormatFromPixelFormat(format), data, (format >> 24) & 0xFF, mipmapData);
+            this->_FinishLoading(GetInternalFormatFromPixelFormat(format), GetFormatFromPixelFormat(format), size, data, (format >> 24) & 0xFF, mipmapData);
         }
     }
 
@@ -44,7 +44,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         {
             ilBindImage(0);
             ilDeleteImage(ilID);
-            throw std::runtime_error("Texture2D::ctor: Can't load image.");
+            throw std::runtime_error("Texture2D::ctor: Can't load image file: " + imagePath);
         }
         this->_FinishLoading(ilID);
     }
@@ -68,11 +68,11 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         ilBindImage(0);
         ilDeleteImage(ilID);
 
-        this->_FinishLoading(4, GL_RGBA, pixmap, 4, 0);
+        this->_FinishLoading(4, GL_RGBA, size, pixmap, 4, 0);
         delete [] pixmap;
     }
 
-    void Texture2D::_FinishLoading(GLint internalFormat, GLenum format, GLvoid const* data, int pixelSize, void const* mipmapData)
+    void Texture2D::_FinishLoading(GLint internalFormat, GLenum format, Uint32 size, GLvoid const* data, int pixelSize, void const* mipmapData)
     {
         GLCHECK(glGenTextures(1, &this->_id));
         GLCHECK(glBindTexture(GL_TEXTURE_2D, this->_id));
@@ -87,7 +87,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 data));
 
         Color4<Uint8> const* pixmap = reinterpret_cast<Color4<Uint8> const*>(data);
-        unsigned int size = this->_size.w * this->_size.h;
         for (unsigned int i = 0; i < size; ++i)
             if (pixmap[i].a != 255)
             {

@@ -5,13 +5,14 @@
 #include "client/Client.hpp"
 #include "tools/logger/Logger.hpp"
 #include "tools/ToString.hpp"
-#include "common/Packet.hpp"
+#include "tools/Deleter.hpp"
 
 namespace Client { namespace Network {
 
     Network::Network() :
         _socket(_ioService),
         _udpSocket(_ioService),
+        _udpReceiveSocket(_ioService),
         _thread(0),
         _sending(false),
         _isConnected(false),
@@ -21,6 +22,7 @@ namespace Client { namespace Network {
         _udp(false)
     {
         this->_sizeBuffer.resize(2);
+        this->_udpDataBuffer.resize(Common::Packet::maxSize);
     }
 
     float Network::GetLoadingProgression()
@@ -31,16 +33,13 @@ namespace Client { namespace Network {
 
     void Network::Connect(std::string const& host, std::string const& port)
     {
-        {
-            boost::lock_guard<boost::mutex> lock(this->_metaMutex);
-            if (this->_isRunning)
-                throw std::runtime_error("Network::Connect called while thread running");
-        }
+        if (this->_isRunning)
+            throw std::runtime_error("Network::Connect called while thread running");
 
         if (this->_thread) // dans le cas ou le _Connect() à foiré
         {
             this->_thread->join(); // on attend pour etre sur qu'il a completement return de _Connect()
-            delete this->_thread; // et on ne leak pas de mémoire
+            Tools::Delete(this->_thread); // et on ne leak pas de mémoire
         }
 
         this->_host = host;
@@ -53,9 +52,8 @@ namespace Client { namespace Network {
 
     Network::~Network()
     {
-        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { delete p; });
-        std::for_each(this->_inQueue.begin(), this->_inQueue.end(), [](Common::Packet* p) { delete p; });
-        std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { delete p; });
+        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { Tools::Delete(p); });
+        std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
         Tools::Delete(this->_thread);
     }
 
@@ -76,24 +74,34 @@ namespace Client { namespace Network {
             if (error)
             {
                 Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed: " << error.message() << ".\n";
-                boost::lock_guard<boost::mutex> lock(this->_metaMutex);
                 this->_isRunning = false;
                 this->_lastError = error.message();
                 return;
             }
             else
             {
-                boost::lock_guard<boost::mutex> lock(this->_metaMutex);
                 this->_isConnected = true;
             }
         }
         catch (std::exception& e)
         {
             Tools::error << "Network::Network: Exception while connecting to " << host << ":" << port << ": " << e.what() << ".\n";
-            boost::lock_guard<boost::mutex> lock(this->_metaMutex);
             this->_isRunning = false;
             this->_lastError = e.what();
             return;
+        }
+
+        try
+        {
+            boost::asio::ip::udp::endpoint endpoint(this->_socket.local_endpoint().address(), this->_socket.local_endpoint().port());
+            this->_udpReceiveSocket.open(endpoint.protocol());
+            this->_udpReceiveSocket.bind(endpoint);
+            this->_udpReceive = true;
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "Network::Network: Exception while Receiving to (UDP) " << host << ":" << port << ": " << e.what() << ".\n";
+            this->_udpReceive = false;
         }
 
         try
@@ -122,96 +130,95 @@ namespace Client { namespace Network {
     void Network::_Run()
     {
         this->_ReceivePacketSize();
+        if (this->_udpReceive)
+            this->_ReceiveUdpPacket();
         this->_ioService.run();
     }
 
     void Network::Stop()
     {
-        {
-            boost::lock_guard<boost::mutex> lock(this->_metaMutex);
-            if (!this->_isRunning)
-                throw std::runtime_error("Network::Connect called while thread not running");
-        }
+        if (!this->_isRunning)
+            throw std::runtime_error("Network::Connect called while thread not running");
 
+        this->_ioService.stop();
+        this->_thread->join();
+
+        this->_ioService.reset();
         if (this->IsConnected())
             this->_CloseSocket();
-        this->_ioService.stop();
-        this->_ioService.reset();
-        this->_thread->join();
         this->_isRunning = false;
         this->_lastError.clear();
         this->_isConnected = false;
 
         // Pas de leak dans le cas où on refait un connect
-        delete this->_thread;
+        Tools::Delete(this->_thread);
         this->_thread = 0;
-        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { delete p; });
-        std::for_each(this->_inQueue.begin(), this->_inQueue.end(), [](Common::Packet* p) { delete p; });
+        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { Tools::Delete(p); });
+        this->_inQueue.Clear();
         this->_outQueue.clear();
-        this->_inQueue.clear();
-        std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { delete p; });
+        std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
         this->_outQueueUdp.clear();
     }
 
     void Network::SendPacket(std::unique_ptr<Common::Packet> packet)
     {
+        std::function<void(void)> fx =
+            std::bind(&Network::_SendPacket,
+                      this,
+                      Tools::Deleter<Common::Packet>::CreatePtr(packet.release()));
+        this->_ioService.dispatch(fx);
+    }
+
+    void Network::_SendPacket(std::shared_ptr<Common::Packet> packet)
+    {
+        if (!this->_isConnected)
         {
-            boost::lock_guard<boost::mutex> lock(this->_metaMutex);
-            if (!this->_isConnected)
-            {
-                Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
-                return;
-            }
+            Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
+            return;
         }
-        bool sendNext = false;
+
+        this->_outQueue.push_back(Tools::Deleter<Common::Packet>::StealPtr(packet));
+        if (!this->_sending)
         {
-            boost::lock_guard<boost::mutex> lock(this->_outMutex);
-            this->_outQueue.push_back(packet.release());
-            if (!this->_sending)
-            {
-                this->_sending = true;
-                sendNext = true;
-            }
-        }
-        if (sendNext)
+            this->_sending = true;
             this->_SendNext();
+        }
     }
 
     void Network::SendUdpPacket(std::unique_ptr<UdpPacket> packet)
     {
-        bool udp = false;
-        {
-            boost::lock_guard<boost::mutex> lock(this->_metaMutex);
-            if (!this->_isConnected)
-            {
-                Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
-                return;
-            }
-            udp = this->_udp;
-        }
-        if (!udp)
-        {
-            this->SendPacket(std::unique_ptr<Common::Packet>(packet.release()));
-            return;
-        }
-        bool sendNext = false;
-        {
-            boost::lock_guard<boost::mutex> lock(this->_outMutexUdp);
-            this->_outQueueUdp.push_back(packet.release());
-            if (!this->_sendingUdp)
-            {
-                this->_sendingUdp = true;
-                sendNext = true;
-            }
-        }
-        if (sendNext)
-            this->_SendNextUdp();
+        std::function<void(void)> fx =
+            std::bind(&Network::_SendUdpPacket,
+                      this,
+                      Tools::Deleter<UdpPacket>::CreatePtr(packet.release()));
+        this->_ioService.dispatch(fx);
     }
 
-    std::list<Common::Packet*> Network::GetInPackets()
+    void Network::_SendUdpPacket(std::shared_ptr<UdpPacket> packet)
     {
-        boost::lock_guard<boost::mutex> lock(this->_inMutex);
-        return std::move(this->_inQueue);
+        if (!this->_isConnected)
+        {
+            Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
+            return;
+        }
+
+        if (!this->_udp)
+        {
+            this->_SendPacket(std::shared_ptr<Common::Packet>(Tools::Deleter<UdpPacket>::StealPtr(packet)));
+            return;
+        }
+
+        this->_outQueueUdp.push_back(Tools::Deleter<UdpPacket>::StealPtr(packet));
+        if (!this->_sendingUdp)
+        {
+            this->_sendingUdp = true;
+            this->_SendNextUdp();
+        }
+    }
+
+    std::list<Tools::ByteArray*> Network::GetInPackets()
+    {
+        return this->_inQueue.StealPackets();
     }
 
     void Network::_CloseSocket()
@@ -224,11 +231,9 @@ namespace Client { namespace Network {
 
     void Network::_DisconnectedByNetwork(std::string const& error)
     {
-        {
-            boost::lock_guard<boost::mutex> lock(this->_metaMutex);
-            this->_isConnected = false;
-            this->_lastError = error;
-        }
+        this->_isConnected = false;
+        this->_lastError = error;
+
         try
         {
             this->_CloseSocket();
@@ -243,11 +248,7 @@ namespace Client { namespace Network {
 
     void Network::_SendNext()
     {
-        Common::Packet* p;
-        {
-            boost::lock_guard<boost::mutex> lock(this->_outMutex);
-            p = this->_outQueue.front();
-        }
+        Common::Packet* p = this->_outQueue.front();
         std::vector<boost::asio::const_buffer> buffers;
         buffers.push_back(boost::asio::buffer(p->GetCompleteData(), p->GetCompleteSize()));
         boost::asio::async_write(this->_socket, buffers, boost::bind(&Network::_HandleWrite, this, boost::asio::placeholders::error));
@@ -255,11 +256,7 @@ namespace Client { namespace Network {
 
     void Network::_SendNextUdp()
     {
-        UdpPacket* p;
-        {
-            boost::lock_guard<boost::mutex> lock(this->_outMutexUdp);
-            p = this->_outQueueUdp.front();
-        }
+        UdpPacket* p = this->_outQueueUdp.front();
         std::vector<boost::asio::const_buffer> buffers;
         buffers.push_back(boost::asio::buffer(p->GetCompleteData(), p->GetCompleteSize()));
         this->_udpSocket.async_send(buffers, boost::bind(&Network::_HandleWriteUdp, this, boost::asio::placeholders::error));
@@ -274,17 +271,11 @@ namespace Client { namespace Network {
         }
         else
         {
-            bool sendNext = false;
-            {
-                boost::lock_guard<boost::mutex> lock(this->_outMutex);
-                Tools::Delete(this->_outQueue.front());
-                this->_outQueue.pop_front();
-                if (this->_outQueue.empty())
-                    this->_sending = false;
-                else
-                    sendNext = true;
-            }
-            if (sendNext)
+            Tools::Delete(this->_outQueue.front());
+            this->_outQueue.pop_front();
+            if (this->_outQueue.empty())
+                this->_sending = false;
+            else
                 this->_SendNext();
         }
     }
@@ -294,30 +285,45 @@ namespace Client { namespace Network {
         if (error)
         {
             Tools::error << "Network::_HandleWrite: UDP Write error: \"" << error.message() << "\".\n";
-            {
-                boost::lock_guard<boost::mutex> lock(this->_metaMutex);
-                this->_udp = false;
-            }
-            {
-                boost::lock_guard<boost::mutex> lock(this->_outMutexUdp);
-                std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { delete p; });
-                this->_outQueueUdp.clear();
-            }
+            this->_udp = false;
+            std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
+            this->_outQueueUdp.clear();
         }
         else
         {
-            bool sendNext = false;
-            {
-                boost::lock_guard<boost::mutex> lock(this->_outMutexUdp);
-                Tools::Delete(this->_outQueueUdp.front());
-                this->_outQueueUdp.pop_front();
-                if (this->_outQueueUdp.empty())
-                    this->_sendingUdp = false;
-                else
-                    sendNext = true;
-            }
-            if (sendNext)
+            Tools::Delete(this->_outQueueUdp.front());
+            this->_outQueueUdp.pop_front();
+            if (this->_outQueueUdp.empty())
+                this->_sendingUdp = false;
+            else
                 this->_SendNextUdp();
+        }
+    }
+
+    void Network::_ReceiveUdpPacket()
+    {
+        this->_udpReceiveSocket.async_receive(
+            boost::asio::buffer(this->_udpDataBuffer),
+            boost::bind(
+                &Network::_HandleReceiveUdpPacket, this,
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred)
+            );
+    }
+
+    void Network::_HandleReceiveUdpPacket(boost::system::error_code const& error, std::size_t size)
+    {
+        if (error)
+        {
+            Tools::error << "Network::_HandleReceiveUdpPacket: Read error \"" << error.message() << "\".\n";
+            this->_DisconnectedByNetwork(error.message());
+        }
+        else
+        {
+            auto p = new Tools::ByteArray();
+            p->SetData(this->_udpDataBuffer.data(), (Uint32)size);
+            this->_inQueue.PushPacket(p);
+            this->_ReceiveUdpPacket();
         }
     }
 
@@ -352,12 +358,9 @@ namespace Client { namespace Network {
         }
         else
         {
-            auto p = new Common::Packet();
-            p->SetData(this->_dataBuffer.data(), (Uint16)this->_dataBuffer.size());
-            {
-                boost::lock_guard<boost::mutex> lock(this->_inMutex);
-                this->_inQueue.push_back(p);
-            }
+            auto p = new Tools::ByteArray();
+            p->SetData(this->_dataBuffer.data(), (Uint32)this->_dataBuffer.size());
+            this->_inQueue.PushPacket(p);
             this->_ReceivePacketSize();
         }
     }

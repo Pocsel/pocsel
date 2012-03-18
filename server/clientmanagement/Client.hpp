@@ -31,6 +31,7 @@ namespace Server { namespace ClientManagement {
         ~Client();
 
         void SendPacket(std::unique_ptr<Common::Packet> packet);
+        void SendUdpPacket(std::unique_ptr<Common::Packet> packet);
 
         void SetLogin(std::string const& login);
         std::string const& GetLogin() const { return this->_login; }

@@ -14,6 +14,7 @@ namespace Tools { namespace Gui {
 namespace Tools { namespace Renderers {
 
     namespace OpenGL {
+        class IndexBuffer;
         class ShaderProgram;
     }
 
@@ -43,7 +44,10 @@ namespace Tools { namespace Renderers {
         IShaderProgram* _currentProgram;
 
     public:
-        GLRenderer(bool useShaders = true) : _useShaders(useShaders), _state(DrawNone), _currentProgram(0) {}
+        OpenGL::IndexBuffer* bindedIndexBuffer;
+
+    public:
+        GLRenderer(bool useShaders = true) : _useShaders(useShaders), _state(DrawNone), _currentProgram(0), bindedIndexBuffer(0) {}
         virtual ~GLRenderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -70,7 +74,7 @@ namespace Tools { namespace Renderers {
         virtual void EndDraw();
 
         virtual void UpdateCurrentParameters();
-        virtual void DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode = DrawingMode::Triangles);
+        virtual void DrawElements(Uint32 count, DataType::Type indicesType = DataType::UnsignedInt, void const* indices = 0, DrawingMode::Type mode = DrawingMode::Triangles);
         virtual void DrawVertexBuffer(Uint32 offset, Uint32 count, DrawingMode::Type mode = DrawingMode::Triangles);
 
         // Matrices

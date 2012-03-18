@@ -1,13 +1,13 @@
 #include "tests/database/precompiled.hpp"
 
-#include "Connection.hpp"
+#include "tools/database/IConnection.hpp"
+#include "tools/database/sqlite/Connection.hpp"
 
-int main(int ac, char *av[])
+int main()
 {
-    std::unique_ptr<Tools::Database::IConnection> conn(new Tools::Database::Sqlite::Connection("test.sqlite"));
-
     try
     {
+        std::unique_ptr<Tools::Database::IConnection> conn(new Tools::Database::Sqlite::Connection("test.sqlite"));
         std::srand(1230); // seed statique
         conn->CreateQuery("DROP TABLE IF EXISTS users")->ExecuteNonSelect();
         conn->CreateQuery("DROP TABLE IF EXISTS stress")->ExecuteNonSelect();
@@ -29,7 +29,12 @@ int main(int ac, char *av[])
 
         auto it = conn->CreateQuery("SELECT id, login, password, (SELECT 1) FROM users");
         while (auto ptr = it->Fetch())
-            Tools::log << std::setw(5) << ptr->GetInt(0)  << std::setw(12) << ptr->GetString(1) << std::setw(12) << ptr->GetString(2) << std::setw(5) << ptr->GetInt(3) << std::endl;
+            Tools::log
+                << std::setw(2) << ptr->GetInt32(0)
+                << std::setw(6) << ptr->GetString(1)
+                << std::setw(6) << ptr->GetString(2)
+                << std::setw(2) << ptr->GetInt32(3)
+                << std::endl;
 
         for (int i = 0; i < 50; ++i)
             query2->Bind(std::rand()).Bind(Tools::ToString(std::rand())).ExecuteNonSelect().Reset();
@@ -38,6 +43,7 @@ int main(int ac, char *av[])
     {
         Tools::error << e.what() << std::endl;
     }
+
 #ifdef _WIN32
     std::cout << "Press enter\n";
     std::cin.get();

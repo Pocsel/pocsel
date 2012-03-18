@@ -26,8 +26,8 @@ namespace Tools { namespace Renderers { namespace Utils {
     private:
         IRenderer& _renderer;
         FontData* _data;
-        ITexture2D* _texture;
-        IVertexBuffer* _vertexBuffer;
+        std::unique_ptr<ITexture2D> _texture;
+        std::unique_ptr<IVertexBuffer> _vertexBuffer;
         std::vector<CharInfo> _charInfos;
 
     public:

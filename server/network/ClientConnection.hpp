@@ -4,9 +4,7 @@
 #include "common/Packet.hpp"
 
 namespace Server { namespace ClientManagement {
-
     class ClientManager;
-
 }}
 
 namespace Server { namespace Network {
@@ -17,7 +15,7 @@ namespace Server { namespace Network {
     {
     public:
         typedef std::function<void(void)> ErrorCallback;
-        typedef std::function<void(std::unique_ptr<Common::Packet>&)> PacketCallback;
+        typedef std::function<void(std::unique_ptr<Tools::ByteArray>&)> PacketCallback;
 
     private:
         static const unsigned int _bufferSize = 8192;
@@ -30,8 +28,10 @@ namespace Server { namespace Network {
         size_t _offset;
         size_t _toRead;
         std::queue<std::unique_ptr<Common::Packet>> _toSendPackets;
+        std::queue<std::unique_ptr<Common::Packet>> _toSendUdpPackets;
         bool _connected;
         bool _writeConnected;
+        bool _udpWriteConnected;
         ErrorCallback _errorCallback;
         PacketCallback _packetCallback;
         bool _udp;
@@ -43,20 +43,25 @@ namespace Server { namespace Network {
 
         // threadsafe
         void SendPacket(std::unique_ptr<Common::Packet> packet);
+        void SendUdpPacket(std::unique_ptr<Common::Packet> packet);
         void Shutdown();
         void ConnectRead();
 
     private:
         void _Shutdown();
         void _HandleError(boost::system::error_code const& error);
-        void _SendPacket(Common::Packet* packet);
+        void _SendPacket(std::shared_ptr<Common::Packet> packet);
+        void _SendUdpPacket(std::shared_ptr<Common::Packet> packet);
         void _ConnectRead();
         void _ConnectWrite();
+        void _ConnectUdpWrite();
         void _HandleRead(boost::system::error_code const error,
                          std::size_t transferredBytes);
         void _HandleWrite(boost::shared_ptr<Common::Packet> packetSent,
                           boost::system::error_code const error,
                           std::size_t bytes_transferred);
+        void _HandleUdpWrite(boost::shared_ptr<Common::Packet> packetSent,
+                          boost::system::error_code const error);
     };
 
 }}

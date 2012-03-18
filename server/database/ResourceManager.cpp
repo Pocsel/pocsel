@@ -1,9 +1,9 @@
+#include "server/precompiled.hpp"
+
 #include "server/database/ResourceManager.hpp"
 
 #include "common/Packet.hpp"
 #include "common/Resource.hpp"
-
-#include "tools/database/ConnectionPool.hpp"
 
 #include "tools/database/sqlite/Connection.hpp"
 
@@ -16,36 +16,29 @@ namespace Server { namespace Database {
     ResourceManager::ResourceManager(Server& server) :
         _server(server)
     {
-        this->_connectionPool = new Tools::Database::ConnectionPool<Tools::Database::Sqlite::Connection>(
-                server.GetSettings().worldFile.string()
-                );
+        this->_connection = new Tools::Database::Sqlite::Connection(server.GetSettings().worldFile.string());
 
-        auto conn = this->_connectionPool->GetConnection();
-        auto& curs = conn->GetCursor();
-
-        curs.Execute("SELECT count(*) FROM resource");
-        size_t nbResources = curs.FetchOne()[0].GetInt() + 1;
-        this->_resources.resize(nbResources);
-        curs.Execute("SELECT id, plugin_id, version, type, filename, data FROM resource");
-        if (!curs.HasData())
+        Uint32 nbResources = this->_connection->CreateQuery("SELECT count(*) FROM resource")->Fetch()->GetUint32(0);
+        if (nbResources == 0)
             Tools::error << "No resource found on the server !\n";
-        while (curs.HasData())
+        this->_resources.resize(nbResources + 1);
+        auto query = this->_connection->CreateQuery("SELECT id, plugin_id, version, type, filename, data FROM resource");
+        while (auto row = query->Fetch())
         {
-            auto& row = curs.FetchOne();
-            Uint32 id = row[0].GetInt();
-            Uint32 plugin_id = row[1].GetInt();
-            Uint32 version = row[2].GetInt();
-            std::string type = row[3].GetString();
-            std::string filename = row[4].GetString();
-            Tools::Database::Blob data = row[5].GetBlob();
+            Uint32 id = row->GetUint32(0);
+            Uint32 plugin_id = row->GetUint32(1);
+            Uint32 version = row->GetUint32(2);
+            std::string type = row->GetString(3);
+            std::string filename = row->GetString(4);
+            auto data = row->GetArray(5);
 
             this->_resources[id] = new Common::Resource(
                 id,
                 plugin_id,
                 type,
                 filename,
-                data.data,
-                static_cast<Uint32>(data.size)
+                data.data(),
+                static_cast<Uint32>(data.size())
             );
             Log::load << "Found resource " << id << ": " << filename << ".\n";
             this->_ids[filename] = id;
@@ -56,7 +49,7 @@ namespace Server { namespace Database {
     ResourceManager::~ResourceManager()
     {
         std::for_each(this->_resources.begin(), this->_resources.end(), [](Common::Resource* r) { Tools::Delete(r); });
-        Tools::Delete(this->_connectionPool);
+        Tools::Delete(this->_connection);
     }
 
     Uint32 ResourceManager::GetId(std::string const& filename) const

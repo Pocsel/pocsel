@@ -24,7 +24,7 @@ plugin_tables = [
         ["name TEXT", "lua TEXT"],
     ),
     (
-        'entity_type',
+        'entity_file',
         ["name TEXT", "lua TEXT"],
     ),
     (

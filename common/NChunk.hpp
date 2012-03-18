@@ -105,9 +105,9 @@ namespace Common {
                 template<unsigned int Nother>
                     bool Contains(NChunk<Nother> const& other)
                     {
-                        static_assert(N >= Nother, "Cannot contain something bigger.");
+                        static_assert(N > Nother, "Cannot contain something bigger.");
 
-                        return other.id & idMask == this->id;
+                        return (other.id & idMask) == this->id;
                     }
 
                 template<unsigned int Nother>

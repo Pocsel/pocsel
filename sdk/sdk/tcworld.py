@@ -82,9 +82,9 @@ def installPlugin(worldconn, pluginconn, server_version):
                 (fullname, plugin_id, lua)
             )
             tools.createTable(wconn, "%s_bigchunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
-#            tools.createTable(wconn, "%s_chunk" % (fullname), ["id INTEGER PRIMARY KEY", "data BLOB"])
             tools.createTable(wconn, "%s_entity" % (fullname), ["id INTEGER", "type TEXT", "storage TEXT"])
-            tools.createTable(wconn, "%s_event" % (fullname), ["time INTEGER", "entity_id INTEGER", "function TEXT", "args TEXT"])
+            tools.createTable(wconn, "%s_entity_type" % (fullname), ["type TEXT", "storage TEXT"])
+            tools.createTable(wconn, "%s_entity_callback" % (fullname), ["id INTEGER", "target_id INTEGER", "function TEXT", "arg TEXT"])
 
 
 
@@ -108,15 +108,15 @@ def installPlugin(worldconn, pluginconn, server_version):
         else:
             print "File '%s' is up-to-date" % filename
 
-    for obj in ['cube', 'entity']:
+    for obj in ['cube_type', 'entity_file']:
         with pluginconn() as pconn:
             pcurs = pconn.cursor()
-            pcurs.execute("SELECT name, lua FROM %s_type" % obj)
+            pcurs.execute("SELECT name, lua FROM %s" % obj)
             with worldconn() as wconn:
                 wcurs = wconn.cursor()
                 for name, lua in pcurs:
                     wcurs.execute(
-                        "SELECT id FROM %s_type WHERE plugin_id = ? AND name = ?" % obj,
+                        "SELECT name FROM %s WHERE plugin_id = ? AND name = ?" % obj,
                         (plugin_id, name)
                     )
                     res = wcurs.fetchone()
@@ -124,8 +124,8 @@ def installPlugin(worldconn, pluginconn, server_version):
                         print "Insert new %s type %s" % (obj, name)
                         wcurs.execute(
                             """
-                                INSERT INTO %s_type (id, plugin_id, name, lua)
-                                VALUES (NULL, ?, ?, ?)
+                                INSERT INTO %s (plugin_id, name, lua)
+                                VALUES (?, ?, ?)
                             """ % obj,
                             (plugin_id, name, lua)
                         )
@@ -133,11 +133,11 @@ def installPlugin(worldconn, pluginconn, server_version):
                         print "Update %s type %s" % (obj, name)
                         wcurs.execute(
                             """
-                                UPDATE %s_type
+                                UPDATE %s
                                     SET lua = ?
-                                WHERE id = ?
+                                WHERE plugin_id = ? AND name = ?
                             """ % obj,
-                            (lua, res[0])
+                            (lua, plugin_id, name)
                         )
                 wconn.commit()
 

@@ -60,12 +60,12 @@ namespace Protocol {
         TeleportOk,
 
         /**
-         * Camera nouvelle position
+         * MovingOrientedPosition nouvelle position
          */
         Move,
 
         /**
-         * Camera position
+         * OrientedPosition position
          * CubePosition target
          * Uint32 actionId
          */
@@ -130,6 +130,12 @@ namespace Protocol {
          * Position pos
          */
         TeleportPlayer,
+
+        /**
+         * MovingOrientedPosition pos
+         * Uint32 item id
+         */
+        ItemMove,
 
         NbPacketTypeServer, // pour les tableaux
     };
@@ -214,7 +220,8 @@ namespace Tools {
                 "NeededResourceIds",
                 "ResourceRange",
                 "CubeType",
-                "TeleportPlayer"
+                "TeleportPlayer",
+                "ItemMove"
             };
             static std::string unknown = "Unknown";
 

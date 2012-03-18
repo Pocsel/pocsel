@@ -4,6 +4,7 @@ set(src
     ${test_src}
     ${common_src}
     ${tools_base_src}
+    ${tools_database_src}
     ${tools_logger_src}
 )
 

@@ -12,7 +12,7 @@ namespace Client { namespace Window {
 
     Window::~Window()
     {
-        delete this->_inputManager;
+        Tools::Delete(this->_inputManager);
     }
 
     int Window::RegisterCallback(std::function<void(Tools::Vector2u const&)> const& callback)

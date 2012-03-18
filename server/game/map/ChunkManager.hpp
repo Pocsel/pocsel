@@ -2,7 +2,7 @@
 #define __SERVER_GAME_MAP_CHUNKMANAGER_HPP__
 
 #include "tools/ByteArray.hpp"
-#include "server/Chunk.hpp"
+#include "server/game/map/Chunk.hpp"
 #include "server/game/map/BigChunk.hpp"
 
 namespace Tools { namespace Database {
@@ -19,25 +19,48 @@ namespace Server { namespace Game { namespace Map {
         private boost::noncopyable
     {
     private:
+        struct ChunkValue
+        {
+            float value;
+            Chunk::IdType id;
+
+            ChunkValue(float v, Chunk::IdType i) :
+                value(v), id(i)
+            {
+            }
+            bool operator< (ChunkValue const& right)
+            {
+                return this->value < right.value;
+            }
+        };
+    private:
         Map& _map;
+        Tools::Database::IConnection& _conn;
 
         std::unordered_map<Chunk::IdType, Chunk*> _chunks;
+        std::unordered_map<BigChunk::IdType, BigChunk> _inflatedChunksContainers;
+        std::list<Chunk::IdType> _inflatedValues;
 
         std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedChunks;
         std::unordered_map<BigChunk::IdType, BigChunk> _deflatedChunksContainers;
+        std::list<BigChunk::IdType> _deflatedValues;
 
         std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedBigChunks;
+        std::list<BigChunk::IdType> _deflatedBigValues;
 
         std::unordered_set<Chunk::IdType> _dbBigChunks;
 
         std::list<std::pair<float, Chunk::IdType>> _priorities;
 
+        static const int _deflateLevel = 9;
+
     public:
-        ChunkManager(Map& map, std::vector<Chunk::IdType> const& existingChunks);
+        ChunkManager(Map& map,
+                Tools::Database::IConnection& conn,
+                std::vector<Chunk::IdType> const& existingChunks);
         ~ChunkManager();
 
         void Save(Tools::Database::IConnection& conn);
-//        void LoadExistingChunks(std::vector<Chunk::IdType> const& ids);
 
         Chunk* GetChunk(Chunk::IdType id);
         std::vector<Chunk*> GetChunks(std::vector<Chunk::IdType> const& id);
@@ -45,10 +68,51 @@ namespace Server { namespace Game { namespace Map {
         void AddChunk(std::unique_ptr<Chunk> chunk);
 
     private:
-        void _DeflateChunk(Chunk::IdType id);
-        void _InflateChunk(Chunk::IdType id);
-        void _ExtractFromDb(Chunk::IdType id);
-        void _DeflateBigChunk(BigChunk::IdType id);
+        // _chunks
+        // \/
+        void _MoveInflatedToDeflated(Chunk::IdType id);
+        // \/
+        // _deflatedChunks
+        // \/
+        void _MoveDeflatedToDeflatedBig(BigChunk::IdType id);
+        // \/
+        // _deflatedBigChunks
+        // \/
+        void _MoveDeflatedBigToDb(BigChunk::IdType id); // does not push in db
+        // \/
+        // _dbBigChunks
+
+        // _chunks
+        // ./\.
+        void _MoveDeflatedToInflated(Chunk::IdType id);
+        // ./\.
+        // _deflatedChunks
+        // ./\.
+        void _MoveDeflatedBigToDeflated(BigChunk::IdType id);
+        // ./\.
+        // _deflatedBigChunks
+        // ./\.
+        void _MoveDbToDeflatedBig(BigChunk::IdType id);
+        // ./\.
+        // _dbBigChunks
+
+        static Tools::ByteArray* _DeflateChunk(Chunk const& chunk);
+        static Chunk* _InflateChunk(Tools::ByteArray const& array);
+
+        static Tools::ByteArray* _DeflateBigChunk(Tools::ByteArray const& bigChunk);
+        static Tools::ByteArray* _InflateBigChunk(Tools::ByteArray const& array);
+
+        void _PushInflated(Chunk* chunk);
+        Chunk* _PopInflated(Chunk::IdType id);
+
+        void _PushDeflated(Chunk::IdType, Tools::ByteArray* array);
+        Tools::ByteArray* _PopDeflated(Chunk::IdType id);
+
+        void _PushDeflatedBig(BigChunk::IdType, Tools::ByteArray* array);
+        Tools::ByteArray* _PopDeflatedBig(BigChunk::IdType);
+
+        void _PushDb(BigChunk::IdType); // does not push in db
+        Tools::ByteArray* _PopDb(BigChunk::IdType);
     };
 
 }}}

@@ -3,8 +3,8 @@
 
 #include "protocol/protocol.hpp"
 
-namespace Common {
-    class Packet;
+namespace Tools {
+    class ByteArray;
 }
 namespace Client {
     class Client;
@@ -16,17 +16,17 @@ namespace Client { namespace Network {
         private boost::noncopyable
     {
     private:
-        std::function<void(Common::Packet&)> _dispatcher[(int)Protocol::ServerToClient::NbPacketTypeServer];
+        std::function<void(Tools::ByteArray&)> _dispatcher[(int)Protocol::ServerToClient::NbPacketTypeServer];
         Client& _client;
 
     public:
         PacketDispatcher(Client& client);
-        void ProcessAllPackets(std::list<Common::Packet*>&& packets);
+        void ProcessAllPackets(std::list<Tools::ByteArray*>&& packets);
 
     private:
-        void _ProcessPacket(Common::Packet& packet);
-        void _HandleLogin(Common::Packet& p);
-        void _HandleNeededResourceIds(Common::Packet& p);
+        void _ProcessPacket(Tools::ByteArray& packet);
+        void _HandleLogin(Tools::ByteArray& p);
+        void _HandleNeededResourceIds(Tools::ByteArray& p);
     };
 
 }}

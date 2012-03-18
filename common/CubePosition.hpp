@@ -21,10 +21,7 @@ namespace Common {
         CubePosition(BaseChunk::CoordsType const& world, Tools::Vector3f const& chk) :
             world(world)
         {
-            chunk.x = chk.x;
-            chunk.y = chk.y;
-            chunk.z = chk.z;
-
+            chunk = BaseChunk::CoordsType(chk);
 
             if (chunk.x >= Common::ChunkSize)
                 chunk.x = Common::ChunkSize - 1;

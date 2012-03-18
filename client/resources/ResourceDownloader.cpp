@@ -26,11 +26,11 @@ namespace Client { namespace Resources {
         this->_CheckDownloadEnd();
     }
 
-    void ResourceDownloader::HandleResourceRange(Common::Packet& p)
+    void ResourceDownloader::HandleResourceRange(Tools::ByteArray& p)
     {
         Uint32 id, offset, pluginId, totalSize, dataSize;
         std::string type, filename;
-        char const* data = Network::PacketExtractor::ExtractResourceRange(p, id, offset, pluginId, type, filename, totalSize, dataSize);
+        char const* data = Network::PacketExtractor::ResourceRange(p, id, offset, pluginId, type, filename, totalSize, dataSize);
 
         if (id == 0)
             throw std::runtime_error("Wrong resource id");

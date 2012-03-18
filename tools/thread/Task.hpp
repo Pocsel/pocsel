@@ -3,8 +3,16 @@
 
 namespace Tools { namespace Thread {
 
+    class ITask
+    {
+    public:
+        virtual ~ITask() {}
+        virtual void Execute() = 0;
+        virtual bool IsCancelled() const = 0;
+    };
+
     template<class T = void>
-    class Task
+    class Task : public ITask
     {
     private:
         std::function<T()> _task;
@@ -21,7 +29,7 @@ namespace Tools { namespace Thread {
         {
         }
 
-        void Execute()
+        virtual void Execute()
         {
             if (!this->_isCancelled)
                 this->_result = this->_task();
@@ -30,12 +38,12 @@ namespace Tools { namespace Thread {
         bool IsExecuted() const { return this->_isExecuted; }
         T const& GetResult() const { return this->_result; }
         T& GetResult() { return this->_result; }
-        bool IsCancelled() const { return this->_isCancelled; }
+        virtual bool IsCancelled() const { return this->_isCancelled; }
         void Cancel() { this->_isCancelled = true; }
     };
 
     template<>
-    class Task<void>
+    class Task<void> : public ITask
     {
     private:
         std::function<void()> _task;
@@ -50,14 +58,14 @@ namespace Tools { namespace Thread {
         {
         }
 
-        void Execute()
+        virtual void Execute()
         {
             if (!this->_isCancelled)
                 this->_task();
             this->_isExecuted = true;
         }
         bool IsExecuted() const { return this->_isExecuted; }
-        bool IsCancelled() const { return this->_isCancelled; }
+        virtual bool IsCancelled() const { return this->_isCancelled; }
         void Cancel() { this->_isCancelled = true; }
     };
 

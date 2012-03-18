@@ -5,7 +5,8 @@
 #include "protocol/protocol.hpp"
 
 #include "common/Packet.hpp"
-#include "common/Camera.hpp"
+#include "common/OrientedPosition.hpp"
+#include "common/MovingOrientedPosition.hpp"
 #include "common/CubePosition.hpp"
 
 #include "server/Server.hpp"
@@ -18,11 +19,13 @@
 #include "server/network/PacketCreator.hpp"
 #include "server/network/PacketExtractor.hpp"
 
+#include "tools/ByteArray.hpp"
+
 namespace Server { namespace ClientManagement {
 
     namespace ClientActionsNS { namespace {
 
-        void _HandleLogin(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandleLogin(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandleLogin (client " << client.id << ")\n";
             Protocol::Version major, minor;
@@ -30,11 +33,11 @@ namespace Server { namespace ClientManagement {
             Network::PacketExtractor::Login(packet, major, minor, login);
             if (major != Protocol::Version::Major || minor != Protocol::Version::Minor)
             {
-                client.SendPacket(std::move(Network::PacketCreator::LoggedIn(false,
+                client.SendPacket(Network::PacketCreator::LoggedIn(false,
                     "Protocol verions mismatch : Server " + Tools::ToString(Protocol::Version::Major) +
                     "." + Tools::ToString(Protocol::Version::Minor) +
                     " != Client " + Tools::ToString(major) +
-                    "." + Tools::ToString(minor))));
+                    "." + Tools::ToString(minor)));
                 return;
             }
 
@@ -47,21 +50,21 @@ namespace Server { namespace ClientManagement {
             manager.ClientLogin(client, login);
         }
 
-        void _HandlePong(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandlePong(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandlePong (client " << client.id << ")\n";
         }
 
-        void _HandleNeedChunks(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandleNeedChunks(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandleNeedChunks (client " << client.id << ")\n";
-            std::vector<Chunk::IdType> ids;
+            std::vector<Game::Map::Chunk::IdType> ids;
             Network::PacketExtractor::NeedChunks(packet, ids);
 
             manager.ClientNeedChunks(client, ids);
         }
 
-        void _HandleGetNeededResourceIds(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandleGetNeededResourceIds(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandleGetNeededResourceIds (client " << client.id << ")\n";
             Uint32 version;
@@ -76,7 +79,7 @@ namespace Server { namespace ClientManagement {
             } while (offset < ids.size());
         }
 
-        void _HandleGetResourceRange(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandleGetResourceRange(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandleGetResourceRange (client " << client.id << ")\n";
             Uint32 id, offset;
@@ -89,10 +92,10 @@ namespace Server { namespace ClientManagement {
             client.SendPacket(std::move(Network::PacketCreator::ResourceRange(resource, offset)));
         }
 
-        void _HandleGetCubeType(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandleGetCubeType(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandleGetCubeType (client " << client.id << ")\n";
-            Chunk::CubeType id;
+            Game::Map::Chunk::CubeType id;
             Network::PacketExtractor::GetCubeType(packet, id);
 
             Game::World const& world = manager.GetServer().GetGame().GetWorld();
@@ -102,7 +105,7 @@ namespace Server { namespace ClientManagement {
             client.SendPacket(std::move(Network::PacketCreator::CubeType(world.GetCubeType(id))));
         }
 
-        void _HandleSettings(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandleSettings(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandleSettings (client " << client.id << ")\n";
 
@@ -118,47 +121,47 @@ namespace Server { namespace ClientManagement {
             manager.ClientSpawn(client, viewDistance, playerName);
         }
 
-        void _HandleTeleportOk(ClientManager& manager, Client& client, Common::Packet const&)
+        void _HandleTeleportOk(ClientManager& manager, Client& client, Tools::ByteArray const&)
         {
             Tools::debug << "_HandleTeleportOk (client " << client.id << ")\n";
 
             manager.ClientTeleportOk(client);
         }
 
-        void _HandleMove(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandleMove(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
 //            Tools::debug << "_HandleMove (client " << client.id << ")\n";
 
-            Common::Camera cam;
+            Common::MovingOrientedPosition pos;
 
-            Network::PacketExtractor::Move(packet, cam);
+            Network::PacketExtractor::Move(packet, pos);
 
-//            manager.GetServer().GetGame().PlayerMove(client.id, cam);
+            manager.GetServer().GetGame().PlayerMove(client.id, pos);
         }
 
-        void _HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
+        void _HandleAction(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandleAction (client " << client.id << ")\n";
 
-            Common::Camera cam;
+            Common::OrientedPosition pos;
             Common::CubePosition cubePos;
             Uint32 actionId;
 
-            Network::PacketExtractor::Action(packet, cam, cubePos, actionId);
+            Network::PacketExtractor::Action(packet, pos, cubePos, actionId);
 
             if (actionId == 1)
-                manager.GetServer().GetGame().PlayerAction(client.id, cam, cubePos);
+                manager.GetServer().GetGame().PlayerAction(client.id, pos, cubePos);
             else if (actionId == 2)
-                manager.GetServer().GetGame().PlayerAction2(client.id, cam, cubePos);
+                manager.GetServer().GetGame().PlayerAction2(client.id, pos, cubePos);
             else
                 Tools::log << "client " << client.id << ": unknown action " << actionId << ".\n";
         }
 
     }}
 
-    void ClientActions::HandleAction(ClientManager& manager, Client& client, Common::Packet const& packet)
+    void ClientActions::HandleAction(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
     {
-        typedef void (*ActionCallback)(ClientManager&, Client&, Common::Packet const&);
+        typedef void (*ActionCallback)(ClientManager&, Client&, Tools::ByteArray const&);
         static ActionCallback actions[] = {
             &ClientActionsNS::_HandleLogin,
             &ClientActionsNS::_HandlePong,

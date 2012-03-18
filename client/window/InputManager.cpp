@@ -14,7 +14,7 @@ namespace Client { namespace Window {
 
     InputManager::~InputManager()
     {
-        delete this->_inputBinder;
+        Tools::Delete(this->_inputBinder);
     }
 
     void InputManager::_ResetStates()

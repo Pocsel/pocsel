@@ -66,8 +66,6 @@ namespace Tools { namespace Renderers { namespace Utils {
     Font::~Font()
     {
         Delete(this->_data);
-        Delete(this->_texture);
-        Delete(this->_vertexBuffer);
     }
 
     // Init textures
@@ -106,7 +104,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         unsigned int height = NextPowerOfTwo(maxHeight);
 
         // Fill the bitmap
-        std::vector<Uint8> textureData(width * height * 2);
+        std::vector<Uint8> textureData(width * height * 4);
 #ifdef DEBUG
         std::memset(textureData.data(), 64, textureData.size());
 #endif
@@ -141,7 +139,7 @@ namespace Tools { namespace Renderers { namespace Utils {
                 auto oldSize = textureData.size();
                 while (ry + bitmap_glyph->bitmap.rows + 1 > height)
                     height *= 2;
-                textureData.resize(width * height * 2);
+                textureData.resize(width * height * 4);
 #ifdef DEBUG
                 std::memset(textureData.data() + oldSize, 64, textureData.size() - oldSize);
 #endif
@@ -157,8 +155,10 @@ namespace Tools { namespace Renderers { namespace Utils {
             for (int y = 0; y < bitmap.rows; ++y)
                 for (int x = 0; x < bitmap.width; ++x)
                 {
-                    textureData[(rx + x + 1 + (ry + y + 1) * width) * 2] = bitmap.buffer[x + y * bitmap.width];
-                    textureData[(rx + x + 1 + (ry + y + 1) * width) * 2 + 1] = bitmap.buffer[x + y * bitmap.width];
+                    textureData[(rx + x + 1 + (ry + y + 1) * width) * 4 + 0] = bitmap.buffer[x + y * bitmap.width];
+                    textureData[(rx + x + 1 + (ry + y + 1) * width) * 4 + 1] = bitmap.buffer[x + y * bitmap.width];
+                    textureData[(rx + x + 1 + (ry + y + 1) * width) * 4 + 2] = bitmap.buffer[x + y * bitmap.width];
+                    textureData[(rx + x + 1 + (ry + y + 1) * width) * 4 + 3] = bitmap.buffer[x + y * bitmap.width];
                 }
             rx += bitmap.width + 2;
 
@@ -166,11 +166,11 @@ namespace Tools { namespace Renderers { namespace Utils {
         }
 
         this->_texture = this->_renderer.CreateTexture2D(
-            Renderers::PixelFormat::Luminance8Alpha8,
+            Renderers::PixelFormat::Rgba8,
             (Uint32)textureData.size(), textureData.data(),
-            Vector2u(width, height)).release();
+            Vector2u(width, height));
 
-        this->_vertexBuffer = this->_renderer.CreateVertexBuffer().release();
+        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
         this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Position, 3);
         this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::TexCoord, 2);
     }

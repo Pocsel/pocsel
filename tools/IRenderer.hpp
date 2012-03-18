@@ -146,7 +146,6 @@ namespace Tools {
             virtual ~ITexture2D() {}
             virtual Vector2u const& GetSize() const = 0;
             virtual bool HasAlpha() const = 0;
-            virtual void SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter) = 0;
             virtual void Bind() = 0;
             virtual void Unbind() = 0;
 
@@ -161,7 +160,7 @@ namespace Tools {
         {
         public:
             virtual ~IIndexBuffer() {}
-            virtual void SetData(std::size_t size, void const* data) = 0;
+            virtual void SetData(Renderers::DataType::Type indicesType, std::size_t size, void const* data) = 0;
             virtual void SetSubData(std::size_t offset, std::size_t size, void const* data) = 0;
             virtual void Bind() = 0;
             virtual void Unbind() = 0;
@@ -257,7 +256,7 @@ namespace Tools {
         virtual void EndDraw() = 0;
 
         virtual void UpdateCurrentParameters() = 0;
-        virtual void DrawElements(Uint32 count, Renderers::DataType::Type indicesType, void const* indices, Renderers::DrawingMode::Type mode = Renderers::DrawingMode::Triangles) = 0;
+        virtual void DrawElements(Uint32 count, Renderers::DataType::Type indicesType = Renderers::DataType::UnsignedInt, void const* indices = 0, Renderers::DrawingMode::Type mode = Renderers::DrawingMode::Triangles) = 0;
         virtual void DrawVertexBuffer(Uint32 offset, Uint32 count, Renderers::DrawingMode::Type mode = Renderers::DrawingMode::Triangles) = 0;
 
         // Matrices

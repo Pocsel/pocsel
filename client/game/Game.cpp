@@ -7,6 +7,7 @@
 #include "client/map/Map.hpp"
 #include "client/window/Window.hpp"
 #include "client/game/Player.hpp"
+#include "client/game/ItemManager.hpp"
 
 namespace Client { namespace Game {
 
@@ -18,6 +19,7 @@ namespace Client { namespace Game {
     {
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
         this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
+        this->_itemManager = new ItemManager(*this),
         this->_player = new Player(*this);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](Tools::Vector2u const& size)
@@ -32,6 +34,7 @@ namespace Client { namespace Game {
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
         Tools::Delete(this->_player);
+        Tools::Delete(this->_itemManager);
         Tools::Delete(this->_resourceManager);
     }
 
@@ -40,7 +43,7 @@ namespace Client { namespace Game {
         this->_player->SetPosition(position);
         if (this->_map != 0 && this->_map->GetName() != map)
         {
-            delete this->_map;
+            Tools::Delete(this->_map);
             this->_map = 0;
         }
         if (this->_map == 0)
@@ -54,7 +57,9 @@ namespace Client { namespace Game {
     void Game::Update()
     {
         this->_map->GetChunkManager().Update(this->_gameTimer.GetPreciseElapsedTime(), this->_player->GetPosition());
-        this->_player->UpdateMovements(this->_updateTimer.GetElapsedTime());
+        Uint32 time = this->_updateTimer.GetElapsedTime();
+        this->_player->UpdateMovements(time);
+        this->_itemManager->Update(time);
         this->_updateTimer.Reset();
     }
 
@@ -65,6 +70,7 @@ namespace Client { namespace Game {
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
         this->_renderer.BeginDraw();
         this->_map->GetChunkManager().Render();
+        this->_itemManager->Render();
         this->_player->Render();
         this->_renderer.EndDraw();
     }

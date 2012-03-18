@@ -43,9 +43,8 @@ world_tables = [
         ]
     ),
     (
-        'entity_type',
+        'entity_file',
         [
-            "id INTEGER PRIMARY KEY",
             "plugin_id INTEGER",
             "name TEXT",
             "lua TEXT",
@@ -64,7 +63,7 @@ world_tables = [
     (
         'map',
         [
-            "name TEXT PRIMARY KEY",
+            "name TEXT",
             "plugin_id INTEGER",
             "lua TEXT",
             "tick INTEGER",

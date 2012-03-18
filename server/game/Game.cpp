@@ -1,11 +1,14 @@
+#include "server/precompiled.hpp"
+
 #include "server/game/Game.hpp"
 #include "server/game/Player.hpp"
 #include "server/game/World.hpp"
 
 #include "common/Position.hpp"
+#include "common/OrientedPosition.hpp"
+#include "common/MovingOrientedPosition.hpp"
 #include "common/CubePosition.hpp"
 #include "common/RayCast.hpp"
-#include "common/Camera.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
 
@@ -59,7 +62,20 @@ namespace Server { namespace Game {
         player->TeleportOk();
     }
 
-    void Game::PlayerAction(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos)
+    void Game::PlayerMove(Uint32 id, Common::MovingOrientedPosition const& pos)
+    {
+        auto it = this->_players.find(id);
+        if (it == this->_players.end())
+            return;
+        Player* player = it->second.get();
+
+        if (!player->IsInGame())
+            return;
+
+        player->GetCurrentMap().MovePlayer(id, pos);
+    }
+
+    void Game::PlayerAction(Uint32 id, Common::OrientedPosition const& pos, Common::CubePosition const& targetPos)
     {
         auto it = this->_players.find(id);
         if (it == this->_players.end())
@@ -72,7 +88,7 @@ namespace Server { namespace Game {
         player->GetCurrentMap().DestroyCube(targetPos);
     }
 
-    void Game::PlayerAction2(Uint32 id, Common::Camera const& cam, Common::CubePosition const& targetPos)
+    void Game::PlayerAction2(Uint32 id, Common::OrientedPosition const& pos, Common::CubePosition const& targetPos)
     {
         auto it = this->_players.find(id);
         if (it == this->_players.end())
@@ -83,15 +99,15 @@ namespace Server { namespace Game {
             return;
 
         Common::Position p0(targetPos.world,
-                            Tools::Vector3f(targetPos.chunk.x + 0.5,
-                                            targetPos.chunk.y + 0.5,
-                                            targetPos.chunk.z + 0.5));
+                            Tools::Vector3f((float)targetPos.chunk.x + 0.5f,
+                                            (float)targetPos.chunk.y + 0.5f,
+                                            (float)targetPos.chunk.z + 0.5f));
 
-        float dist = (p0 - cam.position).GetMagnitude();
+        float dist = (p0 - pos.position).GetMagnitude();
 
-        player->GetCurrentMap().DestroyCubes(Common::RayCast::Ray(cam, 50.0f));
-        if (dist > 1)
-            player->GetCurrentMap().DestroyCubes(Common::RayCast::SphereArea(p0, 120.0f / dist));
+        player->GetCurrentMap().DestroyCubes(Common::RayCast::Ray(pos, 50.0f));
+        if (dist > 1.0f)
+            player->GetCurrentMap().DestroyCubes(Common::RayCast::SphereArea(p0, 133.3f / std::log10(dist * dist * 10.0f)));
     }
 
     void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance)
@@ -108,7 +124,7 @@ namespace Server { namespace Game {
         this->_messageQueue.PushMessage(m);
     }
 
-    void Game::GetChunkPacket(Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback)
+    void Game::GetChunkPacket(Map::Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Game::_GetChunkPacket, this, id, clientId, callback));
@@ -156,7 +172,7 @@ namespace Server { namespace Game {
         this->_server.GetClientManager().ClientTeleport(id, std::cref(map->GetName()), position);
     }
 
-    void Game::_GetChunkPacket(Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback)
+    void Game::_GetChunkPacket(Map::Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback)
     {
         auto it = this->_players.find(clientId);
         if (it == this->_players.end())

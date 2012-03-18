@@ -65,3 +65,12 @@ technique tech_arb
        FragmentProgram = compile arbfp1 fs();
    }
 }
+
+technique tech_dx9
+{
+   pass p0
+   {
+       VertexProgram = compile vs_2_0 vs();
+       FragmentProgram = compile ps_2_0 fs();
+   }
+}

@@ -1,51 +1,102 @@
-#include "tools/database/DatabaseError.hpp"
+#include "tools/precompiled.hpp"
 
-#include "tools/database/sqlite/Value.hpp"
 #include "tools/database/sqlite/Row.hpp"
 
 namespace Tools { namespace Database { namespace Sqlite {
 
-    Row::Row(::sqlite3* db, ::sqlite3_stmt* stmt) :
-        _db(db), _stmt(stmt), _values(0), _column_count(0)
+    Row::Row(Connection& connection, Query& query)
+        : _connection(connection),
+        _stmt(query.GetSqliteHandler())
     {
-        assert(db != 0 && "Database pointer is NULL");
-        assert(stmt != 0 && "Statement pointer is NULL");
-        int res = ::sqlite3_column_count(stmt);
-        if (res < 0)
-            throw Tools::Database::DatabaseError("Unexpected column count");
-        this->_column_count = res;
-        if (this->_column_count != 0)
-        {
-            this->_values = static_cast<Tools::Database::IValue**>(::calloc(this->_column_count, sizeof(Value*)));
-            if (this->_values == 0)
-                throw std::runtime_error("Bad alloc!");
-        }
+        this->_nbColumn = sqlite3_column_count(this->_stmt);
     }
 
-    Tools::Database::IValue& Row::operator[](unsigned int column)
+    Int8 Row::GetInt8(Uint32 column) const
     {
-        if (column >= this->_column_count)
-        {
-            std::stringstream ss;
-            ss << "Out of range: " << column << " >= " << this->_column_count;
-            throw Tools::Database::DatabaseError(ss.str());
-        }
-        if (this->_values[column] == 0)
-        {
-            this->_values[column] = new Value(this->_db, this->_stmt, column);
-        }
-        return *this->_values[column];
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_int(this->_stmt, column);
     }
 
-    Row::~Row()
+    Uint8 Row::GetUint8(Uint32 column) const
     {
-        for (unsigned int i = 0; i < this->_column_count; ++i)
-        {
-            delete this->_values[i];
-            this->_values[i] = 0;
-        }
-        ::free(this->_values);
-        this->_values = 0;
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_int(this->_stmt, column);
+    }
+
+    Int16 Row::GetInt16(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_int(this->_stmt, column);
+    }
+
+    Uint16 Row::GetUint16(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_int(this->_stmt, column);
+    }
+
+    Int32 Row::GetInt32(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_int(this->_stmt, column);
+    }
+
+    Uint32 Row::GetUint32(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_int(this->_stmt, column);
+    }
+
+    Int64 Row::GetInt64(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_int64(this->_stmt, column);
+    }
+
+    Uint64 Row::GetUint64(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_int64(this->_stmt, column);
+    }
+
+    float Row::GetFloat(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return (float)sqlite3_column_double(this->_stmt, column);
+    }
+
+    double Row::GetDouble(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return sqlite3_column_double(this->_stmt, column);
+    }
+
+    std::string Row::GetString(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        return std::string((char*)sqlite3_column_text(this->_stmt, column), sqlite3_column_bytes(this->_stmt, column));
+    }
+
+    std::vector<char> Row::GetArray(Uint32 column) const
+    {
+        if (column >= this->_nbColumn)
+            throw std::invalid_argument("Sqlite: Bad column id");
+        auto ptr = sqlite3_column_blob(this->_stmt, column);
+        auto size = sqlite3_column_bytes(this->_stmt, column);
+        std::vector<char> data(size);
+        std::memcpy(data.data(), ptr, size);
+        return data;
     }
 
 }}}

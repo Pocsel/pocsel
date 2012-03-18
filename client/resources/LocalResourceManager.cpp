@@ -21,16 +21,12 @@ namespace Client { namespace Resources {
 
     LocalResourceManager::~LocalResourceManager()
     {
-        std::for_each(this->_textures.begin(), this->_textures.end(),
-            [](std::pair<std::string, Tools::Renderers::ITexture2D*> const& pair)
-            {
-                delete pair.second;
-            });
-        std::for_each(this->_shaders.begin(), this->_shaders.end(),
-            [](std::pair<std::string, Tools::Renderers::IShaderProgram*> const& pair)
-            {
-                delete pair.second;
-            });
+        for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
+            Tools::Delete(it->second);
+        for (auto it = this->_shaders.begin(), ite = this->_shaders.end(); it != ite; ++it)
+            Tools::Delete(it->second);
+        for (auto it = this->_fonts.begin(), ite = this->_fonts.end(); it != ite; ++it)
+            Tools::Delete(it->second);
     }
 
     Tools::Renderers::Utils::Font& LocalResourceManager::GetFont(std::string const& path, Uint32 size)
@@ -109,7 +105,7 @@ namespace Client { namespace Resources {
             255, 0, 255, 255,
             0, 0, 0, 255
         };
-        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, Tools::Vector2u(2, 2)).release();
+        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 16, toto, Tools::Vector2u(2, 2)).release();
     }
 
 }}
