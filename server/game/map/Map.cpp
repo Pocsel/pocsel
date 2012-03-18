@@ -291,8 +291,8 @@ namespace Server { namespace Game { namespace Map {
         {
             if (id == it->first)
                 continue;
-            auto toto = Network::PacketCreator::ItemMove(pos, 0);
-            this->_game.GetServer().GetClientManager().SendUdpPacket(id, toto);
+            auto toto = Network::PacketCreator::ItemMove(pos, id);
+            this->_game.GetServer().GetClientManager().SendUdpPacket(it->first, toto);
         }
     }
 
