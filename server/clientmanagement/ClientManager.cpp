@@ -87,6 +87,16 @@ namespace Server { namespace ClientManagement {
         this->_messageQueue.PushMessage(m);
     }
 
+    void ClientManager::SendUdpPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&ClientManager::_SendUdpPacket,
+                        this,
+                        clientId,
+                        Tools::Deleter<Common::Packet>::CreatePtr(packet.release())));
+        this->_messageQueue.PushMessage(m);
+    }
+
     void ClientManager::ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)
     {
         Tools::SimpleMessageQueue::Message
@@ -250,6 +260,17 @@ namespace Server { namespace ClientManagement {
         }
 
         this->_clients[clientId]->SendPacket(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
+    }
+
+    void ClientManager::_SendUdpPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet)
+    {
+        if (this->_clients.find(clientId) == this->_clients.end())
+        {
+            Tools::error << "SendPacket: Client " << clientId << " not found.\n";
+            return ;
+        }
+
+        this->_clients[clientId]->SendUdpPacket(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
     }
 
     void ClientManager::_ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)

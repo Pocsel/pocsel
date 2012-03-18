@@ -25,6 +25,11 @@ namespace Server { namespace ClientManagement {
         this->_connection->SendPacket(std::move(packet));
     }
 
+    void Client::SendUdpPacket(std::unique_ptr<Common::Packet> packet)
+    {
+        this->_connection->SendUdpPacket(std::move(packet));
+    }
+
     void Client::SetLogin(std::string const& login)
     {
         assert(login.size() > 0 && "login is empty");

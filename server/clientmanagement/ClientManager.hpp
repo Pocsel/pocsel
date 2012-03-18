@@ -53,7 +53,7 @@ namespace Server { namespace ClientManagement {
         void HandlePacket(Uint32 clientId, std::unique_ptr<Tools::ByteArray>& packet);
         void HandleUdpPacket(std::unique_ptr<Tools::ByteArray>& packet);
         void SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet);
-        //void SendUdpPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet);
+        void SendUdpPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet);
         void ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position);
 
         // A appeler du thread clientmanagement
@@ -71,7 +71,7 @@ namespace Server { namespace ClientManagement {
         void _HandlePacket(Uint32 clientId, std::shared_ptr<Tools::ByteArray> packet);
         void _HandleUdpPacket(std::shared_ptr<Tools::ByteArray> packet);
         void _SendPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet);
-        //void _SendUdpPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet);
+        void _SendUdpPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet);
         void _ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position);
     };
 
