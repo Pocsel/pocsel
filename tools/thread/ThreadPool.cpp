@@ -29,8 +29,13 @@ namespace Tools { namespace Thread {
 
     void ThreadPool::PushTask(std::function<void()>&& task)
     {
+        this->PushTask(std::shared_ptr<ITask>(new Task<void>(std::move(task))));
+    }
+
+    void ThreadPool::PushTask(std::shared_ptr<ITask> task)
+    {
         boost::lock_guard<boost::mutex> lock(this->_taskMutex);
-        this->_tasks.push_back(std::move(task));
+        this->_tasks.emplace_back(task);
         this->_condition.notify_one();
     }
 
@@ -38,17 +43,22 @@ namespace Tools { namespace Thread {
     {
         while (this->_isRunning)
         {
-            std::function<void()> task;
+            std::shared_ptr<ITask> task;
             {
                 boost::lock_guard<boost::mutex> lock(this->_taskMutex);
+                this->_tasks.remove_if(
+                    [](std::shared_ptr<ITask> task)
+                    {
+                        return task->IsCancelled();
+                    });
                 if (!this->_tasks.empty())
                 {
-                    task = std::move(this->_tasks.front());
+                    task = this->_tasks.front();
                     this->_tasks.pop_front();
                 }
             }
-            if (task)
-                task();
+            if (task.get() != 0)
+                task->Execute();
             else
             {
                 boost::unique_lock<boost::mutex> conditionLock(this->_conditionMutex);

@@ -1,9 +1,9 @@
 #ifndef __TOOLS_THREAD_THREADPOOL_HPP__
 #define __TOOLS_THREAD_THREADPOOL_HPP__
 
-namespace Tools { namespace Thread {
+#include "tools/thread/Task.hpp"
 
-    template<class T> class Task;
+namespace Tools { namespace Thread {
 
     class ThreadPool
     {
@@ -12,7 +12,7 @@ namespace Tools { namespace Thread {
         boost::mutex _conditionMutex;
         boost::condition_variable _condition;
         boost::mutex _taskMutex;
-        std::list<std::function<void()>> _tasks;
+        std::list<std::shared_ptr<ITask>> _tasks;
         bool _isRunning;
 
     public:
@@ -20,16 +20,11 @@ namespace Tools { namespace Thread {
         ~ThreadPool();
 
         void PushTask(std::function<void()>&& task);
+        void PushTask(std::shared_ptr<ITask> task);
         template<class T>
-        void PushTask(std::weak_ptr<Tools::Thread::Task<T>> task)
+        void PushTask(std::shared_ptr<Task<T>> task)
         {
-            this->PushTask(
-                [task]()
-                {
-                    auto ptr = task.lock();
-                    if (ptr)
-                        ptr->Execute();
-                });
+            this->PushTask(std::shared_ptr<ITask>(task));
         }
     private:
         void _Run();

@@ -1,6 +1,8 @@
 #pragma once
 
-#define D3D_DEBUG_INFO
+#ifdef DEBUG
+# define D3D_DEBUG_INFO
+#endif
 
 #include <d3dx9.h>
 
