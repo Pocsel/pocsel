@@ -4,12 +4,11 @@
 #include "server/game/map/Chunk.hpp"
 
 namespace Common{
-
     class Packet;
     class Resource;
     struct CubeType;
     struct Position;
-
+    struct MovingOrientedPosition;
 }
 
 namespace Server { namespace Network {
@@ -40,6 +39,9 @@ namespace Server { namespace Network {
 
         static std::unique_ptr<Common::Packet> TeleportPlayer(std::string const& map,
                                                               Common::Position const& pos);
+
+        static std::unique_ptr<Common::Packet> ItemMove(Common::MovingOrientedPosition const& pos,
+                                                        Uint32 itemId);
     };
 
 }}

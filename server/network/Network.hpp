@@ -1,8 +1,8 @@
 #ifndef __SERVER_NETWORK_NETWORK_HPP__
 #define __SERVER_NETWORK_NETWORK_HPP__
 
-namespace Common {
-    class Packet;
+namespace Tools {
+    class ByteArray;
 }
 
 namespace Server {
@@ -19,7 +19,7 @@ namespace Server { namespace Network {
     {
     public:
         typedef std::function<void(boost::shared_ptr<ClientConnection>)> NewConnectionHandler;
-        typedef std::function<void(std::unique_ptr<Common::Packet>&)> UdpPacketHandler;
+        typedef std::function<void(std::unique_ptr<Tools::ByteArray>&)> UdpPacketHandler;
 
     private:
         static const unsigned int _buffSize = 1024;

@@ -287,11 +287,13 @@ namespace Server { namespace Game { namespace Map {
 
         this->_players[id]->SetPosition(pos);
 
-        //for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
-        //{
-        //    auto toto = Network::PacketCreator::Chunk(*chunk);
-        //    this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
-        //}
+        for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+        {
+            if (id == it->first)
+                continue;
+            auto toto = Network::PacketCreator::ItemMove(pos, 0);
+            this->_game.GetServer().GetClientManager().SendUdpPacket(id, toto);
+        }
     }
 
     void Map::_DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos)

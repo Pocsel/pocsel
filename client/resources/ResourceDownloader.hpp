@@ -2,8 +2,11 @@
 #define __CLIENT_RESOURCES_RESOURCEDOWNLOADER_HPP__
 
 namespace Common {
-    class Packet;
     class Resource;
+}
+
+namespace Tools {
+    class ByteArray;
 }
 
 namespace Client { namespace Network {
@@ -30,7 +33,7 @@ namespace Client { namespace Resources {
             ResourceDownloader(CacheDatabaseProxy& database, Network::Network& network);
 
             void AskResources(Uint32 nbResources, std::list<Uint32>& neededResources);
-            void HandleResourceRange(Common::Packet& p);
+            void HandleResourceRange(Tools::ByteArray& p);
             float GetLoadingProgression() const { return this->_loading; }
 
         private:
