@@ -10,7 +10,7 @@ from sdk.constants import FORMAT_VERSION
 def prepareType(conn, type, name, lua):
     print "Add %s type '%s'" % (type, name)
     curs = conn.cursor()
-    curs.execute("INSERT INTO %s_type (name, lua) VALUES (?, ?)" % type, (name, lua))
+    curs.execute("INSERT INTO %s (name, lua) VALUES (?, ?)" % type, (name, lua))
     conn.commit()
 
 def addResource(connector, root, relpath, filename):
@@ -50,7 +50,7 @@ def preparePlugin(connector, plugin_dir):
             if entity.endswith('.lua'):
                 with open(os.path.join(entities_dir, entity)) as f:
                     data = f.read()
-                prepareType(connector(), 'entity', entity[:-4], data)
+                prepareType(connector(), 'entity_file', entity[:-4], data)
                 nb_entity += 1
             else:
                 print "ignoring '%s' in entities folder" % entity
@@ -69,7 +69,7 @@ def preparePlugin(connector, plugin_dir):
             if cube.endswith('.lua'):
                 with open(os.path.join(cubes_dir, cube)) as f:
                     data = f.read()
-                prepareType(connector(), 'cube', cube[:-4], data)
+                prepareType(connector(), 'cube_type', cube[:-4], data)
                 nb_cubes += 1
             else:
                 print "ignoring '%s' in cubes folder" % cube

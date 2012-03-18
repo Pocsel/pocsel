@@ -181,7 +181,7 @@ namespace Client { namespace Map {
                         continue;
 
                     auto const& cubeType = cubeTypes[cubes[cubeOffset] - 1];
-                    Tools::Vector3f p(x, y, z);
+                    Tools::Vector3f p((float)x, (float)y, (float)z);
 
                     // Right
                     nearType = 0;
