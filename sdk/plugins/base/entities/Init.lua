@@ -2,7 +2,7 @@ Server.Entity.Register{
     entityName = "Init",
     Spawn = function(self)
         self:Method()
-        Server.Call.Later(5, self.id, "EventTest", 1)
+        Server.Message.Later(5, self.id, "EventTest", 1)
     end,
     Method = function(self)
         print("hey from " .. self.entityName)
@@ -10,11 +10,11 @@ Server.Entity.Register{
     end,
     EventTest = function(self, nbCalls)
         print(nbCalls)
-        Server.Call.Later(5, self.id, "EventTest", nbCalls, self.id, "Notify", "Test!")
+        Server.Message.Later(5, self.id, "EventTest", nbCalls, self.id, "Notify", "Test!")
     end,
     Notify = function(self, arg, result)
         print(arg, result.entityId, result.success)
-        Server.Call.Later(5, 12, "ca va pas marcher", nil, self.id, "NotifyError")
+        Server.Message.Later(5, 12, "ca va pas marcher", nil, self.id, "NotifyError")
     end,
     NotifyError = function(self, arg, r)
         print("NotifyError: " .. tostring(arg) .. ", " .. r.entityId .. ", " .. tostring(r.success))
