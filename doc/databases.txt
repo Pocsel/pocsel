@@ -131,8 +131,8 @@
             - killer_id [int]
             - notification_callback_id [int]
 
-        - <plugin>_<map>_entity_call
-            Stores entities' pending calls for a map.
+        - <plugin>_<map>_entity_message
+            Stores entities' pending messages for a map.
             - time [int]
             - callback_id [int]
             - notification_callback_id [int]
