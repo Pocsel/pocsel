@@ -25,7 +25,8 @@ namespace sv {
         _pt1.ok = false;
         try
         {
-            boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
+            boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), 9999);
+            //boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
             this->_udpSocket.open(endpoint.protocol());
             this->_udpSocket.connect(endpoint);
             Tools::error << "UDP endpoint: " << socket->remote_endpoint().address() << ":" << socket->remote_endpoint().port() << ".\n";
@@ -85,7 +86,21 @@ namespace sv {
         if (this->_udp == false)
         {
             std::cout << "udp is false\n";
-            return;
+            try
+            {
+                this->_udpSocket.close();
+                boost::asio::ip::udp::endpoint endpoint(_socket->remote_endpoint().address(), _socket->remote_endpoint().port());
+                this->_udpSocket.open(endpoint.protocol());
+                this->_udpSocket.connect(endpoint);
+                Tools::error << "UDP endpoint: " << _socket->remote_endpoint().address() << ":" << _socket->remote_endpoint().port() << ".\n";
+                this->_udp = true;
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "Could not connect to UDP endpoint: " << e.what() << ".\n";
+                this->_udp = false;
+                return;
+            }
         }
         if (_pt1.count == 0)
             std::cout << "PassThrough 1, DEBUT\n";
@@ -96,9 +111,9 @@ namespace sv {
             return;
         }
 
-        _pt1.count++;
+        std::cout << _pt1.count++ << "\n";
 
-        if (_pt1.count == 20)
+        if (_pt1.count == 200)
         {
             std::cout << "Toujours pas bon au bout de 20, passThrough suivant\n";
             return;
@@ -110,7 +125,7 @@ namespace sv {
         std::function<void(void)> fx =
             std::bind(&Connection::PassThrough1,
                     this->shared_from_this());
-        this->_TimedDispatch(fx, 200);
+        this->_TimedDispatch(fx, 3000);
     }
 
     void Connection::_Shutdown()
@@ -154,8 +169,10 @@ namespace sv {
             return;
         }
 
-        if (!this->_udp)
-            this->_SendPacket(packet);
+        std::cout << "sendudppacket\n";
+
+        //if (!this->_udp)
+        //    this->_SendPacket(packet);
 
         this->_toSendUdpPackets.push(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
         if (!this->_udpWriteConnected)
@@ -222,6 +239,8 @@ namespace sv {
                     boost::shared_ptr<Common::Packet>(packet.release()),
                     boost::asio::placeholders::error)
                 );
+        std::cout << "connectudpwrite\n";
+
     }
 
     void Connection::_HandleRead(boost::system::error_code const error,
@@ -307,7 +326,10 @@ namespace sv {
     {
         this->_udpWriteConnected = false;
         if (!error)
+        {
+            std::cout << "_handleudpwrite ok\n";
             this->_ConnectUdpWrite();
+        }
         else
         {
             std::cout << "_HANDLEUDPWRITE error\n";
