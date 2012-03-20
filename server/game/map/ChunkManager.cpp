@@ -480,7 +480,7 @@ namespace Server { namespace Game { namespace Map {
         auto b = row->GetArray(0);
 
         Tools::ByteArray* deflatedBigChunk = new Tools::ByteArray();
-        deflatedBigChunk->SetData(b.data(), b.size());
+        deflatedBigChunk->SetData(b.data(), (Uint32)b.size());
 
         this->_dbBigChunks.erase(bigId);
 
