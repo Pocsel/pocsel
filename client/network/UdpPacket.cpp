@@ -33,7 +33,7 @@ namespace Client { namespace Network {
 
     Uint16 UdpPacket::GetCompleteSize() const
     {
-        return this->_size + sizeof(Uint32);
+        return (Uint16)(this->_size + sizeof(Uint32));
     }
 
     void UdpPacket::_WriteId()

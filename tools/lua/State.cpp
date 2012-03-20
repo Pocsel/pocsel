@@ -31,7 +31,7 @@ namespace {
             return -1;
         }
         auto const& rets = callHelper.GetRetList();
-        if (!lua_checkstack(env->i->GetState(), rets.size()))
+        if (!lua_checkstack(env->i->GetState(), (int)rets.size()))
         {
             lua_pushstring(state, "Lua::State: Call error: insufficient Lua stack size for return values");
             return -1;

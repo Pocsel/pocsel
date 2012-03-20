@@ -9,7 +9,7 @@ namespace Tools { namespace Database { namespace Sqlite {
         : _connection(connection),
         _bindIdx(1)
     {
-        int ret = sqlite3_prepare_v2(this->_connection.GetSqliteHandler(), request.c_str(), request.length(), &this->_stmt, 0);
+        int ret = sqlite3_prepare_v2(this->_connection.GetSqliteHandler(), request.c_str(), (int)request.length(), &this->_stmt, 0);
         if (ret != SQLITE_OK)
             throw std::runtime_error(std::string("Sqlite: Query error: ") + sqlite3_errmsg(this->_connection.GetSqliteHandler()));
     }
@@ -79,7 +79,7 @@ namespace Tools { namespace Database { namespace Sqlite {
 
     IQuery& Query::Bind(std::string const& val)
     {
-        int ret = sqlite3_bind_text(this->_stmt, this->_bindIdx++, val.c_str(), val.length(), SQLITE_TRANSIENT);
+        int ret = sqlite3_bind_text(this->_stmt, this->_bindIdx++, val.c_str(), (int)val.length(), SQLITE_TRANSIENT);
         if (ret != SQLITE_OK)
             throw std::runtime_error(std::string("Sqlite: Bind error: ") + sqlite3_errmsg(this->_connection.GetSqliteHandler()));
         return *this;

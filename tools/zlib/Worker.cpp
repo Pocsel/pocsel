@@ -85,7 +85,7 @@ namespace Tools { namespace Zlib {
                 assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
                 have = _chunkSize - strm.avail_out;
 
-                unsigned int curIndex = dst.size();
+                size_t curIndex = dst.size();
                 dst.resize(dst.size() + have);
                 std::memcpy(dst.data() + curIndex, _out, have);
 
@@ -109,7 +109,7 @@ namespace Tools { namespace Zlib {
 
         std::memcpy(_dst, dst.data(), dst.size());
 
-        dstLenght = dst.size();
+        dstLenght = (unsigned int)dst.size();
     }
 
     void Worker::Inflate(void const* _src, unsigned int srcLength,
@@ -169,7 +169,7 @@ namespace Tools { namespace Zlib {
                 }
                 have = _chunkSize - strm.avail_out;
 
-                unsigned int curIndex = dst.size();
+                size_t curIndex = dst.size();
                 dst.resize(dst.size() + have);
                 std::memcpy(dst.data() + curIndex, _out, have);
                 //if (fwrite(out, 1, have, dest) != have || ferror(dest))
@@ -191,7 +191,7 @@ namespace Tools { namespace Zlib {
         std::memcpy(_dst, dst.data(), dst.size());
 
 
-        dstLenght = dst.size();
+        dstLenght = (unsigned int)dst.size();
     }
 
     std::string Worker::_GetError(int ret)

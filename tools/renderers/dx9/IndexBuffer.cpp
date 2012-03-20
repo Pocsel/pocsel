@@ -29,7 +29,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     void IndexBuffer::SetSubData(std::size_t offset, std::size_t size, void const* data)
     {
         void* ptr;
-        DXCHECKERROR(this->_indexBuffer->Lock(offset, size, &ptr, 0));
+        DXCHECKERROR(this->_indexBuffer->Lock((UINT)offset, (UINT)size, &ptr, 0));
         std::memcpy(ptr, data, size);
         DXCHECKERROR(this->_indexBuffer->Unlock());
     }
