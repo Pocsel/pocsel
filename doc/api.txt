@@ -74,7 +74,7 @@
         - Call(function, [arg])
             Calls CallLater() with the first parameter (seconds) set to 0.
 
-    - Call
+    - Message
         Messaging system between entities.
 
         - Later(seconds, target, function,
