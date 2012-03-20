@@ -1,5 +1,7 @@
 #include "sv_connection.hpp"
 #include "sv_network.hpp"
+#include "sv_packetcreator.hpp"
+#include "sv_packetextractor.hpp"
 
 #include "tools/Deleter.hpp"
 
@@ -19,11 +21,14 @@ namespace sv {
         _udpWriteConnected(false),
         _udp(true)
     {
+        _pt1.count = 0;
+        _pt1.ok = false;
         try
         {
             boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
             this->_udpSocket.open(endpoint.protocol());
             this->_udpSocket.connect(endpoint);
+            Tools::error << "UDP endpoint: " << socket->remote_endpoint().address() << ":" << socket->remote_endpoint().port() << ".\n";
         }
         catch (std::exception& e)
         {
@@ -38,7 +43,7 @@ namespace sv {
         Tools::Delete(this->_socket);
     }
 
-    void Connection::SendPacket(std::unique_ptr<Common::Packet> packet)
+    void Connection::SendPacket(std::unique_ptr<Common::Packet>& packet)
     {
         std::function<void(void)> fx =
             std::bind(&Connection::_SendPacket,
@@ -47,7 +52,7 @@ namespace sv {
         this->_ioService.dispatch(fx);
     }
 
-    void Connection::SendUdpPacket(std::unique_ptr<Common::Packet> packet)
+    void Connection::SendUdpPacket(std::unique_ptr<Common::Packet>& packet)
     {
         std::function<void(void)> fx =
             std::bind(&Connection::_SendUdpPacket,
@@ -68,6 +73,44 @@ namespace sv {
         std::function<void(void)> fx =
             std::bind(&Connection::_ConnectRead, this->shared_from_this());
         this->_ioService.dispatch(fx);
+    }
+
+    void Connection::PassThrough1()
+    {
+        if (this->_connected == false)
+        {
+            std::cout << "already disconnected, bye\n";
+            return;
+        }
+        if (this->_udp == false)
+        {
+            std::cout << "udp is false\n";
+            return;
+        }
+        if (_pt1.count == 0)
+            std::cout << "PassThrough 1, DEBUT\n";
+
+        if (_pt1.ok == true)
+        {
+            std::cout << "pt1 ok\n";
+            return;
+        }
+
+        _pt1.count++;
+
+        if (_pt1.count == 20)
+        {
+            std::cout << "Toujours pas bon au bout de 20, passThrough suivant\n";
+            return;
+        }
+
+        auto toto = PacketCreator::PassThrough(1);
+        this->SendUdpPacket(toto);
+
+        std::function<void(void)> fx =
+            std::bind(&Connection::PassThrough1,
+                    this->shared_from_this());
+        this->_TimedDispatch(fx, 200);
     }
 
     void Connection::_Shutdown()
@@ -236,6 +279,7 @@ namespace sv {
         }
         else
         {
+            std::cout << "_HANDLEREAD error\n";
             this->_HandleError(error);
             return;
         }
@@ -252,7 +296,10 @@ namespace sv {
         if (!error)
             this->_ConnectWrite();
         else
+        {
+            std::cout << "_HANDLEWRITE error\n";
             this->_HandleError(error);
+        }
     }
 
     void Connection::_HandleUdpWrite(boost::shared_ptr<Common::Packet> /*packetSent*/,
@@ -262,7 +309,78 @@ namespace sv {
         if (!error)
             this->_ConnectUdpWrite();
         else
-            this->_HandleError(error);
+        {
+            std::cout << "_HANDLEUDPWRITE error\n";
+            this->_udp = false;
+        }
     }
 
+    void Connection::_HandlePacket(std::unique_ptr<Tools::ByteArray>& packet)
+    {
+        try
+        {
+            tst_protocol::ClientToServer type;
+            packet->Read(type);
+
+            switch (type)
+            {
+            case tst_protocol::ClientToServer::clPassThrough:
+                {
+                    Uint32 ptType;
+                    PacketExtractor::PassThrough(*packet, ptType);
+
+                    auto toto = PacketCreator::PassThroughOk(ptType);
+                    this->SendPacket(toto);
+                }
+                break;
+            case tst_protocol::ClientToServer::clPassThroughOk:
+                {
+                    Uint32 ptType;
+                    PacketExtractor::PassThroughOk(*packet, ptType);
+
+                    switch (ptType)
+                    {
+                    case 1:
+                        std::cout << "PT1OK\n";
+                        _pt1.ok = true;
+                        _udp = true;
+                    default:
+                        throw std::runtime_error("WTF unknown pass through type");
+                    }
+                }
+                break;
+            default:
+                throw std::runtime_error("Unknown packet type :(");
+            }
+        }
+        catch (std::exception& e)
+        {
+            std::cout << "could not read packet, client de merde: " << e.what() << "\n";
+        }
+    }
+
+    void Connection::_TimedDispatch(std::function<void(void)> fx, Uint32 ms)
+    {
+        boost::asio::deadline_timer* t = new boost::asio::deadline_timer(this->_ioService, boost::posix_time::milliseconds(ms));
+        std::function<void(boost::system::error_code const& e)>
+            function(std::bind(&Connection::_ExecDispatch,
+                               this->shared_from_this(),
+                               fx,
+                               std::shared_ptr<boost::asio::deadline_timer>(t),
+                               std::placeholders::_1));
+        t->async_wait(function);
+    }
+
+    void Connection::_ExecDispatch(std::function<void(void)>& message,
+            std::shared_ptr<boost::asio::deadline_timer>,
+            boost::system::error_code const& error)
+    {
+        if (error == boost::asio::error::operation_aborted)
+        {
+            Tools::debug << "Timer aborted;";
+            return;
+        }
+
+        message();
+    }
 }

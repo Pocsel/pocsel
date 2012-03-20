@@ -1,5 +1,5 @@
-file(GLOB test_udp_sv_src "sv_*.[ch]pp" "precompiled.[ch]pp")
-file(GLOB test_udp_cl_src "cl_*.[ch]pp" "precompiled.[ch]pp")
+file(GLOB test_udp_sv_src "sv_*.[ch]pp" "tst_*.[ch]pp" "precompiled.[ch]pp")
+file(GLOB test_udp_cl_src "cl_*.[ch]pp" "tst_*.[ch]pp" "precompiled.[ch]pp")
 
 set(src_sv
     ${test_udp_sv_src}

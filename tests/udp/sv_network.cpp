@@ -1,5 +1,8 @@
 #include "sv_network.hpp"
 #include "sv_connection.hpp"
+#include "sv_packetcreator.hpp"
+#include "common/Packet.hpp"
+
 
 namespace sv {
 
@@ -11,7 +14,8 @@ namespace sv {
         _acceptor(this->_ioService),
         _newConnection(0),
         _udpSocket(this->_ioService),
-        _data(new Uint8[_buffSize])
+        _data(new Uint8[_buffSize]),
+        _nextId(1)
     {
         std::cout << "Network::Network()\n";
         try
@@ -80,6 +84,31 @@ namespace sv {
         Tools::DeleteTab(this->_data);
     }
 
+    void Network::Run()
+    {
+        Tools::debug << "Network::Run()\n";
+        this->_ioService.run();
+    }
+
+    void Network::Stop()
+    {
+        Tools::debug << "Network::Stop()\n";
+        this->_ioService.stop();
+    }
+
+    void Network::RemoveConnection(boost::shared_ptr<Connection> conn)
+    {
+        for (auto it = this->_connections.begin(), ite = this->_connections.end(); it != ite; ++it)
+        {
+            if (it->second == conn)
+            {
+                std::cout << "removed: " << it->first << "\n";
+                this->_connections.erase(it);
+                return;
+            }
+        }
+    }
+
     void Network::_ConnectAccept()
     {
         this->_newConnection = new boost::asio::ip::tcp::socket(this->_ioService);
@@ -95,7 +124,7 @@ namespace sv {
         {
             Tools::log << "New connection.\n";
 
-            std::shared_ptr<Connection> newConnection(new Connection(*this, this->_newConnection));
+            boost::shared_ptr<Connection> newConnection(new Connection(*this, this->_newConnection));
             this->_HandleNewConnection(newConnection);
         }
         else
@@ -134,16 +163,41 @@ namespace sv {
         this->_ConnectUdpRead();
     }
 
-    void Network::Run()
+    void Network::_HandleNewConnection(boost::shared_ptr<Connection> conn)
     {
-        Tools::debug << "Network::Run()\n";
-        this->_ioService.run();
+        Uint32 id = this->_nextId++;
+
+        std::cout << "New client: " << id << "\n";
+
+        this->_connections[id] = conn;
+
+        auto toto = PacketCreator::Login(id);
+        conn->SendPacket(toto);
+
+        conn->PassThrough1();
     }
 
-    void Network::Stop()
+    void Network::_HandleUdpPacket(std::unique_ptr<Tools::ByteArray>& packet)
     {
-        Tools::debug << "Network::Stop()\n";
-        this->_ioService.stop();
-    }
+        Uint32 id;
+        try
+        {
+            packet->Read(id);
+        }
+        catch (std::exception& e)
+        {
+            std::cout << "ERROR: could not read udp packet\n";
+            return;
+        }
 
+        auto it = this->_connections.find(id);
+        if (it == this->_connections.end())
+        {
+            std::cout << "udp packet received: unknown id: " << id << "\n";
+            return;
+        }
+
+        std::cout << "UDP packet received: " << id << "\n";
+        it->second->HandlePacket(packet);
+    }
 }

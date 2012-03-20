@@ -29,15 +29,23 @@ namespace sv {
         bool _udpWriteConnected;
         bool _udp;
 
+        struct {
+            int count;
+            bool ok;
+        } _pt1;
+
     public:
         Connection(Network& network, boost::asio::ip::tcp::socket* socket);
         ~Connection();
 
         // threadsafe
-        void SendPacket(std::unique_ptr<Common::Packet> packet);
-        void SendUdpPacket(std::unique_ptr<Common::Packet> packet);
+        void SendPacket(std::unique_ptr<Common::Packet>& packet);
+        void SendUdpPacket(std::unique_ptr<Common::Packet>& packet);
         void Shutdown();
         void ConnectRead();
+        void HandlePacket(std::unique_ptr<Tools::ByteArray>& packet) { this->_HandlePacket(packet); }
+
+        void PassThrough1();
 
     private:
         void _Shutdown();
@@ -56,6 +64,11 @@ namespace sv {
                           boost::system::error_code const error);
 
         void _HandlePacket(std::unique_ptr<Tools::ByteArray>& packet);
+
+        void _TimedDispatch(std::function<void(void)> fx, Uint32 ms);
+        void _ExecDispatch(std::function<void(void)>& message,
+                std::shared_ptr<boost::asio::deadline_timer>,
+                boost::system::error_code const& error);
     };
 
 }

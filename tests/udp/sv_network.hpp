@@ -27,8 +27,9 @@ namespace sv {
         boost::asio::ip::udp::socket _udpSocket;
         size_t _size;
         Uint8* _data;
+        Uint32 _nextId;
 
-        std::vector<boost::shared_ptr<Connection>> _connections;
+        std::map<Uint32, boost::shared_ptr<Connection>> _connections;
 
     public:
         Network();
@@ -44,7 +45,7 @@ namespace sv {
         void _ConnectUdpRead();
         void _HandleUdpRead(boost::system::error_code const& e, std::size_t size);
 
-        void _HandleNewConnection(std::shared_ptr<Connection> conn);
+        void _HandleNewConnection(boost::shared_ptr<Connection> conn);
         void _HandleUdpPacket(std::unique_ptr<Tools::ByteArray>& packet);
     };
 
