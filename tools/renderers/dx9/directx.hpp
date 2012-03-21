@@ -184,14 +184,15 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
 #define DXCHECKERROR(result) Tools::Renderers::DX9::_DXCHECKERROR(#result, result)
 
-    inline void _DXCHECKERROR(const char* code, HRESULT result)
+    inline HRESULT _DXCHECKERROR(const char* code, HRESULT result)
     {
-        if (result < 0)
+        if (FAILED(result))
         {
             std::string err = DXGetErrorString(result);
             Tools::debug << "DirectX: " << code << ":\n" << err << std::endl;
             throw std::runtime_error("DirectX: " + err);
         }
+        return result;
     }
 
 }}}
