@@ -2,6 +2,7 @@
 #pragma once // include guard non standard
 
 #include "tools/renderers/dx9/directx.hpp"
+#include "tools/renderers/dx9/ShaderProgram.hpp"
 #include "tools/renderers/dx9/VertexBuffer.hpp"
 
 #include "tools/IRenderer.hpp"
@@ -38,6 +39,8 @@ namespace Tools { namespace Renderers {
 
         LPDIRECT3D9 _object;
         LPDIRECT3DDEVICE9 _device;
+        LPD3DXEFFECTPOOL _effectPool;
+        std::list<DX9::ShaderProgram*> _allPrograms;
 
         IShaderProgram* _currentProgram;
         DX9::VertexBuffer* _vertexBuffer;
@@ -106,7 +109,10 @@ namespace Tools { namespace Renderers {
         }
         void SetVertexBuffer(DX9::VertexBuffer& vb) { this->_vertexBuffer = &vb; }
         LPDIRECT3DDEVICE9 GetDevice() const { return this->_device; }
+        LPD3DXEFFECTPOOL GetEffectPool() const { return this->_effectPool; }
         void Present();
+        void RegisterProgram(DX9::ShaderProgram& program);
+        void UnregisterProgram(DX9::ShaderProgram& program);
     };
 
 }}

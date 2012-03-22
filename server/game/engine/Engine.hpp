@@ -15,7 +15,7 @@ namespace Server { namespace Game { namespace Map {
 
 namespace Server { namespace Game { namespace Engine {
 
-    class CallManager;
+    class MessageManager;
     class EntityManager;
     class CallbackManager;
 
@@ -25,7 +25,7 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Map::Map& _map;
         Tools::Lua::Interpreter* _interpreter;
-        CallManager* _callManager;
+        MessageManager* _messageManager;
         EntityManager* _entityManager;
         CallbackManager* _callbackManager;
         Uint64 _currentTime;
@@ -35,7 +35,7 @@ namespace Server { namespace Game { namespace Engine {
         ~Engine();
         void Tick(Uint64 currentTime);
         void Save(Tools::Database::IConnection& conn);
-        CallManager& GetCallManager() { return *this->_callManager; }
+        MessageManager& GetMessageManager() { return *this->_messageManager; }
         EntityManager& GetEntityManager() { return *this->_entityManager; }
         CallbackManager& GetCallbackManager() { return *this->_callbackManager; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }

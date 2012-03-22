@@ -1,5 +1,5 @@
 #include "server/game/engine/Engine.hpp"
-#include "server/game/engine/CallManager.hpp"
+#include "server/game/engine/MessageManager.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
 #include "tools/lua/Interpreter.hpp"
@@ -19,13 +19,13 @@ namespace Server { namespace Game { namespace Engine {
         this->_interpreter->Globals().Set("S", namespaceTable);
         this->_callbackManager = new CallbackManager(*this);
         this->_entityManager = new EntityManager(*this);
-        this->_callManager = new CallManager(*this);
+        this->_messageManager = new MessageManager(*this);
     }
 
     Engine::~Engine()
     {
         Tools::debug << "Engine::~Engine()\n";
-        Tools::Delete(this->_callManager);
+        Tools::Delete(this->_messageManager);
         Tools::Delete(this->_entityManager);
         Tools::Delete(this->_callbackManager);
         Tools::Delete(this->_interpreter);
@@ -36,7 +36,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_currentTime = currentTime;
         this->_entityManager->DispatchKillEvents();
         this->_entityManager->DispatchSpawnEvents();
-        this->_callManager->DispatchCalls();
+        this->_messageManager->DispatchMessages();
     }
 
     void Engine::Save(Tools::Database::IConnection& conn)

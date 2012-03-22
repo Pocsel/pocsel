@@ -40,7 +40,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_attributes[this->_nbAttrib].Method = D3DDECLMETHOD_DEFAULT;
         this->_attributes[this->_nbAttrib].Usage = GetVertexAttributeUsage(usage);
         this->_attributes[this->_nbAttrib].UsageIndex = GetVertexAttributeUsageIndex(usage);
-        this->_stride += nbElements * DataType::GetSize(type);
+        this->_stride += nbElements * (UINT)DataType::GetSize(type);
         this->_nbAttrib++;
         std::memcpy(&(this->_attributes[this->_nbAttrib]), &end, sizeof(end));
     }
@@ -51,19 +51,19 @@ namespace Tools { namespace Renderers { namespace DX9 {
         {
             if (this->_vertexBuffer)
                 this->_vertexBuffer->Release();
-            DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexBuffer(size, D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &this->_vertexBuffer, 0));
+            DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexBuffer((UINT)size, D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &this->_vertexBuffer, 0));
             this->_size = size;
         }
         if (data == 0)
             return;
-        this->_count = size / (this->_stride == 0 ? 1 : this->_stride);
+        this->_count = (UINT)size / (this->_stride == 0 ? 1 : this->_stride);
         this->SetSubData(0, size, data);
     }
 
     void VertexBuffer::SetSubData(std::size_t offset, std::size_t size, void const* data)
     {
         void* ptr;
-        DXCHECKERROR(this->_vertexBuffer->Lock(offset, size, &ptr, 0));
+        DXCHECKERROR(this->_vertexBuffer->Lock((UINT)offset, (UINT)size, &ptr, 0));
         std::memcpy(ptr, data, size);
         DXCHECKERROR(this->_vertexBuffer->Unlock());
     }

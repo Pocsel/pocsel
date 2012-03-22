@@ -79,7 +79,7 @@ namespace Tools { namespace Lua {
         }
         call.ClearRets();
         auto const& args = call.GetArgList();
-        if (!lua_checkstack(this->_state, args.size()))
+        if (!lua_checkstack(this->_state, (int)args.size()))
         {
             lua_pop(this->_state, 1);
             throw std::runtime_error("Lua::Ref: Insufficient Lua stack size for arguments");

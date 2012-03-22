@@ -50,7 +50,7 @@ namespace Client { namespace Map {
             boost::this_thread::yield();
             std::list<ChunkNode*> toDelete;
             for (auto it = this->_refreshTasks.begin(), ite = this->_refreshTasks.end(); it != ite; ++it)
-                if (it->second->IsExecuted())
+                if (it->second->IsCancelled() || it->second->IsExecuted())
                     toDelete.push_back(it->first);
             std::for_each(toDelete.begin(), toDelete.end(), [this](ChunkNode* node) { this->_refreshTasks.erase(node); });
         }

@@ -78,7 +78,7 @@ namespace Client { namespace Menu {
 
     void MainMenu::SetVisible(bool visible /* = true */, bool warpMouse /* = true */)
     {
-        if (!this->_visible && warpMouse)
+        if (this->_visible != visible && warpMouse)
             this->_client.GetWindow().GetInputManager().WarpMouse(
                     this->_client.GetWindow().GetSize().w / 2,
                     this->_client.GetWindow().GetSize().h / 2);
