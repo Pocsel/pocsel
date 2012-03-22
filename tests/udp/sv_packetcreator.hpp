@@ -1,0 +1,43 @@
+#ifndef __SV_PACKETCREATOR_HPP__
+#define __SV_PACKETCREATOR_HPP__
+
+#include "common/Packet.hpp"
+
+#include "tst_protocol.hpp"
+
+namespace sv {
+
+    class PacketCreator
+    {
+    public:
+        static std::unique_ptr<Common::Packet> Login(Uint32 id)
+        {
+            Common::Packet* p = new Common::Packet();
+            p->Write(tst_protocol::ServerToClient::svPassThrough);
+
+            p->Write(id);
+            return std::unique_ptr<Common::Packet>(p);
+        }
+
+        static std::unique_ptr<Common::Packet> PassThrough(Uint32 type)
+        {
+            Common::Packet* p = new Common::Packet();
+            p->Write(tst_protocol::ServerToClient::svPassThrough);
+
+            p->Write(type);
+            return std::unique_ptr<Common::Packet>(p);
+        }
+
+        static std::unique_ptr<Common::Packet> PassThroughOk(Uint32 type)
+        {
+            Common::Packet* p = new Common::Packet();
+            p->Write(tst_protocol::ServerToClient::svPassThroughOk);
+
+            p->Write(type);
+            return std::unique_ptr<Common::Packet>(p);
+        }
+    };
+
+}
+
+#endif
