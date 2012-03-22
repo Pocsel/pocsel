@@ -11,6 +11,13 @@ namespace cl {
     class PacketCreator
     {
     public:
+        static std::unique_ptr<Common::Packet> UdpReady()
+        {
+            UdpPacket* p = new UdpPacket();
+            p->Write(tst_protocol::ClientToServer::clUdpReady);
+            return std::unique_ptr<UdpPacket>(p);
+        }
+
         static std::unique_ptr<UdpPacket> PassThrough(Uint32 type)
         {
             UdpPacket* p = new UdpPacket();

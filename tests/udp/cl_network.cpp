@@ -1,13 +1,9 @@
-#include "client/precompiled.hpp"
-
-#include "client/network/Network.hpp"
-#include "client/network/UdpPacket.hpp"
-#include "client/Client.hpp"
-#include "tools/logger/Logger.hpp"
-#include "tools/ToString.hpp"
+#include "cl_network.hpp"
+#include "cl_udppacket.hpp"
+#include "cl_packetcreator.hpp"
 #include "tools/Deleter.hpp"
 
-namespace Client { namespace Network {
+namespace cl {
 
     Network::Network() :
         _socket(_ioService),
@@ -96,11 +92,17 @@ namespace Client { namespace Network {
             boost::asio::ip::udp::endpoint endpoint(this->_socket.local_endpoint().address(), this->_socket.local_endpoint().port());
             this->_udpReceiveSocket.open(endpoint.protocol());
             this->_udpReceiveSocket.bind(endpoint);
+            Tools::error << "Receiving on (UDP): " <<
+                this->_socket.local_endpoint().address() <<
+                ":" << this->_socket.local_endpoint().port() << "\n";
             this->_udpReceive = true;
         }
         catch (std::exception& e)
         {
-            Tools::error << "Network::Network: Exception while Receiving to (UDP) " << host << ":" << port << ": " << e.what() << ".\n";
+            Tools::error << "Network::Network: Exception while Receiving to (UDP) " <<
+                this->_socket.local_endpoint().address() <<
+                ":" << this->_socket.local_endpoint().port() <<
+                ": " << e.what() << ".\n";
             this->_udpReceive = false;
         }
 
@@ -131,7 +133,11 @@ namespace Client { namespace Network {
     {
         this->_ReceivePacketSize();
         if (this->_udpReceive)
+        {
             this->_ReceiveUdpPacket();
+            auto toto = PacketCreator::UdpReady();
+            this->SendPacket(toto);
+        }
         this->_ioService.run();
     }
 
@@ -154,7 +160,6 @@ namespace Client { namespace Network {
         Tools::Delete(this->_thread);
         this->_thread = 0;
         std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { Tools::Delete(p); });
-        this->_inQueue.Clear();
         this->_outQueue.clear();
         std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
         this->_outQueueUdp.clear();
@@ -214,11 +219,6 @@ namespace Client { namespace Network {
             this->_sendingUdp = true;
             this->_SendNextUdp();
         }
-    }
-
-    std::list<Tools::ByteArray*> Network::GetInPackets()
-    {
-        return this->_inQueue.StealPackets();
     }
 
     void Network::_CloseSocket()
@@ -322,7 +322,7 @@ namespace Client { namespace Network {
         {
             auto p = new Tools::ByteArray();
             p->SetData(this->_udpDataBuffer.data(), (Uint32)size);
-            this->_inQueue.PushPacket(p);
+            this->_HandlePacket(p);
             this->_ReceiveUdpPacket();
         }
     }
@@ -360,9 +360,17 @@ namespace Client { namespace Network {
         {
             auto p = new Tools::ByteArray();
             p->SetData(this->_dataBuffer.data(), (Uint32)this->_dataBuffer.size());
-            this->_inQueue.PushPacket(p);
+            this->_HandlePacket(p);
             this->_ReceivePacketSize();
         }
     }
 
-}}
+    void Network::_HandlePacket(Tools::ByteArray* packet)
+    {
+        std::unique_ptr<Tools::ByteArray> _autoDelete(packet);
+
+        std::cout << "Received packet!\n";
+
+    }
+
+}
