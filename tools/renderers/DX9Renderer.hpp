@@ -113,6 +113,7 @@ namespace Tools { namespace Renderers {
         void Present();
         void RegisterProgram(DX9::ShaderProgram& program);
         void UnregisterProgram(DX9::ShaderProgram& program);
+        void _RefreshDevice();
     };
 
 }}

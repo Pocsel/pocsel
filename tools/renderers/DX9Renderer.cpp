@@ -237,27 +237,7 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::SetScreenSize(Vector2u const& size)
     {
         this->_screenSize = size;
-        D3DPRESENT_PARAMETERS present_parameters = {0};
-        present_parameters.Windowed = true;
-        present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
-        present_parameters.EnableAutoDepthStencil = true;
-        present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
-        present_parameters.hDeviceWindow = GetActiveWindow();
-        present_parameters.BackBufferWidth = this->_screenSize.w;
-        present_parameters.BackBufferHeight = this->_screenSize.h;
-
-        for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
-            (*it)->GetEffect()->OnLostDevice();
-        DXCHECKERROR(this->_device->Reset(&present_parameters));
-        for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
-            (*it)->GetEffect()->OnResetDevice();
-
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));
-
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
+        this->_RefreshDevice();
     }
 
     void DX9Renderer::SetViewport(Rectangle const& viewport)
@@ -319,7 +299,11 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Present()
     {
-        DXCHECKERROR(this->_device->Present(0, 0, 0, 0));
+        HRESULT hr = this->_device->Present(0, 0, 0, 0);
+        if (hr == D3DERR_DEVICELOST || hr == D3DERR_DEVICENOTRESET)
+            this->_RefreshDevice();
+        else
+            DXCHECKERROR(hr);
     }
 
     void DX9Renderer::RegisterProgram(DX9::ShaderProgram& program)
@@ -332,6 +316,30 @@ namespace Tools { namespace Renderers {
         this->_allPrograms.remove(&program);
     }
 
+    void DX9Renderer::_RefreshDevice()
+    {
+        D3DPRESENT_PARAMETERS present_parameters = {0};
+        present_parameters.Windowed = true;
+        present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+        present_parameters.EnableAutoDepthStencil = true;
+        present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
+        present_parameters.hDeviceWindow = GetActiveWindow();
+        present_parameters.BackBufferWidth = this->_screenSize.w;
+        present_parameters.BackBufferHeight = this->_screenSize.h;
+
+        for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
+            (*it)->GetEffect()->OnLostDevice();
+        DXCHECKERROR(this->_device->Reset(&present_parameters));
+        for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
+            (*it)->GetEffect()->OnResetDevice();
+
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));
+
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
+    }
 }}
 
 #endif
