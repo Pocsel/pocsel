@@ -182,16 +182,17 @@ namespace Tools { namespace Renderers { namespace DX9 {
     //    throw std::runtime_error("Bad TextureFilter ?!");
     //}
 
-#define DXCHECKERROR(result) Tools::Renderers::DX9::_DXCHECKERROR(#result, result)
+#define DXCHECKERROR(result) Tools::Renderers::DX9::CheckError(result, #result)
 
-    inline void _DXCHECKERROR(const char* code, HRESULT result)
+    inline HRESULT CheckError(HRESULT result, const char* code = 0)
     {
-        if (result < 0)
+        if (FAILED(result))
         {
             std::string err = DXGetErrorString(result);
-            Tools::debug << "DirectX: " << code << ":\n" << err << std::endl;
+            Tools::debug << "DirectX: " << (code == 0 ? "" : code) << ":\n" << err << std::endl;
             throw std::runtime_error("DirectX: " + err);
         }
+        return result;
     }
 
 }}}

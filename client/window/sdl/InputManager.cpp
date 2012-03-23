@@ -12,7 +12,8 @@ namespace Client { namespace Window { namespace Sdl {
         _mousePos(0),
         _showMouse(false),
         _mouseShown(true),
-        _hasFocus(true)
+        _hasFocus(true),
+        _isMinimized(false)
     {
     }
 
@@ -73,6 +74,8 @@ namespace Client { namespace Window { namespace Sdl {
             case SDL_ACTIVEEVENT:
                 if ((e.active.state & SDL_APPINPUTFOCUS) == SDL_APPINPUTFOCUS)
                     this->_hasFocus = e.active.gain != 0;
+                if ((e.active.state & SDL_APPACTIVE) == SDL_APPACTIVE)
+                    this->_isMinimized = e.active.gain == 0;
                 break;
             case SDL_VIDEORESIZE:
                 this->_window.Resize(e.resize.w, e.resize.h);
