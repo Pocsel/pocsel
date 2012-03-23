@@ -1,42 +1,23 @@
 #ifndef __CLIENT_NETWORK_NETWORK_HPP__
 #define __CLIENT_NETWORK_NETWORK_HPP__
 
-#include "common/Packet.hpp"
+namespace Common {
+    class Packet;
+}
 
-namespace Client { namespace Network {
+namespace Tools {
+    class ByteArray;
+}
 
+namespace cl {
     class UdpPacket;
+}
+
+namespace cl {
 
     class Network :
         private boost::noncopyable
     {
-    private:
-        struct InQueue
-        {
-        private:
-            std::list<Tools::ByteArray*> _list;
-            boost::mutex _mutex;
-        public:
-            void PushPacket(Tools::ByteArray* p)
-            {
-                boost::lock_guard<boost::mutex> lock(_mutex);
-                _list.push_back(p);
-            }
-            std::list<Tools::ByteArray*> StealPackets()
-            {
-                boost::lock_guard<boost::mutex> lock(_mutex);
-                return std::move(_list);
-            }
-            void Clear()
-            {
-                std::for_each(this->_list.begin(), this->_list.end(), [](Tools::ByteArray* p) { Tools::Delete(p); });
-                this->_list.clear();
-            }
-            ~InQueue()
-            {
-                this->Clear();
-            }
-        };
     private:
         boost::asio::io_service _ioService;
         boost::asio::ip::tcp::socket _socket;
@@ -46,7 +27,6 @@ namespace Client { namespace Network {
         std::vector<char> _sizeBuffer;
         std::vector<char> _dataBuffer;
         std::list<Common::Packet*> _outQueue;
-        InQueue _inQueue;
         bool _sending;
         std::string _host;
         std::string _port;
@@ -70,7 +50,6 @@ namespace Client { namespace Network {
         void Stop();
         void SendPacket(std::unique_ptr<Common::Packet> packet);
         void SendUdpPacket(std::unique_ptr<UdpPacket> packet);
-        std::list<Tools::ByteArray*> GetInPackets();
         std::string const& GetHost() const { return this->_host; }
         std::string const& GetPort() const { return this->_port; }
         bool IsRunning() const { return this->_isRunning; }
@@ -94,8 +73,10 @@ namespace Client { namespace Network {
         void _HandleReceivePacketSize(const boost::system::error_code& error);
         void _ReceivePacketContent(unsigned int size);
         void _HandleReceivePacketContent(const boost::system::error_code& error);
+
+        void _HandlePacket(Tools::ByteArray* packet);
     };
 
-}}
+}
 
 #endif

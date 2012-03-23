@@ -346,6 +346,15 @@ namespace sv {
 
             switch (type)
             {
+            case tst_protocol::ClientToServer::clUdpReady:
+                {
+                    Uint32 ptType;
+                    PacketExtractor::PassThrough(*packet, ptType);
+
+                    auto toto = PacketCreator::PassThroughOk(ptType);
+                    this->SendPacket(toto);
+                }
+                break;
             case tst_protocol::ClientToServer::clPassThrough:
                 {
                     Uint32 ptType;

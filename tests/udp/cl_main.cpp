@@ -15,7 +15,9 @@ int main(int ac, char** av)
 
     cl::Network network;
     network.Connect(host, port);
+
     while (1)
-        sleep(123);
+        sleep(2);
+
     return 0;
 }
