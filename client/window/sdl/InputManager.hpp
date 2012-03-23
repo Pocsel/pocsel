@@ -35,6 +35,7 @@ namespace Client { namespace Window { namespace Sdl {
         bool _showMouse;
         bool _mouseShown;
         bool _hasFocus;
+        bool _isMinimized;
 
     public:
         InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
@@ -46,6 +47,7 @@ namespace Client { namespace Window { namespace Sdl {
         virtual void ShowMouse();
         virtual bool MouseShown() const { return this->_showMouse; }
         virtual bool HasFocus() const { return this->_hasFocus; }
+        virtual bool IsMinimized() const { return this->_isMinimized; }
     private:
         char _UnicodeToAscii(Uint16 unicode) const;
         void _TriggerBind(KeyHeld const& k, BindAction::Type type);
