@@ -13,14 +13,14 @@ namespace cl {
     public:
         static std::unique_ptr<Common::Packet> UdpReady()
         {
-            UdpPacket* p = new UdpPacket();
+            Common::Packet* p = new Common::Packet();
             p->Write(tst_protocol::ClientToServer::clUdpReady);
-            return std::unique_ptr<UdpPacket>(p);
+            return std::unique_ptr<Common::Packet>(p);
         }
 
-        static std::unique_ptr<UdpPacket> PassThrough(Uint32 type)
+        static std::unique_ptr<UdpPacket> PassThrough(Uint32 id, Uint32 type)
         {
-            UdpPacket* p = new UdpPacket();
+            UdpPacket* p = new UdpPacket(id);
             p->Write(tst_protocol::ClientToServer::clPassThrough);
 
             p->Write(type);

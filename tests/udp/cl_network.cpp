@@ -136,7 +136,7 @@ namespace cl {
         {
             this->_ReceiveUdpPacket();
             auto toto = PacketCreator::UdpReady();
-            this->SendPacket(toto);
+            this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
         }
         this->_ioService.run();
     }
