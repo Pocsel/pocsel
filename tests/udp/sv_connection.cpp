@@ -25,8 +25,8 @@ namespace sv {
         _pt1.ok = false;
         try
         {
-            boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), 9999);
-            //boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
+            //boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), 9999);
+            boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
             this->_udpSocket.open(endpoint.protocol());
             this->_udpSocket.connect(endpoint);
             Tools::error << "UDP endpoint: " << socket->remote_endpoint().address() << ":" << socket->remote_endpoint().port() << ".\n";
@@ -346,6 +346,15 @@ namespace sv {
 
             switch (type)
             {
+            case tst_protocol::ClientToServer::clUdpReady:
+                {
+                    Uint32 ptType;
+                    PacketExtractor::PassThrough(*packet, ptType);
+
+                    auto toto = PacketCreator::PassThroughOk(ptType);
+                    this->SendPacket(toto);
+                }
+                break;
             case tst_protocol::ClientToServer::clPassThrough:
                 {
                     Uint32 ptType;

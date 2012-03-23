@@ -8,6 +8,10 @@ namespace sv {
     class PacketExtractor
     {
     public:
+        static void UdpReady(Tools::ByteArray const&)
+        {
+        }
+
         static void PassThrough(Tools::ByteArray const& p, Uint32& type)
         {
             p.Read(type);
