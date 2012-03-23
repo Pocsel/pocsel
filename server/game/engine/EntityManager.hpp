@@ -16,26 +16,6 @@ namespace Server { namespace Game { namespace Engine {
         private boost::noncopyable
     {
     private:
-        struct EntityType
-        {
-            EntityType(std::string const& entityName, Uint32 pluginId, Tools::Lua::Ref const& prototype) :
-                entityName(entityName), pluginId(pluginId), prototype(prototype)
-            {
-            }
-            std::string entityName;
-            Uint32 pluginId;
-            Tools::Lua::Ref prototype;
-        };
-        struct Entity
-        {
-            Entity(EntityType* type, Tools::Lua::Ref const& self) :
-                type(type), self(self)
-            {
-            }
-            EntityType* type;
-            Tools::Lua::Ref self;
-            std::map<Uint64 /* time */, Uint32 /* callback */> selfCallbacks;
-        };
         struct SpawnEvent
         {
             SpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId) :
@@ -64,6 +44,7 @@ namespace Server { namespace Game { namespace Engine {
         Engine& _engine;
         std::map<Uint32 /* pluginId */, std::map<std::string /* entityName */, EntityType*>> _entityTypes;
         std::map<Uint32 /* entityId */, Entity*> _entities;
+        std::map<Uint32 /* entityId */, PositionalEntity*> _positionalEntities;
         Uint32 _pluginIdForRegistering;
         std::string _pluginNameForRegistering;
         Uint32 _nextEntityId;

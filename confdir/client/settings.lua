@@ -1,11 +1,11 @@
 nickname = "Boloss"
 fps = 60
-resX = 800
-resY = 600
-fullscreen = false
+resX = 1920
+resY = 1080
+fullscreen = true
 useShaders = true
 useDirect3D9 = true
-chunkViewDistance = 10
+chunkViewDistance = 5
 chunkCacheArea = 0
 chunkMinimumArea = 2
 mouseSensitivity = 0.707

@@ -66,7 +66,27 @@ namespace Server { namespace Game { namespace Engine {
             Tools::error << "EntityManager::LuaFunctionCall: Call to \"" << function << "\" for entity " << targetId << " failed: entity not found.\n";
             return CallbackManager::EntityNotFound;
         }
-        auto f = it->second->type->prototype[function];
+        try
+        {
+            auto prototype = it->second->GetType().GetPrototype();
+            if (!prototype.IsTable())
+                throw std::runtime_error("prototype is not a table");
+            auto f = it->second->GetType().GetPrototype()[function];
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "EntityManager::LuaFunctionCall: Fatal (entity deleted): Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->type->entityName << "\") failed: " << e.what() << std::endl;
+            delete it->second;
+            this->_entities.erase(it);
+            this->_runningEntityId = 0;
+            return CallbackManager::Error;
+        }
+        Tools::debug << "EntityManager::LuaFunctionCall: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\").\n";
+        return CallbackManager::Ok;
+
+
+        auto prototype = it->second->GetType().GetPrototype();
+        auto f = it->second->GetType().GetPrototype()[function];
         if (f.IsFunction())
         {
             this->_runningEntityId = targetId;
