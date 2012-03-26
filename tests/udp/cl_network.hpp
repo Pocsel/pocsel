@@ -42,6 +42,13 @@ namespace cl {
         std::vector<char> _udpDataBuffer;
         bool _udpReceive;
 
+        struct {
+            int count;
+            bool ok;
+        } _pt1;
+
+        Uint32 _id;
+
     public:
         Network();
         ~Network();

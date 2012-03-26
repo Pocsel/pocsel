@@ -181,8 +181,10 @@ namespace sv {
 
     void Connection::_ConnectRead()
     {
+        std::cout << "_ConnectRead() 0\n";
         if (!this->_connected || !this->_socket)
             return;
+        std::cout << "_ConnectRead() 1\n";
         boost::asio::async_read(
             *this->_socket,
             boost::asio::buffer(this->_data + this->_offset, this->_size - this->_offset),
@@ -246,6 +248,7 @@ namespace sv {
     void Connection::_HandleRead(boost::system::error_code const error,
                                        std::size_t transferredBytes)
     {
+        std::cout << "_HandleRead()\n";
         std::list<std::unique_ptr<Tools::ByteArray>> packets;
         if (!error)
         {
@@ -341,12 +344,17 @@ namespace sv {
     {
         try
         {
-            tst_protocol::ClientToServer type;
+            tst_protocol::ActionType type;
             packet->Read(type);
 
             switch (type)
             {
-            case tst_protocol::ClientToServer::clUdpReady:
+            case (tst_protocol::ActionType)tst_protocol::ClientToServer::clUdpReady:
+                {
+                    this->PassThrough1();
+                }
+                break;
+            case (tst_protocol::ActionType)tst_protocol::ClientToServer::clPassThrough:
                 {
                     Uint32 ptType;
                     PacketExtractor::PassThrough(*packet, ptType);
@@ -355,16 +363,7 @@ namespace sv {
                     this->SendPacket(toto);
                 }
                 break;
-            case tst_protocol::ClientToServer::clPassThrough:
-                {
-                    Uint32 ptType;
-                    PacketExtractor::PassThrough(*packet, ptType);
-
-                    auto toto = PacketCreator::PassThroughOk(ptType);
-                    this->SendPacket(toto);
-                }
-                break;
-            case tst_protocol::ClientToServer::clPassThroughOk:
+            case (tst_protocol::ActionType)tst_protocol::ClientToServer::clPassThroughOk:
                 {
                     Uint32 ptType;
                     PacketExtractor::PassThroughOk(*packet, ptType);
@@ -381,7 +380,7 @@ namespace sv {
                 }
                 break;
             default:
-                throw std::runtime_error("Unknown packet type :(");
+                throw std::runtime_error("Unknown packet type (" + Tools::ToString(type) + ")");
             }
         }
         catch (std::exception& e)

@@ -1,6 +1,7 @@
 #include "cl_network.hpp"
 #include "cl_udppacket.hpp"
 #include "cl_packetcreator.hpp"
+#include "cl_packetextractor.hpp"
 #include "tools/Deleter.hpp"
 
 namespace cl {
@@ -248,6 +249,7 @@ namespace cl {
 
     void Network::_SendNext()
     {
+        std::cout << "_SendNext()\n";
         Common::Packet* p = this->_outQueue.front();
         std::vector<boost::asio::const_buffer> buffers;
         buffers.push_back(boost::asio::buffer(p->GetCompleteData(), p->GetCompleteSize()));
@@ -264,6 +266,7 @@ namespace cl {
 
     void Network::_HandleWrite(boost::system::error_code const& error)
     {
+        std::cout << "_HandleWrite()\n";
         if (error)
         {
             Tools::error << "Network::_HandleWrite: Write error: \"" << error.message() << "\".\n";
@@ -371,6 +374,54 @@ namespace cl {
 
         std::cout << "Received packet!\n";
 
+        try
+        {
+            tst_protocol::ActionType type;
+            packet->Read(type);
+
+            switch (type)
+            {
+                case (tst_protocol::ActionType)tst_protocol::ServerToClient::svLogin:
+                {
+                    Uint32 id;
+                    PacketExtractor::Login(*packet, id);
+
+                    this->_id = id;
+                }
+                break;
+            case (tst_protocol::ActionType)tst_protocol::ServerToClient::svPassThrough:
+                {
+                    Uint32 ptType;
+                    PacketExtractor::PassThrough(*packet, ptType);
+
+                    auto toto = PacketCreator::PassThroughOk(ptType);
+                    this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
+                }
+                break;
+            case (tst_protocol::ActionType)tst_protocol::ServerToClient::svPassThroughOk:
+                {
+                    Uint32 ptType;
+                    PacketExtractor::PassThroughOk(*packet, ptType);
+
+                    switch (ptType)
+                    {
+                    case 1:
+                        std::cout << "PT1OK\n";
+                        _pt1.ok = true;
+                        _udp = true;
+                    default:
+                        throw std::runtime_error("WTF unknown pass through type");
+                    }
+                }
+                break;
+            default:
+                throw std::runtime_error("Unknown packet type (" + Tools::ToString(type) + ")");
+            }
+        }
+        catch (std::exception& e)
+        {
+            std::cout << "could not read packet, serveur de merde: " << e.what() << "\n";
+        }
     }
 
 }

@@ -171,10 +171,10 @@ namespace sv {
 
         this->_connections[id] = conn;
 
+        conn->ConnectRead();
+
         auto toto = PacketCreator::Login(id);
         conn->SendPacket(toto);
-
-        conn->PassThrough1();
     }
 
     void Network::_HandleUdpPacket(std::unique_ptr<Tools::ByteArray>& packet)

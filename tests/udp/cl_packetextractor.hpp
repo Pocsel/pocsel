@@ -5,7 +5,7 @@
 
 namespace cl {
 
-    class PacketExctractor
+    class PacketExtractor
     {
     public:
         static void Login(Tools::ByteArray const& p, Uint32& id)

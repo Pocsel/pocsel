@@ -80,6 +80,48 @@ namespace Tools {
         }
     };
 
+    template<> struct Stringify<tst_protocol::ClientToServer>
+    {
+        static inline std::string MakeString(tst_protocol::ClientToServer var)
+        {
+            static std::string strings[] = {
+                "clUdpReady",
+                "clPassThrough",
+                "clPassThroughOk"
+            };
+
+            if (((tst_protocol::ActionType) var) < array_size(strings))
+                return strings[(tst_protocol::ActionType) var];
+            else
+                return "Unknown (" + Tools::ToString((Uint32)var) + ")" + "(" + Tools::ToString((tst_protocol::ActionType)var) + ")";
+        }
+    };
+
+    template<> struct Stringify<tst_protocol::ServerToClient>
+    {
+        static inline std::string MakeString(tst_protocol::ServerToClient var)
+        {
+            static std::string strings[] = {
+                "svLogin",
+                "svPassThrough",
+                "svPassThroughOk"
+            };
+
+            if ((tst_protocol::ActionType) var < array_size(strings))
+                return strings[(tst_protocol::ActionType) var] + "(" + Tools::ToString((tst_protocol::ActionType)var) + ")";
+            else
+                return "Unknown (" + Tools::ToString((Uint32)var) + ")";
+        }
+    };
+
+    template<> struct Stringify<tst_protocol::Version>
+    {
+        static inline std::string MakeString(tst_protocol::Version var)
+        {
+            return ToString((int) var);
+        }
+    };
+
 }
 
 #endif
