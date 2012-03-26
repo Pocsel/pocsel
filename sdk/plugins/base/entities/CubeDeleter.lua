@@ -7,7 +7,7 @@
 --         Server.Cube.Delete(args.pos)
 --         Server.Event.CallLater(1, this.id, "_DeleteCube", { pos = Server.Pos.Add(args.pos, 1, 0, 0) })
 --     end,
--- }
+-- }    
 
 Server.Entity.Register{
     name = "GrosTest",
