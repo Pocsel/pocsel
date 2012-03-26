@@ -2,6 +2,8 @@
 
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/Engine.hpp"
+#include "server/game/engine/Entity.hpp"
+#include "server/game/engine/EntityType.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/MetaTable.hpp"
 #include "tools/database/sqlite/Connection.hpp"
@@ -72,47 +74,30 @@ namespace Server { namespace Game { namespace Engine {
             if (!prototype.IsTable())
                 throw std::runtime_error("prototype is not a table");
             auto f = it->second->GetType().GetPrototype()[function];
+            if (f.IsFunction())
+            {
+                this->_runningEntityId = targetId;
+                if (bonusArg.Exists())
+                    f(it->second->GetSelf(), arg, bonusArg);
+                else
+                    f(it->second->GetSelf(), arg);
+                this->_runningEntityId = 0;
+            }
+            else
+            {
+                Tools::error << "EntityManager::LuaFunctionCall: Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\") failed: function not found (type: " << f.GetTypeName() << ").\n";
+                return CallbackManager::FunctionNotFound;
+            }
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::LuaFunctionCall: Fatal (entity deleted): Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->type->entityName << "\") failed: " << e.what() << std::endl;
+            Tools::error << "EntityManager::LuaFunctionCall: Fatal (entity deleted): Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\") failed: " << e.what() << std::endl;
             delete it->second;
             this->_entities.erase(it);
             this->_runningEntityId = 0;
             return CallbackManager::Error;
         }
         Tools::debug << "EntityManager::LuaFunctionCall: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\").\n";
-        return CallbackManager::Ok;
-
-
-        auto prototype = it->second->GetType().GetPrototype();
-        auto f = it->second->GetType().GetPrototype()[function];
-        if (f.IsFunction())
-        {
-            this->_runningEntityId = targetId;
-            try
-            {
-                if (bonusArg.Exists())
-                    f(it->second->self, arg, bonusArg);
-                else
-                    f(it->second->self, arg);
-            }
-            catch (std::exception& e)
-            {
-                Tools::error << "EntityManager::LuaFunctionCall: Fatal (entity deleted): Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->type->entityName << "\") failed: " << e.what() << std::endl;
-                delete it->second;
-                this->_entities.erase(it);
-                this->_runningEntityId = 0;
-                return CallbackManager::Error;
-            }
-            this->_runningEntityId = 0;
-        }
-        else
-        {
-            Tools::error << "EntityManager::LuaFunctionCall: Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->type->entityName << "\") failed: function not found.\n";
-            return CallbackManager::FunctionNotFound;
-        }
-        Tools::debug << "EntityManager::LuaFunctionCall: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->type->entityName << "\").\n";
         return CallbackManager::Ok;
     }
 
@@ -193,11 +178,11 @@ namespace Server { namespace Game { namespace Engine {
         {
             try
             {
-                query->Bind(it->first).Bind(it->second->type->entityName).Bind(this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->self["storage"])).ExecuteNonSelect().Reset();
+                query->Bind(it->first).Bind(it->second->GetType().GetName()).Bind(this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->GetSelf()["storage"])).ExecuteNonSelect().Reset();
             }
             catch (std::exception& e)
             {
-                Tools::error << "EntityManager::Save: Could not save entity " << it->first << " (of type \"" << it->second->type->entityName << "\"): " << e.what() << std::endl;
+                Tools::error << "EntityManager::Save: Could not save entity " << it->first << " (of type \"" << it->second->GetType().GetName() << "\"): " << e.what() << std::endl;
             }
         }
         conn.EndTransaction();
@@ -243,17 +228,8 @@ namespace Server { namespace Game { namespace Engine {
             ++this->_nextEntityId;
 
         // allocation
-        Entity* entity = new Entity(itType->second, this->_engine.GetInterpreter().MakeTable());
+        Entity* entity = new Entity(this->_engine, this->_nextEntityId, *(itType->second));
         this->_entities[this->_nextEntityId] = entity;
-
-        // configurationn du self
-        // metatable pour le prototype
-        Tools::Lua::Ref metatable = this->_engine.GetInterpreter().MakeTable();
-        metatable.Set("__index", itType->second->prototype);
-        entity->self.SetMetaTable(metatable);
-        // champs par défaut
-        entity->self.Set("id", this->_nextEntityId);
-        entity->self.Set("prototype", itType->second->prototype);
 
         Tools::debug << "EntityManager::_CreateEntity: New entity \"" << entityName << "\" (plugin " << pluginId << ") created (" << this->_nextEntityId << ").\n";
         return this->_nextEntityId++;
@@ -295,13 +271,13 @@ namespace Server { namespace Game { namespace Engine {
             return;
         }
         EntityType* type = new EntityType(entityName, this->_pluginIdForRegistering, prototype);
-        if (this->_entityTypes[type->pluginId].count(type->entityName))
+        if (this->_entityTypes[type->GetPluginId()].count(type->GetName()))
         {
-            delete this->_entityTypes[type->pluginId][type->entityName];
-            Tools::log << "EntityManager::_ApiRegister: Replacing entity type \"" << type->entityName << "\" with a newer type from \"" << this->_pluginNameForRegistering << "\" (plugin " << type->pluginId << ").\n";
+            delete this->_entityTypes[type->GetPluginId()][type->GetName()];
+            Tools::log << "EntityManager::_ApiRegister: Replacing entity type \"" << type->GetName() << "\" with a newer type from \"" << this->_pluginNameForRegistering << "\" (plugin " << type->GetPluginId() << ").\n";
         }
-        this->_entityTypes[type->pluginId][type->entityName] = type;
-        Tools::debug << "EntityManager::_ApiRegister: New entity type \"" << type->entityName << "\" registered from \"" << this->_pluginNameForRegistering << "\" (plugin " << type->pluginId << ").\n";
+        this->_entityTypes[type->GetPluginId()][type->GetName()] = type;
+        Tools::debug << "EntityManager::_ApiRegister: New entity type \"" << type->GetName() << "\" registered from \"" << this->_pluginNameForRegistering << "\" (plugin " << type->GetPluginId() << ").\n";
     }
 
 }}}

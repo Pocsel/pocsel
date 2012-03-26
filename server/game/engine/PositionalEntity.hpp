@@ -1,6 +1,7 @@
-#ifndef __SERVER_GAME_ENGINE_ENTITY_HPP__
-#define __SERVER_GAME_ENGINE_ENTITY_HPP__
+#ifndef __SERVER_GAME_ENGINE_POSITIONALENTITY_HPP__
+#define __SERVER_GAME_ENGINE_POSITIONALENTITY_HPP__
 
+#include "common/Position.hpp"
 #include "server/game/engine/Entity.hpp"
 
 namespace Server { namespace Game { namespace Engine {

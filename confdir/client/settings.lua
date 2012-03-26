@@ -1,8 +1,8 @@
 nickname = "Boloss"
 fps = 60
-resX = 1920
-resY = 1080
-fullscreen = true
+resX = 800
+resY = 600
+fullscreen = false
 useShaders = true
 useDirect3D9 = true
 chunkViewDistance = 5

@@ -1,6 +1,8 @@
 #ifndef __SERVER_GAME_ENGINE_ENTITYTYPE_HPP__
 #define __SERVER_GAME_ENGINE_ENTITYTYPE_HPP__
 
+#include "tools/lua/Ref.hpp"
+
 namespace Server { namespace Game { namespace Engine {
 
     class EntityType :

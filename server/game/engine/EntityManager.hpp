@@ -11,6 +11,9 @@ namespace Tools { namespace Database {
 namespace Server { namespace Game { namespace Engine {
 
     class Engine;
+    class Entity;
+    class PositionalEntity;
+    class EntityType;
 
     class EntityManager :
         private boost::noncopyable
