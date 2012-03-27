@@ -73,6 +73,8 @@ namespace Tools { namespace Renderers {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
 
+        DXCHECKERROR(this->_device->GetRenderTarget(0, &this->_backBuffer));
+
         D3DXCreateEffectPool(&this->_effectPool);
 
         InitDevIL();
@@ -84,6 +86,8 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Shutdown()
     {
+        if (this->_backBuffer != 0)
+            this->_backBuffer->Release();
         if (this->_device != 0)
             this->_device->Release();
         if (this->_object != 0)
@@ -100,6 +104,13 @@ namespace Tools { namespace Renderers {
         return std::unique_ptr<IIndexBuffer>(new DX9::IndexBuffer(*this));
     }
 
+    std::unique_ptr<Renderers::IRenderTarget> DX9Renderer::CreateRenderTarget(Vector2u const& imgSize)
+    {
+        auto rt = new DX9::RenderTarget(*this, imgSize);
+        this->_allRenderTargets.push_back(rt);
+        return std::unique_ptr<IRenderTarget>(rt);
+    }
+
     std::unique_ptr<ITexture2D> DX9Renderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData)
     {
         return std::unique_ptr<ITexture2D>(new DX9::Texture2D(*this, format, size, data, imgSize, mipmapData));
@@ -112,14 +123,10 @@ namespace Tools { namespace Renderers {
 
     std::unique_ptr<IShaderProgram> DX9Renderer::CreateProgram(std::string const& effect)
     {
-        return std::unique_ptr<IShaderProgram>(new DX9::ShaderProgram(*this, effect));
+        auto prog = new DX9::ShaderProgram(*this, effect);
+        this->_allPrograms.push_back(prog);
+        return std::unique_ptr<IShaderProgram>(prog);
     }
-
-    /*
-    std::unique_ptr<IPixelBuffer> DX9Renderer::CreatePixelBuffer() = 0;
-    std::unique_ptr<IVertexBuffer> DX9Renderer::CreateVertexBuffer() = 0;
-    std::unique_ptr<IFont> DX9Renderer::CreateFont() = 0;
-    */
 
     // Drawing
     void DX9Renderer::Clear(int clearFlags)
@@ -135,6 +142,10 @@ namespace Tools { namespace Renderers {
     {
         assert(this->_state == 0 && "Operation invalide");
         this->_state = Draw2D;
+
+        this->_resetRenderTarget = target != 0;
+        if (target != 0)
+            target->Bind();
 
         this->_model = Tools::Matrix4<float>::identity;
         this->_view = Tools::Matrix4<float>::CreateTranslation(0, 0, 1);
@@ -155,14 +166,21 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::EndDraw2D()
     {
         DXCHECKERROR(this->_device->EndScene());
-        this->_state = DrawNone;
+        if (this->_resetRenderTarget)
+            DXCHECKERROR(this->_device->SetRenderTarget(0, this->_backBuffer));
         this->_currentProgram = 0;
+
+        this->_state = DrawNone;
     }
 
     void DX9Renderer::BeginDraw(IRenderTarget* target)
     {
         assert(this->_state == 0 && "Operation invalide");
         this->_state = Draw3D;
+
+        this->_resetRenderTarget = target != 0;
+        if (target != 0)
+            target->Bind();
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW));
@@ -172,12 +190,16 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::EndDraw()
     {
         DXCHECKERROR(this->_device->EndScene());
-        this->_state = DrawNone;
+        if (this->_resetRenderTarget)
+            DXCHECKERROR(this->_device->SetRenderTarget(0, this->_backBuffer));
         this->_currentProgram = 0;
+
+        this->_state = DrawNone;
     }
 
     void DX9Renderer::UpdateCurrentParameters()
     {
+        assert(this->_currentProgram != 0 && "Il faut obligatoirement un shader !");
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
@@ -309,12 +331,12 @@ namespace Tools { namespace Renderers {
             DXCHECKERROR(hr);
     }
 
-    void DX9Renderer::RegisterProgram(DX9::ShaderProgram& program)
+    void DX9Renderer::Unregister(DX9::RenderTarget& rt)
     {
-        this->_allPrograms.push_back(&program);
+        this->_allRenderTargets.remove(&rt);
     }
 
-    void DX9Renderer::UnregisterProgram(DX9::ShaderProgram& program)
+    void DX9Renderer::Unregister(DX9::ShaderProgram& program)
     {
         this->_allPrograms.remove(&program);
     }
@@ -333,11 +355,21 @@ namespace Tools { namespace Renderers {
 
         Tools::debug << "ScreenSize = " << ToString(this->_screenSize) << std::endl;
 
+        // Release...
+        this->_backBuffer->Release();
         for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
             (*it)->GetEffect()->OnLostDevice();
+        for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
+            (*it)->OnLostDevice();
+
         DXCHECKERROR(this->_device->Reset(&present_parameters));
+
+        // Recreate...
+        for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
+            (*it)->OnResetDevice();
         for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
             (*it)->GetEffect()->OnResetDevice();
+        DXCHECKERROR(this->_device->GetRenderTarget(0, &this->_backBuffer));
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));

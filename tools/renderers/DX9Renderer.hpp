@@ -2,6 +2,7 @@
 #pragma once // include guard non standard
 
 #include "tools/renderers/dx9/directx.hpp"
+#include "tools/renderers/dx9/RenderTarget.hpp"
 #include "tools/renderers/dx9/ShaderProgram.hpp"
 #include "tools/renderers/dx9/VertexBuffer.hpp"
 
@@ -42,6 +43,9 @@ namespace Tools { namespace Renderers {
         LPDIRECT3DDEVICE9 _device;
         LPD3DXEFFECTPOOL _effectPool;
         std::list<DX9::ShaderProgram*> _allPrograms;
+        std::list<DX9::RenderTarget*> _allRenderTargets;
+        IDirect3DSurface9* _backBuffer;
+        bool _resetRenderTarget;
 
         IShaderProgram* _currentProgram;
         DX9::VertexBuffer* _vertexBuffer;
@@ -51,7 +55,7 @@ namespace Tools { namespace Renderers {
         int _clearStencil;
 
     public:
-        DX9Renderer(Vector2u const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _state(DrawNone), _object(0), _device(0), _currentProgram(0) {}
+        DX9Renderer(Vector2u const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _state(DrawNone), _object(0), _device(0), _backBuffer(0), _currentProgram(0) {}
         virtual ~DX9Renderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -66,6 +70,7 @@ namespace Tools { namespace Renderers {
         // Resources
         virtual std::unique_ptr<Renderers::IIndexBuffer> CreateIndexBuffer();
         virtual std::unique_ptr<Renderers::IVertexBuffer> CreateVertexBuffer();
+        virtual std::unique_ptr<Renderers::IRenderTarget> CreateRenderTarget(Vector2u const& imgSize);
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0);
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath);
         virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect);
@@ -112,8 +117,8 @@ namespace Tools { namespace Renderers {
         LPDIRECT3DDEVICE9 GetDevice() const { return this->_device; }
         LPD3DXEFFECTPOOL GetEffectPool() const { return this->_effectPool; }
         void Present();
-        void RegisterProgram(DX9::ShaderProgram& program);
-        void UnregisterProgram(DX9::ShaderProgram& program);
+        void Unregister(DX9::ShaderProgram& program);
+        void Unregister(DX9::RenderTarget& renderTarget);
         void _RefreshDevice();
     };
 

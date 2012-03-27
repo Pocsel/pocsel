@@ -48,7 +48,7 @@ namespace Server { namespace Game { namespace Map {
         std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedBigChunks;
         std::list<BigChunk::IdType> _deflatedBigValues;
 
-        std::unordered_set<Chunk::IdType> _dbBigChunks;
+        std::set<Chunk::IdType> _dbBigChunks;
 
         std::list<std::pair<float, Chunk::IdType>> _priorities;
 

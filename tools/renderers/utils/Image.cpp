@@ -15,13 +15,13 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void Image::Render(IShaderParameter& textureParameter, ITexture2D& texture)
     {
-        static const unsigned char indices[] = { 2, 1, 3, 0 };
+        static const unsigned short indices[] = { 0, 1, 3, 2 };
 
         Image::_vertexBuffer->Bind();
         texture.Bind();
         textureParameter.Set(texture);
 
-        this->_renderer.DrawElements(sizeof(indices), Renderers::DataType::UnsignedByte, indices, Renderers::DrawingMode::TrianglesStrip);
+        this->_renderer.DrawElements(sizeof(indices), Renderers::DataType::UnsignedShort, indices, Renderers::DrawingMode::TrianglesStrip);
 
         texture.Unbind();
         Image::_vertexBuffer->Unbind();
@@ -36,10 +36,10 @@ namespace Tools { namespace Renderers { namespace Utils {
 
         const float vertices[] =
         {
-            -1,  1, 0,  0, 0,
-             1,  1, 0,  1, 0,
-             1, -1, 0,  1, 1,
-            -1, -1, 0,  0, 1,
+            -1,  1, 0,  0, 1,
+             1,  1, 0,  1, 1,
+             1, -1, 0,  1, 0,
+            -1, -1, 0,  0, 0,
         };
         Image::_vertexBuffer = renderer.CreateVertexBuffer().release();
         Image::_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Position, 3); // position

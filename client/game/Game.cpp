@@ -1,6 +1,8 @@
 #include "client/precompiled.hpp"
 
 #include "tools/IRenderer.hpp"
+#include "tools/renderers/utils/Image.hpp"
+
 #include "client/Client.hpp"
 #include "client/network/Network.hpp"
 #include "client/game/Game.hpp"
@@ -8,6 +10,7 @@
 #include "client/window/Window.hpp"
 #include "client/game/Player.hpp"
 #include "client/game/ItemManager.hpp"
+#include "client/resources/LocalResourceManager.hpp"
 
 namespace Client { namespace Game {
 
@@ -18,7 +21,7 @@ namespace Client { namespace Game {
         _map(0)
     {
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
-        this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
+        this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 0)); // XXX
         this->_itemManager = new ItemManager(*this),
         this->_player = new Player(*this);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
@@ -27,6 +30,12 @@ namespace Client { namespace Game {
                 this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, size.w / float(size.h), 0.02f, 500.0f);
             });
         this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.02f, 500.0f);
+        // XXX
+        this->_renderTarget = this->_renderer.CreateRenderTarget(Tools::Vector2u(800, 600));
+        this->_renderImage = std::unique_ptr<Tools::Renderers::Utils::Image>(new Tools::Renderers::Utils::Image(this->_renderer));
+        this->_renderShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.cgfx");
+        this->_renderParameter = this->_renderShader->GetParameter("baseTex");
+        // XXX
     }
 
     Game::~Game()
@@ -65,6 +74,13 @@ namespace Client { namespace Game {
 
     void Game::Render()
     {
+        this->_renderer.BeginDraw(this->_renderTarget.get());
+        this->_renderer.SetProjectionMatrix(Tools::Matrix4<float>::CreatePerspective(90, 1, 0.02f, 500.0f));
+        this->_renderer.SetViewMatrix(Tools::Matrix4<float>::CreateLookAt(this->GetPlayer().GetCamera().direction * -50, this->GetPlayer().GetCamera().direction, Tools::Vector3f(0, 1, 0)));
+        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+        this->_map->GetChunkManager().Render();
+        this->_renderer.EndDraw();
+
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
         this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
@@ -73,6 +89,13 @@ namespace Client { namespace Game {
         this->_itemManager->Render();
         this->_player->Render();
         this->_renderer.EndDraw();
+
+        this->_renderer.BeginDraw2D();
+        this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(1, 1, 0) * Tools::Matrix4<float>::CreateScale(128, 128, 1));
+        this->_renderShader->BeginPass();
+        this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture());
+        this->_renderShader->EndPass();
+        this->_renderer.EndDraw2D();
     }
 
 }}

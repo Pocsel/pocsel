@@ -4,6 +4,7 @@
 
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/IndexBuffer.hpp"
+#include "tools/renderers/opengl/RenderTarget.hpp"
 #include "tools/renderers/opengl/ShaderProgramCg.hpp"
 #include "tools/renderers/opengl/ShaderProgramNull.hpp"
 #include "tools/renderers/opengl/Texture2D.hpp"
@@ -106,6 +107,11 @@ namespace Tools { namespace Renderers {
         return std::unique_ptr<IIndexBuffer>(new OpenGL::IndexBuffer(*this));
     }
 
+    std::unique_ptr<Renderers::IRenderTarget> GLRenderer::CreateRenderTarget(Vector2u const& imgSize)
+    {
+        return std::unique_ptr<IRenderTarget>(new OpenGL::RenderTarget(*this, imgSize));
+    }
+
     std::unique_ptr<ITexture2D> GLRenderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData)
     {
         return std::unique_ptr<ITexture2D>(new OpenGL::Texture2D(*this, format, size, data, imgSize, mipmapData));
@@ -124,12 +130,6 @@ namespace Tools { namespace Renderers {
             return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramNull(*this));
     }
 
-    /*
-    std::unique_ptr<IPixelBuffer> GLRenderer::CreatePixelBuffer() = 0;
-    std::unique_ptr<IVertexBuffer> GLRenderer::CreateVertexBuffer() = 0;
-    std::unique_ptr<IFont> GLRenderer::CreateFont() = 0;
-    */
-
     // Drawing
     void GLRenderer::Clear(int clearFlags)
     {
@@ -143,6 +143,9 @@ namespace Tools { namespace Renderers {
     {
         assert(this->_state == 0 && "Operation invalide");
         this->_state = Draw2D;
+
+        if (target != 0)
+            target->Bind();
 
         this->_model = Tools::Matrix4<float>::identity;
         this->_view = Tools::Matrix4<float>::CreateTranslation(0, 0, 1);
@@ -162,12 +165,16 @@ namespace Tools { namespace Renderers {
     {
         this->_state = DrawNone;
         this->_currentProgram = 0;
+        GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0));
     }
 
     void GLRenderer::BeginDraw(IRenderTarget* target)
     {
         assert(this->_state == 0 && "Operation invalide");
         this->_state = Draw3D;
+
+        if (target != 0)
+            target->Bind();
 
         GLCHECK(glEnable(GL_DEPTH_TEST));
         GLCHECK(glEnable(GL_CULL_FACE));
@@ -180,6 +187,7 @@ namespace Tools { namespace Renderers {
 
         this->_state = DrawNone;
         this->_currentProgram = 0;
+        GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0));
     }
 
     void GLRenderer::UpdateCurrentParameters()

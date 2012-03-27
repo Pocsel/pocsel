@@ -39,12 +39,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_model = this->_effect->GetParameterBySemantic(0, "World");
         this->_view = this->_effect->GetParameterBySemantic(0, "View");
         this->_projection = this->_effect->GetParameterBySemantic(0, "Projection");
-        this->_renderer.RegisterProgram(*this);
     }
 
     ShaderProgram::~ShaderProgram()
     {
-        this->_renderer.UnregisterProgram(*this);
+        this->_renderer.Unregister(*this);
         this->_effect->Release();
     }
 

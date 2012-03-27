@@ -20,7 +20,7 @@ namespace Server { namespace Game { namespace Map {
         _deflatedChunks(20000),
         _deflatedChunksContainers(40),
         _deflatedBigChunks(60),
-        _dbBigChunks(100000)
+        _dbBigChunks()
     {
         Tools::debug << existingBigChunks.size() << " existing chunks in " << map.GetName() << "\n";
 

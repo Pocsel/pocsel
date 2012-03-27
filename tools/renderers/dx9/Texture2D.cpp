@@ -57,6 +57,13 @@ namespace Tools { namespace Renderers { namespace DX9 {
             this->_FinishLoading(ilID);
     }
 
+    Texture2D::Texture2D(DX9Renderer& renderer, IDirect3DTexture9* texture) :
+        _renderer(renderer),
+        _hasAlpha(false),
+        _texture(texture)
+    {
+    }
+
     void Texture2D::_FinishLoading(unsigned int ilID)
     {
         this->_size = Vector2u(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
