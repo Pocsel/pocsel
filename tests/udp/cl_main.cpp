@@ -1,3 +1,6 @@
+#include "precompiled.hpp"
+
+#include "tools/Timer.hpp"
 #include "cl_network.hpp"
 
 int main(int ac, char** av)
@@ -17,7 +20,7 @@ int main(int ac, char** av)
     network.Connect(host, port);
 
     while (1)
-        sleep(2);
+        Tools::Timer::Sleep(2000);
 
     return 0;
 }

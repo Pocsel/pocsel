@@ -15,7 +15,8 @@ set(src_cl
     ${tools_logger_src}
 )
 
-CreateGroups("${src}")
+CreateGroups("${src_sv}")
+CreateGroups("${src_cl}")
 add_executable(test_udp_cl ${src_cl})
 add_executable(test_udp_sv ${src_sv})
 

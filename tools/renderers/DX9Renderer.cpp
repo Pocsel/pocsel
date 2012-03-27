@@ -51,14 +51,17 @@ namespace Tools { namespace Renderers {
         Tools::log << "Renderer: DirectX 9\n";
 
         D3DPRESENT_PARAMETERS present_parameters = {0};
-        present_parameters.Windowed = true;
+        present_parameters.Windowed = !this->_fullscreen;
         present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
         present_parameters.EnableAutoDepthStencil = true;
         present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
         present_parameters.hDeviceWindow = GetActiveWindow();
-        //present_parameters.BackBufferWidth = this->_screenSize.w;
-        //present_parameters.BackBufferHeight = this->_screenSize.h;
-        present_parameters.BackBufferFormat = D3DFMT_UNKNOWN;
+        if (this->_fullscreen)
+        {
+            present_parameters.BackBufferWidth = this->_screenSize.w;
+            present_parameters.BackBufferHeight = this->_screenSize.h;
+        }
+        present_parameters.BackBufferFormat = this->_fullscreen ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
         present_parameters.MultiSampleType = D3DMULTISAMPLE_NONE;
 
         DXCHECKERROR(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &present_parameters, &this->_device));
@@ -319,13 +322,16 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::_RefreshDevice()
     {
         D3DPRESENT_PARAMETERS present_parameters = {0};
-        present_parameters.Windowed = true;
+        present_parameters.Windowed = !this->_fullscreen;
         present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
         present_parameters.EnableAutoDepthStencil = true;
         present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
         present_parameters.hDeviceWindow = GetActiveWindow();
         present_parameters.BackBufferWidth = this->_screenSize.w;
         present_parameters.BackBufferHeight = this->_screenSize.h;
+        present_parameters.BackBufferFormat = this->_fullscreen ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
+
+        Tools::debug << "ScreenSize = " << ToString(this->_screenSize) << std::endl;
 
         for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
             (*it)->GetEffect()->OnLostDevice();

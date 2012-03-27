@@ -37,7 +37,7 @@ namespace Client { namespace Window { namespace Sdl {
         SDL_EnableUNICODE(SDL_ENABLE);
 #ifdef _WIN32
         if (directX)
-            this->_renderer = new Tools::Renderers::DX9Renderer(this->_size);
+            this->_renderer = new Tools::Renderers::DX9Renderer(this->_size, fullscreen);
         else
             this->_renderer = new Tools::Renderers::GLRenderer(useShaders);
 #else

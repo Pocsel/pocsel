@@ -28,6 +28,7 @@ namespace Tools { namespace Renderers {
 
     private:
         Vector2u _screenSize;
+        bool _fullscreen;
         Rectangle _viewport;
         Matrix4<float> _modelViewProjection;
         Matrix4<float> _model;
@@ -50,7 +51,7 @@ namespace Tools { namespace Renderers {
         int _clearStencil;
 
     public:
-        DX9Renderer(Vector2u const& screenSize) : _screenSize(screenSize), _state(DrawNone), _object(0), _device(0), _currentProgram(0) {}
+        DX9Renderer(Vector2u const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _state(DrawNone), _object(0), _device(0), _currentProgram(0) {}
         virtual ~DX9Renderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const

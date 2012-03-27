@@ -138,8 +138,6 @@ namespace Tools {
             };
         }
 
-        class IRenderTarget;
-
         class ITexture2D
         {
         public:
@@ -154,6 +152,13 @@ namespace Tools {
         private:
             ITexture2D(ITexture2D const&);
             ITexture2D& operator =(ITexture2D const&);
+        };
+
+        class IRenderTarget
+        {
+        public:
+            virtual ~IRenderTarget();
+            virtual ITexture2D& GetTexture() = 0;
         };
 
         class IIndexBuffer
@@ -244,6 +249,7 @@ namespace Tools {
         // Resources
         virtual std::unique_ptr<Renderers::IIndexBuffer> CreateIndexBuffer() = 0;
         virtual std::unique_ptr<Renderers::IVertexBuffer> CreateVertexBuffer() = 0;
+        //virtual std::unique_ptr<Renderers::IRenderTarget> CreateRenderTarget(Renderers::PixelFormat::Type format, Vector2u const& imgSize = Vector2u(0)) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath) = 0;
         virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect) = 0;
