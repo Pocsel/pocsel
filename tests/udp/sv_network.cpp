@@ -185,6 +185,8 @@ namespace sv {
         std::unique_ptr<Common::Packet> packet = this->_sendingConnections.front()->GetUdpPacket();
         boost::asio::ip::udp::endpoint endpoint = this->_sendingConnections.front()->GetEndpoint();
 
+        std::cout << "Sending udp packet to " << endpoint.address() << ":" << endpoint.port() << "\n";
+
         std::vector<boost::asio::const_buffer> buffers;
         buffers.push_back(boost::asio::buffer(packet->GetData(), packet->GetSize()));
         this->_udpSocket.async_send_to(

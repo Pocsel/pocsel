@@ -17,6 +17,9 @@ namespace cl {
         _sendingUdp(false),
         _udp(false)
     {
+        _pt1.count = 0;
+        _pt1.ok = false;
+        _pt1.okok = false;
         this->_sizeBuffer.resize(2);
         this->_udpDataBuffer.resize(Common::Packet::maxSize);
     }
@@ -136,6 +139,11 @@ namespace cl {
         if (_pt1.ok == true)
         {
             std::cout << "pt1 ok\n";
+//            return;
+        }
+        if (_pt1.okok == true)
+        {
+            std::cout << "pt1 okok\n";
             return;
         }
 
@@ -423,6 +431,9 @@ namespace cl {
                 {
                     Uint32 ptType;
                     PacketExtractor::PassThrough(*packet, ptType);
+
+                    std::cout << "PT1 OKOK\n";
+                    _pt1.okok = true;
 
                     std::cout << "Rcv passthrough" << ptType << "\n";
                     auto toto = PacketCreator::PassThroughOk(ptType);

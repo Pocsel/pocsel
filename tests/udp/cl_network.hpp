@@ -45,6 +45,7 @@ namespace cl {
         struct {
             int count;
             bool ok;
+            bool okok;
         } _pt1;
 
         Uint32 _id;
