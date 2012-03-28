@@ -15,7 +15,8 @@ namespace sv {
         _newConnection(0),
         _udpSocket(this->_ioService),
         _data(new Uint8[_buffSize]),
-        _nextId(1)
+        _nextId(1),
+        _udpWriteConnected(false)
     {
         try
         {
@@ -98,8 +99,7 @@ namespace sv {
     void Network::IHasPacketToSend(boost::shared_ptr<Connection> conn)
     {
         this->_sendingConnections.push(conn);
-        if (!this->_udpWriteConnected)
-            this->_ConnectUdpWrite();
+        this->_ConnectUdpWrite();
     }
 
     void Network::RemoveConnection(boost::shared_ptr<Connection> conn)
@@ -177,6 +177,7 @@ namespace sv {
     {
         // TODO verif si la udp socket elle est bien ok
 
+        std::cout << "_connectudpwrite0\n";
         if (this->_sendingConnections.size() == 0 || this->_udpWriteConnected == true)
             return;
 
