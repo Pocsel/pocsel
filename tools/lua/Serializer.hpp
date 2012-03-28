@@ -21,6 +21,7 @@ namespace Tools { namespace Lua {
         Ref _CopySimpleValue(Ref const& ref, bool nilOnError) const throw(std::runtime_error);
         std::string _SerializeSimpleValue(Ref const& ref, bool nilOnError) const throw(std::runtime_error);
         std::string _SerializeString(std::string const& string) const;
+        std::string _SerializeWithMetaTable(Ref const& ref, Ref const& table, bool nilOnError) const throw(std::runtime_error);
         std::string _Serialize(Ref const& ref, std::list<Ref>& tables, unsigned int level, bool nilOnError) const throw(std::runtime_error);
     };
 

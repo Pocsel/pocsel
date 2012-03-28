@@ -240,7 +240,17 @@ namespace Server { namespace Game { namespace Engine {
         // TODO paps
     }
 
+    void EntityManager::_ApiSpawnPositionalFromPlugin(Tools::Lua::CallHelper& helper)
+    {
+        // TODO paps
+    }
+
     void EntityManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
+    {
+        // TODO paps
+    }
+
+    void EntityManager::_ApiSpawnPositional(Tools::Lua::CallHelper& helper)
     {
         // TODO paps
     }

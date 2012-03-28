@@ -46,7 +46,7 @@ namespace Tools { namespace Lua {
             Ref Set(T key, U value) const throw(std::runtime_error); // retourne une nouvelle reference vers value
         // metatable
         Ref SetMetaTable(Ref const& table) const throw(std::runtime_error); // retourne table
-        bool HasMetaTable() const throw();
+        bool HasMetaTable() const throw(); // peut retourner true alors que la metatable n'est pas une table mais est settée quand meme, genre un number (faudrait tester, je suis pas sur)
         Ref GetMetaTable() const throw(); // retourne une reference vers nil si pas de metatable
         // safe type conversions
         bool ToBoolean() const throw(); // true pour toute valeur differente de false ou nil (true pour 0 ou "0")

@@ -237,6 +237,25 @@ int main(int, char**)
         Tools::log << "second: " << i.GetSerializer().Serialize(i.GetSerializer().Deserialize(i.GetSerializer().Serialize(i.Globals()["tab"]))) << std::endl;
 
         i.DumpStack();
+
+
+        Tools::log << "------- Begin super test de serialization -------" << std::endl;
+        auto testObj = i.MakeTable();
+        auto testObjMetaTable = i.MakeTable();
+        i.DoString("testObjSerialize = function(obj) return \"return nil\" end -- lol");
+        testObjMetaTable.Set("__serialize", i.Globals()["testObjSerialize"]);
+        testObj.SetMetaTable(testObjMetaTable);
+        auto t = i.MakeTable();
+        t.Set("h", i.MakeFunction(std::bind(&f, std::placeholders::_1)));
+        t.Set("obj", testObj);
+        try
+        {
+            Tools::log << i.GetSerializer().Serialize(t, true) << std::endl;
+        }
+        catch (std::exception& e)
+        {
+            Tools::log << "error: " << e.what() << std::endl;
+        }
     }
 #ifdef _WIN32
     std::cin.get();
