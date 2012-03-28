@@ -9,7 +9,6 @@ namespace cl {
     Network::Network() :
         _socket(_ioService),
         _udpSocket(_ioService),
-        _udpReceiveSocket(_ioService),
         _thread(0),
         _sending(false),
         _isConnected(false),
@@ -91,25 +90,15 @@ namespace cl {
         try
         {
             boost::asio::ip::udp::endpoint endpoint(this->_socket.local_endpoint().address(), this->_socket.local_endpoint().port());
-            this->_udpReceiveSocket.open(endpoint.protocol());
-            this->_udpReceiveSocket.bind(endpoint);
+            this->_udpSocket.open(endpoint.protocol());
+            this->_udpSocket.bind(endpoint);
             Tools::error << "Receiving on (UDP): " <<
                 this->_socket.local_endpoint().address() <<
                 ":" << this->_socket.local_endpoint().port() << "\n";
             this->_udpReceive = true;
-        }
-        catch (std::exception& e)
-        {
-            Tools::error << "Network::Network: Exception while Receiving to (UDP) " <<
-                this->_socket.local_endpoint().address() <<
-                ":" << this->_socket.local_endpoint().port() <<
-                ": " << e.what() << ".\n";
-            this->_udpReceive = false;
-        }
 
-        try
-        {
-            boost::asio::ip::udp::endpoint endpoint(this->_socket.remote_endpoint().address(), this->_socket.remote_endpoint().port());
+
+            boost::asio::ip::udp::endpoint sendEndpoint(this->_socket.remote_endpoint().address(), this->_socket.remote_endpoint().port());
             boost::system::error_code error = boost::asio::error::host_not_found;
             this->_udpSocket.connect(endpoint, error);
             if (error)
@@ -130,15 +119,47 @@ namespace cl {
         this->_Run();
     }
 
+    void Network::PassThrough1()
+    {
+        if (this->_udp == false)
+        {
+            std::cout << "udp is false\n";
+            this->_udp = true;
+        }
+
+        if (_pt1.count == 0)
+            std::cout << "PassThrough 1, DEBUT\n";
+
+        if (_pt1.ok == true)
+        {
+            std::cout << "pt1 ok\n";
+            return;
+        }
+
+        std::cout << _pt1.count++ << "\n";
+
+        if (_pt1.count == 200)
+        {
+            std::cout << "Toujours pas bon au bout de 20, passThrough suivant\n";
+            return;
+        }
+
+        std::cout << "SendPassThrough1\n";
+        auto toto = PacketCreator::PassThrough(this->_id, 1);
+        this->SendUdpPacket(std::move(toto));
+
+        std::function<void(void)> fx =
+            std::bind(&Network::PassThrough1, this);
+        this->_TimedDispatch(fx, 200);
+    }
+
     void Network::_Run()
     {
         this->_ReceivePacketSize();
+        auto toto = PacketCreator::UdpReady(this->_udpReceive);
+        this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
         if (this->_udpReceive)
-        {
             this->_ReceiveUdpPacket();
-            auto toto = PacketCreator::UdpReady();
-            this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
-        }
         this->_ioService.run();
     }
 
@@ -305,8 +326,9 @@ namespace cl {
 
     void Network::_ReceiveUdpPacket()
     {
-        this->_udpReceiveSocket.async_receive(
+        this->_udpSocket.async_receive_from(
             boost::asio::buffer(this->_udpDataBuffer),
+            this->_udpSenderEndpoint,
             boost::bind(
                 &Network::_HandleReceiveUdpPacket, this,
                 boost::asio::placeholders::error,
@@ -323,6 +345,9 @@ namespace cl {
         }
         else
         {
+            std::cout << "udp packet received from " <<
+                this->_udpSenderEndpoint.address() << ":" << this->_udpSenderEndpoint.port() << "\n";
+
             auto p = new Tools::ByteArray();
             p->SetData(this->_udpDataBuffer.data(), (Uint32)size);
             this->_HandlePacket(p);
@@ -387,6 +412,8 @@ namespace cl {
                     PacketExtractor::Login(*packet, id);
 
                     this->_id = id;
+
+                    this->PassThrough1();
                 }
                 break;
             case (tst_protocol::ActionType)tst_protocol::ServerToClient::svPassThrough:
@@ -407,7 +434,7 @@ namespace cl {
                     switch (ptType)
                     {
                     case 1:
-                        std::cout << "PT1OK\n";
+                        std::cout << "PT1 OK\n";
                         _pt1.ok = true;
                         _udp = true;
                         break;
@@ -424,6 +451,31 @@ namespace cl {
         {
             std::cout << "could not read packet, serveur de merde: " << e.what() << "\n";
         }
+    }
+
+    void Network::_TimedDispatch(std::function<void(void)> fx, Uint32 ms)
+    {
+        boost::asio::deadline_timer* t = new boost::asio::deadline_timer(this->_ioService, boost::posix_time::milliseconds(ms));
+        std::function<void(boost::system::error_code const& e)>
+            function(std::bind(&Network::_ExecDispatch,
+                               this,
+                               fx,
+                               std::shared_ptr<boost::asio::deadline_timer>(t),
+                               std::placeholders::_1));
+        t->async_wait(function);
+    }
+
+    void Network::_ExecDispatch(std::function<void(void)>& message,
+            std::shared_ptr<boost::asio::deadline_timer>,
+            boost::system::error_code const& error)
+    {
+        if (error == boost::asio::error::operation_aborted)
+        {
+            Tools::debug << "Timer aborted;";
+            return;
+        }
+
+        message();
     }
 
 }

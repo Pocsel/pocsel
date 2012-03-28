@@ -11,31 +11,16 @@ namespace sv {
         _network(network),
         _ioService(socket->get_io_service()),
         _socket(socket),
-        _udpSocket(socket->get_io_service()),
         _data(new Uint8[_bufferSize]),
         _size(_bufferSize),
         _offset(0),
         _toRead(0),
         _connected(true),
         _writeConnected(false),
-        _udpWriteConnected(false),
-        _udp(true)
+        _udp(false)
     {
         _pt1.count = 0;
         _pt1.ok = false;
-        try
-        {
-            //boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), 9999);
-            boost::asio::ip::udp::endpoint endpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
-            this->_udpSocket.open(endpoint.protocol());
-            this->_udpSocket.connect(endpoint);
-            Tools::error << "UDP endpoint: " << socket->remote_endpoint().address() << ":" << socket->remote_endpoint().port() << ".\n";
-        }
-        catch (std::exception& e)
-        {
-            Tools::error << "Could not connect to UDP endpoint: " << e.what() << ".\n";
-            this->_udp = false;
-        }
     }
 
     Connection::~Connection()
@@ -76,6 +61,13 @@ namespace sv {
         this->_ioService.dispatch(fx);
     }
 
+    std::unique_ptr<Common::Packet> Connection::GetUdpPacket()
+    {
+        std::unique_ptr<Common::Packet> ret = std::move(this->_toSendUdpPackets.front());
+        this->_toSendUdpPackets.pop();
+        return ret;
+    }
+
     void Connection::PassThrough1()
     {
         if (this->_connected == false)
@@ -86,21 +78,7 @@ namespace sv {
         if (this->_udp == false)
         {
             std::cout << "udp is false\n";
-            try
-            {
-                this->_udpSocket.close();
-                boost::asio::ip::udp::endpoint endpoint(_socket->remote_endpoint().address(), _socket->remote_endpoint().port());
-                this->_udpSocket.open(endpoint.protocol());
-                this->_udpSocket.connect(endpoint);
-                Tools::error << "UDP endpoint: " << _socket->remote_endpoint().address() << ":" << _socket->remote_endpoint().port() << ".\n";
-                this->_udp = true;
-            }
-            catch (std::exception& e)
-            {
-                Tools::error << "Could not connect to UDP endpoint: " << e.what() << ".\n";
-                this->_udp = false;
-                return;
-            }
+            this->_udp = true;
         }
         if (_pt1.count == 0)
             std::cout << "PassThrough 1, DEBUT\n";
@@ -172,12 +150,12 @@ namespace sv {
 
         std::cout << "sendudppacket\n";
 
+        // XXX blablabla
         //if (!this->_udp)
         //    this->_SendPacket(packet);
 
         this->_toSendUdpPackets.push(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
-        if (!this->_udpWriteConnected)
-            this->_ConnectUdpWrite();
+        this->_network.IHasPacketToSend(this->shared_from_this());
     }
 
     void Connection::_ConnectRead()
@@ -219,31 +197,6 @@ namespace sv {
                 boost::asio::placeholders::bytes_transferred
             )
         );
-    }
-
-    void Connection::_ConnectUdpWrite()
-    {
-        if (!this->_connected || !this->_socket)
-            return;
-
-        if (this->_toSendUdpPackets.size() == 0 || this->_udpWriteConnected == true)
-            return;
-        this->_udpWriteConnected = true;
-        std::unique_ptr<Common::Packet> packet(std::move(this->_toSendUdpPackets.front()));
-        this->_toSendUdpPackets.pop();
-
-        std::vector<boost::asio::const_buffer> buffers;
-        buffers.push_back(boost::asio::buffer(packet->GetData(), packet->GetSize()));
-        this->_udpSocket.async_send(
-                buffers,
-                boost::bind(
-                    &Connection::_HandleUdpWrite,
-                    this->shared_from_this(),
-                    boost::shared_ptr<Common::Packet>(packet.release()),
-                    boost::asio::placeholders::error)
-                );
-        std::cout << "connectudpwrite\n";
-
     }
 
     void Connection::_HandleRead(boost::system::error_code const error,
@@ -325,22 +278,6 @@ namespace sv {
         }
     }
 
-    void Connection::_HandleUdpWrite(boost::shared_ptr<Common::Packet> /*packetSent*/,
-                                           boost::system::error_code const error)
-    {
-        this->_udpWriteConnected = false;
-        if (!error)
-        {
-            std::cout << "_handleudpwrite ok\n";
-            this->_ConnectUdpWrite();
-        }
-        else
-        {
-            std::cout << "_HANDLEUDPWRITE error\n";
-            this->_udp = false;
-        }
-    }
-
     void Connection::_HandlePacket(std::unique_ptr<Tools::ByteArray>& packet)
     {
         try
@@ -352,7 +289,10 @@ namespace sv {
             {
             case (tst_protocol::ActionType)tst_protocol::ClientToServer::clUdpReady:
                 {
-                    this->PassThrough1();
+                    bool ready;
+                    PacketExtractor::UdpReady(*packet, ready);
+
+                    this->_clientCanRcvUdp = ready;
                 }
                 break;
             case (tst_protocol::ActionType)tst_protocol::ClientToServer::clPassThrough:
@@ -362,6 +302,8 @@ namespace sv {
 
                     auto toto = PacketCreator::PassThroughOk(ptType);
                     this->SendPacket(toto);
+                    if (this->_clientCanRcvUdp)
+                        this->PassThrough1();
                 }
                 break;
             case (tst_protocol::ActionType)tst_protocol::ClientToServer::clPassThroughOk:

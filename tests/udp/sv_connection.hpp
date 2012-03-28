@@ -17,7 +17,7 @@ namespace sv {
         Network& _network;
         boost::asio::io_service& _ioService;
         boost::asio::ip::tcp::socket* _socket;
-        boost::asio::ip::udp::socket _udpSocket;
+        boost::asio::ip::udp::endpoint _udpEndpoint;
         Uint8* _data;
         size_t _size;
         size_t _offset;
@@ -26,8 +26,9 @@ namespace sv {
         std::queue<std::unique_ptr<Common::Packet>> _toSendUdpPackets;
         bool _connected;
         bool _writeConnected;
-        bool _udpWriteConnected;
         bool _udp;
+        bool _clientCanRcvUdp;
+        bool _passThroughOk;
 
         struct {
             int count;
@@ -45,6 +46,10 @@ namespace sv {
         void ConnectRead();
         void HandlePacket(std::unique_ptr<Tools::ByteArray>& packet) { this->_HandlePacket(packet); }
 
+        std::unique_ptr<Common::Packet> GetUdpPacket();
+        boost::asio::ip::udp::endpoint const& GetEndpoint() const { return this->_udpEndpoint; }
+        void SetEndpoint(boost::asio::ip::udp::endpoint const& e) { this->_udpEndpoint = e; }
+
         void PassThrough1();
 
     private:
@@ -54,14 +59,11 @@ namespace sv {
         void _SendUdpPacket(std::shared_ptr<Common::Packet> packet);
         void _ConnectRead();
         void _ConnectWrite();
-        void _ConnectUdpWrite();
         void _HandleRead(boost::system::error_code const error,
                          std::size_t transferredBytes);
         void _HandleWrite(boost::shared_ptr<Common::Packet> packetSent,
                           boost::system::error_code const error,
                           std::size_t bytes_transferred);
-        void _HandleUdpWrite(boost::shared_ptr<Common::Packet> packetSent,
-                          boost::system::error_code const error);
 
         void _HandlePacket(std::unique_ptr<Tools::ByteArray>& packet);
 

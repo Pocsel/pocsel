@@ -22,7 +22,7 @@ namespace cl {
         boost::asio::io_service _ioService;
         boost::asio::ip::tcp::socket _socket;
         boost::asio::ip::udp::socket _udpSocket;
-        boost::asio::ip::udp::socket _udpReceiveSocket;
+        boost::asio::ip::udp::endpoint _udpSenderEndpoint;
         boost::thread* _thread;
         std::vector<char> _sizeBuffer;
         std::vector<char> _dataBuffer;
@@ -62,6 +62,7 @@ namespace cl {
         bool IsRunning() const { return this->_isRunning; }
         bool IsConnected() const { return this->_isConnected; }
         std::string GetLastError() const { return this->_lastError; }
+        void PassThrough1();
 
     private:
         void _SendPacket(std::shared_ptr<Common::Packet> p);
@@ -82,6 +83,10 @@ namespace cl {
         void _HandleReceivePacketContent(const boost::system::error_code& error);
 
         void _HandlePacket(Tools::ByteArray* packet);
+        void _TimedDispatch(std::function<void(void)> fx, Uint32 ms);
+        void _ExecDispatch(std::function<void(void)>& message,
+                std::shared_ptr<boost::asio::deadline_timer>,
+                boost::system::error_code const& error);
     };
 
 }

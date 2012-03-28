@@ -15,6 +15,7 @@ namespace tst_protocol {
 
     ENUM ClientToServer
     {
+        // bool ok
         clUdpReady,
         // Uint32 type
         clPassThrough,
