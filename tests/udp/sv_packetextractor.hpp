@@ -10,16 +10,19 @@ namespace sv {
     public:
         static void UdpReady(Tools::ByteArray const&)
         {
+            std::cout << "extract UdpReady\n";
         }
 
         static void PassThrough(Tools::ByteArray const& p, Uint32& type)
         {
             p.Read(type);
+            std::cout << "extract PassThrough | " << type << " |\n";
         }
 
         static void PassThroughOk(Tools::ByteArray const& p, Uint32& type)
         {
             p.Read(type);
+            std::cout << "extract PassThroughOk | " << type << " |\n";
         }
     };
 

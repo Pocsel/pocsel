@@ -11,16 +11,19 @@ namespace cl {
         static void Login(Tools::ByteArray const& p, Uint32& id)
         {
             p.Read(id);
+            std::cout << "extract Login | " << id << " |\n";
         }
 
         static void PassThrough(Tools::ByteArray const& p, Uint32& type)
         {
             p.Read(type);
+            std::cout << "extract PassThrough | " << type << " |\n";
         }
 
         static void PassThroughOk(Tools::ByteArray const& p, Uint32& type)
         {
             p.Read(type);
+            std::cout << "extract PassThroughOk | " << type << " |\n";
         }
     };
 

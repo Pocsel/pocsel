@@ -13,6 +13,7 @@ namespace cl {
     public:
         static std::unique_ptr<Common::Packet> UdpReady()
         {
+            std::cout << "create UdpReady\n";
             Common::Packet* p = new Common::Packet();
             p->Write(tst_protocol::ClientToServer::clUdpReady);
             return std::unique_ptr<Common::Packet>(p);
@@ -20,6 +21,7 @@ namespace cl {
 
         static std::unique_ptr<UdpPacket> PassThrough(Uint32 id, Uint32 type)
         {
+            std::cout << "create PassThrough (" << id << ") | " << type << " |\n";
             UdpPacket* p = new UdpPacket(id);
             p->Write(tst_protocol::ClientToServer::clPassThrough);
 
@@ -29,6 +31,7 @@ namespace cl {
 
         static std::unique_ptr<Common::Packet> PassThroughOk(Uint32 type)
         {
+            std::cout << "create PassThroughOk | " << type << " |\n";
             Common::Packet* p = new Common::Packet();
             p->Write(tst_protocol::ClientToServer::clPassThroughOk);
 

@@ -12,8 +12,9 @@ namespace sv {
     public:
         static std::unique_ptr<Common::Packet> Login(Uint32 id)
         {
+            std::cout << "create Login | " << id << " |\n";
             Common::Packet* p = new Common::Packet();
-            p->Write(tst_protocol::ServerToClient::svPassThrough);
+            p->Write(tst_protocol::ServerToClient::svLogin);
 
             p->Write(id);
             return std::unique_ptr<Common::Packet>(p);
@@ -21,6 +22,7 @@ namespace sv {
 
         static std::unique_ptr<Common::Packet> PassThrough(Uint32 type)
         {
+            std::cout << "create PassThrough | " << type << " |\n";
             Common::Packet* p = new Common::Packet();
             p->Write(tst_protocol::ServerToClient::svPassThrough);
 
@@ -30,6 +32,7 @@ namespace sv {
 
         static std::unique_ptr<Common::Packet> PassThroughOk(Uint32 type)
         {
+            std::cout << "create PassThroughOk | " << type << " |\n";
             Common::Packet* p = new Common::Packet();
             p->Write(tst_protocol::ServerToClient::svPassThroughOk);
 

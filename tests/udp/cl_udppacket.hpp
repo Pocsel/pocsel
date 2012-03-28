@@ -1,5 +1,5 @@
-#ifndef __CLIENT_NETWORK_UDPPACKET_HPP__
-#define __CLIENT_NETWORK_UDPPACKET_HPP__
+#ifndef __CL_UDPPACKET_HPP__
+#define __CL_UDPPACKET_HPP__
 
 #include "common/Packet.hpp"
 

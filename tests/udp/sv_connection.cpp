@@ -119,13 +119,14 @@ namespace sv {
             return;
         }
 
+        std::cout << "SendPassThrough1\n";
         auto toto = PacketCreator::PassThrough(1);
         this->SendUdpPacket(toto);
 
         std::function<void(void)> fx =
             std::bind(&Connection::PassThrough1,
                     this->shared_from_this());
-        this->_TimedDispatch(fx, 3000);
+        this->_TimedDispatch(fx, 200);
     }
 
     void Connection::_Shutdown()
@@ -371,9 +372,10 @@ namespace sv {
                     switch (ptType)
                     {
                     case 1:
-                        std::cout << "PT1OK\n";
+                        std::cout << "PT1 OK\n";
                         _pt1.ok = true;
                         _udp = true;
+                    break;
                     default:
                         throw std::runtime_error("WTF unknown pass through type");
                     }

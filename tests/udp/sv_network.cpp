@@ -17,7 +17,6 @@ namespace sv {
         _data(new Uint8[_buffSize]),
         _nextId(1)
     {
-        std::cout << "Network::Network()\n";
         try
         {
             boost::asio::ip::tcp::resolver resolver(this->_ioService);
@@ -102,8 +101,8 @@ namespace sv {
         {
             if (it->second == conn)
             {
-                std::cout << "removed: " << it->first << "\n";
                 this->_connections.erase(it);
+                std::cout << "removed: " << it->first << "\n";
                 return;
             }
         }

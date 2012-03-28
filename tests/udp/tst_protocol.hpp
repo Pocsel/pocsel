@@ -1,5 +1,5 @@
-#ifndef __TST_PROTOCOL_TST_PROTOCOL_HPP__
-#define __TST_PROTOCOL_TST_PROTOCOL_HPP__
+#ifndef __TST_PROTOCOL_HPP__
+#define __TST_PROTOCOL_HPP__
 
 #include "tools/array_size.hpp"
 #include "tools/enum.hpp"

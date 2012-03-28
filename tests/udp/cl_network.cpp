@@ -394,6 +394,7 @@ namespace cl {
                     Uint32 ptType;
                     PacketExtractor::PassThrough(*packet, ptType);
 
+                    std::cout << "Rcv passthrough" << ptType << "\n";
                     auto toto = PacketCreator::PassThroughOk(ptType);
                     this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
                 }
@@ -409,6 +410,7 @@ namespace cl {
                         std::cout << "PT1OK\n";
                         _pt1.ok = true;
                         _udp = true;
+                        break;
                     default:
                         throw std::runtime_error("WTF unknown pass through type");
                     }

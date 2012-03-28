@@ -1,5 +1,5 @@
-#ifndef __SERVER_NETWORK_NETWORK_HPP__
-#define __SERVER_NETWORK_NETWORK_HPP__
+#ifndef __SV_NETWORK_HPP__
+#define __SV_NETWORK_HPP__
 
 namespace Tools {
     class ByteArray;

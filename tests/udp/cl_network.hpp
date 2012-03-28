@@ -1,5 +1,5 @@
-#ifndef __CLIENT_NETWORK_NETWORK_HPP__
-#define __CLIENT_NETWORK_NETWORK_HPP__
+#ifndef __CL_NETWORK_HPP__
+#define __CL_NETWORK_HPP__
 
 namespace Common {
     class Packet;

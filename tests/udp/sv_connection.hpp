@@ -1,5 +1,5 @@
-#ifndef __SERVER_NETWORK_Connection_HPP__
-#define __SERVER_NETWORK_Connection_HPP__
+#ifndef __SV_CONNECTION_HPP__
+#define __SV_CONNECTION_HPP__
 
 #include "common/Packet.hpp"
 
