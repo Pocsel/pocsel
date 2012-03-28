@@ -100,7 +100,10 @@ namespace cl {
 
             boost::asio::ip::udp::endpoint sendEndpoint(this->_socket.remote_endpoint().address(), this->_socket.remote_endpoint().port());
             boost::system::error_code error = boost::asio::error::host_not_found;
-            this->_udpSocket.connect(endpoint, error);
+            this->_udpSocket.connect(sendEndpoint, error);
+            Tools::error << "Sending on (UDP): " <<
+                this->_socket.remote_endpoint().address() <<
+                ":" << this->_socket.remote_endpoint().port() << "\n";
             if (error)
             {
                 Tools::error << "Network::Network: Connection to (UDP) " << host << ":" << port << " failed: " << error.message() << ".\n";
