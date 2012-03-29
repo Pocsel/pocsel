@@ -57,7 +57,8 @@
                 the entity was found (kill successful) or false otherwise.
                 The "success" field will still be set to true if the entity did
                 not have a Die() function (that is, arg was not passed to the
-                killed entity).
+                killed entity), or even if the Die() function triggered an
+                error.
                 If the callback's target is unloaded or destroyed when the
                 callback is triggered, the callback fails silently.
 

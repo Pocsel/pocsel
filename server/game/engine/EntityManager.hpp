@@ -75,6 +75,8 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 _CreateEntity(Uint32 pluginId, std::string entityName) throw(std::runtime_error);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper);
+        void _ApiSpawnPositional(Tools::Lua::CallHelper& helper);
+        void _ApiSpawnPositionalFromPlugin(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
     };

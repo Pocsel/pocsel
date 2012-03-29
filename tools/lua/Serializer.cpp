@@ -80,14 +80,41 @@ namespace Tools { namespace Lua {
             return "nil";
         else if (ref.IsUserData())
         {
-            auto serialize = ref.GetMetaTable()["__serialize"];
-            if (!serialize.Exists())
-                throw std::runtime_error("Lua::Seralizer: Cannot serialize this user data");
-            return "(function() " + serialize(ref).CheckString() + " end)()";
+            auto metaTable = ref.GetMetaTable();
+            if (metaTable.IsTable())
+                return this->_SerializeWithMetaTable(ref, metaTable, nilOnError);
+            // le user data n'a pas de metatable (CHELOU)
+            if (nilOnError)
+                return "nil";
+            throw std::runtime_error("Lua::Serializer: User data with no metatable");
         }
         if (nilOnError)
             return "nil";
         throw std::runtime_error("Lua::Serializer: Type " + ref.GetTypeName() + " is not serializable");
+    }
+
+    std::string Serializer::_SerializeWithMetaTable(Ref const& ref, Ref const& table, bool nilOnError) const throw(std::runtime_error)
+    {
+        auto serializeFunc = table["__serialize"];
+        if (!serializeFunc.IsFunction())
+        {
+            if (nilOnError)
+                return "nil";
+            throw std::runtime_error("Lua::Seralizer: Cannot serialize this " + ref.GetTypeName() + " (the value at \"__serialize\" is of type \"" + serializeFunc.GetTypeName() + "\")");
+        }
+        try
+        {
+            auto res = serializeFunc(ref);
+            if (!res.IsString())
+                throw std::runtime_error("return value of serialization function is of type " + res.GetTypeName());
+            return "(function() " + res.ToString() + " end)()";
+        }
+        catch (std::exception& e)
+        {
+            if (nilOnError)
+                return "nil";
+            throw std::runtime_error("Lua::Serializer: Cannot serialize this " + ref.GetTypeName() + ": " + e.what());
+        }
     }
 
     std::string Serializer::_SerializeString(std::string const& string) const
@@ -127,13 +154,16 @@ namespace Tools { namespace Lua {
                 throw std::runtime_error("Lua::Serializer: Cyclic or shared table(s) found in table to serialize");
             }
             tables.push_front(ref);
+            auto metaTable = ref.GetMetaTable();
+            if (metaTable.IsTable())
+                return this->_SerializeWithMetaTable(ref, metaTable, nilOnError);
             std::string ret = "{\n";
             auto it = ref.Begin();
             auto itEnd = ref.End();
             for (; it != itEnd; ++it)
             {
                 std::string key = this->_Serialize(it.GetKey(), tables, 0, nilOnError);
-                if (key != "nil") // peut être nil uniquement si nilOnError == true et que la key est un userdata non serializable ou une table cyclique
+                if (key != "nil") // peut être nil uniquement si nilOnError == true et que la key est un userdata non serializable ou une table cyclique ou une "table objet" non serializable
                 {
                     for (unsigned int i = 0; i < level; ++i)
                         ret += "\t";
