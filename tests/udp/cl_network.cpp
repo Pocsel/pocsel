@@ -14,12 +14,15 @@ namespace cl {
         _isConnected(false),
         _isRunning(false),
         _loading(0),
-        _sendingUdp(false),
-        _udp(false)
+        _sendingUdp(false)
     {
-        _pt1.count = 0;
-        _pt1.ok = false;
-        _pt1.okok = false;
+        this->_udpStatus.canReceive = false;
+        this->_udpStatus.canSend = false;
+        this->_udpStatus.serverCanReceive = false;
+        this->_udpStatus.passThroughActive = false;
+        this->_udpStatus.passThroughCount = 0;
+        this->_udpStatus.ptOkSent = false;
+
         this->_sizeBuffer.resize(2);
         this->_udpDataBuffer.resize(Common::Packet::maxSize);
     }
@@ -79,6 +82,7 @@ namespace cl {
             }
             else
             {
+                Tools::log << "Connection to " << host << ":" << port << " is a success.\n";
                 this->_isConnected = true;
             }
         }
@@ -95,81 +99,79 @@ namespace cl {
             boost::asio::ip::udp::endpoint endpoint(this->_socket.local_endpoint().address(), this->_socket.local_endpoint().port());
             this->_udpSocket.open(endpoint.protocol());
             this->_udpSocket.bind(endpoint);
-            Tools::error << "Receiving on (UDP): " <<
+            Tools::log << "Receiving on (UDP): " <<
                 this->_socket.local_endpoint().address() <<
                 ":" << this->_socket.local_endpoint().port() << "\n";
-            this->_udpReceive = true;
 
+            this->_udpStatus.canReceive = true;
 
             boost::asio::ip::udp::endpoint sendEndpoint(this->_socket.remote_endpoint().address(), this->_socket.remote_endpoint().port());
             boost::system::error_code error = boost::asio::error::host_not_found;
             this->_udpSocket.connect(sendEndpoint, error);
-            Tools::error << "Sending on (UDP): " <<
-                this->_socket.remote_endpoint().address() <<
-                ":" << this->_socket.remote_endpoint().port() << "\n";
+
             if (error)
             {
                 Tools::error << "Network::Network: Connection to (UDP) " << host << ":" << port << " failed: " << error.message() << ".\n";
-                this->_udp = false;
             }
             else
             {
-                this->_udp = true;
+                Tools::log << "Sending on (UDP): " <<
+                    this->_socket.remote_endpoint().address() <<
+                    ":" << this->_socket.remote_endpoint().port() << "\n";
+                this->_udpStatus.canSend = true;
             }
         }
         catch (std::exception& e)
         {
-            Tools::error << "Network::Network: Exception while connecting to (UDP) " << host << ":" << port << ": " << e.what() << ".\n";
-            this->_udp = false;
+            Tools::error << "Exception while binding to (UDP) : " <<
+                this->_socket.local_endpoint().address() <<
+                ":" << this->_socket.local_endpoint().port() << "\n";
         }
         this->_Run();
     }
 
     void Network::PassThrough1()
     {
-        if (this->_udp == false)
+        std::cout << "PassThrough1()\n";
+        if (this->_isConnected == false)
         {
-            std::cout << "udp is false\n";
-            this->_udp = true;
-        }
-
-        if (_pt1.count == 0)
-            std::cout << "PassThrough 1, DEBUT\n";
-
-        if (_pt1.ok == true)
-        {
-            std::cout << "pt1 ok\n";
-//            return;
-        }
-        if (_pt1.okok == true)
-        {
-            std::cout << "pt1 okok\n";
+            std::cout << "not connected at all\n";
             return;
         }
-
-        std::cout << _pt1.count++ << "\n";
-
-        if (_pt1.count == 200)
+        if (this->_udpStatus.canSend == false)
         {
-            std::cout << "Toujours pas bon au bout de 20, passThrough suivant\n";
+            std::cout << "cant send\n";
             return;
         }
-
-        std::cout << "SendPassThrough1\n";
-        auto toto = PacketCreator::PassThrough(this->_id, 1);
-        this->SendUdpPacket(std::move(toto));
 
         std::function<void(void)> fx =
             std::bind(&Network::PassThrough1, this);
-        this->_TimedDispatch(fx, 200);
+
+        if (this->_udpStatus.passThroughActive == false)
+        {
+            std::cout << "count=" << this->_udpStatus.passThroughCount++ << "\n";
+            if (this->_udpStatus.passThroughCount == 120)
+            {
+                std::cout << "too much\n";
+                return;
+            }
+            this->_TimedDispatch(fx, 55);
+        }
+        else
+        {
+            this->_TimedDispatch(fx, 5555);
+        }
+
+        auto toto = PacketCreator::PassThrough(this->_id, 1);
+        this->SendUdpPacket(std::move(toto));
     }
 
     void Network::_Run()
     {
         this->_ReceivePacketSize();
-        auto toto = PacketCreator::UdpReady(this->_udpReceive);
+        auto toto = PacketCreator::UdpReady(this->_udpStatus.canReceive);
         this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
-        if (this->_udpReceive)
+        if (this->_udpStatus.canReceive)
             this->_ReceiveUdpPacket();
         this->_ioService.run();
     }
@@ -240,9 +242,15 @@ namespace cl {
             return;
         }
 
-        if (!this->_udp)
+        if (this->_udpStatus.canSend == false ||
+                (packet->forceUdp == false && this->_udpStatus.serverCanReceive == false))
         {
-            this->_SendPacket(std::shared_ptr<Common::Packet>(Tools::Deleter<UdpPacket>::StealPtr(packet)));
+            if (packet->forceUdp == true)
+            {
+                std::cout << "cant send this shit\n";
+                return;
+            }
+            this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(Tools::Deleter<UdpPacket>::StealPtr(packet)));
             return;
         }
 
@@ -320,7 +328,7 @@ namespace cl {
         if (error)
         {
             Tools::error << "Network::_HandleWrite: UDP Write error: \"" << error.message() << "\".\n";
-            this->_udp = false;
+            this->_udpStatus.canSend = false;
             std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
             this->_outQueueUdp.clear();
         }
@@ -432,12 +440,14 @@ namespace cl {
                     Uint32 ptType;
                     PacketExtractor::PassThrough(*packet, ptType);
 
-                    std::cout << "PT1 OKOK\n";
-                    _pt1.okok = true;
+                    this->_udpStatus.passThroughActive = true;
 
-                    std::cout << "Rcv passthrough" << ptType << "\n";
-                    auto toto = PacketCreator::PassThroughOk(ptType);
-                    this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
+                    if (this->_udpStatus.ptOkSent == false)
+                    {
+                        auto toto = PacketCreator::PassThroughOk(ptType);
+                        this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
+                        this->_udpStatus.ptOkSent = true;
+                    }
                 }
                 break;
             case (tst_protocol::ActionType)tst_protocol::ServerToClient::svPassThroughOk:
@@ -448,9 +458,7 @@ namespace cl {
                     switch (ptType)
                     {
                     case 1:
-                        std::cout << "PT1 OK\n";
-                        _pt1.ok = true;
-                        _udp = true;
+                        this->_udpStatus.serverCanReceive = true;
                         break;
                     default:
                         throw std::runtime_error("WTF unknown pass through type");

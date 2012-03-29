@@ -34,21 +34,24 @@ namespace cl {
         bool _isRunning;
         std::string _lastError;
         float _loading;
+        Uint32 _id;
 
         std::list<UdpPacket*> _outQueueUdp;
         bool _sendingUdp;
-        bool _udp;
 
         std::vector<char> _udpDataBuffer;
-        bool _udpReceive;
 
         struct {
-            int count;
-            bool ok;
-            bool okok;
-        } _pt1;
+            bool canReceive;
+            bool canSend;
 
-        Uint32 _id;
+            bool serverCanReceive;
+            bool passThroughActive;
+            unsigned int passThroughCount;
+
+            bool ptOkSent;
+        } _udpStatus;
+
 
     public:
         Network();

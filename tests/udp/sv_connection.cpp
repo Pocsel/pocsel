@@ -174,7 +174,7 @@ namespace sv {
                 std::cout << "cant send this shit\n";
                 return;
             }
-            this->_SendPacket(packet);
+            this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(Tools::Deleter<UdpPacket>::StealPtr(packet)));
             return;
         }
 

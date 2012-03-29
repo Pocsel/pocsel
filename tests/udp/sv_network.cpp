@@ -108,8 +108,8 @@ namespace sv {
         {
             if (it->second == conn)
             {
-                this->_connections.erase(it);
                 std::cout << "removed: " << it->first << "\n";
+                this->_connections.erase(it);
                 return;
             }
         }
