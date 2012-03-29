@@ -8,6 +8,8 @@ namespace cl {
     class UdpPacket :
         public Common::Packet
     {
+    public:
+        bool forceUdp;
     private:
         Uint32 _id;
     public:

@@ -4,6 +4,7 @@ namespace cl {
 
     UdpPacket::UdpPacket(Uint32 id) :
         Common::Packet(),
+        forceUdp(false),
         _id(id)
     {
         this->_data = this->_data + (sizeof(Uint32) - 2);

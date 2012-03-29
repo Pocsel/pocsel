@@ -31,9 +31,12 @@ namespace sv {
         bool _passThroughOk;
 
         struct {
-            int count;
-            bool ok;
-        } _pt1;
+            bool passThroughIsActive;
+            bool clientReadyForUdp;
+            bool clientSentUdpReady;
+            unsigned int count;
+            bool ok
+        } _udpStatus;
 
     public:
         Connection(Network& network, boost::asio::ip::tcp::socket* socket);

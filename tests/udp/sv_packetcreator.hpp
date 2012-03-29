@@ -4,6 +4,7 @@
 #include "common/Packet.hpp"
 
 #include "tst_protocol.hpp"
+#include "sv_udppacket.hpp"
 
 namespace sv {
 
@@ -20,14 +21,14 @@ namespace sv {
             return std::unique_ptr<Common::Packet>(p);
         }
 
-        static std::unique_ptr<Common::Packet> PassThrough(Uint32 type)
+        static std::unique_ptr<UdpPacket> PassThrough(Uint32 type)
         {
             std::cout << "create PassThrough | " << type << " |\n";
-            Common::Packet* p = new Common::Packet();
+            UdpPacket* p = new UdpPacket(true);
             p->Write(tst_protocol::ServerToClient::svPassThrough);
 
             p->Write(type);
-            return std::unique_ptr<Common::Packet>(p);
+            return std::unique_ptr<UdpPacket>(p);
         }
 
         static std::unique_ptr<Common::Packet> PassThroughOk(Uint32 type)
