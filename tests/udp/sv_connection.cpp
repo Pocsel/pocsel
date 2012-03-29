@@ -16,11 +16,14 @@ namespace sv {
         _offset(0),
         _toRead(0),
         _connected(true),
-        _writeConnected(false),
-        _udp(false)
+        _writeConnected(false)
     {
-        _pt1.count = 0;
-        _pt1.ok = false;
+        _udpStatus.udpReadySent = false;
+        _udpStatus.udpReady = false;
+        _udpStatus.endpointKnown = false;
+        _udpStatus.passThroughActive = false;
+        _udpStatus.passThroughCount = 0;
+        _udpStatus.ptOkSent = false;
     }
 
     Connection::~Connection()
@@ -38,12 +41,12 @@ namespace sv {
         this->_ioService.dispatch(fx);
     }
 
-    void Connection::SendUdpPacket(std::unique_ptr<Common::Packet>& packet)
+    void Connection::SendUdpPacket(std::unique_ptr<UdpPacket>& packet)
     {
         std::function<void(void)> fx =
             std::bind(&Connection::_SendUdpPacket,
                     this->shared_from_this(),
-                    Tools::Deleter<Common::Packet>::CreatePtr(packet.release()));
+                    Tools::Deleter<UdpPacket>::CreatePtr(packet.release()));
         this->_ioService.dispatch(fx);
     }
 
@@ -61,6 +64,22 @@ namespace sv {
         this->_ioService.dispatch(fx);
     }
 
+    void Connection::HandlePacket(std::unique_ptr<Tools::ByteArray>& packet, boost::asio::ip::udp::endpoint const& sender)
+    {
+        if (this->_udpStatus.endpointKnown == false)
+        {
+            this->_udpStatus.endpoint = sender;
+            this->_udpStatus.endpointKnown = true;
+        }
+        else if (sender != this->_udpStatus.endpoint)
+        {
+            // TODO smthng
+            // le sender est différent d'avant, c'est la cacastrophe.
+        }
+
+        this->_HandlePacket(packet);
+    }
+
     std::unique_ptr<Common::Packet> Connection::GetUdpPacket()
     {
         std::unique_ptr<Common::Packet> ret = std::move(this->_toSendUdpPackets.front());
@@ -70,41 +89,39 @@ namespace sv {
 
     void Connection::PassThrough1()
     {
+        std::cout << "PassThrough1()\n";
         if (this->_connected == false)
         {
             std::cout << "already disconnected, bye\n";
             return;
         }
-        if (this->_udp == false)
+        if (this->_udpStatus.udpReady == false)
         {
-            std::cout << "udp is false\n";
-            this->_udp = true;
-        }
-        if (_pt1.count == 0)
-            std::cout << "PassThrough 1, DEBUT\n";
-
-        if (_pt1.ok == true)
-        {
-            std::cout << "pt1 ok\n";
+            std::cout << "client cant receive udp, bye\n";
             return;
         }
-
-        std::cout << _pt1.count++ << "\n";
-
-        if (_pt1.count == 200)
-        {
-            std::cout << "Toujours pas bon au bout de 20, passThrough suivant\n";
-            return;
-        }
-
-        std::cout << "SendPassThrough1\n";
-        auto toto = PacketCreator::PassThrough(1);
-        this->SendUdpPacket(toto);
 
         std::function<void(void)> fx =
             std::bind(&Connection::PassThrough1,
                     this->shared_from_this());
-        this->_TimedDispatch(fx, 200);
+
+        if (_udpStatus.passThroughActive == false)
+        {
+            std::cout << "count=" << _udpStatus.passThroughCount++ << "\n";
+            if (_udpStatus.passThroughCount == 50)
+            {
+                std::cout << "trop d'essai, on laisse tomber l'udp\n";
+                return;
+            }
+            this->_TimedDispatch(fx, 55);
+        }
+        else
+        {
+            this->_TimedDispatch(fx, 5555);
+        }
+
+        auto toto = PacketCreator::PassThrough(1);
+        this->SendUdpPacket(toto);
     }
 
     void Connection::_Shutdown()
@@ -140,7 +157,7 @@ namespace sv {
             this->_ConnectWrite();
     }
 
-    void Connection::_SendUdpPacket(std::shared_ptr<Common::Packet> packet)
+    void Connection::_SendUdpPacket(std::shared_ptr<UdpPacket> packet)
     {
         if (!this->_connected || !this->_socket)
         {
@@ -148,13 +165,20 @@ namespace sv {
             return;
         }
 
-        std::cout << "sendudppacket\n";
+        if (this->_udpStatus.udpReady == false ||
+            this->_udpStatus.endpointKnown == false ||
+            (packet->forceUdp == false && this->_udpStatus.passThroughActive == false))
+        {
+            if (packet->forceUdp == true)
+            {
+                std::cout << "cant send this shit\n";
+                return;
+            }
+            this->_SendPacket(packet);
+            return;
+        }
 
-        // XXX blablabla
-        //if (!this->_udp)
-        //    this->_SendPacket(packet);
-
-        this->_toSendUdpPackets.push(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
+        this->_toSendUdpPackets.push(std::unique_ptr<UdpPacket>(Tools::Deleter<UdpPacket>::StealPtr(packet)));
         this->_network.IHasPacketToSend(this->shared_from_this());
     }
 
@@ -292,7 +316,13 @@ namespace sv {
                     bool ready;
                     PacketExtractor::UdpReady(*packet, ready);
 
-                    this->_clientCanRcvUdp = ready;
+                    this->_udpStatus.udpReadySent = true;
+                    this->_udpStatus.udpReady = ready;
+                    if (ready == true &&
+                        this->_udpStatus.endpointKnown == true &&
+                        this->_udpStatus.passThroughCount == 0 &&
+                        this->_udpStatus.passThroughActive == false)
+                        this->PassThrough1();
                 }
                 break;
             case (tst_protocol::ActionType)tst_protocol::ClientToServer::clPassThrough:
@@ -300,9 +330,16 @@ namespace sv {
                     Uint32 ptType;
                     PacketExtractor::PassThrough(*packet, ptType);
 
-                    auto toto = PacketCreator::PassThroughOk(ptType);
-                    this->SendPacket(toto);
-                    if (this->_clientCanRcvUdp)
+                    if (this->_udpStatus.ptOkSent == false)
+                    {
+                        auto toto = PacketCreator::PassThroughOk(ptType);
+                        this->SendPacket(toto);
+                        this->_udpStatus.ptOkSent = true;
+                    }
+                    if (this->_udpStatus.udpReady == true &&
+                        this->_udpStatus.endpointKnown == true &&
+                        this->_udpStatus.passThroughCount == 0 &&
+                        this->_udpStatus.passThroughActive == false)
                         this->PassThrough1();
                 }
                 break;
@@ -314,9 +351,7 @@ namespace sv {
                     switch (ptType)
                     {
                     case 1:
-                        std::cout << "PT1 OK\n";
-                        _pt1.ok = true;
-                        _udp = true;
+                        this->_udpStatus.passThroughActive = true;
                     break;
                     default:
                         throw std::runtime_error("WTF unknown pass through type");

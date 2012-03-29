@@ -2,6 +2,7 @@
 #define __SV_CONNECTION_HPP__
 
 #include "common/Packet.hpp"
+#include "sv_udppacket.hpp"
 
 namespace sv {
 
@@ -17,25 +18,26 @@ namespace sv {
         Network& _network;
         boost::asio::io_service& _ioService;
         boost::asio::ip::tcp::socket* _socket;
-        boost::asio::ip::udp::endpoint _udpEndpoint;
         Uint8* _data;
         size_t _size;
         size_t _offset;
         size_t _toRead;
         std::queue<std::unique_ptr<Common::Packet>> _toSendPackets;
-        std::queue<std::unique_ptr<Common::Packet>> _toSendUdpPackets;
+        std::queue<std::unique_ptr<UdpPacket>> _toSendUdpPackets;
         bool _connected;
         bool _writeConnected;
-        bool _udp;
-        bool _clientCanRcvUdp;
-        bool _passThroughOk;
 
         struct {
-            bool passThroughIsActive;
-            bool clientReadyForUdp;
-            bool clientSentUdpReady;
-            unsigned int count;
-            bool ok
+            bool udpReadySent;
+            bool udpReady;
+
+            bool endpointKnown;
+            boost::asio::ip::udp::endpoint endpoint;
+
+            bool passThroughActive;
+            unsigned int passThroughCount;
+
+            bool ptOkSent;
         } _udpStatus;
 
     public:
@@ -44,14 +46,13 @@ namespace sv {
 
         // threadsafe
         void SendPacket(std::unique_ptr<Common::Packet>& packet);
-        void SendUdpPacket(std::unique_ptr<Common::Packet>& packet);
+        void SendUdpPacket(std::unique_ptr<UdpPacket>& packet);
         void Shutdown();
         void ConnectRead();
-        void HandlePacket(std::unique_ptr<Tools::ByteArray>& packet) { this->_HandlePacket(packet); }
+        void HandlePacket(std::unique_ptr<Tools::ByteArray>& packet, boost::asio::ip::udp::endpoint const& sender);
 
         std::unique_ptr<Common::Packet> GetUdpPacket();
-        boost::asio::ip::udp::endpoint const& GetEndpoint() const { return this->_udpEndpoint; }
-        void SetEndpoint(boost::asio::ip::udp::endpoint const& e) { this->_udpEndpoint = e; }
+        boost::asio::ip::udp::endpoint const& GetEndpoint() const { return this->_udpStatus.endpoint; }
 
         void PassThrough1();
 
@@ -59,7 +60,7 @@ namespace sv {
         void _Shutdown();
         void _HandleError(boost::system::error_code const& error);
         void _SendPacket(std::shared_ptr<Common::Packet> packet);
-        void _SendUdpPacket(std::shared_ptr<Common::Packet> packet);
+        void _SendUdpPacket(std::shared_ptr<UdpPacket> packet);
         void _ConnectRead();
         void _ConnectWrite();
         void _HandleRead(boost::system::error_code const error,

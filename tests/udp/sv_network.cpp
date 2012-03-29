@@ -257,7 +257,6 @@ namespace sv {
         }
 
         std::cout << "UDP packet received: " << id << "\n";
-        it->second->SetEndpoint(this->_udpSenderEndpoint);
-        it->second->HandlePacket(packet);
+        it->second->HandlePacket(packet, this->_udpSenderEndpoint);
     }
 }
