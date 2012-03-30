@@ -18,7 +18,7 @@ namespace Common {
             p.Read(positionInChunk);
 
             return std::unique_ptr<Position>(
-                    new Position(BaseChunk::IdToCoords(chunkId), positionInChunk)
+                    new Position(GetChunkPosition(BaseChunk::IdToCoords(chunkId)) + GetCubePositionInChunk(positionInChunk))
                     );
         }
 

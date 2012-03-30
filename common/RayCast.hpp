@@ -1,7 +1,7 @@
 #ifndef __COMMON_RAYCAST_HPP__
 #define __COMMON_RAYCAST_HPP__
 
-#include "common/BaseChunk.hpp"
+#include "common/Position.hpp"
 
 #include "tools/Vector3.hpp"
 
@@ -9,7 +9,6 @@ namespace Common {
 
     struct OrientedPosition;
     struct CubePosition;
-    struct Position;
 
     class RayCast
     {

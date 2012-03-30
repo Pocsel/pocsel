@@ -166,11 +166,11 @@ namespace Client { namespace Map {
 
     void ChunkManager::_RemoveOldChunks(Common::Position const& playerPosition)
     {
-        if (this->_oldPosition.world == playerPosition.world)
+        if (Common::GetChunkCoords(this->_oldPosition) == Common::GetChunkCoords(playerPosition))
             return;
         unsigned int nbChunks = this->_game.GetClient().GetSettings().chunkViewDistance
             + this->_game.GetClient().GetSettings().chunkCacheArea;
-        Tools::Vector3d pos((playerPosition.world - Tools::Vector3u(nbChunks)) * Common::ChunkSize);
+        Tools::Vector3d pos((Common::GetChunkCoords(playerPosition) - Tools::Vector3u(nbChunks)) * Common::ChunkSize);
         Tools::AlignedCube cacheArea(pos, nbChunks * Common::ChunkSize * 2);
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
         {
@@ -198,14 +198,14 @@ namespace Client { namespace Map {
 
     void ChunkManager::_DownloadNewChunks(Common::Position const& playerPosition)
     {
-        if (this->_oldPosition.world == playerPosition.world)
+        if (Common::GetChunkCoords(this->_oldPosition) == Common::GetChunkCoords(playerPosition))
             return;
         std::deque<Common::BaseChunk::IdType> tmp;
         int cacheDistance = (int)this->_game.GetClient().GetSettings().chunkViewDistance;
         int min = -cacheDistance;
         int max = cacheDistance;
 
-        Common::BaseChunk::CoordsType const& coords = playerPosition.world;
+        Common::BaseChunk::CoordsType const& coords = Common::GetChunkCoords(playerPosition);
         Common::BaseChunk::CoordsType pos;
         Common::BaseChunk::IdType id;
         int x, y, z;
