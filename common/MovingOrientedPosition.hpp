@@ -44,7 +44,7 @@ namespace Common {
 
         void Move(float time)
         {
-            position.position += movement * time;
+            position.position.AddOffset(movement * time);
         }
 
     };

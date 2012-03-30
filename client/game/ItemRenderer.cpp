@@ -50,7 +50,7 @@ namespace Client { namespace Game {
                 )
             *
             Tools::Matrix4<float>::CreateTranslation(
-                pos.position - camera.position
+                pos.position.GetOffset(camera.position)
                 )
             );
 

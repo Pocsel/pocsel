@@ -235,7 +235,7 @@ namespace Server { namespace Game { namespace Map {
                 if (biet.solid)
                 {
                     this->_spawnPosition = new Common::Position(chunk->coords, Tools::Vector3f(0, (float)y, 0));
-                    *this->_spawnPosition += Tools::Vector3f(0.5f, 2.5f, 0.5f);
+                    this->_spawnPosition->AddOffset(Tools::Vector3f(0.5f, 2.5f, 0.5f));
                     for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                         (*it)(*this->_spawnPosition);
                     this->_spawnRequests.clear();

@@ -42,7 +42,7 @@ namespace Client { namespace Game {
 
         this->_renderer.SetModelMatrix(
             Tools::Matrix4<float>::CreateTranslation(
-                Common::Position(pos.world, Tools::Vector3f((float)pos.chunk.x, (float)pos.chunk.y, (float)pos.chunk.z)) - camera.position
+                Common::Position(pos.world, Tools::Vector3f((float)pos.chunk.x, (float)pos.chunk.y, (float)pos.chunk.z)).GetOffset(camera.position)
                 )
             );
 

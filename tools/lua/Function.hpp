@@ -39,7 +39,7 @@ namespace Tools { namespace Lua {
         template<> struct _DeRef<float>         : public _NoDeRef<float>         {};
         template<> struct _DeRef<double>        : public _NoDeRef<double>        {};
         template<> struct _DeRef<std::string>   : public _NoDeRef<std::string>   {};
-		
+
 		template<class T, class U> struct _DeRef2 { static U Do(T const& o) { return o; } };
 		template<class T, class U> struct _DeRef2<T*, U> { static U& Do(T* o) { return *o; } };
 		template<class T, class U> struct _DeRef2<T*, U*> { static U* Do(T* o) { return o; } };
@@ -180,24 +180,33 @@ namespace Tools { namespace Lua {
     template<> std::string Ref::To<std::string>() const throw();
 
     template<class T>
-    inline T Ref::Check() const throw(std::runtime_error)
-    {
-		try
-		{
-			if (!(this->IsUserData() || this->IsLightUserData()) || this->GetMetaTable().IsNoneOrNil() ||
-				this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
-				throw 1;
-			return reinterpret_cast<T>(this->CheckUserData());
-		}
-		catch (int)
-		{
-			throw std::runtime_error(std::string("Lua::Ref: Value is not of \"") + typeid(typename std::remove_pointer<T>::type).name() + "\" type");
-		}
-		catch (std::exception& e)
-		{
-			throw std::runtime_error(std::string("Lua::Ref::Check<") + typeid(typename std::remove_pointer<T>::type).name() + ">: " + e.what());
-		}
-    }
+        inline bool Ref::Is() const throw()
+        {
+            if (!this->IsUserData() || this->GetMetaTable().IsNoneOrNil() ||
+                    this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
+                return false;
+            return true;
+        }
+
+    template<class T>
+        inline T Ref::Check() const throw(std::runtime_error)
+        {
+            try
+            {
+                if (!this->IsUserData() || this->GetMetaTable().IsNoneOrNil() ||
+                        this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
+                    throw 1;
+                return reinterpret_cast<T>(this->CheckUserData());
+            }
+            catch (int)
+            {
+                throw std::runtime_error(std::string("Lua::Ref: Value is not of \"") + typeid(typename std::remove_pointer<T>::type).name() + "\" type");
+            }
+            catch (std::exception& e)
+            {
+                throw std::runtime_error(std::string("Lua::Ref::Check<") + typeid(typename std::remove_pointer<T>::type).name() + ">: " + e.what());
+            }
+        }
     template<> bool Ref::Check<bool>() const throw(std::runtime_error);
     template<> int Ref::Check<int>() const throw(std::runtime_error);
     template<> unsigned int Ref::Check<unsigned int>() const throw(std::runtime_error);

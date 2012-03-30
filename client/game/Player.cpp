@@ -209,7 +209,7 @@ namespace Client { namespace Game {
     {
         this->_movement.Normalize();
         Common::Position p = this->_camera.position;
-        p += this->_movement * this->_GetSpeed() * (this->_elapsedTime * 0.001f);
+        p.AddOffset(this->_movement * this->_GetSpeed() * (this->_elapsedTime * 0.001f));
         this->SetPosition(p);
         this->_moved = true;
     }
