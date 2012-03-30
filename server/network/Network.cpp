@@ -4,12 +4,19 @@
 #include "server/Server.hpp"
 #include "server/Settings.hpp"
 
+#include "protocol/protocol.hpp"
+
 namespace Server { namespace Network {
 
-    Network::Network(Server& server, NewConnectionHandler& newConnectionHandler, UdpPacketHandler& udpPacketHandler) :
+    Network::Network(Server& server,
+                     NewConnectionHandler& newConnectionHandler,
+                     PacketHandler& packetHandler,
+                     ErrorHandler& errorHandler) :
         _server(server),
+        _nextId(1),
         _newConnectionHandler(newConnectionHandler),
-        _udpPacketHandler(udpPacketHandler),
+        _packetHandler(packetHandler),
+        _errorHandler(errorHandler),
         _ioService(),
         _acceptor(this->_ioService),
         _newConnection(0),
@@ -85,6 +92,30 @@ namespace Server { namespace Network {
         Tools::DeleteTab(this->_data);
     }
 
+    void Network::Run()
+    {
+        Tools::debug << "Network::Run()\n";
+        this->_ioService.run();
+    }
+
+    void Network::Stop()
+    {
+        Tools::debug << "Network::Stop()\n";
+        this->_ioService.stop();
+    }
+
+    void Network::SendUdpPacket(Uint32 connId)
+    {
+        this->_sendingConnections.push(connId);
+        this->_ConnectUdpWrite();
+    }
+
+    void Network::RemoveConnection(Uint32 connId)
+    {
+        this->_connections.erase(connId);
+        Tools::log << "Removed connection: " << connId << "\n";
+    }
+
     void Network::_ConnectAccept()
     {
         this->_newConnection = new boost::asio::ip::tcp::socket(this->_ioService);
@@ -100,8 +131,17 @@ namespace Server { namespace Network {
         {
             Tools::log << "New connection.\n";
 
-            boost::shared_ptr<ClientConnection> newClientConnection(new ClientConnection(this->_newConnection));
-            this->_newConnectionHandler(newClientConnection);
+            Uint32 newId = this->_GetNextId();
+            boost::shared_ptr<ClientConnection> newClientConnection(
+                new ClientConnection(
+                    *this,
+                    newId,
+                    this->_newConnection,
+                    this->_errorHandler,
+                    this->_packetHandler)
+                );
+            this->_connections[newId] = newClientConnection;
+            this->_newConnectionHandler(newId, newClientConnection);
         }
         else
         {
@@ -123,13 +163,86 @@ namespace Server { namespace Network {
             );
     }
 
+    void Network::_ConnectUdpWrite()
+    {
+        // TODO verif si la udp socket elle est bien ok
+
+        if (this->_sendingConnections.size() == 0 || this->_udpWriteConnected == true)
+            return;
+
+        this->_udpWriteConnected = true;
+
+        while (this->_connections.count(this->_sendingConnections.front()) == 0)
+        {
+            this->_sendingConnections.pop();
+            if (this->_sendingConnections.size() == 0)
+                return;
+        }
+
+        boost::shared_ptr<ClientConnection>& conn = this->_connections.find(this->_sendingConnections.front())->second;
+
+        std::unique_ptr<UdpPacket> packet = conn->GetUdpPacket();
+        boost::asio::ip::udp::endpoint endpoint = conn->GetEndpoint();
+
+        std::vector<boost::asio::const_buffer> buffers;
+        buffers.push_back(boost::asio::buffer(packet->GetData(), packet->GetSize()));
+        this->_udpSocket.async_send_to(
+                buffers,
+                endpoint,
+                boost::bind(
+                    &Network::_HandleUdpWrite,
+                    this,
+                    boost::shared_ptr<UdpPacket>(packet.release()),
+                    boost::asio::placeholders::error)
+                );
+    }
+
+    void Network::_HandleUdpWrite(boost::shared_ptr<UdpPacket> /*packetSent*/,
+                                  boost::system::error_code const error)
+    {
+        this->_udpWriteConnected = false;
+        if (!error)
+        {
+            this->_sendingConnections.pop();
+            this->_ConnectUdpWrite();
+        }
+        else
+        {
+            // TODO
+            //this->_sendingConnections.front().faireqqc();
+            // TODO
+            // réparer la socket udp
+            this->_sendingConnections.pop();
+            this->_ConnectUdpWrite();
+        }
+    }
+
     void Network::_HandleUdpRead(boost::system::error_code const& e, std::size_t transferredBytes)
     {
         if (!e)
         {
-            std::unique_ptr<Tools::ByteArray> packet(new Tools::ByteArray());
-            packet->SetData((char*)this->_data, (Uint16)transferredBytes);
-            this->_udpPacketHandler(packet);
+            if (transferredBytes < sizeof(Uint32) + sizeof(Protocol::ActionType))
+            {
+                Tools::error << "Received a too little packet\n";
+            }
+            else
+            {
+                Tools::ByteArray idArray;
+                idArray.SetData((char*)this->_data, sizeof(Uint32));
+                Uint32 id;
+                idArray.Read(id);
+
+                if (this->_connections.count(id) == 0)
+                {
+                    Tools::error << "Received packet for an unknown client\n";
+                }
+                else
+                {
+                    std::unique_ptr<Tools::ByteArray> packet(new Tools::ByteArray());
+                    packet->SetData(((char*)this->_data) + sizeof(Uint32), (Uint16)(transferredBytes - sizeof(Uint32)));
+                    this->_connections.find(id)->second->HandlePacket(packet);
+                }
+            }
         }
         else
         {
@@ -139,16 +252,11 @@ namespace Server { namespace Network {
         this->_ConnectUdpRead();
     }
 
-    void Network::Run()
+    Uint32 Network::_GetNextId()
     {
-        Tools::debug << "Network::Run()\n";
-        this->_ioService.run();
-    }
-
-    void Network::Stop()
-    {
-        Tools::debug << "Network::Stop()\n";
-        this->_ioService.stop();
+        while (this->_connections.count(this->_nextId) || this->_nextId == 0)
+            ++this->_nextId;
+        return this->_nextId++;
     }
 
 }}

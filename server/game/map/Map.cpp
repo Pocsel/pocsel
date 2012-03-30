@@ -26,6 +26,7 @@
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/database/ResourceManager.hpp"
 #include "server/network/PacketCreator.hpp"
+#include "server/network/UdpPacket.hpp"
 
 namespace Server { namespace Game { namespace Map {
 

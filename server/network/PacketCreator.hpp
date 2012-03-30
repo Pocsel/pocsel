@@ -12,6 +12,10 @@ namespace Common{
 }
 
 namespace Server { namespace Network {
+    class UdpPacket;
+}}
+
+namespace Server { namespace Network {
 
     class PacketCreator
     {
@@ -24,6 +28,10 @@ namespace Server { namespace Network {
                                         Uint32 worldVersion = 0,
                                         Game::Map::Chunk::CubeType nbCubeTypes = 0,
                                         std::string const& worldBuildHash = "");
+
+        static std::unique_ptr<UdpPacket> PassThrough();
+
+        static std::unique_ptr<Common::Packet> PassThroughOk();
 
         static std::unique_ptr<Common::Packet> Ping(Uint64 timestamp);
 
@@ -40,8 +48,8 @@ namespace Server { namespace Network {
         static std::unique_ptr<Common::Packet> TeleportPlayer(std::string const& map,
                                                               Common::Position const& pos);
 
-        static std::unique_ptr<Common::Packet> ItemMove(Common::MovingOrientedPosition const& pos,
-                                                        Uint32 itemId);
+        static std::unique_ptr<UdpPacket> ItemMove(Common::MovingOrientedPosition const& pos,
+                                                   Uint32 itemId);
     };
 
 }}

@@ -73,8 +73,8 @@ namespace sv {
         }
         else if (sender != this->_udpStatus.endpoint)
         {
-            // TODO smthng
-            // le sender est différent d'avant, c'est la cacastrophe.
+            std::cout << "HORRY SHIT WRONG SENDER\n";
+            return;
         }
 
         this->_HandlePacket(packet);
