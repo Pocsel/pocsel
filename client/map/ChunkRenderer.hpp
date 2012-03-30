@@ -28,7 +28,7 @@ namespace Client { namespace Map {
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
         std::map<Uint32, std::unique_ptr<Resources::ITexture>> _textures;
-        std::map<Uint32, Effect*> _effects;
+        //std::map<Uint32, Effect*> _effects;
 
     public:
         ChunkRenderer(Game::Game& game);
