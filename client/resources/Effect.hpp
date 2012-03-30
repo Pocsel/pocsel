@@ -22,7 +22,7 @@ namespace Client { namespace Resources {
         Tools::Lua::Ref* _update;
 
     public:
-        Effect(Game::Game& game, Tools::Lua::Ref& settings, Uint32 pluginId);
+        Effect(Game::Game& game, Tools::Lua::Ref settings, Uint32 pluginId);
         ~Effect();
 
         void Init(Tools::Lua::Ref const& object);

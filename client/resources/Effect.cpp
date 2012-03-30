@@ -8,7 +8,7 @@
 
 namespace Client { namespace Resources {
 
-    Effect::Effect(Game::Game& game, Tools::Lua::Ref& settings, Uint32 pluginId)
+    Effect::Effect(Game::Game& game, Tools::Lua::Ref settings, Uint32 pluginId)
         : _pluginId(pluginId),
         _shader(0),
         _settings(new Tools::Lua::Ref(settings)),
