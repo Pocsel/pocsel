@@ -8,23 +8,21 @@
 
 namespace Client { namespace Resources {
 
-    Effect::Effect(Game::Game& game, Tools::Lua::CallHelper& helper, Uint32 pluginId)
+    Effect::Effect(Game::Game& game, Tools::Lua::Ref& settings, Uint32 pluginId)
         : _pluginId(pluginId),
         _shader(0),
-        _settings(0),
+        _settings(new Tools::Lua::Ref(settings)),
         _initObject(0),
         _update(0)
     {
         try
         {
-            auto settings = helper.PopArg();
-            // TODO: id
+            this->_name = settings["name"].Check<std::string>();
             this->_shader = &game.GetResourceManager().GetShader(pluginId, settings["resource"].CheckString());
             if (settings["initObject"].IsFunction())
                 this->_initObject = new Tools::Lua::Ref(settings["initObject"]);
             if (settings["update"].IsFunction())
                 this->_update = new Tools::Lua::Ref(settings["update"]);
-            this->_settings = new Tools::Lua::Ref(settings);
         }
         catch (std::exception& e)
         {
@@ -45,16 +43,13 @@ namespace Client { namespace Resources {
 
     void Effect::Init(Tools::Lua::Ref const& object)
     {
-        if (this->_initObject == 0)
-            return;
-        (*this->_initObject)(*this->_settings, object);
+        if (this->_initObject != 0)
+            (*this->_initObject)(*this->_settings, object);
     }
 
     void Effect::Update(Tools::Lua::Ref const& object)
     {
-        if (this->_update == 0)
-            return;
-        (*this->_update)(*this->_settings, object);
+        if (this->_update != 0)
+            (*this->_update)(*this->_settings, object);
     }
-
 }}

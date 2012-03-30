@@ -22,13 +22,14 @@ namespace Client { namespace Resources {
         Tools::Lua::Ref* _update;
 
     public:
-        Effect(Game::Game& game, Tools::Lua::CallHelper& helper, Uint32 pluginId);
+        Effect(Game::Game& game, Tools::Lua::Ref& settings, Uint32 pluginId);
         ~Effect();
 
         void Init(Tools::Lua::Ref const& object);
         void Update(Tools::Lua::Ref const& object);
 
         std::string const& GetName() const { return this->_name; }
+
     private:
         Effect(Effect const&);
         Effect& operator =(Effect const&);

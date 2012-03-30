@@ -92,6 +92,7 @@ namespace Client {
                 {
                     this->_state = WaitingPosition;
                     this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
+                    this->_game->GetResourceManager().LoadAllResources();
                 }
                 break;
             case WaitingPosition:
