@@ -149,6 +149,7 @@ namespace Client {
         if (this->_state != LoggingIn)
             throw std::runtime_error("Bad client state");
         this->_clientId = clientId;
+        this->_network.SetId(clientId);
         this->_state = LoadingResources;
         if (this->_game)
             Tools::Delete(this->_game);

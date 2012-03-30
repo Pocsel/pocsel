@@ -154,8 +154,9 @@ namespace Server { namespace Network {
 
     void Network::_ConnectUdpRead()
     {
-        this->_udpSocket.async_receive(
+        this->_udpSocket.async_receive_from(
             boost::asio::buffer(this->_data, _buffSize),
+            this->_udpSenderEndpoint,
             boost::bind(
                 &Network::_HandleUdpRead, this,
                 boost::asio::placeholders::error,

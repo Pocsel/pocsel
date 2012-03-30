@@ -41,7 +41,7 @@ namespace Client { namespace Network {
         boost::asio::io_service _ioService;
         boost::asio::ip::tcp::socket _socket;
         boost::asio::ip::udp::socket _udpSocket;
-        boost::asio::ip::udp::socket _udpReceiveSocket;
+        boost::asio::ip::udp::endpoint _udpSenderEndpoint;
         boost::thread* _thread;
         std::vector<char> _sizeBuffer;
         std::vector<char> _dataBuffer;
@@ -54,19 +54,30 @@ namespace Client { namespace Network {
         bool _isRunning;
         std::string _lastError;
         float _loading;
+        Uint32 _id;
 
         std::list<UdpPacket*> _outQueueUdp;
         bool _sendingUdp;
-        bool _udp;
 
         std::vector<char> _udpDataBuffer;
-        bool _udpReceive;
+
+        struct {
+            bool canReceive;
+            bool canSend;
+
+            bool serverCanReceive;
+            bool passThroughActive;
+            unsigned int passThroughCount;
+
+            bool ptOkSent;
+        } _udpStatus;
 
     public:
         Network();
         ~Network();
         float GetLoadingProgression();
         void Connect(std::string const& host, std::string const& port);
+        void SetId(Uint32 id);
         void Stop();
         void SendPacket(std::unique_ptr<Common::Packet> packet);
         void SendUdpPacket(std::unique_ptr<UdpPacket> packet);
@@ -94,6 +105,13 @@ namespace Client { namespace Network {
         void _HandleReceivePacketSize(const boost::system::error_code& error);
         void _ReceivePacketContent(unsigned int size);
         void _HandleReceivePacketContent(const boost::system::error_code& error);
+
+        void _PassThrough();
+        void _HandlePacket(Tools::ByteArray* packet);
+        void _TimedDispatch(std::function<void(void)> fx, Uint32 ms);
+        void _ExecDispatch(std::function<void(void)>& message,
+                std::shared_ptr<boost::asio::deadline_timer>,
+                boost::system::error_code const& error);
     };
 
 }}

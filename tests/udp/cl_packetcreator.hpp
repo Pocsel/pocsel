@@ -24,7 +24,7 @@ namespace cl {
         static std::unique_ptr<UdpPacket> PassThrough(Uint32 id, Uint32 type)
         {
             std::cout << "create PassThrough (" << id << ") | " << type << " |\n";
-            UdpPacket* p = new UdpPacket(id);
+            UdpPacket* p = new UdpPacket(id, true);
             p->Write(tst_protocol::ClientToServer::clPassThrough);
 
             p->Write(type);
