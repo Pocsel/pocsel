@@ -280,9 +280,10 @@ namespace Common {
             i %= ChunkSize;
             return i;
         }
-        unsigned int __GetChunkPos(int i, unsigned int start)
+        unsigned int __GetChunkPos(int i, unsigned int start)//, bool debug)
         {
-            std::cout << "i=" << i << ", start=" << start << "\n";
+//            if (debug)
+//                std::cout << "i=" << i << ", start=" << start << "\n";
             while (i < 0)
             {
                 start -= 1;
@@ -303,21 +304,23 @@ namespace Common {
         double x, y, z;
 
         x = -distance;
-        while (x < distance)
+        while (x < distance)// || __GetChunkPos(x + (int)pos.chunk.x, pos.world.x, false) == __GetChunkPos(distance + (int)pos.chunk.x, pos.world.x, false))
         {
-            std::cout << "x=" << x << ", ";
-            cx = __GetChunkPos(x + (int)pos.chunk.x, pos.world.x);
-            std::cout << "cx=" << cx << "\n";
+//            std::cout << "x=" << x << ", ";
+            cx = __GetChunkPos(x + (int)pos.chunk.x, pos.world.x);//, /*XXX DEBUG*/ true);
+//            std::cout << "cx=" << cx << "\n";
             y = -distance;
-            while (y < distance)
+            while (y < distance)// || __GetChunkPos(y + (int)pos.chunk.y, pos.world.y, false) == __GetChunkPos(distance + (int)pos.chunk.y, pos.world.y, false))
             {
-                cy = __GetChunkPos(y + (int)pos.chunk.y, pos.world.y);
-                std::cout << "y=" << y << ", cy=" << cy << "\n";
+                cy = __GetChunkPos(y + (int)pos.chunk.y, pos.world.y);//, /* XXX DEBUG */x == -distance);
+//                if (x == -distance)
+//                    std::cout << "y=" << y << ", cy=" << cy << "\n";
                 z = -distance;
-                while (z < distance)
+                while (z < distance)// || __GetChunkPos(z + (int)pos.chunk.z, pos.world.z, false) == __GetChunkPos(distance + (int)pos.chunk.z, pos.world.z, false))
                 {
-                    cz = __GetChunkPos(z + (int)pos.chunk.z, pos.world.z);
-                    std::cout << "z=" << z << ", cz=" << cz << "\n";
+                    cz = __GetChunkPos(z + (int)pos.chunk.z, pos.world.z);//, /* XXX DEBUG */ x == -distance && y == -distance);
+//                    if (x == -distance && y == -distance)
+//                        std::cout << "z=" << z << ", cz=" << cz << "\n";
 
 
                     if (x == -distance || y == -distance || z == -distance ||
@@ -336,9 +339,18 @@ namespace Common {
                                 dy = GR_ABS(dy);
                                 for (zz = 0; zz < (int)ChunkSize; ++zz)
                                 {
-                                    if ((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
+                                    if (((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
                                         (zy == 0 || zy == 1 || zy == ChunkSize - 2 || zy == ChunkSize - 1) &&
-                                        (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1))
+                                        (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1)) ||
+                                            (zx == zy && zy == zz) ||
+                                            (zx == (int)ChunkSize-zy && (int)ChunkSize-zy == zz) ||
+                                            ((int)ChunkSize-zx == zy && zy == zz) ||
+                                            (zx == zy && zy == (int)ChunkSize-zz) ||
+
+                                            ((zx == 0 || zx == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1)) ||
+                                            ((zx == 0 || zx == ChunkSize - 1) && (zy == 0 || zy == ChunkSize - 1)) ||
+                                            ((zy == 0 || zy == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1))
+                                       )
                                         continue;
                                     dz = ((int)cz - (int)pos.world.z) * (int)ChunkSize + (zz - (int)pos.chunk.z);
                                     dz = GR_ABS(dz);
@@ -352,7 +364,7 @@ namespace Common {
                         res.push_back(new CastChunk(BaseChunk::CoordsToId(cx, cy, cz), true));
 
                     if (z == -distance && __GetCubePos(z + (int)pos.chunk.z) != 0)
-                        z += (int)ChunkSize - (int)pos.chunk.z;
+                        z += (int)ChunkSize - (int)__GetCubePos(z + (int)pos.chunk.z);
                     //{
                     //    while (__GetCubePos(z + pos.chunk.z) != 0)
                     //        z += 1;
@@ -361,7 +373,7 @@ namespace Common {
                         z += ChunkSize;
                 }
                 if (y == -distance && __GetCubePos(y + (int)pos.chunk.y) != 0)
-                    y += (int)ChunkSize - (int)pos.chunk.y;
+                    y += (int)ChunkSize - (int)__GetCubePos(y + (int)pos.chunk.y);
                 //{
                 //    while (__GetCubePos(y + pos.chunk.y) != 0)
                 //        y += 1;
@@ -370,7 +382,7 @@ namespace Common {
                     y += ChunkSize;
             }
             if (x == -distance && __GetCubePos(x + (int)pos.chunk.x) != 0)
-                x += (int)ChunkSize - (int)pos.chunk.x;
+                x += (int)ChunkSize - (int)__GetCubePos(x + (int)pos.chunk.x);
             //{
             //    while (__GetCubePos(x + pos.chunk.x) != 0)
             //        x += 1;
