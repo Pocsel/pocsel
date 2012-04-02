@@ -5,7 +5,6 @@
 #include "tools/VectorSerializer.hpp"
 
 #include "common/OrientedPosition.hpp"
-#include "common/PositionSerializer.hpp"
 
 namespace Common {
 

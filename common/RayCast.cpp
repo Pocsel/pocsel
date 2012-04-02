@@ -25,10 +25,11 @@ namespace Common {
                 vx = pos.direction.x,
                 vy = pos.direction.y,
                 vz = pos.direction.z;
+            Position p = GetPositionInChunk(pos.position);
             const double
-                px = pos.position.chunk.x,
-                pz = pos.position.chunk.z,
-                py = pos.position.chunk.y;
+                px = p.x,
+                pz = p.z,
+                py = p.y;
 
             int sign;
             double dist;
@@ -124,7 +125,7 @@ namespace Common {
 
             for (auto mit = preRes.begin(), mite = preRes.end(); mit != mite; ++mit)
             {
-                world = pos.world;
+                world = GetChunkCoords(pos);
 
                 Tools::Vector3i r = mit->second;
 
@@ -186,6 +187,7 @@ namespace Common {
         void __SphereArea(Common::Position const& pos, float distance,
                     std::vector<Tools::Vector3i>& res)
         {
+            Position p = GetPositionInChunk(pos);
             double sqdist = (double)distance * (double)distance;
 
             res.reserve((std::size_t)(distance*distance*distance*boost::math::constants::pi<double>()*4.0/3.0));
@@ -196,7 +198,7 @@ namespace Common {
                     for (double z = -distance; z < distance; z += 1)
                     {
                         if (x*x+y*y+z*z < sqdist)
-                            res.push_back(Tools::Vector3i((int)(x + pos.chunk.x), (int)(y + pos.chunk.y), (int)(z + pos.chunk.z)));
+                            res.push_back(Tools::Vector3i((int)(x + p.x), (int)(y + p.y), (int)(z + p.z)));
                     }
                 }
             }
@@ -205,6 +207,8 @@ namespace Common {
         void __CubeArea(Common::Position const& pos, float distance,
                     std::vector<Tools::Vector3i>& res)
         {
+            Position p = GetPositionInChunk(pos);
+
             res.reserve((std::size_t)(distance*distance*distance*8));
             for (double x = -distance; x < distance; x += 1)
             {
@@ -212,7 +216,7 @@ namespace Common {
                 {
                     for (double z = -distance; z < distance; z += 1)
                     {
-                        res.push_back(Tools::Vector3i((int)(x + pos.chunk.x), (int)(y + pos.chunk.y), (int)(z + pos.chunk.z)));
+                        res.push_back(Tools::Vector3i((int)(x + p.x), (int)(y + p.y), (int)(z + p.z)));
                     }
                 }
             }
@@ -228,7 +232,7 @@ namespace Common {
 
             for (auto mit = preRes.begin(), mite = preRes.end(); mit != mite; ++mit)
             {
-                world = pos.world;
+                world = GetChunkCoords(pos);
 
                 Tools::Vector3i r = *mit;
 

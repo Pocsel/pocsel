@@ -98,8 +98,8 @@ namespace Server { namespace Game {
         if (!player->IsInGame())
             return;
 
-        Common::Position p0(targetPos.world,
-                            Tools::Vector3f((float)targetPos.chunk.x + 0.5f,
+        Common::Position p0(GetCubePosition(targetPos) +
+                            Tools::Vector3d((float)targetPos.chunk.x + 0.5f,
                                             (float)targetPos.chunk.y + 0.5f,
                                             (float)targetPos.chunk.z + 0.5f));
 

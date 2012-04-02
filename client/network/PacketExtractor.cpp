@@ -4,7 +4,6 @@
 #include "client/network/PacketExtractor.hpp"
 #include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
-#include "common/PositionSerializer.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
 
 namespace Client { namespace Network {

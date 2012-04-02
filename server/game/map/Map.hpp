@@ -5,10 +5,10 @@
 
 #include "server/game/map/Chunk.hpp"
 #include "server/game/map/BigChunk.hpp"
+#include "common/Position.hpp"
 
 namespace Common {
     class Packet;
-    struct Position;
     struct MovingOrientedPosition;
     struct CubePosition;
 }

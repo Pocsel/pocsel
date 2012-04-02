@@ -2,10 +2,10 @@
 #define __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 
 #include "server/game/map/Chunk.hpp"
+#include "common/Position.hpp"
 
 namespace Common {
     class Packet;
-    struct Position;
 }
 
 namespace Tools {
