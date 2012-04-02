@@ -1,3 +1,7 @@
+#include "server/network/PacketCreator.hpp"
+#include "server/network/ChunkSerializer.hpp"
+#include "server/network/UdpPacket.hpp"
+
 #include "tools/VectorSerializer.hpp"
 
 #include "protocol/protocol.hpp"
@@ -8,9 +12,6 @@
 #include "common/CubeTypeSerializer.hpp"
 #include "common/PositionSerializer.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
-
-#include "server/network/PacketCreator.hpp"
-#include "server/network/ChunkSerializer.hpp"
 
 namespace Server { namespace Network {
 
@@ -46,12 +47,28 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(p);
     }
 
+    std::unique_ptr<UdpPacket> PacketCreator::PassThrough()
+    {
+        UdpPacket* p = new UdpPacket(true);
+        p->Write(Protocol::ServerToClient::SvPassThrough);
+
+        return std::unique_ptr<UdpPacket>(p);
+    }
+
+    std::unique_ptr<Common::Packet> PacketCreator::PassThroughOk()
+    {
+        Common::Packet* p = new Common::Packet();
+        p->Write(Protocol::ServerToClient::SvPassThroughOk);
+
+        return std::unique_ptr<Common::Packet>(p);
+    }
+
     std::unique_ptr<Common::Packet> PacketCreator::Ping(Uint64 timestamp)
     {
         Common::Packet* p(new Common::Packet);
         p->Write((Protocol::ActionType)Protocol::ServerToClient::Ping);
 
-        p->Write(timestamp); // timestamp agréé par le commité du temps
+        p->Write(timestamp);
         return std::unique_ptr<Common::Packet>(p);
     }
 
@@ -136,14 +153,14 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(ptr);
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::ItemMove(Common::MovingOrientedPosition const& pos,
+    std::unique_ptr<UdpPacket> PacketCreator::ItemMove(Common::MovingOrientedPosition const& pos,
                                                             Uint32 itemId)
     {
-        Common::Packet* ptr(new Common::Packet);
+        UdpPacket* ptr(new UdpPacket);
         ptr->Write(Protocol::ServerToClient::ItemMove);
 
         ptr->Write(pos);
         ptr->Write(itemId);
-        return std::unique_ptr<Common::Packet>(ptr);
+        return std::unique_ptr<UdpPacket>(ptr);
     }
 }}

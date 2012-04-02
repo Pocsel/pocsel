@@ -25,6 +25,7 @@ namespace Client {
     }
     namespace Resources {
         class ITexture;
+        class Effect;
     }
 }
 
@@ -42,6 +43,7 @@ namespace Client { namespace Resources {
         std::map<Uint32, Tools::Renderers::ITexture2D*> _textures;
         std::map<Uint32, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextures;
         std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
+        std::map<Uint32, std::map<std::string, Effect*>> _effects;
         std::map<Uint32, std::string> _scripts;
 
     public:
@@ -64,6 +66,7 @@ namespace Client { namespace Resources {
         Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& filename);
         std::string GetScript(Uint32 pluginId, std::string const& filename);
         std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& filename);
+        Effect& GetEffect(Uint32 pluginId, std::string const& name);
 
         std::unique_ptr<ITexture> CreateTexture(Uint32 id);
         std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> CreateTextureAtlas(std::list<Uint32> const& textureIds);
@@ -77,8 +80,11 @@ namespace Client { namespace Resources {
             return it != this->_resourceToPluginId.end() ? it->second : 0;
         }
 
+        void LoadAllResources();
+
     private:
         void _InitErrorTexture();
+        void _LoadEffects();
     };
 
 }}

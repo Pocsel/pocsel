@@ -92,6 +92,7 @@ namespace Client {
                 {
                     this->_state = WaitingPosition;
                     this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
+                    this->_game->GetResourceManager().LoadAllResources();
                 }
                 break;
             case WaitingPosition:
@@ -149,6 +150,7 @@ namespace Client {
         if (this->_state != LoggingIn)
             throw std::runtime_error("Bad client state");
         this->_clientId = clientId;
+        this->_network.SetId(clientId);
         this->_state = LoadingResources;
         if (this->_game)
             Tools::Delete(this->_game);

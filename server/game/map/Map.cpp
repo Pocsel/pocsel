@@ -8,6 +8,7 @@
 #include "common/MovingOrientedPosition.hpp"
 #include "common/CubePosition.hpp"
 #include "common/Packet.hpp"
+#include "common/RayCast.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
 
@@ -26,6 +27,7 @@
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/database/ResourceManager.hpp"
 #include "server/network/PacketCreator.hpp"
+#include "server/network/UdpPacket.hpp"
 
 namespace Server { namespace Game { namespace Map {
 
@@ -129,22 +131,29 @@ namespace Server { namespace Game { namespace Map {
         this->GetChunk(Chunk::CoordsToId(pos.world), cb);
     }
 
-    void Map::DestroyCubes(std::vector<Common::CubePosition> const& pos)
+    //void Map::DestroyCubes(std::vector<Common::CubePosition> const& pos)
+    //{
+    //    std::map<Chunk::IdType, std::vector<Chunk::CoordsType>> positions;
+
+    //    std::for_each(pos.begin(), pos.end(), [&positions](Common::CubePosition const& p)
+    //        {
+    //            positions[Chunk::CoordsToId(p.world)].push_back(p.chunk);
+    //        }
+    //        );
+
+    //    std::for_each(positions.begin(), positions.end(), [this](std::pair<Chunk::IdType const, std::vector<Chunk::CoordsType>>& p)
+    //        {
+    //            ChunkCallback cb(std::bind(&Map::_DestroyCubes, this, std::placeholders::_1, p.second));
+    //            this->GetChunk(p.first, cb);
+    //        }
+    //        );
+    //}
+
+    void Map::DestroyCubes(std::vector<Common::CastChunk*> const& pos)
     {
-        std::map<Chunk::IdType, std::vector<Chunk::CoordsType>> positions;
-
-        std::for_each(pos.begin(), pos.end(), [&positions](Common::CubePosition const& p)
-            {
-                positions[Chunk::CoordsToId(p.world)].push_back(p.chunk);
-            }
-            );
-
-        std::for_each(positions.begin(), positions.end(), [this](std::pair<Chunk::IdType const, std::vector<Chunk::CoordsType>>& p)
-            {
-                ChunkCallback cb(std::bind(&Map::_DestroyCubes, this, std::placeholders::_1, p.second));
-                this->GetChunk(p.first, cb);
-            }
-            );
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_PreDestroyCubes, this, pos));
+        this->_messageQueue->PushMessage(m);
     }
 
     void Map::AddPlayer(std::shared_ptr<Player> const& p)
@@ -321,6 +330,39 @@ namespace Server { namespace Game { namespace Map {
 
         if (send)
             this->_SendChunkToPlayers(chunk);
+    }
+
+    void Map::_DestroyChunk(Chunk::IdType id)
+    {
+        Chunk* chunk = this->_chunkManager->GetChunk(id);
+        if (chunk == 0)
+        {
+            chunk = new Chunk(id);
+            this->_SendChunkToPlayers(chunk);
+            this->_chunkManager->AddChunk(std::unique_ptr<Chunk>(chunk));
+        }
+        else
+        {
+            chunk->StealCubes();
+            this->_SendChunkToPlayers(chunk);
+        }
+    }
+
+    void Map::_PreDestroyCubes(std::vector<Common::CastChunk*> pos)
+    {
+        for (auto it = pos.begin(), ite = pos.end(); it != ite; ++it)
+        {
+            if ((*it)->IsFull() == true)
+                this->_DestroyChunk((*it)->id);
+            else if ((*it)->IsEmpty() == false)
+            {
+                ChunkCallback
+                    cb(std::bind(&Map::_DestroyCubes, this, std::placeholders::_1, (*it)->GetContained()));
+                this->GetChunk((*it)->id, cb);
+            }
+
+            Tools::Delete(*it);
+        }
     }
 
     void Map::_SendChunkToPlayers(Chunk* chunk)

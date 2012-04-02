@@ -20,6 +20,9 @@ namespace Client { namespace Network {
     class PacketCreator
     {
     public:
+        static std::unique_ptr<Common::Packet> UdpReady(bool ready);
+        static std::unique_ptr<UdpPacket> PassThrough(Uint32 id);
+        static std::unique_ptr<Common::Packet> PassThroughOk();
         static std::unique_ptr<Common::Packet> Login(std::string const& login);
         static std::unique_ptr<Common::Packet> Pong(Uint64 timestamp);
         static std::unique_ptr<Common::Packet> NeedChunks(std::deque<Common::BaseChunk::IdType>& chunkIds);

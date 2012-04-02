@@ -12,9 +12,9 @@ namespace Tools { namespace Lua {
 
     namespace {
 
-		template<class T> struct _PointerWrapper { T* ptr; };
+        template<class T> struct _PointerWrapper { T* ptr; };
         template<class T> struct _GetLuaType { typedef T* type; };
-		template<class T> struct _GetLuaType<T*> { typedef T* type; };
+        template<class T> struct _GetLuaType<T*> { typedef T* type; };
         template<class T> struct _GetLuaType<T&> : public _GetLuaType<T> {};
         template<class T> struct _GetLuaType<const T> : public _GetLuaType<T> {};
         template<> struct _GetLuaType<bool>          { typedef bool type; };
@@ -27,9 +27,9 @@ namespace Tools { namespace Lua {
         template<> struct _GetLuaType<std::string>   { typedef std::string type; };
 
         template<class T> struct _DeRef;
-		template<class T> struct _DeRef<T*> { static T& Do(T* o) { return *o; } };
+        template<class T> struct _DeRef<T*> { static T& Do(T* o) { return *o; } };
         template<class T> struct _DeRef<T*&> : public _DeRef<T*> {};
-		template<class T> struct _DeRef<T&> { static T& Do(T& o) { return o; } };
+        template<class T> struct _DeRef<T&> { static T& Do(T& o) { return o; } };
         template<class T> struct _NoDeRef { static T Do(T o) { return o; } };
         template<> struct _DeRef<bool>          : public _NoDeRef<bool>          {};
         template<> struct _DeRef<int>           : public _NoDeRef<int>           {};
@@ -40,9 +40,9 @@ namespace Tools { namespace Lua {
         template<> struct _DeRef<double>        : public _NoDeRef<double>        {};
         template<> struct _DeRef<std::string>   : public _NoDeRef<std::string>   {};
 
-		template<class T, class U> struct _DeRef2 { static U Do(T const& o) { return o; } };
-		template<class T, class U> struct _DeRef2<T*, U> { static U& Do(T* o) { return *o; } };
-		template<class T, class U> struct _DeRef2<T*, U*> { static U* Do(T* o) { return o; } };
+        template<class T, class U> struct _DeRef2 { static U Do(T const& o) { return o; } };
+        template<class T, class U> struct _DeRef2<T*, U> { static U& Do(T* o) { return *o; } };
+        template<class T, class U> struct _DeRef2<T*, U*> { static U* Do(T* o) { return o; } };
 
         template<class TRet, class TArgs>
         struct _Caller
@@ -178,6 +178,7 @@ namespace Tools { namespace Lua {
     template<> double Ref::To<double>() const throw();
     template<> float Ref::To<float>() const throw();
     template<> std::string Ref::To<std::string>() const throw();
+    template<> inline Ref Ref::To<Ref>() const throw(std::runtime_error) { return *this; }
 
     template<class T>
         inline bool Ref::Is() const throw()
@@ -215,6 +216,7 @@ namespace Tools { namespace Lua {
     template<> double Ref::Check<double>() const throw(std::runtime_error);
     template<> float Ref::Check<float>() const throw(std::runtime_error);
     template<> std::string Ref::Check<std::string>() const throw(std::runtime_error);
+    template<> inline Ref Ref::Check<Ref>() const throw(std::runtime_error) { return *this; }
 
     template <typename T>
         inline T Ref::To(T const& defaultValue) const throw()

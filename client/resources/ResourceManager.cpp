@@ -10,6 +10,7 @@
 #include "client/resources/ResourceManager.hpp"
 #include "client/resources/ITexture.hpp"
 #include "client/resources/AnimatedTexture.hpp"
+#include "client/resources/Effect.hpp"
 #include "client/resources/Texture.hpp"
 #include "client/window/Window.hpp"
 #include "client/Settings.hpp"
@@ -211,6 +212,17 @@ namespace Client { namespace Resources {
         return this->_database.GetResource(this->_database.GetResourceId(pluginId, filename));
     }
 
+    Effect& ResourceManager::GetEffect(Uint32 pluginId, std::string const& name)
+    {
+        auto it = this->_effects.find(pluginId);
+        if (it == this->_effects.end())
+            throw std::runtime_error("Bad pluginId (remove your cache)");
+        auto itEffect = it->second.find(name);
+        if (itEffect == it->second.end())
+            throw std::runtime_error("Bad pluginId (remove your cache)");
+        return *itEffect->second;
+    }
+
     std::unique_ptr<ITexture> ResourceManager::CreateTexture(Uint32 id)
     {
         auto res = this->_database.GetResource(id);
@@ -244,6 +256,34 @@ namespace Client { namespace Resources {
             0, 0, 0, 255
         };
         this->_textures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, Tools::Vector2u(2, 2)).release();
+    }
+
+    void ResourceManager::LoadAllResources()
+    {
+        this->_LoadEffects();
+    }
+
+    void ResourceManager::_LoadEffects()
+    {
+        auto const& resources = this->_database.GetAllResources("lua");
+
+        auto& interpreter = this->_game.GetInterpreter();
+        auto clientNs = interpreter.Globals().Set("Client", interpreter.MakeTable());
+        auto effectNs = clientNs.Set("Effect", interpreter.MakeTable());
+
+        for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
+        {
+            auto createEffect =
+                [this, &it](Tools::Lua::CallHelper& helper)
+                {
+                    auto pluginId = (*it)->pluginId;
+                    auto effect = new Effect(this->_game, helper.PopArg(), pluginId);
+                    this->_effects[pluginId][effect->GetName()] = effect;
+                    Tools::log << "Register effect \"" << effect->GetName() << "\" (plugin: " << pluginId << ")." << std::endl;
+                };
+            effectNs.Set("Create", interpreter.MakeFunction(createEffect));
+            interpreter.DoString(std::string((char const*)(*it)->data, (*it)->size));
+        }
     }
 
 }}
