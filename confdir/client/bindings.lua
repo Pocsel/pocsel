@@ -39,6 +39,7 @@ bind("Rctrl", "crouch")
 
 bind("LeftClick", "fire")
 bind("RightClick", "altfire")
+bind("Z", "altfire")
 
 bind("Escape", "menu")
 

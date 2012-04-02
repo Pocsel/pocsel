@@ -163,6 +163,9 @@ namespace Server { namespace ClientManagement {
     {
         typedef void (*ActionCallback)(ClientManager&, Client&, Tools::ByteArray const&);
         static ActionCallback actions[] = {
+            0, // UdpReady
+            0, // ClPassThrough
+            0, // ClPassThroughOk
             &ClientActionsNS::_HandleLogin,
             &ClientActionsNS::_HandlePong,
             &ClientActionsNS::_HandleNeedChunks,
@@ -175,16 +178,16 @@ namespace Server { namespace ClientManagement {
             &ClientActionsNS::_HandleAction,
         };
 
-        static_assert((int) Protocol::ClientToServer::Login == 0, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::Pong == 1, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::NeedChunks == 2, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::GetNeededResourceIds == 3, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::GetResourceRange == 4, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::GetCubeType == 5, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::Settings == 6, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::TeleportOk == 7, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::Move == 8, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::Action == 9, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Login == 3, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Pong == 4, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::NeedChunks == 5, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::GetNeededResourceIds == 6, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::GetResourceRange == 7, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::GetCubeType == 8, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Settings == 9, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::TeleportOk == 10, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Move == 11, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Action == 12, "wrong callback index");
 
 
         static_assert((size_t)Protocol::ClientToServer::NbPacketTypeClient == sizeof(actions) / sizeof(*actions),
@@ -196,10 +199,7 @@ namespace Server { namespace ClientManagement {
         if (action >= (sizeof(actions) / sizeof(*actions)))
             throw std::runtime_error("Unknown action: " + Tools::ToString<Uint32>(action));
 
-#ifdef DEBUG
-        if (actions[action] == 0)
-            Tools::error << "Action not coded yet!\n";
-#endif
+        assert(actions[action] != 0 && "action networkspecific ne doit pas se retrouver ici.");
 
         actions[action](manager, client, packet);
     }

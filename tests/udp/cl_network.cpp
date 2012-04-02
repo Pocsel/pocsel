@@ -367,9 +367,16 @@ namespace cl {
             std::cout << "udp packet received from " <<
                 this->_udpSenderEndpoint.address() << ":" << this->_udpSenderEndpoint.port() << "\n";
 
-            auto p = new Tools::ByteArray();
-            p->SetData(this->_udpDataBuffer.data(), (Uint32)size);
-            this->_HandlePacket(p);
+            if (this->_udpStatus.canSend == true && this->_udpSenderEndpoint != this->_udpSocket.remote_endpoint())
+            {
+                std::cout << "packet received from the wrong endpoint, ignoring\n";
+            }
+            else
+            {
+                auto p = new Tools::ByteArray();
+                p->SetData(this->_udpDataBuffer.data(), (Uint32)size);
+                this->_HandlePacket(p);
+            }
             this->_ReceiveUdpPacket();
         }
     }

@@ -20,10 +20,20 @@ namespace Server {
         this->_game = new Game::Game(*this, *this->_admMessageQueue);
 
         Network::Network::NewConnectionHandler
-            nch(std::bind(&ClientManagement::ClientManager::HandleNewClient, this->_clientManager, std::placeholders::_1));
-        Network::Network::UdpPacketHandler
-            uph(std::bind(&ClientManagement::ClientManager::HandleUdpPacket, this->_clientManager, std::placeholders::_1));
-        this->_network = new Network::Network(*this, nch, uph);
+            nch(std::bind(&ClientManagement::ClientManager::HandleNewClient,
+                          this->_clientManager,
+                          std::placeholders::_1,
+                          std::placeholders::_2));
+        Network::Network::PacketHandler
+            ph(std::bind(&ClientManagement::ClientManager::HandlePacket,
+                          this->_clientManager,
+                          std::placeholders::_1,
+                          std::placeholders::_2));
+        Network::Network::ErrorHandler
+            eh(std::bind(&ClientManagement::ClientManager::HandleClientError,
+                          this->_clientManager,
+                          std::placeholders::_1));
+        this->_network = new Network::Network(*this, nch, ph, eh);
     }
 
     Server::~Server()

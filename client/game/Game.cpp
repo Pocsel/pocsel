@@ -74,12 +74,14 @@ namespace Client { namespace Game {
 
     void Game::Render()
     {
+        // XXX
         this->_renderer.BeginDraw(this->_renderTarget.get());
         this->_renderer.SetProjectionMatrix(Tools::Matrix4<float>::CreatePerspective(90, 1, 0.02f, 500.0f));
         this->_renderer.SetViewMatrix(Tools::Matrix4<float>::CreateLookAt(this->GetPlayer().GetCamera().direction * -50, this->GetPlayer().GetCamera().direction, Tools::Vector3f(0, 1, 0)));
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
         this->_map->GetChunkManager().Render();
         this->_renderer.EndDraw();
+        // XXX
 
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
         this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
@@ -90,12 +92,14 @@ namespace Client { namespace Game {
         this->_player->Render();
         this->_renderer.EndDraw();
 
+        // XXX
         this->_renderer.BeginDraw2D();
         this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(1, 1, 0) * Tools::Matrix4<float>::CreateScale(128, 128, 1));
         this->_renderShader->BeginPass();
         this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture());
         this->_renderShader->EndPass();
         this->_renderer.EndDraw2D();
+        // XXX
     }
 
 }}

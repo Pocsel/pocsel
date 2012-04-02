@@ -2,10 +2,16 @@
 #define __SERVER_NETWORK_CLIENTCONNECTION_HPP__
 
 #include "common/Packet.hpp"
+#include "server/network/UdpPacket.hpp"
 
-namespace Server { namespace ClientManagement {
-    class ClientManager;
-}}
+namespace Server {
+    namespace Network {
+        class Network;
+    }
+    namespace ClientManagement {
+        class ClientManager;
+    }
+}
 
 namespace Server { namespace Network {
 
@@ -14,54 +20,80 @@ namespace Server { namespace Network {
         private boost::noncopyable
     {
     public:
-        typedef std::function<void(void)> ErrorCallback;
-        typedef std::function<void(std::unique_ptr<Tools::ByteArray>&)> PacketCallback;
+        typedef std::function<void(Uint32)> ErrorCallback;
+        typedef std::function<void(Uint32, std::unique_ptr<Tools::ByteArray>&)> PacketCallback;
 
     private:
         static const unsigned int _bufferSize = 8192;
 
+        Network& _network;
+        Uint32 _id;
         boost::asio::io_service& _ioService;
         boost::asio::ip::tcp::socket* _socket;
-        boost::asio::ip::udp::socket _udpSocket;
         Uint8* _data;
         size_t _size;
         size_t _offset;
         size_t _toRead;
         std::queue<std::unique_ptr<Common::Packet>> _toSendPackets;
-        std::queue<std::unique_ptr<Common::Packet>> _toSendUdpPackets;
+        std::queue<std::unique_ptr<UdpPacket>> _toSendUdpPackets;
         bool _connected;
         bool _writeConnected;
         bool _udpWriteConnected;
         ErrorCallback _errorCallback;
         PacketCallback _packetCallback;
-        bool _udp;
+
+        struct {
+            bool udpReadySent;
+            bool udpReady;
+
+            bool endpointKnown;
+            boost::asio::ip::udp::endpoint endpoint;
+
+            bool passThroughActive;
+            unsigned int passThroughCount;
+
+            bool ptOkSent;
+        } _udpStatus;
 
     public:
-        ClientConnection(boost::asio::ip::tcp::socket* socket);
+        ClientConnection(
+                Network& network,
+                Uint32 id,
+                boost::asio::ip::tcp::socket* socket,
+                ErrorCallback& errorCallback,
+                PacketCallback& packetCallback);
         ~ClientConnection();
-        void SetCallbacks(ErrorCallback& errorCallback, PacketCallback& packetCallback);
 
         // threadsafe
         void SendPacket(std::unique_ptr<Common::Packet> packet);
-        void SendUdpPacket(std::unique_ptr<Common::Packet> packet);
+        void SendUdpPacket(std::unique_ptr<UdpPacket> packet);
         void Shutdown();
         void ConnectRead();
+
+        // from Network
+        bool CheckEndpoint(boost::asio::ip::udp::endpoint const& sender);
+        void HandlePacket(std::unique_ptr<Tools::ByteArray>& packet); // rcv a 'clean' packet
+        std::unique_ptr<UdpPacket> GetUdpPacket();
+        boost::asio::ip::udp::endpoint const& GetEndpoint() const { return this->_udpStatus.endpoint; }
 
     private:
         void _Shutdown();
         void _HandleError(boost::system::error_code const& error);
         void _SendPacket(std::shared_ptr<Common::Packet> packet);
-        void _SendUdpPacket(std::shared_ptr<Common::Packet> packet);
+        void _SendUdpPacket(std::shared_ptr<UdpPacket> packet);
         void _ConnectRead();
         void _ConnectWrite();
-        void _ConnectUdpWrite();
         void _HandleRead(boost::system::error_code const error,
                          std::size_t transferredBytes);
         void _HandleWrite(boost::shared_ptr<Common::Packet> packetSent,
                           boost::system::error_code const error,
                           std::size_t bytes_transferred);
-        void _HandleUdpWrite(boost::shared_ptr<Common::Packet> packetSent,
-                          boost::system::error_code const error);
+
+        void _PassThrough();
+        void _TimedDispatch(std::function<void(void)> fx, Uint32 ms);
+        void _ExecDispatch(std::function<void(void)>& message,
+                std::shared_ptr<boost::asio::deadline_timer>,
+                boost::system::error_code const& error);
     };
 
 }}
