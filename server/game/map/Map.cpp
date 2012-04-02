@@ -370,8 +370,15 @@ namespace Server { namespace Game { namespace Map {
         auto packet = Network::PacketCreator::Chunk(*chunk);
         for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
         {
-            auto toto = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
-            this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
+            Player* p = it->second.get();
+            int viewDist = p->GetViewDistance();
+            if (viewDist >= std::abs((int)p->GetPosition().position.position.world.x - (int)chunk->coords.x) ||
+                viewDist >= std::abs((int)p->GetPosition().position.position.world.y - (int)chunk->coords.y) ||
+                viewDist >= std::abs((int)p->GetPosition().position.position.world.z - (int)chunk->coords.z))
+            {
+                auto toto = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
+                this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
+            }
         }
     }
 

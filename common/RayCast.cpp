@@ -343,9 +343,9 @@ namespace Common {
                                         (zy == 0 || zy == 1 || zy == ChunkSize - 2 || zy == ChunkSize - 1) &&
                                         (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1)) ||
                                             (zx == zy && zy == zz) ||
-                                            (zx == (int)ChunkSize-zy && (int)ChunkSize-zy == zz) ||
-                                            ((int)ChunkSize-zx == zy && zy == zz) ||
-                                            (zx == zy && zy == (int)ChunkSize-zz) ||
+                                            (zx == (int)ChunkSize-1-zy && (int)ChunkSize-1-zy == zz) ||
+                                            ((int)ChunkSize-1-zx == zy && zy == zz) ||
+                                            (zx == zy && zy == (int)ChunkSize-1-zz) ||
 
                                             ((zx == 0 || zx == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1)) ||
                                             ((zx == 0 || zx == ChunkSize - 1) && (zy == 0 || zy == ChunkSize - 1)) ||
