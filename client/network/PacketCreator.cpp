@@ -11,6 +11,31 @@
 
 namespace Client { namespace Network {
 
+    std::unique_ptr<Common::Packet> PacketCreator::UdpReady(bool ready)
+    {
+        Common::Packet* p = new Common::Packet();
+        p->Write(Protocol::ClientToServer::UdpReady);
+
+        p->Write(ready);
+        return std::unique_ptr<Common::Packet>(p);
+    }
+
+    std::unique_ptr<UdpPacket> PacketCreator::PassThrough(Uint32 id)
+    {
+        UdpPacket* p = new UdpPacket(id, true);
+        p->Write(Protocol::ClientToServer::ClPassThrough);
+
+        return std::unique_ptr<UdpPacket>(p);
+    }
+
+    std::unique_ptr<Common::Packet> PacketCreator::PassThroughOk()
+    {
+        Common::Packet* p = new Common::Packet();
+        p->Write(Protocol::ClientToServer::ClPassThroughOk);
+
+        return std::unique_ptr<Common::Packet>(p);
+    }
+
     std::unique_ptr<Common::Packet> PacketCreator::Login(std::string const& login)
     {
         std::unique_ptr<Common::Packet> p(new Common::Packet());

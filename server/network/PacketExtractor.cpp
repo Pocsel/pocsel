@@ -8,6 +8,19 @@
 
 namespace Server { namespace Network {
 
+    void PacketExtractor::UdpReady(Tools::ByteArray const& p, bool& ready)
+    {
+        p.Read(ready);
+    }
+
+    void PacketExtractor::PassThrough(Tools::ByteArray const&)
+    {
+    }
+
+    void PacketExtractor::PassThroughOk(Tools::ByteArray const&)
+    {
+    }
+
     void PacketExtractor::Login(Tools::ByteArray const& p,
                                 Protocol::Version& major,
                                 Protocol::Version& minor,

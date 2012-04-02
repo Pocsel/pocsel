@@ -1,26 +1,31 @@
-#include "client/precompiled.hpp"
-
 #include "client/network/Network.hpp"
 #include "client/network/UdpPacket.hpp"
+#include "client/network/PacketCreator.hpp"
+
 #include "client/Client.hpp"
-#include "tools/logger/Logger.hpp"
-#include "tools/ToString.hpp"
+
 #include "tools/Deleter.hpp"
+
+#include "protocol/protocol.hpp"
 
 namespace Client { namespace Network {
 
     Network::Network() :
         _socket(_ioService),
         _udpSocket(_ioService),
-        _udpReceiveSocket(_ioService),
         _thread(0),
         _sending(false),
         _isConnected(false),
         _isRunning(false),
-        _loading(0),
-        _sendingUdp(false),
-        _udp(false)
+        _loading(0)
     {
+        this->_udpStatus.canReceive = false;
+        this->_udpStatus.canSend = false;
+        this->_udpStatus.serverCanReceive = false;
+        this->_udpStatus.passThroughActive = false;
+        this->_udpStatus.passThroughCount = 0;
+        this->_udpStatus.ptOkSent = false;
+
         this->_sizeBuffer.resize(2);
         this->_udpDataBuffer.resize(Common::Packet::maxSize);
     }
@@ -43,213 +48,236 @@ namespace Client { namespace Network {
         }
 
         this->_host = host;
-        this->_port = port;
-        this->_isRunning = true;
-        this->_loading = 0;
-        this->_lastError.clear();
-        this->_thread = new boost::thread(std::bind(&Network::_Connect, this, this->_host, this->_port));
-    }
+            this->_port = port;
+            this->_isRunning = true;
+            this->_loading = 0;
+            this->_lastError.clear();
+            this->_thread = new boost::thread(std::bind(&Network::_Connect, this, this->_host, this->_port));
+        }
 
-    Network::~Network()
-    {
-        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { Tools::Delete(p); });
-        std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
-        Tools::Delete(this->_thread);
-    }
-
-    void Network::_Connect(std::string host, std::string port)
-    {
-        try
+        void Network::SetId(Uint32 id)
         {
-            boost::asio::ip::tcp::resolver resolver(this->_ioService);
-            boost::asio::ip::tcp::resolver::query query(host, port);
-            boost::asio::ip::tcp::resolver::iterator endpointIterator = resolver.resolve(query);
-            boost::asio::ip::tcp::resolver::iterator end;
-            boost::system::error_code error = boost::asio::error::host_not_found;
-            while (error && endpointIterator != end)
+            this->_id = id;
+            this->_PassThrough();
+        }
+
+        Network::~Network()
+        {
+            std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { Tools::Delete(p); });
+            std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
+            Tools::Delete(this->_thread);
+        }
+
+        void Network::_Connect(std::string host, std::string port)
+        {
+            try
             {
-                this->_socket.close();
-                this->_socket.connect(*endpointIterator++, error);
+                boost::asio::ip::tcp::resolver resolver(this->_ioService);
+                boost::asio::ip::tcp::resolver::query query(host, port);
+                boost::asio::ip::tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+                boost::asio::ip::tcp::resolver::iterator end;
+                boost::system::error_code error = boost::asio::error::host_not_found;
+                while (error && endpointIterator != end)
+                {
+                    this->_socket.close();
+                    this->_socket.connect(*endpointIterator++, error);
+                }
+                if (error)
+                {
+                    Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed: " << error.message() << ".\n";
+                    this->_isRunning = false;
+                    this->_lastError = error.message();
+                    return;
+                }
+                else
+                {
+                    Tools::log << "Connection to " << host << ":" << port << " is a success.\n";
+                    this->_isConnected = true;
+                }
             }
-            if (error)
+            catch (std::exception& e)
             {
-                Tools::error << "Network::Network: Connection to " << host << ":" << port << " failed: " << error.message() << ".\n";
+                Tools::error << "Network::Network: Exception while connecting to " << host << ":" << port << ": " << e.what() << ".\n";
                 this->_isRunning = false;
-                this->_lastError = error.message();
+                this->_lastError = e.what();
                 return;
             }
-            else
+
+            try
             {
-                this->_isConnected = true;
+                boost::asio::ip::udp::endpoint endpoint(this->_socket.local_endpoint().address(), this->_socket.local_endpoint().port());
+                this->_udpSocket.open(endpoint.protocol());
+                this->_udpSocket.bind(endpoint);
+                Tools::log << "Receiving on (UDP): " <<
+                    this->_socket.local_endpoint().address() <<
+                    ":" << this->_socket.local_endpoint().port() << "\n";
+
+                this->_udpStatus.canReceive = true;
+
+                boost::asio::ip::udp::endpoint sendEndpoint(this->_socket.remote_endpoint().address(), this->_socket.remote_endpoint().port());
+                boost::system::error_code error = boost::asio::error::host_not_found;
+                this->_udpSocket.connect(sendEndpoint, error);
+
+                if (error)
+                {
+                    Tools::error << "Network::Network: Connection to (UDP) " << host << ":" << port << " failed: " << error.message() << ".\n";
+                }
+                else
+                {
+                    Tools::log << "Sending on (UDP): " <<
+                        this->_socket.remote_endpoint().address() <<
+                        ":" << this->_socket.remote_endpoint().port() << "\n";
+                    this->_udpStatus.canSend = true;
+                }
             }
+            catch (std::exception& e)
+            {
+                Tools::error << "Exception while binding to (UDP) : " <<
+                    this->_socket.local_endpoint().address() <<
+                    ":" << this->_socket.local_endpoint().port() << "(" <<
+                    e.what() <<  ")\n";
+            }
+
+            this->_Run();
         }
-        catch (std::exception& e)
+
+        void Network::_Run()
         {
-            Tools::error << "Network::Network: Exception while connecting to " << host << ":" << port << ": " << e.what() << ".\n";
+            this->_ReceivePacketSize();
+            auto toto = PacketCreator::UdpReady(this->_udpStatus.canReceive);
+            this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
+            if (this->_udpStatus.canReceive)
+                this->_ReceiveUdpPacket();
+            this->_ioService.run();
+        }
+
+        void Network::Stop()
+        {
+            if (!this->_isRunning)
+                throw std::runtime_error("Network::Connect called while thread not running");
+
+            this->_ioService.stop();
+            this->_thread->join();
+
+            this->_ioService.reset();
+            if (this->IsConnected())
+                this->_CloseSocket();
             this->_isRunning = false;
-            this->_lastError = e.what();
-            return;
+            this->_lastError.clear();
+            this->_isConnected = false;
+
+            this->_udpStatus.canReceive = false;
+            this->_udpStatus.canSend = false;
+            this->_udpStatus.serverCanReceive = false;
+            this->_udpStatus.passThroughActive = false;
+            this->_udpStatus.passThroughCount = 0;
+            this->_udpStatus.ptOkSent = false;
+
+            // Pas de leak dans le cas où on refait un connect
+            Tools::Delete(this->_thread);
+            this->_thread = 0;
+            std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { Tools::Delete(p); });
+            this->_inQueue.Clear();
+            this->_outQueue.clear();
+            std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
+            this->_outQueueUdp.clear();
         }
 
-        try
+        void Network::SendPacket(std::unique_ptr<Common::Packet> packet)
         {
-            boost::asio::ip::udp::endpoint endpoint(this->_socket.local_endpoint().address(), this->_socket.local_endpoint().port());
-            this->_udpReceiveSocket.open(endpoint.protocol());
-            this->_udpReceiveSocket.bind(endpoint);
-            this->_udpReceive = true;
-        }
-        catch (std::exception& e)
-        {
-            Tools::error << "Network::Network: Exception while Receiving to (UDP) " << host << ":" << port << ": " << e.what() << ".\n";
-            this->_udpReceive = false;
+            std::function<void(void)> fx =
+                std::bind(&Network::_SendPacket,
+                          this,
+                          Tools::Deleter<Common::Packet>::CreatePtr(packet.release()));
+            this->_ioService.dispatch(fx);
         }
 
-        try
+        void Network::_SendPacket(std::shared_ptr<Common::Packet> packet)
         {
-            boost::asio::ip::udp::endpoint endpoint(this->_socket.remote_endpoint().address(), this->_socket.remote_endpoint().port());
-            boost::system::error_code error = boost::asio::error::host_not_found;
-            this->_udpSocket.connect(endpoint, error);
-            if (error)
+            if (!this->_isConnected)
             {
-                Tools::error << "Network::Network: Connection to (UDP) " << host << ":" << port << " failed: " << error.message() << ".\n";
-                this->_udp = false;
+                Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
+                return;
             }
-            else
+
+            this->_outQueue.push_back(Tools::Deleter<Common::Packet>::StealPtr(packet));
+            if (!this->_sending)
             {
-                this->_udp = true;
+                this->_sending = true;
+                this->_SendNext();
             }
         }
-        catch (std::exception& e)
+
+        void Network::SendUdpPacket(std::unique_ptr<UdpPacket> packet)
         {
-            Tools::error << "Network::Network: Exception while connecting to (UDP) " << host << ":" << port << ": " << e.what() << ".\n";
-            this->_udp = false;
-        }
-        this->_Run();
-    }
-
-    void Network::_Run()
-    {
-        this->_ReceivePacketSize();
-        if (this->_udpReceive)
-            this->_ReceiveUdpPacket();
-        this->_ioService.run();
-    }
-
-    void Network::Stop()
-    {
-        if (!this->_isRunning)
-            throw std::runtime_error("Network::Connect called while thread not running");
-
-        this->_ioService.stop();
-        this->_thread->join();
-
-        this->_ioService.reset();
-        if (this->IsConnected())
-            this->_CloseSocket();
-        this->_isRunning = false;
-        this->_lastError.clear();
-        this->_isConnected = false;
-
-        // Pas de leak dans le cas où on refait un connect
-        Tools::Delete(this->_thread);
-        this->_thread = 0;
-        std::for_each(this->_outQueue.begin(), this->_outQueue.end(), [](Common::Packet* p) { Tools::Delete(p); });
-        this->_inQueue.Clear();
-        this->_outQueue.clear();
-        std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
-        this->_outQueueUdp.clear();
-    }
-
-    void Network::SendPacket(std::unique_ptr<Common::Packet> packet)
-    {
-        std::function<void(void)> fx =
-            std::bind(&Network::_SendPacket,
-                      this,
-                      Tools::Deleter<Common::Packet>::CreatePtr(packet.release()));
-        this->_ioService.dispatch(fx);
-    }
-
-    void Network::_SendPacket(std::shared_ptr<Common::Packet> packet)
-    {
-        if (!this->_isConnected)
-        {
-            Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
-            return;
+            std::function<void(void)> fx =
+                std::bind(&Network::_SendUdpPacket,
+                          this,
+                          Tools::Deleter<UdpPacket>::CreatePtr(packet.release()));
+            this->_ioService.dispatch(fx);
         }
 
-        this->_outQueue.push_back(Tools::Deleter<Common::Packet>::StealPtr(packet));
-        if (!this->_sending)
+        void Network::_SendUdpPacket(std::shared_ptr<UdpPacket> packet)
         {
-            this->_sending = true;
-            this->_SendNext();
-        }
-    }
+            if (!this->_isConnected)
+            {
+                Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
+                return;
+            }
 
-    void Network::SendUdpPacket(std::unique_ptr<UdpPacket> packet)
-    {
-        std::function<void(void)> fx =
-            std::bind(&Network::_SendUdpPacket,
-                      this,
-                      Tools::Deleter<UdpPacket>::CreatePtr(packet.release()));
-        this->_ioService.dispatch(fx);
-    }
+            if (this->_udpStatus.canSend == false ||
+                    (packet->forceUdp == false && this->_udpStatus.serverCanReceive == false))
+            {
+                if (packet->forceUdp == true)
+                {
+                    return;
+                }
+                this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(Tools::Deleter<UdpPacket>::StealPtr(packet)));
+                return;
+            }
 
-    void Network::_SendUdpPacket(std::shared_ptr<UdpPacket> packet)
-    {
-        if (!this->_isConnected)
-        {
-            Tools::error << "Network::SendPacket: Sending packet with no open socket.\n";
-            return;
-        }
-
-        if (!this->_udp)
-        {
-            this->_SendPacket(std::shared_ptr<Common::Packet>(Tools::Deleter<UdpPacket>::StealPtr(packet)));
-            return;
+            this->_outQueueUdp.push_back(Tools::Deleter<UdpPacket>::StealPtr(packet));
+            if (!this->_sendingUdp)
+            {
+                this->_sendingUdp = true;
+                this->_SendNextUdp();
+            }
         }
 
-        this->_outQueueUdp.push_back(Tools::Deleter<UdpPacket>::StealPtr(packet));
-        if (!this->_sendingUdp)
+        std::list<Tools::ByteArray*> Network::GetInPackets()
         {
-            this->_sendingUdp = true;
-            this->_SendNextUdp();
+            return this->_inQueue.StealPackets();
         }
-    }
 
-    std::list<Tools::ByteArray*> Network::GetInPackets()
-    {
-        return this->_inQueue.StealPackets();
-    }
-
-    void Network::_CloseSocket()
-    {
-        this->_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-        this->_socket.close();
-
-        this->_udpSocket.close();
-    }
-
-    void Network::_DisconnectedByNetwork(std::string const& error)
-    {
-        this->_isConnected = false;
-        this->_lastError = error;
-
-        try
+        void Network::_CloseSocket()
         {
-            this->_CloseSocket();
-        }
-        catch (std::exception& e)
-        {
-            Tools::error << "Network::_Disconnect: Exception on socket shutdown: \"" << e.what() << "\".\n";
-            return;
-        }
-        Tools::log << "Network::_Disconnect: Socket disconnected.\n";
-    }
+            this->_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+            this->_socket.close();
 
-    void Network::_SendNext()
-    {
-        Common::Packet* p = this->_outQueue.front();
-        std::vector<boost::asio::const_buffer> buffers;
+            this->_udpSocket.close();
+        }
+
+        void Network::_DisconnectedByNetwork(std::string const& error)
+        {
+            this->_isConnected = false;
+            this->_lastError = error;
+
+            try
+            {
+                this->_CloseSocket();
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "Network::_Disconnect: Exception on socket shutdown: \"" << e.what() << "\".\n";
+                return;
+            }
+            Tools::log << "Network::_Disconnect: Socket disconnected.\n";
+        }
+
+        void Network::_SendNext()
+        {
+            Common::Packet* p = this->_outQueue.front();
+            std::vector<boost::asio::const_buffer> buffers;
         buffers.push_back(boost::asio::buffer(p->GetCompleteData(), p->GetCompleteSize()));
         boost::asio::async_write(this->_socket, buffers, boost::bind(&Network::_HandleWrite, this, boost::asio::placeholders::error));
     }
@@ -285,7 +313,8 @@ namespace Client { namespace Network {
         if (error)
         {
             Tools::error << "Network::_HandleWrite: UDP Write error: \"" << error.message() << "\".\n";
-            this->_udp = false;
+            this->_udpStatus.canSend = false;
+            // TODO reparer la socket ?
             std::for_each(this->_outQueueUdp.begin(), this->_outQueueUdp.end(), [](UdpPacket* p) { Tools::Delete(p); });
             this->_outQueueUdp.clear();
         }
@@ -302,8 +331,9 @@ namespace Client { namespace Network {
 
     void Network::_ReceiveUdpPacket()
     {
-        this->_udpReceiveSocket.async_receive(
+        this->_udpSocket.async_receive_from(
             boost::asio::buffer(this->_udpDataBuffer),
+            this->_udpSenderEndpoint,
             boost::bind(
                 &Network::_HandleReceiveUdpPacket, this,
                 boost::asio::placeholders::error,
@@ -320,9 +350,17 @@ namespace Client { namespace Network {
         }
         else
         {
-            auto p = new Tools::ByteArray();
-            p->SetData(this->_udpDataBuffer.data(), (Uint32)size);
-            this->_inQueue.PushPacket(p);
+            if (this->_udpStatus.canSend == true && this->_udpSenderEndpoint != this->_udpSocket.remote_endpoint())
+            {
+                Tools::error << "udp packet received from wrong endpoint(" <<
+                    this->_udpSenderEndpoint.address() << ":" << this->_udpSenderEndpoint.port() << "), ignoring.\n";
+            }
+            else
+            {
+                auto p = new Tools::ByteArray();
+                p->SetData(this->_udpDataBuffer.data(), (Uint32)size);
+                this->_HandlePacket(p);
+            }
             this->_ReceiveUdpPacket();
         }
     }
@@ -360,9 +398,127 @@ namespace Client { namespace Network {
         {
             auto p = new Tools::ByteArray();
             p->SetData(this->_dataBuffer.data(), (Uint32)this->_dataBuffer.size());
-            this->_inQueue.PushPacket(p);
+            //this->_inQueue.PushPacket(p);
+            this->_HandlePacket(p);
             this->_ReceivePacketSize();
         }
     }
+
+    void Network::_HandlePacket(Tools::ByteArray* packet)
+    {
+        if (packet->GetBytesLeft() < sizeof(Protocol::ActionType))
+        {
+            Tools::error << "Received an empty packet\n";
+            Tools::Delete(packet);
+            return ;
+        }
+        char const* data = packet->GetData();
+
+        static_assert(sizeof(Protocol::ActionType) == sizeof(Uint8), "actiontype doit etre un char ici");
+        Protocol::ActionType action = data[0];
+
+        if (action != (Protocol::ActionType)Protocol::ServerToClient::SvPassThrough &&
+            action != (Protocol::ActionType)Protocol::ServerToClient::SvPassThroughOk
+            )
+        {
+            this->_inQueue.PushPacket(packet);
+            return;
+        }
+
+        std::unique_ptr<Tools::ByteArray> _autoDelete(packet);
+
+        try
+        {
+            Protocol::ActionType type;
+            packet->Read(type);
+
+            switch (type)
+            {
+            case (Protocol::ActionType)Protocol::ServerToClient::SvPassThrough:
+                {
+                    this->_udpStatus.passThroughActive = true;
+
+                    if (this->_udpStatus.ptOkSent == false)
+                    {
+                        auto toto = PacketCreator::PassThroughOk();
+                        this->_SendPacket(Tools::Deleter<Common::Packet>::CreatePtr(toto.release()));
+                        this->_udpStatus.ptOkSent = true;
+                    }
+                }
+                break;
+            case (Protocol::ActionType)Protocol::ServerToClient::SvPassThroughOk:
+                {
+                    this->_udpStatus.serverCanReceive = true;
+                }
+                break;
+            default:
+                throw std::runtime_error("Unknown packet type (" + Tools::ToString(type) + ")");
+            }
+        }
+        catch (std::exception& e)
+        {
+            std::cout << "could not read packet, serveur de merde: " << e.what() << "\n";
+        }
+    }
+
+    void Network::_TimedDispatch(std::function<void(void)> fx, Uint32 ms)
+    {
+        boost::asio::deadline_timer* t = new boost::asio::deadline_timer(this->_ioService, boost::posix_time::milliseconds(ms));
+        std::function<void(boost::system::error_code const& e)>
+            function(std::bind(&Network::_ExecDispatch,
+                               this,
+                               fx,
+                               std::shared_ptr<boost::asio::deadline_timer>(t),
+                               std::placeholders::_1));
+        t->async_wait(function);
+    }
+
+    void Network::_ExecDispatch(std::function<void(void)>& message,
+            std::shared_ptr<boost::asio::deadline_timer>,
+            boost::system::error_code const& error)
+    {
+        if (error == boost::asio::error::operation_aborted)
+        {
+            Tools::debug << "Timer aborted;";
+            return;
+        }
+
+        message();
+    }
+
+    void Network::_PassThrough()
+    {
+        if (this->_isConnected == false)
+        {
+            Tools::error << "Not connected, abandonning passthrough\n";
+            return;
+        }
+        if (this->_udpStatus.canSend == false)
+        {
+            Tools::error << "Cannot send UDP, abandonning passthrough\n";
+            return;
+        }
+
+        std::function<void(void)> fx =
+            std::bind(&Network::_PassThrough, this);
+
+        if (this->_udpStatus.passThroughActive == false)
+        {
+            if (this->_udpStatus.passThroughCount == 120)
+            {
+                Tools::error << "Too many tries, abandonning UDP passthrough\n";
+                return;
+            }
+            this->_TimedDispatch(fx, 55);
+        }
+        else
+        {
+            this->_TimedDispatch(fx, 5555);
+        }
+
+        auto toto = PacketCreator::PassThrough(this->_id);
+        this->SendUdpPacket(std::move(toto));
+    }
+
 
 }}

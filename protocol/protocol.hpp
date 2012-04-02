@@ -16,11 +16,29 @@ namespace Protocol {
     ENUM ClientToServer
     {
         /**
+         * (network specific)
+         * bool Ok
+         */
+        UdpReady = 0,
+
+        /**
+         * (network specific)
+         * void
+         */
+        ClPassThrough,
+
+        /**
+         * (network specific)
+         * void
+         */
+        ClPassThroughOk,
+
+        /**
          * Int32 Version Major
          * Int32 Version Minor
          * String login
          */
-        Login = 0,
+        Login,
 
         /**
          * Uint64 timestamp du packet ping
@@ -91,6 +109,18 @@ namespace Protocol {
          *   String world build hash - ajouté le 28/2/12
          */
         LoggedIn = 0,
+
+        /**
+         * (network specific)
+         * void
+         */
+        SvPassThrough,
+
+        /**
+         * (network specific)
+         * void
+         */
+        SvPassThroughOk,
 
         /**
          * Uint64 timestamp
@@ -189,6 +219,9 @@ namespace Tools {
         static inline std::string MakeString(Protocol::ClientToServer var)
         {
             static std::string strings[] = {
+                "UdpReady",
+                "ClPassThrough",
+                "ClPassThroughOk",
                 "Login",
                 "Pong",
                 "NeedChunks",
@@ -215,6 +248,8 @@ namespace Tools {
         {
             static std::string strings[] = {
                 "LoggedIn",
+                "SvPassThrough",
+                "SvPassThroughOk",
                 "Ping",
                 "Chunk",
                 "NeededResourceIds",

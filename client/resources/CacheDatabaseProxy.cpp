@@ -125,6 +125,32 @@ namespace Client { namespace Resources {
         }
     }
 
+    std::list<std::unique_ptr<Common::Resource>> CacheDatabaseProxy::GetAllResources(std::string const& type)
+    {
+        std::list<std::unique_ptr<Common::Resource>> resources;
+        try
+        {
+            auto query = this->_connection->CreateQuery("SELECT id, plugin_id, type, filename, data FROM resource WHERE type LIKE ?");
+            query->Bind(type);
+            while (auto row = query->Fetch())
+            {
+                auto const& arr = row->GetArray(4);
+                resources.push_back(std::unique_ptr<Common::Resource>(new Common::Resource(
+                        row->GetUint32(0),
+                        row->GetUint32(1),
+                        row->GetString(2),
+                        row->GetString(3),
+                        arr.data(),
+                        (Uint32)arr.size())));
+            }
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "Cache error : " << e.what() << "\n";
+        }
+        return resources;
+    }
+
     Uint32 CacheDatabaseProxy::GetResourceId(Uint32 pluginId, std::string const& filename)
     {
         try

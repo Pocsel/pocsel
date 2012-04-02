@@ -57,7 +57,7 @@ namespace Common {
 
                 void Dump()
                 {
-                    std::cout << this->_containedCount << " a la place de " << countMax3 << "\n";
+                    std::cout << this->_containedCount << " sur " << countMax3 << "\n";
                 }
 
                 ~NChunkContainer()

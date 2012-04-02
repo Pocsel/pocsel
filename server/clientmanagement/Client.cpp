@@ -25,7 +25,7 @@ namespace Server { namespace ClientManagement {
         this->_connection->SendPacket(std::move(packet));
     }
 
-    void Client::SendUdpPacket(std::unique_ptr<Common::Packet> packet)
+    void Client::SendUdpPacket(std::unique_ptr<Network::UdpPacket> packet)
     {
         this->_connection->SendUdpPacket(std::move(packet));
     }

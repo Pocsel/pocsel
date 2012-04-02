@@ -11,6 +11,7 @@ namespace Common {
     class Packet;
     struct MovingOrientedPosition;
     struct CubePosition;
+    struct CastChunk;
 }
 
 namespace Tools {
@@ -80,7 +81,8 @@ namespace Server { namespace Game { namespace Map {
         void GetChunk(Chunk::IdType id, ChunkCallback& response);
         void GetChunkPacket(Chunk::IdType id, ChunkPacketCallback& response);
         void DestroyCube(Common::CubePosition const& pos);
-        void DestroyCubes(std::vector<Common::CubePosition> const& pos);
+        //void DestroyCubes(std::vector<Common::CubePosition> const& pos);
+        void DestroyCubes(std::vector<Common::CastChunk*> const& pos);
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
@@ -96,6 +98,8 @@ namespace Server { namespace Game { namespace Map {
         void _MovePlayer(Uint32 id, Common::MovingOrientedPosition pos);
         void _DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos);
         void _DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos);
+        void _DestroyChunk(Chunk::IdType id);
+        void _PreDestroyCubes(std::vector<Common::CastChunk*> cubePos);
         void _SendChunkToPlayers(Chunk* chunk);
         void _Tick(Uint64 currentTime);
         void _TimedSave();
