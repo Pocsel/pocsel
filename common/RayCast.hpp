@@ -2,12 +2,12 @@
 #define __COMMON_RAYCAST_HPP__
 
 #include "common/Position.hpp"
+#include "common/CubePosition.hpp"
 
 #include "tools/Vector3.hpp"
 
 namespace Common {
     struct OrientedPosition;
-    struct CubePosition;
 }
 
 namespace Common {

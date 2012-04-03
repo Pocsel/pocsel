@@ -5,6 +5,7 @@
 #include "tools/IRenderer.hpp"
 
 #include "common/CubePosition.hpp"
+#include "common/Position.hpp"
 
 #include "client/Client.hpp"
 
@@ -42,7 +43,7 @@ namespace Client { namespace Game {
 
         this->_renderer.SetModelMatrix(
             Tools::Matrix4<float>::CreateTranslation(
-                Tools::Vector3f(GetCubePosition(pos) - camera.position)
+                Tools::Vector3f(Common::Position(pos) - camera.position)
                 )
             );
 

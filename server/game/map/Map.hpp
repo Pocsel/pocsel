@@ -6,11 +6,11 @@
 #include "server/game/map/Chunk.hpp"
 #include "server/game/map/BigChunk.hpp"
 #include "common/Position.hpp"
+#include "common/CubePosition.hpp"
 
 namespace Common {
     class Packet;
     struct MovingOrientedPosition;
-    struct CubePosition;
     struct CastChunk;
 }
 

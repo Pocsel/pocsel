@@ -98,7 +98,7 @@ namespace Server { namespace Game {
         if (!player->IsInGame())
             return;
 
-        Common::Position p0(GetCubePosition(targetPos) +
+        Common::Position p0(Common::Position(targetPos) +
                             Tools::Vector3d(0.5));
 
         float dist = (p0 - pos.position).GetMagnitude();
