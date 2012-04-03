@@ -127,8 +127,8 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::DestroyCube(Common::CubePosition const& pos)
     {
-        ChunkCallback cb(std::bind(&Map::_DestroyCube, this, std::placeholders::_1, pos.chunk));
-        this->GetChunk(Chunk::CoordsToId(pos.world), cb);
+        ChunkCallback cb(std::bind(&Map::_DestroyCube, this, std::placeholders::_1, Common::GetCubeCoordsInChunk(pos)));
+        this->GetChunk(Chunk::CoordsToId(Common::GetChunkCoords(pos)), cb);
     }
 
     void Map::DestroyCubes(std::vector<Common::CastChunk*> const& pos)

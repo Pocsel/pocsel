@@ -164,7 +164,7 @@ namespace Common {
                 chunk.y = r.y;
                 chunk.z = r.z;
 
-                res.push_back(Common::CubePosition(world, chunk));
+                res.push_back(Common::CubePosition(world * Common::ChunkSize + chunk));
             }
 
             return res;
@@ -253,7 +253,7 @@ namespace Common {
                 chunk.y = r.y;
                 chunk.z = r.z;
 
-                res.push_back(Common::CubePosition(world, chunk));
+                res.push_back(Common::CubePosition(world * Common::ChunkSize + chunk));
             }
 
             return res;

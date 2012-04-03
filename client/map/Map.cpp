@@ -26,14 +26,14 @@ namespace Client { namespace Map {
         for (auto it = positions.begin(), ite = positions.end(); it != ite; ++it)
         {
             Common::CubePosition const& pos = *it;
-            Chunk::IdType id = Chunk::CoordsToId(pos.world);
+            Chunk::IdType id = Chunk::CoordsToId(Common::GetChunkCoords(pos));
             if (curChunk.get() == 0 || curChunk->id != id)
                 curChunk = this->_chunkManager.GetChunk(id);
 
             if (curChunk == 0)
                 continue;
 
-            if (curChunk->GetCube(pos.chunk.x, pos.chunk.y, pos.chunk.z) != 0)
+            if (curChunk->GetCube(Common::GetCubeCoordsInChunk(pos)) != 0)
             {
                 result = pos;
                 return true;
