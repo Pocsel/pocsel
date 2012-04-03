@@ -3,11 +3,11 @@
 
 #include "server/game/map/Chunk.hpp"
 #include "protocol/protocol.hpp"
+#include "common/CubePosition.hpp"
 
 namespace Common {
     struct OrientedPosition;
     struct MovingOrientedPosition;
-    struct CubePosition;
 }
 
 namespace Tools {
