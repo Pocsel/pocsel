@@ -7,8 +7,6 @@
 
 namespace Common {
 
-    struct CubePosition;
-
     typedef Tools::Vector3d Position;
 
     /* coordonnées entières du chunk contenant cette position */
@@ -27,10 +25,10 @@ namespace Common {
     inline BaseChunk::CoordsType GetCubeCoordsInChunk(Position const& pos);
 
     /* position du cube situé à ce CubePosition (non relatif au chunk) */
-    inline Position GetCubePosition(CubePosition const& cubePos);
+    //inline Position GetCubePosition(CubePosition const& cubePos);
 
     /* coordonnées entières du cube contenant cette position */
-    inline CubePosition GetCubePosition(Position const& pos);
+    //inline CubePosition GetCubePosition(Position const& pos);
 
     /* position de l'origine du chunk contenant cette position */
     inline Position GetPositionInChunk(Position const& pos);
@@ -70,20 +68,20 @@ namespace Common {
                 );
     }
 
-    Position GetCubePosition(CubePosition const& cubePos)
-    {
-        Position world = GetChunkPosition(cubePos.world);
-        return Position(
-                world.x + cubePos.chunk.x,
-                world.y + cubePos.chunk.y,
-                world.z + cubePos.chunk.z
-                );
-    }
+    //Position GetCubePosition(CubePosition const& cubePos)
+    //{
+    //    Position world = GetChunkPosition(cubePos.world);
+    //    return Position(
+    //            world.x + cubePos.chunk.x,
+    //            world.y + cubePos.chunk.y,
+    //            world.z + cubePos.chunk.z
+    //            );
+    //}
 
-    CubePosition GetCubePosition(Position const& pos)
-    {
-        return CubePosition(GetChunkCoords(pos), GetCubeCoordsInChunk(pos));
-    }
+    //CubePosition GetCubePosition(Position const& pos)
+    //{
+    //    return CubePosition(GetChunkCoords(pos), GetCubeCoordsInChunk(pos));
+    //}
 
     Position GetPositionInChunk(Position const& pos)
     {

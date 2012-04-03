@@ -15,7 +15,6 @@
 #include "client/network/Network.hpp"
 
 #include "common/RayCast.hpp"
-#include "common/CubePosition.hpp"
 #include "common/MovingOrientedPosition.hpp"
 
 namespace Client { namespace Game {
@@ -164,7 +163,7 @@ namespace Client { namespace Game {
         if (this->_targetedCube != 0)
             target = *this->_targetedCube;
         else
-            target = Common::GetCubePosition(this->_camera.position);
+            target = Common::CubePosition(this->_camera.position);
 
         this->_game.GetClient().GetNetwork().SendUdpPacket(
             Network::PacketCreator::Action(
@@ -182,7 +181,7 @@ namespace Client { namespace Game {
         if (this->_targetedCube != 0)
             target = *this->_targetedCube;
         else
-            target = Common::GetCubePosition(this->_camera.position);
+            target = Common::CubePosition(this->_camera.position);
 
         this->_game.GetClient().GetNetwork().SendUdpPacket(
             Network::PacketCreator::Action(
