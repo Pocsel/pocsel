@@ -134,7 +134,11 @@ namespace Server { namespace Game { namespace Map {
     void Map::DestroyCubes(std::vector<Common::CastChunk*> const& pos)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&Map::_PreDestroyCubes, this, pos));
+            m(std::bind(&Map::_PreDestroyCubes,
+                        this,
+                        std::shared_ptr<std::vector<Common::CastChunk*>>(
+                            new std::vector<Common::CastChunk*>(pos))
+                        ));
         this->_messageQueue->PushMessage(m);
     }
 
@@ -358,31 +362,40 @@ namespace Server { namespace Game { namespace Map {
         }
     }
 
-    void Map::_PreDestroyCubes(std::vector<Common::CastChunk*> pos)
+    void Map::_PreDestroyCubes(std::shared_ptr<std::vector<Common::CastChunk*>> pos)
     {
-        if (pos.empty() == true)
+        if (pos->empty() == true)
             return;
 
-        Common::CastChunk* c = pos[pos.size() - 1];
-        pos.pop_back();
+        Common::CastChunk* c = pos->back();
+        pos->pop_back();
 
-        if (c->full == true)
+        while (c && c->full == true)
         {
             this->_DestroyChunk(c->id);
             Tools::Delete(c);
+            c = 0;
+
+            if (!pos->empty())
+            {
+                c = pos->back();
+                pos->pop_back();
+            }
         }
-        else
+
+        if (c != 0)
         {
             ChunkCallback
                 cb(std::bind(&Map::_DestroyCubes2, this, std::placeholders::_1, std::shared_ptr<Common::CastChunk>(c)));
             this->GetChunk(c->id, cb);
         }
 
-        if (pos.empty() == false)
+        if (pos->empty() == false)
         {
             Tools::SimpleMessageQueue::Message
                 m(std::bind(&Map::_PreDestroyCubes, this, pos));
-            this->_messageQueue->PushMessage(m);
+            //this->_messageQueue->PushMessage(m);
+            this->_messageQueue->PushTimedMessage(0, m);
         }
     }
 

@@ -20,6 +20,7 @@ namespace Common {
             Cube,
             Sphere
         };
+
     public:
         BaseChunk::IdType const id;
         bool const full;
@@ -56,6 +57,8 @@ namespace Common {
 
     class RayCast
     {
+    public:
+        typedef NChunk<3> BigChunk;
     public:
         static std::vector<Common::CubePosition> Ray(Common::OrientedPosition const& pos, float distance);
         static std::vector<CastChunk*> SphereArea(Common::Position const& pos, float distance);

@@ -280,8 +280,8 @@ namespace Common {
 
     std::vector<CastChunk*> RayCast::CubeArea(Common::Position const& pos, float distance)
     {
-        std::vector<CastChunk*> res;
-        res.reserve((std::size_t)((distance*distance*distance)*8/(ChunkSize3)));
+        std::unordered_map<BigChunk::IdType, std::vector<CastChunk*>> preRes;
+        unsigned int count = 0;
 
         int cx, cy, cz;
         double x, y, z;
@@ -298,11 +298,14 @@ namespace Common {
                 {
                     cz = (z + pos.z) / (int)Common::ChunkSize;
 
+                    BaseChunk::IdType cId = BaseChunk::CoordsToId(cx, cy, cz);
+
                     if (x == -distance || y == -distance || z == -distance ||
                         x + ChunkSize > distance || y + ChunkSize > distance || z + ChunkSize > distance)
-                        res.push_back(new CastChunk(BaseChunk::CoordsToId(cx, cy, cz), CastChunk::CastType::Cube, pos, distance));
+                        preRes[BigChunk::GetId(cId)].push_back(new CastChunk(cId, CastChunk::CastType::Cube, pos, distance));
                     else
-                        res.push_back(new CastChunk(BaseChunk::CoordsToId(cx, cy, cz)));
+                        preRes[BigChunk::GetId(cId)].push_back(new CastChunk(cId));
+                    ++count;
 
                     if (z == -distance && __GetCubePos(z + (int)GetCubeCoords(pos).z) != 0)
                         z += (int)ChunkSize - (int)__GetCubePos(z + (int)GetCubeCoords(pos).z);
@@ -319,6 +322,14 @@ namespace Common {
             else
                 x += ChunkSize;
         }
+
+        std::vector<CastChunk*> res;
+        res.reserve(count);
+        for (auto it = preRes.begin(), ite = preRes.end(); it != ite; ++it)
+        {
+            res.insert(res.end(), it->second.begin(), it->second.end());
+        }
+
         std::cout << "CAP=" << res.capacity() << "\n";
         std::cout << "SIZE=" << res.size() << "\n";
         return res;
