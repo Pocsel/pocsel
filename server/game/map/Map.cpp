@@ -131,24 +131,6 @@ namespace Server { namespace Game { namespace Map {
         this->GetChunk(Chunk::CoordsToId(pos.world), cb);
     }
 
-    //void Map::DestroyCubes(std::vector<Common::CubePosition> const& pos)
-    //{
-    //    std::map<Chunk::IdType, std::vector<Chunk::CoordsType>> positions;
-
-    //    std::for_each(pos.begin(), pos.end(), [&positions](Common::CubePosition const& p)
-    //        {
-    //            positions[Chunk::CoordsToId(p.world)].push_back(p.chunk);
-    //        }
-    //        );
-
-    //    std::for_each(positions.begin(), positions.end(), [this](std::pair<Chunk::IdType const, std::vector<Chunk::CoordsType>>& p)
-    //        {
-    //            ChunkCallback cb(std::bind(&Map::_DestroyCubes, this, std::placeholders::_1, p.second));
-    //            this->GetChunk(p.first, cb);
-    //        }
-    //        );
-    //}
-
     void Map::DestroyCubes(std::vector<Common::CastChunk*> const& pos)
     {
         Tools::SimpleMessageQueue::Message
@@ -236,6 +218,14 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_FindSpawnPosition(Chunk* chunk)
     {
+        // les limites du monde lol
+//        this->_spawnPosition = new Common::Position(1000.0);
+//        *this->_spawnPosition += Tools::Vector3d(0.5, 2.5, 0.5);
+//        for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
+//            (*it)(*this->_spawnPosition);
+//        this->_spawnRequests.clear();
+//        return;
+
         for (int y = Common::ChunkSize - 1 ; y >= 0 ; --y)
         {
             if (chunk->GetCube(0, y, 0))
@@ -243,8 +233,8 @@ namespace Server { namespace Game { namespace Map {
                 Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk->GetCube(0, y, 0) - 1];
                 if (biet.solid)
                 {
-                    this->_spawnPosition = new Common::Position(chunk->coords, Tools::Vector3f(0, (float)y, 0));
-                    this->_spawnPosition->AddOffset(Tools::Vector3f(0.5f, 2.5f, 0.5f));
+                    this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(0, (float)y, 0));
+                    *this->_spawnPosition += Tools::Vector3d(0.5, 2.5, 0.5);
                     for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                         (*it)(*this->_spawnPosition);
                     this->_spawnRequests.clear();
@@ -259,8 +249,8 @@ namespace Server { namespace Game { namespace Map {
                             Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk->GetCube(x, y, 0) - 1];
                             if (biet.solid)
                             {
-                                this->_spawnPosition = new Common::Position(chunk->coords, Tools::Vector3f((float)x, (float)y, 0));
-                                *this->_spawnPosition += Tools::Vector3f(0.5f, 2.5f, 0.5f);
+                                this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(x, y, 0));
+                                *this->_spawnPosition += Tools::Vector3d(0.5f, 2.5f, 0.5f);
                                 for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                                     (*it)(*this->_spawnPosition);
                                 this->_spawnRequests.clear();
@@ -332,6 +322,26 @@ namespace Server { namespace Game { namespace Map {
             this->_SendChunkToPlayers(chunk);
     }
 
+    void Map::_DestroyCubes2(Chunk* chunk, std::shared_ptr<Common::CastChunk> pos)
+    {
+        bool send = false;
+
+        auto cubePos = pos->GetCubes();
+
+        std::for_each(cubePos.begin(), cubePos.end(), [chunk, &send](Chunk::CoordsType& pos)
+            {
+                if (chunk->GetCube(pos) != 0)
+                {
+                    chunk->SetCube(pos, 0);
+                    send = true;
+                }
+            }
+            );
+
+        if (send)
+            this->_SendChunkToPlayers(chunk);
+    }
+
     void Map::_DestroyChunk(Chunk::IdType id)
     {
         Chunk* chunk = this->_chunkManager->GetChunk(id);
@@ -350,18 +360,29 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_PreDestroyCubes(std::vector<Common::CastChunk*> pos)
     {
-        for (auto it = pos.begin(), ite = pos.end(); it != ite; ++it)
-        {
-            if ((*it)->IsFull() == true)
-                this->_DestroyChunk((*it)->id);
-            else if ((*it)->IsEmpty() == false)
-            {
-                ChunkCallback
-                    cb(std::bind(&Map::_DestroyCubes, this, std::placeholders::_1, (*it)->GetContained()));
-                this->GetChunk((*it)->id, cb);
-            }
+        if (pos.empty() == true)
+            return;
 
-            Tools::Delete(*it);
+        Common::CastChunk* c = pos[pos.size() - 1];
+        pos.pop_back();
+
+        if (c->full == true)
+        {
+            this->_DestroyChunk(c->id);
+            Tools::Delete(c);
+        }
+        else
+        {
+            ChunkCallback
+                cb(std::bind(&Map::_DestroyCubes2, this, std::placeholders::_1, std::shared_ptr<Common::CastChunk>(c)));
+            this->GetChunk(c->id, cb);
+        }
+
+        if (pos.empty() == false)
+        {
+            Tools::SimpleMessageQueue::Message
+                m(std::bind(&Map::_PreDestroyCubes, this, pos));
+            this->_messageQueue->PushMessage(m);
         }
     }
 
@@ -370,8 +391,16 @@ namespace Server { namespace Game { namespace Map {
         auto packet = Network::PacketCreator::Chunk(*chunk);
         for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
         {
-            auto toto = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
-            this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
+            Player* p = it->second.get();
+            int viewDist = p->GetViewDistance();
+            Common::Position const& playerPos = p->GetPosition().position.position;
+            if (viewDist * Common::ChunkSize >= std::abs(playerPos.x - (int)(chunk->coords.x * Common::ChunkSize)) ||
+                viewDist * Common::ChunkSize >= std::abs(playerPos.y - (int)(chunk->coords.y * Common::ChunkSize)) ||
+                viewDist * Common::ChunkSize >= std::abs(playerPos.z - (int)(chunk->coords.z * Common::ChunkSize)))
+            {
+                auto toto = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
+                this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
+            }
         }
     }
 

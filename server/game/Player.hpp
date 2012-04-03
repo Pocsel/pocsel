@@ -31,6 +31,7 @@ namespace Server { namespace Game {
         Player(Game& game, Uint32 id, std::string const& playerName, Uint32 viewDistance);
         ~Player();
 
+        Uint32 GetViewDistance() const { return this->_viewDistance; }
         void SetCurrentMap(Map::Map& map) { this->_currentMap = &map; }
         bool HasMap() const { return this->_currentMap != 0; }
         Map::Map& GetCurrentMap() { assert(this->_currentMap); return *this->_currentMap; }

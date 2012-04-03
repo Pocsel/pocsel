@@ -1,14 +1,13 @@
 #ifndef __COMMON_RAYCAST_HPP__
 #define __COMMON_RAYCAST_HPP__
 
-#include "common/BaseChunk.hpp"
+#include "common/Position.hpp"
 
 #include "tools/Vector3.hpp"
 
 namespace Common {
     struct OrientedPosition;
     struct CubePosition;
-    struct Position;
 }
 
 namespace Common {
@@ -16,67 +15,43 @@ namespace Common {
     struct CastChunk
     {
     public:
-        BaseChunk::IdType id;
+        enum CastType
+        {
+            Cube,
+            Sphere
+        };
+    public:
+        BaseChunk::IdType const id;
+        bool const full;
     private:
-        bool* _contained;
-        unsigned int _containedCount;
+        std::vector<BaseChunk::CoordsType> (CastChunk::*_getCubes)();
+        Position _origin;
+        float _distance;
 
     public:
-        CastChunk(BaseChunk::IdType id, bool full = false) : id(id)
+        CastChunk(BaseChunk::IdType id) : id(id), full(true), _getCubes(0)
         {
-            if (full)
-            {
-                _contained = 0;
-                _containedCount = ChunkSize3;
-            }
-            else
-            {
-                _contained = new bool[ChunkSize3];
-                std::memset(_contained, 0, ChunkSize3);
-                _containedCount = 0;
-            }
         }
-        ~CastChunk()
+        CastChunk(BaseChunk::IdType id, CastType type, Position const& origin, float distance) : id(id), full(false), _origin(origin), _distance(distance)
         {
-            Tools::Delete(this->_contained);
-        }
-
-        void AddCube(BaseChunk::CoordType x, BaseChunk::CoordType y, BaseChunk::CoordType z)
-        {
-            unsigned int index = x + y * ChunkSize + z * ChunkSize2;
-
-            assert(this->_containedCount < ChunkSize3 && "already full");
-            assert(this->_contained[index] == false && "cube already here");
-            this->_contained[index] = true;
-            ++this->_containedCount;
-            if (this->_containedCount == ChunkSize3)
+            switch (type)
             {
-                Tools::Delete(this->_contained);
-                this->_contained = 0;
+            case Cube:
+                _getCubes = &CastChunk::_GetCubesCubeCast;
+                break;
+            case Sphere:
+                _getCubes = &CastChunk::_GetCubesSphereCast;
+                break;
             }
         }
-
-        bool IsEmpty() { return this->_containedCount == 0; }
-        bool IsFull() { return this->_containedCount == ChunkSize3; }
-
-        std::vector<BaseChunk::CoordsType> GetContained()
+        std::vector<BaseChunk::CoordsType> GetCubes()
         {
-            assert(this->_containedCount != ChunkSize3);
-
-            std::vector<BaseChunk::CoordsType> res;
-
-            unsigned int x, y, z;
-             for (x = 0; x < ChunkSize; ++x)
-                 for (y = 0; y < ChunkSize; ++y)
-                     for (z = 0; z < ChunkSize; ++z)
-                         if (this->_contained[x + y * ChunkSize + z * ChunkSize2])
-                             res.push_back(BaseChunk::CoordsType(x, y, z));
-
-            return res;
+            assert(this->full == false && "Cannot get cubes on a full CastChunk");
+            return (this->*this->_getCubes)();
         }
     private:
-        CastChunk(CastChunk const&);
-        CastChunk& operator=(CastChunk const&);
+        std::vector<BaseChunk::CoordsType> _GetCubesCubeCast();
+        std::vector<BaseChunk::CoordsType> _GetCubesSphereCast();
     };
 
     class RayCast

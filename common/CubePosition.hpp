@@ -13,6 +13,11 @@ namespace Common {
         BaseChunk::CoordsType chunk;
 
         CubePosition() {}
+        //CubePosition(Tools::Vector3d /* Position */ const& pos) :
+        //    world(GetChunkCoords(pos)),
+        //    chunk(GetCubeCoordsInChunk(pos))
+        //{
+        //}
         CubePosition(BaseChunk::CoordsType const& world, Tools::Vector3u const& chk) :
             world(world),
             chunk(chk)

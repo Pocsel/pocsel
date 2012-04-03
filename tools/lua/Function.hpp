@@ -208,6 +208,7 @@ namespace Tools { namespace Lua {
                 throw std::runtime_error(std::string("Lua::Ref::Check<") + typeid(typename std::remove_pointer<T>::type).name() + ">: " + e.what());
             }
         }
+
     template<> bool Ref::Check<bool>() const throw(std::runtime_error);
     template<> int Ref::Check<int>() const throw(std::runtime_error);
     template<> unsigned int Ref::Check<unsigned int>() const throw(std::runtime_error);

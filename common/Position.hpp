@@ -1,93 +1,105 @@
-#ifndef __COMMON_POSITION_HPP__
-#define __COMMON_POSITION_HPP__
+#ifndef __COMMON_POSITION__
+#define __COMMON_POSITION__
 
 #include "tools/Vector3.hpp"
-#include "common/constants.hpp"
 #include "common/BaseChunk.hpp"
-
-namespace {
-
-    inline void _JumpChunk(Common::BaseChunk::CoordType& world, float& chunk)
-    {
-        if (chunk < 0.0f || chunk >= ((float)Common::ChunkSize))
-        {
-            if (chunk < 0.0f)
-            {
-                world += ((int)chunk - (int)Common::ChunkSize) / ((int)Common::ChunkSize);
-                chunk += (float)Common::ChunkSize;
-            }
-            else
-                world += ((int)chunk + 1) / ((int)Common::ChunkSize);
-            chunk -= (float)(((int)chunk) / ((int)Common::ChunkSize) * (int)Common::ChunkSize);
-        }
-    }
-
-}
+#include "common/CubePosition.hpp"
 
 namespace Common {
 
-    struct Position
+    struct CubePosition;
+
+    typedef Tools::Vector3d Position;
+
+    /* coordonnées entières du chunk contenant cette position */
+    inline BaseChunk::CoordsType GetChunkCoords(Position const& pos);
+
+    /* position de l'origine du chunk situé à ces coordonnées entières */
+    inline Position GetChunkPosition(BaseChunk::CoordsType const& chunkCoords);
+
+    /* position de l'origine du chunk contenant cette position */
+    inline Position GetChunkPosition(Position const& pos);
+
+    /* coordonnées entières du cube contenant cette position (non relatif au chunk) */
+    inline BaseChunk::CoordsType GetCubeCoords(Position const& pos);
+
+    /* coordonnées entières du cube relatives au chunk contenant cette position */
+    inline BaseChunk::CoordsType GetCubeCoordsInChunk(Position const& pos);
+
+    /* position du cube situé à ce CubePosition (non relatif au chunk) */
+    inline Position GetCubePosition(CubePosition const& cubePos);
+
+    inline CubePosition GetCubePosition(Position const& pos);
+
+    /* position de l'origine du chunk contenant cette position */
+    inline Position GetPositionInChunk(Position const& pos);
+
+    BaseChunk::CoordsType GetChunkCoords(Position const& pos)
     {
-        BaseChunk::CoordsType world;
-        Tools::Vector3f chunk;
+        return BaseChunk::CoordsType(
+                pos.x / Common::ChunkSize,
+                pos.y / Common::ChunkSize,
+                pos.z / Common::ChunkSize
+                );
+    }
 
-        Position()
-        {
-        }
+    Position GetChunkPosition(BaseChunk::CoordsType const& chunkCoords)
+    {
+        return Position(
+                chunkCoords.x * Common::ChunkSize,
+                chunkCoords.y * Common::ChunkSize,
+                chunkCoords.z * Common::ChunkSize
+                );
+    }
 
-        Position(BaseChunk::CoordsType world, Tools::Vector3f chunk) :
-            world(world), chunk(chunk)
-        {
-        }
+    Position GetChunkPosition(Position const& pos)
+    {
+        BaseChunk::CoordsType coords = GetChunkCoords(pos);
+        return Position(
+                coords.x * Common::ChunkSize,
+                coords.y * Common::ChunkSize,
+                coords.z * Common::ChunkSize
+                );
+    }
 
-        template<typename T>
-            Tools::Vector3<T> GetVector() const
-            {
-                return Tools::Vector3<T>(
-                        T(world.x) * ChunkSize + T(chunk.x),
-                        T(world.y) * ChunkSize + T(chunk.y),
-                        T(world.z) * ChunkSize + T(chunk.z));
-            }
+    BaseChunk::CoordsType GetCubeCoords(Position const& pos)
+    {
+        return BaseChunk::CoordsType(
+                pos.x,
+                pos.y,
+                pos.z
+                );
+    }
 
-        Tools::Vector3f GetOffset(Position const& pos) const
-        {
-            return ChunkSize*(Tools::Vector3f(world) - Tools::Vector3f(pos.world)) + (chunk - pos.chunk);
-        }
+    BaseChunk::CoordsType GetCubeCoordsInChunk(Position const& pos)
+    {
+        BaseChunk::CoordsType coords = GetChunkCoords(pos);
+        return BaseChunk::CoordsType(
+                pos.x - coords.x * Common::ChunkSize,
+                pos.y - coords.y * Common::ChunkSize,
+                pos.z - coords.z * Common::ChunkSize
+                );
+    }
 
-        void AddOffset(Tools::Vector3f const& direction)
-        {
-            this->chunk += direction;
-#define JUMP_CHUNK(XYZ) do { \
-            if (this->chunk.XYZ < 0.0f || this->chunk.XYZ >= ((float)Common::ChunkSize)) \
-            { \
-                if (this->chunk.XYZ < 0.0f) \
-                { \
-                    this->world.XYZ += ((int)this->chunk.XYZ - (int)Common::ChunkSize) / ((int)Common::ChunkSize); \
-                    this->chunk.XYZ += (float)Common::ChunkSize; \
-                } \
-                else \
-                    this->world.XYZ += ((int)this->chunk.XYZ + 1) / ((int)Common::ChunkSize); \
-                this->chunk.XYZ -= (float)(((int)this->chunk.XYZ) / ((int)Common::ChunkSize) * (int)Common::ChunkSize); \
-            } \
-            } while (0);
+    Position GetCubePosition(CubePosition const& cubePos)
+    {
+        Position world = GetChunkPosition(cubePos.world);
+        return Position(
+                world.x + cubePos.chunk.x,
+                world.y + cubePos.chunk.y,
+                world.z + cubePos.chunk.z
+                );
+    }
 
-/*                if (chunk.XYZ < 0.0f) \
-                    chunk.XYZ += (float)Common::ChunkSize; \*/
+    CubePosition GetCubePosition(Position const& pos)
+    {
+        return CubePosition(GetChunkCoords(pos), GetCubeCoordsInChunk(pos));
+    }
 
-            //JUMP_CHUNK(x);
-            //JUMP_CHUNK(y);
-            //JUMP_CHUNK(z);
-#undef JUMP_CHUNK
-            _JumpChunk(this->world.x, this->chunk.x);
-            _JumpChunk(this->world.y, this->chunk.y);
-            _JumpChunk(this->world.z, this->chunk.z);
-        }
-
-        Position operator +(Position const& pos) const;
-        Position operator -(Position const& pos) const;
-        std::string Serialize() const;
-        Position Clone() const;
-    };
+    Position GetPositionInChunk(Position const& pos)
+    {
+        return pos - GetChunkPosition(pos);
+    }
 
 }
 

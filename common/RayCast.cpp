@@ -25,10 +25,11 @@ namespace Common {
                 vx = pos.direction.x,
                 vy = pos.direction.y,
                 vz = pos.direction.z;
+            Position p = GetPositionInChunk(pos.position);
             const double
-                px = pos.position.chunk.x,
-                pz = pos.position.chunk.z,
-                py = pos.position.chunk.y;
+                px = p.x,
+                pz = p.z,
+                py = p.y;
 
             int sign;
             double dist;
@@ -124,7 +125,7 @@ namespace Common {
 
             for (auto mit = preRes.begin(), mite = preRes.end(); mit != mite; ++mit)
             {
-                world = pos.world;
+                world = GetChunkCoords(pos);
 
                 Tools::Vector3i r = mit->second;
 
@@ -186,6 +187,7 @@ namespace Common {
         void __SphereArea(Common::Position const& pos, float distance,
                     std::vector<Tools::Vector3i>& res)
         {
+            Position p = GetPositionInChunk(pos);
             double sqdist = (double)distance * (double)distance;
 
             res.reserve((std::size_t)(distance*distance*distance*boost::math::constants::pi<double>()*4.0/3.0));
@@ -196,23 +198,7 @@ namespace Common {
                     for (double z = -distance; z < distance; z += 1)
                     {
                         if (x*x+y*y+z*z < sqdist)
-                            res.push_back(Tools::Vector3i((int)(x + pos.chunk.x), (int)(y + pos.chunk.y), (int)(z + pos.chunk.z)));
-                    }
-                }
-            }
-        }
-
-        void __CubeArea(Common::Position const& pos, float distance,
-                    std::vector<Tools::Vector3i>& res)
-        {
-            res.reserve((std::size_t)(distance*distance*distance*8));
-            for (double x = -distance; x < distance; x += 1)
-            {
-                for (double y = -distance; y < distance; y += 1)
-                {
-                    for (double z = -distance; z < distance; z += 1)
-                    {
-                        res.push_back(Tools::Vector3i((int)(x + pos.chunk.x), (int)(y + pos.chunk.y), (int)(z + pos.chunk.z)));
+                            res.push_back(Tools::Vector3i((int)(x + p.x), (int)(y + p.y), (int)(z + p.z)));
                     }
                 }
             }
@@ -228,7 +214,7 @@ namespace Common {
 
             for (auto mit = preRes.begin(), mite = preRes.end(); mit != mite; ++mit)
             {
-                world = pos.world;
+                world = GetChunkCoords(pos);
 
                 Tools::Vector3i r = *mit;
 
@@ -280,10 +266,8 @@ namespace Common {
             i %= ChunkSize;
             return i;
         }
-        unsigned int __GetChunkPos(int i, unsigned int start)//, bool debug)
+        unsigned int __GetChunkPos(int i, unsigned int start)
         {
-//            if (debug)
-//                std::cout << "i=" << i << ", start=" << start << "\n";
             while (i < 0)
             {
                 start -= 1;
@@ -299,115 +283,98 @@ namespace Common {
         std::vector<CastChunk*> res;
         res.reserve((std::size_t)((distance*distance*distance)*8/(ChunkSize3)));
 
-        unsigned int cx, cy, cz;//, bx, by, bz;
-        int zx, zy, zz, dx, dy, dz;
+        int cx, cy, cz;
         double x, y, z;
 
-        x = -distance;
-        while (x < distance)// || __GetChunkPos(x + (int)pos.chunk.x, pos.world.x, false) == __GetChunkPos(distance + (int)pos.chunk.x, pos.world.x, false))
+        for (x = -distance; x < distance;)
         {
-//            std::cout << "x=" << x << ", ";
-            cx = __GetChunkPos(x + (int)pos.chunk.x, pos.world.x);//, /*XXX DEBUG*/ true);
-//            std::cout << "cx=" << cx << "\n";
-            y = -distance;
-            while (y < distance)// || __GetChunkPos(y + (int)pos.chunk.y, pos.world.y, false) == __GetChunkPos(distance + (int)pos.chunk.y, pos.world.y, false))
-            {
-                cy = __GetChunkPos(y + (int)pos.chunk.y, pos.world.y);//, /* XXX DEBUG */x == -distance);
-//                if (x == -distance)
-//                    std::cout << "y=" << y << ", cy=" << cy << "\n";
-                z = -distance;
-                while (z < distance)// || __GetChunkPos(z + (int)pos.chunk.z, pos.world.z, false) == __GetChunkPos(distance + (int)pos.chunk.z, pos.world.z, false))
-                {
-                    cz = __GetChunkPos(z + (int)pos.chunk.z, pos.world.z);//, /* XXX DEBUG */ x == -distance && y == -distance);
-//                    if (x == -distance && y == -distance)
-//                        std::cout << "z=" << z << ", cz=" << cz << "\n";
+            cx = (x + pos.x) / (int)Common::ChunkSize;
 
+            for (y = -distance; y < distance;)
+            {
+                cy = (y + pos.y) / (int)Common::ChunkSize;
+
+                for (z = -distance; z < distance;)
+                {
+                    cz = (z + pos.z) / (int)Common::ChunkSize;
 
                     if (x == -distance || y == -distance || z == -distance ||
                         x + ChunkSize > distance || y + ChunkSize > distance || z + ChunkSize > distance)
-                    {
-                        CastChunk* r = new CastChunk(BaseChunk::CoordsToId(cx, cy, cz));
-                        res.push_back(r);
-
-                        for (zx = 0; zx < (int)ChunkSize; ++zx)
-                        {
-                            dx = ((int)cx - (int)pos.world.x) * (int)ChunkSize + (zx - (int)pos.chunk.x);
-                            dx = GR_ABS(dx);
-                            for (zy = 0; zy < (int)ChunkSize; ++zy)
-                            {
-                                dy = ((int)cy - (int)pos.world.y) * (int)ChunkSize + (zy - (int)pos.chunk.y);
-                                dy = GR_ABS(dy);
-                                for (zz = 0; zz < (int)ChunkSize; ++zz)
-                                {
-                                    if (((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
-                                        (zy == 0 || zy == 1 || zy == ChunkSize - 2 || zy == ChunkSize - 1) &&
-                                        (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1)) ||
-                                            (zx == zy && zy == zz) ||
-                                            (zx == (int)ChunkSize-zy && (int)ChunkSize-zy == zz) ||
-                                            ((int)ChunkSize-zx == zy && zy == zz) ||
-                                            (zx == zy && zy == (int)ChunkSize-zz) ||
-
-                                            ((zx == 0 || zx == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1)) ||
-                                            ((zx == 0 || zx == ChunkSize - 1) && (zy == 0 || zy == ChunkSize - 1)) ||
-                                            ((zy == 0 || zy == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1))
-                                       )
-                                        continue;
-                                    dz = ((int)cz - (int)pos.world.z) * (int)ChunkSize + (zz - (int)pos.chunk.z);
-                                    dz = GR_ABS(dz);
-                                    if (dx <= distance && dy <= distance && dz <= distance)
-                                        r->AddCube(zx, zy, zz);
-                                }
-                            }
-                        }
-                    }
+                        res.push_back(new CastChunk(BaseChunk::CoordsToId(cx, cy, cz), CastChunk::CastType::Cube, pos, distance));
                     else
-                        res.push_back(new CastChunk(BaseChunk::CoordsToId(cx, cy, cz), true));
+                        res.push_back(new CastChunk(BaseChunk::CoordsToId(cx, cy, cz)));
 
-                    if (z == -distance && __GetCubePos(z + (int)pos.chunk.z) != 0)
-                        z += (int)ChunkSize - (int)__GetCubePos(z + (int)pos.chunk.z);
-                    //{
-                    //    while (__GetCubePos(z + pos.chunk.z) != 0)
-                    //        z += 1;
-                    //}
+                    if (z == -distance && __GetCubePos(z + (int)GetCubeCoords(pos).z) != 0)
+                        z += (int)ChunkSize - (int)__GetCubePos(z + (int)GetCubeCoords(pos).z);
                     else
                         z += ChunkSize;
                 }
-                if (y == -distance && __GetCubePos(y + (int)pos.chunk.y) != 0)
-                    y += (int)ChunkSize - (int)__GetCubePos(y + (int)pos.chunk.y);
-                //{
-                //    while (__GetCubePos(y + pos.chunk.y) != 0)
-                //        y += 1;
-                //}
+                if (y == -distance && __GetCubePos(y + (int)GetCubeCoords(pos).y) != 0)
+                    y += (int)ChunkSize - (int)__GetCubePos(y + (int)GetCubeCoords(pos).y);
                 else
                     y += ChunkSize;
             }
-            if (x == -distance && __GetCubePos(x + (int)pos.chunk.x) != 0)
-                x += (int)ChunkSize - (int)__GetCubePos(x + (int)pos.chunk.x);
-            //{
-            //    while (__GetCubePos(x + pos.chunk.x) != 0)
-            //        x += 1;
-            //}
+            if (x == -distance && __GetCubePos(x + (int)GetCubeCoords(pos).x) != 0)
+                x += (int)ChunkSize - (int)__GetCubePos(x + (int)GetCubeCoords(pos).x);
             else
                 x += ChunkSize;
         }
+        std::cout << "CAP=" << res.capacity() << "\n";
+        std::cout << "SIZE=" << res.size() << "\n";
         return res;
     }
-        /*
-        std::vector<Tools::Vector3i> preRes;
-
-        __CubeArea(pos, distance, preRes);
-
-        return __TabToTab(preRes, pos);
-    }
-    */
 
     std::vector<CastChunk*> RayCast::SphereArea(Common::Position const& pos, float distance)
     {
         return RayCast::CubeArea(pos, distance);
-        //std::vector<Tools::Vector3i> preRes;
-
-        //__SphereArea(pos, distance, preRes);
-
-        //return __TabToTab(preRes, pos);
     }
+
+    std::vector<BaseChunk::CoordsType> CastChunk::_GetCubesCubeCast()
+    {
+        BaseChunk::CoordsType coords(BaseChunk::IdToCoords(this->id));
+        int cx = coords.x;
+        int cy = coords.y;
+        int cz = coords.z;
+        int zx, zy, zz, dx, dy, dz;
+        Position const& pos = this->_origin;
+        float distance = this->_distance;
+
+        std::vector<BaseChunk::CoordsType> res;
+        res.reserve(ChunkSize3);
+
+        for (zx = 0; zx < (int)ChunkSize; ++zx)
+        {
+            dx = std::abs((cx * (int)ChunkSize + zx) - pos.x);
+            for (zy = 0; zy < (int)ChunkSize; ++zy)
+            {
+                dy = std::abs((cy * (int)ChunkSize + zy) - pos.y);
+                for (zz = 0; zz < (int)ChunkSize; ++zz)
+                {
+                    if (((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
+                                (zy == 0 || zy == 1 || zy == ChunkSize - 2 || zy == ChunkSize - 1) &&
+                                (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1)) ||
+                            (zx == zy && zy == zz) ||
+                            (zx == (int)ChunkSize-1-zy && (int)ChunkSize-1-zy == zz) ||
+                            ((int)ChunkSize-1-zx == zy && zy == zz) ||
+                            (zx == zy && zy == (int)ChunkSize-1-zz) ||
+
+                            ((zx == 0 || zx == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1)) ||
+                            ((zx == 0 || zx == ChunkSize - 1) && (zy == 0 || zy == ChunkSize - 1)) ||
+                            ((zy == 0 || zy == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1))
+                       )
+                        continue;
+                    dz = std::abs((cz * (int)ChunkSize + zz) - pos.z);
+                    if (dx <= distance && dy <= distance && dz <= distance)
+                        res.push_back(BaseChunk::CoordsType(zx, zy, zz));
+                }
+            }
+        }
+        return res;
+    }
+
+    std::vector<BaseChunk::CoordsType> CastChunk::_GetCubesSphereCast()
+    {
+        return _GetCubesCubeCast();
+    }
+
 }
