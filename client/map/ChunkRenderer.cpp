@@ -51,7 +51,7 @@ namespace Client { namespace Map {
     void ChunkRenderer::Render()
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
-        auto pos = camera.position.GetVector<double>();
+        auto pos = camera.position;
         auto viewProj =
             Tools::Matrix4<double>::CreateLookAt(pos, Tools::Vector3d(pos + Tools::Vector3d(camera.direction)), Tools::Vector3d(0, 1, 0))
             * Tools::Matrix4<double>(camera.projection);
@@ -79,7 +79,8 @@ namespace Client { namespace Map {
                     {
                         if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
                             return;
-                        auto const& relativePosition = Common::Position((*chunkIt)->coords, Tools::Vector3f(Common::ChunkSize / 2.0f)) - camera.position;
+                        auto chunkPos = Common::Position((*chunkIt)->coords) * Common::ChunkSize + Common::Position(Common::ChunkSize / 2.0);
+                        auto const& relativePosition = chunkPos - camera.position;
                         auto dist = relativePosition.GetMagnitudeSquared();
                         transparentChunks[texturesIt->first].insert(std::multimap<double, Chunk*>::value_type(-dist, *chunkIt));
                     }
@@ -92,7 +93,8 @@ namespace Client { namespace Map {
                     {
                         if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
                             return;
-                        this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*chunkIt)->coords, Tools::Vector3f(0)) - camera.position));
+                        auto chunkPos = Common::Position((*chunkIt)->coords) * Common::ChunkSize + Common::Position(Common::ChunkSize / 2.0);
+                        this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Tools::Vector3f(chunkPos - camera.position)));
                         (*chunkIt)->GetMesh()->Render(texturesIt->first, this->_renderer);
                     }
                     texturesIt->second->Unbind();
@@ -115,7 +117,8 @@ namespace Client { namespace Map {
                     auto mesh = itChunk->second->GetMesh();
                     if (!mesh)
                         continue;
-                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position(itChunk->second->coords, Tools::Vector3f(0)) - camera.position));
+                    Tools::Vector3f relativePos(Common::Position(itChunk->second->coords) - camera.position);
+                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(relativePos));
                     mesh->Render(it->first, this->_renderer);
                 }
                 texture->Unbind();

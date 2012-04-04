@@ -177,6 +177,7 @@ namespace Tools {
     typedef Vector3<unsigned int> Vector3u;
     typedef Vector3<float> Vector3f;
     typedef Vector3<double> Vector3d;
+
 }
 
 #endif

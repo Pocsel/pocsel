@@ -3,10 +3,7 @@
 
 #include "common/BaseChunk.hpp"
 #include "client/map/ChunkManager.hpp"
-
-namespace Common {
-    struct CubePosition;
-}
+#include "common/CubePosition.hpp"
 
 namespace Client {
     namespace Game {

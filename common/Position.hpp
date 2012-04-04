@@ -1,64 +1,65 @@
-#ifndef __COMMON_POSITION_HPP__
-#define __COMMON_POSITION_HPP__
+#ifndef __COMMON_POSITION__
+#define __COMMON_POSITION__
 
 #include "tools/Vector3.hpp"
-#include "common/constants.hpp"
 #include "common/BaseChunk.hpp"
+#include "common/CubePosition.hpp"
 
 namespace Common {
 
-    struct Position
+    typedef Tools::Vector3d Position;
+
+    /* coordonnées entières du chunk contenant cette position */
+    inline BaseChunk::CoordsType GetChunkCoords(Position const& pos);
+
+    /* position de l'origine du chunk situé à ces coordonnées entières */
+    inline Position GetChunkPosition(BaseChunk::CoordsType const& chunkCoords);
+
+    /* position de l'origine du chunk contenant cette position */
+    inline Position GetChunkPosition(Position const& pos);
+
+    /* coordonnées entières du cube contenant cette position (non relatif au chunk) */
+    inline BaseChunk::CoordsType GetCubeCoords(Position const& pos);
+
+    /* coordonnées entières du cube relatives au chunk contenant cette position */
+    inline BaseChunk::CoordsType GetCubeCoordsInChunk(Position const& pos);
+
+    /* position de l'origine du chunk contenant cette position */
+    inline Position GetPositionInChunk(Position const& pos);
+
+}
+
+namespace Common {
+
+    BaseChunk::CoordsType GetChunkCoords(Position const& pos)
     {
-        BaseChunk::CoordsType world;
-        Tools::Vector3f chunk;
+        return BaseChunk::CoordsType(pos) / Common::ChunkSize;
+    }
 
-        Position() {}
-        Position(BaseChunk::CoordsType world, Tools::Vector3f chunk) :
-            world(world),
-            chunk(chunk)
-        {
-        }
+    Position GetChunkPosition(BaseChunk::CoordsType const& chunkCoords)
+    {
+        return Position(chunkCoords) * Common::ChunkSize;
+    }
 
-        template<typename T>
-        Tools::Vector3<T> GetVector() const
-        {
-            return Tools::Vector3<T>(
-                T(world.x) * ChunkSize + T(chunk.x),
-                T(world.y) * ChunkSize + T(chunk.y),
-                T(world.z) * ChunkSize + T(chunk.z));
-        }
+    Position GetChunkPosition(Position const& pos)
+    {
+        return Position(GetChunkCoords(pos)) * Common::ChunkSize;
+    }
 
-        inline Tools::Vector3f operator -(Position const& pos) const
-        {
-            return ChunkSize*(Tools::Vector3f(world) - Tools::Vector3f(pos.world)) + (chunk - pos.chunk);
-        }
+    BaseChunk::CoordsType GetCubeCoords(Position const& pos)
+    {
+        return BaseChunk::CoordsType(pos);
+    }
 
-        void operator += (Tools::Vector3f direction)
-        {
-            this->chunk += direction;
-#define JUMP_CHUNK(XYZ) do { \
-            if (this->chunk.XYZ < 0.0f || this->chunk.XYZ >= ((float)Common::ChunkSize)) \
-            { \
-                if (this->chunk.XYZ < 0.0f) \
-                { \
-                    this->world.XYZ += ((int)this->chunk.XYZ - (int)Common::ChunkSize) / ((int)Common::ChunkSize); \
-                    this->chunk.XYZ += (float)Common::ChunkSize;\
-                } \
-                else \
-                    this->world.XYZ += ((int)this->chunk.XYZ + 1) / ((int)Common::ChunkSize); \
-                this->chunk.XYZ -= (float)(((int)this->chunk.XYZ) / ((int)Common::ChunkSize) * (int)Common::ChunkSize); \
-            } \
-            } while (0);
+    BaseChunk::CoordsType GetCubeCoordsInChunk(Position const& pos)
+    {
+        return BaseChunk::CoordsType(pos - Position(GetChunkCoords(pos)) * Common::ChunkSize);
+    }
 
-/*                if (chunk.XYZ < 0.0f) \
-                    chunk.XYZ += (float)Common::ChunkSize; \*/
-
-            JUMP_CHUNK(x);
-            JUMP_CHUNK(y);
-            JUMP_CHUNK(z);
-#undef JUMP_CHUNK
-        }
-    };
+    Position GetPositionInChunk(Position const& pos)
+    {
+        return pos - GetChunkPosition(pos);
+    }
 
 }
 

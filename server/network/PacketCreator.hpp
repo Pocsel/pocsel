@@ -2,12 +2,12 @@
 #define __SERVER_NETWORK_PACKETCREATOR_HPP__
 
 #include "server/game/map/Chunk.hpp"
+#include "common/Position.hpp"
 
 namespace Common{
     class Packet;
     class Resource;
     struct CubeType;
-    struct Position;
     struct MovingOrientedPosition;
 }
 

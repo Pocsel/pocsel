@@ -25,6 +25,7 @@ namespace Tools { namespace Lua {
             "__call",
             "__gc",
             "__serialize",
+            "__clone",
         };
     }
 

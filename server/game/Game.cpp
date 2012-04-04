@@ -98,16 +98,14 @@ namespace Server { namespace Game {
         if (!player->IsInGame())
             return;
 
-        Common::Position p0(targetPos.world,
-                            Tools::Vector3f((float)targetPos.chunk.x + 0.5f,
-                                            (float)targetPos.chunk.y + 0.5f,
-                                            (float)targetPos.chunk.z + 0.5f));
+        Common::Position p0(Common::Position(targetPos) +
+                            Tools::Vector3d(0.5));
 
-        float dist = (p0 - pos.position).GetMagnitude();
+        double dist = (p0 - pos.position).GetMagnitude();
 
         //player->GetCurrentMap().DestroyCubes(Common::RayCast::Ray(pos, 50.0f));
-        if (dist > 1.0f)
-            player->GetCurrentMap().DestroyCubes(Common::RayCast::SphereArea(p0, 333.3f / std::log10(dist * dist * 10.0f)));
+        if (dist > 1.0)
+            player->GetCurrentMap().DestroyCubes(Common::RayCast::SphereArea(p0, 1000.0f));// / std::log10(dist * dist * 10.0f)));
     }
 
     void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance)

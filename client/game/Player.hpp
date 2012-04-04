@@ -4,10 +4,7 @@
 #include "common/Camera.hpp"
 #include "tools/Vector3.hpp"
 #include "client/ActionBinder.hpp"
-
-namespace Common {
-    struct CubePosition;
-}
+#include "common/CubePosition.hpp"
 
 namespace Client { namespace Window {
     class InputManager;

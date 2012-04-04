@@ -10,7 +10,6 @@
 #include "common/Resource.hpp"
 #include "common/ChunkSerializer.hpp"
 #include "common/CubeTypeSerializer.hpp"
-#include "common/PositionSerializer.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
 
 namespace Server { namespace Network {

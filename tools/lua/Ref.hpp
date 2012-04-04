@@ -83,6 +83,8 @@ namespace Tools { namespace Lua {
         bool IsTable() const throw();
         bool IsThread() const throw();
         bool IsUserData() const throw();
+        template <typename T>
+            bool Is() const throw();
 
         // touche pas, appelle pas
         void FromStack() throw();

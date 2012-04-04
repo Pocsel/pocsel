@@ -4,11 +4,11 @@
 #include "common/BaseChunk.hpp"
 #include "common/Packet.hpp"
 #include "client/network/UdpPacket.hpp"
+#include "common/CubePosition.hpp"
 
 namespace Common {
     struct OrientedPosition;
     struct MovingOrientedPosition;
-    struct CubePosition;
 }
 
 namespace Client {

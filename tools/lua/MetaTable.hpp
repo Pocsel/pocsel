@@ -38,6 +38,7 @@ namespace Tools { namespace Lua {
             Call,
             Collect,
             Serialize,
+            Clone,
         };
 
     private:
