@@ -15,6 +15,9 @@ namespace Client {
         class Chunk;
         class Map;
     }
+    namespace Resource {
+        class Effect;
+    }
 }
 
 namespace Client { namespace Map {
@@ -28,7 +31,7 @@ namespace Client { namespace Map {
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
         std::map<Uint32, std::unique_ptr<Resources::ITexture>> _textures;
-        //std::map<Uint32, Effect*> _effects;
+        std::map<Resource::Effect*, std::list<Common::BaseChunk::CubeType>> _cubeTypes;
 
     public:
         ChunkRenderer(Game::Game& game);

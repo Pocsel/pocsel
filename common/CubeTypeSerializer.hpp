@@ -11,20 +11,11 @@ namespace Common {
     {
         static std::unique_ptr<CubeType> Read(Tools::ByteArray const& p)
         {
-            BaseChunk::CubeType id;
-            std::string name;
-            p.Read(id);
-            p.Read(name);
+            std::unique_ptr<CubeType> ptr(new CubeType());
 
-            std::unique_ptr<CubeType> ptr(new CubeType(id, name));
-            p.Read(ptr->textures.top);
-            p.Read(ptr->textures.left);
-            p.Read(ptr->textures.front);
-            p.Read(ptr->textures.right);
-            p.Read(ptr->textures.back);
-            p.Read(ptr->textures.bottom);
-            p.Read(ptr->effectName);
-
+            p.Read(ptr->id);
+            p.Read(ptr->name);
+            p.Read(ptr->luaFile);
             p.Read(ptr->solid);
             p.Read(ptr->transparent);
 
@@ -35,14 +26,7 @@ namespace Common {
         {
             p.Write(cube.id);
             p.Write(cube.name);
-            p.Write(cube.textures.top);
-            p.Write(cube.textures.left);
-            p.Write(cube.textures.front);
-            p.Write(cube.textures.right);
-            p.Write(cube.textures.back);
-            p.Write(cube.textures.bottom);
-            p.Write(cube.effectName);
-
+            p.Write(cube.luaFile);
             p.Write(cube.solid);
             p.Write(cube.transparent);
         }

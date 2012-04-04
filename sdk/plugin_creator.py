@@ -21,7 +21,7 @@ plugin_tables = [
     ),
     (
         'cube_type',
-        ["name TEXT", "lua TEXT"],
+        ["name TEXT", "lua INTEGER"],
     ),
     (
         'entity_file',

@@ -8,6 +8,8 @@
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Iterator.hpp"
 
+#include "common/Resource.hpp"
+
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
 #include "server/game/engine/Engine.hpp"
@@ -48,6 +50,7 @@ namespace Server { namespace Database {
         {
             Uint32 id = row->GetUint32(0);
             std::string name = row->GetString(2);
+            Uint32 luaFile = row->GetUint32(3);
             Log::load << "Load cube type id: " << id <<
                           ", plugin_id: " << row->GetUint64(1) <<
                           ", name: " << name << "\n";
@@ -55,7 +58,9 @@ namespace Server { namespace Database {
                 world._cubeTypes.resize(id);
             world._cubeTypes[id - 1].id = id;
             world._cubeTypes[id - 1].name = name;
-            WorldLoader::_LoadCubeType(world._cubeTypes[id - 1], row->GetString(3), manager);
+            world._cubeTypes[id - 1].luaFile = luaFile;
+            auto const& res = manager.GetResource(luaFile);
+            WorldLoader::_LoadCubeType(world._cubeTypes[id - 1], std::string((char const*)res.data, res.size), manager);
         }
 
         // Maps
@@ -147,25 +152,11 @@ namespace Server { namespace Database {
             Tools::Lua::Interpreter lua;
             lua.DoString(code);
 
-            auto textures = lua.Globals()["textures"];
-            descr.textures.top = manager.GetId(textures["top"].To<std::string>());
-            descr.textures.left = manager.GetId(textures["left"].To<std::string>());
-            descr.textures.front = manager.GetId(textures["front"].To<std::string>());
-            descr.textures.right = manager.GetId(textures["right"].To<std::string>());
-            descr.textures.back = manager.GetId(textures["back"].To<std::string>());
-            descr.textures.bottom = manager.GetId(textures["bottom"].To<std::string>());
-
             descr.solid = lua.Globals()["solid"].To<bool>();
             descr.transparent = lua.Globals()["transparent"].To<bool>();
 
             Log::load << "name: " << descr.name << " " << descr.id << "\n";
-            Log::load << "textures.top: " << descr.textures.top << "\n";
-            Log::load << "textures.left: " << descr.textures.left << "\n";
-            Log::load << "textures.front: " << descr.textures.front << "\n";
-            Log::load << "textures.right: " << descr.textures.right << "\n";
-            Log::load << "textures.back: " << descr.textures.back << "\n";
-            Log::load << "textures.bottom: " << descr.textures.bottom << "\n";
-
+            Log::load << "luaFile: " << descr.luaFile << "\n";
             Log::load << "solid: " << descr.solid << "\n";
             Log::load << "transparent: " << descr.transparent << "\n";
 

@@ -39,7 +39,7 @@ world_tables = [
             "id INTEGER PRIMARY KEY",
             "plugin_id INTEGER",
             "name TEXT",
-            "lua TEXT",
+            "lua INTEGER",
         ]
     ),
     (

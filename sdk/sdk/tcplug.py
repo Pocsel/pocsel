@@ -25,6 +25,7 @@ def addResource(connector, root, relpath, filename):
     conn = connector()
     curs = conn.cursor()
     curs.execute("INSERT INTO resource (filename, type) VALUES (?, ?)", (filename, file_type))
+    id = curs.lastrowid
     conn.commit()
 
     conn = connector()
@@ -35,6 +36,7 @@ def addResource(connector, root, relpath, filename):
     data_hash = hashlib.md5(data).hexdigest()
     curs.execute("UPDATE resource SET data = ?, data_hash = ? WHERE filename = ?", (buffer(data), data_hash, filename))
     conn.commit()
+    return id
 
 def prepareMap(conn, name, lua):
     with conn:
@@ -64,19 +66,18 @@ def preparePlugin(connector, plugin_dir):
     cubes_dir = os.path.join(plugin_dir, 'cubes')
     nb_cubes = 0
     if os.path.isdir(cubes_dir):
-        cubes = os.listdir(cubes_dir)
-        for cube in cubes:
-            if cube.endswith('.lua'):
-                with open(os.path.join(cubes_dir, cube)) as f:
-                    data = f.read()
-                prepareType(connector(), 'cube_type', cube[:-4], data)
-                nb_cubes += 1
+        for root, dirs, files in os.walk(cubes_dir, topdown=True):
+            for filename in files:
+                if filename.endswith('.lua'):
+                    resId = addResource(connector, root, "_cubeTypes_", filename)
+                    prepareType(connector(), 'cube_type', filename[:-4], resId)
+                    nb_cubes += 1
+                else:
+                    print "ignoring '%s' in cubes folder" % cube
+            if nb_cubes == 0:
+                print "No cube type in this plugin"
             else:
-                print "ignoring '%s' in cubes folder" % cube
-        if nb_cubes == 0:
-            print "No cube type in this plugin"
-        else:
-            print "Found %d cube types" % nb_cubes
+                print "Found %d cube types" % nb_cubes
     else:
         print "No 'cubes' directory"
 

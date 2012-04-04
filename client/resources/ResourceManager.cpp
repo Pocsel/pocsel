@@ -261,6 +261,10 @@ namespace Client { namespace Resources {
     void ResourceManager::LoadAllResources()
     {
         this->_LoadEffects();
+        auto const& resources = this->_database.GetAllResources("%");
+        for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
+            this->_resourceIds[(*it)->pluginId][(*it)->filename] = (*it)->id;
+        this->_game.GetCubeTypeManager().LoadResources();
     }
 
     void ResourceManager::_LoadEffects()

@@ -35,6 +35,14 @@ namespace Client { namespace Resources {
         Effect& operator =(Effect const&);
     };
 
+    // TODO !
+    //class EffectState
+    //{
+    //public:
+    //    ~EffectState() {}
+    //    void Set(Effect& effect);
+    //};
+
 }}
 
 #endif

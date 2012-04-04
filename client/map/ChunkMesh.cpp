@@ -2,6 +2,7 @@
 
 #include "client/Client.hpp"
 #include "client/window/Window.hpp"
+#include "client/game/CubeType.hpp"
 #include "client/game/Game.hpp"
 #include "client/map/Chunk.hpp"
 #include "client/map/ChunkManager.hpp"
@@ -125,7 +126,7 @@ namespace Client { namespace Map {
         }
     }
 
-    bool ChunkMesh::Refresh(ChunkRenderer& chunkRenderer, std::vector<Common::CubeType> cubeTypes, std::shared_ptr<Chunk::CubeType> myCubes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
+    bool ChunkMesh::Refresh(ChunkRenderer& chunkRenderer, std::vector<Game::CubeType> cubeTypes, std::shared_ptr<Chunk::CubeType> myCubes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
     {
         boost::lock_guard<boost::mutex> lock(this->_refreshMutex);
         auto const& chunkLeft   = neighbors[0].get();

@@ -55,10 +55,19 @@ namespace Client { namespace Map {
         auto viewProj =
             Tools::Matrix4<double>::CreateLookAt(pos, Tools::Vector3d(pos + Tools::Vector3d(camera.direction)), Tools::Vector3d(0, 1, 0))
             * Tools::Matrix4<double>(camera.projection);
-        Tools::Frustum frustum(viewProj);
+
+        std::list<Chunk*> visibleChunks;
+        this->_game.GetMap().GetChunkManager().ForeachIn(Tools::Frustum(viewProj),
+            [&](Chunk& chunk)
+            {
+                if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount() == 0)
+                    return;
+                visibleChunks.push_back(&chunk);
+            });
+        if (visibleChunks.size() == 0)
+            return;
 
         std::map<Uint32, std::multimap<double, Chunk*>> transparentChunks;
-
         do
         {
             this->_shader->BeginPass();
@@ -66,34 +75,33 @@ namespace Client { namespace Map {
             {
                 if (texturesIt->second->HasAlpha())
                 {
-                    this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
-                        [&](Chunk& chunk)
-                        {
-                            if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount(texturesIt->first) == 0)
-                                return;
-                            auto const& relativePosition = Common::Position(chunk.coords, Tools::Vector3f(Common::ChunkSize / 2.0f)) - camera.position;
-                            auto dist = relativePosition.GetMagnitudeSquared();
-                            auto value = std::multimap<double, Chunk*>::value_type(-dist, &chunk);
-                            transparentChunks[texturesIt->first].insert(value);
-                        });
+                    for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
+                    {
+                        if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
+                            return;
+                        auto const& relativePosition = Common::Position((*chunkIt)->coords, Tools::Vector3f(Common::ChunkSize / 2.0f)) - camera.position;
+                        auto dist = relativePosition.GetMagnitudeSquared();
+                        transparentChunks[texturesIt->first].insert(std::multimap<double, Chunk*>::value_type(-dist, *chunkIt));
+                    }
                 }
                 else
                 {
                     texturesIt->second->Bind();
                     this->_shaderTexture->Set(texturesIt->second->GetCurrentTexture());
-                    this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
-                        [&](Chunk& chunk)
-                        {
-                            if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount(texturesIt->first) == 0)
-                                return;
-                            this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position(chunk.coords, Tools::Vector3f(0)) - camera.position));
-                            chunk.GetMesh()->Render(texturesIt->first, this->_renderer);
-                        });
+                    for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
+                    {
+                        if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
+                            return;
+                        this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Common::Position((*chunkIt)->coords, Tools::Vector3f(0)) - camera.position));
+                        (*chunkIt)->GetMesh()->Render(texturesIt->first, this->_renderer);
+                    }
                     texturesIt->second->Unbind();
                 }
             }
         } while (this->_shader->EndPass());
 
+        if (transparentChunks.size() == 0)
+            return;
         do
         {
             this->_shader->BeginPass();

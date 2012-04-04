@@ -394,7 +394,7 @@ namespace Client { namespace Map {
         this->_refreshTasks[&node] = t;
     }
 
-    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
+    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Game::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
     {
         return chunk->GetMesh()->Refresh(this->_chunkRenderer, cubeTypes, cubes, neighbors);
     }

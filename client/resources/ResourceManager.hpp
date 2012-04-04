@@ -40,6 +40,7 @@ namespace Client { namespace Resources {
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
         std::map<Uint32, Uint32> _resourceToPluginId;
+        std::map<Uint32, std::map<std::string, Uint32>> _resourceIds;
         std::map<Uint32, Tools::Renderers::ITexture2D*> _textures;
         std::map<Uint32, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextures;
         std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
@@ -78,6 +79,14 @@ namespace Client { namespace Resources {
         {
             auto it = this->_resourceToPluginId.find(resourceId);
             return it != this->_resourceToPluginId.end() ? it->second : 0;
+        }
+        Uint32 GetResourceId(Uint32 pluginId, std::string const& filename)
+        {
+            auto it = this->_resourceIds.find(pluginId);
+            if (it == this->_resourceIds.end())
+                return 0;
+            auto it2 = it->second.find(filename);
+            return it2 != it->second.end() ? it2->second : 0;
         }
 
         void LoadAllResources();

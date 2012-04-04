@@ -68,7 +68,7 @@ namespace Client { namespace Map {
         void _RefreshNode(ChunkNode& node);
         void _RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeType> oldCubes);
         void _AddNodeToRefresh(ChunkNode& node);
-        bool _RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors);
+        bool _RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Game::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors);
     };
 
     template<class TFunc>
