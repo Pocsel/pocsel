@@ -346,14 +346,28 @@ namespace Server { namespace Game { namespace Map {
             this->_SendChunkToPlayers(chunk);
     }
 
+    void Map::_DestroyChunkCallback(Chunk* chunk)
+    {
+        chunk->StealCubes();
+        this->_SendChunkToPlayers(chunk);
+    }
+
     void Map::_DestroyChunk(Chunk::IdType id)
     {
         Chunk* chunk = this->_chunkManager->GetChunk(id);
         if (chunk == 0)
         {
-            chunk = new Chunk(id);
-            this->_SendChunkToPlayers(chunk);
-            this->_chunkManager->AddChunk(std::unique_ptr<Chunk>(chunk));
+            if (this->_chunkRequests.count(id) == 0)
+            {
+                chunk = new Chunk(id);
+                this->_SendChunkToPlayers(chunk);
+                this->_chunkManager->AddChunk(std::unique_ptr<Chunk>(chunk));
+            }
+            else
+            {
+                ChunkCallback cb(std::bind(&Map::_DestroyChunkCallback, this, std::placeholders::_1));
+                this->_chunkRequests[id].push_back(cb);
+            }
         }
         else
         {

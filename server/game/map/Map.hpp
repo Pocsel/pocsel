@@ -100,6 +100,7 @@ namespace Server { namespace Game { namespace Map {
         void _DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos);
         void _DestroyCubes2(Chunk* chunk, std::shared_ptr<Common::CastChunk> cubePos);
         void _DestroyChunk(Chunk::IdType id);
+        void _DestroyChunkCallback(Chunk* chunk);
         void _PreDestroyCubes(std::shared_ptr<std::vector<Common::CastChunk*>> cubePos);
         void _SendChunkToPlayers(Chunk* chunk);
         void _Tick(Uint64 currentTime);

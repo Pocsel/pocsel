@@ -39,7 +39,7 @@ namespace Common {
 
     void Packet::_Resize(Uint32 target)
     {
-        if (target > 0xffff - 2)
+        if (target > maxSize)
             throw std::runtime_error("Trying to create a too big packet");
 
         char* tmp = this->_data - 2;
@@ -52,7 +52,7 @@ namespace Common {
 
     void Packet::_WriteSize()
     {
-        assert(this->_size <= 0xffff - 2);
+        assert(this->_size <= maxSize);
         char* tmp = this->_data - 2;
         tmp[0] = (this->_size & 0xFF00) >> 8;
         tmp[1] = this->_size & 0x00FF;
