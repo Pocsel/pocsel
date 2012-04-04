@@ -307,17 +307,17 @@ namespace Common {
                         preRes[BigChunk::GetId(cId)].push_back(new CastChunk(cId));
                     ++count;
 
-                    if (z == -distance && __GetCubePos(z + (int)GetCubeCoords(pos).z) != 0)
+                    if (z == -distance)
                         z += (int)ChunkSize - (int)__GetCubePos(z + (int)GetCubeCoords(pos).z);
                     else
                         z += ChunkSize;
                 }
-                if (y == -distance && __GetCubePos(y + (int)GetCubeCoords(pos).y) != 0)
+                if (y == -distance)
                     y += (int)ChunkSize - (int)__GetCubePos(y + (int)GetCubeCoords(pos).y);
                 else
                     y += ChunkSize;
             }
-            if (x == -distance && __GetCubePos(x + (int)GetCubeCoords(pos).x) != 0)
+            if (x == -distance)
                 x += (int)ChunkSize - (int)__GetCubePos(x + (int)GetCubeCoords(pos).x);
             else
                 x += ChunkSize;
