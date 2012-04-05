@@ -105,7 +105,7 @@ namespace Server { namespace Game {
 
         //player->GetCurrentMap().DestroyCubes(Common::RayCast::Ray(pos, 50.0f));
         if (dist > 1.0f)
-            player->GetCurrentMap().DestroyCubes(Common::RayCast::SphereArea(p0, 100.0f / std::log10(dist * dist * 10.0f)));
+            player->GetCurrentMap().DestroyCubes(Common::RayCast::SphereArea(p0, 1000.0f));// / std::log10(dist * dist * 10.0f)));
     }
 
     void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance)
