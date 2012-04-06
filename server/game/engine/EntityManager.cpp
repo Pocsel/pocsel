@@ -218,7 +218,7 @@ namespace Server { namespace Game { namespace Engine {
         this->AddSpawnEvent(pluginId, "Init", this->_engine.GetInterpreter().MakeNil() /* arg */, 0 /* spawnerId */, 0 /* callbackId */);
     }
 
-    Uint32 EntityManager::_CreateEntity(Uint32 pluginId, std::string entityName, bool positional /* = true */, Common::Position const& pos /* = Common::Position() */) throw(std::runtime_error)
+    Uint32 EntityManager::_CreateEntity(Uint32 pluginId, std::string entityName, bool positional /* = false */, Common::Position const& pos /* = Common::Position() */) throw(std::runtime_error)
     {
         // trouve le plugin
         auto itPlugin = this->_entityTypes.find(pluginId);
@@ -258,13 +258,13 @@ namespace Server { namespace Game { namespace Engine {
     void EntityManager::_ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper)
     {
         Common::Position pos;
-        Tools::Lua::Ref firstArg = helper.PopArg();
+        Tools::Lua::Ref firstArg = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"");
         if (firstArg.IsTable())
         {
             pos = Tools::Lua::Vector::TableToVector3<double>(firstArg);
-            firstArg = helper.PopArg();
+            firstArg = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"");
         }
-        std::string plugin = firstArg.CheckString("Server.Entity.SpawnFromPlugin: Argument \"plugin\" must be a string");
+        std::string plugin = firstArg.CheckString("Server.Entity.Spawn[FromPlugin]: Argument \"plugin\" must be a string");
         Uint32 pluginId = this->_engine.GetMap().GetGame().GetWorld().GetPluginManager().GetPluginId(plugin);
         this->_SpawnFromPlugin(pos, pluginId, helper);
     }
@@ -280,7 +280,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::_SpawnFromPlugin(Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper)
     {
-        std::string entityName = helper.PopArg().CheckString("Server.Entity.SpawnFromPlugin: Argument \"entityName\" must be a string");
+        std::string entityName = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"").CheckString("Server.Entity.Spawn[FromPlugin]: Argument \"entityName\" must be a string");
         Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;
@@ -290,8 +290,8 @@ namespace Server { namespace Game { namespace Engine {
             arg = helper.PopArg();
             if (helper.GetNbArgs())
             {
-                cbTargetId = (Uint32)helper.PopArg().CheckNumber("Server.Message.Later: Argument \"cbTarget\" must be a number");
-                cbFunction = helper.PopArg().CheckString("Server.Message.Later: Argument 5 \"cbFunction\" must be a string");
+                cbTargetId = (Uint32)helper.PopArg().CheckNumber("Server.Entity.Spawn[FromPlugin]: Argument \"cbTarget\" must be a number");
+                cbFunction = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"cbFunction\"").CheckString("Server.Entity.Spawn[FromPlugin]: Argument \"cbFunction\" must be a string");
                 if (helper.GetNbArgs())
                     cbArg = helper.PopArg();
             }
