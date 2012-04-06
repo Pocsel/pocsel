@@ -42,7 +42,7 @@ namespace Server { namespace Game { namespace Map {
         _currentTime(currentTime)
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
-        this->_gen = new Gen::ChunkGenerator(this->_conf);
+        this->_gen = new Gen::ChunkGenerator();
         this->_engine = new Engine::Engine(*this);
         this->_chunkManager = new ChunkManager(*this, this->_game.GetServer().GetResourceManager().GetConnection(), existingBigChunks);
     }
@@ -60,7 +60,7 @@ namespace Server { namespace Game { namespace Map {
     void Map::Start()
     {
         Tools::debug << "Map::Start() -- " << this->_conf.name << "\n";
-        this->_gen->Start();
+        this->_gen->Start(this->_conf);
         this->_messageQueue->Start();
 
         auto& plugins = this->_game.GetWorld().GetPluginManager().GetPlugins();
@@ -234,7 +234,7 @@ namespace Server { namespace Game { namespace Map {
         {
             if (chunk->GetCube(0, y, 0))
             {
-                Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk->GetCube(0, y, 0) - 1];
+                CubeType const& biet = this->_conf.cubeTypes[chunk->GetCube(0, y, 0) - 1];
                 if (biet.solid)
                 {
                     this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(0, (float)y, 0));
@@ -250,7 +250,7 @@ namespace Server { namespace Game { namespace Map {
                     {
                         if (chunk->GetCube(x, y, 0))
                         {
-                            Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk->GetCube(x, y, 0) - 1];
+                            CubeType const& biet = this->_conf.cubeTypes[chunk->GetCube(x, y, 0) - 1];
                             if (biet.solid)
                             {
                                 this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(x, y, 0));

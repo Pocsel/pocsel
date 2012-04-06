@@ -107,10 +107,10 @@ namespace Tools { namespace Lua {
     Ref Ref::GetTable(std::string const& name) const throw(std::runtime_error)
     {
         auto table = this->operator[](name);
-        if (!table.IsTable())
-            throw std::runtime_error("Lua::Ref: Indexing a value that is not a table");
         if (!table.Exists())
             table = this->Set(name, this->_state.MakeTable());
+        if (!table.IsTable())
+            throw std::runtime_error("Lua::Ref: Indexing a value that is not a table");
         return table;
     }
 

@@ -41,7 +41,7 @@ namespace Server { namespace Database {
                 static_cast<Uint32>(data.size())
             );
             Log::load << "Found resource " << id << ": " << filename << ".\n";
-            this->_ids[filename] = id;
+            this->_ids[plugin_id][filename] = id;
             this->_idsByVersion[version].push_back(id);
         }
     }

@@ -31,7 +31,7 @@ void Init(Interpreter& i)
     m.SetMetaMethod(MetaTable::Serialize,
         [&i](CallHelper& helper)
         {
-            auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
+            auto m = helper.PopArg().Check<Tools::Matrix4<float>*>("");
             std::stringstream tmp;
             tmp << m->mm[0];
             for (int j = 1; j < 16; ++j)

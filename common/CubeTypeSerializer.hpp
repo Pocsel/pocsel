@@ -15,7 +15,7 @@ namespace Common {
 
             p.Read(ptr->id);
             p.Read(ptr->name);
-            p.Read(ptr->luaFile);
+            p.Read(ptr->visualEffect);
             p.Read(ptr->solid);
             p.Read(ptr->transparent);
 
@@ -26,7 +26,7 @@ namespace Common {
         {
             p.Write(cube.id);
             p.Write(cube.name);
-            p.Write(cube.luaFile);
+            p.Write(cube.visualEffect);
             p.Write(cube.solid);
             p.Write(cube.transparent);
         }

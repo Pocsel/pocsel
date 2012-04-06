@@ -1,10 +1,10 @@
 #ifndef __SERVER_GAME_MAP_MAP_HPP__
 #define __SERVER_GAME_MAP_MAP_HPP__
 
-#include "server/game/map/Conf.hpp"
-
-#include "server/game/map/Chunk.hpp"
 #include "server/game/map/BigChunk.hpp"
+#include "server/game/map/Chunk.hpp"
+#include "server/game/map/Conf.hpp"
+#include "server/game/map/CubeType.hpp"
 #include "common/Position.hpp"
 #include "common/CubePosition.hpp"
 
@@ -16,11 +16,13 @@ namespace Common {
 
 namespace Tools {
     class SimpleMessageQueue;
+    namespace Database {
+        class IConnection;
+    }
+    namespace Lua {
+        class Interpreter;
+    }
 }
-
-namespace Tools { namespace Database {
-    class IConnection;
-}}
 
 namespace Server { namespace Game {
     class Game;
@@ -72,10 +74,14 @@ namespace Server { namespace Game { namespace Map {
         void Save();
 
         std::string const& GetName() const { return this->_conf.name; }
+        Conf& GetConfiguration() { return this->_conf; }
         Engine::Engine& GetEngine() { return *this->_engine; }
         Game& GetGame() { return this->_game; }
 
         // threadsafe
+        std::vector<CubeType> const& GetCubeTypes() const { return this->_conf.cubeTypes; }
+        CubeType const& GetCubeType(Uint32 id) const { assert(id != 0); return this->_conf.cubeTypes[id - 1]; }
+        bool HasCubeType(Uint32 id) const { return id && this->_conf.cubeTypes.size() >= id; }
         void HandleNewChunk(Chunk* chunk);
         void GetSpawnPosition(SpawnCallback& response);
         void GetChunk(Chunk::IdType id, ChunkCallback& response);

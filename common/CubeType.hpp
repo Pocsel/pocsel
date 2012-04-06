@@ -9,7 +9,7 @@ namespace Common {
     {
         BaseChunk::CubeType id;
         std::string name;
-        Uint32 luaFile;
+        Uint32 visualEffect;
 
         bool solid;
         bool transparent;

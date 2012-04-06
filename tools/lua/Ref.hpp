@@ -66,7 +66,9 @@ namespace Tools { namespace Lua {
         std::string CheckString(std::string const& e = "") const throw(std::runtime_error);
         void* CheckUserData(std::string const& e = "") const throw(std::runtime_error);
         template <typename T>
-            T Check(std::string const& e = "") const throw(std::runtime_error);
+            T Check(std::string const& e) const throw(std::runtime_error);
+        template <typename T>
+            T Check() const throw(std::runtime_error) { return this->Check<T>(""); }
         // type tests
         std::string GetTypeName() const throw();
         int GetType() const throw(); // valeurs possibles : LUA_TNIL, LUA_TBOOLEAN, LUA_TLIGHTUSERDATA, LUA_TNUMBER, LUA_TSTRING, LUA_TTABLE, LUA_TFUNCTION, LUA_TUSERDATA, LUA_TTHREAD, LUA_TNONE

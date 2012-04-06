@@ -1,9 +1,7 @@
 #ifndef __SERVER_DATABASE_WORLDLOADER_HPP__
 #define __SERVER_DATABASE_WORLDLOADER_HPP__
 
-namespace Common {
-    struct CubeType;
-}
+#include "tools/lua/Ref.hpp"
 
 namespace Tools {
     namespace Database {
@@ -18,6 +16,7 @@ namespace Server { namespace Game {
     class World;
     namespace Map {
         struct Conf;
+        struct CubeType;
         class Map;
     }
 }}
@@ -28,18 +27,38 @@ namespace Server { namespace Database {
 
     class WorldLoader
     {
+    private:
+        struct LoadingMapConf
+        {
+            Tools::Lua::Interpreter* interpreter;
+            Tools::Lua::Ref fullname;
+            Tools::Lua::Ref isDefault;
+            Tools::Lua::Ref cubes;
+            Tools::Lua::Ref equations;
+
+            LoadingMapConf(Tools::Lua::Interpreter* interpreter,
+                Tools::Lua::Ref fullname,
+                Tools::Lua::Ref isDefault,
+                Tools::Lua::Ref cubes,
+                Tools::Lua::Ref equations);
+            LoadingMapConf(LoadingMapConf&& rhs);
+            ~LoadingMapConf();
+        };
+
+        Game::World& _world;
+        ResourceManager& _resourceMgr;
+        Tools::Database::IConnection& _connection;
+        std::map<Game::Map::Map*, LoadingMapConf> _loadingMaps;
+
     public:
-        static void Load(Game::World& world, ResourceManager& manager);
+        WorldLoader(Game::World& world, ResourceManager& manager);
 
     private:
-        static void _RegisterResourcesFunctions(Game::Map::Map& map, Tools::Lua::Interpreter& interpreter);
-        static void _LoadCubeTypes(Tools::Database::IConnection& conn, Game::Map::Map& map, ResourceManager& manager);
-        static void _LoadMapConf(Game::Map::Conf& conf,
-                                 std::string const& name,
-                                 std::string const& code,
-                                 Game::World const& world);
-        static Common::CubeType const* _GetCubeTypeByName(std::string const& name,
-                                                          Game::World const& world);
+        void _RegisterResourcesFunctions(Game::Map::Map& map, Tools::Lua::Interpreter& interpreter);
+        void _LoadCubeTypes(Game::Map::Map& map);
+        LoadingMapConf _LoadMapConf(Game::Map::Conf& conf, std::string const& name, std::string const& code);
+        void _LoadMapCubeTypes();
+        Game::Map::CubeType const* _GetCubeTypeByName(std::string const& name);
     };
 
 }}

@@ -30,8 +30,8 @@ namespace Client { namespace Game {
         // Initialisation de l'interpreter
         Tools::Lua::Interpreter interpreter;
 
-        Uint32 pluginId = resourceMgr.GetPluginId(this->luaFile);
-        interpreter.DoString(resourceMgr.GetScript(this->luaFile));
+        Uint32 pluginId = resourceMgr.GetPluginId(this->visualEffect);
+        interpreter.DoString(resourceMgr.GetScript(this->visualEffect));
 
         auto textures = interpreter.Globals()["textures"];
         this->textures.top = resourceMgr.GetResourceId(pluginId, textures["top"].Check<std::string>());
