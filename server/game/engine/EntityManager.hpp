@@ -3,6 +3,7 @@
 
 #include "tools/lua/Ref.hpp"
 #include "server/game/engine/CallbackManager.hpp"
+#include "common/Position.hpp"
 
 namespace Tools { namespace Database {
     class IConnection;
@@ -21,8 +22,8 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct SpawnEvent
         {
-            SpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId) :
-                pluginId(pluginId), entityName(entityName), arg(arg), spawnerId(spawnerId), notificationCallbackId(notificationCallbackId)
+            SpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, Common::Position const& pos) :
+                pluginId(pluginId), entityName(entityName), arg(arg), spawnerId(spawnerId), notificationCallbackId(notificationCallbackId), pos(pos)
             {
             }
             Uint32 pluginId;
@@ -30,6 +31,7 @@ namespace Server { namespace Game { namespace Engine {
             Tools::Lua::Ref arg;
             Uint32 spawnerId;
             Uint32 notificationCallbackId;
+            Common::Position pos;
         };
         struct KillEvent
         {
@@ -51,7 +53,8 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 _pluginIdForRegistering;
         std::string _pluginNameForRegistering;
         Uint32 _nextEntityId;
-        Uint32 _runningEntityId;
+        Uint32 _runningEntityId; // 0 quand aucune entité n'est en cours d'éxécution
+        Entity* _runningEntity; // nul quand aucune entité n'est en cours d'éxécution
         std::queue<SpawnEvent*> _spawnEvents;
         std::queue<KillEvent*> _killEvents;
 
@@ -62,8 +65,7 @@ namespace Server { namespace Game { namespace Engine {
         // entry point unique lua (peut retourner toutes les valeurs de CallbackManager::Result sauf CallbackNotFound (evidemment)
         CallbackManager::Result LuaFunctionCall(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg);
 
-        Uint32 GetRunningEntityId() const; // retourne 0 si aucune entité n'est en cours d'éxécution
-        void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId);
+        void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, Common::Position const& pos = Common::Position());
         void AddKillEvent(Uint32 targetId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId);
         void DispatchSpawnEvents();
         void DispatchKillEvents();
@@ -72,13 +74,13 @@ namespace Server { namespace Game { namespace Engine {
         void EndPluginRegistering();
         void BootstrapPlugin(Uint32 pluginId);
     private:
-        Uint32 _CreateEntity(Uint32 pluginId, std::string entityName) throw(std::runtime_error);
+        Uint32 _CreateEntity(Uint32 pluginId, std::string entityName, bool positional = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper);
-        void _ApiSpawnPositional(Tools::Lua::CallHelper& helper);
-        void _ApiSpawnPositionalFromPlugin(Tools::Lua::CallHelper& helper);
+        void _SpawnFromPlugin(Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
+        void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
     };
 
 }}}

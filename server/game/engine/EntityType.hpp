@@ -12,12 +12,14 @@ namespace Server { namespace Game { namespace Engine {
         std::string _name;
         Uint32 _pluginId;
         Tools::Lua::Ref _prototype;
+        bool _isPositional;
 
     public:
-        EntityType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype);
+        EntityType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype, bool isPositional);
         std::string const& GetName() const { return this->_name; }
         Uint32 GetPluginId() const { return this->_pluginId; }
         Tools::Lua::Ref const& GetPrototype() const { return this->_prototype; }
+        bool IsPositional() const { return this->_isPositional; }
     };
 
 }}}
