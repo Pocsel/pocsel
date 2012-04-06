@@ -1,6 +1,7 @@
 #include "client/precompiled.hpp"
 
 #include "tools/IRenderer.hpp"
+#include "tools/metatables/Metatables.hpp"
 #include "tools/renderers/utils/Image.hpp"
 
 #include "client/Client.hpp"
@@ -20,6 +21,7 @@ namespace Client { namespace Game {
         _cubeTypeManager(client, nbCubeTypes),
         _map(0)
     {
+        Tools::Metatables::RegisterColor(this->_interpreter);
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
         this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 0)); // XXX
         this->_itemManager = new ItemManager(*this),

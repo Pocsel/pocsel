@@ -49,6 +49,7 @@ namespace Server { namespace Game { namespace Map {
 
     Map::~Map()
     {
+        this->_conf.cubes.clear();
         Tools::debug << "Map::~Map() -- " << this->_conf.name << "\n";
         Tools::Delete(this->_gen);
         Tools::Delete(this->_engine);

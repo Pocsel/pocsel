@@ -78,7 +78,7 @@ namespace Client { namespace Map {
                     for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
                     {
                         if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
-                            return;
+                            continue;
                         auto chunkPos = Common::Position((*chunkIt)->coords) * Common::ChunkSize + Common::Position(Common::ChunkSize / 2.0);
                         auto const& relativePosition = chunkPos - camera.position;
                         auto dist = relativePosition.GetMagnitudeSquared();
@@ -92,8 +92,8 @@ namespace Client { namespace Map {
                     for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
                     {
                         if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
-                            return;
-                        auto chunkPos = Common::Position((*chunkIt)->coords) * Common::ChunkSize + Common::Position(Common::ChunkSize / 2.0);
+                            continue;
+                        auto chunkPos = Common::Position((*chunkIt)->coords) * Common::ChunkSize;
                         this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Tools::Vector3f(chunkPos - camera.position)));
                         (*chunkIt)->GetMesh()->Render(texturesIt->first, this->_renderer);
                     }
@@ -117,7 +117,7 @@ namespace Client { namespace Map {
                     auto mesh = itChunk->second->GetMesh();
                     if (!mesh)
                         continue;
-                    Tools::Vector3f relativePos(Common::Position(itChunk->second->coords) - camera.position);
+                    Tools::Vector3f relativePos(Common::Position(itChunk->second->coords) * Common::ChunkSize - camera.position);
                     this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(relativePos));
                     mesh->Render(it->first, this->_renderer);
                 }

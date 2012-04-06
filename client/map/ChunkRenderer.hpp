@@ -47,6 +47,7 @@ namespace Client { namespace Map {
                 throw std::runtime_error("bad id");
             return it->second->GetCurrentTexture();
         }
+        std::map<Uint32, std::unique_ptr<Resources::ITexture>> const& GetAllTextures() const { return this->_textures; }
     };
 
 }}

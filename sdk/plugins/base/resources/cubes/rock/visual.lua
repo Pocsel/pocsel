@@ -7,7 +7,7 @@ textures = {
     back = "cubes/rock/texture.png",
 }
 
-effect = {
+effects = {
     top = "BaseChunk",
     bottom = "BaseChunk",
     left = "BaseChunk",
@@ -16,10 +16,10 @@ effect = {
     back = "BaseChunk",
 }
 effectParameters = {
-    top = { diffuseColor = Client.Colors.Create(0x777777) },
-    bottom = { diffuseColor = Client.Colors.Create(0x007700) },
-    left = { diffuseColor = Client.Colors.Create(0x007777) },
-    right = { diffuseColor = Client.Colors.Create(0x777700) },
-    front = { diffuseColor = Client.Colors.Create(0x770000) },
-    back = { diffuseColor = Client.Colors.Create(0x000077) },
+    top = { diffuseColor = Client.Color.Create(0x777777) },
+    bottom = { diffuseColor = Client.Color.Create(0x007700) },
+    left = { diffuseColor = Client.Color.Create(0x007777) },
+    right = { diffuseColor = Client.Color.Create(0x777700) },
+    front = { diffuseColor = Client.Color.Create(0x770000) },
+    back = { diffuseColor = Client.Color.Create(0x000077) },
 }

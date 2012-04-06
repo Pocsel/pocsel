@@ -82,7 +82,7 @@ namespace Client { namespace Resources {
         Tools::Renderers::ITexture2D* errTex = 0;
         if (this->_textures.find(0) != this->_textures.end())
             errTex = this->_textures[0];
-        Tools::Delete(errTex);
+        delete errTex;
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
             if (it->second != errTex)
                 Tools::Delete(it->second);
@@ -263,7 +263,10 @@ namespace Client { namespace Resources {
         this->_LoadEffects();
         auto const& resources = this->_database.GetAllResources("%");
         for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
+        {
             this->_resourceIds[(*it)->pluginId][(*it)->filename] = (*it)->id;
+            this->_resourceToPluginId[(*it)->id] = (*it)->pluginId;
+        }
         this->_game.GetCubeTypeManager().LoadResources();
     }
 
@@ -272,8 +275,7 @@ namespace Client { namespace Resources {
         auto const& resources = this->_database.GetAllResources("lua");
 
         auto& interpreter = this->_game.GetInterpreter();
-        auto clientNs = interpreter.Globals().Set("Client", interpreter.MakeTable());
-        auto effectNs = clientNs.Set("Effect", interpreter.MakeTable());
+        auto effectNs = interpreter.Globals().GetTable("Client").GetTable("Effect");
 
         for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
         {

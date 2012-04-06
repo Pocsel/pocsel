@@ -46,12 +46,7 @@ namespace Tools { namespace Metatables {
     void RegisterColor(Lua::Interpreter& interpreter)
     {
         Tools::Lua::MetaTable colorsMt(interpreter, Tools::Color4f());
-        auto clientNs = interpreter.Globals()["Client"];
-        if (!clientNs.Exists())
-            clientNs = interpreter.Globals().Set("Client", interpreter.MakeTable());
-        auto colorsNs = clientNs["Colors"];
-        if (!colorsNs.Exists())
-            colorsNs = colorsNs.Set("Colors", interpreter.MakeTable());
+        auto colorsNs = interpreter.Globals().GetTable("Client").GetTable("Color");
         colorsNs.Set("Create", interpreter.MakeFunction(_CreateColor));
     }
 

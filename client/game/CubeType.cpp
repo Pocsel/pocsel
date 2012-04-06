@@ -25,11 +25,8 @@ namespace Client { namespace Game {
     {
     }
 
-    void CubeType::Load(Resources::ResourceManager& resourceMgr)
+    void CubeType::Load(Resources::ResourceManager& resourceMgr, Tools::Lua::Interpreter& interpreter)
     {
-        // Initialisation de l'interpreter
-        Tools::Lua::Interpreter interpreter;
-
         Uint32 pluginId = resourceMgr.GetPluginId(this->visualEffect);
         interpreter.DoString(resourceMgr.GetScript(this->visualEffect));
 
