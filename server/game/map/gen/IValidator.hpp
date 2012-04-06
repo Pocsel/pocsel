@@ -9,6 +9,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
     {
     public:
         virtual bool Check(double x, double y, double z, double eq) const = 0;
+        virtual ~IValidator()
+        {
+        }
+
 
         // XXX mode MethodPtr
 //    public:
