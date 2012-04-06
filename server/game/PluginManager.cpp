@@ -40,4 +40,14 @@ namespace Server { namespace Game {
         return "(plugin not found)";
     }
 
+    Uint32 PluginManager::GetPluginId(std::string const& identifier) const
+    {
+        auto it = this->_plugins.begin();
+        auto itEnd = this->_plugins.end();
+        for (; it != itEnd; ++it)
+            if (it->second.identifier == identifier)
+                return it->first;
+        return 0;
+    }
+
 }}

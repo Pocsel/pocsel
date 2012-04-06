@@ -190,34 +190,40 @@ namespace Tools { namespace Lua {
         }
 
     template<class T>
-        inline T Ref::Check() const throw(std::runtime_error)
+        inline T Ref::Check(std::string const& err /* = "" */) const throw(std::runtime_error)
         {
             try
             {
                 if (!this->IsUserData() || this->GetMetaTable().IsNoneOrNil() ||
                         this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
                     throw 1;
-                return reinterpret_cast<T>(this->CheckUserData());
+                return reinterpret_cast<T>(this->CheckUserData(err));
             }
             catch (int)
             {
-                throw std::runtime_error(std::string("Lua::Ref: Value is not of \"") + typeid(typename std::remove_pointer<T>::type).name() + "\" type");
+                if (!err.empty())
+                    throw std::runtime_error(err);
+                else
+                    throw std::runtime_error(std::string("Lua::Ref: Value is not of \"") + typeid(typename std::remove_pointer<T>::type).name() + "\" type");
             }
             catch (std::exception& e)
             {
-                throw std::runtime_error(std::string("Lua::Ref::Check<") + typeid(typename std::remove_pointer<T>::type).name() + ">: " + e.what());
+                if (!err.empty())
+                    throw std::runtime_error(err);
+                else
+                    throw std::runtime_error(std::string("Lua::Ref::Check<") + typeid(typename std::remove_pointer<T>::type).name() + ">: " + e.what());
             }
         }
 
-    template<> bool Ref::Check<bool>() const throw(std::runtime_error);
-    template<> int Ref::Check<int>() const throw(std::runtime_error);
-    template<> unsigned int Ref::Check<unsigned int>() const throw(std::runtime_error);
-    template<> char Ref::Check<char>() const throw(std::runtime_error);
-    template<> unsigned char Ref::Check<unsigned char>() const throw(std::runtime_error);
-    template<> double Ref::Check<double>() const throw(std::runtime_error);
-    template<> float Ref::Check<float>() const throw(std::runtime_error);
-    template<> std::string Ref::Check<std::string>() const throw(std::runtime_error);
-    template<> inline Ref Ref::Check<Ref>() const throw(std::runtime_error) { return *this; }
+    template<> bool Ref::Check<bool>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> int Ref::Check<int>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> unsigned int Ref::Check<unsigned int>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> char Ref::Check<char>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> unsigned char Ref::Check<unsigned char>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> double Ref::Check<double>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> float Ref::Check<float>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> std::string Ref::Check<std::string>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> inline Ref Ref::Check<Ref>(std::string const&) const throw(std::runtime_error) { return *this; }
 
     template <typename T>
         inline T Ref::To(T const& defaultValue) const throw()

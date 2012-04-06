@@ -52,7 +52,7 @@ namespace Tools { namespace Lua {
         this->_ref = LUA_NOREF;
     }
 
-    size_t Ref::GetLength() throw()
+    size_t Ref::GetLength() const throw()
     {
         this->ToStack();
         size_t ret = lua_objlen(this->_state, -1);
@@ -284,9 +284,9 @@ namespace Tools { namespace Lua {
 
 #define MAKE_CHECKTEMPLATEMETHOD(method, type) \
     template <> \
-        type Ref::Check<type>() const throw(std::runtime_error) \
+        type Ref::Check<type>(std::string const& e) const throw(std::runtime_error) \
         { \
-            return this->method(); \
+            return this->method(e); \
         }
 
     MAKE_CHECKTEMPLATEMETHOD(CheckBoolean, bool);
