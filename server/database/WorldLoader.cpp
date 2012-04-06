@@ -10,6 +10,8 @@
 
 #include "common/Resource.hpp"
 
+#include "server/Server.hpp"
+#include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
 #include "server/game/engine/Engine.hpp"
@@ -28,40 +30,15 @@ namespace Server { namespace Database {
 
         // Meta data
         auto query = conn.CreateQuery("SELECT identifier, fullname, version, build_hash FROM world");
-        if (query)
+        if (auto row = query->Fetch())
         {
-            auto row = query->Fetch();
-            if (row)
-            {
-                world._identifier = row->GetString(0);
-                world._fullname = row->GetString(1);
-                world._version = row->GetUint32(2);
-                world._buildHash = row->GetString(3);
-            }
-            else
-                throw std::runtime_error("WorldLoader::Load: World file is missing metadata (invalid or corrupt world file).");
+            world._identifier = row->GetString(0);
+            world._fullname = row->GetString(1);
+            world._version = row->GetUint32(2);
+            world._buildHash = row->GetString(3);
         }
         else
             throw std::runtime_error("WorldLoader::Load: World file is missing metadata (invalid or corrupt world file).");
-
-        // Cube types
-        query = conn.CreateQuery("SELECT id, plugin_id, name, lua FROM cube_type");
-        while (auto row = query->Fetch())
-        {
-            Uint32 id = row->GetUint32(0);
-            std::string name = row->GetString(2);
-            Uint32 luaFile = row->GetUint32(3);
-            Log::load << "Load cube type id: " << id <<
-                          ", plugin_id: " << row->GetUint64(1) <<
-                          ", name: " << name << "\n";
-            if (world._cubeTypes.size() < id)
-                world._cubeTypes.resize(id);
-            world._cubeTypes[id - 1].id = id;
-            world._cubeTypes[id - 1].name = name;
-            world._cubeTypes[id - 1].luaFile = luaFile;
-            auto const& res = manager.GetResource(luaFile);
-            WorldLoader::_LoadCubeType(world._cubeTypes[id - 1], std::string((char const*)res.data, res.size), manager);
-        }
 
         // Maps
         query = conn.CreateQuery("SELECT name, lua, tick FROM map");
@@ -71,22 +48,9 @@ namespace Server { namespace Database {
             {
                 Game::Map::Conf conf;
                 WorldLoader::_LoadMapConf(conf, row->GetString(0), row->GetString(1), world);
-                conf.cubeTypes = &world._cubeTypes;
                 Uint64 curTime = row->GetUint64(2);
 
                 std::vector<Game::Map::Chunk::IdType> existingChunks;
-
-//                {
-//                    auto coconn = manager.GetConnectionPool().GetConnection();
-//                    auto& cucurs = coconn->GetCursor();
-//                    cucurs.Execute((Tools::ToString("SELECT id FROM ") + row[0].GetString() + "_chunk").c_str());
-//                    while (cucurs.HasData())
-//                    {
-//                        auto& rorow = cucurs.FetchOne();
-//                        existingChunks.push_back(rorow[0].GetUint64());
-//                    }
-//                }
-
                 std::vector<Game::Map::Chunk::IdType> existingBigChunks;
 
                 auto q = conn.CreateQuery("SELECT id FROM " + row->GetString(0) + "_bigchunk");
@@ -94,9 +58,8 @@ namespace Server { namespace Database {
                     existingBigChunks.push_back(r->GetUint64(0));
 
                 world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game, existingBigChunks);
-                if (conf.is_default) {
+                if (conf.is_default)
                     world._defaultMap = world._maps[conf.name];
-                }
             }
             catch (std::exception& e)
             {
@@ -122,6 +85,10 @@ namespace Server { namespace Database {
             }
         }
 
+        // CubeTypes
+        for (auto itMap = world._maps.begin(), itMapEnd = world._maps.end(); itMap != itMapEnd; ++itMap)
+            WorldLoader::_LoadCubeTypes(conn, *itMap->second, manager);
+
         // Entity types
         query = conn.CreateQuery("SELECT plugin_id, name, lua FROM entity_file");
         while (auto row = query->Fetch())
@@ -145,29 +112,67 @@ namespace Server { namespace Database {
         }
     }
 
-    void WorldLoader::_LoadCubeType(Common::CubeType& descr, std::string const& code, ResourceManager const& manager)
+    void WorldLoader::_RegisterResourcesFunctions(Game::Map::Map& map, Tools::Lua::Interpreter& lua)
     {
-        try
+        auto resourceNs = lua.Globals().GetTable("Server").GetTable("Resource");
+        resourceNs.Set("GetEffect", lua.MakeFunction(
+            [&](Tools::Lua::CallHelper& helper)
+            {
+                auto pluginId = map.GetEngine().GetRunningPluginId();
+                helper.PushRet(lua.Make(map.GetGame().GetServer().GetResourceManager().GetId(pluginId, helper.PopArg().Check<std::string>())));
+            }));
+        resourceNs.Set("GetEffectFromPlugin", lua.MakeFunction(
+            [&](Tools::Lua::CallHelper& helper)
+            {
+                // TODO pluginId !
+                auto pluginId = map.GetGame().GetWorld().GetPluginManager().GetPluginId(helper.PopArg().Check<std::string>());
+                auto pluginId = map.GetEngine().GetRunningPluginId();
+                helper.PushRet(lua.Make(map.GetGame().GetServer().GetResourceManager().GetId(pluginId, helper.PopArg().Check<std::string>())));
+            }));
+    }
+
+    void WorldLoader::_LoadCubeTypes(Tools::Database::IConnection& conn, Game::Map::Map& map, ResourceManager& manager)
+    {
+        Uint32 currentPluginId = 0;
+        auto& lua = map.GetEngine().GetInterpreter();
+        auto cubeTypeNs = lua.Globals().GetTable("Server").GetTable("CubeType");
+        cubeTypeNs.Set("Register", lua.Bind(
+            [&](Tools::Lua::Ref cubeType)
+            {
+                Common::BaseChunk::CubeType id;
+                std::string name = cubeType["name"].Check<std::string>();
+                Uint32 visualEffect = cubeType["visualEffect"].Check<Uint32>();
+                Common::CubeType desc(id, name);
+                desc.solid = cubeType["solid"].To<bool>();
+                desc.transparent = cubeType["transparent"].To<bool>();
+
+                Log::load << "[map: " << map.GetName() << "] " <<
+                    "Load cube type " << id <<
+                    ", plugin_id: " << currentPluginId <<
+                    ", name: " << name << "\n";
+            }));
+
+        auto query = conn.CreateQuery("SELECT plugin_id, name, lua FROM cube_type ORDER BY id, plugin_id");
+        while (auto row = query->Fetch())
         {
-            Tools::Lua::Interpreter lua;
-            lua.DoString(code);
+            currentPluginId = row->GetUint64(0);
+            std::string name = row->GetString(1);
+            std::string code = row->GetString(2);
 
-            descr.solid = lua.Globals()["solid"].To<bool>();
-            descr.transparent = lua.Globals()["transparent"].To<bool>();
-
-            Log::load << "name: " << descr.name << " " << descr.id << "\n";
-            Log::load << "luaFile: " << descr.luaFile << "\n";
-            Log::load << "solid: " << descr.solid << "\n";
-            Log::load << "transparent: " << descr.transparent << "\n";
-
-            Log::load << "\n";
+            Log::load << "[map: " << map.GetName() << "] Execute " << name << ".lua...\n";
+            try
+            {
+                lua.DoString(code);
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "WorldLoader: " << e.what();
+                Log::load << "WorldLoader: " << e.what();
+                throw;
+            }
         }
-        catch (std::exception& e)
-        {
-            Tools::error << "WorldLoader: " << e.what();
-            Log::load << "WorldLoader: " << e.what();
-            throw;
-        }
+
+        cubeTypeNs.Set("Register", lua.MakeNil());
     }
 
     void WorldLoader::_LoadMapConf(Game::Map::Conf& conf,

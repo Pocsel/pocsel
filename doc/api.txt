@@ -12,6 +12,12 @@
                     - a boolean value called "transparent",
                     - a boolean value called "solid",
                     - a string value called "visualEffect".
+                Optionnal:
+                    - A integer value called "rotationAxis" where
+                        0 = no rotations
+                        1 = yaw (fr: cap / Y) rotation
+                        2 = pitch (fr: tangage / X) rotation
+                        4 = roll (fr: roulis / Z) rotation
 
     - Entity
         Entity manager.

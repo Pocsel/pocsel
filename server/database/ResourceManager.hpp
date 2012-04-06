@@ -27,7 +27,7 @@ namespace Server { namespace Database {
     private:
         Server& _server;
         Tools::Database::IConnection* _connection;
-        std::unordered_map<std::string, Uint32> _ids;
+        std::unordered_map<Uint32, std::unordered_map<std::string, Uint32>> _ids;
         std::vector<Common::Resource*> _resources;
         std::map<Uint32, std::vector<Uint32>> _idsByVersion;
 
@@ -35,7 +35,16 @@ namespace Server { namespace Database {
         ResourceManager(Server& server);
         ~ResourceManager();
 
-        Uint32 GetId(std::string const& filename) const;
+        Uint32 GetId(Uint32 pluginId, std::string const& filename) const
+        {
+            auto itPlugin = this->_ids.find(pluginId);
+            if (itPlugin == this->_ids.end())
+                throw std::range_error("Plugin Id not found");
+            auto it = itPlugin->second.find(filename);
+            if (it == itPlugin->second.end())
+                throw std::range_error("File not found");
+            return it->second;
+        }
         std::vector<Common::Resource*> const& GetResources() const { return this->_resources; }
 
         bool HasResource(Uint32 id) const { return id && this->_resources.size() >= id; }

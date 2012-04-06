@@ -52,14 +52,6 @@ namespace Server { namespace Database {
         Tools::Delete(this->_connection);
     }
 
-    Uint32 ResourceManager::GetId(std::string const& filename) const
-    {
-        auto it = this->_ids.find(filename);
-        if (it != this->_ids.end())
-            return it->second;
-        return 0;
-    }
-
     std::vector<Uint32> ResourceManager::GetNeededResourceIds(Uint32 fromVersion) const
     {
         std::vector<Uint32> ids;

@@ -2,21 +2,24 @@
 #define __SERVER_DATABASE_WORLDLOADER_HPP__
 
 namespace Common {
-
     struct CubeType;
+}
 
+namespace Tools {
+    namespace Database {
+        class IConnection;
+    }
+    namespace Lua {
+        class Interpreter;
+    }
 }
 
 namespace Server { namespace Game {
-
     class World;
-
     namespace Map {
-
         struct Conf;
-
+        class Map;
     }
-
 }}
 
 namespace Server { namespace Database {
@@ -29,9 +32,8 @@ namespace Server { namespace Database {
         static void Load(Game::World& world, ResourceManager& manager);
 
     private:
-        static void _LoadCubeType(Common::CubeType& descr,
-                                  std::string const& code,
-                                  ResourceManager const& manager);
+        static void _RegisterResourcesFunctions(Game::Map::Map& map, Tools::Lua::Interpreter& interpreter);
+        static void _LoadCubeTypes(Tools::Database::IConnection& conn, Game::Map::Map& map, ResourceManager& manager);
         static void _LoadMapConf(Game::Map::Conf& conf,
                                  std::string const& name,
                                  std::string const& code,
