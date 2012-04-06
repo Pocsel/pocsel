@@ -15,4 +15,8 @@ namespace Server { namespace Game { namespace Engine {
         this->_self.Set("prototype", this->_type.GetPrototype());
     }
 
+    Entity::~Entity()
+    {
+    }
+
 }}}

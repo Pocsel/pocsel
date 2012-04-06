@@ -18,6 +18,7 @@ namespace Server { namespace Game { namespace Engine {
 
     public:
         Entity(Engine& engine, Uint32 id, EntityType& type);
+        virtual ~Entity();
         EntityType const& GetType() const { return this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
     };
