@@ -7,8 +7,8 @@ set(src
     ${tools_database_src}
     ${tools_logger_src}
     ${tools_lua_src}
+    ${tools_lua_utils_src}
     ${tools_renderers_src}
-    ${tools_metatables_src}
     ${tools_thread_src}
 )
 

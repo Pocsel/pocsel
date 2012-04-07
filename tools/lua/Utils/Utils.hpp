@@ -5,10 +5,10 @@ namespace Tools { namespace Lua {
     class Interpreter;
 }}
 
-namespace Tools { namespace Metatables {
+namespace Tools { namespace Lua { namespace Utils {
 
     void RegisterColor(Lua::Interpreter& interpreter);
 
-}}
+}}}
 
 #endif

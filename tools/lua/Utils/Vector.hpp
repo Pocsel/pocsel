@@ -6,7 +6,7 @@
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Iterator.hpp"
 
-namespace Tools { namespace Lua { namespace Vector {
+namespace Tools { namespace Lua { namespace Utils { namespace Vector {
 
     template<typename T>
         Vector3<T> TableToVector3(Ref const& ref) throw(std::runtime_error)
@@ -50,6 +50,6 @@ namespace Tools { namespace Lua { namespace Vector {
             ref.Set("y", v.y);
         }
 
-}}}
+}}}}
 
 #endif
