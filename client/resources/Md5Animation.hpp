@@ -84,7 +84,7 @@ namespace Client { namespace Resources {
         virtual ~Md5Animation();
 
         // Load an animation from the animation file
-        bool LoadAnimation(const std::string& filename);
+        bool LoadAnimation(boost::filesystem::path const& filePath);
         // Update this animation's joint set.
         void Update(float deltaTime);
         // Draw the animated skeleton

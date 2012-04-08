@@ -2,6 +2,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "client/resources/Md5Model.hpp"
+#include "client/resources/LocalResourceManager.hpp"
 
 #include "tools/Math.hpp"
 
@@ -20,26 +21,28 @@ namespace Client { namespace Resources {
     {
     }
 
-    bool Md5Model::LoadModel(std::string const& filename)
+    bool Md5Model::LoadModel(
+            boost::filesystem::path const& filePath,
+            boost::filesystem::path const& texturesPath,
+            LocalResourceManager& resourceManager)
     {
-        if (!boost::filesystem::exists(filename))
+        if (!boost::filesystem::exists(filePath))
         {
-            Tools::error << "Md5Model::LoadModel: Failed to find file: " << filename << "\n";
+            Tools::error << "Md5Model::LoadModel: Failed to find file: " << filePath << "\n";
             return false;
         }
 
-        boost::filesystem::path filePath = filename;
         // store the parent path used for loading images relative to this file.
         boost::filesystem::path parentPath = filePath.parent_path();
 
         std::string param;
         std::string junk;   // Read junk from the file
 
-        boost::filesystem::ifstream file(filename);
+        boost::filesystem::ifstream file(filePath);
         int fileLength = Tools::Filesystem::GetFileLength(file);
         if (fileLength <= 0)
         {
-            Tools::error << "Md5Model::LoadModel: file " << filename << " is empty\n";
+            Tools::error << "Md5Model::LoadModel: file " << filePath << " is empty\n";
             return false;
         }
 
@@ -55,7 +58,7 @@ namespace Client { namespace Resources {
                 file >> this->_md5Version;
                 if (this->_md5Version != 10)
                 {
-                    Tools::error << "Md5Model::LoadModel: " << filename << ": Only MD5 version 10 is supported\n";
+                    Tools::error << "Md5Model::LoadModel: " << filePath << ": Only MD5 version 10 is supported\n";
                     return false;
                 }
             }
@@ -118,13 +121,14 @@ namespace Client { namespace Resources {
                             texturePath = parentPath / shaderPath;
                         }
 
-                        if (!texturePath.has_extension())
-                        {
-                            texturePath.replace_extension(".tga");
-                        }
+                        //if (!texturePath.has_extension())
+                        //{
+                        //    texturePath.replace_extension(".tga");
+                        //}
 
                         // TODO
-                        //mesh.texture = LocalResourceManager::GetTexture2D(texturePath.string());
+
+                        mesh.texture = &resourceManager.GetTexture2D((texturesPath / texturePath.filename()).string());
 
                         file.ignore(fileLength, '\n'); // Ignore everything else on the line
                     }
@@ -197,13 +201,13 @@ namespace Client { namespace Resources {
 
         if ((int)this->_joints.size() != this->_numJoints)
         {
-            Tools::error << "Md5Model::LoadModel: " << filename <<
+            Tools::error << "Md5Model::LoadModel: " << filePath <<
                 ": number of joints not ok. (need " << this->_numJoints << ", has " << this->_joints.size() << ")\n";
             return false;
         }
         if ((int)this->_meshes.size() != this->_numMeshes)
         {
-            Tools::error << "Md5Model::LoadModel: " << filename <<
+            Tools::error << "Md5Model::LoadModel: " << filePath <<
                 ": number of meshes not ok. (need " << this->_numMeshes << ", has " << this->_meshes.size() << ")\n";
             return false;
         }
@@ -211,9 +215,9 @@ namespace Client { namespace Resources {
         return true;
     }
 
-    bool Md5Model::LoadAnim(std::string const& filename)
+    bool Md5Model::LoadAnim(boost::filesystem::path const& filePath)
     {
-        if (this->_animation.LoadAnimation(filename))
+        if (this->_animation.LoadAnimation(filePath))
         {
             // Check to make sure the animation is appropriate for this model
             this->_hasAnimation = this->_CheckAnimation(this->_animation);

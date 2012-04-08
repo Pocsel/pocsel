@@ -23,24 +23,22 @@ namespace Client { namespace Resources {
     {
     }
 
-    bool Md5Animation::LoadAnimation(std::string const& filename)
+    bool Md5Animation::LoadAnimation(boost::filesystem::path const& filePath)
     {
-        if (!boost::filesystem::exists(filename))
+        if (!boost::filesystem::exists(filePath))
         {
-            Tools::error << "Md5Animation::LoadAnimation: Failed to find file: " << filename << "\n";
+            Tools::error << "Md5Animation::LoadAnimation: Failed to find file: " << filePath << "\n";
             return false;
         }
-
-        boost::filesystem::path filePath = filename;
 
         std::string param;
         std::string junk;   // Read junk from the file
 
-        boost::filesystem::ifstream file(filename);
+        boost::filesystem::ifstream file(filePath);
         int fileLength = Tools::Filesystem::GetFileLength(file);
         if (fileLength <= 0)
         {
-            Tools::error << "Md5Animation::LoadAnimation: file " << filename << " is empty\n";
+            Tools::error << "Md5Animation::LoadAnimation: file " << filePath << " is empty\n";
             return false;
         }
 
@@ -60,7 +58,7 @@ namespace Client { namespace Resources {
                 file >> this->_md5Version;
                 if (this->_md5Version != 10)
                 {
-                    Tools::error << "Md5Animation::LoadAnimation: " << filename << ": Only MD5 version 10 is supported\n";
+                    Tools::error << "Md5Animation::LoadAnimation: " << filePath << ": Only MD5 version 10 is supported\n";
                     return false;
                 }
             }
@@ -176,31 +174,31 @@ namespace Client { namespace Resources {
 
         if ((int)this->_jointInfos.size() != this->_numJoints)
         {
-            Tools::error << "Md5Animation::LoadAnimation: " << filename <<
+            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of joints not ok. (need " << this->_numJoints << ", has " << this->_jointInfos.size() << ")\n";
             return false;
         }
         if ((int)this->_bounds.size() != this->_numFrames)
         {
-            Tools::error << "Md5Animation::LoadAnimation: " << filename <<
+            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of bounds not ok. (need " << this->_numFrames << ", has " << this->_bounds.size() << ")\n";
             return false;
         }
         if ((int)this->_baseFrames.size() != this->_numJoints)
         {
-            Tools::error << "Md5Animation::LoadAnimation: " << filename <<
+            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of baseFrames not ok. (need " << this->_numJoints << ", has " << this->_baseFrames.size() << ")\n";
             return false;
         }
         if ((int)this->_frames.size() != this->_numFrames)
         {
-            Tools::error << "Md5Animation::LoadAnimation: " << filename <<
+            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of frames not ok. (need " << this->_numFrames << ", has " << this->_frames.size() << ")\n";
             return false;
         }
         if ((int)this->_skeletons.size() != this->_numFrames)
         {
-            Tools::error << "Md5Animation::LoadAnimation: " << filename <<
+            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of skels not ok. (need " << this->_numFrames << ", has " << this->_skeletons.size() << ")\n";
             return false;
         }

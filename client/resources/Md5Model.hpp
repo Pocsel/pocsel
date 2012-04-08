@@ -1,7 +1,15 @@
 #ifndef __CLIENT_RESOURCES_Md5MODEL_HPP__
 #define __CLIENT_RESOURCES_Md5MODEL_HPP__
 
-#include "Md5Animation.hpp"
+#include "client/resources/Md5Animation.hpp"
+
+namespace Tools { namespace Renderers {
+    class ITexture2D;
+}}
+
+namespace Client { namespace Resources {
+    class LocalResourceManager;
+}}
 
 namespace Client { namespace Resources {
 
@@ -55,7 +63,8 @@ namespace Client { namespace Resources {
             WeightList weights;
 
             // A texture ID for the material
-            GLuint texID;
+            //GLuint texID;
+            Tools::Renderers::ITexture2D* texture;
 
             // These buffers are used for rendering the animated mesh
             PositionBuffer positionBuffer;   // Vertex position stream
@@ -79,8 +88,11 @@ namespace Client { namespace Resources {
         Md5Model();
         virtual ~Md5Model();
 
-        bool LoadModel(std::string const& filename);
-        bool LoadAnim(std::string const& filename);
+        bool LoadModel(
+                boost::filesystem::path const& filePath,
+                boost::filesystem::path const& texturesPath,
+                LocalResourceManager& resourceManager);
+        bool LoadAnim(boost::filesystem::path const& filePath);
         void Update(Uint32 time);
         void Render();
 

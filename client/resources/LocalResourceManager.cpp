@@ -5,6 +5,7 @@
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
 #include "client/resources/LocalResourceManager.hpp"
+#include "client/resources/Md5Model.hpp"
 #include "client/window/Window.hpp"
 
 #include "tools/IRenderer.hpp"
@@ -95,6 +96,34 @@ namespace Client { namespace Resources {
         }
         else
             return *it->second;
+    }
+
+    Md5Model* LocalResourceManager::GetMd5Model(std::string const& path)
+    {
+        Md5Model* model = new Md5Model();
+        try
+        {
+            boost::filesystem::path texturesPath = this->_client.GetSettings().confDir / "models" / path;
+            boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
+            modelPath.replace_extension(".md5mesh");
+            if (!model->LoadModel(
+                        modelPath,
+                        texturesPath,
+                        *this
+                        )
+                    )
+                throw std::runtime_error("cant load " + path);
+            boost::filesystem::path animPath = this->_client.GetSettings().confDir / "models" / path;
+            animPath.replace_extension(".md5anim");
+            model->LoadAnim(animPath);
+        }
+        catch (std::exception& ex)
+        {
+            Tools::error << "Can't load Md5Model \"" << path << "\", details: " << ex.what() << "\n";
+            Tools::Delete(model);
+            throw;
+        }
+        return model;
     }
 
     void LocalResourceManager::_InitErrorTexture()

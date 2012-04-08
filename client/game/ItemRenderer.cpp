@@ -25,13 +25,19 @@ namespace Client { namespace Game {
 
         this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("test.png");
 
-        this->_InitVertexBuffer();
+        this->_md5Model = this->_game.GetClient().GetLocalResourceManager().GetMd5Model("boblampclean");
+
+        //this->_md5Model.LoadModel("");
+        //this->_md5Model.LoadAnim("");
+
+        //this->_InitVertexBuffer();
     }
 
     ItemRenderer::~ItemRenderer()
     {
         Tools::Delete(this->_shaderTexture);
         Tools::Delete(this->_shaderTime);
+        Tools::Delete(this->_md5Model);
     }
 
     void ItemRenderer::Render(Common::OrientedPosition const& pos)
@@ -54,19 +60,20 @@ namespace Client { namespace Game {
                 )
             );
 
-        this->_vertexBuffer->Bind();
-        this->_texture->Bind();
-        this->_shaderTexture->Set(*this->_texture);
-        this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
-        this->_renderer.DrawVertexBuffer(0, 6*6);
-        this->_texture->Unbind();
-        this->_vertexBuffer->Unbind();
+//        this->_vertexBuffer->Bind();
+//        this->_texture->Bind();
+//        this->_shaderTexture->Set(*this->_texture);
+//        this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
+//        this->_renderer.DrawVertexBuffer(0, 6*6);
+//        this->_texture->Unbind();
+//        this->_vertexBuffer->Unbind();
 
         this->_shader->EndPass();
     }
 
     void ItemRenderer::Update(Uint32 time)
     {
+        this->_md5Model->Update(time);
         this->_elapsedTime += time;
     }
 
@@ -128,10 +135,10 @@ namespace Client { namespace Game {
             -0.001f, 1.001f, 1.001f,  1.0f, 1.0f,
         };
 
-        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // texCoord
-        this->_vertexBuffer->SetData(6*6*3*sizeof(float) + 6*6*2*sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);
+//        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
+//        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
+//        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // texCoord
+//        this->_vertexBuffer->SetData(6*6*3*sizeof(float) + 6*6*2*sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);
     }
 
 }}
