@@ -50,16 +50,18 @@ namespace Tools { namespace Renderers {
 
         Tools::log << "Renderer: DirectX 9\n";
 
-        D3DPRESENT_PARAMETERS present_parameters;
-        std::memset(&present_parameters, 0, sizeof(present_parameters));
-        present_parameters.Windowed = true;
+        D3DPRESENT_PARAMETERS present_parameters = {0};
+        present_parameters.Windowed = !this->_fullscreen;
         present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
         present_parameters.EnableAutoDepthStencil = true;
         present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
         present_parameters.hDeviceWindow = GetActiveWindow();
-        //present_parameters.BackBufferWidth = this->_screenSize.w;
-        //present_parameters.BackBufferHeight = this->_screenSize.h;
-        present_parameters.BackBufferFormat = D3DFMT_UNKNOWN;
+        if (this->_fullscreen)
+        {
+            present_parameters.BackBufferWidth = this->_screenSize.w;
+            present_parameters.BackBufferHeight = this->_screenSize.h;
+        }
+        present_parameters.BackBufferFormat = this->_fullscreen ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
         present_parameters.MultiSampleType = D3DMULTISAMPLE_NONE;
 
         DXCHECKERROR(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &present_parameters, &this->_device));
@@ -71,6 +73,10 @@ namespace Tools { namespace Renderers {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
 
+        DXCHECKERROR(this->_device->GetRenderTarget(0, &this->_backBuffer));
+
+        D3DXCreateEffectPool(&this->_effectPool);
+
         InitDevIL();
 
         this->_clearColor = Color4f(0, 0, 0, 1);
@@ -80,6 +86,8 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Shutdown()
     {
+        if (this->_backBuffer != 0)
+            this->_backBuffer->Release();
         if (this->_device != 0)
             this->_device->Release();
         if (this->_object != 0)
@@ -96,6 +104,13 @@ namespace Tools { namespace Renderers {
         return std::unique_ptr<IIndexBuffer>(new DX9::IndexBuffer(*this));
     }
 
+    std::unique_ptr<Renderers::IRenderTarget> DX9Renderer::CreateRenderTarget(Vector2u const& imgSize)
+    {
+        auto rt = new DX9::RenderTarget(*this, imgSize);
+        this->_allRenderTargets.push_back(rt);
+        return std::unique_ptr<IRenderTarget>(rt);
+    }
+
     std::unique_ptr<ITexture2D> DX9Renderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData)
     {
         return std::unique_ptr<ITexture2D>(new DX9::Texture2D(*this, format, size, data, imgSize, mipmapData));
@@ -108,14 +123,10 @@ namespace Tools { namespace Renderers {
 
     std::unique_ptr<IShaderProgram> DX9Renderer::CreateProgram(std::string const& effect)
     {
-        return std::unique_ptr<IShaderProgram>(new DX9::ShaderProgram(*this, effect));
+        auto prog = new DX9::ShaderProgram(*this, effect);
+        this->_allPrograms.push_back(prog);
+        return std::unique_ptr<IShaderProgram>(prog);
     }
-
-    /*
-    std::unique_ptr<IPixelBuffer> DX9Renderer::CreatePixelBuffer() = 0;
-    std::unique_ptr<IVertexBuffer> DX9Renderer::CreateVertexBuffer() = 0;
-    std::unique_ptr<IFont> DX9Renderer::CreateFont() = 0;
-    */
 
     // Drawing
     void DX9Renderer::Clear(int clearFlags)
@@ -131,6 +142,10 @@ namespace Tools { namespace Renderers {
     {
         assert(this->_state == 0 && "Operation invalide");
         this->_state = Draw2D;
+
+        this->_resetRenderTarget = target != 0;
+        if (target != 0)
+            target->Bind();
 
         this->_model = Tools::Matrix4<float>::identity;
         this->_view = Tools::Matrix4<float>::CreateTranslation(0, 0, 1);
@@ -151,14 +166,21 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::EndDraw2D()
     {
         DXCHECKERROR(this->_device->EndScene());
-        this->_state = DrawNone;
+        if (this->_resetRenderTarget)
+            DXCHECKERROR(this->_device->SetRenderTarget(0, this->_backBuffer));
         this->_currentProgram = 0;
+
+        this->_state = DrawNone;
     }
 
     void DX9Renderer::BeginDraw(IRenderTarget* target)
     {
         assert(this->_state == 0 && "Operation invalide");
         this->_state = Draw3D;
+
+        this->_resetRenderTarget = target != 0;
+        if (target != 0)
+            target->Bind();
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW));
@@ -168,12 +190,16 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::EndDraw()
     {
         DXCHECKERROR(this->_device->EndScene());
-        this->_state = DrawNone;
+        if (this->_resetRenderTarget)
+            DXCHECKERROR(this->_device->SetRenderTarget(0, this->_backBuffer));
         this->_currentProgram = 0;
+
+        this->_state = DrawNone;
     }
 
     void DX9Renderer::UpdateCurrentParameters()
     {
+        assert(this->_currentProgram != 0 && "Il faut obligatoirement un shader !");
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
@@ -236,6 +262,7 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::SetScreenSize(Vector2u const& size)
     {
         this->_screenSize = size;
+        this->_RefreshDevice();
     }
 
     void DX9Renderer::SetViewport(Rectangle const& viewport)
@@ -297,10 +324,60 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Present()
     {
-        DXCHECKERROR(this->_device->Present(0, 0, 0, 0));
-        DXCHECKERROR(this->_device->TestCooperativeLevel());
+        HRESULT hr = this->_device->Present(0, 0, 0, 0);
+        if (hr == D3DERR_DEVICELOST || hr == D3DERR_DEVICENOTRESET)
+            this->_RefreshDevice();
+        else
+            DXCHECKERROR(hr);
     }
 
+    void DX9Renderer::Unregister(DX9::RenderTarget& rt)
+    {
+        this->_allRenderTargets.remove(&rt);
+    }
+
+    void DX9Renderer::Unregister(DX9::ShaderProgram& program)
+    {
+        this->_allPrograms.remove(&program);
+    }
+
+    void DX9Renderer::_RefreshDevice()
+    {
+        D3DPRESENT_PARAMETERS present_parameters = {0};
+        present_parameters.Windowed = !this->_fullscreen;
+        present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+        present_parameters.EnableAutoDepthStencil = true;
+        present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
+        present_parameters.hDeviceWindow = GetActiveWindow();
+        present_parameters.BackBufferWidth = this->_screenSize.w;
+        present_parameters.BackBufferHeight = this->_screenSize.h;
+        present_parameters.BackBufferFormat = this->_fullscreen ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
+
+        Tools::debug << "ScreenSize = " << ToString(this->_screenSize) << std::endl;
+
+        // Release...
+        this->_backBuffer->Release();
+        for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
+            (*it)->GetEffect()->OnLostDevice();
+        for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
+            (*it)->OnLostDevice();
+
+        DXCHECKERROR(this->_device->Reset(&present_parameters));
+
+        // Recreate...
+        for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
+            (*it)->OnResetDevice();
+        for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
+            (*it)->GetEffect()->OnResetDevice();
+        DXCHECKERROR(this->_device->GetRenderTarget(0, &this->_backBuffer));
+
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));
+
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
+    }
 }}
 
 #endif

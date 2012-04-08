@@ -19,6 +19,14 @@ namespace Client {
 }
 namespace Tools {
     class IRenderer;
+    namespace Renderers {
+        class IRenderTarget;
+        class IShaderProgram;
+        class IShaderParameter;
+        namespace Utils {
+            class Image;
+        }
+    }
 }
 
 namespace Client { namespace Game {
@@ -38,6 +46,12 @@ namespace Client { namespace Game {
         Tools::Timer _updateTimer;
         Tools::Timer _gameTimer;
         Tools::Lua::Interpreter _interpreter;
+        // XXX
+        std::unique_ptr<Tools::Renderers::IRenderTarget> _renderTarget;
+        std::unique_ptr<Tools::Renderers::Utils::Image> _renderImage;
+        Tools::Renderers::IShaderProgram* _renderShader;
+        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderParameter;
+        // XXX
 
     public:
         Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash);

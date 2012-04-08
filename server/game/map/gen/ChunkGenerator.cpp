@@ -234,7 +234,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
 
         bool* rDone = new bool[this->_equations.size()];
 
-        unsigned int eqSize = this->_equations.size();
+        unsigned int eqSize = (unsigned int)this->_equations.size();
 
         xx = (double)((int)coords.x - (1 << 21));
         zz = (double)((int)coords.z - (1 << 21));

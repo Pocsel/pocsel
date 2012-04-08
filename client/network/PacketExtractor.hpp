@@ -7,10 +7,10 @@
 #include "protocol/protocol.hpp"
 #include "client/map/Chunk.hpp"
 #include "common/CubeType.hpp"
+#include "common/Position.hpp"
 
 namespace Common {
     class Packet;
-    struct Position;
     struct MovingOrientedPosition;
 }
 

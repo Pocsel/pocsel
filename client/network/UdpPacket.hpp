@@ -8,10 +8,12 @@ namespace Client { namespace Network {
     class UdpPacket :
         public Common::Packet
     {
+    public:
+        bool forceUdp;
     private:
         Uint32 _id;
     public:
-        explicit UdpPacket(Uint32 id);
+        explicit UdpPacket(Uint32 id, bool forceUdp = false);
         virtual ~UdpPacket();
 
         void ConvertToTcpPacket();

@@ -1,9 +1,19 @@
 float4x4 mvp : WorldViewProjection;
+
+#ifdef DIRECTX
 sampler2D baseTex = sampler_state
 {
-    minFilter = Linear;
-    magFilter = Linear;
+	MinFilter = Linear;
+	MagFilter = Linear;
+	MipFilter = Linear;
 };
+#else
+sampler2D baseTex = sampler_state
+{
+   minFilter = Linear;
+   magFilter = Linear;
+};
+#endif
 
 struct VSout
 {
@@ -13,15 +23,19 @@ struct VSout
 
 VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 {
-   VSout vout;
-   vout.position = mul(mvp, position);
-   vout.texCoord = texCoord;
-   return vout;
+	VSout vout;
+	vout.position = mul(mvp, position);
+#ifdef DIRECTX
+	vout.texCoord = texCoord;
+#else
+	vout.texCoord = float2(texCoord.x, -texCoord.y);
+#endif
+	return vout;
 }
 
 float4 fs(in VSout v) : COLOR
 {
-   return tex2D(baseTex, v.texCoord);
+	return tex2D(baseTex, v.texCoord);
 }
 
 #ifndef DIRECTX

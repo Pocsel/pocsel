@@ -25,7 +25,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
                 0
             };
         LPD3DXBUFFER errors;
-        D3DXCreateEffect(this->_renderer.GetDevice(), effect.c_str(), (UINT)effect.length(), defines, 0, 0, 0, &this->_effect, &errors);
+        D3DXCreateEffect(this->_renderer.GetDevice(), effect.c_str(), (UINT)effect.length(), defines, 0, 0, this->_renderer.GetEffectPool(), &this->_effect, &errors);
         if (errors)
         {
             Tools::debug << "DX9::Shader errors: " << (char const*)errors->GetBufferPointer() << std::endl;
@@ -43,6 +43,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     ShaderProgram::~ShaderProgram()
     {
+        this->_renderer.Unregister(*this);
         this->_effect->Release();
     }
 

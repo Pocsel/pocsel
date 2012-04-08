@@ -18,7 +18,7 @@ namespace Tools { namespace Lua {
         Interpreter& GetInterpreter() throw() { return this->_i; }
         // arguments
         void PushArg(Ref const& arg) throw();
-        Ref PopArg() throw(std::runtime_error);
+        Ref PopArg(std::string const& e = "") throw(std::runtime_error);
         std::list<Ref>& GetArgList() throw() { return this->_args; }
         std::size_t GetNbArgs() const throw() { return this->_args.size(); }
         void ClearArgs() throw();

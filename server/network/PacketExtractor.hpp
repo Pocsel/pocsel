@@ -3,11 +3,11 @@
 
 #include "server/game/map/Chunk.hpp"
 #include "protocol/protocol.hpp"
+#include "common/CubePosition.hpp"
 
 namespace Common {
     struct OrientedPosition;
     struct MovingOrientedPosition;
-    struct CubePosition;
 }
 
 namespace Tools {
@@ -19,6 +19,13 @@ namespace Server { namespace Network {
     class PacketExtractor
     {
     public:
+        static void UdpReady(Tools::ByteArray const& p,
+                             bool& ready);
+
+        static void PassThrough(Tools::ByteArray const& p);
+
+        static void PassThroughOk(Tools::ByteArray const& p);
+
         static void Login(Tools::ByteArray const& p,
                           Protocol::Version& major,
                           Protocol::Version& minor,

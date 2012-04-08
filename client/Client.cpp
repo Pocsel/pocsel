@@ -72,7 +72,8 @@ namespace Client {
             switch (this->_state)
             {
             case Connecting:
-                this->_menu->GetLoadingScreen().Render("Connecting to " + this->_settings.host + ":" + this->_settings.port + "...",
+                if (!this->_window->GetInputManager().IsMinimized())
+                    this->_menu->GetLoadingScreen().Render("Connecting to " + this->_settings.host + ":" + this->_settings.port + "...",
                         this->_network.GetLoadingProgression());
                 if (this->_network.IsConnected())
                 {
@@ -81,21 +82,26 @@ namespace Client {
                 }
                 break;
             case LoggingIn:
-                this->_menu->GetLoadingScreen().Render("Logging in...", this->_network.GetLoadingProgression());
+                if (!this->_window->GetInputManager().IsMinimized())
+                    this->_menu->GetLoadingScreen().Render("Logging in...", this->_network.GetLoadingProgression());
                 break;
             case LoadingResources:
-                this->_menu->GetLoadingScreen().Render("Downloading resources...", this->_game->GetLoadingProgression());
+                if (!this->_window->GetInputManager().IsMinimized())
+                    this->_menu->GetLoadingScreen().Render("Downloading resources...", this->_game->GetLoadingProgression());
                 if (this->_game->GetLoadingProgression() >= 1.0f)
                 {
                     this->_state = WaitingPosition;
                     this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
+                    this->_game->GetResourceManager().LoadAllResources();
                 }
                 break;
             case WaitingPosition:
-                this->_menu->GetLoadingScreen().Render("Waiting for position...", 0);
+                if (!this->_window->GetInputManager().IsMinimized())
+                    this->_menu->GetLoadingScreen().Render("Waiting for position...", 0);
                 break;
             case LoadingChunks:
-                this->_menu->GetLoadingScreen().Render("Downloading & generating chunks...", this->_game->GetMap().GetLoadingProgression());
+                if (!this->_window->GetInputManager().IsMinimized())
+                    this->_menu->GetLoadingScreen().Render("Downloading & generating chunks...", this->_game->GetMap().GetLoadingProgression());
                 this->_game->GetMap().GetChunkManager().UpdateLoading();
                 if (this->_game->GetMap().GetLoadingProgression() >= 1.0f)
                 {
@@ -106,10 +112,12 @@ namespace Client {
                 break;
             case Running:
                 this->_game->Update();
-                this->_game->Render();
+                if (!this->_window->GetInputManager().IsMinimized())
+                    this->_game->Render();
                 break;
             case Disconnected:
-                this->_menu->GetDisconnectedScreen().Render();
+                if (!this->_window->GetInputManager().IsMinimized())
+                    this->_menu->GetDisconnectedScreen().Render();
                 break;
             default:
                 ;
@@ -117,13 +125,14 @@ namespace Client {
 
             if (this->_menu->GetMainMenu().IsVisible())
                 this->_menu->GetMainMenu().Render();
-            else if (!this->_window->GetInputManager().HasFocus())
+            else if (!this->_window->GetInputManager().HasFocus() || this->_window->GetInputManager().IsMinimized())
                 this->_menu->GetMainMenu().SetVisible(true /* visible */, false /* warpMouse */);
 
             // dispatch actions that were not dispatched
             this->_window->GetInputManager().Dispatch(this->_window->GetInputManager(), true);
 
-            this->_window->Render();
+            if (!this->_window->GetInputManager().IsMinimized())
+                this->_window->Render();
 
             int timeLeft = 1000 / this->_settings.fps - frameTimer.GetElapsedTime();
             if (timeLeft > 2)
@@ -141,6 +150,7 @@ namespace Client {
         if (this->_state != LoggingIn)
             throw std::runtime_error("Bad client state");
         this->_clientId = clientId;
+        this->_network.SetId(clientId);
         this->_state = LoadingResources;
         if (this->_game)
             Tools::Delete(this->_game);

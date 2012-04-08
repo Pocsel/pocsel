@@ -63,11 +63,11 @@ namespace Server { namespace Game { namespace Engine {
 
     void MessageManager::_ApiLater(Tools::Lua::CallHelper& helper)
     {
-        double seconds = helper.PopArg().CheckNumber("Server.Message.Later: Argument 1 (seconds) must be a number");
+        double seconds = helper.PopArg().CheckNumber("Server.Message.Later: Argument \"seconds\" must be a number");
         if (seconds < 0)
             seconds = 0;
-        Uint32 targetId = (Uint32)helper.PopArg().CheckNumber("Server.Message.Later: Argument 2 (target) must be a number");
-        std::string function = helper.PopArg().CheckString("Server.Message.Later: Argument 3 (function) must be a string");
+        Uint32 targetId = static_cast<Uint32>(helper.PopArg("Server.Message.[Later/Now]: Missing argument \"target\"").CheckNumber("Server.Message.[Later/Now]: Argument \"target\" must be a number"));
+        std::string function = helper.PopArg("Server.Message.[Later/Now]: Missing argument \"function\"").CheckString("Server.Message.[Later/Now]: Argument \"function\" must be a string");
         Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;
@@ -77,8 +77,8 @@ namespace Server { namespace Game { namespace Engine {
             arg = helper.PopArg();
             if (helper.GetNbArgs())
             {
-                cbTargetId = (Uint32)helper.PopArg().CheckNumber("Server.Message.Later: Argument 5 (cbTarget) must be a number");
-                cbFunction = helper.PopArg().CheckString("Server.Message.Later: Argument 6 (cbFunction) must be a string");
+                cbTargetId = static_cast<Uint32>(helper.PopArg("Server.Message.[Later/Now]: Missing argument \"cbTarget\"").CheckNumber("Server.Message.[Later/Now]: Argument \"cbTarget\" must be a number"));
+                cbFunction = helper.PopArg("Server.Message.[Later/Now]: Missing argument \"cbFunction\"").CheckString("Server.Message.[Later/Now]: Argument \"cbFunction\" must be a string");
                 if (helper.GetNbArgs())
                     cbArg = helper.PopArg();
             }
@@ -87,7 +87,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 notificationCallbackId = 0;
         if (cbTargetId)
             notificationCallbackId = this->_engine.GetCallbackManager().MakeCallback(cbTargetId, cbFunction, cbArg);
-        this->_messages[this->_engine.GetCurrentTime() + (Uint64)(seconds * 1000000.0)].push_back(new Message(targetId, callbackId, notificationCallbackId));
+        this->_messages[this->_engine.GetCurrentTime() + static_cast<Uint64>(seconds * 1000000.0)].push_back(new Message(targetId, callbackId, notificationCallbackId));
     }
 
     void MessageManager::_ApiNow(Tools::Lua::CallHelper& helper)

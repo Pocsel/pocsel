@@ -20,8 +20,7 @@ namespace Server { namespace ClientManagement {
 
     ClientManager::ClientManager(Server& server, Tools::SimpleMessageQueue& messageQueue) :
         _messageQueue(messageQueue),
-        _server(server),
-        _nextId(1)
+        _server(server)
     {
         Tools::debug << "ClientManager::ClientManager()\n";
     }
@@ -44,10 +43,10 @@ namespace Server { namespace ClientManagement {
         Tools::debug << "ClientManager::Stop()\n";
     }
 
-    void ClientManager::HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection)
+    void ClientManager::HandleNewClient(Uint32 id, boost::shared_ptr<Network::ClientConnection> clientConnection)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&ClientManager::_HandleNewClient, this, clientConnection));
+            m(std::bind(&ClientManager::_HandleNewClient, this, id, clientConnection));
         this->_messageQueue.PushMessage(m);
     }
 
@@ -68,15 +67,6 @@ namespace Server { namespace ClientManagement {
         this->_messageQueue.PushMessage(m);
     }
 
-    void ClientManager::HandleUdpPacket(std::unique_ptr<Tools::ByteArray>& packet)
-    {
-        Tools::SimpleMessageQueue::Message
-            m(std::bind(&ClientManager::_HandleUdpPacket,
-                        this,
-                        Tools::Deleter<Tools::ByteArray>::CreatePtr(packet.release())));
-        this->_messageQueue.PushMessage(m);
-    }
-
     void ClientManager::SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
     {
         Tools::SimpleMessageQueue::Message
@@ -87,13 +77,13 @@ namespace Server { namespace ClientManagement {
         this->_messageQueue.PushMessage(m);
     }
 
-    void ClientManager::SendUdpPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet)
+    void ClientManager::SendUdpPacket(Uint32 clientId, std::unique_ptr<Network::UdpPacket>& packet)
     {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&ClientManager::_SendUdpPacket,
                         this,
                         clientId,
-                        Tools::Deleter<Common::Packet>::CreatePtr(packet.release())));
+                        Tools::Deleter<Network::UdpPacket>::CreatePtr(packet.release())));
         this->_messageQueue.PushMessage(m);
     }
 
@@ -168,27 +158,14 @@ namespace Server { namespace ClientManagement {
         this->_server.GetGame().PlayerTeleportOk(client.id);
     }
 
-    Uint32 ClientManager::_GetNextId()
+    void ClientManager::_HandleNewClient(Uint32 id, boost::shared_ptr<Network::ClientConnection> clientConnection)
     {
-        if (this->_nextId == 0)
-            this->_nextId = 1;
-        return this->_nextId++;
-    }
-
-    void ClientManager::_HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection)
-    {
-        Uint32 id = this->_GetNextId();
-        while (this->_clients.find(id) != this->_clients.end())
+        if (this->_clients.find(id) != this->_clients.end())
         {
             Tools::log << "Client id " << id << " already taken.\n";
-            id = this->_GetNextId();
+            clientConnection->Shutdown();
+            return;
         }
-
-        Network::ClientConnection::ErrorCallback
-            ecb(std::bind(&ClientManager::HandleClientError, this, id));
-        Network::ClientConnection::PacketCallback
-            pcb(std::bind(&ClientManager::HandlePacket, this, id, std::placeholders::_1));
-        clientConnection->SetCallbacks(ecb, pcb);
 
         Client* newClient = new Client(id, clientConnection);
 
@@ -232,25 +209,6 @@ namespace Server { namespace ClientManagement {
         }
     }
 
-    void ClientManager::_HandleUdpPacket(std::shared_ptr<Tools::ByteArray> packet)
-    {
-        bool ok = false;
-        Uint32 clientId;
-        try
-        {
-            packet->Read(clientId);
-            ok = true;
-        }
-        catch (std::exception&)
-        {
-            Tools::error << "Could not read id in UDP packet\n";
-        }
-        if (ok)
-        {
-            this->_HandlePacket(clientId, packet);
-        }
-    }
-
     void ClientManager::_SendPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet)
     {
         if (this->_clients.find(clientId) == this->_clients.end())
@@ -262,7 +220,7 @@ namespace Server { namespace ClientManagement {
         this->_clients[clientId]->SendPacket(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
     }
 
-    void ClientManager::_SendUdpPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet)
+    void ClientManager::_SendUdpPacket(Uint32 clientId, std::shared_ptr<Network::UdpPacket> packet)
     {
         if (this->_clients.find(clientId) == this->_clients.end())
         {
@@ -270,7 +228,7 @@ namespace Server { namespace ClientManagement {
             return ;
         }
 
-        this->_clients[clientId]->SendUdpPacket(std::unique_ptr<Common::Packet>(Tools::Deleter<Common::Packet>::StealPtr(packet)));
+        this->_clients[clientId]->SendUdpPacket(std::unique_ptr<Network::UdpPacket>(Tools::Deleter<Network::UdpPacket>::StealPtr(packet)));
     }
 
     void ClientManager::_ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position)

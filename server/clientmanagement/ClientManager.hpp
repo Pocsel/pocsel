@@ -2,10 +2,10 @@
 #define __SERVER_CLIENTMANAGEMENT_CLIENTMANAGER_HPP__
 
 #include "server/game/map/Chunk.hpp"
+#include "common/Position.hpp"
 
 namespace Common {
     class Packet;
-    struct Position;
 }
 
 namespace Tools {
@@ -24,6 +24,7 @@ namespace Server {
     }
     namespace Network {
         class ClientConnection;
+        class UdpPacket;
     }
 }
 
@@ -38,7 +39,6 @@ namespace Server { namespace ClientManagement {
         Tools::SimpleMessageQueue& _messageQueue;
         Server& _server;
         std::unordered_map<Uint32, Client*> _clients;
-        Uint32 _nextId;
 
     public:
         ClientManager(Server& server, Tools::SimpleMessageQueue& messageQueue);
@@ -48,12 +48,11 @@ namespace Server { namespace ClientManagement {
         void Stop();
 
         // A appeler d'un autre thread
-        void HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection);
+        void HandleNewClient(Uint32 id, boost::shared_ptr<Network::ClientConnection> clientConnection);
         void HandleClientError(Uint32 clientId);
         void HandlePacket(Uint32 clientId, std::unique_ptr<Tools::ByteArray>& packet);
-        void HandleUdpPacket(std::unique_ptr<Tools::ByteArray>& packet);
         void SendPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet);
-        void SendUdpPacket(Uint32 clientId, std::unique_ptr<Common::Packet>& packet);
+        void SendUdpPacket(Uint32 clientId, std::unique_ptr<Network::UdpPacket>& packet);
         void ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position);
 
         // A appeler du thread clientmanagement
@@ -65,13 +64,11 @@ namespace Server { namespace ClientManagement {
         void ClientTeleportOk(Client& client);
 
     private:
-        Uint32 _GetNextId();
-        void _HandleNewClient(boost::shared_ptr<Network::ClientConnection> clientConnection);
+        void _HandleNewClient(Uint32 id, boost::shared_ptr<Network::ClientConnection> clientConnection);
         void _HandleClientError(Uint32 clientId);
         void _HandlePacket(Uint32 clientId, std::shared_ptr<Tools::ByteArray> packet);
-        void _HandleUdpPacket(std::shared_ptr<Tools::ByteArray> packet);
         void _SendPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet);
-        void _SendUdpPacket(Uint32 clientId, std::shared_ptr<Common::Packet> packet);
+        void _SendUdpPacket(Uint32 clientId, std::shared_ptr<Network::UdpPacket> packet);
         void _ClientTeleport(Uint32 clientId, std::string const& map, Common::Position const& position);
     };
 

@@ -2,12 +2,12 @@
 #define __SERVER_GAME_GAME_HPP__
 
 #include "server/game/map/Chunk.hpp"
+#include "common/Position.hpp"
+#include "common/CubePosition.hpp"
 
 namespace Common {
-    struct Position;
     struct OrientedPosition;
     struct MovingOrientedPosition;
-    struct CubePosition;
     class Packet;
 }
 

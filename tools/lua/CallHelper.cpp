@@ -14,10 +14,15 @@ namespace Tools { namespace Lua {
         this->_args.push_front(arg);
     }
 
-    Ref CallHelper::PopArg() throw(std::runtime_error)
+    Ref CallHelper::PopArg(std::string const& e /* = "" */) throw(std::runtime_error)
     {
         if (this->_args.empty())
-            throw std::runtime_error("Lua::CallHelper: Missing argument");
+        {
+            if (!e.empty())
+                throw std::runtime_error(e);
+            else
+                throw std::runtime_error("Lua::CallHelper: Missing argument");
+        }
         Ref arg = this->_args.front();
         this->_args.pop_front();
         return arg;

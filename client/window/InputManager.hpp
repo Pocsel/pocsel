@@ -36,6 +36,7 @@ namespace Client { namespace Window {
         virtual void ShowMouse() = 0;
         virtual bool MouseShown() const = 0;
         virtual bool HasFocus() const = 0;
+        virtual bool IsMinimized() const = 0;
 
         std::list<std::pair<InputBinder::Action, BindAction::Type>>& GetActionList() { return this->_actionList; }
         InputBinder& GetInputBinder() { return *this->_inputBinder; }

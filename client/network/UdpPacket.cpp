@@ -2,8 +2,9 @@
 
 namespace Client { namespace Network {
 
-    UdpPacket::UdpPacket(Uint32 id) :
+    UdpPacket::UdpPacket(Uint32 id, bool forceUdp) :
         Common::Packet(),
+        forceUdp(forceUdp),
         _id(id)
     {
         this->_data = this->_data + (sizeof(Uint32) - 2);
@@ -33,7 +34,7 @@ namespace Client { namespace Network {
 
     Uint16 UdpPacket::GetCompleteSize() const
     {
-        return this->_size + sizeof(Uint32);
+        return (Uint16)(this->_size + sizeof(Uint32));
     }
 
     void UdpPacket::_WriteId()

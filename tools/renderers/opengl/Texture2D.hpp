@@ -22,6 +22,7 @@ namespace Tools { namespace Renderers {
     public:
         Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0);
         Texture2D(GLRenderer& renderer, std::string const& imagePath);
+        Texture2D(GLRenderer& renderer, GLuint id);
         virtual ~Texture2D();
 
         virtual void Bind();

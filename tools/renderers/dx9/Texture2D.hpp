@@ -21,6 +21,7 @@ namespace Tools { namespace Renderers {
     public:
         Texture2D(DX9Renderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0);
         Texture2D(DX9Renderer& renderer, std::string const& imagePath);
+        Texture2D(DX9Renderer& renderer, IDirect3DTexture9* texture);
         virtual ~Texture2D();
 
         virtual void Bind();

@@ -39,6 +39,9 @@ namespace Tools { namespace Lua {
                 throw std::runtime_error("Lua::Serializer: Cyclic or shared table(s) found in table to copy and serialize");
             }
             tables.push_front(ref);
+            auto metaTable = ref.GetMetaTable();
+            if (metaTable.IsTable())
+                return this->_CopyWithMetaTable(ref, metaTable, nilOnError);
             auto copiedTable = this->_interpreter.MakeTable();
             auto it = ref.Begin();
             auto itEnd = ref.End();
@@ -49,7 +52,7 @@ namespace Tools { namespace Lua {
                 }
                 catch (std::exception&)
                 {
-                    // ça peut throw uniquement si nilOnError == true et que la key est un userdata non serializable ou une table cyclique (ça donne un index qui vaut nil)
+                    // ça peut throw uniquement si nilOnError == true et que la key est un userdata non copiable ou une table cyclique ou une "table objet" non copiable (ça donne un index qui vaut nil)
                     // donc on fait rien car de toute manière on veut nil en cas d'erreur
                 }
             return copiedTable;
@@ -62,10 +65,41 @@ namespace Tools { namespace Lua {
     {
         if (ref.IsNumber() || ref.IsBoolean() || ref.IsString() || ref.IsNil())
             return ref;
-        // TODO user data
+        else if (ref.IsUserData())
+        {
+            auto metaTable = ref.GetMetaTable();
+            if (metaTable.IsTable())
+                return this->_CopyWithMetaTable(ref, metaTable, nilOnError);
+            // le user data n'a pas de metatable (CHELOU)
+            if (nilOnError)
+                return this->_interpreter.MakeNil();
+            throw std::runtime_error("Lua::Serializer: User data with no metatable");
+        }
+        // autre type -> erreur
         if (nilOnError)
             return this->_interpreter.MakeNil();
         throw std::runtime_error("Lua::Serializer: Value of type " + ref.GetTypeName() + " is not copyable or serializable");
+    }
+
+    Ref Serializer::_CopyWithMetaTable(Ref const& ref, Ref const& table, bool nilOnError) const throw(std::runtime_error)
+    {
+        auto cloneFunc = table["__clone"];
+        if (!cloneFunc.IsFunction())
+        {
+            if (nilOnError)
+                return this->_interpreter.MakeNil();
+            throw std::runtime_error("Lua::Serializer: Cannot copy this " + ref.GetTypeName() + " (the value at \"__clone\" is of type \"" + cloneFunc.GetTypeName() + "\")");
+        }
+        try
+        {
+            return cloneFunc(ref);
+        }
+        catch (std::exception& e)
+        {
+            if (nilOnError)
+                return this->_interpreter.MakeNil();
+            throw std::runtime_error("Lua::Serializer: Cannot copy this " + ref.GetTypeName() + ": " + e.what());
+        }
     }
 
     std::string Serializer::_SerializeSimpleValue(Ref const& ref, bool nilOnError) const throw(std::runtime_error)
@@ -80,14 +114,42 @@ namespace Tools { namespace Lua {
             return "nil";
         else if (ref.IsUserData())
         {
-            auto serialize = ref.GetMetaTable()["__serialize"];
-            if (!serialize.Exists())
-                throw std::runtime_error("Lua::Seralizer: Cannot serialize this user data");
-            return "(function() " + serialize(ref).CheckString() + " end)()";
+            auto metaTable = ref.GetMetaTable();
+            if (metaTable.IsTable())
+                return this->_SerializeWithMetaTable(ref, metaTable, nilOnError);
+            // le user data n'a pas de metatable (CHELOU)
+            if (nilOnError)
+                return "nil";
+            throw std::runtime_error("Lua::Serializer: User data with no metatable");
         }
+        // autre type -> erreur
         if (nilOnError)
             return "nil";
         throw std::runtime_error("Lua::Serializer: Type " + ref.GetTypeName() + " is not serializable");
+    }
+
+    std::string Serializer::_SerializeWithMetaTable(Ref const& ref, Ref const& table, bool nilOnError) const throw(std::runtime_error)
+    {
+        auto serializeFunc = table["__serialize"];
+        if (!serializeFunc.IsFunction())
+        {
+            if (nilOnError)
+                return "nil";
+            throw std::runtime_error("Lua::Seralizer: Cannot serialize this " + ref.GetTypeName() + " (the value at \"__serialize\" is of type \"" + serializeFunc.GetTypeName() + "\")");
+        }
+        try
+        {
+            auto res = serializeFunc(ref);
+            if (!res.IsString())
+                throw std::runtime_error("return value of serialization function is of type " + res.GetTypeName());
+            return "(function() " + res.ToString() + " end)()";
+        }
+        catch (std::exception& e)
+        {
+            if (nilOnError)
+                return "nil";
+            throw std::runtime_error("Lua::Serializer: Cannot serialize this " + ref.GetTypeName() + ": " + e.what());
+        }
     }
 
     std::string Serializer::_SerializeString(std::string const& string) const
@@ -127,13 +189,16 @@ namespace Tools { namespace Lua {
                 throw std::runtime_error("Lua::Serializer: Cyclic or shared table(s) found in table to serialize");
             }
             tables.push_front(ref);
+            auto metaTable = ref.GetMetaTable();
+            if (metaTable.IsTable())
+                return this->_SerializeWithMetaTable(ref, metaTable, nilOnError);
             std::string ret = "{\n";
             auto it = ref.Begin();
             auto itEnd = ref.End();
             for (; it != itEnd; ++it)
             {
                 std::string key = this->_Serialize(it.GetKey(), tables, 0, nilOnError);
-                if (key != "nil") // peut être nil uniquement si nilOnError == true et que la key est un userdata non serializable ou une table cyclique
+                if (key != "nil") // peut être nil uniquement si nilOnError == true et que la key est un userdata non serializable ou une table cyclique ou une "table objet" non serializable
                 {
                     for (unsigned int i = 0; i < level; ++i)
                         ret += "\t";

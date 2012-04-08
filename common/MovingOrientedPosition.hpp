@@ -44,7 +44,7 @@ namespace Common {
 
         void Move(float time)
         {
-            position.position += movement * time;
+            position.position += Tools::Vector3d(movement) * time;
         }
 
     };

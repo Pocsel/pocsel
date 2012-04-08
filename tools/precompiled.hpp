@@ -18,6 +18,9 @@
 #ifdef GetCurrentTime
 #undef GetCurrentTime
 #endif
+#ifdef IsMinimized
+#undef IsMinimized
+#endif
 #else
 // common/Packet.hpp
 #include <arpa/inet.h>

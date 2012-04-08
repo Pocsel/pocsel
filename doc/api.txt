@@ -12,8 +12,15 @@
                 Must at least contain a string value called "entityName"
                 (alphanumerical + "-" + "_", size 1-20).
 
-        - Spawn(entityName, [arg, [cbTarget, cbFunction, [cbArg]]])
+        - RegisterPositional(prototype)
+            Registers a new positional entity prototype (see Register()).
+
+        - Spawn([position], entityName, [arg, [cbTarget, cbFunction, [cbArg]]])
             Adds an event for spawning a new entity on the next tick.
+            - position [table]
+                Position of the new entity (must be used for spawning a
+                positional entity and must be omitted for spawning a normal
+                entity).
             - entityName [string]
                 Type of the new entity.
             - arg [serializable]
@@ -32,7 +39,7 @@
                 If the callback's target is unloaded or destroyed when the
                 callback is triggered, the callback fails silently.
 
-        - SpawnFromPlugin(plugin, entityName,
+        - SpawnFromPlugin([position], plugin, entityName,
                           [arg, [cbTarget, cbFunction, [cbArg]]])
             Adds an event for spawning a new entity from a different plugin
             (see Spawn()).
@@ -57,7 +64,8 @@
                 the entity was found (kill successful) or false otherwise.
                 The "success" field will still be set to true if the entity did
                 not have a Die() function (that is, arg was not passed to the
-                killed entity).
+                killed entity), or even if the Die() function triggered an
+                error.
                 If the callback's target is unloaded or destroyed when the
                 callback is triggered, the callback fails silently.
 

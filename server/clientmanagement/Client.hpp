@@ -2,15 +2,12 @@
 #define __SERVER_CLIENTMANAGEMENT_CLIENT_HPP__
 
 namespace Common {
-
     class Packet;
-
 }
 
 namespace Server { namespace Network {
-
-        class ClientConnection;
-
+    class ClientConnection;
+    class UdpPacket;
 }}
 
 namespace Server { namespace ClientManagement {
@@ -31,7 +28,7 @@ namespace Server { namespace ClientManagement {
         ~Client();
 
         void SendPacket(std::unique_ptr<Common::Packet> packet);
-        void SendUdpPacket(std::unique_ptr<Common::Packet> packet);
+        void SendUdpPacket(std::unique_ptr<Network::UdpPacket> packet);
 
         void SetLogin(std::string const& login);
         std::string const& GetLogin() const { return this->_login; }

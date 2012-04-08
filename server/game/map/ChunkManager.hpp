@@ -37,22 +37,25 @@ namespace Server { namespace Game { namespace Map {
         Map& _map;
         Tools::Database::IConnection& _conn;
 
-        std::unordered_map<Chunk::IdType, Chunk*> _chunks;
+        std::map<Chunk::IdType, Chunk*> _chunks;
         std::unordered_map<BigChunk::IdType, BigChunk> _inflatedChunksContainers;
         std::list<Chunk::IdType> _inflatedValues;
 
-        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedChunks;
+        std::map<Chunk::IdType, Tools::ByteArray*> _deflatedChunks;
         std::unordered_map<BigChunk::IdType, BigChunk> _deflatedChunksContainers;
         std::list<BigChunk::IdType> _deflatedValues;
 
-        std::unordered_map<Chunk::IdType, Tools::ByteArray*> _deflatedBigChunks;
+        std::map<Chunk::IdType, Tools::ByteArray*> _deflatedBigChunks;
         std::list<BigChunk::IdType> _deflatedBigValues;
 
-        std::unordered_set<Chunk::IdType> _dbBigChunks;
+        std::set<Chunk::IdType> _dbBigChunks;
 
         std::list<std::pair<float, Chunk::IdType>> _priorities;
 
         static const int _deflateLevel = 9;
+        static const unsigned int _maxInflated = 1000;
+        static const unsigned int _maxDeflatedVal = 20;
+        static const unsigned int _maxDeflatedBig = 40;
 
     public:
         ChunkManager(Map& map,
@@ -68,6 +71,8 @@ namespace Server { namespace Game { namespace Map {
         void AddChunk(std::unique_ptr<Chunk> chunk);
 
     private:
+        void _DeflateIfPossible(Chunk::IdType noDeflateId = 0, bool noDeflate = false);
+
         // _chunks
         // \/
         void _MoveInflatedToDeflated(Chunk::IdType id);

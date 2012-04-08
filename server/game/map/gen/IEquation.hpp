@@ -10,6 +10,9 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
 //        virtual bool Is2D() const = 0;
 //        virtual bool ByChunkCalculation() const = 0;
         virtual void Calc(double x, double y, double z, Uint32 cx, Uint32 cy, Uint32 cz, double* res, unsigned int offset) const = 0;
+        virtual ~IEquation()
+        {
+        }
     };
 
 }}}}

@@ -49,6 +49,10 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         this->_FinishLoading(ilID);
     }
 
+    Texture2D::Texture2D(GLRenderer& renderer, GLuint id) : _renderer(renderer), _id(id), _hasAlpha(false)
+    {
+    }
+
     void Texture2D::_FinishLoading(unsigned int ilID)
     {
         this->_size = Vector2u(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));

@@ -22,7 +22,7 @@ namespace Tools { namespace Lua {
         bool operator ==(Ref const& ref) const throw();
         bool operator !=(Ref const& ref) const throw();
         void Unref() throw();
-        size_t GetLength() throw(); // retourne la longueur pour une chaine, la taille pour un tableau (#), le nombre d'octets pour un user data et 0 pour le reste
+        size_t GetLength() const throw(); // retourne la longueur pour une chaine, la taille pour un tableau (#), le nombre d'octets pour un user data et 0 pour le reste
         // function call
         void operator ()(CallHelper& callHelper) const throw(std::runtime_error);
         Ref operator ()() const throw(std::runtime_error);
@@ -36,7 +36,7 @@ namespace Tools { namespace Lua {
             Ref operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error);
         // array access
         Iterator Begin() const throw(std::runtime_error);
-        Iterator End() const throw(std::runtime_error); // un Iterator n'est égal à un autre uniquement si les 2 sont des Iterator de fin
+        Iterator End() const throw(std::runtime_error); // un Iterator n'est égal à un autre uniquement si les 2 sont des Iterator de fin (ref.Begin() != ref.Begin())
         Ref operator [](Ref const& index) const throw(std::runtime_error);
         template <typename T>
             Ref operator [](T index) const throw(std::runtime_error);
@@ -46,7 +46,7 @@ namespace Tools { namespace Lua {
             Ref Set(T key, U value) const throw(std::runtime_error); // retourne une nouvelle reference vers value
         // metatable
         Ref SetMetaTable(Ref const& table) const throw(std::runtime_error); // retourne table
-        bool HasMetaTable() const throw();
+        bool HasMetaTable() const throw(); // peut retourner true alors que la metatable n'est pas une table mais est settée quand meme, genre un number (faudrait tester, je suis pas sur)
         Ref GetMetaTable() const throw(); // retourne une reference vers nil si pas de metatable
         // safe type conversions
         bool ToBoolean() const throw(); // true pour toute valeur differente de false ou nil (true pour 0 ou "0")
@@ -65,7 +65,7 @@ namespace Tools { namespace Lua {
         std::string CheckString(std::string const& e = "") const throw(std::runtime_error);
         void* CheckUserData(std::string const& e = "") const throw(std::runtime_error);
         template <typename T>
-            T Check() const throw(std::runtime_error);
+            T Check(std::string const& e = "") const throw(std::runtime_error);
         // type tests
         std::string GetTypeName() const throw();
         int GetType() const throw(); // valeurs possibles : LUA_TNIL, LUA_TBOOLEAN, LUA_TLIGHTUSERDATA, LUA_TNUMBER, LUA_TSTRING, LUA_TTABLE, LUA_TFUNCTION, LUA_TUSERDATA, LUA_TTHREAD, LUA_TNONE
@@ -82,6 +82,8 @@ namespace Tools { namespace Lua {
         bool IsTable() const throw();
         bool IsThread() const throw();
         bool IsUserData() const throw();
+        template <typename T>
+            bool Is() const throw();
 
         // touche pas, appelle pas
         void FromStack() throw();

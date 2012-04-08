@@ -12,9 +12,9 @@ namespace Tools { namespace Lua {
 
     namespace {
 
-		template<class T> struct _PointerWrapper { T* ptr; };
+        template<class T> struct _PointerWrapper { T* ptr; };
         template<class T> struct _GetLuaType { typedef T* type; };
-		template<class T> struct _GetLuaType<T*> { typedef T* type; };
+        template<class T> struct _GetLuaType<T*> { typedef T* type; };
         template<class T> struct _GetLuaType<T&> : public _GetLuaType<T> {};
         template<class T> struct _GetLuaType<const T> : public _GetLuaType<T> {};
         template<> struct _GetLuaType<bool>          { typedef bool type; };
@@ -27,9 +27,9 @@ namespace Tools { namespace Lua {
         template<> struct _GetLuaType<std::string>   { typedef std::string type; };
 
         template<class T> struct _DeRef;
-		template<class T> struct _DeRef<T*> { static T& Do(T* o) { return *o; } };
+        template<class T> struct _DeRef<T*> { static T& Do(T* o) { return *o; } };
         template<class T> struct _DeRef<T*&> : public _DeRef<T*> {};
-		template<class T> struct _DeRef<T&> { static T& Do(T& o) { return o; } };
+        template<class T> struct _DeRef<T&> { static T& Do(T& o) { return o; } };
         template<class T> struct _NoDeRef { static T Do(T o) { return o; } };
         template<> struct _DeRef<bool>          : public _NoDeRef<bool>          {};
         template<> struct _DeRef<int>           : public _NoDeRef<int>           {};
@@ -39,10 +39,10 @@ namespace Tools { namespace Lua {
         template<> struct _DeRef<float>         : public _NoDeRef<float>         {};
         template<> struct _DeRef<double>        : public _NoDeRef<double>        {};
         template<> struct _DeRef<std::string>   : public _NoDeRef<std::string>   {};
-		
-		template<class T, class U> struct _DeRef2 { static U Do(T const& o) { return o; } };
-		template<class T, class U> struct _DeRef2<T*, U> { static U& Do(T* o) { return *o; } };
-		template<class T, class U> struct _DeRef2<T*, U*> { static U* Do(T* o) { return o; } };
+
+        template<class T, class U> struct _DeRef2 { static U Do(T const& o) { return o; } };
+        template<class T, class U> struct _DeRef2<T*, U> { static U& Do(T* o) { return *o; } };
+        template<class T, class U> struct _DeRef2<T*, U*> { static U* Do(T* o) { return o; } };
 
         template<class TRet, class TArgs>
         struct _Caller
@@ -178,34 +178,52 @@ namespace Tools { namespace Lua {
     template<> double Ref::To<double>() const throw();
     template<> float Ref::To<float>() const throw();
     template<> std::string Ref::To<std::string>() const throw();
+    template<> inline Ref Ref::To<Ref>() const throw(std::runtime_error) { return *this; }
 
     template<class T>
-    inline T Ref::Check() const throw(std::runtime_error)
-    {
-		try
-		{
-			if (!(this->IsUserData() || this->IsLightUserData()) || this->GetMetaTable().IsNoneOrNil() ||
-				this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
-				throw 1;
-			return reinterpret_cast<T>(this->CheckUserData());
-		}
-		catch (int)
-		{
-			throw std::runtime_error(std::string("Lua::Ref: Value is not of \"") + typeid(typename std::remove_pointer<T>::type).name() + "\" type");
-		}
-		catch (std::exception& e)
-		{
-			throw std::runtime_error(std::string("Lua::Ref::Check<") + typeid(typename std::remove_pointer<T>::type).name() + ">: " + e.what());
-		}
-    }
-    template<> bool Ref::Check<bool>() const throw(std::runtime_error);
-    template<> int Ref::Check<int>() const throw(std::runtime_error);
-    template<> unsigned int Ref::Check<unsigned int>() const throw(std::runtime_error);
-    template<> char Ref::Check<char>() const throw(std::runtime_error);
-    template<> unsigned char Ref::Check<unsigned char>() const throw(std::runtime_error);
-    template<> double Ref::Check<double>() const throw(std::runtime_error);
-    template<> float Ref::Check<float>() const throw(std::runtime_error);
-    template<> std::string Ref::Check<std::string>() const throw(std::runtime_error);
+        inline bool Ref::Is() const throw()
+        {
+            if (!this->IsUserData() || this->GetMetaTable().IsNoneOrNil() ||
+                    this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
+                return false;
+            return true;
+        }
+
+    template<class T>
+        inline T Ref::Check(std::string const& err /* = "" */) const throw(std::runtime_error)
+        {
+            try
+            {
+                if (!this->IsUserData() || this->GetMetaTable().IsNoneOrNil() ||
+                        this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
+                    throw 1;
+                return reinterpret_cast<T>(this->CheckUserData(err));
+            }
+            catch (int)
+            {
+                if (!err.empty())
+                    throw std::runtime_error(err);
+                else
+                    throw std::runtime_error(std::string("Lua::Ref: Value is not of \"") + typeid(typename std::remove_pointer<T>::type).name() + "\" type");
+            }
+            catch (std::exception& e)
+            {
+                if (!err.empty())
+                    throw std::runtime_error(err);
+                else
+                    throw std::runtime_error(std::string("Lua::Ref::Check<") + typeid(typename std::remove_pointer<T>::type).name() + ">: " + e.what());
+            }
+        }
+
+    template<> bool Ref::Check<bool>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> int Ref::Check<int>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> unsigned int Ref::Check<unsigned int>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> char Ref::Check<char>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> unsigned char Ref::Check<unsigned char>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> double Ref::Check<double>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> float Ref::Check<float>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> std::string Ref::Check<std::string>(std::string const& e /* = "" */) const throw(std::runtime_error);
+    template<> inline Ref Ref::Check<Ref>(std::string const&) const throw(std::runtime_error) { return *this; }
 
     template <typename T>
         inline T Ref::To(T const& defaultValue) const throw()
