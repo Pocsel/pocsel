@@ -68,11 +68,12 @@ namespace Client { namespace Resources {
                 Tools::error << "Can't load texture \"" << path << "\", details: " << ex.what() << "\n";
                 texture = this->_textures["__error__"];
             }
-            this->_textures[path] = texture;
+            this->_textures[path] = 0;//texture;
             return *texture;
         }
-        else
+        else if (it->second != 0)
             return *it->second;
+        return *this->_textures["__error__"];
     }
 
     Tools::Renderers::IShaderProgram& LocalResourceManager::GetShader(std::string const& path)
@@ -103,7 +104,7 @@ namespace Client { namespace Resources {
         Md5Model* model = new Md5Model();
         try
         {
-            boost::filesystem::path texturesPath = this->_client.GetSettings().confDir / "models" / path;
+            boost::filesystem::path texturesPath = path;
             boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
             modelPath.replace_extension(".md5mesh");
             if (!model->LoadModel(

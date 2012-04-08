@@ -128,6 +128,11 @@ namespace Client { namespace Resources {
 
                         // TODO
 
+                        std::string texturePathStr = texturePath.string();
+                        Tools::Filesystem::ReplaceBackslashes(texturePathStr);
+
+                        texturePath = texturePathStr;
+
                         mesh.texture = &resourceManager.GetTexture2D((texturesPath / texturePath.filename()).string());
 
                         file.ignore(fileLength, '\n'); // Ignore everything else on the line

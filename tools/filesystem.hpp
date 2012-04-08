@@ -36,6 +36,18 @@ namespace Tools {
             file.ignore( length, '\n' );
         }
 
+        static void ReplaceBackslashes(std::string& str)
+        {
+            char const* cStr = str.c_str();
+
+            for (unsigned int i = 0; i < str.size(); ++i)
+            {
+                if (cStr[i] == '\\')
+                    str.replace(i, 1, "/");
+            }
+        }
+
+
     };
 
 }
