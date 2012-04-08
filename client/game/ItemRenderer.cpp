@@ -60,6 +60,34 @@ namespace Client { namespace Game {
                 )
             );
 
+        //this->_md5Model->Render(this->_renderer);
+
+        auto meshes = this->_md5Model->GetMeshes();
+        for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
+        {
+            auto mesh = *it;
+            mesh.texture->Bind();
+            this->_shaderTexture->Set(*mesh.texture);
+//            this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
+
+        glEnableClientState( GL_VERTEX_ARRAY );
+        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+        glEnableClientState( GL_NORMAL_ARRAY );
+
+        glVertexPointer( 3, GL_FLOAT, 0, &(mesh.positionBuffer[0]) );
+        glNormalPointer( GL_FLOAT, 0, &(mesh.normalBuffer[0]) );
+        glTexCoordPointer( 2, GL_FLOAT, 0, &(mesh.tex2DBuffer[0]) );
+
+        this->_renderer.DrawElements( mesh.indexBuffer.size(), Tools::Renderers::DataType::UnsignedInt, &(mesh.indexBuffer[0]), Tools::Renderers::DrawingMode::Triangles);
+
+        glDisableClientState( GL_NORMAL_ARRAY );
+        glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+        glDisableClientState( GL_VERTEX_ARRAY );
+
+            mesh.texture->Unbind();
+        }
+
+
 //        this->_vertexBuffer->Bind();
 //        this->_texture->Bind();
 //        this->_shaderTexture->Set(*this->_texture);

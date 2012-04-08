@@ -3,9 +3,12 @@
 
 #include "client/resources/Md5Animation.hpp"
 
-namespace Tools { namespace Renderers {
-    class ITexture2D;
-}}
+namespace Tools {
+    class IRenderer;
+    namespace Renderers {
+        class ITexture2D;
+    }
+}
 
 namespace Client { namespace Resources {
     class LocalResourceManager;
@@ -54,6 +57,7 @@ namespace Client { namespace Resources {
         };
         typedef std::vector<Joint> JointList;
 
+    public:
         struct Mesh
         {
             std::string shader;
@@ -94,7 +98,9 @@ namespace Client { namespace Resources {
                 LocalResourceManager& resourceManager);
         bool LoadAnim(boost::filesystem::path const& filePath);
         void Update(Uint32 time);
-        void Render();
+        void Render(Tools::IRenderer& renderer);
+
+        MeshList& GetMeshes() { return this->_meshes; }
 
     protected:
         // Prepare the mesh for rendering
@@ -104,7 +110,7 @@ namespace Client { namespace Resources {
         bool _PrepareNormals(Mesh& mesh);
 
         // Render a single mesh of the model
-        void _RenderMesh(Mesh const& mesh);
+        void _RenderMesh(Mesh const& mesh, Tools::IRenderer& renderer);
         void _RenderNormals(Mesh const& mesh);
 
         // Draw the skeleton of the mesh for debugging purposes.

@@ -6,6 +6,8 @@
 
 #include "tools/Math.hpp"
 
+#include "tools/IRenderer.hpp"
+
 namespace Client { namespace Resources {
 
     Md5Model::Md5Model() :
@@ -125,8 +127,6 @@ namespace Client { namespace Resources {
                         //{
                         //    texturePath.replace_extension(".tga");
                         //}
-
-                        // TODO
 
                         std::string texturePathStr = texturePath.string();
                         Tools::Filesystem::ReplaceBackslashes(texturePathStr);
@@ -373,8 +373,12 @@ namespace Client { namespace Resources {
         }
     }
 
-    void Md5Model::Render()
+    void Md5Model::Render(Tools::IRenderer& renderer)
     {
+        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
+        {
+            this->_RenderMesh(*it, renderer);
+        }
 //        glPushMatrix();
 //        glMultMatrixf(glm::value_ptr(m_LocalToWorldMatrix));
 //
@@ -394,8 +398,27 @@ namespace Client { namespace Resources {
 //        glPopMatrix();
     }
 
-    void Md5Model::_RenderMesh(Mesh const& mesh)
+    void Md5Model::_RenderMesh(Mesh const& mesh, Tools::IRenderer& renderer)
     {
+        glColor3f( 1.0f, 1.0f, 1.0f );
+        glEnableClientState( GL_VERTEX_ARRAY );
+        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+        glEnableClientState( GL_NORMAL_ARRAY );
+
+        mesh.texture->Bind();
+        glVertexPointer( 3, GL_FLOAT, 0, &(mesh.positionBuffer[0]) );
+        glNormalPointer( GL_FLOAT, 0, &(mesh.normalBuffer[0]) );
+        glTexCoordPointer( 2, GL_FLOAT, 0, &(mesh.tex2DBuffer[0]) );
+
+        renderer.DrawElements( mesh.indexBuffer.size(), Tools::Renderers::DataType::UnsignedInt, &(mesh.indexBuffer[0]), Tools::Renderers::DrawingMode::Triangles);
+        //glDrawElements( GL_TRIANGLES, mesh.indexBuffer.size(), GL_UNSIGNED_INT, &(mesh.indexBuffer[0]) );
+
+        glDisableClientState( GL_NORMAL_ARRAY );
+        glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+        glDisableClientState( GL_VERTEX_ARRAY );
+
+
+        mesh.texture->Unbind();
 //        glColor3f( 1.0f, 1.0f, 1.0f );
 //        glEnableClientState( GL_VERTEX_ARRAY );
 //        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
