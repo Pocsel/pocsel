@@ -77,6 +77,7 @@ file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
 file(GLOB_RECURSE tools_thread_src "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE tools_logger_src "tools/logger/*.[ch]pp")
 file(GLOB_RECURSE tools_zlib_src "tools/zlib/*.[ch]pp")
+file(GLOB_RECURSE tools_plugin_src "tools/plugin/*.[ch]pp")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
