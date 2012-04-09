@@ -103,6 +103,7 @@ set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
 configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
 add_subdirectory(sdk)
+add_subdirectory(sdk2)
 add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(tests)

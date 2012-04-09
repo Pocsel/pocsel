@@ -1,5 +1,5 @@
-#ifndef __TOOLS_PLUGIN_PLUGIN__
-#define __TOOLS_PLUGIN_PLUGIN__
+#ifndef __TOOLS_PLUGIN_PLUGIN_HPP__
+#define __TOOLS_PLUGIN_PLUGIN_HPP__
 
 namespace Tools { namespace Plugin {
 
