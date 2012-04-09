@@ -299,7 +299,7 @@ namespace Client { namespace Resources {
             finalJoint.parent = joint0.parent;
 
             finalJoint.pos = glm::lerp(joint0.pos, joint1.pos, interpolate);
-            finalJoint.orient = glm::mix(joint0.orient, joint1.orient, interpolate);
+            finalJoint.orient = glm::shortMix(joint0.orient, joint1.orient, interpolate);
         }
     }
 

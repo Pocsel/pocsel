@@ -162,7 +162,8 @@ namespace Client { namespace Resources {
                         for (int i = 0; i < numTris; ++i)
                         {
                             Triangle tri;
-                            file >> junk >> junk >> tri.indices[0] >> tri.indices[1] >> tri.indices[2];
+                            // inversion de 1 et 2 pour le cullface
+                            file >> junk >> junk >> tri.indices[0] >> tri.indices[2] >> tri.indices[1];
 
                             Tools::Filesystem::IgnoreLine(file, fileLength);
 

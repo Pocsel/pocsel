@@ -19,9 +19,10 @@ namespace Client { namespace Game {
         _renderer(game.GetClient().GetWindow().GetRenderer()),
         _elapsedTime(0)
     {
-        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.cgfx");
+        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("BaseShaderTexture.cgfx");
         this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
-        this->_shaderTime = this->_shader->GetParameter("time").release();
+        //this->_shaderTime = this->_shader->GetParameter("time").release();
+        this->_shaderTime = 0;
 
         this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("test.png");
 
@@ -46,13 +47,23 @@ namespace Client { namespace Game {
 
         this->_shader->BeginPass();
 
+        float pi = std::atan2(0.0f, -1.0f);
+
         this->_renderer.SetModelMatrix(
-            Tools::Matrix4<float>::CreateTranslation(
-                Tools::Vector3f(-0.5f, -0.5f, -0.5f)
+            Tools::Matrix4<float>::CreateScale(
+                Tools::Vector3f(0.1f, 0.1f, 0.1f)
                 )
             *
+            Tools::Matrix4<float>::CreateTranslation(
+                Tools::Vector3f(-0.5f, -0.5f, -3.5f)
+                )
+            *
+//            Tools::Matrix4<float>::CreateYawPitchRollRotation(
+//                    -pos.theta, 0.0f, -pos.phi
+//                )
+//            *
             Tools::Matrix4<float>::CreateYawPitchRollRotation(
-                    -pos.theta, 0.0f, -pos.phi
+                   pi / 2-pos.theta, -pi +pos.phi, 0.0f//-pos.phi
                 )
             *
             Tools::Matrix4<float>::CreateTranslation(
@@ -62,6 +73,7 @@ namespace Client { namespace Game {
 
         //this->_md5Model->Render(this->_renderer);
 
+        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
         auto meshes = this->_md5Model->GetMeshes();
         for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
         {
@@ -70,6 +82,7 @@ namespace Client { namespace Game {
             this->_shaderTexture->Set(*mesh.texture);
 //            this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
 
+//        glDisable(GL_CULL_FACE);
         glEnableClientState( GL_VERTEX_ARRAY );
         glEnableClientState( GL_TEXTURE_COORD_ARRAY );
         glEnableClientState( GL_NORMAL_ARRAY );
@@ -83,10 +96,12 @@ namespace Client { namespace Game {
         glDisableClientState( GL_NORMAL_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
+//        glEnable(GL_CULL_FACE);
 
             mesh.texture->Unbind();
         }
 
+        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
 
 //        this->_vertexBuffer->Bind();
 //        this->_texture->Bind();
@@ -102,7 +117,7 @@ namespace Client { namespace Game {
     void ItemRenderer::Update(Uint32 time)
     {
         this->_md5Model->Update(time);
-        this->_elapsedTime += time;
+        //this->_elapsedTime += time;
     }
 
     void ItemRenderer::_InitVertexBuffer()

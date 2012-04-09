@@ -68,7 +68,10 @@ namespace Client { namespace Resources {
                 Tools::error << "Can't load texture \"" << path << "\", details: " << ex.what() << "\n";
                 texture = this->_textures["__error__"];
             }
-            this->_textures[path] = 0;//texture;
+            if (texture == this->_textures["__error__"])
+                this->_textures[path] = 0;
+            else
+                this->_textures[path] = texture;
             return *texture;
         }
         else if (it->second != 0)
