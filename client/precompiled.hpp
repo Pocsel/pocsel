@@ -10,4 +10,6 @@
 // Nos trucs
 #include "tools/logger/Logger.hpp"
 
+#include "glm/all.hpp"
+
 #endif

@@ -13,6 +13,9 @@ namespace Tools {
 }
 namespace Client {
     class Client;
+    namespace Resources {
+        class Md5Model;
+    }
 }
 
 namespace Client { namespace Resources {
@@ -34,6 +37,7 @@ namespace Client { namespace Resources {
             Tools::Renderers::Utils::Font& GetFont(std::string const& path, Uint32 size);
             Tools::Renderers::ITexture2D& GetTexture2D(std::string const& path);
             Tools::Renderers::IShaderProgram& GetShader(std::string const& path);
+            Md5Model* GetMd5Model(std::string const& path);
 
         private:
             void _InitErrorTexture();
