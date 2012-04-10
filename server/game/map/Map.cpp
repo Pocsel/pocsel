@@ -238,7 +238,7 @@ namespace Server { namespace Game { namespace Map {
                 if (biet.solid)
                 {
                     this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(0, (float)y, 0));
-                    *this->_spawnPosition += Tools::Vector3d(0.5, 2.5, 0.5);
+                    *this->_spawnPosition += Tools::Vector3d(0.5, 4.5, 0.5);
                     for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                         (*it)(*this->_spawnPosition);
                     this->_spawnRequests.clear();
@@ -254,7 +254,7 @@ namespace Server { namespace Game { namespace Map {
                             if (biet.solid)
                             {
                                 this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(x, y, 0));
-                                *this->_spawnPosition += Tools::Vector3d(0.5f, 2.5f, 0.5f);
+                                *this->_spawnPosition += Tools::Vector3d(0.5f, 4.5f, 0.5f);
                                 for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                                     (*it)(*this->_spawnPosition);
                                 this->_spawnRequests.clear();

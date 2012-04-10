@@ -75,6 +75,7 @@ namespace Server { namespace Game { namespace Engine {
         void BootstrapPlugin(Uint32 pluginId);
     private:
         Uint32 _CreateEntity(Uint32 pluginId, std::string entityName, bool positional = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
+        void _DeleteEntity(Uint32 id, Entity* entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper);
         void _SpawnFromPlugin(Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper);
