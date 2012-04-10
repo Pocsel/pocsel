@@ -1,7 +1,7 @@
 #ifndef __SDK_QT_MAINWINDOW_HPP__
 #define __SDK_QT_MAINWINDOW_HPP__
 
-#include "sdk2/ui_main.h"
+#include "sdk2/ui_MainWindow.h"
 
 namespace Sdk {
     class Sdk;

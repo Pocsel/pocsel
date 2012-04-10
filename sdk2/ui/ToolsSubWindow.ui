@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ToolBox</class>
- <widget class="QToolBox" name="ToolBox">
+ <class>ToolsSubWindow</class>
+ <widget class="QToolBox" name="ToolsSubWindow">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>186</width>
-    <height>214</height>
+    <width>198</width>
+    <height>236</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ToolBox</string>
+   <string>Tools</string>
   </property>
   <property name="currentIndex">
-   <number>2</number>
+   <number>0</number>
   </property>
   <widget class="QWidget" name="page">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>186</width>
-     <height>130</height>
+     <width>198</width>
+     <height>152</height>
     </rect>
    </property>
    <attribute name="label">
@@ -63,8 +66,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>186</width>
-     <height>130</height>
+     <width>198</width>
+     <height>152</height>
     </rect>
    </property>
    <attribute name="label">
@@ -108,6 +111,14 @@
    </layout>
   </widget>
   <widget class="QWidget" name="page_2">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>198</width>
+     <height>152</height>
+    </rect>
+   </property>
    <attribute name="label">
     <string>Entities</string>
    </attribute>

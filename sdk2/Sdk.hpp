@@ -8,18 +8,22 @@ namespace Sdk {
     namespace Qt {
         class MainWindow;
     }
+    class Debugger;
 
     class Sdk :
         private boost::noncopyable
     {
-        private:
-            QApplication _app;
-            Qt::MainWindow* _mainWindow;
+    private:
+        QApplication _app;
+        Qt::MainWindow* _mainWindow;
+        Debugger* _debugger;
 
-        public:
-            Sdk(int& ac, char** av);
-            int Run();
-            Qt::MainWindow& GetMainWindow();
+    public:
+        Sdk(int& ac, char** av);
+        ~Sdk();
+        int Run();
+        Debugger& GetDebugger();
+        Qt::MainWindow& GetMainWindow();
     };
 
 }
