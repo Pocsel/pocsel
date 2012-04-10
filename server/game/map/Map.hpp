@@ -46,6 +46,10 @@ namespace Server { namespace Game { namespace Map {
         typedef std::function<void(Common::Position const& pos)> SpawnCallback;
 
     private:
+        enum {
+            SaveTime = 600,
+            SaveRetryTime = 10
+        };
         Conf _conf;
         Game& _game;
         Tools::SimpleMessageQueue* _messageQueue;
