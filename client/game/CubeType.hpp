@@ -3,6 +3,10 @@
 
 #include "common/CubeType.hpp"
 
+namespace Tools { namespace Lua {
+    class Interpreter;
+}}
+
 namespace Client {
     class Client;
     namespace Resources {
@@ -66,7 +70,7 @@ namespace Client { namespace Game {
         //} effectParameters;
 
         explicit CubeType(Common::CubeType const& cubeType);
-        void Load(Resources::ResourceManager& resourceMgr);
+        void Load(Resources::ResourceManager& resourceMgr, Tools::Lua::Interpreter& interpreter);
     };
 
 }}

@@ -62,6 +62,10 @@ namespace Server { namespace Database {
 
     WorldLoader::LoadingMapConf::~LoadingMapConf()
     {
+        this->fullname.Unref();
+        this->isDefault.Unref();
+        this->cubes.Unref();
+        this->equations.Unref();
         Tools::Delete(this->interpreter);
     }
 
@@ -186,8 +190,9 @@ namespace Server { namespace Database {
         cubeTypeNs.Set("Register", lua.MakeFunction([&](Tools::Lua::CallHelper& helper)
             {
                 Tools::Lua::Ref cubeType = helper.PopArg();
-                auto id = (Common::BaseChunk::CubeType)map.GetConfiguration().cubeTypes.size();
+                auto id = (Common::BaseChunk::CubeType)map.GetConfiguration().cubeTypes.size() + 1;
                 std::string name = cubeType["name"].Check<std::string>();
+
                 Game::Map::CubeType desc(id, name, cubeType);
                 desc.solid = cubeType["solid"].To<bool>();
                 desc.transparent = cubeType["transparent"].To<bool>();

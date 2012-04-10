@@ -2,7 +2,7 @@
 
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/MetaTable.hpp"
-#include "tools/metatables/Metatables.hpp"
+#include "tools/lua/utils/Utils.hpp"
 #include "tools/Color.hpp"
 
 namespace {
@@ -41,18 +41,13 @@ namespace {
     }
 }
 
-namespace Tools { namespace Metatables {
+namespace Tools { namespace Lua { namespace Utils {
 
     void RegisterColor(Lua::Interpreter& interpreter)
     {
         Tools::Lua::MetaTable colorsMt(interpreter, Tools::Color4f());
-        auto clientNs = interpreter.Globals()["Client"];
-        if (!clientNs.Exists())
-            clientNs = interpreter.Globals().Set("Client", interpreter.MakeTable());
-        auto colorsNs = clientNs["Colors"];
-        if (!colorsNs.Exists())
-            colorsNs = colorsNs.Set("Colors", interpreter.MakeTable());
+        auto colorsNs = interpreter.Globals().GetTable("Utils").GetTable("Color");
         colorsNs.Set("Create", interpreter.MakeFunction(_CreateColor));
     }
 
-}}
+}}}

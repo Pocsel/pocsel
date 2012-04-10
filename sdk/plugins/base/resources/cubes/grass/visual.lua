@@ -1,13 +1,13 @@
 textures = {
-    top = "cubes/grass/texture.png",
-    bottom = "cubes/grass/texture.png",
-    left = "cubes/grass/texture.png",
-    right = "cubes/grass/texture.png",
-    front = "cubes/grass/texture.png",
-    back = "cubes/grass/texture.png",
+    top = "cubes/grass/top.png",
+    bottom = "cubes/grass/side.png",
+    left = "cubes/grass/side.png",
+    right = "cubes/grass/side.png",
+    front = "cubes/grass/side.png",
+    back = "cubes/grass/side.png",
 }
 
-effect = {
+effects = {
     top = "BaseChunk",
     bottom = "BaseChunk",
     left = "BaseChunk",
@@ -16,10 +16,10 @@ effect = {
     back = "BaseChunk",
 }
 effectParameters = {
-    top = { diffuseColor = Client.Colors.Create(0x777777) },
-    bottom = { diffuseColor = Client.Colors.Create(0x007700) },
-    left = { diffuseColor = Client.Colors.Create(0x007777) },
-    right = { diffuseColor = Client.Colors.Create(0x777700) },
-    front = { diffuseColor = Client.Colors.Create(0x770000) },
-    back = { diffuseColor = Client.Colors.Create(0x000077) },
+    top = { diffuseColor = Utils.Color.Create(0x777777) },
+    bottom = { diffuseColor = Utils.Color.Create(0x007700) },
+    left = { diffuseColor = Utils.Color.Create(0x007777) },
+    right = { diffuseColor = Utils.Color.Create(0x777700) },
+    front = { diffuseColor = Utils.Color.Create(0x770000) },
+    back = { diffuseColor = Utils.Color.Create(0x000077) },
 }

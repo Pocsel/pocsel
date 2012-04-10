@@ -29,7 +29,7 @@ namespace Client { namespace Game {
     void CubeTypeManager::LoadResources()
     {
         for (auto it = this->_cubeTypes.begin(), ite = this->_cubeTypes.end(); it != ite; ++it)
-            it->Load(this->_client.GetGame().GetResourceManager());
+            it->Load(this->_client.GetGame().GetResourceManager(), this->_client.GetGame().GetInterpreter());
     }
 
     void CubeTypeManager::_AskOneType()
