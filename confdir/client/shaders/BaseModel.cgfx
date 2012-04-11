@@ -1,5 +1,5 @@
 #ifndef MAX_BONES
-#define MAX_BONES 33
+#define MAX_BONES 58
 #endif
 
 float4x4 mvp : WorldViewProjection;

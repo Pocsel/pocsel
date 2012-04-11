@@ -63,7 +63,19 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     void ShaderParameterCg::Set(std::vector<glm::mat4x4> const& matrices)
     {
-        cgSetParameterValuefc(this->_param, matrices.size() * 16, (float const*)matrices.data());
+        if (!this->_preBuffer)
+        {
+            this->_preBuffer.reset(new std::vector<float>(
+                    cgGetParameterColumns(this->_param) *
+                    cgGetParameterRows(this->_param) *
+                    cgGetArrayTotalSize(this->_param)
+                    ));
+        }
+
+        std::cout << this->_preBuffer->size() << "\n";
+        std::memcpy(this->_preBuffer->data(), matrices.data(), sizeof(float) * std::min(this->_preBuffer->size(), matrices.size() * 4*4));
+
+        cgSetParameterValuefc(this->_param, this->_preBuffer->size(), this->_preBuffer->data());
         //cgSetMatrixParameterfc(this->_param, matrix.mm);
     }
 

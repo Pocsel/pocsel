@@ -11,6 +11,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
     private:
         CGparameter _param;
+        std::unique_ptr<std::vector<float>> _preBuffer;
 
     public:
         ShaderParameterCg(ShaderProgramCg& program, std::string const& identifier);

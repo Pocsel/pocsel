@@ -310,7 +310,6 @@ namespace Client { namespace Resources {
 
                 vert.pos += (joint.pos + rotPos ) * weight.bias;
                 vert.boneIndices[j] = (float)weight.jointID;
-                std::cout << "bone indiesces " << weight.jointID << "\n";
                 vert.boneWeights[j] = weight.bias;
             }
 
