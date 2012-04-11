@@ -72,11 +72,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                     ));
         }
 
-        std::cout << this->_preBuffer->size() << "\n";
         std::memcpy(this->_preBuffer->data(), matrices.data(), sizeof(float) * std::min(this->_preBuffer->size(), matrices.size() * 4*4));
-
         cgSetParameterValuefc(this->_param, this->_preBuffer->size(), this->_preBuffer->data());
-        //cgSetMatrixParameterfc(this->_param, matrix.mm);
     }
 
     void ShaderParameterCg::Set(ITexture2D& texture)
