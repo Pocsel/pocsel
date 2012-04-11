@@ -1,5 +1,5 @@
-#ifndef __SERVER_PRECOMPILED_HPP__
-#define __SERVER_PRECOMPILED_HPP__
+#ifndef __SDK_PRECOMPILED_HPP__
+#define __SDK_PRECOMPILED_HPP__
 
 #include "tools/precompiled.hpp"
 
