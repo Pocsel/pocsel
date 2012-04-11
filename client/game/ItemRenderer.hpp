@@ -32,6 +32,7 @@ namespace Client { namespace Game {
         Tools::IRenderer& _renderer;
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
+        Tools::Renderers::IShaderParameter* _shaderBoneMatrix;
         Tools::Renderers::IShaderParameter* _shaderTime;
         Resources::Md5Model* _md5Model;
         //std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;

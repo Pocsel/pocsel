@@ -61,6 +61,12 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         cgSetMatrixParameterfc(this->_param, matrix.mm);
     }
 
+    void ShaderParameterCg::Set(std::vector<glm::mat4x4> const& matrices)
+    {
+        cgSetParameterValuefc(this->_param, matrices.size() * 16, (float const*)matrices.data());
+        //cgSetMatrixParameterfc(this->_param, matrix.mm);
+    }
+
     void ShaderParameterCg::Set(ITexture2D& texture)
     {
         Texture2D& tex = reinterpret_cast<Texture2D&>(texture);

@@ -19,12 +19,14 @@ namespace Client { namespace Game {
         _renderer(game.GetClient().GetWindow().GetRenderer()),
         _elapsedTime(0)
     {
-        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("BaseShaderTexture.cgfx");
+        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("BaseModel.cgfx");
         this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
+        this->_shaderBoneMatrix = this->_shader->GetParameter("boneMatrix").release();
         //this->_shaderTime = this->_shader->GetParameter("time").release();
         this->_shaderTime = 0;
 
-        this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("test.png");
+        //this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("test.png");
+        this->_texture = 0;
 
         this->_md5Model = this->_game.GetClient().GetLocalResourceManager().GetMd5Model("boblampclean");
 
@@ -73,8 +75,8 @@ namespace Client { namespace Game {
 
         //this->_md5Model->Render(this->_renderer);
 
-        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
         auto meshes = this->_md5Model->GetMeshes();
+        this->_shaderBoneMatrix->Set(this->_md5Model->GetAnimatedBones());
         for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
         {
             auto mesh = *it;
@@ -83,25 +85,17 @@ namespace Client { namespace Game {
 //            this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
 
 //        glDisable(GL_CULL_FACE);
-        glEnableClientState( GL_VERTEX_ARRAY );
-        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-        glEnableClientState( GL_NORMAL_ARRAY );
+            mesh.vertexBuffer->Bind();
+            mesh.indexBuffer->Bind();
 
-        glVertexPointer( 3, GL_FLOAT, 0, &(mesh.positionBuffer[0]) );
-        glNormalPointer( GL_FLOAT, 0, &(mesh.normalBuffer[0]) );
-        glTexCoordPointer( 2, GL_FLOAT, 0, &(mesh.tex2DBuffer[0]) );
+            this->_renderer.DrawElements(mesh.indexes.size());
 
-        this->_renderer.DrawElements( mesh.indexBuffer.size(), Tools::Renderers::DataType::UnsignedInt, &(mesh.indexBuffer[0]), Tools::Renderers::DrawingMode::Triangles);
-
-        glDisableClientState( GL_NORMAL_ARRAY );
-        glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-        glDisableClientState( GL_VERTEX_ARRAY );
 //        glEnable(GL_CULL_FACE);
 
+            mesh.indexBuffer->Unbind();
+            mesh.vertexBuffer->Unbind();
             mesh.texture->Unbind();
         }
-
-        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
 
 //        this->_vertexBuffer->Bind();
 //        this->_texture->Bind();
