@@ -17,7 +17,7 @@ namespace Tools { namespace Lua {
     public:
         Ref(State& state) throw();
         Ref(Ref const& ref) throw();
-        ~Ref() throw();
+        ~Ref() throw(); // Possible d'appeler Unref() pour détruire la ref après l'interpreter sans segfault !
         Ref& operator =(Ref const& ref) throw();
         bool operator ==(Ref const& ref) const throw();
         bool operator !=(Ref const& ref) const throw();

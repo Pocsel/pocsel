@@ -1,4 +1,4 @@
-#include "server/precompiled.hpp"
+# include "server/precompiled.hpp"
 
 #include "server/game/map/Map.hpp"
 #include "server/game/map/ChunkManager.hpp"
@@ -75,10 +75,10 @@ namespace Server { namespace Game { namespace Map {
             tlm(std::bind(&Map::_Tick, this, std::placeholders::_1));
         this->_messageQueue->SetLoopTimer(10000, tlm, this->_currentTime);
 
-        // sauvegarde dans 33 secondes
+        // sauvegarde
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_TimedSave, this));
-        this->_messageQueue->PushTimedMessage(33000000, m);
+        this->_messageQueue->PushTimedMessage(SaveTime * 1000000, m);
     }
 
     void Map::Stop()
@@ -447,17 +447,17 @@ namespace Server { namespace Game { namespace Map {
             Tools::log << this->GetName() << ": could not save, retry in 7 seconds.\n";
             Tools::SimpleMessageQueue::Message
                 m(std::bind(&Map::_TimedSave, this));
-            this->_messageQueue->PushTimedMessage(7000000, m);
+            this->_messageQueue->PushTimedMessage(SaveRetryTime * 1000000, m);
             return;
         }
         boost::lock_guard<boost::mutex> lock(mutex, boost::adopt_lock);
         Tools::log << this->GetName() << ": Saving.\n";
         this->Save();
 
-        // resave dans 33 secondes
+        // resave
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_TimedSave, this));
-        this->_messageQueue->PushTimedMessage(33000000, m);
+        this->_messageQueue->PushTimedMessage(SaveTime * 1000000, m);
     }
 
 }}}
