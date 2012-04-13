@@ -100,7 +100,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             ::FT_Done_Glyph(glyph);
         }
 
-        unsigned int width = 512;
+        unsigned int width = 1024;
         unsigned int height = NextPowerOfTwo(maxHeight);
 
         // Fill the bitmap

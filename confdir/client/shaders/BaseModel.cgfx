@@ -43,12 +43,7 @@ void vs(
     objPos = mul(matTransform, position);
     objNormal = mul(matTransform, float4(normal, 0.0f));
 
-#ifdef DIRECTX
     oTexCoord = texCoord;
-#else
-    oTexCoord = float2(texCoord.x, -texCoord.y);
-#endif
-
     oPosition = mul(mvp, objPos);
 }
 
@@ -86,8 +81,8 @@ technique tech
 {
     pass p0
     {
-        VertexShader = compile vs_2_0 vs();
-        PixelShader = compile ps_2_0 fs();
+        VertexShader = compile vs_3_0 vs();
+        PixelShader = compile ps_3_0 fs();
     }
 }
 

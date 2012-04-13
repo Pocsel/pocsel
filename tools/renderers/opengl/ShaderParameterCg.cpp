@@ -1,3 +1,5 @@
+#include "tools/precompiled.hpp"
+
 #include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/Matrix4.hpp"

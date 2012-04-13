@@ -1,4 +1,5 @@
 #ifdef _WIN32
+#include "tools/precompiled.hpp"
 
 #include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
@@ -62,6 +63,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
     void ShaderParameter::Set(Matrix4<float> const& matrix)
     {
         this->_effect->SetMatrixTranspose(this->_param, (D3DXMATRIX const*)matrix.mm);
+    }
+
+    void ShaderParameter::Set(std::vector<glm::mat4x4> const& matrices)
+    {
+        this->_effect->SetMatrixTransposeArray(this->_param, (D3DXMATRIX const*)matrices.data(), (UINT)matrices.size());
     }
 
     void ShaderParameter::Set(ITexture2D& texture)

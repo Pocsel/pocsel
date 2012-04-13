@@ -148,7 +148,7 @@ namespace Tools { namespace Renderers {
             target->Bind();
 
         this->_model = Tools::Matrix4<float>::identity;
-        this->_view = Tools::Matrix4<float>::CreateTranslation(0, 0, 1);
+        this->_view = Tools::Matrix4<float>::CreateTranslation(0, 0, 2);
         this->_projection = Tools::Matrix4<float>::CreateOrthographic(
                 0,
                 this->_viewport.size.w,
@@ -158,6 +158,7 @@ namespace Tools { namespace Renderers {
                 float(this->_viewport.size.w));
         this->_modelViewProjection = this->_model * this->_view * this->_projection;
 
+        GLCHECK(glDisable(GL_DEPTH_TEST));
         GLCHECK(glDisable(GL_CULL_FACE));
     }
 
@@ -182,9 +183,6 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::EndDraw()
     {
-        GLCHECK(glDisable(GL_CULL_FACE));
-        GLCHECK(glDisable(GL_DEPTH_TEST));
-
         this->_state = DrawNone;
         this->_currentProgram = 0;
         GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0));
