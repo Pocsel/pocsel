@@ -459,4 +459,16 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushTimedMessage(SaveTime * 1000000, m);
     }
 
+    void Map::RconGetEntities(std::function<void(std::string)> cb) const
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_RconGetEntities, this, cb));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::_RconGetEntities(std::function<void(std::string)> cb) const
+    {
+        cb(this->_engine->GetEntityManager().RconGetEntities());
+    }
+
 }}}

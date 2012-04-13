@@ -15,6 +15,7 @@ namespace Server { namespace Rcon {
     private:
         Settings const& _settings;
         boost::uuids::random_generator _tokenGenerator;
+        std::map<std::string /* token */, std::string /* login */> _sessions;
 
     public:
         SessionManager(Settings const& settings);

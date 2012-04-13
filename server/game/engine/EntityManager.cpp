@@ -374,4 +374,25 @@ namespace Server { namespace Game { namespace Engine {
         this->_ApiRegister(helper);
     }
 
+    std::string EntityManager::RconGetEntities() const
+    {
+        std::string json = "[\n";
+        auto it = this->_entities.begin();
+        auto itEnd = this->_entities.end();
+        for (; it != itEnd; ++it)
+        {
+            if (it != this->_entities.begin())
+                json += ",\n";
+            json +=
+                "\t{\n"
+                "\t\t\"id\": " + Tools::ToString(it->first) + ",\n" +
+                "\t\t\"type\": \"" + it->second->GetType().GetName() + "\",\n" +
+                "\t\t\"plugin\": \"" + this->_engine.GetMap().GetGame().GetWorld().GetPluginManager().GetPluginIdentifier(it->second->GetType().GetPluginId()) + "\",\n" +
+                "\t\t\"positional\": " + (it->second->GetType().IsPositional() ? "true" : "false") + "\n" +
+                "\t}";
+        }
+        json += "\n]\n";
+        return json;
+    }
+
 }}}

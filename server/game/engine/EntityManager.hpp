@@ -73,6 +73,9 @@ namespace Server { namespace Game { namespace Engine {
         void BeginPluginRegistering(Uint32 pluginId, std::string const& pluginName);
         void EndPluginRegistering();
         void BootstrapPlugin(Uint32 pluginId);
+
+        std::string RconGetEntities() const;
+
     private:
         Uint32 _CreateEntity(Uint32 pluginId, std::string entityName, bool positional = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
