@@ -17,38 +17,130 @@
             <div class="navbar-inner">
                 <div class="container">
                     <span class="brand">Pocsel Remote Console</span>
+                    <ul class="nav">
+                        <li id="navbar_login"></li>
+                        <li id="navbar_exit"></li>
+                    </ul>
                 </div>
             </div>
         </div>
         <div class="container">
+
             <div id="login-form">
-                <h2>Connect to server</h2>
-                <form class="well" action="#">
+                <h3>Connect to server</h3>
+                <div class="well">
+                    <div id="login-form_alert" class="alert alert-error hide">
+                    </div>
                     <label>Host</label>
-                    <input type="text" class="input-medium" value="localhost"/>
+                    <input id="login-form_host" type="text" class="input-medium" value="localhost"/>
                     <label>Port</label>
-                    <input type="text" class="input-small" value="8173"/>
+                    <input id="login-form_port" type="text" class="input-small" value="8174"/>
                     <label>Login</label>
-                    <input type="text" class="input-medium"/>
+                    <input id="login-form_login" type="text" class="input-medium"/>
                     <label>Password</label>
-                    <input type="password" class="input-medium"/>
+                    <input id="login-form_password" type="password" class="input-medium"/>
                     <br />
-                    <button type="submit" class="btn" id="login-form_submit">Connect</button>
-                </form>
+                    <button id="login-form_submit" class="btn">Connect</button>
+                </div>
             </div>
+
+            <div id="server" class="accordion hide">
+                <h3>Server</h3>
+
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle" href="#maps" data-toggle="collapse" data-target="#maps">
+                            Maps
+                        </a>
+                    </div>
+                    <div id="maps" class="accordion-body collapse">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Identifier</th>
+                                    <th>Full name</th>
+                                </tr>
+                            </thead>
+                            <tbody id="maps_list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle" href="#plugins" data-toggle="collapse" data-target="#plugins">
+                            Plugins
+                        </a>
+                    </div>
+                    <div id="plugins" class="accordion-body collapse">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Identifier</th>
+                                    <th>Full name</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plugins_list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle" href="#players" data-toggle="collapse" data-target="#players">
+                            Players
+                        </a>
+                    </div>
+                    <div id="players" class="accordion-body collapse">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Login</th>
+                                </tr>
+                            </thead>
+                            <tbody id="players_list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle" href="#rcon-clients" data-toggle="collapse" data-target="#rcon-clients">
+                            Rcon Clients
+                        </a>
+                    </div>
+                    <div id="rcon-clients" class="accordion-body collapse">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Login</th>
+                                    <th>User-Agent</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rcon-clients_list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-        <script src="rcon-assets/jquery-1.7.2.js"></script>
-        <script src="rcon-assets/bootstrap-alert.js"></script>
-        <script src="rcon-assets/bootstrap-modal.js"></script>
-        <script src="rcon-assets/bootstrap-dropdown.js"></script>
-        <script src="rcon-assets/bootstrap-scrollspy.js"></script>
-        <script src="rcon-assets/bootstrap-tab.js"></script>
-        <script src="rcon-assets/bootstrap-tooltip.js"></script>
-        <script src="rcon-assets/bootstrap-popover.js"></script>
-        <script src="rcon-assets/bootstrap-button.js"></script>
-        <script src="rcon-assets/bootstrap-collapse.js"></script>
-        <script src="rcon-assets/bootstrap-carousel.js"></script>
-        <script src="rcon-assets/bootstrap-typeahead.js"></script>
-        <script src="rcon-assets/rcon.js"></script>
+        <script src="rcon-assets/js/jquery-1.7.2.js"></script>
+        <script src="rcon-assets/js/bootstrap-alert.js"></script>
+        <script src="rcon-assets/js/bootstrap-modal.js"></script>
+        <script src="rcon-assets/js/bootstrap-dropdown.js"></script>
+        <script src="rcon-assets/js/bootstrap-scrollspy.js"></script>
+        <script src="rcon-assets/js/bootstrap-tab.js"></script>
+        <script src="rcon-assets/js/bootstrap-tooltip.js"></script>
+        <script src="rcon-assets/js/bootstrap-popover.js"></script>
+        <script src="rcon-assets/js/bootstrap-button.js"></script>
+        <script src="rcon-assets/js/bootstrap-collapse.js"></script>
+        <script src="rcon-assets/js/bootstrap-carousel.js"></script>
+        <script src="rcon-assets/js/bootstrap-typeahead.js"></script>
+        <script src="rcon-assets/js/rcon.js"></script>
     </body>
 </html>
