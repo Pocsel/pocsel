@@ -43,11 +43,11 @@ void vs(
     objPos = mul(matTransform, position);
     objNormal = mul(matTransform, float4(normal, 0.0f));
 
-#ifdef DIRECTX
+//#ifdef DIRECTX
     oTexCoord = texCoord;
-#else
-    oTexCoord = float2(texCoord.x, -texCoord.y);
-#endif
+//#else
+//    oTexCoord = float2(texCoord.x, -texCoord.y);
+//#endif
 
     oPosition = mul(mvp, objPos);
 }

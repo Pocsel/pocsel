@@ -154,6 +154,8 @@ namespace Client { namespace Resources {
 
                             Tools::Filesystem::IgnoreLine(file, fileLength);
 
+                            vert.tex0.y = 1.0f - vert.tex0.y;
+
                             mesh.verts.push_back(vert);
                             mesh.tex2DBuffer.push_back(vert.tex0);
                         }
