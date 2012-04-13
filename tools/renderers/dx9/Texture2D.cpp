@@ -12,7 +12,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     static int nbBindedTexture = 0;
 
-    Texture2D::Texture2D(DX9Renderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData) :
+    Texture2D::Texture2D(DX9Renderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize, void const* mipmapData) :
         _renderer(renderer),
         _hasAlpha(false),
         _texture(0)
@@ -66,7 +66,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     void Texture2D::_FinishLoading(unsigned int ilID)
     {
-        this->_size = Vector2u(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
+        this->_size = glm::uvec2(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 
         int bytesPerPixel = ilGetInteger(IL_IMAGE_BPP);
         if (bytesPerPixel != 3 && bytesPerPixel != 4)
@@ -112,7 +112,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         {
             int level = 1;
             Color4<Uint8> const* idx = reinterpret_cast<Color4<Uint8> const*>(mipmapData);
-            for (Tools::Vector2u vsize = this->_size / 2; vsize.w >= 1 && vsize.h >= 1; vsize /= 2)
+            for (glm::uvec2 vsize = this->_size / 2; vsize.w >= 1 && vsize.h >= 1; vsize /= 2)
             {
                 DXCHECKERROR(this->_texture->LockRect(level, &lockRect, 0, D3DLOCK_DISCARD));
                 Uint8* ptr = reinterpret_cast<Uint8*>(lockRect.pBits);

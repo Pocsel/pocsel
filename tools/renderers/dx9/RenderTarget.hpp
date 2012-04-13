@@ -15,10 +15,10 @@ namespace Tools { namespace Renderers { namespace DX9 {
         DX9Renderer& _renderer;
         IDirect3DSurface9* _surface;
         Texture2D* _texture;
-        Vector2u _size;
+        glm::uvec2 _size;
 
     public:
-        RenderTarget(DX9Renderer& renderer, Vector2u const& size);
+        RenderTarget(DX9Renderer& renderer, glm::uvec2 const& size);
         virtual ~RenderTarget();
 
         void OnLostDevice();

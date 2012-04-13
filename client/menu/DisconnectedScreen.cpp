@@ -23,7 +23,7 @@ namespace Client { namespace Menu {
                 *this->_actionBinder,
                 f,
                 "Retry",
-                Tools::Vector2f(100, 20));
+                glm::fvec2(100, 20));
         this->_backRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
         this->_backRect->SetColor(
                 Tools::Color4f(0.31f, 0.03f, 0.03f, 1),
@@ -52,14 +52,15 @@ namespace Client { namespace Menu {
         this->_message = message;
     }
 
-    void DisconnectedScreen::_Resize(Tools::Vector2u const& sz)
+    void DisconnectedScreen::_Resize(glm::uvec2 const& sz)
     {
-        Tools::Vector2f size(sz);
-        this->_text1Matrix = Tools::Matrix4<float>::CreateScale(Tools::Vector3f(0.5f)) * Tools::Matrix4<float>::CreateTranslation(10, size.h - 80, 0);
-        this->_text2Matrix = Tools::Matrix4<float>::CreateScale(Tools::Vector3f(0.5f)) * Tools::Matrix4<float>::CreateTranslation(10, size.h - 60, 0);
-        this->_backRectMatrix = Tools::Matrix4<float>::CreateScale(size.w / 2 + 1, size.h / 2 + 1, 1)
-            * Tools::Matrix4<float>::CreateTranslation(size.w / 2, size.h / 2, 0);
-        this->_button->SetPos(Tools::Vector2f(10, size.h - 30));
+        glm::fvec2 size(sz);
+        this->_text1Matrix = glm::translate<float>(10, size.h - 80, 0) * glm::scale<float>(glm::fvec3(0.5f));
+        this->_text2Matrix = glm::translate<float>(10, size.h - 60, 0) * glm::scale<float>(glm::fvec3(0.5f));
+        this->_backRectMatrix =
+            glm::translate<float>(size.w / 2, size.h / 2, 0)
+            * glm::scale<float>(size.w / 2 + 1, size.h / 2 + 1, 1);
+        this->_button->SetPos(glm::fvec2(10, size.h - 30));
     }
 
     void DisconnectedScreen::Render()

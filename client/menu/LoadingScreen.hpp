@@ -23,9 +23,9 @@ namespace Client { namespace Menu {
         Client& _client;
         Menu& _menu;
         Tools::IRenderer& _renderer;
-        Tools::Matrix4<float> _text1Matrix;
-        Tools::Matrix4<float> _text2Matrix;
-        Tools::Matrix4<float> _backRectMatrix;
+        glm::detail::tmat4x4<float> _text1Matrix;
+        glm::detail::tmat4x4<float> _text2Matrix;
+        glm::detail::tmat4x4<float> _backRectMatrix;
         Tools::Renderers::Utils::Rectangle* _backRect;
         Tools::Renderers::Utils::Rectangle* _barRect;
         int _callbackId;
@@ -35,7 +35,7 @@ namespace Client { namespace Menu {
         ~LoadingScreen();
         void Render(std::string const& status, float progress);
     private:
-        void _Resize(Tools::Vector2u const& size);
+        void _Resize(glm::uvec2 const& size);
     };
 
 }}

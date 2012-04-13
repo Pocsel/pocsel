@@ -270,7 +270,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Ref firstArg = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"");
         if (firstArg.IsTable())
         {
-            pos = Tools::Lua::Vector::TableToVector3<double>(firstArg);
+            pos = Tools::Lua::Vector::TableToVec3<double>(firstArg);
             firstArg = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"");
         }
         std::string plugin = firstArg.CheckString("Server.Entity.Spawn[FromPlugin]: Argument \"plugin\" must be a string");
@@ -282,7 +282,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         Common::Position pos;
         if (helper.GetNbArgs() && helper.GetArgList().front().IsTable())
-            pos = Tools::Lua::Vector::TableToVector3<double>(helper.PopArg());
+            pos = Tools::Lua::Vector::TableToVec3<double>(helper.PopArg());
         Uint32 pluginId = this->_runningEntity->GetType().GetPluginId();
         this->_SpawnFromPlugin(pos, pluginId, helper);
     }

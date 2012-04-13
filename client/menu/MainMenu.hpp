@@ -27,7 +27,7 @@ namespace Client { namespace Menu {
         Client& _client;
         Menu& _menu;
         Tools::IRenderer& _renderer;
-        Tools::Matrix4<float> _backRectMatrix;
+        glm::detail::tmat4x4<float> _backRectMatrix;
         Tools::Renderers::Utils::Rectangle* _backRect;
         int _callbackId;
         bool _visible;
@@ -43,7 +43,7 @@ namespace Client { namespace Menu {
         void Update();
         void Render();
     private:
-        void _Resize(Tools::Vector2u const& size);
+        void _Resize(glm::uvec2 const& size);
         void _QuitButton();
         void _BackButton();
         void _MenuBind();

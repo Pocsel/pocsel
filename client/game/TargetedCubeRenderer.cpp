@@ -42,8 +42,8 @@ namespace Client { namespace Game {
         this->_shader->BeginPass();
 
         this->_renderer.SetModelMatrix(
-            Tools::Matrix4<float>::CreateTranslation(
-                Tools::Vector3f(Common::Position(pos) - camera.position)
+            glm::translate<float>(
+                glm::fvec3(Common::Position(pos) - camera.position)
                 )
             );
 

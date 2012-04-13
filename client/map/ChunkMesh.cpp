@@ -51,11 +51,11 @@ namespace Client { namespace Map {
     namespace {
         struct Vertex
         {
-            Tools::Vector3f position;
-            Tools::Vector3f normal;
-            Tools::Vector2f texture;
+            glm::fvec3 position;
+            glm::fvec3 normal;
+            glm::fvec2 texture;
             Vertex() {}
-            Vertex(Tools::Vector3f const& position, Tools::Vector3f const& normal, Tools::Vector2f const& texture)
+            Vertex(glm::fvec3 const& position, glm::fvec3 const& normal, glm::fvec2 const& texture)
                 : position(position),
                 normal(normal),
                 texture(texture)
@@ -67,31 +67,31 @@ namespace Client { namespace Map {
             }
         };
 
-        inline void VerticesPushFace(std::vector<Vertex>& vertices, unsigned int& offset, Tools::Vector3f const& p, int idx)
+        inline void VerticesPushFace(std::vector<Vertex>& vertices, unsigned int& offset, glm::fvec3 const& p, int idx)
         {
-            static Tools::Vector3f const positions[] = {
-                Tools::Vector3f(0, 1, 1), // frontTopLeft = 0;
-                Tools::Vector3f(1, 1, 1), // frontTopRight = 1;
-                Tools::Vector3f(1, 1, 0), // backTopRight = 2;
-                Tools::Vector3f(0, 1, 0), // backTopLeft = 3;
-                Tools::Vector3f(0, 0, 0), // backBottomLeft = 4;
-                Tools::Vector3f(1, 0, 0), // backBottomRight = 5;
-                Tools::Vector3f(1, 0, 1), // frontBottomRight = 6;
-                Tools::Vector3f(0, 0, 1), // frontBottomLeft = 7;
+            static glm::fvec3 const positions[] = {
+                glm::fvec3(0, 1, 1), // frontTopLeft = 0;
+                glm::fvec3(1, 1, 1), // frontTopRight = 1;
+                glm::fvec3(1, 1, 0), // backTopRight = 2;
+                glm::fvec3(0, 1, 0), // backTopLeft = 3;
+                glm::fvec3(0, 0, 0), // backBottomLeft = 4;
+                glm::fvec3(1, 0, 0), // backBottomRight = 5;
+                glm::fvec3(1, 0, 1), // frontBottomRight = 6;
+                glm::fvec3(0, 0, 1), // frontBottomLeft = 7;
             };
-            static Tools::Vector3f const normals[] = {
-                Tools::Vector3f(0, 0, 1), // front = 0;
-                Tools::Vector3f(0, 1, 0), // top = 1;
-                Tools::Vector3f(1, 0, 0), // right = 2;
-                Tools::Vector3f(0, -1, 0), // bottom = 3;
-                Tools::Vector3f(-1, 0, 0), // left = 4;
-                Tools::Vector3f(0, 0, -1), // back = 5;
+            static glm::fvec3 const normals[] = {
+                glm::fvec3(0, 0, 1), // front = 0;
+                glm::fvec3(0, 1, 0), // top = 1;
+                glm::fvec3(1, 0, 0), // right = 2;
+                glm::fvec3(0, -1, 0), // bottom = 3;
+                glm::fvec3(-1, 0, 0), // left = 4;
+                glm::fvec3(0, 0, -1), // back = 5;
             };
-            Tools::Vector2f const textures[] = {
-                Tools::Vector2f(1, 0),
-                Tools::Vector2f(0, 0),
-                Tools::Vector2f(0, 1),
-                Tools::Vector2f(1, 1),
+            glm::fvec2 const textures[] = {
+                glm::fvec2(1, 0),
+                glm::fvec2(0, 0),
+                glm::fvec2(0, 1),
+                glm::fvec2(1, 1),
             };
             static int positionIndices[][4] = {
                 {6, 1, 0, 7}, // front = 0;
@@ -181,7 +181,7 @@ namespace Client { namespace Map {
                         continue;
 
                     auto const& cubeType = cubeTypes[cubes[cubeOffset] - 1];
-                    Tools::Vector3f p((float)x, (float)y, (float)z);
+                    glm::fvec3 p((float)x, (float)y, (float)z);
 
                     // Right
                     nearType = 0;

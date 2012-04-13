@@ -33,7 +33,7 @@ namespace Tools {
             return Outside;
         }
 
-        virtual IntersectionType Contains(Vector3d const& object) const = 0;
+        virtual IntersectionType Contains(glm::dvec3 const& object) const = 0;
         virtual IntersectionType Contains(AlignedBox const& object) const = 0;
         virtual IntersectionType Contains(AlignedCube const& object) const = 0;
         virtual IntersectionType Contains(Frustum const& object) const = 0;

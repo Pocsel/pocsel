@@ -104,14 +104,14 @@ namespace Tools { namespace Renderers {
         return std::unique_ptr<IIndexBuffer>(new DX9::IndexBuffer(*this));
     }
 
-    std::unique_ptr<Renderers::IRenderTarget> DX9Renderer::CreateRenderTarget(Vector2u const& imgSize)
+    std::unique_ptr<Renderers::IRenderTarget> DX9Renderer::CreateRenderTarget(glm::uvec2 const& imgSize)
     {
         auto rt = new DX9::RenderTarget(*this, imgSize);
         this->_allRenderTargets.push_back(rt);
         return std::unique_ptr<IRenderTarget>(rt);
     }
 
-    std::unique_ptr<ITexture2D> DX9Renderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData)
+    std::unique_ptr<ITexture2D> DX9Renderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize, void const* mipmapData)
     {
         return std::unique_ptr<ITexture2D>(new DX9::Texture2D(*this, format, size, data, imgSize, mipmapData));
     }
@@ -147,9 +147,9 @@ namespace Tools { namespace Renderers {
         if (target != 0)
             target->Bind();
 
-        this->_model = Tools::Matrix4<float>::identity;
-        this->_view = Tools::Matrix4<float>::CreateTranslation(0, 0, 1);
-        this->_projection = Tools::Matrix4<float>::CreateOrthographic(
+        this->_model = glm::detail::tmat4x4<float>::identity;
+        this->_view = glm::translate<float>(0, 0, 1);
+        this->_projection = glm::ortho<float>(
                 0,
                 this->_viewport.size.w,
                 this->_viewport.size.h,
@@ -228,14 +228,14 @@ namespace Tools { namespace Renderers {
     }
 
     // Matrices
-    void DX9Renderer::SetModelMatrix(Matrix4<float> const& matrix)
+    void DX9Renderer::SetModelMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
         this->_model = matrix;
         if (this->_currentProgram != 0)
             this->_modelViewProjection = this->_model * this->_view * this->_projection;
     }
 
-    void DX9Renderer::SetViewMatrix(Matrix4<float> const& matrix)
+    void DX9Renderer::SetViewMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
         this->_view = matrix;
         if (this->_currentProgram != 0)
@@ -247,7 +247,7 @@ namespace Tools { namespace Renderers {
         }
     }
 
-    void DX9Renderer::SetProjectionMatrix(Matrix4<float> const& matrix)
+    void DX9Renderer::SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
         this->_projection = matrix;
         if (this->_currentProgram != 0)
@@ -259,7 +259,7 @@ namespace Tools { namespace Renderers {
     }
 
     // States
-    void DX9Renderer::SetScreenSize(Vector2u const& size)
+    void DX9Renderer::SetScreenSize(glm::uvec2 const& size)
     {
         this->_screenSize = size;
         this->_RefreshDevice();
@@ -278,7 +278,7 @@ namespace Tools { namespace Renderers {
         this->_viewport = viewport;
         if (this->_state == Draw2D)
         {
-            this->_projection = Tools::Matrix4<float>::CreateOrthographic(
+            this->_projection = glm::ortho<float>(
                 0,
                 this->_viewport.size.w,
                 this->_viewport.size.h,

@@ -10,31 +10,31 @@
 template<class T>
 void DoTests()
 {
-    Vector2<T> a(10, 0);
-    Vector2<T> b(20, 0);
-    Vector3<T> c(10, 0, 5);
-    Vector3<T> d(20, 0, 5);
+    glm::detail::tvec2<T> a(10, 0);
+    glm::detail::tvec2<T> b(20, 0);
+    glm::detail::tvec3<T> c(10, 0, 5);
+    glm::detail::tvec3<T> d(20, 0, 5);
 
-    Assert(Vector2<T>::CheckDistance(a, b, 10));
-    Assert(Vector2<T>::GetDistance(a, b) == 10);
-    Assert(Vector2<T>::GetDistanceSquared(a, b) == 10*10);
+    Assert(glm::detail::tvec2<T>::CheckDistance(a, b, 10));
+    Assert(glm::detail::tvec2<T>::GetDistance(a, b) == 10);
+    Assert(glm::detail::tvec2<T>::GetDistanceSquared(a, b) == 10*10);
 
-    Assert(Vector3<T>::CheckDistance(c, d, 10));
-    Assert(Vector3<T>::GetDistance(c, d) == 10);
-    Assert(Vector3<T>::GetDistanceSquared(c, d) == 10*10);
+    Assert(glm::detail::tvec3<T>::CheckDistance(c, d, 10));
+    Assert(glm::detail::tvec3<T>::GetDistance(c, d) == 10);
+    Assert(glm::detail::tvec3<T>::GetDistanceSquared(c, d) == 10*10);
 
     Assert(a == a);
     Assert(c == c);
 
     std::cout << ToString(a) << " / " << ToString(c) << std::endl;
-    a.Normalize();
+    a = glm::normalize(a);
     a *= 10;
-    b.Normalize();
+    b = glm::normalize(b);
     b *= 10;
     Assert(a == b);
 
-    c.Normalize();
-    d.Normalize();
+    c = glm::normalize(c);
+    d = Normalize(d);
 
     a = 2*(a + b - b/5); // Plein de constructions
     c = 2*(c + d - d/5);

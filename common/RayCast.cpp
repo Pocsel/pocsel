@@ -18,7 +18,7 @@ namespace Common {
     namespace {
 
         void __Ray(Common::OrientedPosition const& pos, float distance,
-                   std::map<double, Tools::Vector3i>& res)
+                   std::map<double, glm::ivec3>& res)
         {
             double x, y, z;
             const double
@@ -52,7 +52,7 @@ namespace Common {
                     y = py + (dist * vy);
                     z = pz + (dist * vz);
 
-                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x) - (sign < 0 ? 1 : 0),
+                    res[dist] = glm::ivec3((int)GR_NEGFLOOR(x) - (sign < 0 ? 1 : 0),
                                                 (int)GR_NEGFLOOR(y),
                                                 (int)GR_NEGFLOOR(z)
                                                );
@@ -78,7 +78,7 @@ namespace Common {
                     x = px + (dist * vx);
                     z = pz + (dist * vz);
 
-                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x),
+                    res[dist] = glm::ivec3((int)GR_NEGFLOOR(x),
                                                 (int)GR_NEGFLOOR(y) - (sign < 0 ? 1 : 0),
                                                 (int)GR_NEGFLOOR(z)
                                                );
@@ -105,7 +105,7 @@ namespace Common {
                     x = px + (dist * vx);
                     y = py + (dist * vy);
 
-                    res[dist] = Tools::Vector3i((int)GR_NEGFLOOR(x),
+                    res[dist] = glm::ivec3((int)GR_NEGFLOOR(x),
                                                 (int)GR_NEGFLOOR(y),
                                                 (int)GR_NEGFLOOR(z) - (sign < 0 ? 1 : 0)
                                                );
@@ -116,10 +116,10 @@ namespace Common {
         }
 
         template<typename T>
-        std::vector<Common::CubePosition> __MapToTab(std::map<T, Tools::Vector3i> const& preRes, Common::Position const& pos)
+        std::vector<Common::CubePosition> __MapToTab(std::map<T, glm::ivec3> const& preRes, Common::Position const& pos)
         {
             Common::BaseChunk::CoordsType world;
-            Tools::Vector3u chunk;
+            glm::uvec3 chunk;
 
             std::vector<Common::CubePosition> res(preRes.size());
 
@@ -127,7 +127,7 @@ namespace Common {
             {
                 world = GetChunkCoords(pos);
 
-                Tools::Vector3i r = mit->second;
+                glm::ivec3 r = mit->second;
 
                 while (r.x < 0)
                 {
@@ -174,7 +174,7 @@ namespace Common {
 
     std::vector<Common::CubePosition> RayCast::Ray(Common::OrientedPosition const& pos, float distance)
     {
-        std::map<double, Tools::Vector3i> preRes;
+        std::map<double, glm::ivec3> preRes;
 
         __Ray(pos, distance, preRes);
 

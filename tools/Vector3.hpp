@@ -1,3 +1,4 @@
+#if 0
 #ifndef __TOOLS_VECTOR3_HPP__
 #define __TOOLS_VECTOR3_HPP__
 
@@ -16,33 +17,33 @@ namespace Tools {
             struct { T u, v, w; };
         };
 
-        static T GetDistanceSquared(Vector3<T> const& a, Vector3<T> const& b)
+        static T GetDistanceSquared(glm::detail::tvec3<T> const& a, glm::detail::tvec3<T> const& b)
         {
-            Vector3<T> delta = Vector3<T>(a.x - b.x, a.y - b.y, a.z - b.z);
+            glm::detail::tvec3<T> delta = glm::detail::tvec3<T>(a.x - b.x, a.y - b.y, a.z - b.z);
             return delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
         }
 
-        static T GetDistance(Vector3<T> const& a, Vector3<T> const& b)
+        static T GetDistance(glm::detail::tvec3<T> const& a, glm::detail::tvec3<T> const& b)
         {
             return std::sqrt(GetDistanceSquared(a, b));
         }
-        static bool CheckDistance(Vector3<T> const& a, Vector3<T> const& b, T distance)
+        static bool CheckDistance(glm::detail::tvec3<T> const& a, glm::detail::tvec3<T> const& b, T distance)
         {
             return GetDistanceSquared(a, b) <= distance*distance;
         }
-        static T Dot(Vector3<T> const& a, Vector3<T> const& b)
+        static T Dot(glm::detail::tvec3<T> const& a, glm::detail::tvec3<T> const& b)
         {
             return a.x*b.x + a.y*b.y + a.z*b.z;
         }
         template<class Tb, class Tout>
-        static Tout Dot(Vector3<T> const& a, Vector3<Tb> const& b)
+        static Tout Dot(glm::detail::tvec3<T> const& a, glm::detail::tvec3<Tb> const& b)
         {
             return a.x*b.x + a.y*b.y + a.z*b.z;
         }
 
-        static Vector3<T> Cross(Vector3<T> const& a, Vector3<T> const& b)
+        static glm::detail::tvec3<T> Cross(glm::detail::tvec3<T> const& a, glm::detail::tvec3<T> const& b)
         {
-            Vector3<T> r;
+            glm::detail::tvec3<T> r;
             r.x = a.y * b.z - a.z * b.y;
             r.y = a.z * b.x - a.x * b.z;
             r.z = a.x * b.y - a.y * b.x;
@@ -53,11 +54,11 @@ namespace Tools {
         {
         }
         template<typename Vec2T>
-        explicit Vector3(Vector2<Vec2T> const& vec2, T z = 0) : x(vec2.x), y(vec2.y), z(z)
+        explicit Vector3(glm::detail::tvec2<Vec2T> const& vec2, T z = 0) : x(vec2.x), y(vec2.y), z(z)
         {
         }
         template<typename Vec3T>
-        explicit Vector3(Vector3<Vec3T> const& vec3) :
+        explicit Vector3(glm::detail::tvec3<Vec3T> const& vec3) :
             x(T(vec3.x)), y(T(vec3.y)), z(T(vec3.z))
         {
         }
@@ -68,14 +69,14 @@ namespace Tools {
         {
         }
 
-        Vector2<T> GetXY() const
+        glm::detail::tvec2<T> GetXY() const
         {
-            return Tools::Vector2<T>(this->x, this->y);
+            return glm::detail::tvec2<T>(this->x, this->y);
         }
         template<typename Vec2T>
-        Vector2<Vec2T> GetXY() const
+        glm::detail::tvec2<Vec2T> GetXY() const
         {
-            return Tools::Vector2<Vec2T>((Vec2T)this->x, (Vec2T)this->y);
+            return glm::detail::tvec2<Vec2T>((Vec2T)this->x, (Vec2T)this->y);
         }
         T GetMagnitude() const
         {
@@ -100,84 +101,85 @@ namespace Tools {
             }
         }
 
-        Vector3<T> operator +(Vector3<T> const& value) const
+        glm::detail::tvec3<T> operator +(glm::detail::tvec3<T> const& value) const
         {
-            return Vector3<T>(this->x + value.x, this->y + value.y, this->z + value.z);
+            return glm::detail::tvec3<T>(this->x + value.x, this->y + value.y, this->z + value.z);
         }
-        Vector3<T> operator -(Vector3<T> const& value) const
+        glm::detail::tvec3<T> operator -(glm::detail::tvec3<T> const& value) const
         {
-            return Vector3<T>(this->x - value.x, this->y - value.y, this->z - value.z);
+            return glm::detail::tvec3<T>(this->x - value.x, this->y - value.y, this->z - value.z);
         }
-        Vector3<T> operator -() const
+        glm::detail::tvec3<T> operator -() const
         {
-            return Vector3<T>(-this->x, -this->y, -this->z);
+            return glm::detail::tvec3<T>(-this->x, -this->y, -this->z);
         }
-        Vector3<T> operator *(T value) const
+        glm::detail::tvec3<T> operator *(T value) const
         {
-            return Vector3<T>(this->x * value, this->y * value, this->z * value);
+            return glm::detail::tvec3<T>(this->x * value, this->y * value, this->z * value);
         }
-        Vector3<T> operator /(T value) const
+        glm::detail::tvec3<T> operator /(T value) const
         {
-            return Vector3<T>(this->x / value, this->y / value, this->z / value);
+            return glm::detail::tvec3<T>(this->x / value, this->y / value, this->z / value);
         }
-        Vector3<T>& operator +=(Vector3<T> const& value)
+        glm::detail::tvec3<T>& operator +=(glm::detail::tvec3<T> const& value)
         {
             this->x += value.x;
             this->y += value.y;
             this->z += value.z;
             return *this;
         }
-        Vector3<T>& operator -=(Vector3<T> const& value)
+        glm::detail::tvec3<T>& operator -=(glm::detail::tvec3<T> const& value)
         {
             this->x -= value.x;
             this->y -= value.y;
             this->z -= value.z;
             return *this;
         }
-        Vector3<T>& operator *=(T value)
+        glm::detail::tvec3<T>& operator *=(T value)
         {
             this->x *= value;
             this->y *= value;
             this->z *= value;
             return *this;
         }
-        Vector3<T>& operator /=(T value)
+        glm::detail::tvec3<T>& operator /=(T value)
         {
             this->x /= value;
             this->y /= value;
             this->z /= value;
             return *this;
         }
-        bool operator ==(Vector3<T> const& value) const
+        bool operator ==(glm::detail::tvec3<T> const& value) const
         {
             return (this->x == value.x && this->y == value.y && this->z == value.z);
         }
-        bool operator !=(Vector3<T> const& value) const
+        bool operator !=(glm::detail::tvec3<T> const& value) const
         {
             return (this->x != value.x || this->y != value.y || this->z != value.z);
         }
     };
 
     template<typename ValueType, typename VectorType>
-    inline Vector3<VectorType> operator *(ValueType value, Vector3<VectorType> const& vector)
+    inline glm::detail::tvec3<VectorType> operator *(ValueType value, glm::detail::tvec3<VectorType> const& vector)
     {
-        return Vector3<VectorType>(vector.x * value, vector.y * value, vector.z * value);
+        return glm::detail::tvec3<VectorType>(vector.x * value, vector.y * value, vector.z * value);
     }
 
     template<typename T>
-    struct Stringify<Tools::Vector3<T>>
+    struct Stringify<glm::detail::tvec3<T>>
     {
-        static inline std::string MakeString(Tools::Vector3<T> const& var)
+        static inline std::string MakeString(glm::detail::tvec3<T> const& var)
         {
             return "(" + ToString(var.x) + ", " + ToString(var.y) + ", " + ToString(var.z) + ")";
         }
     };
 
-    typedef Vector3<int> Vector3i;
-    typedef Vector3<unsigned int> Vector3u;
-    typedef Vector3<float> Vector3f;
-    typedef Vector3<double> Vector3d;
+    typedef glm::detail::tvec3<int> glm::ivec3;
+    typedef glm::detail::tvec3<unsigned int> glm::uvec3;
+    typedef glm::detail::tvec3<float> glm::fvec3;
+    typedef glm::detail::tvec3<double> glm::dvec3;
 
 }
 
+#endif
 #endif

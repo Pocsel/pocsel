@@ -9,20 +9,20 @@
 namespace Tools { namespace Lua { namespace Vector {
 
     template<typename T>
-        Vector3<T> TableToVector3(Ref const& ref) throw(std::runtime_error)
+        glm::detail::tvec3<T> TableToVec3(Ref const& ref) throw(std::runtime_error)
         {
             if (!ref.IsTable())
                 throw std::runtime_error("TableToVector3: Value is of " + ref.GetTypeName() + " type (expected table)");
             if (ref.GetLength() != 3)
                 throw std::runtime_error("TableToVector3: Table has a length of " + ToString(ref.GetLength()) + " (expected 3)");
-            return Vector3<T>(
+            return glm::detail::tvec3<T>(
                     ref["x"].Check<T>("TableToVector2: Invalid type for field \"x\""),
                     ref["y"].Check<T>("TableToVector2: Invalid type for field \"y\""),
                     ref["z"].Check<T>("TableToVector2: Invalid type for field \"z\""));
         }
 
     template<typename T>
-        void Vector3ToTable(Vector3<T> v, Ref& ref) throw(std::runtime_error)
+        void Vec3ToTable(glm::detail::tvec3<T> v, Ref& ref) throw(std::runtime_error)
         {
             ref = ref.GetState().MakeTable();
             ref.Set("x", v.x);
@@ -31,19 +31,19 @@ namespace Tools { namespace Lua { namespace Vector {
         }
 
     template<typename T>
-        Vector2<T> TableToVector2(Ref const& ref) throw(std::runtime_error)
+        glm::detail::tvec2<T> TableToVec2(Ref const& ref) throw(std::runtime_error)
         {
             if (!ref.IsTable())
                 throw std::runtime_error("TableToVector2: Value is of " + ref.GetTypeName() + " type (expected table)");
             if (ref.GetLength() != 2)
                 throw std::runtime_error("TableToVector2: Table has a length of " + ToString(ref.GetLength()) + " (expected 2)");
-            return Vector2<T>(
+            return glm::detail::tvec2<T>(
                     ref["x"].Check<T>("TableToVector2: Invalid type for field \"x\""),
                     ref["y"].Check<T>("TableToVector2: Invalid type for field \"y\""));
         }
 
     template<typename T>
-        void Vector2ToTable(Vector2<T> v, Ref& ref) throw(std::runtime_error)
+        void Vec2ToTable(glm::detail::tvec2<T> v, Ref& ref) throw(std::runtime_error)
         {
             ref = ref.GetState().MakeTable();
             ref.Set("x", v.x);

@@ -22,22 +22,22 @@ namespace Tools {
         };
 
         Plane _planes[6];
-        Matrix4<double> _matrix;
-        Vector3d _corners[8];
-        Vector3d _center;
+        glm::detail::tmat4x4<double> _matrix;
+        glm::dvec3 _corners[8];
+        glm::dvec3 _center;
         double _radiusSquared;
 
     public:
-        Frustum(Matrix4<double> const& view);
+        Frustum(glm::detail::tmat4x4<double> const& view);
 
-        Vector3d const* GetCorners() const { return this->_corners; }
+        glm::dvec3 const* GetCorners() const { return this->_corners; }
 
-        virtual IntersectionType Contains(Vector3d const& object) const;
+        virtual IntersectionType Contains(glm::dvec3 const& object) const;
         virtual IntersectionType Contains(AlignedBox const& object) const;
         virtual IntersectionType Contains(AlignedCube const& object) const;
         virtual IntersectionType Contains(Frustum const& object) const;
 
-        Vector3d const& SupportMapping(Vector3d const& v) const;
+        glm::dvec3 const& SupportMapping(glm::dvec3 const& v) const;
 
     private:
         Ray _ComputeIntersectionLine() const;

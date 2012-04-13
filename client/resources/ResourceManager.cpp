@@ -43,7 +43,7 @@ namespace {
             throw std::runtime_error("AnimatedTexture: A texture must be 24 or 32 bits per pixels.");
         }
 
-        auto size = Tools::Vector2u((ILuint)ilGetInteger(IL_IMAGE_WIDTH), (ILuint)ilGetInteger(IL_IMAGE_HEIGHT));
+        auto size = glm::uvec2((ILuint)ilGetInteger(IL_IMAGE_WIDTH), (ILuint)ilGetInteger(IL_IMAGE_HEIGHT));
         if (size.h % size.w != 0)
         {
             ilBindImage(0);
@@ -51,7 +51,7 @@ namespace {
             throw std::runtime_error("AnimatedTexture: height must be a multiple of width.");
         }
 
-        auto frameSize = Tools::Vector2u(size.w);
+        auto frameSize = glm::uvec2(size.w);
         auto pixmap = new Tools::Color4<Uint8>[frameSize.w * frameSize.h];
         frames.resize(size.h / size.w);
         for (unsigned int y = 0, i = 0; y < size.h; y += size.w, ++i)
@@ -255,7 +255,7 @@ namespace Client { namespace Resources {
             255, 0, 255, 255,
             0, 0, 0, 255
         };
-        this->_textures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, Tools::Vector2u(2, 2)).release();
+        this->_textures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, glm::uvec2(2, 2)).release();
     }
 
     void ResourceManager::LoadAllResources()

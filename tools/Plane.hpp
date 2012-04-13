@@ -17,13 +17,13 @@ namespace Tools {
             Back
         };
 
-        Vector3d normal;
+        glm::dvec3 normal;
         double d;
 
         Plane() {}
         Plane(double a, double b, double c, double d);
-        Plane(Vector3d const& normal, double d);
-        Plane(Vector3d const& pt1, Vector3d const& pt2, Vector3d const& pt3);
+        Plane(glm::dvec3 const& normal, double d);
+        Plane(glm::dvec3 const& pt1, glm::dvec3 const& pt2, glm::dvec3 const& pt3);
 
         void Normalize();
 
@@ -31,7 +31,7 @@ namespace Tools {
         IntersectionType Intersects(Frustum const& object) const;
 
         Ray GetIntersection(Plane const& plane) const;
-        Vector3d GetIntersection(Ray const& ray) const;
+        glm::dvec3 GetIntersection(Ray const& ray) const;
     };
 
 }

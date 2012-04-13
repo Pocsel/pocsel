@@ -99,9 +99,9 @@ namespace Server { namespace Game {
             return;
 
         Common::Position p0(Common::Position(targetPos) +
-                            Tools::Vector3d(0.5));
+                            glm::dvec3(0.5));
 
-        float dist = (p0 - pos.position).GetMagnitude();
+        float dist = glm::distance(p0,pos.position);
 
         //player->GetCurrentMap().DestroyCubes(Common::RayCast::Ray(pos, 50.0f));
         if (dist > 1.0f)

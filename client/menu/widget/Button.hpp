@@ -31,12 +31,12 @@ namespace Client { namespace Menu { namespace Widget {
         Tools::IRenderer& _renderer;
         std::function<void(void)> _callback;
         std::string _text;
-        Tools::Vector2f _size;
-        Tools::Vector2f _pos;
+        glm::fvec2 _size;
+        glm::fvec2 _pos;
         bool _pressed;
         Tools::Renderers::Utils::Rectangle* _rect;
-        Tools::Matrix4<float> _rectMatrix;
-        Tools::Matrix4<float> _textMatrix;
+        glm::detail::tmat4x4<float> _rectMatrix;
+        glm::detail::tmat4x4<float> _textMatrix;
 
     public:
         Button(Window::InputManager const& inputManager,
@@ -45,16 +45,16 @@ namespace Client { namespace Menu { namespace Widget {
                 ActionBinder& actionBinder,
                 std::function<void(void)>& callback,
                 std::string const& text = "",
-                Tools::Vector2f const& size = Tools::Vector2f(50, 20),
-                Tools::Vector2f const& pos = Tools::Vector2f(0));
+                glm::fvec2 const& size = glm::fvec2(50, 20),
+                glm::fvec2 const& pos = glm::fvec2(0));
         ~Button();
         void Render();
         void SetText(std::string const& text);
-        void SetSize(Tools::Vector2f const& size);
-        void SetPos(Tools::Vector2f const& pos);
+        void SetSize(glm::fvec2 const& size);
+        void SetPos(glm::fvec2 const& pos);
         std::string const& GetText() const { return this->_text; }
-        Tools::Vector2f const& GetSize() const { return this->_size; }
-        Tools::Vector2f const& GetPos() const { return this->_pos; }
+        glm::fvec2 const& GetSize() const { return this->_size; }
+        glm::fvec2 const& GetPos() const { return this->_pos; }
     private:
         void _Update();
         void _PressedBind();

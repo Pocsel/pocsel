@@ -21,7 +21,7 @@ namespace Client { namespace Map {
         _loadingProgression(0),
         _threadPool(game.GetClient().GetThreadPool())
     {
-        Tools::Vector3d coords;
+        glm::dvec3 coords;
         coords.y = 0;
         for (unsigned int x = 0 ; x < 4 ; ++x)
         {
@@ -29,7 +29,7 @@ namespace Client { namespace Map {
             for (unsigned int z = 0 ; z < 4 ; ++z)
             {
                 coords.z = z << (22 - 2);
-                this->_octree[x + z * 4] = new Tools::Octree<ChunkNode>(coords * Common::ChunkSize, (1 << 20) * Common::ChunkSize);
+                this->_octree[x + z * 4] = new Tools::Octree<ChunkNode>(coords * (double)Common::ChunkSize, (1 << 20) * Common::ChunkSize);
             }
         }
 
@@ -170,7 +170,7 @@ namespace Client { namespace Map {
             return;
         unsigned int nbChunks = this->_game.GetClient().GetSettings().chunkViewDistance
             + this->_game.GetClient().GetSettings().chunkCacheArea;
-        Tools::Vector3d pos((Common::GetChunkCoords(playerPosition) - Tools::Vector3u(nbChunks)) * Common::ChunkSize);
+        glm::dvec3 pos((Common::GetChunkCoords(playerPosition) - glm::uvec3(nbChunks)) * Common::ChunkSize);
         Tools::AlignedCube cacheArea(pos, nbChunks * Common::ChunkSize * 2);
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
         {

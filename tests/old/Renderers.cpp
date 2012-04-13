@@ -17,11 +17,11 @@ public:
         r.BeginDraw2D();
 
         static auto font = Tools::Gui::Font(RESOURCES_PATH "/DejaVuSerif-Italic.ttf", 16);
-        r.SetModelMatrix(Tools::Matrix4<float>::CreateScale(1.5f, 1.5f, 1));
+        r.SetModelMatrix(glm::scale<float>(1.5f, 1.5f, 1));
         font.Render(r, Tools::Color4f(1, 1, 1, 1), "Test string. ιΰηθ");
         
 #ifdef DEBUG
-        r.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(0, 36, 0));
+        r.SetModelMatrix(glm::translate<float>(0, 36, 0));
         font.RenderTextureDebug(r);
 #endif
 

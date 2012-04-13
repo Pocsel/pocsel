@@ -224,7 +224,7 @@ namespace Server { namespace Game { namespace Map {
     {
         // les limites du monde lol
 //        this->_spawnPosition = new Common::Position(1000.0);
-//        *this->_spawnPosition += Tools::Vector3d(0.5, 2.5, 0.5);
+//        *this->_spawnPosition += glm::dvec3(0.5, 2.5, 0.5);
 //        for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
 //            (*it)(*this->_spawnPosition);
 //        this->_spawnRequests.clear();
@@ -237,8 +237,8 @@ namespace Server { namespace Game { namespace Map {
                 Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk->GetCube(0, y, 0) - 1];
                 if (biet.solid)
                 {
-                    this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(0, (float)y, 0));
-                    *this->_spawnPosition += Tools::Vector3d(0.5, 4.5, 0.5);
+                    this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + glm::dvec3(0, (float)y, 0));
+                    *this->_spawnPosition += glm::dvec3(0.5, 4.5, 0.5);
                     for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                         (*it)(*this->_spawnPosition);
                     this->_spawnRequests.clear();
@@ -253,8 +253,8 @@ namespace Server { namespace Game { namespace Map {
                             Common::CubeType const& biet = (*this->_conf.cubeTypes)[chunk->GetCube(x, y, 0) - 1];
                             if (biet.solid)
                             {
-                                this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(x, y, 0));
-                                *this->_spawnPosition += Tools::Vector3d(0.5f, 4.5f, 0.5f);
+                                this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + glm::dvec3(x, y, 0));
+                                *this->_spawnPosition += glm::dvec3(0.5f, 4.5f, 0.5f);
                                 for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                                     (*it)(*this->_spawnPosition);
                                 this->_spawnRequests.clear();

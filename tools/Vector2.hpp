@@ -1,3 +1,4 @@
+#if 0
 #ifndef __TOOLS_VECTOR2_HPP__
 #define __TOOLS_VECTOR2_HPP__
 
@@ -16,20 +17,20 @@ namespace Tools {
             struct { T w, h; };
         };
 
-        static T GetDistanceSquared(Vector2<T> const& a, Vector2<T> const& b)
+        static T GetDistanceSquared(glm::detail::tvec2<T> const& a, glm::detail::tvec2<T> const& b)
         {
-            Vector2<T> delta = Vector2<T>(a.x - b.x, a.y - b.y);
+            glm::detail::tvec2<T> delta = glm::detail::tvec2<T>(a.x - b.x, a.y - b.y);
             return delta.x*delta.x + delta.y*delta.y;
         }
-        static T GetDistance(Vector2<T> const& a, Vector2<T> const& b)
+        static T GetDistance(glm::detail::tvec2<T> const& a, glm::detail::tvec2<T> const& b)
         {
             return std::sqrt(GetDistanceSquared(a, b));
         }
-        static bool CheckDistance(Vector2<T> const& a, Vector2<T> const& b, T distance)
+        static bool CheckDistance(glm::detail::tvec2<T> const& a, glm::detail::tvec2<T> const& b, T distance)
         {
             return GetDistanceSquared(a, b) <= distance*distance;
         }
-        static T Dot(Vector2<T> const& a, Vector2<T> const& b)
+        static T Dot(glm::detail::tvec2<T> const& a, glm::detail::tvec2<T> const& b)
         {
             return a.x*b.x + a.y*b.y;
         }
@@ -44,7 +45,7 @@ namespace Tools {
         {
         }
         template<class Tin>
-        explicit Vector2(Vector2<Tin> const& value) : x((T)value.x), y((T)value.y)
+        explicit Vector2(glm::detail::tvec2<Tin> const& value) : x((T)value.x), y((T)value.y)
         {
         }
 
@@ -64,81 +65,82 @@ namespace Tools {
             }
         }
 
-        Vector2<T> operator +(Vector2<T> const& value) const
+        glm::detail::tvec2<T> operator +(glm::detail::tvec2<T> const& value) const
         {
-            return Vector2<T>(this->x + value.x, this->y + value.y);
+            return glm::detail::tvec2<T>(this->x + value.x, this->y + value.y);
         }
-        Vector2<T> operator -(Vector2<T> const& value) const
+        glm::detail::tvec2<T> operator -(glm::detail::tvec2<T> const& value) const
         {
-            return Vector2<T>(this->x - value.x, this->y - value.y);
+            return glm::detail::tvec2<T>(this->x - value.x, this->y - value.y);
         }
-        Vector2<T> operator -() const
+        glm::detail::tvec2<T> operator -() const
         {
-            return Vector2<T>(-this->x, -this->y);
+            return glm::detail::tvec2<T>(-this->x, -this->y);
         }
-        Vector2<T> operator *(T value) const
+        glm::detail::tvec2<T> operator *(T value) const
         {
-            return Vector2<T>(this->x * value, this->y * value);
+            return glm::detail::tvec2<T>(this->x * value, this->y * value);
         }
-        Vector2<T> operator /(T value) const
+        glm::detail::tvec2<T> operator /(T value) const
         {
-            return Vector2<T>(this->x / value, this->y / value);
+            return glm::detail::tvec2<T>(this->x / value, this->y / value);
         }
-        Vector2<T>& operator +=(Vector2<T> const& value)
+        glm::detail::tvec2<T>& operator +=(glm::detail::tvec2<T> const& value)
         {
             this->x += value.x;
             this->y += value.y;
             return *this;
         }
-        Vector2<T>& operator -=(Vector2<T> const& value)
+        glm::detail::tvec2<T>& operator -=(glm::detail::tvec2<T> const& value)
         {
             this->x -= value.x;
             this->y -= value.y;
             return *this;
         }
-        Vector2<T>& operator *=(T value)
+        glm::detail::tvec2<T>& operator *=(T value)
         {
             this->x *= value;
             this->y *= value;
             return *this;
         }
-        Vector2<T>& operator /=(T value)
+        glm::detail::tvec2<T>& operator /=(T value)
         {
             this->x /= value;
             this->y /= value;
             return *this;
         }
-        bool operator ==(Vector2<T> const& value) const
+        bool operator ==(glm::detail::tvec2<T> const& value) const
         {
             return (this->x == value.x && this->y == value.y);
         }
-        bool operator !=(Vector2<T> const& value) const
+        bool operator !=(glm::detail::tvec2<T> const& value) const
         {
             return (this->x != value.x || this->y != value.y);
         }
     };
 
     template<typename ValueType, typename VectorType>
-    inline Vector2<VectorType> operator *(ValueType value, Vector2<VectorType> const& vector)
+    inline glm::detail::tvec2<VectorType> operator *(ValueType value, glm::detail::tvec2<VectorType> const& vector)
     {
-        return Vector2<VectorType>(vector.x * value, vector.y * value);
+        return glm::detail::tvec2<VectorType>(vector.x * value, vector.y * value);
     }
 
     template<typename T>
-    struct Stringify<Tools::Vector2<T>>
+    struct Stringify<glm::detail::tvec2<T>>
     {
-        static inline std::string MakeString(Tools::Vector2<T> const& var)
+        static inline std::string MakeString(glm::detail::tvec2<T> const& var)
         {
             return "(" + ToString(var.x) + ", " + ToString(var.y) + ")";
         }
     };
 
 
-    typedef Tools::Vector2<int> Vector2i;
-    typedef Tools::Vector2<unsigned int> Vector2u;
-    typedef Tools::Vector2<float> Vector2f;
-    typedef Tools::Vector2<double> Vector2d;
+    typedef glm::detail::tvec2<int> glm::ivec2;
+    typedef glm::detail::tvec2<unsigned int> glm::uvec2;
+    typedef glm::detail::tvec2<float> glm::fvec2;
+    typedef glm::detail::tvec2<double> glm::dvec2;
 
 }
 
+#endif
 #endif

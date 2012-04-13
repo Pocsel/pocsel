@@ -35,13 +35,14 @@ namespace Client { namespace Menu {
         Tools::Delete(this->_backRect);
     }
 
-    void LoadingScreen::_Resize(Tools::Vector2u const& sz)
+    void LoadingScreen::_Resize(glm::uvec2 const& sz)
     {
-        Tools::Vector2f size(sz);
-        this->_text1Matrix = Tools::Matrix4<float>::CreateScale(Tools::Vector3f(0.5f)) * Tools::Matrix4<float>::CreateTranslation(10, size.h - 80, 0);
-        this->_text2Matrix = Tools::Matrix4<float>::CreateScale(Tools::Vector3f(0.5f)) * Tools::Matrix4<float>::CreateTranslation(10, size.h - 60, 0);
-        this->_backRectMatrix = Tools::Matrix4<float>::CreateScale(size.w / 2 + 1, size.h / 2 + 1, 1)
-            * Tools::Matrix4<float>::CreateTranslation(size.w / 2, size.h / 2, 0);
+        glm::fvec2 size(sz);
+        this->_text1Matrix = glm::translate<float>(10.0f, size.h - 80.0f, 0.0f) * glm::scale<float>(glm::fvec3(0.5f));
+        this->_text2Matrix = glm::translate<float>(10.0f, size.h - 60.0f, 0.0f) * glm::scale<float>(glm::fvec3(0.5f));
+        this->_backRectMatrix =
+            glm::translate<float>(size.w / 2, size.h / 2, 0)
+            * glm::scale<float>(size.w / 2 + 1, size.h / 2 + 1, 1);
     }
 
     void LoadingScreen::Render(std::string const& status, float progress)
@@ -52,8 +53,10 @@ namespace Client { namespace Menu {
             this->_menu.GetRectShader().BeginPass();
             this->_renderer.SetModelMatrix(this->_backRectMatrix);
             this->_backRect->Render();
-            this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateScale((float)(this->_client.GetWindow().GetSize().w / 2) * progress, 10, 1)
-                * Tools::Matrix4<float>::CreateTranslation((float)(this->_client.GetWindow().GetSize().w / 2) * progress, (float)this->_client.GetWindow().GetSize().h - 10, 0));
+            this->_renderer.SetModelMatrix(
+                    glm::translate<float>((float)(this->_client.GetWindow().GetSize().w / 2) * progress, (float)this->_client.GetWindow().GetSize().h - 10, 0)
+                    * glm::scale<float>((float)(this->_client.GetWindow().GetSize().w / 2) * progress, 10, 1)
+                    );
             this->_barRect->Render();
         } while (this->_menu.GetRectShader().EndPass());
 

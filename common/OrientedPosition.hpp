@@ -11,7 +11,7 @@ namespace Common {
         Common::Position position;
         float const theta;
         float const phi;
-        Tools::Vector3f const direction;
+        glm::fvec3 const direction;
 
     public:
         OrientedPosition() :
@@ -40,7 +40,7 @@ namespace Common {
             this->position = right.position;
             const_cast<float&>(this->theta) = right.theta;
             const_cast<float&>(this->phi) = right.phi;
-            const_cast<Tools::Vector3f&>(this->direction) = right.direction;
+            const_cast<glm::fvec3&>(this->direction) = right.direction;
             return *this;
         }
 
@@ -55,14 +55,14 @@ namespace Common {
             float costheta = std::cos(this->theta);
             float sintheta = std::sin(this->theta);
 
-            Tools::Vector3f& dir = const_cast<Tools::Vector3f&>(this->direction);
+            glm::fvec3& dir = const_cast<glm::fvec3&>(this->direction);
             dir.x = sinphi * costheta;
             dir.y = cosphi;
             dir.z = sinphi * sintheta;
-            dir.Normalize();
+            dir = glm::normalize(dir);
         }
 
-        void Rotate(Tools::Vector2f const& delta)
+        void Rotate(glm::fvec2 const& delta)
         {
             this->Rotate(delta.x, delta.y);
         }
