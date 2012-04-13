@@ -68,6 +68,8 @@
 #include "tools/Delete.hpp"
 #include "tools/ToString.hpp"
 
+#include "glm/all.hpp"
+
 #ifdef WIN32
 // warning this utilisé dans le constructeur
 #pragma warning(disable: 4355)

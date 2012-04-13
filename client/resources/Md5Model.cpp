@@ -43,7 +43,7 @@ namespace Client { namespace Resources {
         std::string junk;   // Read junk from the file
 
         boost::filesystem::ifstream file(filePath);
-        int fileLength = Tools::Filesystem::GetFileLength(file);
+        int fileLength = (int)Tools::Filesystem::GetFileLength(file);
         if (fileLength <= 0)
         {
             Tools::error << "Md5Model::LoadModel: file " << filePath << " is empty\n";

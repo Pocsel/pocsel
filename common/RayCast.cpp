@@ -259,15 +259,15 @@ namespace Common {
 
         for (x = -distance; x < distance;)
         {
-            cx = (x + pos.x) / (int)Common::ChunkSize;
+            cx = (int)((x + pos.x) / (int)Common::ChunkSize);
 
             for (y = -distance; y < distance;)
             {
-                cy = (y + pos.y) / (int)Common::ChunkSize;
+                cy = (int)((y + pos.y) / (int)Common::ChunkSize);
 
                 for (z = -distance; z < distance;)
                 {
-                    cz = (z + pos.z) / (int)Common::ChunkSize;
+                    cz = (int)((z + pos.z) / (int)Common::ChunkSize);
 
                     int chunkPos = __ChunkInSphere(BigChunk::CoordsType(cx, cy, cz), pos, distance);
                     if (chunkPos == 1)
@@ -284,17 +284,17 @@ namespace Common {
                     }
 
                     if (z == -distance)
-                        z += (int)ChunkSize - (int)__GetCubePos(z + (int)GetCubeCoords(pos).z);
+                        z += (int)ChunkSize - (int)__GetCubePos((int)z + (int)GetCubeCoords(pos).z);
                     else
                         z += ChunkSize;
                 }
                 if (y == -distance)
-                    y += (int)ChunkSize - (int)__GetCubePos(y + (int)GetCubeCoords(pos).y);
+                    y += (int)ChunkSize - (int)__GetCubePos((int)y + (int)GetCubeCoords(pos).y);
                 else
                     y += ChunkSize;
             }
             if (x == -distance)
-                x += (int)ChunkSize - (int)__GetCubePos(x + (int)GetCubeCoords(pos).x);
+                x += (int)ChunkSize - (int)__GetCubePos((int)x + (int)GetCubeCoords(pos).x);
             else
                 x += ChunkSize;
         }
@@ -362,15 +362,15 @@ namespace Common {
 
         for (x = -distance; x < distance;)
         {
-            cx = (x + pos.x) / (int)Common::ChunkSize;
+            cx = (int)((x + pos.x) / (int)Common::ChunkSize);
 
             for (y = -distance; y < distance;)
             {
-                cy = (y + pos.y) / (int)Common::ChunkSize;
+                cy = (int)((y + pos.y) / (int)Common::ChunkSize);
 
                 for (z = -distance; z < distance;)
                 {
-                    cz = (z + pos.z) / (int)Common::ChunkSize;
+                    cz = (int)((z + pos.z) / (int)Common::ChunkSize);
 
                     BaseChunk::IdType cId = BaseChunk::CoordsToId(cx, cy, cz);
 
@@ -382,17 +382,17 @@ namespace Common {
                     ++count;
 
                     if (z == -distance)
-                        z += (int)ChunkSize - (int)__GetCubePos(z + (int)GetCubeCoords(pos).z);
+                        z += (int)ChunkSize - (int)__GetCubePos((int)z + (int)GetCubeCoords(pos).z);
                     else
                         z += ChunkSize;
                 }
                 if (y == -distance)
-                    y += (int)ChunkSize - (int)__GetCubePos(y + (int)GetCubeCoords(pos).y);
+                    y += (int)ChunkSize - (int)__GetCubePos((int)y + (int)GetCubeCoords(pos).y);
                 else
                     y += ChunkSize;
             }
             if (x == -distance)
-                x += (int)ChunkSize - (int)__GetCubePos(x + (int)GetCubeCoords(pos).x);
+                x += (int)ChunkSize - (int)__GetCubePos((int)x + (int)GetCubeCoords(pos).x);
             else
                 x += ChunkSize;
         }
@@ -424,10 +424,10 @@ namespace Common {
 
         for (zx = 0; zx < (int)ChunkSize; ++zx)
         {
-            dx = std::abs((cx * (int)ChunkSize + zx) - pos.x);
+            dx = (int)std::abs((cx * (int)ChunkSize + zx) - pos.x);
             for (zy = 0; zy < (int)ChunkSize; ++zy)
             {
-                dy = std::abs((cy * (int)ChunkSize + zy) - pos.y);
+                dy = (int)std::abs((cy * (int)ChunkSize + zy) - pos.y);
                 for (zz = 0; zz < (int)ChunkSize; ++zz)
                 {
                     if (((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
@@ -443,7 +443,7 @@ namespace Common {
                             ((zy == 0 || zy == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1))
                        )
                         continue;
-                    dz = std::abs((cz * (int)ChunkSize + zz) - pos.z);
+                    dz = (int)std::abs((cz * (int)ChunkSize + zz) - pos.z);
                     if (dx <= distance && dy <= distance && dz <= distance)
                         res.push_back(BaseChunk::CoordsType(zx, zy, zz));
                 }
