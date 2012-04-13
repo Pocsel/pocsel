@@ -15,7 +15,10 @@ namespace Common {
     class Packet : public Tools::ByteArray
     {
     public:
-        static const size_t maxSize = (1 << 16) - 2;
+        enum {
+            SizeBytes = 2,
+            MaxSize = (1 << 16) // -SizeBytes
+        };
     public:
         explicit Packet();
         explicit Packet(Packet const& packet);
