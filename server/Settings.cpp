@@ -20,6 +20,10 @@ namespace Server {
              "On which UDP port to listen")
             ("host", boost::program_options::value<std::string>()->default_value("0.0.0.0"),
              "On which address to bind")
+            ("rconport", boost::program_options::value<std::string>()->default_value("8174"),
+             "On which port to listen for rcon administration")
+            ("rconhost", boost::program_options::value<std::string>()->default_value("0.0.0.0"),
+             "On which address to bind for rcon administration")
             ("version,v",
              "Show version and exit")
             ("help,h",
@@ -53,9 +57,11 @@ namespace Server {
             exit(boost::exit_success);
         }
 
-        this->host = vm["host"].as<std::string>();
         this->port = vm["port"].as<std::string>();
         this->udpPort = vm["udpport"].as<std::string>();
+        this->host = vm["host"].as<std::string>();
+        this->rconPort = vm["rconport"].as<std::string>();
+        this->rconHost = vm["rconhost"].as<std::string>();
         this->worldFile = vm["world"].as<std::string>();
         this->worldDir = this->worldFile.parent_path();
         Tools::log << "World directory: " << this->worldDir.string() << std::endl;

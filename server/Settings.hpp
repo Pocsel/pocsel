@@ -8,9 +8,11 @@ namespace Server {
     public:
         boost::filesystem::path worldFile;
         boost::filesystem::path worldDir;
-        std::string host;
         std::string port;
         std::string udpPort;
+        std::string host;
+        std::string rconPort;
+        std::string rconHost;
 
     public:
         Settings(int ac, char** av);
