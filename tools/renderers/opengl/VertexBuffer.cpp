@@ -67,6 +67,19 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 break;
 
             case VertexAttributeUsage::TexCoord:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
+                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
+                GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
+                break;
+
+            case VertexAttributeUsage::Custom1:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE1_ARB));
+                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
+                GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
+                break;
+
+            case VertexAttributeUsage::Custom2:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE2_ARB));
                 GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
                 GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
                 break;
@@ -101,7 +114,18 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 break;
 
             case VertexAttributeUsage::TexCoord:
-                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
+                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
+                break;
+
+            case VertexAttributeUsage::Custom1:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE1_ARB));
+                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
+                break;
+
+            case VertexAttributeUsage::Custom2:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE2_ARB));
+                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
                 break;
 
             default:
@@ -109,6 +133,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 break;
             }
         }
+        GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
     }
 
 }}}

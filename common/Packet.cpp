@@ -5,17 +5,17 @@ namespace Common {
     Packet::Packet() :
         Tools::ByteArray()
     {
-        this->_data = this->_data + 2;
-        this->_allocSize -= 2;
+        this->_data = this->_data + SizeBytes;
+        this->_allocSize -= SizeBytes;
     }
 
     Packet::Packet(Packet const& packet) :
         Tools::ByteArray()
     {
-        this->_data = this->_data + 2;
-        this->_allocSize -= 2;
+        this->_data = this->_data + SizeBytes;
+        this->_allocSize -= SizeBytes;
         this->_Resize(packet._allocSize);
-        ::memcpy(this->_data - 2, packet._data - 2, packet._size + 2);
+        ::memcpy(this->_data - SizeBytes, packet._data - SizeBytes, packet._size + SizeBytes);
         this->_allocSize = packet._allocSize;
         this->_size = packet._size;
         this->_offset = packet._offset;
@@ -23,37 +23,38 @@ namespace Common {
 
     Packet::~Packet()
     {
-        this->_data -= 2;
+        this->_data -= SizeBytes;
     }
 
     char const* Packet::GetCompleteData() const
     {
         const_cast<Packet*>(this)->_WriteSize();
-        return this->_data - 2;
+        return this->_data - SizeBytes;
     }
 
     Uint16 Packet::GetCompleteSize() const
     {
-        return this->_size + 2;
+        return this->_size + SizeBytes;
     }
 
     void Packet::_Resize(Uint32 target)
     {
-        if (target > maxSize)
+        if (target > MaxSize)
             throw std::runtime_error("Trying to create a too big packet");
 
-        char* tmp = this->_data - 2;
-        this->_data = new char[target + 2];
-        std::memcpy(this->_data, tmp, this->_allocSize + 2);
+        char* tmp = this->_data - SizeBytes;
+        this->_data = new char[target + SizeBytes];
+        std::memcpy(this->_data, tmp, this->_allocSize + SizeBytes);
         this->_allocSize = target;
         Tools::DeleteTab(tmp);
-        this->_data = this->_data + 2;
+        this->_data = this->_data + SizeBytes;
     }
 
     void Packet::_WriteSize()
     {
-        assert(this->_size <= maxSize);
-        char* tmp = this->_data - 2;
+        static_assert(SizeBytes == 2, "faut changer du code ici si on change la taille des packets");
+        assert(this->_size <= MaxSize);
+        char* tmp = this->_data - SizeBytes;
         tmp[0] = (this->_size & 0xFF00) >> 8;
         tmp[1] = this->_size & 0x00FF;
     }

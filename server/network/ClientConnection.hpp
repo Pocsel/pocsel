@@ -24,16 +24,12 @@ namespace Server { namespace Network {
         typedef std::function<void(Uint32, std::unique_ptr<Tools::ByteArray>&)> PacketCallback;
 
     private:
-        static const unsigned int _bufferSize = 8192;
-
         Network& _network;
         Uint32 _id;
         boost::asio::io_service& _ioService;
         boost::asio::ip::tcp::socket* _socket;
-        Uint8* _data;
-        size_t _size;
-        size_t _offset;
-        size_t _toRead;
+        std::vector<char> _packetSizeBuffer;
+        std::vector<char> _packetContentBuffer;
         std::queue<std::unique_ptr<Common::Packet>> _toSendPackets;
         std::queue<std::unique_ptr<UdpPacket>> _toSendUdpPackets;
         bool _connected;
@@ -81,13 +77,13 @@ namespace Server { namespace Network {
         void _HandleError(boost::system::error_code const& error);
         void _SendPacket(std::shared_ptr<Common::Packet> packet);
         void _SendUdpPacket(std::shared_ptr<UdpPacket> packet);
-        void _ConnectRead();
+        void _ConnectReadPacketSize();
+        void _ConnectReadPacketContent(std::size_t size);
         void _ConnectWrite();
-        void _HandleRead(boost::system::error_code const error,
-                         std::size_t transferredBytes);
+        void _HandleReadPacketSize(boost::system::error_code const& error);
+        void _HandleReadPacketContent(boost::system::error_code const& error);
         void _HandleWrite(boost::shared_ptr<Common::Packet> packetSent,
-                          boost::system::error_code const error,
-                          std::size_t bytes_transferred);
+                          boost::system::error_code const& error);
 
         void _PassThrough();
         void _TimedDispatch(std::function<void(void)> fx, Uint32 ms);

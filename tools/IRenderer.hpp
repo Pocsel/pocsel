@@ -207,6 +207,7 @@ namespace Tools {
             virtual void Set(Vector2<float> const& vector) = 0;
             virtual void Set(Vector3<float> const& vector) = 0;
             virtual void Set(Matrix4<float> const& matrix) = 0;
+            virtual void Set(std::vector<glm::mat4x4> const& matrices) = 0;
             virtual void Set(ITexture2D& texture) = 0;
 
         protected:

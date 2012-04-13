@@ -27,15 +27,12 @@ namespace Server { namespace Network {
         _id(id),
         _ioService(socket->get_io_service()),
         _socket(socket),
-        _data(new Uint8[_bufferSize]),
-        _size(_bufferSize),
-        _offset(0),
-        _toRead(0),
         _connected(true),
         _writeConnected(false),
         _errorCallback(errorCallback),
         _packetCallback(packetCallback)
     {
+        _packetSizeBuffer.resize(Common::Packet::SizeBytes);
         _udpStatus.udpReadySent = false;
         _udpStatus.udpReady = false;
         _udpStatus.endpointKnown = false;
@@ -46,7 +43,6 @@ namespace Server { namespace Network {
 
     ClientConnection::~ClientConnection()
     {
-        Tools::DeleteTab(this->_data);
         Tools::Delete(this->_socket);
     }
 
@@ -78,7 +74,7 @@ namespace Server { namespace Network {
     void ClientConnection::ConnectRead()
     {
         std::function<void(void)> fx =
-            std::bind(&ClientConnection::_ConnectRead, this->shared_from_this());
+            std::bind(&ClientConnection::_ConnectReadPacketSize, this->shared_from_this());
         this->_ioService.dispatch(fx);
     }
 
@@ -230,20 +226,35 @@ namespace Server { namespace Network {
         this->_network.SendUdpPacket(this->_id);
     }
 
-    void ClientConnection::_ConnectRead()
+    void ClientConnection::_ConnectReadPacketSize()
     {
         if (!this->_connected || !this->_socket)
             return;
         boost::asio::async_read(
             *this->_socket,
-            boost::asio::buffer(this->_data + this->_offset, this->_size - this->_offset),
-            boost::asio::transfer_at_least(this->_toRead == 0 ? 2 : this->_toRead),
+            boost::asio::buffer(this->_packetSizeBuffer),
             boost::bind(
-                &ClientConnection::_HandleRead, this->shared_from_this(),
-                boost::asio::placeholders::error,
-                boost::asio::placeholders::bytes_transferred
-            )
-        );
+                &ClientConnection::_HandleReadPacketSize,
+                this->shared_from_this(),
+                boost::asio::placeholders::error
+                )
+            );
+    }
+
+    void ClientConnection::_ConnectReadPacketContent(std::size_t size)
+    {
+        if (!this->_connected || !this->_socket)
+            return;
+        this->_packetContentBuffer.resize(size);
+        boost::asio::async_read(
+                *this->_socket,
+                boost::asio::buffer(this->_packetContentBuffer),
+                boost::bind(
+                    &ClientConnection::_HandleReadPacketContent,
+                    this->shared_from_this(),
+                    boost::asio::placeholders::error
+                    )
+                );
     }
 
     void ClientConnection::_ConnectWrite()
@@ -263,78 +274,40 @@ namespace Server { namespace Network {
             boost::bind(
                 &ClientConnection::_HandleWrite, this->shared_from_this(),
                 boost::shared_ptr<Common::Packet>(packet.release()),
-                boost::asio::placeholders::error,
-                boost::asio::placeholders::bytes_transferred
+                boost::asio::placeholders::error
             )
         );
     }
 
-    void ClientConnection::_HandleRead(boost::system::error_code const error,
-                                       std::size_t transferredBytes)
+    void ClientConnection::_HandleReadPacketSize(const boost::system::error_code& error)
     {
-        std::list<std::unique_ptr<Tools::ByteArray>> packets;
-        if (!error)
-        {
-            assert(transferredBytes >= 2);
-            while (transferredBytes > 0)
-            {
-                if (this->_toRead == 0)
-                {
-                    this->_toRead = Common::ArrayToUint16(this->_data + this->_offset);
-                    if (this->_toRead > 0)
-                    {
-                        if (this->_toRead > this->_size)
-                        {
-                            this->_size += this->_toRead * 2;
-                            Uint8* data = new Uint8[this->_size];
-                            std::memcpy(data, this->_data, transferredBytes);
-                            Tools::DeleteTab(this->_data);
-                            this->_data = data;
-                        }
-                    }
-                    else
-                        Tools::log << "Null sized packet received.\n";
-                    transferredBytes -= 2;
-                    this->_offset += 2;
-                }
-                else
-                {
-                    if (transferredBytes >= this->_toRead)
-                    {
-                        Tools::ByteArray* packet = new Tools::ByteArray();
-                        packets.push_back(std::unique_ptr<Tools::ByteArray>(packet));
-                        this->_offset += this->_toRead;
-                        transferredBytes -= this->_toRead;
-                        this->_toRead = 0;
-                        packet->SetData((char*)(this->_data + 2), static_cast<Uint16>(this->_offset - 2));
-                        if (transferredBytes > 0)
-                            std::memmove(this->_data, this->_data + this->_offset, transferredBytes);
-                        this->_offset = 0;
-                    }
-                    else
-                    {
-                        this->_offset += transferredBytes;
-                        this->_toRead -= transferredBytes;
-                        transferredBytes = 0;
-                        break;
-                    }
-                }
-            }
-            this->_ConnectRead();
-        }
-        else
+        if (error)
         {
             this->_HandleError(error);
             return;
         }
+        static_assert(Common::Packet::SizeBytes == 2, "il faut changer ce code si on change la taille des packets");
+        this->_ConnectReadPacketContent(ntohs(*reinterpret_cast<Uint16*>(this->_packetSizeBuffer.data())));
+    }
 
-        for (auto it = packets.begin(), ite = packets.end(); it != ite; ++it)
-            this->HandlePacket(*it);
+    void ClientConnection::_HandleReadPacketContent(const boost::system::error_code& error)
+    {
+        if (error)
+        {
+            this->_HandleError(error);
+            return;
+        }
+        else
+        {
+            std::unique_ptr<Tools::ByteArray> p(new Tools::ByteArray());
+            p->SetData(this->_packetContentBuffer.data(), (Uint32)this->_packetContentBuffer.size());
+            this->HandlePacket(p);
+            this->_ConnectReadPacketSize();
+        }
     }
 
     void ClientConnection::_HandleWrite(boost::shared_ptr<Common::Packet> /*packetSent*/,
-                                        boost::system::error_code const error,
-                                        std::size_t /*bytes_transferred*/)
+                                        boost::system::error_code const& error)
     {
         this->_writeConnected = false;
         if (!error)

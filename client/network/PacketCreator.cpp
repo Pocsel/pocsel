@@ -61,7 +61,7 @@ namespace Client { namespace Network {
         std::unique_ptr<Common::Packet> p(new Common::Packet());
         p->Write(Protocol::ClientToServer::NeedChunks);
 
-        for (; !chunkIds.empty() && (p->GetSize() + sizeof(Common::BaseChunk::IdType)) < Common::Packet::maxSize; chunkIds.pop_back())
+        for (; !chunkIds.empty() && (p->GetSize() + sizeof(Common::BaseChunk::IdType)) < Common::Packet::MaxSize; chunkIds.pop_back())
             p->Write(chunkIds.back());
         return p;
     }

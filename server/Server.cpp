@@ -7,6 +7,7 @@
 #include "server/database/ResourceManager.hpp"
 #include "server/clientmanagement/ClientManager.hpp"
 #include "server/game/Game.hpp"
+#include "server/rcon/Rcon.hpp"
 
 namespace Server {
 
@@ -18,6 +19,7 @@ namespace Server {
         this->_resourceManager = new Database::ResourceManager(*this);
         this->_clientManager = new ClientManagement::ClientManager(*this, *this->_admMessageQueue);
         this->_game = new Game::Game(*this, *this->_admMessageQueue);
+        this->_rcon = new Rcon::Rcon(*this);
 
         Network::Network::NewConnectionHandler
             nch(std::bind(&ClientManagement::ClientManager::HandleNewClient,
@@ -43,6 +45,7 @@ namespace Server {
         Tools::Delete(this->_game);
         Tools::Delete(this->_clientManager);
         Tools::Delete(this->_resourceManager);
+        Tools::Delete(this->_rcon);
         Tools::Delete(this->_network);
         Tools::Delete(this->_admMessageQueue);
     }
@@ -54,6 +57,7 @@ namespace Server {
         this->_clientManager->Start();
         this->_game->Start();
         this->_admMessageQueue->Start();
+        this->_rcon->Start();
         this->_network->Run();
 
         return 0;
@@ -67,6 +71,7 @@ namespace Server {
         this->_game->Stop();
         this->_admMessageQueue->Stop();
         this->_network->Stop();
+        this->_rcon->Stop();
     }
 
 }

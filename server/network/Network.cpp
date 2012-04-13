@@ -24,7 +24,9 @@ namespace Server { namespace Network {
         _data(new Uint8[_buffSize])
     {
         Tools::debug << "Network::Network()\n";
-        Settings const& settings = server.GetSettings();
+        Settings const& settings = this->_server.GetSettings();
+
+        // TCP!
         try
         {
             boost::asio::ip::tcp::resolver resolver(this->_ioService);
@@ -54,6 +56,7 @@ namespace Server { namespace Network {
             throw;
         }
 
+        // UDP!
         try
         {
             boost::asio::ip::udp::resolver udpResolver(this->_ioService);
@@ -130,7 +133,6 @@ namespace Server { namespace Network {
         if (!e)
         {
             Tools::log << "New connection.\n";
-
             Uint32 newId = this->_GetNextId();
             boost::shared_ptr<ClientConnection> newClientConnection(
                 new ClientConnection(
@@ -145,10 +147,9 @@ namespace Server { namespace Network {
         }
         else
         {
-            Tools::error << "New connection has error.\n";
+            Tools::error << "Error in new connection: " << e.message() << std::endl;
             Tools::Delete(this->_newConnection);
         }
-
         this->_ConnectAccept();
     }
 

@@ -1,0 +1,104 @@
+#ifndef MAX_BONES
+#define MAX_BONES 58
+#endif
+
+float4x4 mvp : WorldViewProjection;
+
+#ifdef DIRECTX
+sampler2D baseTex = sampler_state
+{
+    MinFilter = Linear;
+    MagFilter = Linear;
+    MipFilter = Linear;
+};
+#else
+sampler2D baseTex = sampler_state
+{
+    minFilter = Linear;
+    magFilter = Linear;
+};
+#endif
+
+float4x4 boneMatrix[MAX_BONES];
+
+void vs(
+        float4   position    : POSITION,
+        float3   normal      : NORMAL,
+        float2   texCoord    : TEXCOORD0,
+        float4   weight      : TEXCOORD1,
+        float4   matrixIndex : TEXCOORD2,
+
+        out float4   oPosition   : POSITION,
+        out float4   objPos      : TEXCOORD0,
+        out float4   objNormal   : TEXCOORD1,
+        out float2   oTexCoord   : TEXCOORD2
+        )
+{
+    float4x4 matTransform = boneMatrix[matrixIndex.x] * weight.x;
+    matTransform += boneMatrix[matrixIndex.y] * weight.y;
+    matTransform += boneMatrix[matrixIndex.z] * weight.z;
+    float finalWeight = 1.0f - ( weight.x + weight.y + weight.z );
+    matTransform += boneMatrix[matrixIndex.w] * finalWeight;
+
+    objPos = mul(matTransform, position);
+    objNormal = mul(matTransform, float4(normal, 0.0f));
+
+#ifdef DIRECTX
+    oTexCoord = texCoord;
+#else
+    oTexCoord = float2(texCoord.x, -texCoord.y);
+#endif
+
+    oPosition = mul(mvp, objPos);
+}
+
+float4 fs(
+        float4    position  : TEXCOORD0,
+        float4    normal    : TEXCOORD1,
+        float2    texCoord  : TEXCOORD2
+        ) : COLOR
+{
+    return tex2D(baseTex, texCoord);
+}
+
+#ifndef DIRECTX
+
+technique tech_glsl
+{
+    pass p0
+    {
+        VertexProgram = compile glslv vs();
+        FragmentProgram = compile glslf fs();
+    }
+}
+technique tech
+{
+    pass p0
+    {
+        VertexProgram = compile arbvp1 vs();
+        FragmentProgram = compile arbfp1 fs();
+    }
+}
+
+#else
+
+technique tech
+{
+    pass p0
+    {
+        VertexShader = compile vs_2_0 vs();
+        PixelShader = compile ps_2_0 fs();
+    }
+}
+
+#endif
+
+
+//technique main
+//{
+//    pass p0
+//    {
+//        VertexProgram = compile latest C6E5v_skin4m( gBoneMatrix, gModelViewProj );
+//        FragmentProgram = compile latest C5E3f_basicLight( baseSampler, gGlobalAmbient, gLight, gMaterial, gEyePosition );
+//    }
+//}
