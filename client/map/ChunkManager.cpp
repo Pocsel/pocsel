@@ -151,11 +151,6 @@ namespace Client { namespace Map {
         this->_oldPosition = playerPosition;
     }
 
-    void ChunkManager::Render()
-    {
-        this->_chunkRenderer.Render();
-    }
-
     std::shared_ptr<Chunk> ChunkManager::GetChunk(Common::BaseChunk::IdType id) const
     {
         auto it = this->_chunks.find(id);

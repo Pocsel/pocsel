@@ -15,15 +15,16 @@ namespace Tools {
         static void RemoveQuotes(std::string& str)
         {
             size_t n;
-            while ( ( n = str.find('\"') ) != std::string::npos ) str.erase(n,1);
+            while ((n = str.find('\"')) != std::string::npos)
+                str.erase(n, 1);
         }
 
         // Get's the size of the file in bytes.
-        static int GetFileLength(std::istream& file)
+        static std::streamoff GetFileLength(std::istream& file)
         {
-            int pos = file.tellg();
-            file.seekg(0, std::ios::end );
-            int length = file.tellg();
+            auto pos = file.tellg();
+            file.seekg(0, std::ios::end);
+            auto length = file.tellg();
             // Restore the position of the get pointer
             file.seekg(pos);
 
@@ -33,7 +34,7 @@ namespace Tools {
         // Ignore everything else that comes on the line, up to 'length' characters.
         static void IgnoreLine(std::istream& file, int length)
         {
-            file.ignore( length, '\n' );
+            file.ignore(length, '\n');
         }
 
         static void ReplaceBackslashes(std::string& str)
@@ -46,7 +47,6 @@ namespace Tools {
                     str.replace(i, 1, "/");
             }
         }
-
 
     };
 

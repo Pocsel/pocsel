@@ -55,7 +55,8 @@ namespace Client { namespace Map {
         void AddChunk(std::unique_ptr<Chunk>&& chunk);
         void UpdateLoading();
         void Update(Uint64 totalTime, Common::Position const& playerPosition);
-        void Render();
+        void Render() { this->_chunkRenderer.Render(); }
+        void RenderAlpha() { this->_chunkRenderer.RenderAlpha(); }
 
         template<class TFunc>
         void ForeachIn(Tools::AbstractCollider const& container, TFunc function);

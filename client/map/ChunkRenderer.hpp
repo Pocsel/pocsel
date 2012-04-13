@@ -2,12 +2,12 @@
 #define __CLIENT_MAP_CHUNKRENDERER_HPP__
 
 #include "common/BaseChunk.hpp"
-#include "common/CubeType.hpp"
 #include "tools/IRenderer.hpp"
 #include "client/resources/ITexture.hpp"
 
 namespace Client {
     namespace Game {
+        class CubeType;
         class CubeTypeManager;
         class Game;
     }
@@ -15,7 +15,7 @@ namespace Client {
         class Chunk;
         class Map;
     }
-    namespace Resource {
+    namespace Resources {
         class Effect;
     }
 }
@@ -31,7 +31,8 @@ namespace Client { namespace Map {
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
         std::map<Uint32, std::unique_ptr<Resources::ITexture>> _textures;
-        std::map<Resource::Effect*, std::list<Common::BaseChunk::CubeType>> _cubeTypes;
+        std::map<Resources::Effect*, std::map<Uint32, Resources::ITexture*>> _cubeTypes;
+        std::map<Uint32, std::multimap<double, Chunk*>> _transparentChunks;
 
     public:
         ChunkRenderer(Game::Game& game);
@@ -40,6 +41,7 @@ namespace Client { namespace Map {
         bool RefreshGraphics(Chunk& chunk);
         void Update(Uint64 totalTime);
         void Render();
+        void RenderAlpha();
         Tools::Renderers::ITexture2D& GetTexture(Uint32 id)
         {
             auto it = this->_textures.find(id);

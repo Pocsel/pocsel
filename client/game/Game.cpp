@@ -89,9 +89,12 @@ namespace Client { namespace Game {
         this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
         this->_renderer.BeginDraw();
+
         this->_map->GetChunkManager().Render();
         this->_itemManager->Render();
+        this->_map->GetChunkManager().RenderAlpha();
         this->_player->Render();
+
         this->_renderer.EndDraw();
 
         // XXX

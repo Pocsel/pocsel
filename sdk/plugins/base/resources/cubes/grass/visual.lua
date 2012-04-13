@@ -1,6 +1,6 @@
 textures = {
     top = "cubes/grass/top.png",
-    bottom = "cubes/grass/side.png",
+    bottom = "cubes/dirt/texture.png",
     left = "cubes/grass/side.png",
     right = "cubes/grass/side.png",
     front = "cubes/grass/side.png",
