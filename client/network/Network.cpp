@@ -27,7 +27,7 @@ namespace Client { namespace Network {
         this->_udpStatus.ptOkSent = false;
 
         this->_sizeBuffer.resize(2);
-        this->_udpDataBuffer.resize(Common::Packet::maxSize);
+        this->_udpDataBuffer.resize(Common::Packet::MaxSize);
     }
 
     float Network::GetLoadingProgression()

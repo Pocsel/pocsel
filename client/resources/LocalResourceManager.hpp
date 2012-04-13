@@ -39,6 +39,8 @@ namespace Client { namespace Resources {
             Tools::Renderers::IShaderProgram& GetShader(std::string const& path);
             Md5Model* GetMd5Model(std::string const& path);
 
+            Tools::IRenderer& GetRenderer() { return this->_renderer; }
+
         private:
             void _InitErrorTexture();
     };

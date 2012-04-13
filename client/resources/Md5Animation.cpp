@@ -167,6 +167,7 @@ namespace Client { namespace Resources {
 
         // Make sure there are enough joints for the animated skeleton.
         this->_animatedSkeleton.joints.assign(this->_numJoints, SkeletonJoint());
+        this->_animatedSkeleton.boneMatrices.assign(this->_numJoints, glm::mat4x4(1.0));
 
         this->_frameDuration = 1.0f / (float)this->_framRate;
         this->_animDuration = ( this->_frameDuration * (float)this->_numFrames );
@@ -259,6 +260,13 @@ namespace Client { namespace Resources {
             }
 
             skeleton.joints.push_back(animatedJoint);
+
+            // Build the bone matrix for GPU skinning.
+            glm::mat4x4 boneTranslate = glm::translate(animatedJoint.pos);
+            glm::mat4x4 boneRotate = glm::toMat4(animatedJoint.orient);
+            glm::mat4x4 boneMatrix = boneTranslate * boneRotate;
+
+            skeleton.boneMatrices.push_back(boneMatrix);
         }
 
         skeletons.push_back(skeleton);
@@ -290,9 +298,11 @@ namespace Client { namespace Resources {
 
     void Md5Animation::_InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton const& skeleton0, FrameSkeleton const& skeleton1, float interpolate)
     {
-        for ( int i = 0; i < this->_numJoints; ++i )
+        for (int i = 0; i < this->_numJoints; ++i)
         {
             SkeletonJoint& finalJoint = finalSkeleton.joints[i];
+            glm::mat4x4& finalMatrix = finalSkeleton.boneMatrices[i];
+
             SkeletonJoint const& joint0 = skeleton0.joints[i];
             SkeletonJoint const& joint1 = skeleton1.joints[i];
 
@@ -300,6 +310,9 @@ namespace Client { namespace Resources {
 
             finalJoint.pos = glm::lerp(joint0.pos, joint1.pos, interpolate);
             finalJoint.orient = glm::shortMix(joint0.orient, joint1.orient, interpolate);
+
+            // Build the bone matrix for GPU skinning.
+            finalMatrix = glm::translate(finalJoint.pos) * glm::toMat4(finalJoint.orient);
         }
     }
 

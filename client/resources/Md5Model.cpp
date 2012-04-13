@@ -72,6 +72,7 @@ namespace Client { namespace Resources {
             {
                 file >> this->_numJoints;
                 this->_joints.reserve(this->_numJoints);
+                this->_animatedBones.assign(this->_numJoints, glm::mat4x4(1.0f));
             }
             else if (param == "numMeshes")
             {
@@ -97,6 +98,8 @@ namespace Client { namespace Resources {
                     Tools::Filesystem::IgnoreLine(file, fileLength);
                 }
                 file >> junk; // Read the '}' character
+
+                this->_BuildBindPose(this->_joints);
             }
             else if (param == "mesh")
             {
@@ -151,6 +154,8 @@ namespace Client { namespace Resources {
 
                             Tools::Filesystem::IgnoreLine(file, fileLength);
 
+                            vert.tex0.y = 1.0f - vert.tex0.y;
+
                             mesh.verts.push_back(vert);
                             mesh.tex2DBuffer.push_back(vert.tex0);
                         }
@@ -168,9 +173,9 @@ namespace Client { namespace Resources {
                             Tools::Filesystem::IgnoreLine(file, fileLength);
 
                             mesh.tris.push_back(tri);
-                            mesh.indexBuffer.push_back((GLuint)tri.indices[0]);
-                            mesh.indexBuffer.push_back((GLuint)tri.indices[1]);
-                            mesh.indexBuffer.push_back((GLuint)tri.indices[2]);
+                            mesh.indexes.push_back((GLuint)tri.indices[0]);
+                            mesh.indexes.push_back((GLuint)tri.indices[1]);
+                            mesh.indexes.push_back((GLuint)tri.indices[2]);
                         }
                     }
                     else if (param == "numweights")
@@ -197,6 +202,7 @@ namespace Client { namespace Resources {
 
                 this->_PrepareMesh(mesh);
                 this->_PrepareNormals(mesh);
+                this->_CreateVertexBuffers(mesh, resourceManager.GetRenderer());
 
                 this->_meshes.push_back(mesh);
 
@@ -254,21 +260,46 @@ namespace Client { namespace Resources {
         return true;
     }
 
+    void Md5Model::_BuildBindPose(JointList const& joints)
+    {
+        this->_bindPose.clear();
+        this->_inverseBindPose.clear();
+
+        for (auto it = joints.begin(), ite = joints.end(); it != ite; ++it)
+        {
+            Joint const& joint = (*it);
+
+            glm::mat4x4 boneTranslation = glm::translate(joint.pos);
+            glm::mat4x4 boneRotation = glm::toMat4(joint.orient);
+
+            glm::mat4x4 boneMatrix = boneTranslation * boneRotation;
+
+            glm::mat4x4 inverseBoneMatrix = glm::inverse(boneMatrix);
+
+            this->_bindPose.push_back(boneMatrix);
+            this->_inverseBindPose.push_back(inverseBoneMatrix);
+        }
+    }
+
     // Compute the position of the vertices in object local space
     // in the skeleton's bind pose
     bool Md5Model::_PrepareMesh(Mesh& mesh)
     {
         mesh.positionBuffer.clear();
         mesh.tex2DBuffer.clear();
+        mesh.boneIndex.clear();
+        mesh.boneWeights.clear();
 
         // Compute vertex positions
-        for (unsigned int i = 0; i < mesh.verts.size(); ++i)
+        for (auto it = mesh.verts.begin(), ite = mesh.verts.end(); it != ite; ++it)
         {
             glm::vec3 finalPos(0);
-            Vertex& vert = mesh.verts[i];
+            Vertex& vert = *it;
 
             vert.pos = glm::vec3(0);
             vert.normal = glm::vec3(0);
+            vert.boneWeights = glm::vec4(0);
+            vert.boneIndices = glm::vec4(0);
 
             // Sum the position of the weights
             for (int j = 0; j < vert.weightCount; ++j)
@@ -280,16 +311,53 @@ namespace Client { namespace Resources {
                 glm::vec3 rotPos = joint.orient * weight.pos;
 
                 vert.pos += (joint.pos + rotPos ) * weight.bias;
+                vert.boneIndices[j] = (float)weight.jointID;
+                vert.boneWeights[j] = weight.bias;
             }
 
             mesh.positionBuffer.push_back(vert.pos);
             mesh.tex2DBuffer.push_back(vert.tex0);
+            mesh.boneIndex.push_back(vert.boneIndices);
+            mesh.boneWeights.push_back(vert.boneWeights);
         }
 
         return true;
     }
 
-    bool Md5Model::_PrepareMesh(Mesh& mesh, const Md5Animation::FrameSkeleton& skel)
+    // Compute the vertex normals in the Mesh's bind pose
+    bool Md5Model::_PrepareNormals(Mesh& mesh)
+    {
+        mesh.normalBuffer.clear();
+
+        // Loop through all triangles and calculate the normal of each triangle
+        for (auto it = mesh.tris.begin(), ite = mesh.tris.end(); it != ite; ++it)
+        {
+            Triangle& tri = *it;
+
+            glm::vec3 v0 = mesh.verts[tri.indices[0]].pos;
+            glm::vec3 v1 = mesh.verts[tri.indices[1]].pos;
+            glm::vec3 v2 = mesh.verts[tri.indices[2]].pos;
+
+            glm::vec3 normal = glm::cross(v2 - v0, v1 - v0);
+
+            mesh.verts[tri.indices[0]].normal += normal;
+            mesh.verts[tri.indices[1]].normal += normal;
+            mesh.verts[tri.indices[2]].normal += normal;
+        }
+
+        // Now normalize all the normals
+        for (auto it = mesh.verts.begin(), ite = mesh.verts.end(); it != ite; ++it)
+        {
+            Vertex& vert = *it;
+
+            vert.normal = glm::normalize(vert.normal);
+            mesh.normalBuffer.push_back(vert.normal);
+        }
+
+        return true;
+    }
+
+    bool Md5Model::_PrepareMesh(Mesh& mesh, std::vector<glm::mat4x4> const& skel)
     {
         for (unsigned int i = 0; i < mesh.verts.size(); ++i)
         {
@@ -300,60 +368,64 @@ namespace Client { namespace Resources {
             pos = glm::vec3(0);
             normal = glm::vec3(0);
 
-            for ( int j = 0; j < vert.weightCount; ++j )
+            for (int j = 0; j < vert.weightCount; ++j)
             {
-                const Weight& weight = mesh.weights[vert.startWeight + j];
-                const Md5Animation::SkeletonJoint& joint = skel.joints[weight.jointID];
+                Weight const& weight = mesh.weights[vert.startWeight + j];
+                glm::mat4x4 const& boneMatrix = skel[weight.jointID];
 
-                glm::vec3 rotPos = joint.orient * weight.pos;
-                pos += (joint.pos + rotPos) * weight.bias;
-
-                normal += (joint.orient * vert.normal) * weight.bias;
+                pos += glm::vec3((boneMatrix * glm::vec4(vert.pos, 1.0f)) * weight.bias);
+                normal += glm::vec3((boneMatrix * glm::vec4(vert.normal, 0.0f)) * weight.bias);
             }
         }
         return true;
     }
 
-
-    // Compute the vertex normals in the Mesh's bind pose
-    bool Md5Model::_PrepareNormals(Mesh& mesh)
+    bool Md5Model::_CreateVertexBuffers(Mesh& mesh, Tools::IRenderer& renderer)
     {
-        mesh.normalBuffer.clear();
+        mesh.vertexBuffer = renderer.CreateVertexBuffer().release();
+        mesh.indexBuffer = renderer.CreateIndexBuffer().release();
 
-        // Loop through all triangles and calculate the normal of each triangle
-        for (unsigned int i = 0; i < mesh.tris.size(); ++i)
-        {
-            glm::vec3 v0 = mesh.verts[mesh.tris[i].indices[0]].pos;
-            glm::vec3 v1 = mesh.verts[mesh.tris[i].indices[1]].pos;
-            glm::vec3 v2 = mesh.verts[mesh.tris[i].indices[2]].pos;
-
-            glm::vec3 normal = glm::cross(v2 - v0, v1 - v0);
-
-            mesh.verts[mesh.tris[i].indices[0]].normal += normal;
-            mesh.verts[mesh.tris[i].indices[1]].normal += normal;
-            mesh.verts[mesh.tris[i].indices[2]].normal += normal;
-        }
-
-        // Now normalize all the normals
+        std::vector<float> vertexBuffer;
+        vertexBuffer.reserve(
+                sizeof(glm::vec3) * mesh.positionBuffer.size() +
+                sizeof(glm::vec3) * mesh.normalBuffer.size() +
+                sizeof(glm::vec2) * mesh.tex2DBuffer.size() +
+                sizeof(glm::vec4) * mesh.boneWeights.size() +
+                sizeof(glm::vec4) * mesh.boneIndex.size()
+                );
         for (unsigned int i = 0; i < mesh.verts.size(); ++i)
         {
-            Vertex& vert = mesh.verts[i];
-
-            glm::vec3 normal = glm::normalize(vert.normal);
-            mesh.normalBuffer.push_back(normal);
-
-            // Reset the normal to calculate the bind-pose normal in joint space
-            vert.normal = glm::vec3(0);
-
-            // Put the bind-pose normal into joint-local space
-            // so the animated normal can be computed faster later
-            for (int j = 0; j < vert.weightCount; ++j)
-            {
-                const Weight& weight = mesh.weights[vert.startWeight + j];
-                const Joint& joint = this->_joints[weight.jointID];
-                vert.normal += (normal * joint.orient) * weight.bias;
-            }
+            vertexBuffer.push_back(mesh.positionBuffer[i].x);
+            vertexBuffer.push_back(mesh.positionBuffer[i].y);
+            vertexBuffer.push_back(mesh.positionBuffer[i].z);
+            vertexBuffer.push_back(mesh.normalBuffer[i].x);
+            vertexBuffer.push_back(mesh.normalBuffer[i].y);
+            vertexBuffer.push_back(mesh.normalBuffer[i].z);
+            vertexBuffer.push_back(mesh.tex2DBuffer[i].x);
+            vertexBuffer.push_back(mesh.tex2DBuffer[i].y);
+            vertexBuffer.push_back(mesh.boneWeights[i].x);
+            vertexBuffer.push_back(mesh.boneWeights[i].y);
+            vertexBuffer.push_back(mesh.boneWeights[i].z);
+            vertexBuffer.push_back(mesh.boneWeights[i].w);
+            vertexBuffer.push_back(mesh.boneIndex[i].x);
+            vertexBuffer.push_back(mesh.boneIndex[i].y);
+            vertexBuffer.push_back(mesh.boneIndex[i].z);
+            vertexBuffer.push_back(mesh.boneIndex[i].w);
         }
+
+        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+                Tools::Renderers::VertexAttributeUsage::Position, 3);
+        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+                Tools::Renderers::VertexAttributeUsage::Normal, 3);
+        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+                Tools::Renderers::VertexAttributeUsage::TexCoord, 2);
+        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+                Tools::Renderers::VertexAttributeUsage::Custom1, 4);
+        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+                Tools::Renderers::VertexAttributeUsage::Custom2, 4);
+        mesh.vertexBuffer->SetData(sizeof(float) * vertexBuffer.size(), vertexBuffer.data(), Tools::Renderers::VertexBufferUsage::Static);
+
+        mesh.indexBuffer->SetData(Tools::Renderers::DataType::UnsignedInt, sizeof(GLuint) * mesh.indexes.size(), &(mesh.indexes[0]));
 
         return true;
     }
@@ -363,15 +435,23 @@ namespace Client { namespace Resources {
         if (this->_hasAnimation)
         {
             float deltaTime = (float)time / 1000.0f;
+
             this->_animation.Update(deltaTime);
 
-            Md5Animation::FrameSkeleton const& skeleton = this->_animation.GetSkeleton();
+            MatrixList const& animatedSkeleton = this->_animation.GetSkeletonMatrixList();
 
-            for (unsigned int i = 0; i < this->_meshes.size(); ++i)
+            // Multiply the animated skeleton joints by the inverse of the bind pose.
+            for (int i = 0; i < this->_numJoints; ++i)
             {
-                this->_PrepareMesh(this->_meshes[i], skeleton);
+                this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i];
             }
         }
+
+         // pour afficher les normales il faut faire ça
+         //   for (unsigned int i = 0; i < this->_meshes.size(); ++i)
+         //   {
+         //       this->_PrepareMesh(this->_meshes[i], skeleton);
+         //   }
     }
 
     void Md5Model::Render(Tools::IRenderer& renderer)
@@ -401,25 +481,26 @@ namespace Client { namespace Resources {
 
     void Md5Model::_RenderMesh(Mesh const& mesh, Tools::IRenderer& renderer)
     {
-        glColor3f( 1.0f, 1.0f, 1.0f );
-        glEnableClientState( GL_VERTEX_ARRAY );
-        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-        glEnableClientState( GL_NORMAL_ARRAY );
+//        glColor3f( 1.0f, 1.0f, 1.0f );
+//        glEnableClientState( GL_VERTEX_ARRAY );
+//        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+//        glEnableClientState( GL_NORMAL_ARRAY );
+//
+//        mesh.texture->Bind();
+//        glVertexPointer( 3, GL_FLOAT, 0, &(mesh.positionBuffer[0]) );
+//        glNormalPointer( GL_FLOAT, 0, &(mesh.normalBuffer[0]) );
+//        glTexCoordPointer( 2, GL_FLOAT, 0, &(mesh.tex2DBuffer[0]) );
+//
+//        renderer.DrawElements( mesh.indexBuffer.size(), Tools::Renderers::DataType::UnsignedInt, &(mesh.indexBuffer[0]), Tools::Renderers::DrawingMode::Triangles);
+//        //glDrawElements( GL_TRIANGLES, mesh.indexBuffer.size(), GL_UNSIGNED_INT, &(mesh.indexBuffer[0]) );
+//
+//        glDisableClientState( GL_NORMAL_ARRAY );
+//        glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+//        glDisableClientState( GL_VERTEX_ARRAY );
+//
+//
+//        mesh.texture->Unbind();
 
-        mesh.texture->Bind();
-        glVertexPointer( 3, GL_FLOAT, 0, &(mesh.positionBuffer[0]) );
-        glNormalPointer( GL_FLOAT, 0, &(mesh.normalBuffer[0]) );
-        glTexCoordPointer( 2, GL_FLOAT, 0, &(mesh.tex2DBuffer[0]) );
-
-        renderer.DrawElements( mesh.indexBuffer.size(), Tools::Renderers::DataType::UnsignedInt, &(mesh.indexBuffer[0]), Tools::Renderers::DrawingMode::Triangles);
-        //glDrawElements( GL_TRIANGLES, mesh.indexBuffer.size(), GL_UNSIGNED_INT, &(mesh.indexBuffer[0]) );
-
-        glDisableClientState( GL_NORMAL_ARRAY );
-        glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-        glDisableClientState( GL_VERTEX_ARRAY );
-
-
-        mesh.texture->Unbind();
 //        glColor3f( 1.0f, 1.0f, 1.0f );
 //        glEnableClientState( GL_VERTEX_ARRAY );
 //        glEnableClientState( GL_TEXTURE_COORD_ARRAY );

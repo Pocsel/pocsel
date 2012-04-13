@@ -11,6 +11,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
     private:
         CGparameter _param;
+        std::unique_ptr<std::vector<float>> _preBuffer;
 
     public:
         ShaderParameterCg(ShaderProgramCg& program, std::string const& identifier);
@@ -24,6 +25,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         virtual void Set(Vector2<float> const& vector);
         virtual void Set(Vector3<float> const& vector);
         virtual void Set(Matrix4<float> const& matrix);
+        virtual void Set(std::vector<glm::mat4x4> const& matrices);
         virtual void Set(ITexture2D& texture);
     };
 

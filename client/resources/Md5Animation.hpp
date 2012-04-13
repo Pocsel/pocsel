@@ -41,22 +41,20 @@ namespace Client { namespace Resources {
         // A Skeleton joint is a joint of the skeleton per frame
         struct SkeletonJoint
         {
-            SkeletonJoint() : parent(-1), pos(0)
-            {}
-
-            SkeletonJoint( const BaseFrame& copy )
-                : pos(copy.pos ), orient(copy.orient )
-            {}
+            SkeletonJoint() : parent(-1), pos(0) {}
+            SkeletonJoint(BaseFrame const& src) : pos(src.pos), orient(src.orient) {}
 
             int parent;
             glm::vec3 pos;
             glm::quat orient;
         };
         typedef std::vector<SkeletonJoint> SkeletonJointList;
+        typedef std::vector<glm::mat4x4> SkeletonMatrixList;
 
         // A frame skeleton stores the joints of the skeleton for a single frame.
         struct FrameSkeleton
         {
+            SkeletonMatrixList boneMatrices;
             SkeletonJointList joints;
         };
         typedef std::vector<FrameSkeleton> FrameSkeletonList;
@@ -91,15 +89,9 @@ namespace Client { namespace Resources {
         void Render();
 
 
-        FrameSkeleton const& GetSkeleton() const
-        {
-            return this->_animatedSkeleton;
-        }
-
-        int GetNumJoints() const
-        {
-            return this->_numJoints;
-        }
+        FrameSkeleton const& GetSkeleton() const { return this->_animatedSkeleton; }
+        const SkeletonMatrixList& GetSkeletonMatrixList() const { return this->_animatedSkeleton.boneMatrices; }
+        int GetNumJoints() const { return this->_numJoints; }
 
         JointInfo const& GetJointInfo(unsigned int index) const
         {
@@ -109,8 +101,8 @@ namespace Client { namespace Resources {
 
     protected:
         // Build the frame skeleton for a particular frame
-        void _BuildFrameSkeleton(FrameSkeletonList& skeletons, const JointInfoList& jointInfo, const BaseFrameList& baseFrames, const FrameData& frameData);
-        void _InterpolateSkeletons(FrameSkeleton& finalSkeleton, const FrameSkeleton& skeleton0, const FrameSkeleton& skeleton1, float fInterpolate);
+        void _BuildFrameSkeleton(FrameSkeletonList& skeletons, JointInfoList const& jointInfo, BaseFrameList const& baseFrames, FrameData const& frameData);
+        void _InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton const& skeleton0, FrameSkeleton const& skeleton1, float fInterpolate);
     };
 
 }}
