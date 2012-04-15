@@ -1,11 +1,13 @@
 #include "client/precompiled.hpp"
 
 #include "client/Client.hpp"
+#include "client/game/CubeType.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
 #include "client/map/Chunk.hpp"
 #include "client/map/ChunkRenderer.hpp"
 #include "client/map/Map.hpp"
+#include "client/resources/Effect.hpp"
 #include "client/resources/LocalResourceManager.hpp"
 #include "client/window/Window.hpp"
 
@@ -28,6 +30,7 @@ namespace Client { namespace Map {
                 Uint32 textureId = cubeTypes[i].textures.ids[j];
                 if (this->_textures.find(textureId) == this->_textures.end())
                     this->_textures[textureId] = this->_game.GetResourceManager().CreateTexture(textureId);
+                this->_cubeTypes[cubeTypes[i].effects.effects[j]][textureId] = this->_textures[textureId].get();
             }
         }
     }
@@ -53,65 +56,86 @@ namespace Client { namespace Map {
         auto const& camera = this->_game.GetPlayer().GetCamera();
         auto pos = camera.position;
         auto viewProj =
-            Tools::Matrix4<double>::CreateLookAt(pos, Tools::Vector3d(pos + Tools::Vector3d(camera.direction)), Tools::Vector3d(0, 1, 0))
-            * Tools::Matrix4<double>(camera.projection);
-        Tools::Frustum frustum(viewProj);
+            glm::detail::tmat4x4<double>(camera.projection)
+            * glm::lookAt<double>(pos, glm::dvec3(pos + glm::dvec3(camera.direction)), glm::dvec3(0, 1, 0));
 
-        std::map<Uint32, std::multimap<double, Chunk*>> transparentChunks;
-
-        do
-        {
-            this->_shader->BeginPass();
-            for (auto texturesIt = this->_textures.begin(), texturesIte = this->_textures.end(); texturesIt != texturesIte; ++texturesIt)
+        std::list<Chunk*> visibleChunks;
+        this->_game.GetMap().GetChunkManager().ForeachIn(Tools::Frustum(viewProj),
+            [&](Chunk& chunk)
             {
-                if (texturesIt->second->HasAlpha())
-                {
-                    this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
-                        [&](Chunk& chunk)
-                        {
-                            if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount(texturesIt->first) == 0)
-                                return;
-                            auto const& relativePosition = (Common::GetChunkPosition(chunk.coords) + Tools::Vector3d(Common::ChunkSize / 2.0f)) - camera.position;
-                            auto dist = relativePosition.GetMagnitudeSquared();
-                            auto value = std::multimap<double, Chunk*>::value_type(-dist, &chunk);
-                            transparentChunks[texturesIt->first].insert(value);
-                        });
-                }
-                else
-                {
-                    texturesIt->second->Bind();
-                    this->_shaderTexture->Set(texturesIt->second->GetCurrentTexture());
-                    this->_game.GetMap().GetChunkManager().ForeachIn(frustum,
-                        [&](Chunk& chunk)
-                        {
-                            if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount(texturesIt->first) == 0)
-                                return;
-                            this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Tools::Vector3f(Common::GetChunkPosition(chunk.coords) - camera.position)));
-                            chunk.GetMesh()->Render(texturesIt->first, this->_renderer);
-                        });
-                    texturesIt->second->Unbind();
-                }
-            }
-        } while (this->_shader->EndPass());
+                if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount() == 0)
+                    return;
+                visibleChunks.push_back(&chunk);
+            });
 
-        do
+        this->_transparentChunks.clear();
+        if (visibleChunks.size() == 0)
+            return;
+
+        for (auto effectIt = this->_cubeTypes.begin(), effectIte = this->_cubeTypes.end(); effectIt != effectIte; ++effectIt)
         {
-            this->_shader->BeginPass();
-            for (auto it = transparentChunks.begin(), ite = transparentChunks.end(); it != ite; ++it)
+            do
             {
-                auto texture = this->_textures[it->first].get();
-                texture->Bind();
-                this->_shaderTexture->Set(texture->GetCurrentTexture());
-                for (auto itChunk = it->second.begin(), iteChunk = it->second.end(); itChunk != iteChunk; ++itChunk)
+                effectIt->first->BeginPass();
+                for (auto texturesIt = effectIt->second.begin(), texturesIte = effectIt->second.end(); texturesIt != texturesIte; ++texturesIt)
                 {
-                    auto mesh = itChunk->second->GetMesh();
-                    if (!mesh)
-                        continue;
-                    this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(Tools::Vector3f(Common::GetChunkPosition(itChunk->second->coords) - camera.position)));
-                    mesh->Render(it->first, this->_renderer);
+                    if (texturesIt->second->HasAlpha())
+                    {
+                        for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
+                        {
+                            if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
+                                continue;
+                            auto const& relativePosition = (Common::GetChunkPosition((*chunkIt)->coords) + glm::dvec3(Common::ChunkSize / 2.0f)) - camera.position;
+                            auto dist = glm::lengthSquared(relativePosition);
+                            this->_transparentChunks[texturesIt->first].insert(std::multimap<double, Chunk*>::value_type(-dist, *chunkIt));
+                        }
+                    }
+                    else
+                    {
+                        texturesIt->second->Bind();
+                        this->_shaderTexture->Set(texturesIt->second->GetCurrentTexture());
+                        for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
+                        {
+                            if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
+                                continue;
+                            effectIt->first->Update(this->_game.GetInterpreter().MakeNil()); // TODO: biome data
+                            this->_renderer.SetModelMatrix(glm::translate<float>(glm::fvec3(Common::GetChunkPosition((*chunkIt)->coords) - camera.position)));
+                            (*chunkIt)->GetMesh()->Render(texturesIt->first, this->_renderer);
+                        }
+                        texturesIt->second->Unbind();
+                    }
                 }
-                texture->Unbind();
-            }
-        } while (this->_shader->EndPass());
+            } while (effectIt->first->EndPass());
+        }
+    }
+
+    void ChunkRenderer::RenderAlpha()
+    {
+        if (this->_transparentChunks.size() == 0)
+            return;
+
+        auto const& camera = this->_game.GetPlayer().GetCamera();
+        for (auto effectIt = this->_cubeTypes.begin(), effectIte = this->_cubeTypes.end(); effectIt != effectIte; ++effectIt)
+        {
+            do
+            {
+                effectIt->first->BeginPass();
+                for (auto it = this->_transparentChunks.begin(), ite = this->_transparentChunks.end(); it != ite; ++it)
+                {
+                    auto texture = effectIt->second[it->first];
+                    texture->Bind();
+                    this->_shaderTexture->Set(texture->GetCurrentTexture());
+                    for (auto itChunk = it->second.begin(), iteChunk = it->second.end(); itChunk != iteChunk; ++itChunk)
+                    {
+                        auto mesh = itChunk->second->GetMesh();
+                        if (!mesh)
+                            continue;
+                        this->_renderer.SetModelMatrix(glm::translate<float>(glm::fvec3(Common::GetChunkPosition(itChunk->second->coords) - camera.position)));
+                        mesh->Render(it->first, this->_renderer);
+                    }
+                    texture->Unbind();
+                }
+            } while (effectIt->first->EndPass());
+        }
     }
 }}

@@ -14,10 +14,10 @@ namespace Tools {
         static boost::thread_specific_ptr<Gjk> _instance;
         static int _bitsToIndices[];
 
-        Vector3d _closestPoint;
-        Vector3d _y[4];
+        glm::dvec3 _closestPoint;
+        glm::dvec3 _y[4];
         double _yLengthSq[4];
-        Vector3d _edges[4][4];
+        glm::dvec3 _edges[4][4];
         double _edgeLengthSq[4][4];
         double _det[16][4];
         int _simplexBits;
@@ -35,8 +35,8 @@ namespace Tools {
 
         bool IsFullSimplex() const { return this->_simplexBits == 15; }
         double GetMaxLengthSquared() const { return this->_maxLengthSq; }
-        Vector3d const& GetClosestPoint() const { return this->_closestPoint; }
-        bool AddSupportPoint(Vector3d const& newPoint);
+        glm::dvec3 const& GetClosestPoint() const { return this->_closestPoint; }
+        bool AddSupportPoint(glm::dvec3 const& newPoint);
         void Reset();
 
     private:
@@ -44,7 +44,7 @@ namespace Tools {
 
         void _UpdateDeterminant(int xmIdx);
         bool _UpdateSimplex(int newIndex);
-        Vector3d _ComputeClosestPoint();
+        glm::dvec3 _ComputeClosestPoint();
         bool _IsSatisfiesRule(int xBits, int yBits);
     };
 

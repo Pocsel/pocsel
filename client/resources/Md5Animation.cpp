@@ -35,7 +35,7 @@ namespace Client { namespace Resources {
         std::string junk;   // Read junk from the file
 
         boost::filesystem::ifstream file(filePath);
-        int fileLength = Tools::Filesystem::GetFileLength(file);
+        auto fileLength = Tools::Filesystem::GetFileLength(file);
         if (fileLength <= 0)
         {
             Tools::error << "Md5Animation::LoadAnimation: file " << filePath << " is empty\n";

@@ -9,20 +9,7 @@ namespace Common {
     {
         BaseChunk::CubeType id;
         std::string name;
-        union
-        {
-            struct
-            {
-                Uint32 top;
-                Uint32 left;
-                Uint32 front;
-                Uint32 right;
-                Uint32 back;
-                Uint32 bottom;
-            };
-            Uint32 ids[6];
-        } textures;
-        std::string effectName;
+        Uint32 visualEffect;
 
         bool solid;
         bool transparent;
@@ -30,30 +17,12 @@ namespace Common {
         CubeType()
         {
         }
+
         CubeType(BaseChunk::CubeType id, std::string const& name) :
             id(id),
             name(name)
         {
         }
-
-        // j'ai perdu du temps à cause de ces 2 chiasses useless !
-        // ça avait l'air de servir a rien, alors j'ai commenté ! (david)
-        // à moins que visual ne sache pas faire un constructeur
-        // par copie tout seul ?
-//        CubeType(CubeType const& descr) :
-//            id(descr.id),
-//            name(descr.name),
-//            textures(descr.textures),
-//            solid(solid),
-//            transparent(transparent)
-//        {}
-//        CubeType(CubeType&& descr) :
-//            id(descr.id),
-//            name(descr.name),
-//            textures(descr.textures),
-//            solid(solid),
-//            transparent(transparent)
-//        {}
     };
 
 }

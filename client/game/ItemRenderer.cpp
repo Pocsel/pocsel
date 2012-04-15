@@ -32,8 +32,6 @@ namespace Client { namespace Game {
 
         //this->_md5Model.LoadModel("");
         //this->_md5Model.LoadAnim("");
-
-        //this->_InitVertexBuffer();
     }
 
     ItemRenderer::~ItemRenderer()
@@ -52,24 +50,20 @@ namespace Client { namespace Game {
         float pi = std::atan2(0.0f, -1.0f);
 
         this->_renderer.SetModelMatrix(
-            Tools::Matrix4<float>::CreateScale(
-                Tools::Vector3f(0.1f, 0.1f, 0.1f)
+            glm::translate<float>(
+                glm::fvec3(pos.position - camera.position)
                 )
             *
-            Tools::Matrix4<float>::CreateTranslation(
-                Tools::Vector3f(-0.5f, -0.5f, -3.5f)
-                )
-            *
-//            Tools::Matrix4<float>::CreateYawPitchRollRotation(
-//                    -pos.theta, 0.0f, -pos.phi
-//                )
-//            *
-            Tools::Matrix4<float>::CreateYawPitchRollRotation(
+            glm::yawPitchRoll<float>(
                    pi / 2-pos.theta, -pi +pos.phi, 0.0f//-pos.phi
                 )
             *
-            Tools::Matrix4<float>::CreateTranslation(
-                Tools::Vector3f(pos.position - camera.position)
+            glm::translate<float>(
+                glm::fvec3(-0.5f, -0.5f, -3.5f)
+                )
+            *
+            glm::scale<float>(
+                glm::fvec3(0.1f, 0.1f, 0.1f)
                 )
             );
 
@@ -112,70 +106,6 @@ namespace Client { namespace Game {
     {
         this->_md5Model->Update(time);
         //this->_elapsedTime += time;
-    }
-
-    void ItemRenderer::_InitVertexBuffer()
-    {
-        const float vertices[] = {
-            // front
-            -0.001f, 1.001f, -0.001f,  1.0f, 1.0f,
-            1.001f, -0.001f, -0.001f,  0.0f, 0.0f,
-            -0.001f, -0.001f, -0.001f,  1.0f, 0.0f,
-
-            1.001f, 1.001f, -0.001f,  0.0f, 1.0f,
-            1.001f, -0.001f, -0.001f,  0.0f, 0.0f,
-            -0.001f, 1.001f, -0.001f,  1.0f, 1.0f,
-
-            // back
-            1.001f, 1.001f, 1.001f,  1.0f, 1.0f,
-            -0.001f, -0.001f, 1.001f,  0.0f, 0.0f,
-            1.001f, -0.001f, 1.001f,  1.0f, 0.0f,
-
-            -0.001f, 1.001f, 1.001f,  0.0f, 1.0f,
-            -0.001f, -0.001f, 1.001f,  0.0f, 0.0f,
-            1.001f, 1.001f, 1.001f,  1.0f, 1.0f,
-
-            // left
-            -0.001f, 1.001f, 1.001f,  1.0f, 1.0f,
-            -0.001f, -0.001f, -0.001f,  0.0f, 0.0f,
-            -0.001f, -0.001f, 1.001f,  1.0f, 0.0f,
-
-            -0.001f, 1.001f, -0.001f,  0.0f, 1.0f,
-            -0.001f, -0.001f, -0.001f,  0.0f, 0.0f,
-            -0.001f, 1.001f, 1.001f,  1.0f, 1.0f,
-
-            // right
-            1.001f, 1.001f, -0.001f,  1.0f, 1.0f,
-            1.001f, -0.001f, 1.001f,  0.0f, 0.0f,
-            1.001f, -0.001f, -0.001f,  1.0f, 0.0f,
-
-            1.001f, 1.001f, 1.001f,  0.0f, 1.0f,
-            1.001f, -0.001f, 1.001f,  0.0f, 0.0f,
-            1.001f, 1.001f, -0.001f,  1.0f, 1.0f,
-
-            // bottom
-            -0.001f, -0.001f, -0.001f,  1.0f, 1.0f,
-            1.001f, -0.001f, 1.001f,  0.0f, 0.0f,
-            -0.001f, -0.001f, 1.001f,  1.0f, 0.0f,
-
-            1.001f, -0.001f, -0.001f,  0.0f, 1.0f,
-            1.001f, -0.001f, 1.001f,  0.0f, 0.0f,
-            -0.001f, -0.001f, -0.001f,  1.0f, 1.0f,
-
-            // top
-            -0.001f, 1.001f, 1.001f,  1.0f, 1.0f,
-            1.001f, 1.001f, -0.001f,  0.0f, 0.0f,
-            -0.001f, 1.001f, -0.001f,  1.0f, 0.0f,
-
-            1.001f, 1.001f, 1.001f,  0.0f, 1.0f,
-            1.001f, 1.001f, -0.001f,  0.0f, 0.0f,
-            -0.001f, 1.001f, 1.001f,  1.0f, 1.0f,
-        };
-
-//        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
-//        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-//        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // texCoord
-//        this->_vertexBuffer->SetData(6*6*3*sizeof(float) + 6*6*2*sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);
     }
 
 }}

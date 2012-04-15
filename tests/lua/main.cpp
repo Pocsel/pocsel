@@ -27,48 +27,48 @@ void TestFunction(int test)
 
 void Init(Interpreter& i)
 {
-    MetaTable m(i, Tools::Matrix4<float>());
-    m.SetMetaMethod(MetaTable::Serialize,
-        [&i](CallHelper& helper)
-        {
-            auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
-            std::stringstream tmp;
-            tmp << m->mm[0];
-            for (int j = 1; j < 16; ++j)
-                tmp << ", " << m->mm[j];
-            helper.PushRet(i.MakeString("return Matrix4f.New16(" + tmp.str() + ")"));
-        });
-    m.SetMethod("Rotate", [](CallHelper&) { });
-    m.SetMethod("Dump",
-        [](CallHelper& helper)
-        {
-            auto m = helper.PopArg().Check<Tools::Matrix4<float>*>();
-            for (int i = 0; i < 4; ++i)
-                Tools::log << m->m[i][0] << ", " << m->m[i][1] << ", " << m->m[i][2] << ", " << m->m[i][3] << std::endl;
-        });
-    m.SetMetaMethod(MetaTable::Call, [](CallHelper&) { Tools::log << "call !\n"; });
-    m.SetMetaMethod(
-        MetaTable::Multiply,// i.Bind(&Tools::Matrix4<float>::operator*, std::placeholders::_1, std::placeholders::_2));
-        [m](CallHelper& helper)
-        {
-            auto m1 = helper.PopArg().Check<Tools::Matrix4<float>*>();
-            auto m2 = helper.PopArg().Check<Tools::Matrix4<float>*>();
-
-            helper.PushRet(helper.GetInterpreter().Make(m1->operator *(*m2)));
-        });
-
+//    MetaTable m(i, glm::detail::tmat4x4<float>());
+//    m.SetMetaMethod(MetaTable::Serialize,
+//        [&i](CallHelper& helper)
+//        {
+//            auto m = helper.PopArg().Check<glm::detail::tmat4x4<float>*>();
+//            std::stringstream tmp;
+////            tmp << m[0][0];
+//            for (int j = 1; j < 16; ++j)
+//                tmp << ", " << m[j/4][j%4];
+//            helper.PushRet(i.MakeString("return Matrix4f.New16(" + tmp.str() + ")"));
+//        });
+//    m.SetMethod("Rotate", [](CallHelper&) { });
+//    m.SetMethod("Dump",
+//        [](CallHelper& helper)
+//        {
+//            auto m = helper.PopArg().Check<glm::detail::tmat4x4<float>*>();
+//            for (int i = 0; i < 4; ++i)
+//                Tools::log << m[i][0] << ", " << m[i][1] << ", " << m[i][2] << ", " << m[i][3] << std::endl;
+//        });
+//    m.SetMetaMethod(MetaTable::Call, [](CallHelper&) { Tools::log << "call !\n"; });
+//    m.SetMetaMethod(
+//        MetaTable::Multiply,// i.Bind(&glm::detail::tmat4x4<float>::operator*, std::placeholders::_1, std::placeholders::_2));
+//        [m](CallHelper& helper)
+//        {
+//            auto m1 = helper.PopArg().Check<glm::detail::tmat4x4<float>*>();
+//            auto m2 = helper.PopArg().Check<glm::detail::tmat4x4<float>*>();
+//
+////            helper.PushRet(helper.GetInterpreter().Make(m1->operator *(*m2)));
+//        });
+//
     auto n = i.MakeTable();
-    n.Set("New", i.MakeFunction(
-        [](CallHelper& helper)
-        {
-            helper.PushRet(helper.GetInterpreter().Make(Tools::Matrix4<float>::identity));
-        }));
+//    n.Set("New", i.MakeFunction(
+//        [](CallHelper& helper)
+//        {
+//            helper.PushRet(helper.GetInterpreter().Make(glm::detail::tmat4x4<float>::identity));
+//        }));
     n.Set("New16", i.MakeFunction(
         [](CallHelper& helper)
         {
-            Tools::Matrix4<float> m;
+            glm::detail::tmat4x4<float> m;
             for (int i = 0; i < 16; ++i)
-                m.mm[i] = (float)helper.PopArg().CheckNumber();
+                m[i/4][i%4] = (float)helper.PopArg().CheckNumber();
             helper.PushRet(helper.GetInterpreter().Make(m));
         }));
     i.Globals().Set("Matrix4f", n);
@@ -184,7 +184,7 @@ int main(int, char**)
         }
         catch (std::exception& e)
         {
-            Tools::log << "call \"Matrix4<float>::Dump\" with a variable of type \"A\": " << e.what() << "\n";
+            Tools::log << "call \"glm::detail::tmat4x4<float>::Dump\" with a variable of type \"A\": " << e.what() << "\n";
         }
         try
         {
@@ -200,22 +200,22 @@ int main(int, char**)
         auto r = i.Globals().Set("A", i.Bind(&A::Print, std::placeholders::_1, std::placeholders::_2));
         r(A(), 50);
 
-        //// Vector2d - MetaTable
-        MetaTable mVector2d(i, Tools::Vector2d());
-        mVector2d.SetMethod("Normalize", i.Bind(&Tools::Vector2d::Normalize, std::placeholders::_1));
-        mVector2d.SetMethod("Dot", i.Bind(&Tools::Vector2d::Dot, std::placeholders::_1, std::placeholders::_2));
-        mVector2d.SetMetaMethod(MetaTable::Serialize,
-            [&i](CallHelper& helper)
-            {
-                auto v = helper.PopArg().Check<Tools::Vector2d*>();
-                helper.PushRet(i.MakeString("return Vector2d.New(" + Tools::ToString(v->x) + ", " + Tools::ToString(v->y) + ")"));
-            });
-        mVector2d.SetMethod("Dump",
-            [](CallHelper& helper)
-            {
-                auto v = helper.PopArg().Check<Tools::Vector2d*>();
-                Tools::log << "(" << v->x << ";" << v->y << ")\n";
-            });
+        //// glm::dvec2 - MetaTable
+//        MetaTable mglm::dvec2(i, glm::dvec2());
+        //mglm::dvec2.SetMethod("Normalize", i.Bind(&glm::dvec2::Normalize, std::placeholders::_1));
+        //mglm::dvec2.SetMethod("Dot", i.Bind(&glm::dvec2::Dot, std::placeholders::_1, std::placeholders::_2));
+ //       mglm::dvec2.SetMetaMethod(MetaTable::Serialize,
+ //           [&i](CallHelper& helper)
+ //           {
+ //               auto v = helper.PopArg().Check<glm::dvec2*>();
+ //               helper.PushRet(i.MakeString("return glm::dvec2.New(" + Tools::ToString(v->x) + ", " + Tools::ToString(v->y) + ")"));
+ //           });
+ //       mglm::dvec2.SetMethod("Dump",
+ //           [](CallHelper& helper)
+ //           {
+ //               auto v = helper.PopArg().Check<glm::dvec2*>();
+ //               Tools::log << "(" << v->x << ";" << v->y << ")\n";
+ //           });
         // Namespace
         auto n = i.MakeTable();
         n.Set("New", i.MakeFunction(
@@ -223,11 +223,11 @@ int main(int, char**)
             {
                 auto x = helper.PopArg().Check<double>();
                 auto y = helper.PopArg().Check<double>();
-                helper.PushRet(i.Make(Tools::Vector2d(x, y)));
+                helper.PushRet(i.Make(glm::dvec2(x, y)));
             }));
-        i.Globals().Set("Vector2d", n);
+        i.Globals().Set("glm::dvec2", n);
         i.DoString(
-            "v = Vector2d.New(2, 3)"
+            "v = glm::dvec2.New(2, 3)"
             "v:Dump()"
             "v:Normalize()"
             "v:Dump()");

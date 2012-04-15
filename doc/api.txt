@@ -1,6 +1,24 @@
 - Server
     Server side API.
 
+    - CubeType
+        CubeType manager.
+
+        - Register(table prototype)
+            TODO
+            - prototype [table]
+                Must at least contain:
+                    - a string value called "name",
+                    - a boolean value called "transparent",
+                    - a boolean value called "solid",
+                    - a string value called "visualEffect".
+                Optionnal:
+                    - A integer value called "rotationAxis" where
+                        0 = no rotations
+                        1 = yaw (fr: cap / Y) rotation
+                        2 = pitch (fr: tangage / X) rotation
+                        4 = roll (fr: roulis / Z) rotation
+
     - Entity
         Entity manager.
 
@@ -113,3 +131,24 @@
 
 - Client
     Client side API.
+
+    - Colors
+        TODO
+
+        - Create(string colorName)
+            Creates a new color.
+            - colorName [string]
+                TODO
+
+        - Create(int color)
+            Creates a new color.
+            - color [int]
+                ARGB color
+                
+        - Create(float red, float green, float blue)
+            Creates a new color.
+            TODO
+
+        - Create(float alpha, float red, float green, float blue)
+            Creates a new color.
+            TODO

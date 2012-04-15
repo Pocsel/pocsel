@@ -31,7 +31,7 @@ namespace Client { namespace Window { namespace Sdl {
         InputBinder& _inputBinder;
         std::map<SDLKey, KeyHeld> _keysHeld;
         std::map<int, ButtonHeld> _buttonsHeld;
-        Tools::Vector2i _mousePos;
+        glm::ivec2 _mousePos;
         bool _showMouse;
         bool _mouseShown;
         bool _hasFocus;
@@ -40,9 +40,9 @@ namespace Client { namespace Window { namespace Sdl {
     public:
         InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
         virtual void ProcessEvents();
-        virtual Tools::Vector2i const& GetMousePos() const { return this->_mousePos; }
-        virtual Tools::Vector2i GetMousePosRealTime() const;
-        virtual void WarpMouse(Tools::Vector2i const& pos);
+        virtual glm::ivec2 const& GetMousePos() const { return this->_mousePos; }
+        virtual glm::ivec2 GetMousePosRealTime() const;
+        virtual void WarpMouse(glm::ivec2 const& pos);
         virtual void WarpMouse(int x, int y);
         virtual void ShowMouse();
         virtual bool MouseShown() const { return this->_showMouse; }

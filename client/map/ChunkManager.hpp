@@ -31,7 +31,7 @@ namespace Client { namespace Map {
             std::shared_ptr<Chunk> chunk;
 
             ChunkNode(std::unique_ptr<Chunk>&& chunk)
-                : Tools::AlignedCube(Tools::Vector3d(chunk->coords * Common::ChunkSize), Common::ChunkSize),
+                : Tools::AlignedCube(glm::dvec3(chunk->coords * Common::ChunkSize), Common::ChunkSize),
                 chunk(std::move(chunk))
             {
             }
@@ -55,7 +55,8 @@ namespace Client { namespace Map {
         void AddChunk(std::unique_ptr<Chunk>&& chunk);
         void UpdateLoading();
         void Update(Uint64 totalTime, Common::Position const& playerPosition);
-        void Render();
+        void Render() { this->_chunkRenderer.Render(); }
+        void RenderAlpha() { this->_chunkRenderer.RenderAlpha(); }
 
         template<class TFunc>
         void ForeachIn(Tools::AbstractCollider const& container, TFunc function);
@@ -68,7 +69,7 @@ namespace Client { namespace Map {
         void _RefreshNode(ChunkNode& node);
         void _RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeType> oldCubes);
         void _AddNodeToRefresh(ChunkNode& node);
-        bool _RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors);
+        bool _RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Game::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors);
     };
 
     template<class TFunc>

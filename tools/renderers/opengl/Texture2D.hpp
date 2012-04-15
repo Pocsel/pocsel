@@ -16,11 +16,11 @@ namespace Tools { namespace Renderers {
         GLRenderer& _renderer;
         GLuint _id;
         int _bindId;
-        Vector2u _size;
+        glm::uvec2 _size;
         bool _hasAlpha;
 
     public:
-        Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0);
+        Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0);
         Texture2D(GLRenderer& renderer, std::string const& imagePath);
         Texture2D(GLRenderer& renderer, GLuint id);
         virtual ~Texture2D();
@@ -31,7 +31,7 @@ namespace Tools { namespace Renderers {
         GLuint GetID() const { return this->_id; }
         int GetBindID() const { return this->_bindId; }
 
-        virtual Vector2u const& GetSize() const { return this->_size; }
+        virtual glm::uvec2 const& GetSize() const { return this->_size; }
         virtual bool HasAlpha() const { return this->_hasAlpha; }
         virtual void SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter);
 

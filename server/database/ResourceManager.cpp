@@ -41,7 +41,7 @@ namespace Server { namespace Database {
                 static_cast<Uint32>(data.size())
             );
             Log::load << "Found resource " << id << ": " << filename << ".\n";
-            this->_ids[filename] = id;
+            this->_ids[plugin_id][filename] = id;
             this->_idsByVersion[version].push_back(id);
         }
     }
@@ -50,14 +50,6 @@ namespace Server { namespace Database {
     {
         std::for_each(this->_resources.begin(), this->_resources.end(), [](Common::Resource* r) { Tools::Delete(r); });
         Tools::Delete(this->_connection);
-    }
-
-    Uint32 ResourceManager::GetId(std::string const& filename) const
-    {
-        auto it = this->_ids.find(filename);
-        if (it != this->_ids.end())
-            return it->second;
-        return 0;
     }
 
     std::vector<Uint32> ResourceManager::GetNeededResourceIds(Uint32 fromVersion) const

@@ -1,3 +1,5 @@
+#include "server/precompiled.hpp"
+
 #include "server/clientmanagement/ClientActions.hpp"
 #include "server/clientmanagement/ClientManager.hpp"
 #include "server/clientmanagement/Client.hpp"
@@ -13,6 +15,7 @@
 
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
+#include "server/game/map/Map.hpp"
 
 #include "server/database/ResourceManager.hpp"
 
@@ -98,11 +101,11 @@ namespace Server { namespace ClientManagement {
             Game::Map::Chunk::CubeType id;
             Network::PacketExtractor::GetCubeType(packet, id);
 
-            Game::World const& world = manager.GetServer().GetGame().GetWorld();
+            Game::Map::Map const& map = manager.GetServer().GetGame().GetWorld().GetDefaultMap();
 
-            if (!world.HasCubeType(id))
+            if (!map.HasCubeType(id))
                 throw std::runtime_error("Invalid cube description id: " + Tools::ToString(id));
-            client.SendPacket(std::move(Network::PacketCreator::CubeType(world.GetCubeType(id))));
+            client.SendPacket(std::move(Network::PacketCreator::CubeType(map.GetCubeType(id))));
         }
 
         void _HandleSettings(ClientManager& manager, Client& client, Tools::ByteArray const& packet)

@@ -41,6 +41,8 @@ namespace Tools { namespace Renderers {
         }
     }
 
+    const glm::mat4 DX9Renderer::_glToDirectX = glm::scale(1.0f, 1.0f, 0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
+
     void DX9Renderer::Initialise()
     {
         this->_currentMatrixMode = -1;
@@ -64,7 +66,7 @@ namespace Tools { namespace Renderers {
         present_parameters.BackBufferFormat = this->_fullscreen ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
         present_parameters.MultiSampleType = D3DMULTISAMPLE_NONE;
 
-        DXCHECKERROR(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &present_parameters, &this->_device));
+        DXCHECKERROR(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &present_parameters, &this->_device));
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));
@@ -104,14 +106,14 @@ namespace Tools { namespace Renderers {
         return std::unique_ptr<IIndexBuffer>(new DX9::IndexBuffer(*this));
     }
 
-    std::unique_ptr<Renderers::IRenderTarget> DX9Renderer::CreateRenderTarget(Vector2u const& imgSize)
+    std::unique_ptr<Renderers::IRenderTarget> DX9Renderer::CreateRenderTarget(glm::uvec2 const& imgSize)
     {
         auto rt = new DX9::RenderTarget(*this, imgSize);
         this->_allRenderTargets.push_back(rt);
         return std::unique_ptr<IRenderTarget>(rt);
     }
 
-    std::unique_ptr<ITexture2D> DX9Renderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData)
+    std::unique_ptr<ITexture2D> DX9Renderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize, void const* mipmapData)
     {
         return std::unique_ptr<ITexture2D>(new DX9::Texture2D(*this, format, size, data, imgSize, mipmapData));
     }
@@ -147,16 +149,16 @@ namespace Tools { namespace Renderers {
         if (target != 0)
             target->Bind();
 
-        this->_model = Tools::Matrix4<float>::identity;
-        this->_view = Tools::Matrix4<float>::CreateTranslation(0, 0, 1);
-        this->_projection = Tools::Matrix4<float>::CreateOrthographic(
+        this->_model = glm::detail::tmat4x4<float>::identity;
+        this->_view = glm::translate<float>(0, 0, 1);
+        this->_projection = DX9Renderer::_glToDirectX * glm::ortho<float>(
                 0,
                 this->_viewport.size.w,
                 this->_viewport.size.h,
                 0,
                 -float(this->_viewport.size.w),
                 float(this->_viewport.size.w));
-        this->_modelViewProjection = this->_model * this->_view * this->_projection;
+        this->_modelViewProjection = this->_projection * this->_view * this->_model;
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
@@ -228,38 +230,38 @@ namespace Tools { namespace Renderers {
     }
 
     // Matrices
-    void DX9Renderer::SetModelMatrix(Matrix4<float> const& matrix)
+    void DX9Renderer::SetModelMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
         this->_model = matrix;
         if (this->_currentProgram != 0)
-            this->_modelViewProjection = this->_model * this->_view * this->_projection;
+            this->_modelViewProjection = this->_projection * this->_view * this->_model;
     }
 
-    void DX9Renderer::SetViewMatrix(Matrix4<float> const& matrix)
+    void DX9Renderer::SetViewMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
         this->_view = matrix;
         if (this->_currentProgram != 0)
         {
-            this->_modelViewProjection = this->_model * this->_view * this->_projection;
+            this->_modelViewProjection = this->_projection * this->_view * this->_model;
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         }
     }
 
-    void DX9Renderer::SetProjectionMatrix(Matrix4<float> const& matrix)
+    void DX9Renderer::SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_projection = matrix;
+        this->_projection = DX9Renderer::_glToDirectX * matrix;
         if (this->_currentProgram != 0)
         {
-            this->_modelViewProjection = this->_model * this->_view * this->_projection;
+            this->_modelViewProjection = this->_projection * this->_view * this->_model;
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         }
     }
 
     // States
-    void DX9Renderer::SetScreenSize(Vector2u const& size)
+    void DX9Renderer::SetScreenSize(glm::uvec2 const& size)
     {
         this->_screenSize = size;
         this->_RefreshDevice();
@@ -278,14 +280,14 @@ namespace Tools { namespace Renderers {
         this->_viewport = viewport;
         if (this->_state == Draw2D)
         {
-            this->_projection = Tools::Matrix4<float>::CreateOrthographic(
+            this->_projection = DX9Renderer::_glToDirectX * glm::ortho<float>(
                 0,
                 this->_viewport.size.w,
                 this->_viewport.size.h,
                 0,
                 -float(this->_viewport.size.w),
                 float(this->_viewport.size.w));
-            this->_modelViewProjection = this->_model * this->_view * this->_projection;
+            this->_modelViewProjection = this->_projection * this->_view * this->_model;
         }
     }
 

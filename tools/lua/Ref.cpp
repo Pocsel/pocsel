@@ -1,6 +1,7 @@
 #include "tools/lua/Lua.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Iterator.hpp"
+#include "tools/lua/Interpreter.hpp"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4244) // return conversion double to float (data lost)
@@ -101,6 +102,16 @@ namespace Tools { namespace Lua {
             ret.FromStack();
             call.PushRet(ret);
         }
+    }
+
+    Ref Ref::GetTable(std::string const& name) const throw(std::runtime_error)
+    {
+        auto table = this->operator[](name);
+        if (!table.Exists())
+            table = this->Set(name, this->_state.MakeTable());
+        if (!table.IsTable())
+            throw std::runtime_error("Lua::Ref: Indexing a value that is not a table");
+        return table;
     }
 
     Iterator Ref::Begin() const throw(std::runtime_error)

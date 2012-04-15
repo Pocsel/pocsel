@@ -13,8 +13,8 @@ namespace Client { namespace Menu { namespace Widget {
             ActionBinder& actionBinder,
             std::function<void(void)>& callback,
             std::string const& text /* = "" */,
-            Tools::Vector2f const& size /* = Tools::Vector2f(50, 20) */,
-            Tools::Vector2f const& pos /* = Tools::Vector2f(0) */) :
+            glm::fvec2 const& size /* = glm::fvec2(50, 20) */,
+            glm::fvec2 const& pos /* = glm::fvec2(0) */) :
         _inputManager(inputManager),
         _menu(menu),
         _renderer(renderer),
@@ -65,9 +65,12 @@ namespace Client { namespace Menu { namespace Widget {
                     Tools::Color4f(0.93f, 0.1f, 0.1f, 1),
                     Tools::Color4f(0.43f, 0.1f, 0.1f, 1),
                     Tools::Color4f(0.43f, 0.1f, 0.1f, 1));
-        this->_rectMatrix = Tools::Matrix4<float>::CreateScale(this->_size.w / 2, this->_size.h / 2, 1)
-            * Tools::Matrix4<float>::CreateTranslation(this->_size.w / 2 + this->_pos.w, this->_size.h / 2 + this->_pos.h, 0);
-        this->_textMatrix = Tools::Matrix4<float>::CreateScale(Tools::Vector3f(0.5f)) * Tools::Matrix4<float>::CreateTranslation(this->_pos.w + 4, this->_pos.h - 3, 0);
+        this->_rectMatrix =
+            glm::translate<float>(this->_size.w / 2 + this->_pos.w, this->_size.h / 2 + this->_pos.h, 0)
+            * glm::scale<float>(this->_size.w / 2, this->_size.h / 2, 1);
+        this->_textMatrix =
+            glm::translate<float>(this->_pos.w + 4, this->_pos.h - 3, 0)
+            * glm::scale<float>(glm::fvec3(0.5f));
     }
 
     bool Button::_MouseIsHovering() const
@@ -99,13 +102,13 @@ namespace Client { namespace Menu { namespace Widget {
         this->_text = text;
     }
 
-    void Button::SetSize(Tools::Vector2f const& size)
+    void Button::SetSize(glm::fvec2 const& size)
     {
         this->_size = size;
         this->_Update();
     }
 
-    void Button::SetPos(Tools::Vector2f const& pos)
+    void Button::SetPos(glm::fvec2 const& pos)
     {
         this->_pos = pos;
         this->_Update();

@@ -66,7 +66,7 @@ namespace Client { namespace Game {
         {
             auto sensi = this->_game.GetClient().GetSettings().mouseSensitivity;
             auto mousePos = w.GetInputManager().GetMousePosRealTime();
-            Tools::Vector2f delta;
+            glm::fvec2 delta;
             delta.x = (mousePos.x - (static_cast<int>(w.GetSize().x) / 2)) / (1000.0f - 990.0f * sensi);
             delta.y = (mousePos.y - (static_cast<int>(w.GetSize().y) / 2)) / (1000.0f - 990.0f * sensi);
             if (delta.x != 0.0f || delta.y != 0.0f)
@@ -74,10 +74,10 @@ namespace Client { namespace Game {
                 this->_camera.Rotate(delta);
                 this->_moved = true;
             }
-            w.GetInputManager().WarpMouse(Tools::Vector2i(w.GetSize() / 2));
+            w.GetInputManager().WarpMouse(glm::ivec2(w.GetSize() / (std::remove_reference<decltype(w.GetSize())>::type::value_type)2));
         }
 
-        if (this->_movement != Tools::Vector3f())
+        if (this->_movement != glm::fvec3())
             this->_Move();
 
         this->_movedTime += time;
@@ -90,7 +90,7 @@ namespace Client { namespace Game {
             this->_movedTime %= 40;
         }
 
-        this->_movement = Tools::Vector3f();
+        this->_movement = glm::fvec3();
 
         {
             auto cubes = Common::RayCast::Ray(this->_camera, 50);
@@ -131,8 +131,8 @@ namespace Client { namespace Game {
 
     void Player::StrafeLeft()
     {
-        Tools::Vector3f dir = this->_camera.direction;
-        this->_Move(Tools::Vector3f(
+        glm::fvec3 dir = this->_camera.direction;
+        this->_Move(glm::fvec3(
             dir.y * 0 - dir.z * -1,
             dir.z * 0 - dir.x * 0,
             dir.x * -1 - dir.y * 0));
@@ -140,8 +140,8 @@ namespace Client { namespace Game {
 
     void Player::StrafeRight()
     {
-        Tools::Vector3f dir = this->_camera.direction;
-        this->_Move(Tools::Vector3f(
+        glm::fvec3 dir = this->_camera.direction;
+        this->_Move(glm::fvec3(
             dir.y * 0 - dir.z * 1,
             dir.z * 0 - dir.x * 0,
             dir.x * 1 - dir.y * 0));
@@ -149,12 +149,12 @@ namespace Client { namespace Game {
 
     void Player::Jump()
     {
-        this->_Move(Tools::Vector3f(0, 1, 0));
+        this->_Move(glm::fvec3(0, 1, 0));
     }
 
     void Player::Crouch()
     {
-        this->_Move(Tools::Vector3f(0, -1, 0));
+        this->_Move(glm::fvec3(0, -1, 0));
     }
 
     void Player::Action()
@@ -198,17 +198,18 @@ namespace Client { namespace Game {
         this->_sprint = !this->_sprint;
     }
 
-    void Player::_Move(Tools::Vector3f moveVector)
+    void Player::_Move(glm::fvec3 moveVector)
     {
-        moveVector.Normalize();
+        moveVector = glm::normalize(moveVector);
         this->_movement += moveVector;
     }
 
     void Player::_Move()
     {
-        this->_movement.Normalize();
+        this->_movement = glm::normalize(this->_movement);
+        auto tmp = glm::dvec3(this->_movement) * (double)(this->_GetSpeed() * this->_elapsedTime * 0.001);
         Common::Position p = this->_camera.position;
-        p += Tools::Vector3d(this->_movement) * this->_GetSpeed() * (this->_elapsedTime * 0.001f);
+        p += tmp;
         this->SetPosition(p);
         this->_moved = true;
     }

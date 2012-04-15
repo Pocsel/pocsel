@@ -8,90 +8,110 @@
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Iterator.hpp"
 
+#include "common/Resource.hpp"
+
+#include "server/Server.hpp"
+#include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
-
 #include "server/game/map/Conf.hpp"
+#include "server/game/map/CubeType.hpp"
 #include "server/game/map/Map.hpp"
 
 #include "server/Logger.hpp"
 
+#ifdef _MSC_VER
+namespace detail {
+  template <class T>
+  struct type_helper {
+    typedef T type;
+  };
+}
+
+#define decltype(...) \
+  detail::type_helper<decltype(__VA_ARGS__)>::type
+#endif
+
 namespace Server { namespace Database {
 
-    void WorldLoader::Load(Game::World& world, ResourceManager& manager)
+    WorldLoader::LoadingMapConf::LoadingMapConf(
+        Tools::Lua::Interpreter* interpreter,
+        Tools::Lua::Ref fullname,
+        Tools::Lua::Ref isDefault,
+        Tools::Lua::Ref cubes,
+        Tools::Lua::Ref equations)
+        : interpreter(interpreter),
+        fullname(fullname),
+        isDefault(isDefault),
+        cubes(cubes),
+        equations(equations)
     {
-        auto& conn = manager.GetConnection();
+    }
 
+    WorldLoader::LoadingMapConf::LoadingMapConf(LoadingMapConf&& rhs)
+        : interpreter(rhs.interpreter),
+        fullname(rhs.fullname),
+        isDefault(rhs.isDefault),
+        cubes(rhs.cubes),
+        equations(rhs.equations)
+    {
+        rhs.interpreter = 0;
+    }
+
+    WorldLoader::LoadingMapConf::~LoadingMapConf()
+    {
+        this->fullname.Unref();
+        this->isDefault.Unref();
+        this->cubes.Unref();
+        this->equations.Unref();
+        Tools::Delete(this->interpreter);
+    }
+
+    WorldLoader::WorldLoader(Game::World& world, ResourceManager& manager)
+        : _world(world),
+        _resourceMgr(manager),
+        _connection(manager.GetConnection())
+    {
         // Meta data
-        auto query = conn.CreateQuery("SELECT identifier, fullname, version, build_hash FROM world");
-        if (query)
+        auto query = this->_connection.CreateQuery("SELECT identifier, fullname, version, build_hash FROM world");
+        if (auto row = query->Fetch())
         {
-            auto row = query->Fetch();
-            if (row)
-            {
-                world._identifier = row->GetString(0);
-                world._fullname = row->GetString(1);
-                world._version = row->GetUint32(2);
-                world._buildHash = row->GetString(3);
-            }
-            else
-                throw std::runtime_error("WorldLoader::Load: World file is missing metadata (invalid or corrupt world file).");
+            world._identifier = row->GetString(0);
+            world._fullname = row->GetString(1);
+            world._version = row->GetUint32(2);
+            world._buildHash = row->GetString(3);
         }
         else
             throw std::runtime_error("WorldLoader::Load: World file is missing metadata (invalid or corrupt world file).");
 
-        // Cube types
-        query = conn.CreateQuery("SELECT id, plugin_id, name, lua FROM cube_type");
-        while (auto row = query->Fetch())
-        {
-            Uint32 id = row->GetUint32(0);
-            std::string name = row->GetString(2);
-            Log::load << "Load cube type id: " << id <<
-                          ", plugin_id: " << row->GetUint64(1) <<
-                          ", name: " << name << "\n";
-            if (world._cubeTypes.size() < id)
-                world._cubeTypes.resize(id);
-            world._cubeTypes[id - 1].id = id;
-            world._cubeTypes[id - 1].name = name;
-            WorldLoader::_LoadCubeType(world._cubeTypes[id - 1], row->GetString(3), manager);
-        }
-
         // Maps
-        query = conn.CreateQuery("SELECT name, lua, tick FROM map");
+        query = this->_connection.CreateQuery("SELECT name, lua, tick FROM map");
         while (auto row = query->Fetch())
         {
             try
             {
-                Game::Map::Conf conf;
-                WorldLoader::_LoadMapConf(conf, row->GetString(0), row->GetString(1), world);
-                conf.cubeTypes = &world._cubeTypes;
-                Uint64 curTime = row->GetUint64(2);
-
-                std::vector<Game::Map::Chunk::IdType> existingChunks;
-
-//                {
-//                    auto coconn = manager.GetConnectionPool().GetConnection();
-//                    auto& cucurs = coconn->GetCursor();
-//                    cucurs.Execute((Tools::ToString("SELECT id FROM ") + row[0].GetString() + "_chunk").c_str());
-//                    while (cucurs.HasData())
-//                    {
-//                        auto& rorow = cucurs.FetchOne();
-//                        existingChunks.push_back(rorow[0].GetUint64());
-//                    }
-//                }
-
                 std::vector<Game::Map::Chunk::IdType> existingBigChunks;
-
-                auto q = conn.CreateQuery("SELECT id FROM " + row->GetString(0) + "_bigchunk");
+                auto q = this->_connection.CreateQuery("SELECT id FROM " + row->GetString(0) + "_bigchunk");
                 while (auto r = q->Fetch())
                     existingBigChunks.push_back(r->GetUint64(0));
 
-                world._maps[conf.name] = new Game::Map::Map(conf, curTime, world._game, existingBigChunks);
-                if (conf.is_default) {
+                Game::Map::Conf conf;
+                auto lmc = WorldLoader::_LoadMapConf(conf, row->GetString(0), row->GetString(1));
+                if (world._maps.find(conf.name) != world._maps.end())
+                    throw std::runtime_error("A map " + Tools::ToString(conf.name) + " already exists");
+
+                auto map = new Game::Map::Map(conf, row->GetUint64(2), world._game, existingBigChunks);
+                if (world._maps.find(conf.name) != world._maps.end())
+                    throw std::runtime_error("A map named \"" + conf.name + "\" already exists");
+                world._maps[conf.name] = map;
+                WorldLoader::_RegisterResourcesFunctions(*map, map->GetEngine().GetInterpreter());
+                if (conf.is_default)
                     world._defaultMap = world._maps[conf.name];
-                }
+
+                this->_loadingMaps.insert(decltype(this->_loadingMaps)::value_type(map, std::move(lmc)));
+                lmc.interpreter = 0;
             }
             catch (std::exception& e)
             {
@@ -103,7 +123,7 @@ namespace Server { namespace Database {
             throw std::runtime_error("Cannot find default map");
 
         // Plugins
-        query = conn.CreateQuery("SELECT id, fullname, identifier FROM plugin");
+        query = this->_connection.CreateQuery("SELECT id, fullname, identifier FROM plugin");
         while (auto row = query->Fetch())
         {
             try
@@ -117,8 +137,13 @@ namespace Server { namespace Database {
             }
         }
 
+        // CubeTypes
+        for (auto itMap = world._maps.begin(), itMapEnd = world._maps.end(); itMap != itMapEnd; ++itMap)
+            WorldLoader::_LoadCubeTypes(*itMap->second);
+        this->_LoadMapCubeTypes();
+
         // Entity types
-        query = conn.CreateQuery("SELECT plugin_id, name, lua FROM entity_file");
+        query = this->_connection.CreateQuery("SELECT plugin_id, name, lua FROM entity_file");
         while (auto row = query->Fetch())
         {
             try
@@ -140,59 +165,82 @@ namespace Server { namespace Database {
         }
     }
 
-    void WorldLoader::_LoadCubeType(Common::CubeType& descr, std::string const& code, ResourceManager const& manager)
+    void WorldLoader::_RegisterResourcesFunctions(Game::Map::Map& map, Tools::Lua::Interpreter& lua)
     {
-        try
-        {
-            Tools::Lua::Interpreter lua;
-            lua.DoString(code);
-
-            auto textures = lua.Globals()["textures"];
-            descr.textures.top = manager.GetId(textures["top"].To<std::string>());
-            descr.textures.left = manager.GetId(textures["left"].To<std::string>());
-            descr.textures.front = manager.GetId(textures["front"].To<std::string>());
-            descr.textures.right = manager.GetId(textures["right"].To<std::string>());
-            descr.textures.back = manager.GetId(textures["back"].To<std::string>());
-            descr.textures.bottom = manager.GetId(textures["bottom"].To<std::string>());
-
-            descr.solid = lua.Globals()["solid"].To<bool>();
-            descr.transparent = lua.Globals()["transparent"].To<bool>();
-
-            Log::load << "name: " << descr.name << " " << descr.id << "\n";
-            Log::load << "textures.top: " << descr.textures.top << "\n";
-            Log::load << "textures.left: " << descr.textures.left << "\n";
-            Log::load << "textures.front: " << descr.textures.front << "\n";
-            Log::load << "textures.right: " << descr.textures.right << "\n";
-            Log::load << "textures.back: " << descr.textures.back << "\n";
-            Log::load << "textures.bottom: " << descr.textures.bottom << "\n";
-
-            Log::load << "solid: " << descr.solid << "\n";
-            Log::load << "transparent: " << descr.transparent << "\n";
-
-            Log::load << "\n";
-        }
-        catch (std::exception& e)
-        {
-            Tools::error << "WorldLoader: " << e.what();
-            Log::load << "WorldLoader: " << e.what();
-            throw;
-        }
+        auto resourceNs = lua.Globals().GetTable("Server").GetTable("Resource");
+        resourceNs.Set("GetEffect", lua.MakeFunction(
+            [&](Tools::Lua::CallHelper& helper)
+            {
+                auto pluginId = map.GetEngine().GetRunningPluginId();
+                helper.PushRet(lua.Make(map.GetGame().GetServer().GetResourceManager().GetId(pluginId, helper.PopArg().Check<std::string>())));
+            }));
+        resourceNs.Set("GetEffectFromPlugin", lua.MakeFunction(
+            [&](Tools::Lua::CallHelper& helper)
+            {
+                auto pluginId = map.GetGame().GetWorld().GetPluginManager().GetPluginId(helper.PopArg().Check<std::string>());
+                helper.PushRet(lua.Make(map.GetGame().GetServer().GetResourceManager().GetId(pluginId, helper.PopArg().Check<std::string>())));
+            }));
     }
 
-    void WorldLoader::_LoadMapConf(Game::Map::Conf& conf,
-                                   std::string const& name,
-                                   std::string const& code,
-                                   Game::World const& world)
+    void WorldLoader::_LoadCubeTypes(Game::Map::Map& map)
+    {
+        Uint32 currentPluginId = 0;
+        auto& lua = map.GetEngine().GetInterpreter();
+        auto cubeTypeNs = lua.Globals().GetTable("Server").GetTable("CubeType");
+        cubeTypeNs.Set("Register", lua.MakeFunction([&](Tools::Lua::CallHelper& helper)
+            {
+                Tools::Lua::Ref cubeType = helper.PopArg();
+                auto id = (Common::BaseChunk::CubeType)map.GetConfiguration().cubeTypes.size() + 1;
+                std::string name = cubeType["name"].Check<std::string>();
+
+                Game::Map::CubeType desc(id, name, cubeType);
+                desc.solid = cubeType["solid"].To<bool>();
+                desc.transparent = cubeType["transparent"].To<bool>();
+                desc.visualEffect = cubeType["visualEffect"].Check<Uint32>();
+                map.GetConfiguration().cubeTypes.push_back(desc);
+
+                Log::load << "[map: " << map.GetName() << "] " <<
+                    "Load cube type " << id <<
+                    ", plugin_id: " << currentPluginId <<
+                    ", name: " << name << "\n";
+            }));
+
+        auto query = this->_connection.CreateQuery("SELECT plugin_id, name, lua FROM cube_type ORDER BY id, plugin_id");
+        while (auto row = query->Fetch())
+        {
+            currentPluginId = row->GetUint32(0);
+            std::string name = row->GetString(1);
+            std::string code = row->GetString(2);
+
+            Log::load << "[map: " << map.GetName() << "] Execute " << name << ".lua...\n";
+            try
+            {
+                map.GetEngine().SetRunningPluginId(currentPluginId);
+                lua.DoString(code);
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "WorldLoader: " << e.what();
+                Log::load << "WorldLoader: " << e.what();
+                throw;
+            }
+        }
+
+        cubeTypeNs.Set("Register", lua.MakeNil());
+        map.GetEngine().SetRunningPluginId(0);
+    }
+
+    WorldLoader::LoadingMapConf WorldLoader::_LoadMapConf(Game::Map::Conf& conf, std::string const& name, std::string const& code)
     {
         conf.name = name;
 
         Log::load << "Load lua code:\n'''\n" << code << "\n'''\n";
-        Tools::Lua::Interpreter lua;
-        lua.DoString(code);
-        auto fullname = lua.Globals()["fullname"],
-             is_default = lua.Globals()["is_default"],
-             cubes = lua.Globals()["cubes"],
-             equations = lua.Globals()["equations"];
+        std::unique_ptr<Tools::Lua::Interpreter> lua(new Tools::Lua::Interpreter());
+        lua->DoString(code);
+        auto fullname = lua->Globals()["fullname"],
+             is_default = lua->Globals()["is_default"],
+             cubes = lua->Globals()["cubes"],
+             equations = lua->Globals()["equations"];
 
         conf.fullname = fullname.To<std::string>();
         conf.is_default = is_default.To<bool>();
@@ -210,64 +258,72 @@ namespace Server { namespace Database {
             }
         }
 
-        for (auto cubeIt = cubes.Begin(), cubeItEnd = cubes.End(); cubeIt != cubeItEnd; ++cubeIt)
+        return WorldLoader::LoadingMapConf(lua.release(), fullname, is_default, cubes, equations);
+    }
+
+    void WorldLoader::_LoadMapCubeTypes()
+    {
+        for (auto mapIt = this->_loadingMaps.begin(), mapIte = this->_loadingMaps.end(); mapIt != mapIte; ++mapIt)
         {
-            auto cvb = cubeIt.GetValue(); // Cube validation block, lol
-            auto name = cubeIt.GetKey().To<std::string>();
-            Log::load << "Loading cube " << cubeIt.GetKey().To<std::string>() << "\n";
-
-            if (conf.cubes.find(name) != conf.cubes.end())
+            auto cubes = mapIt->second.cubes;
+            auto& conf = mapIt->first->GetConfiguration();
+            for (auto cubeIt = cubes.Begin(), cubeItEnd = cubes.End(); cubeIt != cubeItEnd; ++cubeIt)
             {
-                Log::load << "WARNING: cube \"" << name << "\" already defined, only one definition will be used.\n";
-                Tools::error << "WARNING: cube \"" << name << "\" already defined, only one definition will be used.\n";
-                continue;
-            }
+                auto cvb = cubeIt.GetValue(); // Cube validation block, lol
+                auto name = cubeIt.GetKey().To<std::string>();
+                Log::load << "Loading cube " << cubeIt.GetKey().To<std::string>() << "\n";
 
-            auto& cube = conf.cubes[name];
-            cube.type = WorldLoader::_GetCubeTypeByName(name, world);
-            if (cube.type == 0)
-            {
-                if (name != "void")
+                if (conf.cubes.find(name) != conf.cubes.end())
                 {
-                    Log::load << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
-                    Tools::error << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
+                    Log::load << "WARNING: cube \"" << name << "\" already defined, only one definition will be used.\n";
+                    Tools::error << "WARNING: cube \"" << name << "\" already defined, only one definition will be used.\n";
                     continue;
                 }
-                cube.type = new Common::CubeType(0, "void");
-            }
 
-            // Parcours des ValidationBlocConf
-            for (auto it = cvb.Begin(), ite = cvb.End(); it != ite; ++it)
-            {
-                Game::Map::Conf::ValidationBlocConf validation_bloc;
-
-                validation_bloc.cube_type = cube.type;
-                validation_bloc.priority = it.GetValue()["priority"].To<int>();
-
-                auto validators = it.GetValue()["validators"];
-
-                // Parcours des ValidatorConf
-                for (auto it2 = validators.Begin(), ite2 = validators.End(); it2 != ite2; ++it2)
+                auto& cube = conf.cubes[name];
+                cube.type = this->_GetCubeTypeByName(name);
+                if (cube.type == 0)
                 {
-                    Game::Map::Conf::ValidatorConf validator;
-                    validator.equation = it2.GetValue()["equation"].To<std::string>();
-                    validator.validator = it2.GetValue()["validator"].To<std::string>();
-                    for (auto it3 = it2.GetValue().Begin(), ite3 = it2.GetValue().End(); it3 != ite3; ++it3)
-                        if (it3.GetValue().IsNumber())
-                            validator.values[it3.GetKey().To<std::string>()] = it3.GetValue().To<double>();
-                    validation_bloc.validators.push_back(validator);
+                    if (name != "void")
+                    {
+                        Log::load << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
+                        Tools::error << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
+                        continue;
+                    }
+                    cube.type = new Game::Map::CubeType(0, "void", mapIt->second.interpreter->MakeTable());
                 }
-                cube.validation_blocs.push_back(validation_bloc);
-            }
 
+                // Parcours des ValidationBlocConf
+                for (auto it = cvb.Begin(), ite = cvb.End(); it != ite; ++it)
+                {
+                    Game::Map::Conf::ValidationBlocConf validation_bloc;
+
+                    validation_bloc.cube_type = cube.type;
+                    validation_bloc.priority = it.GetValue()["priority"].To<int>();
+
+                    auto validators = it.GetValue()["validators"];
+
+                    // Parcours des ValidatorConf
+                    for (auto it2 = validators.Begin(), ite2 = validators.End(); it2 != ite2; ++it2)
+                    {
+                        Game::Map::Conf::ValidatorConf validator;
+                        validator.equation = it2.GetValue()["equation"].To<std::string>();
+                        validator.validator = it2.GetValue()["validator"].To<std::string>();
+                        for (auto it3 = it2.GetValue().Begin(), ite3 = it2.GetValue().End(); it3 != ite3; ++it3)
+                            if (it3.GetValue().IsNumber())
+                                validator.values[it3.GetKey().To<std::string>()] = it3.GetValue().To<double>();
+                        validation_bloc.validators.push_back(validator);
+                    }
+                    cube.validation_blocs.push_back(validation_bloc);
+                }
+            }
         }
     }
 
-    Common::CubeType const* WorldLoader::_GetCubeTypeByName(std::string const& name,
-                                                            Game::World const& world)
+    Game::Map::CubeType const* WorldLoader::_GetCubeTypeByName(std::string const& name)
     {
-        auto it = world._cubeTypes.begin(),
-             end = world._cubeTypes.end();
+        auto it = this->_world.GetDefaultMap().GetCubeTypes().begin(),
+             end = this->_world.GetDefaultMap().GetCubeTypes().end();
         for (; it != end; ++it)
         {
             if ((*it).name == name)

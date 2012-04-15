@@ -28,13 +28,15 @@ namespace Tools { namespace Renderers {
         };
 
     private:
-        Vector2u _screenSize;
+        static const glm::mat4 _glToDirectX;
+
+        glm::uvec2 _screenSize;
         bool _fullscreen;
         Rectangle _viewport;
-        Matrix4<float> _modelViewProjection;
-        Matrix4<float> _model;
-        Matrix4<float> _view;
-        Matrix4<float> _projection;
+        glm::detail::tmat4x4<float> _modelViewProjection;
+        glm::detail::tmat4x4<float> _model;
+        glm::detail::tmat4x4<float> _view;
+        glm::detail::tmat4x4<float> _projection;
         unsigned int _currentMatrixMode;
         bool _useShaders;
         DrawState _state;
@@ -55,7 +57,7 @@ namespace Tools { namespace Renderers {
         int _clearStencil;
 
     public:
-        DX9Renderer(Vector2u const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _state(DrawNone), _object(0), _device(0), _backBuffer(0), _currentProgram(0) {}
+        DX9Renderer(glm::uvec2 const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _state(DrawNone), _object(0), _device(0), _backBuffer(0), _currentProgram(0) {}
         virtual ~DX9Renderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -70,8 +72,8 @@ namespace Tools { namespace Renderers {
         // Resources
         virtual std::unique_ptr<Renderers::IIndexBuffer> CreateIndexBuffer();
         virtual std::unique_ptr<Renderers::IVertexBuffer> CreateVertexBuffer();
-        virtual std::unique_ptr<Renderers::IRenderTarget> CreateRenderTarget(Vector2u const& imgSize);
-        virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0);
+        virtual std::unique_ptr<Renderers::IRenderTarget> CreateRenderTarget(glm::uvec2 const& imgSize);
+        virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0);
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath);
         virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect);
 
@@ -87,17 +89,17 @@ namespace Tools { namespace Renderers {
         virtual void DrawVertexBuffer(Uint32 offset, Uint32 count, Renderers::DrawingMode::Type mode = Renderers::DrawingMode::Triangles);
 
         // Matrices
-        virtual void SetModelMatrix(Matrix4<float> const& matrix);
-        virtual void SetViewMatrix(Matrix4<float> const& matrix);
-        virtual void SetProjectionMatrix(Matrix4<float> const& matrix);
+        virtual void SetModelMatrix(glm::detail::tmat4x4<float> const& matrix);
+        virtual void SetViewMatrix(glm::detail::tmat4x4<float> const& matrix);
+        virtual void SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix);
 
-        Matrix4<float> const& GetModelViewProjectionMatrix() const { return this->_modelViewProjection; }
-        Matrix4<float> const& GetModelMatrix() const { return this->_model; }
-        Matrix4<float> const& GetViewMatrix() const { return this->_view; }
-        Matrix4<float> const& GetProjectionMatrix() const { return this->_projection; }
+        glm::detail::tmat4x4<float> const& GetModelViewProjectionMatrix() const { return this->_modelViewProjection; }
+        glm::detail::tmat4x4<float> const& GetModelMatrix() const { return this->_model; }
+        glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_view; }
+        glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_projection; }
 
         // States
-        virtual void SetScreenSize(Vector2u const& size);
+        virtual void SetScreenSize(glm::uvec2 const& size);
         virtual void SetClearColor(Color4f const& color) { this->_clearColor = color; }
         virtual void SetClearDepth(float value) { this->_clearDepth = value; }
         virtual void SetClearStencil(int value) { this->_clearStencil = value; }
@@ -111,7 +113,7 @@ namespace Tools { namespace Renderers {
         void SetCurrentProgram(IShaderProgram& program)
         {
             this->_currentProgram = &program;
-            this->_modelViewProjection = this->_model * this->_view * this->_projection;
+            this->_modelViewProjection = this->_projection * this->_view * this->_model;
         }
         void SetVertexBuffer(DX9::VertexBuffer& vb) { this->_vertexBuffer = &vb; }
         LPDIRECT3DDEVICE9 GetDevice() const { return this->_device; }

@@ -7,7 +7,7 @@
 
 namespace Common {
 
-    typedef Tools::Vector3d Position;
+    typedef glm::dvec3 Position;
 
     /* coordonnées entières du chunk contenant cette position */
     inline BaseChunk::CoordsType GetChunkCoords(Position const& pos);
@@ -38,12 +38,12 @@ namespace Common {
 
     Position GetChunkPosition(BaseChunk::CoordsType const& chunkCoords)
     {
-        return Position(chunkCoords) * Common::ChunkSize;
+        return Position(chunkCoords) * (double)Common::ChunkSize;
     }
 
     Position GetChunkPosition(Position const& pos)
     {
-        return Position(GetChunkCoords(pos)) * Common::ChunkSize;
+        return Position(GetChunkCoords(pos)) * (double)Common::ChunkSize;
     }
 
     BaseChunk::CoordsType GetCubeCoords(Position const& pos)
@@ -53,12 +53,7 @@ namespace Common {
 
     BaseChunk::CoordsType GetCubeCoordsInChunk(Position const& pos)
     {
-        BaseChunk::CoordsType coords = GetChunkCoords(pos);
-        return BaseChunk::CoordsType(
-                pos.x - coords.x * Common::ChunkSize,
-                pos.y - coords.y * Common::ChunkSize,
-                pos.z - coords.z * Common::ChunkSize
-                );
+        return BaseChunk::CoordsType(pos - Position(GetChunkCoords(pos)) * (double)Common::ChunkSize);
     }
 
     Position GetPositionInChunk(Position const& pos)

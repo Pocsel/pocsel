@@ -88,31 +88,33 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     void ShaderProgram::UpdateParameter(ShaderParameterUsage::Type usage)
     {
+        glm::mat4 tmp;
         switch (usage)
         {
         case ShaderParameterUsage::ModelViewProjectionMatrix:
             if (this->_mvp)
-                this->_effect->SetMatrixTranspose(this->_mvp, (D3DXMATRIX const*)this->_renderer.GetModelViewProjectionMatrix().mm);
+                this->_effect->SetMatrixTranspose(this->_mvp, (D3DXMATRIX const*)&this->_renderer.GetModelViewProjectionMatrix()[0]);
             break;
 
         case ShaderParameterUsage::ModelViewMatrix:
+            tmp = this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix();
             if (this->_mv)
-                this->_effect->SetMatrixTranspose(this->_mv, (D3DXMATRIX const*)(this->_renderer.GetModelMatrix() * this->_renderer.GetViewMatrix()).mm);
+                this->_effect->SetMatrixTranspose(this->_mv, (D3DXMATRIX const*)&tmp[0]);
             break;
 
         case ShaderParameterUsage::ModelMatrix:
             if (this->_model)
-                this->_effect->SetMatrixTranspose(this->_model, (D3DXMATRIX const*)this->_renderer.GetModelMatrix().mm);
+                this->_effect->SetMatrixTranspose(this->_model, (D3DXMATRIX const*)&this->_renderer.GetModelMatrix()[0]);
             break;
 
         case ShaderParameterUsage::ViewMatrix:
             if (this->_view)
-                this->_effect->SetMatrixTranspose(this->_view, (D3DXMATRIX const*)this->_renderer.GetViewMatrix().mm);
+                this->_effect->SetMatrixTranspose(this->_view, (D3DXMATRIX const*)&this->_renderer.GetViewMatrix()[0]);
             break;
 
         case ShaderParameterUsage::ProjectionMatrix:
             if (this->_projection)
-                this->_effect->SetMatrixTranspose(this->_projection, (D3DXMATRIX const*)this->_renderer.GetProjectionMatrix().mm);
+                this->_effect->SetMatrixTranspose(this->_projection, (D3DXMATRIX const*)&this->_renderer.GetProjectionMatrix()[0]);
             break;
 
         default:

@@ -26,7 +26,7 @@ namespace Client { namespace Resources {
         }
         catch (std::exception& e)
         {
-            Tools::error << "Fail to load an effect from cache, check your plugin or tccache file:\n" << e.what() << "\n";
+            Tools::error << "Fail to load an effect from cache, check your plugin or tccache file :\n" << e.what() << "\n";
             Tools::Delete(this->_settings);
             Tools::Delete(this->_initObject);
             Tools::Delete(this->_update);

@@ -1,3 +1,5 @@
+#include "client/precompiled.hpp"
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -41,7 +43,7 @@ namespace Client { namespace Resources {
         std::string junk;   // Read junk from the file
 
         boost::filesystem::ifstream file(filePath);
-        int fileLength = Tools::Filesystem::GetFileLength(file);
+        int fileLength = (int)Tools::Filesystem::GetFileLength(file);
         if (fileLength <= 0)
         {
             Tools::error << "Md5Model::LoadModel: file " << filePath << " is empty\n";
@@ -155,7 +157,6 @@ namespace Client { namespace Resources {
                             Tools::Filesystem::IgnoreLine(file, fileLength);
 
                             vert.tex0.y = 1.0f - vert.tex0.y;
-
                             mesh.verts.push_back(vert);
                             mesh.tex2DBuffer.push_back(vert.tex0);
                         }

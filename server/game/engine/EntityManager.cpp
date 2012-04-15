@@ -13,8 +13,8 @@
 #include "tools/database/sqlite/Connection.hpp"
 #include "server/game/map/Map.hpp"
 #include "common/FieldValidator.hpp"
-#include "tools/lua/Vector.hpp"
 #include "server/rcon/ToJsonStr.hpp"
+#include "tools/lua/utils/Vector.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -271,7 +271,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Ref firstArg = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"");
         if (firstArg.IsTable())
         {
-            pos = Tools::Lua::Vector::TableToVector3<double>(firstArg);
+            pos = Tools::Lua::Utils::Vector::TableToVec3<double>(firstArg);
             firstArg = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"");
         }
         std::string plugin = firstArg.CheckString("Server.Entity.Spawn[FromPlugin]: Argument \"plugin\" must be a string");
@@ -283,7 +283,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         Common::Position pos;
         if (helper.GetNbArgs() && helper.GetArgList().front().IsTable())
-            pos = Tools::Lua::Vector::TableToVector3<double>(helper.PopArg());
+            pos = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg());
         Uint32 pluginId = this->_runningEntity->GetType().GetPluginId();
         this->_SpawnFromPlugin(pos, pluginId, helper);
     }
@@ -314,7 +314,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::_ApiKill(Tools::Lua::CallHelper& helper)
     {
-        Uint32 targetId = helper.PopArg("Server.Entity.Kill: Missing argument \"target\"").CheckNumber("Server.Entity.Kill: Argument \"target\" must be a number");
+        Uint32 targetId = helper.PopArg("Server.Entity.Kill: Missing argument \"target\"").Check<Uint32>("Server.Entity.Kill: Argument \"target\" must be a number");
         Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;

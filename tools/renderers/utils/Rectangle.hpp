@@ -11,23 +11,23 @@ namespace Tools { namespace Renderers { namespace Utils {
         IRenderer& _renderer;
         std::unique_ptr<IVertexBuffer> _vertexBuffer;
         std::unique_ptr<IIndexBuffer> _indexBuffer;
-        Vector3<float> _point1, _point2, _point3, _point4;
+        glm::detail::tvec3<float> _point1, _point2, _point3, _point4;
         Color4f _point1Color, _point2Color, _point3Color, _point4Color;
 
     public:
         Rectangle(IRenderer& renderer);
         void Render();
 
-        Vector3<float> const& GetPosition1() const { return this->_point1; }
-        Vector3<float> const& GetPosition2() const { return this->_point2; }
-        Vector3<float> const& GetPosition3() const { return this->_point3; }
-        Vector3<float> const& GetPosition4() const { return this->_point4; }
+        glm::detail::tvec3<float> const& GetPosition1() const { return this->_point1; }
+        glm::detail::tvec3<float> const& GetPosition2() const { return this->_point2; }
+        glm::detail::tvec3<float> const& GetPosition3() const { return this->_point3; }
+        glm::detail::tvec3<float> const& GetPosition4() const { return this->_point4; }
         Color4f const& GetColor1() const { return this->_point1Color; }
         Color4f const& GetColor2() const { return this->_point2Color; }
         Color4f const& GetColor3() const { return this->_point3Color; }
         Color4f const& GetColor4() const { return this->_point4Color; }
 
-        void SetPosition(Vector3<float> const& p1, Vector3<float> const& p2, Vector3<float> const& p3, Vector3<float> const& p4)
+        void SetPosition(glm::detail::tvec3<float> const& p1, glm::detail::tvec3<float> const& p2, glm::detail::tvec3<float> const& p3, glm::detail::tvec3<float> const& p4)
         {
             this->_point1 = p1;
             this->_point2 = p2;

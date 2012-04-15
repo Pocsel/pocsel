@@ -13,11 +13,11 @@ namespace Tools { namespace Renderers { namespace Utils {
         struct FontData;
         struct CharInfo
         {
-            Vector2f advance;
-            Vector2f offset;
-            Vector2f size;
-            Vector2f texUVmin;
-            Vector2f texUVmax;
+            glm::fvec2 advance;
+            glm::fvec2 offset;
+            glm::fvec2 size;
+            glm::fvec2 texUVmin;
+            glm::fvec2 texUVmax;
         };
 
         static const int startChar = ' ';

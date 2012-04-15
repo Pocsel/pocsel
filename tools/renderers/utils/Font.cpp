@@ -100,7 +100,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             ::FT_Done_Glyph(glyph);
         }
 
-        unsigned int width = 512;
+        unsigned int width = 1024;
         unsigned int height = NextPowerOfTwo(maxHeight);
 
         // Fill the bitmap
@@ -146,11 +146,11 @@ namespace Tools { namespace Renderers { namespace Utils {
             }
             maxHeight = (bitmap_glyph->bitmap.rows > maxHeight ? bitmap_glyph->bitmap.rows : maxHeight);
 
-            info.advance = Vector2f(this->_data->face->glyph->advance.x / 64.0f, bitmap_glyph->root.advance.y / 65536.0f);
-            info.offset = Vector2f((float)bitmap_glyph->left, (float)maxHeightOffset - (float)bitmap_glyph->top);
-            info.size = Vector2f((float)bitmap.width, (float)bitmap.rows);
-            info.texUVmin = Vector2f((float)rx + 1, (float)ry + 1);
-            info.texUVmax = Vector2f((float)rx + 1 + (float)bitmap.width, (float)bitmap.rows + ry + 1);
+            info.advance = glm::fvec2(this->_data->face->glyph->advance.x / 64.0f, bitmap_glyph->root.advance.y / 65536.0f);
+            info.offset = glm::fvec2((float)bitmap_glyph->left, (float)maxHeightOffset - (float)bitmap_glyph->top);
+            info.size = glm::fvec2((float)bitmap.width, (float)bitmap.rows);
+            info.texUVmin = glm::fvec2((float)rx + 1, (float)ry + 1);
+            info.texUVmax = glm::fvec2((float)rx + 1 + (float)bitmap.width, (float)bitmap.rows + ry + 1);
 
             for (int y = 0; y < bitmap.rows; ++y)
                 for (int x = 0; x < bitmap.width; ++x)
@@ -168,7 +168,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_texture = this->_renderer.CreateTexture2D(
             Renderers::PixelFormat::Rgba8,
             (Uint32)textureData.size(), textureData.data(),
-            Vector2u(width, height));
+            glm::uvec2(width, height));
 
         this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
         this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Position, 3);

@@ -10,29 +10,29 @@ namespace Tools {
     class AlignedCube : public AbstractCollider
     {
     private:
-        Vector3d _position;
+        glm::dvec3 _position;
         double _size;
 
     public:
-        AlignedCube(Vector3d const& position, double size)
+        AlignedCube(glm::dvec3 const& position, double size)
             : _position(position),
             _size(size)
         {
         }
 
-        Vector3d const& GetPosition() const { return this->_position; }
+        glm::dvec3 const& GetPosition() const { return this->_position; }
         double GetSize() const { return this->_size; }
-        void SetPosition(Vector3d const& position) { this->_position = position; }
+        void SetPosition(glm::dvec3 const& position) { this->_position = position; }
         void SetSize(double size) { this->_size = size; }
 
         Plane::IntersectionType Intersects(Plane const& plane) const;
 
-        virtual IntersectionType Contains(Vector3d const& object) const;
+        virtual IntersectionType Contains(glm::dvec3 const& object) const;
         virtual IntersectionType Contains(AlignedBox const& object) const;
         virtual IntersectionType Contains(AlignedCube const& object) const;
         virtual IntersectionType Contains(Frustum const& object) const;
 
-        Vector3d SupportMapping(Vector3d const& v) const;
+        glm::dvec3 SupportMapping(glm::dvec3 const& v) const;
     };
 
 }

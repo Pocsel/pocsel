@@ -11,7 +11,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     static int nbBindedTexture = 0;
 
-    Texture2D::Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize, void const* mipmapData) :
+    Texture2D::Texture2D(GLRenderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize, void const* mipmapData) :
         _renderer(renderer),
         _hasAlpha(false)
     {
@@ -55,7 +55,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     void Texture2D::_FinishLoading(unsigned int ilID)
     {
-        this->_size = Vector2u(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
+        this->_size = glm::uvec2(ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT));
 
         int bytesPerPixel = ilGetInteger(IL_IMAGE_BPP);
         if (bytesPerPixel != 3 && bytesPerPixel != 4)
@@ -106,7 +106,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         {
             int level = 1;
             char const* idx = (char const*)mipmapData;
-            for (Tools::Vector2u size = this->_size / 2; size.w >= 1 && size.h >= 1; size /= 2)
+            for (glm::uvec2 size = this->_size / 2u; size.w >= 1 && size.h >= 1; size /= 2u)
             {
                 GLCHECK(glTexImage2D(GL_TEXTURE_2D, level++, internalFormat, size.w, size.h, 0, format, GL_UNSIGNED_BYTE, idx));
                 idx += size.w * size.h * pixelSize;
@@ -115,7 +115,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         else if (GLEW_VERSION_3_0)
             GLCHECK(glGenerateMipmap(GL_TEXTURE_2D));
         else
-            gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, this->_size.w, this->_size.h, format, GL_UNSIGNED_BYTE, data); 
+            gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, this->_size.w, this->_size.h, format, GL_UNSIGNED_BYTE, data);
 
         GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
         GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));

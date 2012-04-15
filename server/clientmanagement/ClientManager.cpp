@@ -12,6 +12,7 @@
 
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
+#include "server/game/map/Map.hpp"
 
 #include "server/network/ClientConnection.hpp"
 #include "server/network/PacketCreator.hpp"
@@ -127,7 +128,7 @@ namespace Server { namespace ClientManagement {
             this->_server.GetGame().GetWorld().GetIdentifier(),
             this->_server.GetGame().GetWorld().GetFullname(),
             this->_server.GetGame().GetWorld().GetVersion(),
-            static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetCubeTypes().size()),
+            static_cast<Common::BaseChunk::CubeType>(this->_server.GetGame().GetWorld().GetDefaultMap().GetCubeTypes().size()),
             this->_server.GetGame().GetWorld().GetBuildHash()
             )));
 

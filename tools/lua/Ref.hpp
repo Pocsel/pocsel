@@ -17,7 +17,7 @@ namespace Tools { namespace Lua {
     public:
         Ref(State& state) throw();
         Ref(Ref const& ref) throw();
-        ~Ref() throw();
+        ~Ref() throw(); // Possible d'appeler Unref() pour détruire la ref après l'interpreter sans segfault !
         Ref& operator =(Ref const& ref) throw();
         bool operator ==(Ref const& ref) const throw();
         bool operator !=(Ref const& ref) const throw();
@@ -35,6 +35,7 @@ namespace Tools { namespace Lua {
         template <typename T, typename U, typename V, typename W>
             Ref operator ()(T a1, U a2, V a3, W a4) const throw(std::runtime_error);
         // array access
+        Ref GetTable(std::string const& name) const throw(std::runtime_error); // Retourne la table "name" si elle n'existe pas, elle est créée
         Iterator Begin() const throw(std::runtime_error);
         Iterator End() const throw(std::runtime_error); // un Iterator n'est égal à un autre uniquement si les 2 sont des Iterator de fin (ref.Begin() != ref.Begin())
         Ref operator [](Ref const& index) const throw(std::runtime_error);
@@ -65,7 +66,9 @@ namespace Tools { namespace Lua {
         std::string CheckString(std::string const& e = "") const throw(std::runtime_error);
         void* CheckUserData(std::string const& e = "") const throw(std::runtime_error);
         template <typename T>
-            T Check(std::string const& e = "") const throw(std::runtime_error);
+            T Check(std::string const& e) const throw(std::runtime_error);
+        template <typename T>
+            T Check() const throw(std::runtime_error) { return this->Check<T>(""); }
         // type tests
         std::string GetTypeName() const throw();
         int GetType() const throw(); // valeurs possibles : LUA_TNIL, LUA_TBOOLEAN, LUA_TLIGHTUSERDATA, LUA_TNUMBER, LUA_TSTRING, LUA_TTABLE, LUA_TFUNCTION, LUA_TUSERDATA, LUA_TTHREAD, LUA_TNONE

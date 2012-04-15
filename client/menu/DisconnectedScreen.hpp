@@ -27,9 +27,9 @@ namespace Client { namespace Menu {
         Client& _client;
         Menu& _menu;
         Tools::IRenderer& _renderer;
-        Tools::Matrix4<float> _text1Matrix;
-        Tools::Matrix4<float> _text2Matrix;
-        Tools::Matrix4<float> _backRectMatrix;
+        glm::detail::tmat4x4<float> _text1Matrix;
+        glm::detail::tmat4x4<float> _text2Matrix;
+        glm::detail::tmat4x4<float> _backRectMatrix;
         Tools::Renderers::Utils::Rectangle* _backRect;
         int _callbackId;
         std::string _message;
@@ -42,7 +42,7 @@ namespace Client { namespace Menu {
         void SetMessage(std::string const& message);
         void Render();
     private:
-        void _Resize(Tools::Vector2u const& size);
+        void _Resize(glm::uvec2 const& size);
         void _RetryButton();
     };
 

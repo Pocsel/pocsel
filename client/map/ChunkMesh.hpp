@@ -5,12 +5,9 @@
 
 #include "common/BaseChunk.hpp"
 
-namespace Common {
-    struct CubeType;
-}
-
 namespace Client {
     namespace Game {
+        class CubeType;
         class Game;
     }
     namespace Map {
@@ -52,7 +49,7 @@ namespace Client { namespace Map {
         ~ChunkMesh();
 
         bool Refresh(ChunkRenderer& chunkRenderer,
-                     std::vector<Common::CubeType> cubeTypes,
+                     std::vector<Game::CubeType> cubeTypes,
                      std::shared_ptr<Common::BaseChunk::CubeType> cubes,
                      std::vector<std::shared_ptr<Common::BaseChunk::CubeType>> neighbors);
 

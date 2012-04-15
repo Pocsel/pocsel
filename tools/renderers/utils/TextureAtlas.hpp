@@ -9,7 +9,7 @@ namespace Tools { namespace Renderers { namespace Utils {
     class TextureAtlas
     {
     private:
-        std::map<Uint32, Vector3f> _textureCoords;
+        std::map<Uint32, glm::fvec3> _textureCoords;
         std::map<Uint32, bool> _hasAlpha;
         ITexture2D* _texture;
 
@@ -18,7 +18,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         ~TextureAtlas();
 
         ITexture2D& GetTexture() { return *this->_texture; }
-        Vector3f const& GetCoords(Uint32 id) const
+        glm::fvec3 const& GetCoords(Uint32 id) const
         {
             auto it = this->_textureCoords.find(id);
             if (it == this->_textureCoords.end())
