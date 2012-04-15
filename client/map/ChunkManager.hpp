@@ -31,7 +31,7 @@ namespace Client { namespace Map {
             std::shared_ptr<Chunk> chunk;
 
             ChunkNode(std::unique_ptr<Chunk>&& chunk)
-                : Tools::AlignedCube(Tools::Vector3d(chunk->coords * Common::ChunkSize), Common::ChunkSize),
+                : Tools::AlignedCube(glm::dvec3(chunk->coords * Common::ChunkSize), Common::ChunkSize),
                 chunk(std::move(chunk))
             {
             }

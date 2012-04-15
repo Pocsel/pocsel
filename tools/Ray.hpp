@@ -8,8 +8,8 @@ namespace Tools {
     class Ray
     {
     public:
-        Vector3d position;
-        Vector3d direction;
+        glm::dvec3 position;
+        glm::dvec3 direction;
 
     public:
         Ray() {}

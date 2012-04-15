@@ -33,7 +33,7 @@ namespace Client { namespace Menu {
                 *this->_actionBinder,
                 f,
                 "Quit",
-                Tools::Vector2f(200, 20));
+                glm::fvec2(200, 20));
         f = std::bind(&MainMenu::_BackButton, this);
         this->_backButton = new Widget::Button(this->_client.GetWindow().GetInputManager(),
                 this->_menu,
@@ -41,7 +41,7 @@ namespace Client { namespace Menu {
                 *this->_actionBinder,
                 f,
                 "Back to game",
-                Tools::Vector2f(200, 20));
+                glm::fvec2(200, 20));
 
         this->_callbackId = this->_client.GetWindow().RegisterCallback(std::bind(&MainMenu::_Resize, this, std::placeholders::_1));
         this->_Resize(this->_client.GetWindow().GetSize());
@@ -85,13 +85,14 @@ namespace Client { namespace Menu {
         this->_visible = visible;
     }
 
-    void MainMenu::_Resize(Tools::Vector2u const& sz)
+    void MainMenu::_Resize(glm::uvec2 const& sz)
     {
-        Tools::Vector2f size(sz);
-        this->_backRectMatrix = Tools::Matrix4<float>::CreateScale(size.w / 2 + 1, size.h / 2 + 1, 1)
-            * Tools::Matrix4<float>::CreateTranslation(size.w / 2, size.h / 2, 0);
-        this->_quitButton->SetPos(Tools::Vector2f(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 80));
-        this->_backButton->SetPos(Tools::Vector2f(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 40));
+        glm::fvec2 size(sz);
+        this->_backRectMatrix =
+            glm::translate<float>(size.w / 2, size.h / 2, 0)
+            * glm::scale<float>(size.w / 2 + 1, size.h / 2 + 1, 1);
+        this->_quitButton->SetPos(glm::fvec2(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 80));
+        this->_backButton->SetPos(glm::fvec2(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 40));
     }
 
     void MainMenu::_QuitButton()

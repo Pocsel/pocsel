@@ -79,6 +79,7 @@ namespace Server { namespace Game { namespace Map {
 
         std::string const& GetName() const { return this->_conf.name; }
         Conf& GetConfiguration() { return this->_conf; }
+        std::string const& GetFullName() const { return this->_conf.fullname; }
         Engine::Engine& GetEngine() { return *this->_engine; }
         Game& GetGame() { return this->_game; }
 
@@ -96,6 +97,9 @@ namespace Server { namespace Game { namespace Map {
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
+
+        // rcon requests
+        void RconGetEntities(std::function<void(std::string)> cb) const;
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
@@ -115,6 +119,9 @@ namespace Server { namespace Game { namespace Map {
         void _SendChunkToPlayers(Chunk* chunk);
         void _Tick(Uint64 currentTime);
         void _TimedSave();
+
+        // rcon requests
+        void _RconGetEntities(std::function<void(std::string)> cb) const;
     };
 
 }}}

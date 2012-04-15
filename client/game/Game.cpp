@@ -27,13 +27,13 @@ namespace Client { namespace Game {
         this->_itemManager = new ItemManager(*this),
         this->_player = new Player(*this);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
-            [this](Tools::Vector2u const& size)
+            [this](glm::uvec2 const& size)
             {
-                this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, size.w / float(size.h), 0.02f, 500.0f);
+                this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.w / float(size.h), 0.02f, 500.0f);
             });
-        this->GetPlayer().GetCamera().projection = Tools::Matrix4<float>::CreatePerspective(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.02f, 500.0f);
+        this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.02f, 500.0f);
         // XXX
-        this->_renderTarget = this->_renderer.CreateRenderTarget(Tools::Vector2u(800, 600));
+        this->_renderTarget = this->_renderer.CreateRenderTarget(glm::uvec2(800, 600));
         this->_renderImage = std::unique_ptr<Tools::Renderers::Utils::Image>(new Tools::Renderers::Utils::Image(this->_renderer));
         this->_renderShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.cgfx");
         this->_renderParameter = this->_renderShader->GetParameter("baseTex");
@@ -78,8 +78,8 @@ namespace Client { namespace Game {
     {
         // XXX
         this->_renderer.BeginDraw(this->_renderTarget.get());
-        this->_renderer.SetProjectionMatrix(Tools::Matrix4<float>::CreatePerspective(90, 1, 0.02f, 500.0f));
-        this->_renderer.SetViewMatrix(Tools::Matrix4<float>::CreateLookAt(this->GetPlayer().GetCamera().direction * -50, this->GetPlayer().GetCamera().direction, Tools::Vector3f(0, 1, 0)));
+        this->_renderer.SetProjectionMatrix(glm::perspective<float>(90, 1, 0.02f, 500.0f));
+        this->_renderer.SetViewMatrix(glm::lookAt<float>(this->GetPlayer().GetCamera().direction * -50.0f, this->GetPlayer().GetCamera().direction, glm::fvec3(0, 1, 0)));
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
         this->_map->GetChunkManager().Render();
         this->_renderer.EndDraw();
@@ -99,7 +99,7 @@ namespace Client { namespace Game {
 
         // XXX
         this->_renderer.BeginDraw2D();
-        this->_renderer.SetModelMatrix(Tools::Matrix4<float>::CreateTranslation(1, 1, 0) * Tools::Matrix4<float>::CreateScale(128, 128, 1));
+        this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(1, 1, 0));
         this->_renderShader->BeginPass();
         this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture());
         this->_renderShader->EndPass();

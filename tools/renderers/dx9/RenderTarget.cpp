@@ -8,7 +8,7 @@
 
 namespace Tools { namespace Renderers { namespace DX9 {
 
-    RenderTarget::RenderTarget(DX9Renderer& renderer, Vector2u const& size) :
+    RenderTarget::RenderTarget(DX9Renderer& renderer, glm::uvec2 const& size) :
         _renderer(renderer),
         _texture(0),
         _size(size)

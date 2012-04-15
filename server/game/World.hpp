@@ -45,6 +45,7 @@ namespace Server { namespace Game {
         Map::Map& GetMap(std::string const& name) { assert(this->_maps.find(name) != this->_maps.end()); return *this->_maps[name]; }
         Map::Map& GetDefaultMap() const { return *this->_defaultMap; }
         PluginManager& GetPluginManager() { return *this->_pluginManager; }
+        std::unordered_map<std::string, Map::Map*> const& GetMaps() const { return this->_maps; }
 
         void Start();
         void Stop();

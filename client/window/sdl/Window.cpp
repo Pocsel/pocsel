@@ -10,7 +10,7 @@
 namespace Client { namespace Window { namespace Sdl {
 
     Window::Window(bool directX,
-            Tools::Vector2u const& size /* = Tools::Vector2u(800, 600) */,
+            glm::uvec2 const& size /* = glm::uvec2(800, 600) */,
             bool fullscreen /* = false */,
             bool useShaders /* = true */) :
         ::Client::Window::Window(new InputManager(*this, new InputBinder())),
@@ -46,7 +46,7 @@ namespace Client { namespace Window { namespace Sdl {
 #endif
         this->_renderer->Initialise();
         this->_renderer->SetScreenSize(this->_size);
-        this->_renderer->SetViewport(Tools::Rectangle(Tools::Vector2i(0), this->_size));
+        this->_renderer->SetViewport(Tools::Rectangle(glm::ivec2(0), this->_size));
     }
 
     Window::~Window()
@@ -74,21 +74,21 @@ namespace Client { namespace Window { namespace Sdl {
             }
             this->_size = this->_targetSize;
             this->_renderer->SetScreenSize(this->_size);
-            this->_renderer->SetViewport(Tools::Rectangle(Tools::Vector2i(0), this->_size));
+            this->_renderer->SetViewport(Tools::Rectangle(glm::ivec2(0), this->_size));
             this->_OnResize(this->_size);
             this->_targetSize.w = 0;
             this->_targetSize.h = 0;
         }
     }
 
-    void Window::Resize(Tools::Vector2u const& size)
+    void Window::Resize(glm::uvec2 const& size)
     {
         this->_targetSize = size;
     }
 
     void Window::Resize(unsigned int w, unsigned int h)
     {
-        this->Resize(Tools::Vector2u(w, h));
+        this->Resize(glm::uvec2(w, h));
     }
 
 }}}

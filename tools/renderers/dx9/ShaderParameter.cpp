@@ -50,19 +50,19 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_effect->SetFloatArray(this->_param, color.colors, 4);
     }
 
-    void ShaderParameter::Set(Vector2<float> const& vector)
+    void ShaderParameter::Set(glm::detail::tvec2<float> const& vector)
     {
-        this->_effect->SetFloatArray(this->_param, vector.coords, 2);
+        this->_effect->SetFloatArray(this->_param, (float const*)&vector, 2);
     }
 
-    void ShaderParameter::Set(Vector3<float> const& vector)
+    void ShaderParameter::Set(glm::detail::tvec3<float> const& vector)
     {
-        this->_effect->SetFloatArray(this->_param, vector.coords, 3);
+        this->_effect->SetFloatArray(this->_param, (float const*)&vector, 3);
     }
 
-    void ShaderParameter::Set(Matrix4<float> const& matrix)
+    void ShaderParameter::Set(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_effect->SetMatrixTranspose(this->_param, (D3DXMATRIX const*)matrix.mm);
+        this->_effect->SetMatrixTranspose(this->_param, (D3DXMATRIX const*)&matrix);
     }
 
     void ShaderParameter::Set(std::vector<glm::mat4x4> const& matrices)

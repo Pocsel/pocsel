@@ -26,22 +26,28 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         switch (usage)
         {
         case ShaderParameterUsage::ModelViewProjectionMatrix:
-            this->_renderer.SetMatrixMode(GL_MODELVIEW);
-            GLCHECK(glLoadMatrixf((this->_renderer.GetModelMatrix() * this->_renderer.GetViewMatrix()).mm));
-            this->_renderer.SetMatrixMode(GL_PROJECTION);
-            GLCHECK(glLoadMatrixf(this->_renderer.GetProjectionMatrix().mm));
+            {
+                this->_renderer.SetMatrixMode(GL_MODELVIEW);
+                auto mat = this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix();
+                GLCHECK(glLoadMatrixf((float*)&mat));
+                this->_renderer.SetMatrixMode(GL_PROJECTION);
+                GLCHECK(glLoadMatrixf((float*)&this->_renderer.GetProjectionMatrix()));
+            }
             break;
 
         case ShaderParameterUsage::ModelViewMatrix:
         case ShaderParameterUsage::ModelMatrix:
         case ShaderParameterUsage::ViewMatrix:
-            this->_renderer.SetMatrixMode(GL_MODELVIEW);
-            GLCHECK(glLoadMatrixf((this->_renderer.GetModelMatrix() * this->_renderer.GetViewMatrix()).mm));
+            {
+                this->_renderer.SetMatrixMode(GL_MODELVIEW);
+                auto mat = this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix();
+                GLCHECK(glLoadMatrixf((float*)&mat));
+            }
             break;
 
         case ShaderParameterUsage::ProjectionMatrix:
             this->_renderer.SetMatrixMode(GL_PROJECTION);
-            GLCHECK(glLoadMatrixf(this->_renderer.GetProjectionMatrix().mm));
+            GLCHECK(glLoadMatrixf((float*)&this->_renderer.GetProjectionMatrix()));
             break;
 
         default:

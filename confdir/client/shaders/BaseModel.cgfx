@@ -16,19 +16,21 @@ sampler2D baseTex = sampler_state
 
 float4x4 boneMatrix[MAX_BONES];
 
-void vs(
-        float4   position    : POSITION,
-        float3   normal      : NORMAL,
-        float2   texCoord    : TEXCOORD0,
-        float4   weight      : TEXCOORD1,
-        float4   matrixIndex : TEXCOORD2,
+struct VSout
+{
+    float4   oPosition   : POSITION;
+    float4   objNormal   : TEXCOORD3;
+    float2   oTexCoord   : TEXCOORD0;
+    float    ofogFactor  : TEXCOORD1;
+    float4   objPosition : TEXCOORD2;
+};
 
-        out float4   oPosition   : POSITION,
-        out float4   objNormal   : NORMAL,
-        out float2   oTexCoord   : TEXCOORD0,
-        out float    ofogFactor  : TEXCOORD1,
-        out float4   objPosition : TEXCOORD2
-        )
+VSout vs(
+        in float4   position    : POSITION,
+        in float3   normal      : NORMAL,
+        in float2   texCoord    : TEXCOORD0,
+        in float4   weight      : TEXCOORD1,
+        in float4   matrixIndex : TEXCOORD2)
 {
     float4x4 matTransform = boneMatrix[matrixIndex.x] * weight.x;
     matTransform += boneMatrix[matrixIndex.y] * weight.y;
@@ -36,27 +38,24 @@ void vs(
     float finalWeight = 1.0f - ( weight.x + weight.y + weight.z );
     matTransform += boneMatrix[matrixIndex.w] * finalWeight;
 
-    objPosition = mul(matTransform, position);
-    objNormal = mul(matTransform, float4(normal, 0.0f));
-    oTexCoord = texCoord;
+    VSout vout;
+    vout.objPosition = mul(matTransform, position);
+    vout.objNormal = mul(matTransform, float4(normal, 0.0f));
+    vout.oTexCoord = texCoord;
     
-    oPosition = mul(mvp, objPosition);
-    float fog = clamp(abs(oPosition.z), 0, fogEnd);
+    vout.oPosition = mul(mvp, vout.objPosition);
+    float fog = clamp(abs(vout.oPosition.z), 0, fogEnd);
     fog = (fogEnd - fog) / fogEnd;
-    ofogFactor = clamp(fog, 0, 1);
+    vout.ofogFactor = clamp(fog, 0, 1);
+    return vout;
 }
 
-float4 fs(
-        float4    tmpNormal   : NORMAL,
-        float2    texCoord    : TEXCOORD0,
-        float     fogFactor   : TEXCOORD1,
-        float4    objPosition : TEXCOORD2
-        ) : COLOR
+float4 fs(VSout v) : COLOR
 {
-    float3 normal = normalize(tmpNormal.xyz);
-    float4 c = tex2D(baseTex, texCoord);
+    float3 normal = normalize(v.objNormal.xyz);
+    float4 c = tex2D(baseTex, v.oTexCoord);
     float lightIntensity = dot(-lightDirection, normal) * 0.35 + 0.65;
-    c.rgb = lightIntensity * lerp(fogColor, normal, fogFactor);
+    c.rgb = lightIntensity * lerp(fogColor, normal, v.ofogFactor);
     return c;
 }
 

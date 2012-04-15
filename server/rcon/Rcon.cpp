@@ -8,7 +8,6 @@ namespace Server { namespace Rcon {
 
     Rcon::Rcon(Server& server) :
         _server(server),
-        _ioService(),
         _acceptor(this->_ioService),
         _thread(0)
     {
@@ -28,7 +27,6 @@ namespace Server { namespace Rcon {
             this->_acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
             this->_acceptor.bind(endpoint);
             this->_acceptor.listen();
-            this->_ConnectAccept();
             Tools::log <<
                 "Rcon: Listening on " << endpoint.address().to_string()
                 << ":" << settings.rconPort << std::endl;

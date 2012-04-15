@@ -14,7 +14,7 @@ namespace Common {
         static std::unique_ptr<MovingOrientedPosition> Read(Tools::ByteArray const& p)
         {
             Common::OrientedPosition pos;
-            Tools::Vector3f movement;
+            glm::fvec3 movement;
             p.Read(pos);
             p.Read(movement);
 

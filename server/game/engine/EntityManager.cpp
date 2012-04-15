@@ -270,7 +270,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Ref firstArg = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"");
         if (firstArg.IsTable())
         {
-            pos = Tools::Lua::Utils::Vector::TableToVector3<double>(firstArg);
+            pos = Tools::Lua::Utils::Vector::TableToVec3<double>(firstArg);
             firstArg = helper.PopArg("Server.Entity.Spawn[FromPlugin]: Missing argument \"entityName\"");
         }
         std::string plugin = firstArg.CheckString("Server.Entity.Spawn[FromPlugin]: Argument \"plugin\" must be a string");
@@ -282,7 +282,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         Common::Position pos;
         if (helper.GetNbArgs() && helper.GetArgList().front().IsTable())
-            pos = Tools::Lua::Utils::Vector::TableToVector3<double>(helper.PopArg());
+            pos = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg());
         Uint32 pluginId = this->_runningEntity->GetType().GetPluginId();
         this->_SpawnFromPlugin(pos, pluginId, helper);
     }
@@ -313,7 +313,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::_ApiKill(Tools::Lua::CallHelper& helper)
     {
-        Uint32 targetId = helper.PopArg("Server.Entity.Kill: Missing argument \"target\"").CheckNumber("Server.Entity.Kill: Argument \"target\" must be a number");
+        Uint32 targetId = helper.PopArg("Server.Entity.Kill: Missing argument \"target\"").Check<Uint32>("Server.Entity.Kill: Argument \"target\" must be a number");
         Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;
@@ -372,6 +372,27 @@ namespace Server { namespace Game { namespace Engine {
     {
         helper.PushArg(this->_engine.GetInterpreter().MakeBoolean(true));
         this->_ApiRegister(helper);
+    }
+
+    std::string EntityManager::RconGetEntities() const
+    {
+        std::string json = "[\n";
+        auto it = this->_entities.begin();
+        auto itEnd = this->_entities.end();
+        for (; it != itEnd; ++it)
+        {
+            if (it != this->_entities.begin())
+                json += ",\n";
+            json +=
+                "\t{\n"
+                "\t\t\"id\": " + Tools::ToString(it->first) + ",\n" +
+                "\t\t\"type\": \"" + it->second->GetType().GetName() + "\",\n" +
+                "\t\t\"plugin\": \"" + this->_engine.GetMap().GetGame().GetWorld().GetPluginManager().GetPluginIdentifier(it->second->GetType().GetPluginId()) + "\",\n" +
+                "\t\t\"positional\": " + (it->second->GetType().IsPositional() ? "true" : "false") + "\n" +
+                "\t}";
+        }
+        json += "\n]\n";
+        return json;
     }
 
 }}}

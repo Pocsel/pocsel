@@ -1,3 +1,4 @@
+#if 0
 #ifndef __TOOLS_MATRIX4_HPP__
 #define __TOOLS_MATRIX4_HPP__
 
@@ -15,56 +16,56 @@ namespace Tools {
             T mm[16];
         };
 
-        static const Matrix4<T> identity;
+        static const glm::detail::tmat4x4<T> identity;
 
-        static Matrix4<T> CreateTranslation(Vector3<T> const& v);
-        static Matrix4<T> CreateTranslation(T tx, T ty, T tz);
-        static Matrix4<T> CreateScale(Vector3<T> const& v);
-        static Matrix4<T> CreateScale(T sx, T sy, T sz );
-        static Matrix4<T> CreateYawPitchRollRotation(T yaw, T pitch, T roll);
+        static glm::detail::tmat4x4<T> CreateTranslation(glm::detail::tvec3<T> const& v);
+        static glm::detail::tmat4x4<T> CreateTranslation(T tx, T ty, T tz);
+        static glm::detail::tmat4x4<T> CreateScale(glm::detail::tvec3<T> const& v);
+        static glm::detail::tmat4x4<T> CreateScale(T sx, T sy, T sz );
+        static glm::detail::tmat4x4<T> CreateYawPitchRollRotation(T yaw, T pitch, T roll);
 
-        static Matrix4<T> CreateOrthographic(T left, T right, T bottom, T top, T zNearPlane, T zFarPlane);
-        static Matrix4<T> CreatePerspective(T fov, T ratio, T zNearPlane, T zFarPlane);
-        static Matrix4<T> CreatePerspective2(T horizontalFov, T verticalFov, T zNearPlane, T zFarPlane);
-        static Matrix4<T> CreateLookAt(Vector3<T> const& eye, Vector3<T> const& center, Vector3<T> const& up);
+        static glm::detail::tmat4x4<T> CreateOrthographic(T left, T right, T bottom, T top, T zNearPlane, T zFarPlane);
+        static glm::detail::tmat4x4<T> CreatePerspective(T fov, T ratio, T zNearPlane, T zFarPlane);
+        static glm::detail::tmat4x4<T> CreatePerspective2(T horizontalFov, T verticalFov, T zNearPlane, T zFarPlane);
+        static glm::detail::tmat4x4<T> CreateLookAt(glm::detail::tvec3<T> const& eye, glm::detail::tvec3<T> const& center, glm::detail::tvec3<T> const& up);
 
         Matrix4() {}
         template<typename Targ>
-        explicit Matrix4(Matrix4<Targ> const& matrix);
+        explicit Matrix4(glm::detail::tmat4x4<Targ> const& matrix);
         Matrix4(T m00, T m01, T m02, T m03,
                 T m10, T m11, T m12, T m13,
                 T m20, T m21, T m22, T m23,
                 T m30, T m31, T m32, T m33);
 
-        Matrix4<T> operator *(Matrix4<T> const& m2) const;
-        Matrix4<T> operator +(Matrix4<T> const& m2) const;
-        Matrix4<T> operator -(Matrix4<T> const& m2) const;
-        bool operator ==(Matrix4<T> const& m2) const;
-        bool operator !=(Matrix4<T> const& m2) const;
+        glm::detail::tmat4x4<T> operator *(glm::detail::tmat4x4<T> const& m2) const;
+        glm::detail::tmat4x4<T> operator +(glm::detail::tmat4x4<T> const& m2) const;
+        glm::detail::tmat4x4<T> operator -(glm::detail::tmat4x4<T> const& m2) const;
+        bool operator ==(glm::detail::tmat4x4<T> const& m2) const;
+        bool operator !=(glm::detail::tmat4x4<T> const& m2) const;
 
-        Matrix4<T> Transpose(void) const;
-        void Translate(Vector3<T> const& v);
-        void Scale(Vector3<T> const& v);
+        glm::detail::tmat4x4<T> Transpose(void) const;
+        void Translate(glm::detail::tvec3<T> const& v);
+        void Scale(glm::detail::tvec3<T> const& v);
     };
 
     // Implementation
     template<class T>
-    const Matrix4<T> Matrix4<T>::identity(
+    const glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::identity(
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1);
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreateTranslation(Vector3<T> const& v)
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreateTranslation(glm::detail::tvec3<T> const& v)
     {
-        return Matrix4<T>::CreateTranslation(v.x, v.y, v.z);
+        return glm::detail::tmat4x4<T>::CreateTranslation(v.x, v.y, v.z);
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreateTranslation(T tx, T ty, T tz)
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreateTranslation(T tx, T ty, T tz)
     {
-        Matrix4<T> r = Matrix4<T>::identity;
+        glm::detail::tmat4x4<T> r = glm::detail::tmat4x4<T>::identity;
         r.m[3][0] = tx;
         r.m[3][1] = ty;
         r.m[3][2] = tz;
@@ -72,15 +73,15 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreateScale(Vector3<T> const& v)
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreateScale(glm::detail::tvec3<T> const& v)
     {
-        return Matrix4<T>::CreateScale(v.x, v.y, v.z);
+        return glm::detail::tmat4x4<T>::CreateScale(v.x, v.y, v.z);
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreateScale(T sx, T sy, T sz )
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreateScale(T sx, T sy, T sz )
     {
-        Matrix4<T> r = Matrix4<T>::identity;
+        glm::detail::tmat4x4<T> r = glm::detail::tmat4x4<T>::identity;
         r.m[0][0] = sx;
         r.m[1][1] = sy;
         r.m[2][2] = sz;
@@ -88,7 +89,7 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreateYawPitchRollRotation(T yaw, T pitch, T roll)
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreateYawPitchRollRotation(T yaw, T pitch, T roll)
     {
         T num2(std::sin(roll / 2));
         T num3(std::cos(roll / 2));
@@ -114,7 +115,7 @@ namespace Tools {
         T yz = y * z;
         T xw = x * w;
 
-        Matrix4<T> r;
+        glm::detail::tmat4x4<T> r;
         r.m[0][0] = 1 - 2 * (yy + zz);
         r.m[0][1] = 2 * (xy + zw);
         r.m[0][2] = 2 * (zx - yw);
@@ -135,9 +136,9 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreateOrthographic(T left, T right, T bottom, T top, T zNearPlane, T zFarPlane)
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreateOrthographic(T left, T right, T bottom, T top, T zNearPlane, T zFarPlane)
     {
-        Matrix4<T> r = Matrix4<T>::identity;
+        glm::detail::tmat4x4<T> r = glm::detail::tmat4x4<T>::identity;
         r.m[0][0] = 2 / (right - left);
         r.m[1][1] = 2 / (top - bottom);
         r.m[2][2] = 1 / (zNearPlane - zFarPlane);
@@ -148,13 +149,13 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreatePerspective(T fov, T ratio, T zNearPlane, T zFarPlane)
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreatePerspective(T fov, T ratio, T zNearPlane, T zFarPlane)
     {
         T rad = T(fov * 0.01745329251994329576923690768489);
         T h = T(1.0 / std::tan(T(0.5) * rad));
         T w = h / ratio;
 
-        Matrix4<T> r;
+        glm::detail::tmat4x4<T> r;
         r.m[0][0] = w;
         r.m[0][1] = 0;
         r.m[0][2] = 0;
@@ -178,14 +179,14 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreatePerspective2(T horizontalFov, T verticalFov, T zNearPlane, T zFarPlane)
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreatePerspective2(T horizontalFov, T verticalFov, T zNearPlane, T zFarPlane)
     {
         T rad = T(verticalFov * 0.01745329251994329576923690768489);
         T h = T(1.0 / std::tan(rad * T(0.5)));
         rad = T(horizontalFov * 0.01745329251994329576923690768489);
         T w = T(1.0 / std::tan(rad * T(0.5)));
 
-        Matrix4<T> r(Matrix4<T>::identity);
+        glm::detail::tmat4x4<T> r(glm::detail::tmat4x4<T>::identity);
         r.m[0][0] = w;
         r.m[1][1] = h;
         r.m[2][2] = (zFarPlane + zNearPlane) / (zFarPlane - zNearPlane);
@@ -195,16 +196,16 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::CreateLookAt(Vector3<T> const& eye, Vector3<T> const& target, Vector3<T> const& upDir)
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::CreateLookAt(glm::detail::tvec3<T> const& eye, glm::detail::tvec3<T> const& target, glm::detail::tvec3<T> const& upDir)
     {
         auto forward = eye - target; // vecteur qui part devant moi (avec un moins mais ça marche, ne demandez pas pourquoi x))
         forward.Normalize();
-        auto left = Vector3<T>::Cross(upDir, forward); // vecteur d'un coté (ou de l'autre)
+        auto left = glm::detail::tvec3<T>::Cross(upDir, forward); // vecteur d'un coté (ou de l'autre)
         left.Normalize();
-        auto up = Vector3<T>::Cross(forward, left); // le haut de la caméra
+        auto up = glm::detail::tvec3<T>::Cross(forward, left); // le haut de la caméra
         up.Normalize();
 
-        Matrix4<T> r;
+        glm::detail::tmat4x4<T> r;
         r.m[0][0] = left.x;
         r.m[0][1] = up.x;
         r.m[0][2] = forward.x;
@@ -217,20 +218,20 @@ namespace Tools {
         r.m[2][1] = up.z;
         r.m[2][2] = forward.z;
         r.m[2][3] = 0;
-        //r.m[3][0] = -Vector3<T>::Dot(left, eye);
-        //r.m[3][1] = -Vector3<T>::Dot(up, eye);
-        //r.m[3][2] = -Vector3<T>::Dot(forward, eye);
+        //r.m[3][0] = -glm::detail::tvec3<T>::Dot(left, eye);
+        //r.m[3][1] = -glm::detail::tvec3<T>::Dot(up, eye);
+        //r.m[3][2] = -glm::detail::tvec3<T>::Dot(forward, eye);
         r.m[3][0] = 0;
         r.m[3][1] = 0;
         r.m[3][2] = 0;
         r.m[3][3] = 1;
 
-        return Matrix4<T>::CreateTranslation(-eye) * r;
+        return glm::detail::tmat4x4<T>::CreateTranslation(-eye) * r;
     }
 
     template<class T>
     template<typename Targ>
-    Matrix4<T>::Matrix4(Matrix4<Targ> const& matrix)
+    glm::detail::tmat4x4<T>::Matrix4(glm::detail::tmat4x4<Targ> const& matrix)
     {
         m[0][0] = T(matrix.m[0][0]);
         m[0][1] = T(matrix.m[0][1]);
@@ -251,7 +252,7 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T>::Matrix4(T m00, T m01, T m02, T m03,
+    glm::detail::tmat4x4<T>::Matrix4(T m00, T m01, T m02, T m03,
                 T m10, T m11, T m12, T m13,
                 T m20, T m21, T m22, T m23,
                 T m30, T m31, T m32, T m33)
@@ -275,9 +276,9 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::operator *(Matrix4<T> const& m2) const
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::operator *(glm::detail::tmat4x4<T> const& m2) const
     {
-        Matrix4<T> r;
+        glm::detail::tmat4x4<T> r;
 
         r.m[0][0] = m[0][0] * m2.m[0][0] + m[0][1] * m2.m[1][0] + m[0][2] * m2.m[2][0] + m[0][3] * m2.m[3][0];
         r.m[0][1] = m[0][0] * m2.m[0][1] + m[0][1] * m2.m[1][1] + m[0][2] * m2.m[2][1] + m[0][3] * m2.m[3][1];
@@ -303,9 +304,9 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::operator +(Matrix4<T> const& m2) const
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::operator +(glm::detail::tmat4x4<T> const& m2) const
     {
-        Matrix4<T> r;
+        glm::detail::tmat4x4<T> r;
 
         r.m[0][0] = m[0][0] + m2.m[0][0];
         r.m[0][1] = m[0][1] + m2.m[0][1];
@@ -331,9 +332,9 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::operator -(Matrix4<T> const& m2) const
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::operator -(glm::detail::tmat4x4<T> const& m2) const
     {
-        Matrix4<T> r;
+        glm::detail::tmat4x4<T> r;
 
         r.m[0][0] = m[0][0] - m2.m[0][0];
         r.m[0][1] = m[0][1] - m2.m[0][1];
@@ -359,7 +360,7 @@ namespace Tools {
     }
 
     template<class T>
-    bool Matrix4<T>::operator ==(Matrix4<T> const& m2) const
+    bool glm::detail::tmat4x4<T>::operator ==(glm::detail::tmat4x4<T> const& m2) const
     {
         if (m[0][0] != m2.m[0][0] || m[0][1] != m2.m[0][1] || m[0][2] != m2.m[0][2] || m[0][3] != m2.m[0][3] ||
             m[1][0] != m2.m[1][0] || m[1][1] != m2.m[1][1] || m[1][2] != m2.m[1][2] || m[1][3] != m2.m[1][3] ||
@@ -370,7 +371,7 @@ namespace Tools {
     }
 
     template<class T>
-    bool Matrix4<T>::operator !=(Matrix4<T> const& m2) const
+    bool glm::detail::tmat4x4<T>::operator !=(glm::detail::tmat4x4<T> const& m2) const
     {
         if (m[0][0] != m2.m[0][0] || m[0][1] != m2.m[0][1] || m[0][2] != m2.m[0][2] || m[0][3] != m2.m[0][3] ||
             m[1][0] != m2.m[1][0] || m[1][1] != m2.m[1][1] || m[1][2] != m2.m[1][2] || m[1][3] != m2.m[1][3] ||
@@ -381,9 +382,9 @@ namespace Tools {
     }
 
     template<class T>
-    Matrix4<T> Matrix4<T>::Transpose(void) const
+    glm::detail::tmat4x4<T> glm::detail::tmat4x4<T>::Transpose(void) const
     {
-        return Matrix4<T>(
+        return glm::detail::tmat4x4<T>(
             m[0][0], m[1][0], m[2][0], m[3][0],
             m[0][1], m[1][1], m[2][1], m[3][1],
             m[0][2], m[1][2], m[2][2], m[3][2],
@@ -391,10 +392,10 @@ namespace Tools {
     }
 
     template<class T>
-    void Matrix4<T>::Translate(Vector3<T> const& v)
+    void glm::detail::tmat4x4<T>::Translate(glm::detail::tvec3<T> const& v)
     {
         //slow ><
-        *this = *this * Matrix4<T>::CreateTranslation(v);
+        *this = *this * glm::detail::tmat4x4<T>::CreateTranslation(v);
         /*
         this->m[0][3] = m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z + m[0][3];
         this->m[1][3] = m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z + m[1][3];
@@ -404,7 +405,7 @@ namespace Tools {
     }
 
     template<class T>
-    void Matrix4<T>::Scale(Vector3<T> const& v)
+    void glm::detail::tmat4x4<T>::Scale(glm::detail::tvec3<T> const& v)
     {
         this->m[0][0] *= v.x;
         this->m[0][1] *= v.x;
@@ -421,4 +422,5 @@ namespace Tools {
 
 }
 
+#endif
 #endif

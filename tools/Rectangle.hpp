@@ -8,12 +8,12 @@ namespace Tools {
     struct Rectangle
     {
     public:
-        Vector2<int> pos;
-        Vector2<unsigned int> size;
+        glm::detail::tvec2<int> pos;
+        glm::detail::tvec2<unsigned int> size;
 
     public:
         Rectangle() : pos(), size() {}
-        Rectangle(Vector2<int> pos, Vector2<unsigned int> size) : pos(pos), size(size) {}
+        Rectangle(glm::detail::tvec2<int> pos, glm::detail::tvec2<unsigned int> size) : pos(pos), size(size) {}
         Rectangle(int x, int y, unsigned int w, unsigned int h) : pos(x, y), size(w, h) {}
         bool operator ==(Rectangle const& other) const
         {
@@ -27,7 +27,7 @@ namespace Tools {
                 this->pos.y < y &&
                 y < this->pos.y + static_cast<int>(this->size.y);
         }
-        bool Contains(Vector2<int> const& vec) const
+        bool Contains(glm::detail::tvec2<int> const& vec) const
         {
             return this->Contains(vec.x, vec.y);
         }

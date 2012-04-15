@@ -225,7 +225,7 @@ namespace Server { namespace Game { namespace Map {
     {
         // les limites du monde lol
 //        this->_spawnPosition = new Common::Position(1000.0);
-//        *this->_spawnPosition += Tools::Vector3d(0.5, 2.5, 0.5);
+//        *this->_spawnPosition += glm::dvec3(0.5, 2.5, 0.5);
 //        for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
 //            (*it)(*this->_spawnPosition);
 //        this->_spawnRequests.clear();
@@ -238,8 +238,8 @@ namespace Server { namespace Game { namespace Map {
                 CubeType const& biet = this->_conf.cubeTypes[chunk->GetCube(0, y, 0) - 1];
                 if (biet.solid)
                 {
-                    this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(0, (float)y, 0));
-                    *this->_spawnPosition += Tools::Vector3d(0.5, 4.5, 0.5);
+                    this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + glm::dvec3(0, (float)y, 0));
+                    *this->_spawnPosition += glm::dvec3(0.5, 4.5, 0.5);
                     for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                         (*it)(*this->_spawnPosition);
                     this->_spawnRequests.clear();
@@ -254,8 +254,8 @@ namespace Server { namespace Game { namespace Map {
                             CubeType const& biet = this->_conf.cubeTypes[chunk->GetCube(x, y, 0) - 1];
                             if (biet.solid)
                             {
-                                this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + Tools::Vector3d(x, y, 0));
-                                *this->_spawnPosition += Tools::Vector3d(0.5f, 4.5f, 0.5f);
+                                this->_spawnPosition = new Common::Position(Common::GetChunkPosition(chunk->coords) + glm::dvec3(x, y, 0));
+                                *this->_spawnPosition += glm::dvec3(0.5f, 4.5f, 0.5f);
                                 for (auto it = this->_spawnRequests.begin(), ite = this->_spawnRequests.end(); it != ite; ++it)
                                     (*it)(*this->_spawnPosition);
                                 this->_spawnRequests.clear();
@@ -458,6 +458,18 @@ namespace Server { namespace Game { namespace Map {
         Tools::SimpleMessageQueue::Message
             m(std::bind(&Map::_TimedSave, this));
         this->_messageQueue->PushTimedMessage(SaveTime * 1000000, m);
+    }
+
+    void Map::RconGetEntities(std::function<void(std::string)> cb) const
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_RconGetEntities, this, cb));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::_RconGetEntities(std::function<void(std::string)> cb) const
+    {
+        cb(this->_engine->GetEntityManager().RconGetEntities());
     }
 
 }}}

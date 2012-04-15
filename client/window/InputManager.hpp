@@ -29,9 +29,9 @@ namespace Client { namespace Window {
         void TriggerAction(InputBinder::Action const& action, BindAction::Type type);
         void TriggerAction(std::string const& action, BindAction::Type type);
         void TriggerAction(BindAction::BindAction action, BindAction::Type type);
-        virtual Tools::Vector2i const& GetMousePos() const = 0;
-        virtual Tools::Vector2i GetMousePosRealTime() const = 0;
-        virtual void WarpMouse(Tools::Vector2i const& pos) = 0;
+        virtual glm::ivec2 const& GetMousePos() const = 0;
+        virtual glm::ivec2 GetMousePosRealTime() const = 0;
+        virtual void WarpMouse(glm::ivec2 const& pos) = 0;
         virtual void WarpMouse(int x, int y) = 0;
         virtual void ShowMouse() = 0;
         virtual bool MouseShown() const = 0;

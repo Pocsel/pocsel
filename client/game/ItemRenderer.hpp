@@ -46,7 +46,6 @@ namespace Client { namespace Game {
         void Update(Uint32 time);
 
     private:
-        void _InitVertexBuffer();
     };
 
 }}

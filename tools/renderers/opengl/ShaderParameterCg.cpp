@@ -48,19 +48,19 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         cgSetParameter4fv(this->_param, color.colors);
     }
 
-    void ShaderParameterCg::Set(Vector2<float> const& vector)
+    void ShaderParameterCg::Set(glm::detail::tvec2<float> const& vector)
     {
-        cgSetParameter2fv(this->_param, vector.coords);
+        cgSetParameter2fv(this->_param, (float*)&vector);
     }
 
-    void ShaderParameterCg::Set(Vector3<float> const& vector)
+    void ShaderParameterCg::Set(glm::detail::tvec3<float> const& vector)
     {
-        cgSetParameter3fv(this->_param, vector.coords);
+        cgSetParameter3fv(this->_param, (float*)&vector);
     }
 
-    void ShaderParameterCg::Set(Matrix4<float> const& matrix)
+    void ShaderParameterCg::Set(glm::detail::tmat4x4<float> const& matrix)
     {
-        cgSetMatrixParameterfc(this->_param, matrix.mm);
+        cgSetMatrixParameterfc(this->_param, (float*)&matrix);
     }
 
     void ShaderParameterCg::Set(std::vector<glm::mat4x4> const& matrices)
