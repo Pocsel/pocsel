@@ -1,5 +1,5 @@
-#ifndef __TOOLS_METATABLES_METATABLES_HPP__
-#define __TOOLS_METATABLES_METATABLES_HPP__
+#ifndef __TOOLS_LUA_UTILS_UTILS_HPP__
+#define __TOOLS_LUA_UTILS_UTILS_HPP__
 
 namespace Tools { namespace Lua {
     class Interpreter;
