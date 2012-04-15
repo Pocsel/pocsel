@@ -1,13 +1,9 @@
 #ifndef __SERVER_GAME_MAP_CONF_HPP__
 #define __SERVER_GAME_MAP_CONF_HPP__
 
-namespace Common {
+namespace Server { namespace Game { namespace Map {
 
     struct CubeType;
-
-}
-
-namespace Server { namespace Game { namespace Map {
 
     struct Conf
     {
@@ -29,16 +25,16 @@ namespace Server { namespace Game { namespace Map {
         struct ValidationBlocConf
         {
             int priority;
-            Common::CubeType const* cube_type; // ça se répète avec celui de CubeConf mais c'est fait exprès
+            CubeType const* cube_type; // ça se répète avec celui de CubeConf mais c'est fait exprès
             std::list<ValidatorConf> validators;
         };
         struct CubeConf
         {
-            Common::CubeType const* type;
+            CubeType const* type;
             std::list<ValidationBlocConf> validation_blocs;
         };
         std::map<std::string, CubeConf> cubes;
-        std::vector<Common::CubeType> const* cubeTypes;
+        std::vector<CubeType> cubeTypes;
     };
 
 }}}

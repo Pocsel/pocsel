@@ -34,10 +34,10 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         Perlin* _perlin;
 
     public:
-        explicit ChunkGenerator(Conf const& conf);
+        ChunkGenerator();
         ~ChunkGenerator();
 
-        void Start();
+        void Start(Conf const& conf);
         void Stop();
 
         void GetChunk(Chunk::IdType id, Callback& callback);

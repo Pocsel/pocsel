@@ -1,10 +1,10 @@
 #ifndef __SERVER_GAME_MAP_MAP_HPP__
 #define __SERVER_GAME_MAP_MAP_HPP__
 
-#include "server/game/map/Conf.hpp"
-
-#include "server/game/map/Chunk.hpp"
 #include "server/game/map/BigChunk.hpp"
+#include "server/game/map/Chunk.hpp"
+#include "server/game/map/Conf.hpp"
+#include "server/game/map/CubeType.hpp"
 #include "common/Position.hpp"
 #include "common/CubePosition.hpp"
 
@@ -16,11 +16,13 @@ namespace Common {
 
 namespace Tools {
     class SimpleMessageQueue;
+    namespace Database {
+        class IConnection;
+    }
+    namespace Lua {
+        class Interpreter;
+    }
 }
-
-namespace Tools { namespace Database {
-    class IConnection;
-}}
 
 namespace Server { namespace Game {
     class Game;
@@ -46,6 +48,10 @@ namespace Server { namespace Game { namespace Map {
         typedef std::function<void(Common::Position const& pos)> SpawnCallback;
 
     private:
+        enum {
+            SaveTime = 600,
+            SaveRetryTime = 10
+        };
         Conf _conf;
         Game& _game;
         Tools::SimpleMessageQueue* _messageQueue;
@@ -72,10 +78,15 @@ namespace Server { namespace Game { namespace Map {
         void Save();
 
         std::string const& GetName() const { return this->_conf.name; }
+        Conf& GetConfiguration() { return this->_conf; }
+        std::string const& GetFullName() const { return this->_conf.fullname; }
         Engine::Engine& GetEngine() { return *this->_engine; }
         Game& GetGame() { return this->_game; }
 
         // threadsafe
+        std::vector<CubeType> const& GetCubeTypes() const { return this->_conf.cubeTypes; }
+        CubeType const& GetCubeType(Uint32 id) const { assert(id != 0); return this->_conf.cubeTypes[id - 1]; }
+        bool HasCubeType(Uint32 id) const { return id && this->_conf.cubeTypes.size() >= id; }
         void HandleNewChunk(Chunk* chunk);
         void GetSpawnPosition(SpawnCallback& response);
         void GetChunk(Chunk::IdType id, ChunkCallback& response);
@@ -86,6 +97,9 @@ namespace Server { namespace Game { namespace Map {
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
+
+        // rcon requests
+        void RconGetEntities(std::function<void(std::string)> cb) const;
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
@@ -105,6 +119,9 @@ namespace Server { namespace Game { namespace Map {
         void _SendChunkToPlayers(Chunk* chunk);
         void _Tick(Uint64 currentTime);
         void _TimedSave();
+
+        // rcon requests
+        void _RconGetEntities(std::function<void(std::string)> cb) const;
     };
 
 }}}

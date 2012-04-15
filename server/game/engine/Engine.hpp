@@ -1,6 +1,8 @@
 #ifndef __SERVER_GAME_ENGINE_ENGINE_HPP__
 #define __SERVER_GAME_ENGINE_ENGINE_HPP__
 
+#include "server/game/engine/EntityManager.hpp"
+
 namespace Tools { namespace Database {
     class IConnection;
 }}
@@ -16,7 +18,6 @@ namespace Server { namespace Game { namespace Map {
 namespace Server { namespace Game { namespace Engine {
 
     class MessageManager;
-    class EntityManager;
     class CallbackManager;
 
     class Engine :
@@ -29,6 +30,7 @@ namespace Server { namespace Game { namespace Engine {
         EntityManager* _entityManager;
         CallbackManager* _callbackManager;
         Uint64 _currentTime;
+        Uint32 _overridedPluginId;
 
     public:
         Engine(Map::Map& map);
@@ -41,6 +43,8 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
+        Uint32 GetRunningPluginId() { return this->_overridedPluginId; }// TODO: { return this->_overridedPluginId ? this->_overridedPluginId : this->_entityManager->... }
+        void SetRunningPluginId(Uint32 pluginId) { this->_overridedPluginId = pluginId; }
     };
 
 }}}

@@ -6,7 +6,7 @@
 
 namespace Common {
 
-    typedef Tools::Vector3u CubePosition;
+    typedef glm::uvec3 CubePosition;
 
     /* coordonnées entières du chunk contenant ce cube */
     inline BaseChunk::CoordsType GetChunkCoords(CubePosition const& pos);
@@ -38,17 +38,17 @@ namespace Common {
 //        BaseChunk::CoordsType chunk;
 //
 //        CubePosition() {}
-//        //CubePosition(Tools::Vector3d /* Position */ const& pos) :
+//        //CubePosition(glm::dvec3 /* Position */ const& pos) :
 //        //    world(GetChunkCoords(pos)),
 //        //    chunk(GetCubeCoordsInChunk(pos))
 //        //{
 //        //}
-//        CubePosition(BaseChunk::CoordsType const& world, Tools::Vector3u const& chk) :
+//        CubePosition(BaseChunk::CoordsType const& world, glm::uvec3 const& chk) :
 //            world(world),
 //            chunk(chk)
 //        {
 //        }
-//        CubePosition(BaseChunk::CoordsType const& world, Tools::Vector3f const& chk) :
+//        CubePosition(BaseChunk::CoordsType const& world, glm::fvec3 const& chk) :
 //            world(world)
 //        {
 //            chunk = BaseChunk::CoordsType(chk);

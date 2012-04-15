@@ -15,7 +15,7 @@ namespace Client { namespace Window {
         Tools::Delete(this->_inputManager);
     }
 
-    int Window::RegisterCallback(std::function<void(Tools::Vector2u const&)> const& callback)
+    int Window::RegisterCallback(std::function<void(glm::uvec2 const&)> const& callback)
     {
         this->_resizeCallbacks[this->_callbackNextId] = callback;
         return this->_callbackNextId++;
@@ -26,7 +26,7 @@ namespace Client { namespace Window {
         this->_resizeCallbacks.erase(callbackId);
     }
 
-    void Window::_OnResize(Tools::Vector2u const& newSize)
+    void Window::_OnResize(glm::uvec2 const& newSize)
     {
         for (auto it = this->_resizeCallbacks.begin(), ite = this->_resizeCallbacks.end(); it != ite; ++it)
             it->second(newSize);

@@ -108,9 +108,9 @@ namespace Client { namespace Window { namespace Sdl {
         this->_showMouse = false;
     }
 
-    Tools::Vector2i InputManager::GetMousePosRealTime() const
+    glm::ivec2 InputManager::GetMousePosRealTime() const
     {
-        Tools::Vector2i ret;
+        glm::ivec2 ret;
         SDL_PumpEvents();
         SDL_GetMouseState(&ret.x, &ret.y);
         return ret;
@@ -130,7 +130,7 @@ namespace Client { namespace Window { namespace Sdl {
         this->_mouseShown = show;
     }
 
-    void InputManager::WarpMouse(Tools::Vector2<int> const& pos)
+    void InputManager::WarpMouse(glm::detail::tvec2<int> const& pos)
     {
         this->WarpMouse(pos.x, pos.y);
     }

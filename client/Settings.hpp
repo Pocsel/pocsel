@@ -8,7 +8,7 @@ namespace Client {
     class Settings
     {
     public:
-        // CLI options
+        // options CLI
         std::string port;
         std::string host;
         boost::filesystem::path confDir;
@@ -18,7 +18,7 @@ namespace Client {
         // settings.lua
         std::string nickname;
         unsigned int fps;
-        Tools::Vector2u res;
+        glm::uvec2 res;
         bool fullscreen;
         bool useShaders;
         bool useDirect3D9;

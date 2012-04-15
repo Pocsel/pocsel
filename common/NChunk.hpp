@@ -18,7 +18,7 @@ namespace Common {
             public:
                 typedef Int64 IdType;
                 typedef Uint32 CoordType;
-                typedef Tools::Vector3<CoordType> CoordsType;
+                typedef glm::detail::tvec3<CoordType> CoordsType;
 
                 enum
                 {

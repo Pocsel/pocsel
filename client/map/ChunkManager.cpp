@@ -21,7 +21,7 @@ namespace Client { namespace Map {
         _loadingProgression(0),
         _threadPool(game.GetClient().GetThreadPool())
     {
-        Tools::Vector3d coords;
+        glm::dvec3 coords;
         coords.y = 0;
         for (unsigned int x = 0 ; x < 4 ; ++x)
         {
@@ -29,7 +29,7 @@ namespace Client { namespace Map {
             for (unsigned int z = 0 ; z < 4 ; ++z)
             {
                 coords.z = z << (22 - 2);
-                this->_octree[x + z * 4] = new Tools::Octree<ChunkNode>(coords * Common::ChunkSize, (1 << 20) * Common::ChunkSize);
+                this->_octree[x + z * 4] = new Tools::Octree<ChunkNode>(coords * (double)Common::ChunkSize, (1 << 20) * Common::ChunkSize);
             }
         }
 
@@ -151,11 +151,6 @@ namespace Client { namespace Map {
         this->_oldPosition = playerPosition;
     }
 
-    void ChunkManager::Render()
-    {
-        this->_chunkRenderer.Render();
-    }
-
     std::shared_ptr<Chunk> ChunkManager::GetChunk(Common::BaseChunk::IdType id) const
     {
         auto it = this->_chunks.find(id);
@@ -170,7 +165,7 @@ namespace Client { namespace Map {
             return;
         unsigned int nbChunks = this->_game.GetClient().GetSettings().chunkViewDistance
             + this->_game.GetClient().GetSettings().chunkCacheArea;
-        Tools::Vector3d pos((Common::GetChunkCoords(playerPosition) - Tools::Vector3u(nbChunks)) * Common::ChunkSize);
+        glm::dvec3 pos((Common::GetChunkCoords(playerPosition) - glm::uvec3(nbChunks)) * Common::ChunkSize);
         Tools::AlignedCube cacheArea(pos, nbChunks * Common::ChunkSize * 2);
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
         {
@@ -407,7 +402,7 @@ namespace Client { namespace Map {
         this->_refreshTasks[&node] = t;
     }
 
-    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Common::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
+    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Game::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
     {
         return chunk->GetMesh()->Refresh(this->_chunkRenderer, cubeTypes, cubes, neighbors);
     }

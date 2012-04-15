@@ -5,6 +5,7 @@
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
 #include "client/resources/LocalResourceManager.hpp"
+#include "client/resources/Md5Model.hpp"
 #include "client/window/Window.hpp"
 
 #include "tools/IRenderer.hpp"
@@ -67,11 +68,15 @@ namespace Client { namespace Resources {
                 Tools::error << "Can't load texture \"" << path << "\", details: " << ex.what() << "\n";
                 texture = this->_textures["__error__"];
             }
-            this->_textures[path] = texture;
+            if (texture == this->_textures["__error__"])
+                this->_textures[path] = 0;
+            else
+                this->_textures[path] = texture;
             return *texture;
         }
-        else
+        else if (it->second != 0)
             return *it->second;
+        return *this->_textures["__error__"];
     }
 
     Tools::Renderers::IShaderProgram& LocalResourceManager::GetShader(std::string const& path)
@@ -97,6 +102,34 @@ namespace Client { namespace Resources {
             return *it->second;
     }
 
+    Md5Model* LocalResourceManager::GetMd5Model(std::string const& path)
+    {
+        Md5Model* model = new Md5Model();
+        try
+        {
+            boost::filesystem::path texturesPath = path;
+            boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
+            modelPath.replace_extension(".md5mesh");
+            if (!model->LoadModel(
+                        modelPath,
+                        texturesPath,
+                        *this
+                        )
+                    )
+                throw std::runtime_error("cant load " + path);
+            boost::filesystem::path animPath = this->_client.GetSettings().confDir / "models" / path;
+            animPath.replace_extension(".md5anim");
+            model->LoadAnim(animPath);
+        }
+        catch (std::exception& ex)
+        {
+            Tools::error << "Can't load Md5Model \"" << path << "\", details: " << ex.what() << "\n";
+            Tools::Delete(model);
+            throw;
+        }
+        return model;
+    }
+
     void LocalResourceManager::_InitErrorTexture()
     {
         unsigned char toto[] = {
@@ -105,7 +138,7 @@ namespace Client { namespace Resources {
             255, 0, 255, 255,
             0, 0, 0, 255
         };
-        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 16, toto, Tools::Vector2u(2, 2)).release();
+        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 16, toto, glm::uvec2(2, 2)).release();
     }
 
 }}

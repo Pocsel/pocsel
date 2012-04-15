@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <title>Remote Console - Pocsel</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="rcon-assets/css/bootstrap.css" rel="stylesheet">
+        <link href="rcon-assets/css/bootstrap-responsive.css" rel="stylesheet">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+        <!-- <link rel="shortcut icon" href="http://twitter.github.com/bootstrap/assets/ico/favicon.ico"> -->
+    </head>
+    <body>
+        <div class="navbar">
+            <div class="navbar-inner">
+                <div class="container">
+                    <span class="brand">Pocsel Remote Console</span>
+                    <ul class="nav">
+                        <li id="navbar_login"></li>
+                        <li id="navbar_exit"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+
+            <div id="login-form">
+                <h3>Connect to server</h3>
+                <div class="well">
+                    <div id="login-form_alert" class="alert alert-error hide">
+                    </div>
+                    <label>Host</label>
+                    <input id="login-form_host" type="text" class="input-medium" value="localhost"/>
+                    <label>Port</label>
+                    <input id="login-form_port" type="text" class="input-small" value="8174"/>
+                    <label>Login</label>
+                    <input id="login-form_login" type="text" class="input-medium"/>
+                    <label>Password</label>
+                    <input id="login-form_password" type="password" class="input-medium"/>
+                    <br />
+                    <button id="login-form_submit" class="btn">Connect</button> <img id="login-form_preloader" class="hide" src="rcon-assets/img/preloader.gif" alt="" />
+                </div>
+            </div>
+
+            <div id="category-server" class="accordion hide">
+                <h3 id="category-server_title"></h3>
+
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle" href="#maps" data-toggle="collapse" data-target="#maps">
+                            Maps
+                        </a>
+                    </div>
+                    <div id="maps" class="accordion-body collapse">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Identifier</th>
+                                    <th>Full name</th>
+                                </tr>
+                            </thead>
+                            <tbody id="maps_list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle" href="#plugins" data-toggle="collapse" data-target="#plugins">
+                            Plugins
+                        </a>
+                    </div>
+                    <div id="plugins" class="accordion-body collapse">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Identifier</th>
+                                    <th>Full name</th>
+                                </tr>
+                            </thead>
+                            <tbody id="plugins_list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle" href="#rcon-sessions" data-toggle="collapse" data-target="#rcon-sessions">
+                            Rcon sessions
+                        </a>
+                    </div>
+                    <div id="rcon-sessions" class="accordion-body collapse">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Login</th>
+                                    <th>User-Agent</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rcon-sessions_list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="category-logs">
+                <h3>Logs</h3>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#category-logs" data-toggle="tab">All</a></li>
+                    <li><a href="#category-logs" data-toggle="tab">Warnings</a></li>
+                    <li><a href="#category-logs" data-toggle="tab">Errors</a></li>
+                </ul>
+                <textarea style="width: 100%; height: 200px;"></textarea>
+            </div>
+
+            <div id="category-maps">
+                <h3>Maps</h3>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a id="ceci_test" href="#category-maps" data-toggle="tab">map1</a></li>
+                    <li><a href="#main" data-toggle="tab">map2</a></li>
+                </ul>
+                <div class="accordion">
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" href="#players" data-toggle="collapse" data-target="#players">
+                                Players
+                            </a>
+                        </div>
+                        <div id="players" class="accordion-body collapse">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Login</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="players_list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" href="#entities" data-toggle="collapse" data-target="#entities">
+                                Entity instances
+                            </a>
+                        </div>
+                        <div id="entities" class="accordion-body collapse">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Plugin</th>
+                                        <th>Type</th>
+                                        <th>Position</th>
+                                        <th>Storage</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="entities_list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" href="#messages" data-toggle="collapse" data-target="#messages">
+                                Pending messages
+                            </a>
+                        </div>
+                        <div id="messages" class="accordion-body collapse">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Due in</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Function</th>
+                                        <th>Arguments</th>
+                                        <th>Notification function</th>
+                                        <th>Notification arguments</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="entities_list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" href="#execute" data-toggle="collapse" data-target="#execute">
+                                Execute Lua
+                            </a>
+                        </div>
+                        <div id="execute" class="accordion-body collapse">
+                            <div class="well">
+                                <textarea style="width: 80%; height: 70px;"></textarea><br />
+                                <button class="btn">Run script on map1</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="category-entities">
+                <h3>Entities</h3>
+                <div class="accordion">
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" href="#entity-types" data-toggle="collapse" data-target="#entity-types">
+                                Registered types
+                            </a>
+                        </div>
+                        <div id="entity-types" class="accordion-body collapse">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Plugin</th>
+                                        <th>Type</th>
+                                        <th>Positional</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="entity-type_list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" href="#entity-files" data-toggle="collapse" data-target="#entity-files">
+                                Source files
+                            </a>
+                        </div>
+                        <div id="entity-files" class="accordion-body collapse">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Plugin</th>
+                                        <th>File</th>
+                                        <th>Hot-swap</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="entity-files_list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <script src="rcon-assets/js/jquery-1.7.2.js"></script>
+        <script src="rcon-assets/js/jquery.timer.js"></script>
+        <script src="rcon-assets/js/bootstrap-alert.js"></script>
+        <script src="rcon-assets/js/bootstrap-modal.js"></script>
+        <script src="rcon-assets/js/bootstrap-dropdown.js"></script>
+        <script src="rcon-assets/js/bootstrap-scrollspy.js"></script>
+        <script src="rcon-assets/js/bootstrap-tab.js"></script>
+        <script src="rcon-assets/js/bootstrap-tooltip.js"></script>
+        <script src="rcon-assets/js/bootstrap-popover.js"></script>
+        <script src="rcon-assets/js/bootstrap-button.js"></script>
+        <script src="rcon-assets/js/bootstrap-collapse.js"></script>
+        <script src="rcon-assets/js/bootstrap-carousel.js"></script>
+        <script src="rcon-assets/js/bootstrap-typeahead.js"></script>
+        <script src="rcon-assets/js/rcon.js"></script>
+    </body>
+</html>

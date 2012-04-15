@@ -6,7 +6,7 @@
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
-    RenderTarget::RenderTarget(GLRenderer& renderer, Vector2u const& size) :
+    RenderTarget::RenderTarget(GLRenderer& renderer, glm::uvec2 const& size) :
         _renderer(renderer)
     {
         GLCHECK(glGenFramebuffersEXT(1, &this->_frameBuffer));

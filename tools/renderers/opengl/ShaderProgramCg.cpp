@@ -91,27 +91,30 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         {
         case ShaderParameterUsage::ModelViewProjectionMatrix:
             if (this->_mvp)
-                cgSetMatrixParameterfc(this->_mvp, this->_renderer.GetModelViewProjectionMatrix().mm);
+                cgSetMatrixParameterfc(this->_mvp, (float*)&this->_renderer.GetModelViewProjectionMatrix());
             break;
 
         case ShaderParameterUsage::ModelViewMatrix:
             if (this->_mv)
-                cgSetMatrixParameterfc(this->_mv, (this->_renderer.GetModelMatrix() * this->_renderer.GetViewMatrix()).mm);
+            {
+                auto mat = this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix();
+                cgSetMatrixParameterfc(this->_mv, (float*)&mat);
+            }
             break;
 
         case ShaderParameterUsage::ModelMatrix:
             if (this->_model)
-                cgSetMatrixParameterfc(this->_model, this->_renderer.GetModelMatrix().mm);
+                cgSetMatrixParameterfc(this->_model, (float*)&this->_renderer.GetModelMatrix());
             break;
 
         case ShaderParameterUsage::ViewMatrix:
             if (this->_view)
-                cgSetMatrixParameterfc(this->_view, this->_renderer.GetViewMatrix().mm);
+                cgSetMatrixParameterfc(this->_view, (float*)&this->_renderer.GetViewMatrix());
             break;
 
         case ShaderParameterUsage::ProjectionMatrix:
             if (this->_projection)
-                cgSetMatrixParameterfc(this->_projection, this->_renderer.GetProjectionMatrix().mm);
+                cgSetMatrixParameterfc(this->_projection, (float*)&this->_renderer.GetProjectionMatrix());
             break;
 
         default:

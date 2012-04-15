@@ -2,6 +2,7 @@
 #define __CLIENT_GAME_ITEMRENDERER_HPP__
 
 #include "client/resources/ITexture.hpp"
+#include "client/resources/Md5Model.hpp"
 
 namespace Common {
     struct OrientedPosition;
@@ -16,9 +17,11 @@ namespace Tools {
     }
 }
 
-namespace Client { namespace Game {
-    class Game;
-}}
+namespace Client {
+    namespace Game {
+        class Game;
+    }
+}
 
 namespace Client { namespace Game {
 
@@ -29,8 +32,10 @@ namespace Client { namespace Game {
         Tools::IRenderer& _renderer;
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
+        Tools::Renderers::IShaderParameter* _shaderBoneMatrix;
         Tools::Renderers::IShaderParameter* _shaderTime;
-        std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;
+        Resources::Md5Model* _md5Model;
+        //std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;
         Tools::Renderers::ITexture2D* _texture;
         Uint32 _elapsedTime;
 
@@ -41,7 +46,6 @@ namespace Client { namespace Game {
         void Update(Uint32 time);
 
     private:
-        void _InitVertexBuffer();
     };
 
 }}

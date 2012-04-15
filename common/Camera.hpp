@@ -11,7 +11,7 @@ namespace Common {
         public OrientedPosition
     {
     public:
-        Tools::Matrix4<float> projection;
+        glm::detail::tmat4x4<float> projection;
 
     public:
         Camera() :
@@ -29,9 +29,9 @@ namespace Common {
         {
         }
 
-        Tools::Matrix4<float> GetViewMatrix() const
+        glm::detail::tmat4x4<float> GetViewMatrix() const
         {
-            return Tools::Matrix4<float>::CreateLookAt(Tools::Vector3f(0), this->direction, Tools::Vector3f(0, 1, 0));
+            return glm::lookAt<float>(glm::fvec3(0), this->direction, glm::fvec3(0, 1, 0));
         }
     };
 

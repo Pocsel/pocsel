@@ -10,38 +10,38 @@ namespace Tools {
     class AlignedBox : public AbstractCollider
     {
     private:
-        Vector3d _min;
-        Vector3d _max;
+        glm::dvec3 _min;
+        glm::dvec3 _max;
 
     public:
-        AlignedBox(Vector3d const& point1, Vector3d const& point2) :
+        AlignedBox(glm::dvec3 const& point1, glm::dvec3 const& point2) :
             _min(point1),
             _max(point2)
         {
             this->_Update();
         }
 
-        Vector3d const& GetMin() const { return this->_min; }
-        Vector3d const& GetMax() const { return this->_max; }
-        Vector3d GetCenter() const { return (this->_max - this->_min) * 0.5 + this->_min; }
-        double GetRadius() const { return Vector3d::GetDistance(this->GetCenter(), this->_min); }
-        double GetRadiusSquared() const { return Vector3d::GetDistanceSquared(this->GetCenter(), this->_min); }
-        void SetMin(Vector3d const& min) { this->_min = min; this->_Update(); }
-        void SetMax(Vector3d const& max) { this->_max = max; this->_Update(); }
+        glm::dvec3 const& GetMin() const { return this->_min; }
+        glm::dvec3 const& GetMax() const { return this->_max; }
+        glm::dvec3 GetCenter() const { return (this->_max - this->_min) * 0.5 + this->_min; }
+        double GetRadius() const { return glm::distance(this->GetCenter(), this->_min); }
+        double GetRadiusSquared() const { return glm::distanceSquared(this->GetCenter(), this->_min); }
+        void SetMin(glm::dvec3 const& min) { this->_min = min; this->_Update(); }
+        void SetMax(glm::dvec3 const& max) { this->_max = max; this->_Update(); }
 
         Plane::IntersectionType Intersects(Plane const& plane) const;
 
-        virtual IntersectionType Contains(Vector3d const& object) const;
+        virtual IntersectionType Contains(glm::dvec3 const& object) const;
         virtual IntersectionType Contains(AlignedBox const& object) const;
         virtual IntersectionType Contains(AlignedCube const& object) const;
         virtual IntersectionType Contains(Frustum const& object) const;
 
-        Vector3d SupportMapping(Vector3d const& v) const;
+        glm::dvec3 SupportMapping(glm::dvec3 const& v) const;
 
     private:
         void _Update()
         {
-            Vector3d min(this->_min);
+            glm::dvec3 min(this->_min);
             this->_min.x = std::min(min.x, this->_max.x);
             this->_min.y = std::min(min.y, this->_max.y);
             this->_min.z = std::min(min.z, this->_max.z);

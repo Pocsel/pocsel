@@ -28,12 +28,23 @@ namespace Client { namespace Resources {
         void Init(Tools::Lua::Ref const& object);
         void Update(Tools::Lua::Ref const& object);
 
+        void BeginPass() { this->_shader->BeginPass(); }
+        bool EndPass() { return this->_shader->EndPass(); }
+
         std::string const& GetName() const { return this->_name; }
 
     private:
         Effect(Effect const&);
         Effect& operator =(Effect const&);
     };
+
+    // TODO !
+    //class EffectState
+    //{
+    //public:
+    //    ~EffectState() {}
+    //    void Set(Effect& effect);
+    //};
 
 }}
 

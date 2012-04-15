@@ -2,9 +2,7 @@
 #define __SERVER_SERVER_HPP__
 
 namespace Tools {
-
     class SimpleMessageQueue;
-
 }
 
 namespace Server {
@@ -19,6 +17,9 @@ namespace Server {
     }
     namespace Game {
         class Game;
+    }
+    namespace Rcon {
+        class Rcon;
     }
 }
 
@@ -36,6 +37,7 @@ namespace Server {
         ClientManagement::ClientManager* _clientManager;
         Game::Game* _game;
         Tools::SimpleMessageQueue* _admMessageQueue;
+        Rcon::Rcon* _rcon;
 
     public:
         Server(Settings& settings);
@@ -49,6 +51,7 @@ namespace Server {
         ClientManagement::ClientManager& GetClientManager() { return *this->_clientManager; }
         Game::Game const& GetGame() const { return *this->_game; }
         Game::Game& GetGame() { return *this->_game; }
+        Rcon::Rcon& GetRcon() { return *this->_rcon; }
     };
 
 }

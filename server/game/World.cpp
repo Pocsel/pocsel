@@ -1,3 +1,5 @@
+#include "server/precompiled.hpp"
+
 #include "server/game/World.hpp"
 #include "server/game/Game.hpp"
 #include "server/game/PluginManager.hpp"
@@ -18,7 +20,7 @@ namespace Server { namespace Game{
         this->_pluginManager = new PluginManager();
         try
         {
-            Database::WorldLoader::Load(*this, game.GetServer().GetResourceManager());
+            Database::WorldLoader(*this, game.GetServer().GetResourceManager());
         }
         catch (std::exception& e)
         {

@@ -58,7 +58,7 @@ set(ALL_INCLUDES
     ${FREETYPE_INCLUDE_DIRS}
     ${SDL_INCLUDE_DIR}
     ${CG_INCLUDE_DIR}
-	${DirectX_D3DX9_INCLUDE_DIR}
+    ${DirectX_D3DX9_INCLUDE_DIR}
 
     ${SQLITE3_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}
@@ -68,15 +68,17 @@ include_directories(
     ${ALL_INCLUDES}
 )
 
-file(GLOB_RECURSE common_src "common/*.[ch]pp")
-file(GLOB tools_base_src "tools/*.[ch]pp" "tools/meta/*.[ch]pp")
-file(GLOB_RECURSE tools_database_src "tools/database/*.[ch]pp")
-file(GLOB_RECURSE tools_gui_src "tools/gui/*.[ch]pp")
-file(GLOB_RECURSE tools_lua_src "tools/lua/*.[ch]pp")
-file(GLOB_RECURSE tools_renderers_src "tools/renderers/*.[ch]pp")
-file(GLOB_RECURSE tools_thread_src "tools/thread/*.[ch]pp")
-file(GLOB_RECURSE tools_logger_src "tools/logger/*.[ch]pp")
-file(GLOB_RECURSE tools_zlib_src "tools/zlib/*.[ch]pp")
+file(GLOB_RECURSE   common_src              "common/*.[ch]pp")
+file(GLOB           tools_base_src          "tools/*.[ch]pp" "tools/meta/*.[ch]pp")
+file(GLOB_RECURSE   tools_database_src      "tools/database/*.[ch]pp")
+file(GLOB_RECURSE   tools_gui_src           "tools/gui/*.[ch]pp")
+file(GLOB           tools_lua_src           "tools/lua/*.[ch]pp")
+file(GLOB_RECURSE   tools_lua_utils_src     "tools/lua/utils/*.[ch]pp")
+file(GLOB_RECURSE   tools_renderers_src     "tools/renderers/*.[ch]pp")
+file(GLOB_RECURSE   tools_thread_src        "tools/thread/*.[ch]pp")
+file(GLOB_RECURSE   tools_logger_src        "tools/logger/*.[ch]pp")
+file(GLOB_RECURSE   tools_zlib_src          "tools/zlib/*.[ch]pp")
+file(GLOB_RECURSE   tools_plugin_src        "tools/plugin/*.[ch]pp")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
@@ -102,6 +104,7 @@ set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
 configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
 add_subdirectory(sdk)
+#add_subdirectory(sdk2)
 add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(tests)

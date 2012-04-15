@@ -142,7 +142,7 @@ namespace Tools {
         {
         public:
             virtual ~ITexture2D() {}
-            virtual Vector2u const& GetSize() const = 0;
+            virtual glm::uvec2 const& GetSize() const = 0;
             virtual bool HasAlpha() const = 0;
             virtual void Bind() = 0;
             virtual void Unbind() = 0;
@@ -204,9 +204,10 @@ namespace Tools {
             virtual void Set(int value) = 0;
             virtual void Set(float value) = 0;
             virtual void Set(Color4<float> const& color) = 0;
-            virtual void Set(Vector2<float> const& vector) = 0;
-            virtual void Set(Vector3<float> const& vector) = 0;
-            virtual void Set(Matrix4<float> const& matrix) = 0;
+            virtual void Set(glm::detail::tvec2<float> const& vector) = 0;
+            virtual void Set(glm::detail::tvec3<float> const& vector) = 0;
+            virtual void Set(glm::detail::tmat4x4<float> const& matrix) = 0;
+            virtual void Set(std::vector<glm::mat4x4> const& matrices) = 0;
             virtual void Set(ITexture2D& texture) = 0;
 
         protected:
@@ -250,8 +251,8 @@ namespace Tools {
         // Resources
         virtual std::unique_ptr<Renderers::IIndexBuffer> CreateIndexBuffer() = 0;
         virtual std::unique_ptr<Renderers::IVertexBuffer> CreateVertexBuffer() = 0;
-        virtual std::unique_ptr<Renderers::IRenderTarget> CreateRenderTarget(Vector2u const& imgSize = Vector2u(0)) = 0;
-        virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, Vector2u const& imgSize = Vector2u(0), void const* mipmapData = 0) = 0;
+        virtual std::unique_ptr<Renderers::IRenderTarget> CreateRenderTarget(glm::uvec2 const& imgSize = glm::uvec2(0)) = 0;
+        virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath) = 0;
         virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect) = 0;
 
@@ -267,12 +268,12 @@ namespace Tools {
         virtual void DrawVertexBuffer(Uint32 offset, Uint32 count, Renderers::DrawingMode::Type mode = Renderers::DrawingMode::Triangles) = 0;
 
         // Matrices
-        virtual void SetModelMatrix(Matrix4<float> const& matrix) = 0;
-        virtual void SetViewMatrix(Matrix4<float> const& matrix) = 0;
-        virtual void SetProjectionMatrix(Matrix4<float> const& matrix) = 0;
+        virtual void SetModelMatrix(glm::detail::tmat4x4<float> const& matrix) = 0;
+        virtual void SetViewMatrix(glm::detail::tmat4x4<float> const& matrix) = 0;
+        virtual void SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix) = 0;
 
         // States
-        virtual void SetScreenSize(Vector2u const& size) = 0;
+        virtual void SetScreenSize(glm::uvec2 const& size) = 0;
         virtual void SetClearColor(Color4f const& color) = 0;
         virtual void SetClearDepth(float value) = 0;
         virtual void SetClearStencil(int value) = 0;

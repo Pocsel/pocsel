@@ -13,7 +13,7 @@
 //        static std::unique_ptr<CubePosition> Read(Tools::ByteArray const& p)
 //        {
 //            BaseChunk::IdType chunkId;
-//            Tools::Vector3u positionInChunk;
+//            glm::uvec3 positionInChunk;
 //            p.Read(chunkId);
 //            p.Read(positionInChunk);
 //

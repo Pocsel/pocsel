@@ -5,9 +5,9 @@
 
 namespace Tools {
 
-    Vector3d AlignedCube::SupportMapping(Vector3d const& v) const
+    glm::dvec3 AlignedCube::SupportMapping(glm::dvec3 const& v) const
     {
-        return Vector3d(
+        return glm::dvec3(
             (v.x >= 0) ? this->_position.x + this->_size : this->_position.x,
             (v.y >= 0) ? this->_position.y + this->_size : this->_position.y,
             (v.z >= 0) ? this->_position.z + this->_size : this->_position.z);
@@ -15,24 +15,24 @@ namespace Tools {
 
     Plane::IntersectionType AlignedCube::Intersects(Plane const& plane) const
     {
-        Vector3d vector;
-        Vector3d tmp(this->_position + Vector3d(this->_size));
+        glm::dvec3 vector;
+        glm::dvec3 tmp(this->_position + glm::dvec3(this->_size));
         vector.x = (plane.normal.x >= 0) ? this->_position.x : tmp.x;
         vector.y = (plane.normal.y >= 0) ? this->_position.y : tmp.y;
         vector.z = (plane.normal.z >= 0) ? this->_position.z : tmp.z;
-        if ((Vector3d::Dot(plane.normal, vector) + plane.d) > 0)
+        if ((glm::dot(plane.normal, vector) + plane.d) > 0)
             return Plane::Front;
 
         vector.x = (plane.normal.x >= 0) ? tmp.x : this->_position.x;
         vector.y = (plane.normal.y >= 0) ? tmp.y : this->_position.y;
         vector.z = (plane.normal.z >= 0) ? tmp.z : this->_position.z;
-        if ((Vector3d::Dot(plane.normal, vector) + plane.d) < 0)
+        if ((glm::dot(plane.normal, vector) + plane.d) < 0)
             return Plane::Back;
 
         return Plane::Intersecting;
     }
 
-    AbstractCollider::IntersectionType AlignedCube::Contains(Vector3d const& point) const
+    AbstractCollider::IntersectionType AlignedCube::Contains(glm::dvec3 const& point) const
     {
         if (this->_position.x <= point.x && point.x <= this->_position.x + this->_size &&
             this->_position.y <= point.y && point.y <= this->_position.y + this->_size &&

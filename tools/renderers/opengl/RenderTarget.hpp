@@ -15,7 +15,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         Texture2D* _texture;
 
     public:
-        RenderTarget(GLRenderer& renderer, Vector2u const& size);
+        RenderTarget(GLRenderer& renderer, glm::uvec2 const& size);
         virtual ~RenderTarget();
 
         virtual void Bind();

@@ -9,7 +9,7 @@ namespace Common {
     {
     public:
         Common::OrientedPosition position;
-        Tools::Vector3f movement;
+        glm::fvec3 movement;
 
     public:
         MovingOrientedPosition() :
@@ -36,7 +36,7 @@ namespace Common {
         {
         }
 
-        MovingOrientedPosition(Common::OrientedPosition const& pos, Tools::Vector3f const& movement) :
+        MovingOrientedPosition(Common::OrientedPosition const& pos, glm::fvec3 const& movement) :
             position(pos),
             movement(movement)
         {
@@ -44,7 +44,7 @@ namespace Common {
 
         void Move(float time)
         {
-            position.position += Tools::Vector3d(movement) * time;
+            position.position += glm::dvec3(movement) * (double)time;
         }
 
     };

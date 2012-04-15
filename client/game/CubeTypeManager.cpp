@@ -1,4 +1,7 @@
+#include "client/precompiled.hpp"
+
 #include "client/Client.hpp"
+#include "client/game/CubeType.hpp"
 #include "client/game/CubeTypeManager.hpp"
 #include "client/network/PacketCreator.hpp"
 
@@ -18,16 +21,15 @@ namespace Client { namespace Game {
 
     void CubeTypeManager::AddCubeType(std::unique_ptr<Common::CubeType> type)
     {
-        Tools::debug
-            << "CubeType: " << type->name << " (id: " << type->id << ", textures: "
-            << type->textures.top << " "
-            << type->textures.left << " "
-            << type->textures.front << " "
-            << type->textures.right << " "
-            << type->textures.back << " "
-            << type->textures.bottom << ")\n";
-        this->_cubeTypes.push_back(Common::CubeType(*type));
+        Tools::debug << "CubeType: " << type->name << " (id: " << type->id << ", description: " << type->visualEffect << ")\n";
+        this->_cubeTypes.push_back(CubeType(*type));
         this->_AskOneType();
+    }
+
+    void CubeTypeManager::LoadResources()
+    {
+        for (auto it = this->_cubeTypes.begin(), ite = this->_cubeTypes.end(); it != ite; ++it)
+            it->Load(this->_client.GetGame().GetResourceManager(), this->_client.GetGame().GetInterpreter());
     }
 
     void CubeTypeManager::_AskOneType()

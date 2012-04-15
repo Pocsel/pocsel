@@ -67,6 +67,9 @@
 #include "tools/types.hpp"
 #include "tools/Delete.hpp"
 #include "tools/ToString.hpp"
+#include "tools/sqrt.hpp"
+
+#include "glm/all.hpp"
 
 #ifdef WIN32
 // warning this utilisé dans le constructeur

@@ -20,7 +20,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         : _texture(0)
     {
         ilDisable(IL_BLIT_BLEND);
-        Vector2u maxSize(0);
+        glm::uvec2 maxSize(0);
         std::map<Uint32, ILuint> textures;
         for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
         {
@@ -52,7 +52,7 @@ namespace Tools { namespace Renderers { namespace Utils {
                     throw std::runtime_error("TextureAtlas: A texture must be 32 bits per pixels (id: " + ToString(it->first) + ").");
                 }
             }
-            auto size = Vector2u((ILuint)ilGetInteger(IL_IMAGE_WIDTH), (ILuint)ilGetInteger(IL_IMAGE_HEIGHT));
+            auto size = glm::uvec2((ILuint)ilGetInteger(IL_IMAGE_WIDTH), (ILuint)ilGetInteger(IL_IMAGE_HEIGHT));
             if (size.w != size.h || size.w != NextPowerOfTwo(size.w))
             {
                 ilBindImage(0);
@@ -74,12 +74,12 @@ namespace Tools { namespace Renderers { namespace Utils {
         }
 
         unsigned int tmp = (unsigned int)std::sqrt(textures.size()) + 1;
-        Vector2u totalSize(tmp * maxSize.w, tmp * maxSize.h);
+        glm::uvec2 totalSize(tmp * maxSize.w, tmp * maxSize.h);
         ILuint result = ilGenImage();
         ilBindImage(result);
         ilTexImage(totalSize.w, totalSize.h, 1, 4, IL_RGBA, IL_UNSIGNED_BYTE, 0);
 
-        Vector2u pos(0);
+        glm::uvec2 pos(0);
         for (auto it = textures.begin(), ite = textures.end(); it != ite; ++it)
         {
             ilBindImage(it->second);
@@ -91,7 +91,7 @@ namespace Tools { namespace Renderers { namespace Utils {
                 pos.x, pos.y, 0,
                 0, 0, 0,
                 maxSize.w, maxSize.h, 1);
-            this->_textureCoords[it->first] = Vector3f((float)pos.x, (float)(totalSize.w - maxSize.w - pos.y), (float)maxSize.w) / (float)totalSize.w;
+            this->_textureCoords[it->first] = glm::fvec3((float)pos.x, (float)(totalSize.w - maxSize.w - pos.y), (float)maxSize.w) / (float)totalSize.w;
 
             pos.x += maxSize.w;
             if (pos.x >= totalSize.w)

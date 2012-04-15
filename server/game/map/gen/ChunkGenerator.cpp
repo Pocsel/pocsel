@@ -1,24 +1,40 @@
+#include "server/precompiled.hpp"
+
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/game/map/gen/CubeSpawnInfo.hpp"
 #include "server/game/map/gen/Perlin.hpp"
 #include "server/game/map/gen/RandMersenneTwister.hpp"
-
-#include "common/CubeType.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
 
 #include "server/Logger.hpp"
 
 #include "server/game/map/Conf.hpp"
+#include "server/game/map/CubeType.hpp"
 
 #include "server/game/map/gen/equations/Equations.hpp"
 #include "server/game/map/gen/validators/Validators.hpp"
 
 namespace Server { namespace Game { namespace Map { namespace Gen {
 
-    ChunkGenerator::ChunkGenerator(Conf const& conf) :
+    ChunkGenerator::ChunkGenerator() :
         _messageQueue(new Tools::SimpleMessageQueue(boost::thread::hardware_concurrency() + 1))
         //_messageQueue(new Tools::SimpleMessageQueue(1))
+    {
+    }
+
+    ChunkGenerator::~ChunkGenerator()
+    {
+        Tools::debug << "ChunkGenerator::~ChunkGenerator()\n";
+
+        Tools::Delete(this->_messageQueue);
+
+        std::for_each(this->_equations.begin(), this->_equations.end(), [](IEquation* eq) { Tools::Delete(eq); });
+
+        Tools::Delete(this->_perlin);
+    }
+
+    void ChunkGenerator::Start(Conf const& conf)
     {
         Tools::debug << "ChunkGenerator::ChunkGenerator()\n";
         Log::load << "Loading chunk generator:\n" <<
@@ -182,21 +198,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
                 Tools::Delete(equations[it->first]);
             }
         }
-    }
 
-    ChunkGenerator::~ChunkGenerator()
-    {
-        Tools::debug << "ChunkGenerator::~ChunkGenerator()\n";
-
-        Tools::Delete(this->_messageQueue);
-
-        std::for_each(this->_equations.begin(), this->_equations.end(), [](IEquation* eq) { Tools::Delete(eq); });
-
-        Tools::Delete(this->_perlin);
-    }
-
-    void ChunkGenerator::Start()
-    {
         Tools::debug << "ChunkGenerator::Start()\n";
         this->_messageQueue->Start();
     }

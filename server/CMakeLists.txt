@@ -7,7 +7,9 @@ set(src
     ${tools_database_src}
     ${tools_logger_src}
     ${tools_lua_src}
+    ${tools_lua_utils_src}
     ${tools_zlib_src}
+    ${tools_plugin_src}
 )
 
 CreateGroups("${src}")

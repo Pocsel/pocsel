@@ -1,0 +1,92 @@
+#ifndef MAX_BONES
+#define MAX_BONES 58
+#endif
+
+float4x4 mvp : WorldViewProjection;
+float3 lightDirection = {-0.704, -0.704, 0};
+
+float3 fogColor = float3(0.8, 0.8, 0.9);
+float fogEnd = 750.0f;
+
+sampler2D baseTex = sampler_state
+{
+    minFilter = Linear;
+    magFilter = Linear;
+};
+
+float4x4 boneMatrix[MAX_BONES];
+
+struct VSout
+{
+    float4   oPosition   : POSITION;
+    float4   objNormal   : TEXCOORD3;
+    float2   oTexCoord   : TEXCOORD0;
+    float    ofogFactor  : TEXCOORD1;
+    float4   objPosition : TEXCOORD2;
+};
+
+VSout vs(
+        in float4   position    : POSITION,
+        in float3   normal      : NORMAL,
+        in float2   texCoord    : TEXCOORD0,
+        in float4   weight      : TEXCOORD1,
+        in float4   matrixIndex : TEXCOORD2)
+{
+    float4x4 matTransform = boneMatrix[matrixIndex.x] * weight.x;
+    matTransform += boneMatrix[matrixIndex.y] * weight.y;
+    matTransform += boneMatrix[matrixIndex.z] * weight.z;
+    float finalWeight = 1.0f - ( weight.x + weight.y + weight.z );
+    matTransform += boneMatrix[matrixIndex.w] * finalWeight;
+
+    VSout vout;
+    vout.objPosition = mul(matTransform, position);
+    vout.objNormal = mul(matTransform, float4(normal, 0.0f));
+    vout.oTexCoord = texCoord;
+    
+    vout.oPosition = mul(mvp, vout.objPosition);
+    float fog = clamp(abs(vout.oPosition.z), 0, fogEnd);
+    fog = (fogEnd - fog) / fogEnd;
+    vout.ofogFactor = clamp(fog, 0, 1);
+    return vout;
+}
+
+float4 fs(VSout v) : COLOR
+{
+    float3 normal = normalize(v.objNormal.xyz);
+    float4 c = tex2D(baseTex, v.oTexCoord);
+    float lightIntensity = dot(-lightDirection, normal) * 0.35 + 0.65;
+    c.rgb = lightIntensity * lerp(fogColor, normal, v.ofogFactor);
+    return c;
+}
+
+#ifndef DIRECTX
+
+technique tech_glsl
+{
+    pass p0
+    {
+        VertexProgram = compile glslv vs();
+        FragmentProgram = compile glslf fs();
+    }
+}
+technique tech
+{
+    pass p0
+    {
+        VertexProgram = compile arbvp1 vs();
+        FragmentProgram = compile arbfp1 fs();
+    }
+}
+
+#else
+
+technique tech
+{
+    pass p0
+    {
+        VertexShader = compile vs_3_0 vs();
+        PixelShader = compile ps_3_0 fs();
+    }
+}
+
+#endif
