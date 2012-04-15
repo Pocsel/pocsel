@@ -8,7 +8,7 @@ namespace Client {
     class Settings
     {
     public:
-        // CLI options
+        // options CLI
         std::string port;
         std::string host;
         boost::filesystem::path confDir;

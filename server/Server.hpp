@@ -51,6 +51,7 @@ namespace Server {
         ClientManagement::ClientManager& GetClientManager() { return *this->_clientManager; }
         Game::Game const& GetGame() const { return *this->_game; }
         Game::Game& GetGame() { return *this->_game; }
+        Rcon::Rcon& GetRcon() { return *this->_rcon; }
     };
 
 }

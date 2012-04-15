@@ -2,10 +2,12 @@
 
 #include "server/rcon/Request.hpp"
 #include "server/rcon/SessionManager.hpp"
+#include "server/rcon/ToJsonStr.hpp"
 #include "server/Server.hpp"
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/map/Map.hpp"
+#include "server/game/PluginManager.hpp"
 #include "server/ProgramInfo.hpp"
 
 namespace Server { namespace Rcon {
@@ -35,7 +37,11 @@ namespace Server { namespace Rcon {
     {
         if (!error)
         {
-            this->_header.assign((std::istreambuf_iterator<char>(&this->_buffer)), std::istreambuf_iterator<char>());
+            std::string buf((std::istreambuf_iterator<char>(&this->_buffer)), std::istreambuf_iterator<char>());
+            std::size_t bufferEnd = buf.find("\r\n\r\n");
+            assert(bufferEnd != std::string::npos && "bug report boost async_read_until needed");
+            this->_header = buf.substr(0, bufferEnd + 4);
+            this->_body = buf.substr(bufferEnd + 4);
             this->_ParseHeader();
         }
         else
@@ -47,9 +53,10 @@ namespace Server { namespace Rcon {
 
     void Request::_ParseHeader()
     {
-        // method
         auto it = this->_header.begin();
         auto itEnd = this->_header.end();
+
+        // method
         while (it != itEnd && *it != ' ')
         {
             this->_method += *it;
@@ -101,16 +108,28 @@ namespace Server { namespace Rcon {
             }
         }
 
+        // user agent
+        std::size_t userAgentPos = this->_header.find("\nUser-Agent: "); // 13 chars
+        if (userAgentPos != std::string::npos && userAgentPos + 14 < this->_header.size())
+        {
+            it = this->_header.begin() + userAgentPos + 13;
+            while (it != itEnd && *it != '\r')
+            {
+                this->_userAgent += *it;
+                ++it;
+            }
+        }
+
         // execution de la requete
-        if (contentLength > MaxContentLength)
+        if (contentLength > MaxContentLength || this->_body.size() > contentLength)
         {
             Tools::error << "Rcon: Content-Length of " << contentLength << " bytes too big (max: " << MaxContentLength << ")." << std::endl;
             this->_WriteHttpResponse("413 Request Entity Too Large");
         }
-        else if (contentLength)
-            this->_ReadHttpBody(contentLength);
+        else if (contentLength && this->_body.size() < contentLength)
+            this->_ReadHttpBody(contentLength - this->_body.size());
         else
-            this->_Execute();
+            this->_ParseBody();
     }
 
     void Request::_ReadHttpBody(std::size_t size)
@@ -123,14 +142,49 @@ namespace Server { namespace Rcon {
     {
         if (!error)
         {
-            this->_body.assign((std::istreambuf_iterator<char>(&this->_buffer)), std::istreambuf_iterator<char>());
-            this->_Execute();
+            std::string buf((std::istreambuf_iterator<char>(&this->_buffer)), std::istreambuf_iterator<char>());
+            this->_body += buf;
+            this->_ParseBody();
         }
         else
         {
             Tools::error << "Rcon: Error while reading HTTP body: " << error.message() << std::endl;
             delete this;
         }
+    }
+
+    void Request::_ParseBody()
+    {
+        bool inKey = true;
+        std::string curKey;
+        std::string curValue;
+        std::string decodedKey;
+        std::string decodedValue;
+        auto it = this->_body.begin();
+        auto itEnd = this->_body.end();
+        for (; it != itEnd; ++it)
+            switch (*it)
+            {
+                case '&':
+                    inKey = true;
+                    if (this->_DecodeUrl(curKey, decodedKey) && this->_DecodeUrl(curValue, decodedValue))
+                        this->_content[decodedKey] = decodedValue;
+                    curKey.clear();
+                    curValue.clear();
+                    break;
+                case '=':
+                    inKey = false;
+                    break;
+                default:
+                    if (inKey)
+                        curKey += *it;
+                    else
+                        curValue += *it;
+            }
+        if (!curKey.empty() && this->_DecodeUrl(curKey, decodedKey) && this->_DecodeUrl(curValue, decodedValue))
+            this->_content[decodedKey] = decodedValue;
+
+        this->_Execute();
     }
 
     void Request::_Execute()
@@ -148,35 +202,91 @@ namespace Server { namespace Rcon {
             }
             else if (this->_url[0] == "login" && this->_method == "POST")
                 return this->_Login();
+            else if (this->_url[0] == "rcon_sessions" && this->_method == "GET")
+                return this->_GetRconSessions();
         }
         this->_WriteHttpResponse("404 Not Found");
     }
 
     void Request::_Login()
     {
-        // TODO lire login/pass dans le POST et les utiliser
-        std::string newToken = this->_sessionManager.NewSession("login", "pass");
+        // credentials checks
+        std::list<std::string> rights;
+        std::string newToken = this->_sessionManager.NewSession(this->_content["login"], this->_content["password"], this->_userAgent, rights);
         if (newToken.empty())
             return this->_WriteHttpResponse("401 Unauthorized");
+
+        // rights
         std::string json = "{\n"
             "\t\"token\": \"" + newToken + "\",\n"
-            "\t\"maps\":\n"
+            "\t\"rights\":\n"
             "\t[\n";
-        auto const& maps = this->_server.GetGame().GetWorld().GetMaps();
-        auto it = maps.begin();
-        auto itEnd = maps.end();
-        for (; it != itEnd; ++it)
         {
-            if (it != maps.begin())
-                json += ",\n";
-            json += "\t\t{\n"
-                "\t\t\t\"identifier\": \"" + it->second->GetName() + "\",\n"
-                "\t\t\t\"fullname\": \"" + it->second->GetFullName() + "\"\n"
-                "\t\t}";
+            auto it = rights.begin();
+            auto itEnd = rights.end();
+            for (; it != itEnd; ++it)
+            {
+                if (it != rights.begin())
+                    json += ",\n";
+                json += "\t\t\"" + ToJsonStr(*it) + "\"";
+            }
         }
-        json += "\n\t]\n"
-            "}\n";
+        json += "\n\t],\n";
+
+        // world
+        json += "\t\"world_identifier\": \"" + this->_server.GetGame().GetWorld().GetIdentifier() + "\",\n"
+            "\t\"world_fullname\": \"" + ToJsonStr(this->_server.GetGame().GetWorld().GetFullname()) + "\",\n"
+            "\t\"world_version\": " + Tools::ToString(this->_server.GetGame().GetWorld().GetVersion()) + ",\n";
+
+        // maps
+        json += "\t\"maps\":\n"
+            "\t[\n";
+        {
+            auto const& maps = this->_server.GetGame().GetWorld().GetMaps();
+            auto it = maps.begin();
+            auto itEnd = maps.end();
+            for (; it != itEnd; ++it)
+            {
+                if (it != maps.begin())
+                    json += ",\n";
+                json += "\t\t{\n"
+                    "\t\t\t\"identifier\": \"" + it->second->GetName() + "\",\n"
+                    "\t\t\t\"fullname\": \"" + ToJsonStr(it->second->GetFullName()) + "\"\n"
+                    "\t\t}";
+            }
+        }
+        json += "\n\t],\n";
+
+        // plugins
+        json += "\t\"plugins\":\n"
+            "\t[\n";
+        {
+            auto const& plugins = this->_server.GetGame().GetWorld().GetPluginManager().GetPlugins();
+            auto it = plugins.begin();
+            auto itEnd = plugins.end();
+            for (; it != itEnd; ++it)
+            {
+                if (it != plugins.begin())
+                    json += ",\n";
+                json += "\t\t{\n"
+                    "\t\t\t\"identifier\": \"" + it->second.identifier + "\",\n"
+                    "\t\t\t\"fullname\": \"" + ToJsonStr(it->second.fullname) + "\"\n"
+                    "\t\t}";
+            }
+        }
+        json += "\n\t]\n";
+
+        // send response
+        json += "}\n";
         this->_WriteHttpResponse("200 OK", json);
+    }
+
+    void Request::_GetRconSessions()
+    {
+        if (this->_sessionManager.HasRights(this->_token, "rcon_sessions"))
+            this->_WriteHttpResponse("200 OK", this->_sessionManager.RconGetSessions());
+        else
+            this->_WriteHttpResponse("401 Unauthorized");
     }
 
     void Request::_GetEntities(Game::Map::Map const& map)
@@ -204,7 +314,7 @@ namespace Server { namespace Rcon {
                 "HTTP/1.1 " + status + "\r\n"
                 "Access-Control-Allow-Origin: *\r\n"
                 "Server: " PROJECT_NAME " " PROGRAM_NAME " " GIT_VERSION "\r\n"
-                "Content-Length: " + boost::lexical_cast<std::string>(content.size()) + "\r\n"
+                "Content-Length: " + Tools::ToString(content.size()) + "\r\n"
                 "Connection: close\r\n"
                 "Content-Type: application/json; charset=utf-8\r\n"
                 "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\n"
@@ -220,6 +330,35 @@ namespace Server { namespace Rcon {
         if (error)
             Tools::error << "Rcon: Error while writing HTTP response: " << error.message() << std::endl;
         delete this;
+    }
+
+    bool Request::_DecodeUrl(std::string const& in, std::string& out)
+    {
+        out.clear();
+        out.reserve(in.size());
+        for (std::size_t i = 0; i < in.size(); ++i)
+            if (in[i] == '%')
+            {
+                if (i + 3 <= in.size())
+                {
+                    int value = 0;
+                    std::istringstream is(in.substr(i + 1, 2));
+                    if (is >> std::hex >> value)
+                    {
+                        out += static_cast<char>(value);
+                        i += 2;
+                    }
+                    else
+                        return false;
+                }
+                else
+                    return false;
+            }
+            else if (in[i] == '+')
+                out += ' ';
+            else
+                out += in[i];
+        return true;
     }
 
 }}

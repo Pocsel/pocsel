@@ -14,6 +14,7 @@
 #include "server/game/map/Map.hpp"
 #include "common/FieldValidator.hpp"
 #include "tools/lua/Vector.hpp"
+#include "server/rcon/ToJsonStr.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
