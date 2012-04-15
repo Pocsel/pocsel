@@ -18,7 +18,7 @@ namespace {
             {
                 auto arg = helper.PopArg();
                 if (arg.IsString())
-                    color = Tools::Color4f::Color4(arg.ToString());
+                    color = Tools::Color4f(arg.ToString());
                 else
                 {
                     int c = arg.ToInteger();
