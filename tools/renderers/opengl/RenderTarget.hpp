@@ -2,7 +2,6 @@
 #define __TOOLS_RENDERERS_OPENGL_RENDERTARGET_HPP__
 
 #include "tools/renderers/GLRenderer.hpp"
-#include "tools/renderers/opengl/Texture2D.hpp"
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
@@ -10,17 +9,19 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
     private:
         GLRenderer& _renderer;
+        glm::uvec2 _size;
         GLuint _frameBuffer;
-        GLuint _renderBuffer;
-        Texture2D* _texture;
+        std::vector<std::unique_ptr<ITexture2D>> _textures;
+        int _colorCount;
 
     public:
         RenderTarget(GLRenderer& renderer, glm::uvec2 const& size);
         virtual ~RenderTarget();
 
+        virtual int PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage);
         virtual void Bind();
 
-        virtual ITexture2D& GetTexture() { return *this->_texture; }
+        virtual ITexture2D& GetTexture(int idx) { return *(this->_textures[idx].get()); }
     };
 
 }}}

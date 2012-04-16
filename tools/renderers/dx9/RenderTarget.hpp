@@ -13,9 +13,12 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
     private:
         DX9Renderer& _renderer;
-        IDirect3DSurface9* _surface;
-        Texture2D* _texture;
         glm::uvec2 _size;
+        std::vector<std::unique_ptr<ITexture2D>> _textures;
+        std::vector<IDirect3DSurface9*> _surfaces;
+        IDirect3DSurface9* _depthBuffer;
+
+        std::vector<std::pair<PixelFormat::Type, RenderTargetUsage::Type>> _targets;
 
     public:
         RenderTarget(DX9Renderer& renderer, glm::uvec2 const& size);
@@ -23,9 +26,12 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
         void OnLostDevice();
         void OnResetDevice();
+        virtual int PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage);
         virtual void Bind();
 
-        virtual ITexture2D& GetTexture() { return *this->_texture; }
+        virtual ITexture2D& GetTexture(int idx) { return *(this->_textures[idx].get()); }
+    private:
+        void _PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage);
     };
 
 }}}

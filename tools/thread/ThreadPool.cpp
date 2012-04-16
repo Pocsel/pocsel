@@ -47,9 +47,14 @@ namespace Tools { namespace Thread {
             {
                 boost::lock_guard<boost::mutex> lock(this->_taskMutex);
                 this->_tasks.remove_if(
-                    [](std::shared_ptr<ITask> task)
+                    [](std::shared_ptr<ITask> task) -> bool
                     {
-                        return task->IsCancelled();
+                        if (task->IsCancelled())
+                        {
+                            task->Execute();
+                            return true;
+                        }
+                        return false;
                     });
                 if (!this->_tasks.empty())
                 {

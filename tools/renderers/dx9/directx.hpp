@@ -12,48 +12,6 @@
 
 namespace Tools { namespace Renderers { namespace DX9 {
 
-    //inline GLint GetInternalFormatFromPixelFormat(Renderers::PixelFormat::Type format)
-    //{
-    //    return (format & 0x00FF00) >> 8;
-    //}
-
-    //inline GLint GetFormatFromPixelFormat(PixelFormat::Type format)
-    //{
-    //    switch (format & 0x0000FF)
-    //    {
-    //    case 1: return GL_ALPHA;
-    //    case 2: return GL_RGB;
-    //    case 3: return GL_RGBA;
-    //    case 4: return GL_LUMINANCE;
-    //    }
-    //    throw std::runtime_error("Bad PixelFormat ?!");
-    //}
-
-    //inline GLint GetTypeFromPixelFormat(PixelFormat::Type format)
-    //{
-    //    switch ((format & 0xFF0000) >> 16)
-    //    {
-    //    case 1: return GL_UNSIGNED_BYTE;
-    //    case 2: return GL_UNSIGNED_INT_8_8_8_8;
-    //    case 3: return GL_UNSIGNED_SHORT_4_4_4_4;
-    //    }
-    //    throw std::runtime_error("Bad PixelFormat ?!");
-    //}
-
-    //inline GLint GetTypeFromDataType(DataType::Type type)
-    //{
-    //    switch (type)
-    //    {
-    //    case DataType::Byte: return GL_BYTE;
-    //    case DataType::UnsignedByte: return GL_UNSIGNED_BYTE;
-    //    case DataType::Short: return GL_SHORT;
-    //    case DataType::UnsignedShort: return GL_UNSIGNED_SHORT;
-    //    case DataType::Int: return GL_INT;
-    //    case DataType::UnsignedInt: return GL_UNSIGNED_INT;
-    //    case DataType::Float: return GL_FLOAT;
-    //    }
-    //    throw std::runtime_error("Bad DataType ?!");
-    //}
     inline D3DFORMAT GetIndexBufferFormat(DataType::Type type)
     {
         switch (type)
@@ -168,20 +126,6 @@ namespace Tools { namespace Renderers { namespace DX9 {
         throw std::runtime_error("Bad DrawingMode ?!");
     }
 
-    //inline GLint GetTextureFilter(TextureFilter::Type type)
-    //{
-    //    switch (type)
-    //    {
-    //    case TextureFilter::Nearest: return GL_NEAREST;
-    //    case TextureFilter::Linear: return GL_LINEAR;
-    //    case TextureFilter::LinearMipmapLinear: return GL_LINEAR_MIPMAP_LINEAR;
-    //    case TextureFilter::LinearMipmapNearest: return GL_LINEAR_MIPMAP_NEAREST;
-    //    case TextureFilter::NearestMipmapNearest: return GL_NEAREST_MIPMAP_NEAREST;
-    //    case TextureFilter::NearestMipmapLinear: return GL_NEAREST_MIPMAP_LINEAR;
-    //    }
-    //    throw std::runtime_error("Bad TextureFilter ?!");
-    //}
-
 #define DXCHECKERROR(result) Tools::Renderers::DX9::CheckError(result, #result)
 
     inline HRESULT CheckError(HRESULT result, const char* code = 0)
@@ -193,6 +137,23 @@ namespace Tools { namespace Renderers { namespace DX9 {
             throw std::runtime_error("DirectX: " + err);
         }
         return result;
+    }
+
+    inline D3DFORMAT GetFormat(PixelFormat::Type format)
+    {
+        switch (format)
+        {
+        case PixelFormat::Alpha8: return D3DFMT_A8;
+        case PixelFormat::Luminance8: return D3DFMT_L8;
+        case PixelFormat::Luminance8Alpha8: return D3DFMT_A8L8;
+        case PixelFormat::Rgb10a2: return D3DFMT_A2R10G10B10;
+        case PixelFormat::Rgb8: return D3DFMT_R8G8B8;
+        case PixelFormat::Rgba16f: return D3DFMT_A16B16G16R16F;
+        case PixelFormat::Rgba4: return D3DFMT_A4R4G4B4;
+        case PixelFormat::Rgba8: return D3DFMT_A8R8G8B8;
+        case PixelFormat::Depth24Stencil8: return D3DFMT_D24S8;
+        }
+        throw std::runtime_error("Bad PixelFormat ?!");
     }
 
 }}}

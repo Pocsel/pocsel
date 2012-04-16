@@ -60,8 +60,8 @@ namespace Tools { namespace Renderers {
         present_parameters.hDeviceWindow = GetActiveWindow();
         if (this->_fullscreen)
         {
-            present_parameters.BackBufferWidth = this->_screenSize.w;
-            present_parameters.BackBufferHeight = this->_screenSize.h;
+            present_parameters.BackBufferWidth = this->_screenSize.x;
+            present_parameters.BackBufferHeight = this->_screenSize.y;
         }
         present_parameters.BackBufferFormat = this->_fullscreen ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
         present_parameters.MultiSampleType = D3DMULTISAMPLE_NONE;
@@ -76,6 +76,7 @@ namespace Tools { namespace Renderers {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
 
         DXCHECKERROR(this->_device->GetRenderTarget(0, &this->_backBuffer));
+        DXCHECKERROR(this->_device->GetDepthStencilSurface(&this->_backZBuffer));
 
         D3DXCreateEffectPool(&this->_effectPool);
 
@@ -153,11 +154,11 @@ namespace Tools { namespace Renderers {
         this->_view = glm::translate<float>(0, 0, 1);
         this->_projection = DX9Renderer::_glToDirectX * glm::ortho<float>(
                 0,
-                this->_viewport.size.w,
-                this->_viewport.size.h,
+                this->_viewport.size.x,
+                this->_viewport.size.y,
                 0,
-                -float(this->_viewport.size.w),
-                float(this->_viewport.size.w));
+                -float(this->_viewport.size.x),
+                float(this->_viewport.size.x));
         this->_modelViewProjection = this->_projection * this->_view * this->_model;
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
@@ -169,7 +170,10 @@ namespace Tools { namespace Renderers {
     {
         DXCHECKERROR(this->_device->EndScene());
         if (this->_resetRenderTarget)
+        {
             DXCHECKERROR(this->_device->SetRenderTarget(0, this->_backBuffer));
+            DXCHECKERROR(this->_device->SetDepthStencilSurface(this->_backZBuffer));
+        }
         this->_currentProgram = 0;
 
         this->_state = DrawNone;
@@ -193,7 +197,10 @@ namespace Tools { namespace Renderers {
     {
         DXCHECKERROR(this->_device->EndScene());
         if (this->_resetRenderTarget)
+        {
             DXCHECKERROR(this->_device->SetRenderTarget(0, this->_backBuffer));
+            DXCHECKERROR(this->_device->SetDepthStencilSurface(this->_backZBuffer));
+        }
         this->_currentProgram = 0;
 
         this->_state = DrawNone;
@@ -270,8 +277,8 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::SetViewport(Rectangle const& viewport)
     {
         D3DVIEWPORT9 vp;
-        vp.Width = viewport.size.w;
-        vp.Height = viewport.size.h;
+        vp.Width = viewport.size.x;
+        vp.Height = viewport.size.y;
         vp.X = viewport.pos.x;
         vp.Y = viewport.pos.y;
         vp.MinZ = 0.0f;
@@ -282,11 +289,11 @@ namespace Tools { namespace Renderers {
         {
             this->_projection = DX9Renderer::_glToDirectX * glm::ortho<float>(
                 0,
-                this->_viewport.size.w,
-                this->_viewport.size.h,
+                this->_viewport.size.x,
+                this->_viewport.size.y,
                 0,
-                -float(this->_viewport.size.w),
-                float(this->_viewport.size.w));
+                -float(this->_viewport.size.x),
+                float(this->_viewport.size.x));
             this->_modelViewProjection = this->_projection * this->_view * this->_model;
         }
     }
@@ -351,14 +358,15 @@ namespace Tools { namespace Renderers {
         present_parameters.EnableAutoDepthStencil = true;
         present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
         present_parameters.hDeviceWindow = GetActiveWindow();
-        present_parameters.BackBufferWidth = this->_screenSize.w;
-        present_parameters.BackBufferHeight = this->_screenSize.h;
+        present_parameters.BackBufferWidth = this->_screenSize.x;
+        present_parameters.BackBufferHeight = this->_screenSize.y;
         present_parameters.BackBufferFormat = this->_fullscreen ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
 
         Tools::debug << "ScreenSize = " << ToString(this->_screenSize) << std::endl;
 
         // Release...
         this->_backBuffer->Release();
+        this->_backZBuffer->Release();
         for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
             (*it)->GetEffect()->OnLostDevice();
         for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
@@ -372,6 +380,7 @@ namespace Tools { namespace Renderers {
         for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
             (*it)->GetEffect()->OnResetDevice();
         DXCHECKERROR(this->_device->GetRenderTarget(0, &this->_backBuffer));
+        DXCHECKERROR(this->_device->GetDepthStencilSurface(&this->_backZBuffer));
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));

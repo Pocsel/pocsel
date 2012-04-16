@@ -10,8 +10,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     RenderTarget::RenderTarget(DX9Renderer& renderer, glm::uvec2 const& size) :
         _renderer(renderer),
-        _texture(0),
-        _size(size)
+        _size(size),
+        _depthBuffer(0)
     {
         this->OnResetDevice();
     }
@@ -19,30 +19,61 @@ namespace Tools { namespace Renderers { namespace DX9 {
     RenderTarget::~RenderTarget()
     {
         this->_renderer.Unregister(*this);
-        Delete(this->_texture);
-        if (this->_surface != 0)
-            this->_surface->Release();
+        for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
+            (*it)->Release();
+        this->_textures.clear();
+        this->_depthBuffer->Release();
     }
 
     void RenderTarget::OnLostDevice()
     {
-        delete this->_texture;
-        this->_texture = 0;
-        this->_surface->Release();
-        this->_surface = 0;
+        for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
+            (*it)->Release();
+        this->_textures.clear();
+        this->_depthBuffer->Release();
+        this->_depthBuffer = 0;
     }
 
     void RenderTarget::OnResetDevice()
     {
-        IDirect3DTexture9* tex;
-        DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), this->_size.w, this->_size.h, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8B8G8R8, D3DPOOL_DEFAULT, &tex));
-        this->_texture = new Texture2D(this->_renderer, tex);
-        DXCHECKERROR(tex->GetSurfaceLevel(0, &this->_surface));
+        for (auto it = this->_targets.begin(), ite = this->_targets.end(); it != ite; ++it)
+            this->_PushRenderTarget(it->first, it->second);
+    }
+
+    int RenderTarget::PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage)
+    {
+        int id = (int)this->_targets.size();
+        this->_targets.push_back(std::make_pair(format, usage));
+        this->_PushRenderTarget(format, usage);
+        return id;
     }
 
     void RenderTarget::Bind()
     {
-        this->_renderer.GetDevice()->SetRenderTarget(0, this->_surface);
+        for (size_t i = 0; i < this->_surfaces.size(); ++i)
+            this->_renderer.GetDevice()->SetRenderTarget(i, this->_surfaces[i]);
+        if (this->_depthBuffer)
+            this->_renderer.GetDevice()->SetDepthStencilSurface(this->_depthBuffer);
+    }
+
+    void RenderTarget::_PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage)
+    {
+        IDirect3DTexture9* tex;
+        DXCHECKERROR(D3DXCreateTexture(
+            this->_renderer.GetDevice(),
+            this->_size.x, this->_size.y, 1,
+            usage == RenderTargetUsage::Color ? D3DUSAGE_RENDERTARGET : D3DUSAGE_DEPTHSTENCIL,
+            GetFormat(format),
+            D3DPOOL_DEFAULT,
+            &tex));
+        this->_textures.push_back(std::unique_ptr<ITexture2D>(new Texture2D(this->_renderer, tex)));
+
+        IDirect3DSurface9* surface;
+        DXCHECKERROR(tex->GetSurfaceLevel(0, &surface));
+        if (usage == RenderTargetUsage::Color)
+            this->_surfaces.push_back(surface);
+        else
+            this->_depthBuffer = surface;
     }
 
 }}}

@@ -47,6 +47,7 @@ namespace Tools { namespace Renderers {
         std::list<DX9::ShaderProgram*> _allPrograms;
         std::list<DX9::RenderTarget*> _allRenderTargets;
         IDirect3DSurface9* _backBuffer;
+        IDirect3DSurface9* _backZBuffer;
         bool _resetRenderTarget;
 
         IShaderProgram* _currentProgram;
@@ -57,7 +58,7 @@ namespace Tools { namespace Renderers {
         int _clearStencil;
 
     public:
-        DX9Renderer(glm::uvec2 const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _state(DrawNone), _object(0), _device(0), _backBuffer(0), _currentProgram(0) {}
+        DX9Renderer(glm::uvec2 const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _state(DrawNone), _object(0), _device(0), _backBuffer(0), _backZBuffer(0), _currentProgram(0) {}
         virtual ~DX9Renderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const

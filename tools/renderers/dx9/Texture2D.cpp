@@ -32,7 +32,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         }
         else if (format == PixelFormat::Rgba8)
         {
-            DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), imgSize.w, imgSize.h, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
+            DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), imgSize.x, imgSize.y, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
             this->_size = imgSize;
             this->_FinishLoading((Color4<Uint8> const*)data, size, mipmapData);
         }
@@ -76,14 +76,14 @@ namespace Tools { namespace Renderers { namespace DX9 {
             throw std::runtime_error("A texture must be 24 or 32 bits per pixels.");
         }
 
-        unsigned int size = this->_size.w * this->_size.h;
+        unsigned int size = this->_size.x * this->_size.y;
         auto pixmap = new Color4<Uint8>[size];
-        ilCopyPixels(0, 0, 0, this->_size.w, this->_size.h, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
+        ilCopyPixels(0, 0, 0, this->_size.x, this->_size.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
 
         ilBindImage(0);
         ilDeleteImage(ilID);
 
-        DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), this->_size.w, this->_size.h, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
+        DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), this->_size.x, this->_size.y, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
         this->_FinishLoading(pixmap, size, 0);
         delete [] pixmap;
     }
@@ -93,11 +93,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
         D3DLOCKED_RECT lockRect;
         DXCHECKERROR(this->_texture->LockRect(0, &lockRect, 0, 0));
         Uint8* ptr = reinterpret_cast<Uint8*>(lockRect.pBits);
-        for (unsigned int y = 0; y < this->_size.h; ++y)
+        for (unsigned int y = 0; y < this->_size.y; ++y)
         {
-            for (unsigned int x = 0; x < this->_size.w; ++x)
+            for (unsigned int x = 0; x < this->_size.x; ++x)
             {
-                int i = y * this->_size.w + x;
+                int i = y * this->_size.x + x;
                 this->_hasAlpha = this->_hasAlpha || (data[i].a != 255);
                 ptr[x * 4 + 0] = data[i].b;
                 ptr[x * 4 + 1] = data[i].g;
@@ -112,11 +112,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
         {
             int level = 1;
             Color4<Uint8> const* idx = reinterpret_cast<Color4<Uint8> const*>(mipmapData);
-            for (auto vsize = glm::uvec2(this->_size.x / 2, this->_size.y / 2); vsize.w >= 1 && vsize.h >= 1; vsize /= 2)
+            for (auto vsize = glm::uvec2(this->_size.x / 2, this->_size.y / 2); vsize.x >= 1 && vsize.y >= 1; vsize /= 2)
             {
                 DXCHECKERROR(this->_texture->LockRect(level, &lockRect, 0, D3DLOCK_DISCARD));
                 Uint8* ptr = reinterpret_cast<Uint8*>(lockRect.pBits);
-                for (unsigned int i = 0; i < vsize.w*vsize.h; ++i)
+                for (unsigned int i = 0; i < vsize.x*vsize.y; ++i)
                 {
                     ptr[i*4 + 0] = idx[i].b;
                     ptr[i*4 + 1] = idx[i].g;
@@ -125,7 +125,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
                 }
                 DXCHECKERROR(this->_texture->UnlockRect(level));
                 ++level;
-                idx += vsize.w * vsize.h * 4;
+                idx += vsize.x * vsize.y * 4;
             }
         }
         else

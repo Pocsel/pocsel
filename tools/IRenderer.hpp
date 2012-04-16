@@ -46,8 +46,8 @@ namespace Tools {
         {
             /**
              * 0x<size><type><nb color><format>
-             * format: Alpha = 1, Rgb = 2, Rgba = 3, Luminance = 4, png = 5, LuminanceAlpha = 6
-             * type: 1*uint8 = 1, 4*uint8 = 2, 1*float = 3, 4*uint4 = 4, 2*uint8 = 5
+             * format: Alpha = 1, Rgb = 2, Rgba = 3, Luminance = 4, png = 5, LuminanceAlpha = 6, DepthStencil = 7
+             * type: 1*uint8 = 1, 4*uint8 = 2, 1*float = 3, 4*uint4 = 4, 2*uint8 = 5, others = 6
              */
             enum Type
             {
@@ -59,7 +59,22 @@ namespace Tools {
                 Luminance8Alpha8 = 0x02050206,
                 Rgb4 = 0x02040302,
                 Rgba4 = 0x02040403,
-                Png = 0x00000405
+                Png = 0x00000405,
+                // Special
+                Rgba16f = 0x08060403,
+                Rgb10a2 = 0x04060403,
+                Depth24Stencil8 = 0x04060207
+            };
+        }
+
+        namespace RenderTargetUsage
+        {
+            enum Type
+            {
+                Color,
+                Depth,
+                Stencil,
+                DepthStencil
             };
         }
 
@@ -158,7 +173,8 @@ namespace Tools {
         {
         public:
             virtual ~IRenderTarget() {}
-            virtual ITexture2D& GetTexture() = 0;
+            virtual ITexture2D& GetTexture(int idx) = 0;
+            virtual int PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage) = 0; // return an index for GetTexture
             virtual void Bind() = 0;
         };
 

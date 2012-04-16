@@ -26,33 +26,50 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     inline GLint GetInternalFormatFromPixelFormat(Renderers::PixelFormat::Type format)
     {
-        if (format == PixelFormat::Luminance8Alpha8)
-            return GL_LUMINANCE8_ALPHA8;
-        return (format >> 8) & 0x00FF;
+        switch (format)
+        {
+        case PixelFormat::Luminance8Alpha8: return GL_LUMINANCE8_ALPHA8;
+        case PixelFormat::Rgba16f: return GL_RGBA16F_ARB;
+        case PixelFormat::Rgb10a2: return GL_RGB10_A2;
+        case PixelFormat::Depth24Stencil8: return GL_DEPTH24_STENCIL8;
+        default: return (format >> 8) & 0x00FF;
+        }
     }
 
     inline GLint GetFormatFromPixelFormat(PixelFormat::Type format)
     {
-        switch (format & 0x0000FF)
+        switch (format)
         {
-        case 1: return GL_ALPHA;
-        case 2: return GL_RGB;
-        case 3: return GL_RGBA;
-        case 4: return GL_LUMINANCE;
-        case 6: return GL_LUMINANCE_ALPHA;
+        case PixelFormat::Depth24Stencil8: return GL_DEPTH_STENCIL;
+        default:
+            switch (format & 0x0000FF)
+            {
+            case 1: return GL_ALPHA;
+            case 2: return GL_RGB;
+            case 3: return GL_RGBA;
+            case 4: return GL_LUMINANCE;
+            case 6: return GL_LUMINANCE_ALPHA;
+            }
         }
         throw std::runtime_error("Bad PixelFormat ?!");
     }
 
     inline GLint GetTypeFromPixelFormat(PixelFormat::Type format)
     {
-        switch ((format >> 16) & 0xFF)
+        switch (format)
         {
-        case 1: return GL_UNSIGNED_BYTE;
-        case 2: return GL_UNSIGNED_INT_8_8_8_8;
-        case 3: return GL_FLOAT;
-        case 4: return GL_UNSIGNED_SHORT_4_4_4_4;
-        case 5: return GL_UNSIGNED_BYTE;
+        case PixelFormat::Rgba16f: return GL_FLOAT;
+        case PixelFormat::Rgb10a2: return GL_UNSIGNED_INT_10_10_10_2;
+        case PixelFormat::Depth24Stencil8: return GL_UNSIGNED_INT_24_8;
+        default:
+            switch ((format >> 16) & 0xFF)
+            {
+            case 1: return GL_UNSIGNED_BYTE;
+            case 2: return GL_UNSIGNED_INT_8_8_8_8;
+            case 3: return GL_FLOAT;
+            case 4: return GL_UNSIGNED_SHORT_4_4_4_4;
+            case 5: return GL_UNSIGNED_BYTE;
+            }
         }
         throw std::runtime_error("Bad PixelFormat ?!");
     }
