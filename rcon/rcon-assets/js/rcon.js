@@ -1,5 +1,10 @@
 var rconToken;
 var rconMaps;
+var rconRights;
+
+function hasRight(str) {
+    return rconRights.indexOf(str) >= 0;
+}
 
 $(document).ready(function() {
 
@@ -24,6 +29,7 @@ $(document).ready(function() {
                 json = $.parseJSON(json);
                 rconToken = json.token;
                 rconMaps = json.maps;
+                rconRights = json.rights;
                 $.each(rconMaps, function() {
                     $('#maps_list').append('<tr><td>' + this.identifier + '</td><td>' + this.fullname + '</td></tr>');
                 });

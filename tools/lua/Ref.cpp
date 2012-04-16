@@ -49,6 +49,8 @@ namespace Tools { namespace Lua {
 
     void Ref::Unref() throw()
     {
+        if (this->_ref == LUA_NOREF)
+            return;
         luaL_unref(this->_state, LUA_REGISTRYINDEX, this->_ref);
         this->_ref = LUA_NOREF;
     }
