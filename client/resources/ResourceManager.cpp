@@ -44,20 +44,20 @@ namespace {
         }
 
         auto size = glm::uvec2((ILuint)ilGetInteger(IL_IMAGE_WIDTH), (ILuint)ilGetInteger(IL_IMAGE_HEIGHT));
-        if (size.h % size.w != 0)
+        if (size.y % size.x != 0)
         {
             ilBindImage(0);
             ilDeleteImage(id);
             throw std::runtime_error("AnimatedTexture: height must be a multiple of width.");
         }
 
-        auto frameSize = glm::uvec2(size.w);
-        auto pixmap = new Tools::Color4<Uint8>[frameSize.w * frameSize.h];
-        frames.resize(size.h / size.w);
-        for (unsigned int y = 0, i = 0; y < size.h; y += size.w, ++i)
+        auto frameSize = glm::uvec2(size.x);
+        auto pixmap = new Tools::Color4<Uint8>[frameSize.x * frameSize.y];
+        frames.resize(size.y / size.x);
+        for (unsigned int y = 0, i = 0; y < size.y; y += size.x, ++i)
         {
-            ilCopyPixels(0, y, 0, frameSize.w, frameSize.h, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
-            frames[i] = renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, frameSize.w * frameSize.h * 4, pixmap, frameSize, 0).release();
+            ilCopyPixels(0, y, 0, frameSize.x, frameSize.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
+            frames[i] = renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, frameSize.x * frameSize.y * 4, pixmap, frameSize, 0).release();
         }
         Tools::Delete(pixmap);
         ilBindImage(0);

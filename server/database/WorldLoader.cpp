@@ -110,7 +110,7 @@ namespace Server { namespace Database {
                 if (conf.is_default)
                     world._defaultMap = world._maps[conf.name];
 
-                this->_loadingMaps.insert(decltype(this->_loadingMaps)::value_type(map, std::move(lmc)));
+                this->_loadingMaps.insert(std::make_pair(map, std::move(lmc)));
                 lmc.interpreter = 0;
             }
             catch (std::exception& e)

@@ -65,9 +65,9 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             throw std::runtime_error("A texture must be 24 or 32 bits per pixels.");
         }
 
-        unsigned int size = this->_size.w * this->_size.h;
+        unsigned int size = this->_size.x * this->_size.y;
         auto pixmap = new Color4<Uint8>[size];
-        ilCopyPixels(0, 0, 0, this->_size.w, this->_size.h, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
+        ilCopyPixels(0, 0, 0, this->_size.x, this->_size.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
 
         ilBindImage(0);
         ilDeleteImage(ilID);
@@ -83,8 +83,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         GLCHECK(glTexImage2D(GL_TEXTURE_2D,
                 0,
                 internalFormat,
-                this->_size.w,
-                this->_size.h,
+                this->_size.x,
+                this->_size.y,
                 0,
                 format,
                 GL_UNSIGNED_BYTE,
@@ -106,16 +106,16 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         {
             int level = 1;
             char const* idx = (char const*)mipmapData;
-            for (glm::uvec2 size = this->_size / 2u; size.w >= 1 && size.h >= 1; size /= 2u)
+            for (glm::uvec2 size = this->_size / 2u; size.x >= 1 && size.y >= 1; size /= 2u)
             {
-                GLCHECK(glTexImage2D(GL_TEXTURE_2D, level++, internalFormat, size.w, size.h, 0, format, GL_UNSIGNED_BYTE, idx));
-                idx += size.w * size.h * pixelSize;
+                GLCHECK(glTexImage2D(GL_TEXTURE_2D, level++, internalFormat, size.x, size.y, 0, format, GL_UNSIGNED_BYTE, idx));
+                idx += size.x * size.y * pixelSize;
             }
         }
         else if (GLEW_VERSION_3_0)
             GLCHECK(glGenerateMipmap(GL_TEXTURE_2D));
         else
-            gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, this->_size.w, this->_size.h, format, GL_UNSIGNED_BYTE, data);
+            gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, this->_size.x, this->_size.y, format, GL_UNSIGNED_BYTE, data);
 
         GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
         GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));

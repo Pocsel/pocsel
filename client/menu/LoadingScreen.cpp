@@ -38,11 +38,11 @@ namespace Client { namespace Menu {
     void LoadingScreen::_Resize(glm::uvec2 const& sz)
     {
         glm::fvec2 size(sz);
-        this->_text1Matrix = glm::translate<float>(10.0f, size.h - 80.0f, 0.0f) * glm::scale<float>(glm::fvec3(0.5f));
-        this->_text2Matrix = glm::translate<float>(10.0f, size.h - 60.0f, 0.0f) * glm::scale<float>(glm::fvec3(0.5f));
+        this->_text1Matrix = glm::translate<float>(10.0f, size.y - 80.0f, 0.0f) * glm::scale<float>(glm::fvec3(0.5f));
+        this->_text2Matrix = glm::translate<float>(10.0f, size.y - 60.0f, 0.0f) * glm::scale<float>(glm::fvec3(0.5f));
         this->_backRectMatrix =
-            glm::translate<float>(size.w / 2, size.h / 2, 0)
-            * glm::scale<float>(size.w / 2 + 1, size.h / 2 + 1, 1);
+            glm::translate<float>(size.x / 2, size.y / 2, 0)
+            * glm::scale<float>(size.x / 2 + 1, size.y / 2 + 1, 1);
     }
 
     void LoadingScreen::Render(std::string const& status, float progress)
@@ -54,8 +54,8 @@ namespace Client { namespace Menu {
             this->_renderer.SetModelMatrix(this->_backRectMatrix);
             this->_backRect->Render();
             this->_renderer.SetModelMatrix(
-                    glm::translate<float>((float)(this->_client.GetWindow().GetSize().w / 2) * progress, (float)this->_client.GetWindow().GetSize().h - 10, 0)
-                    * glm::scale<float>((float)(this->_client.GetWindow().GetSize().w / 2) * progress, 10, 1)
+                    glm::translate<float>((float)(this->_client.GetWindow().GetSize().x / 2) * progress, (float)this->_client.GetWindow().GetSize().y - 10, 0)
+                    * glm::scale<float>((float)(this->_client.GetWindow().GetSize().x / 2) * progress, 10, 1)
                     );
             this->_barRect->Render();
         } while (this->_menu.GetRectShader().EndPass());

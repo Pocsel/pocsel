@@ -66,10 +66,10 @@ namespace Client { namespace Menu { namespace Widget {
                     Tools::Color4f(0.43f, 0.1f, 0.1f, 1),
                     Tools::Color4f(0.43f, 0.1f, 0.1f, 1));
         this->_rectMatrix =
-            glm::translate<float>(this->_size.w / 2 + this->_pos.w, this->_size.h / 2 + this->_pos.h, 0)
-            * glm::scale<float>(this->_size.w / 2, this->_size.h / 2, 1);
+            glm::translate<float>(this->_size.x / 2 + this->_pos.x, this->_size.y / 2 + this->_pos.y, 0)
+            * glm::scale<float>(this->_size.x / 2, this->_size.y / 2, 1);
         this->_textMatrix =
-            glm::translate<float>(this->_pos.w + 4, this->_pos.h - 3, 0)
+            glm::translate<float>(this->_pos.x + 4, this->_pos.y - 3, 0)
             * glm::scale<float>(glm::fvec3(0.5f));
     }
 

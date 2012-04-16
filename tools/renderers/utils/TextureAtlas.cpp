@@ -53,19 +53,19 @@ namespace Tools { namespace Renderers { namespace Utils {
                 }
             }
             auto size = glm::uvec2((ILuint)ilGetInteger(IL_IMAGE_WIDTH), (ILuint)ilGetInteger(IL_IMAGE_HEIGHT));
-            if (size.w != size.h || size.w != NextPowerOfTwo(size.w))
+            if (size.x != size.y || size.x != NextPowerOfTwo(size.x))
             {
                 ilBindImage(0);
                 ilDeleteImage(id);
                 throw std::runtime_error("TextureAtlas: Dimensions must be power of two and square (id: " + ToString(it->first) + ").");
             }
-            maxSize.w = std::max(maxSize.w, size.w);
-            maxSize.h = std::max(maxSize.h, size.h);
+            maxSize.x = std::max(maxSize.x, size.x);
+            maxSize.y = std::max(maxSize.y, size.y);
 
             textures[it->first] = id;
             auto data = ilGetData();
             this->_hasAlpha[it->first] = false;
-            for (unsigned int i = 3; i < size.w*size.h; i += 4)
+            for (unsigned int i = 3; i < size.x*size.y; i += 4)
                 if (data[i] != 255)
                 {
                     this->_hasAlpha[it->first] = true;
@@ -74,30 +74,30 @@ namespace Tools { namespace Renderers { namespace Utils {
         }
 
         unsigned int tmp = (unsigned int)std::sqrt(textures.size()) + 1;
-        glm::uvec2 totalSize(tmp * maxSize.w, tmp * maxSize.h);
+        glm::uvec2 totalSize(tmp * maxSize.x, tmp * maxSize.y);
         ILuint result = ilGenImage();
         ilBindImage(result);
-        ilTexImage(totalSize.w, totalSize.h, 1, 4, IL_RGBA, IL_UNSIGNED_BYTE, 0);
+        ilTexImage(totalSize.x, totalSize.y, 1, 4, IL_RGBA, IL_UNSIGNED_BYTE, 0);
 
         glm::uvec2 pos(0);
         for (auto it = textures.begin(), ite = textures.end(); it != ite; ++it)
         {
             ilBindImage(it->second);
-            iluScale(maxSize.w, maxSize.h, 1);
+            iluScale(maxSize.x, maxSize.y, 1);
             //iluBuildMipmaps();
 
             ilBindImage(result);
             ilBlit(it->second,
                 pos.x, pos.y, 0,
                 0, 0, 0,
-                maxSize.w, maxSize.h, 1);
-            this->_textureCoords[it->first] = glm::fvec3((float)pos.x, (float)(totalSize.w - maxSize.w - pos.y), (float)maxSize.w) / (float)totalSize.w;
+                maxSize.x, maxSize.y, 1);
+            this->_textureCoords[it->first] = glm::fvec3((float)pos.x, (float)(totalSize.x - maxSize.x - pos.y), (float)maxSize.x) / (float)totalSize.x;
 
-            pos.x += maxSize.w;
-            if (pos.x >= totalSize.w)
+            pos.x += maxSize.x;
+            if (pos.x >= totalSize.x)
             {
                 pos.x = 0;
-                pos.y += maxSize.h;
+                pos.y += maxSize.y;
             }
 
             ilBindImage(0);
@@ -105,9 +105,9 @@ namespace Tools { namespace Renderers { namespace Utils {
         }
 
         ilBindImage(result);
-        unsigned int size = totalSize.w * totalSize.h;
+        unsigned int size = totalSize.x * totalSize.y;
         auto pixmap = new Color4<Uint8>[size];
-        ilCopyPixels(0, 0, 0, totalSize.w, totalSize.h, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
+        ilCopyPixels(0, 0, 0, totalSize.x, totalSize.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
         this->_texture = renderer.CreateTexture2D(PixelFormat::Rgba8, size, pixmap, totalSize, 0).release();
         delete pixmap;
         ilBindImage(0);

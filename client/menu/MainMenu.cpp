@@ -80,8 +80,8 @@ namespace Client { namespace Menu {
     {
         if (this->_visible != visible && warpMouse)
             this->_client.GetWindow().GetInputManager().WarpMouse(
-                    this->_client.GetWindow().GetSize().w / 2,
-                    this->_client.GetWindow().GetSize().h / 2);
+                    this->_client.GetWindow().GetSize().x / 2,
+                    this->_client.GetWindow().GetSize().y / 2);
         this->_visible = visible;
     }
 
@@ -89,10 +89,10 @@ namespace Client { namespace Menu {
     {
         glm::fvec2 size(sz);
         this->_backRectMatrix =
-            glm::translate<float>(size.w / 2, size.h / 2, 0)
-            * glm::scale<float>(size.w / 2 + 1, size.h / 2 + 1, 1);
-        this->_quitButton->SetPos(glm::fvec2(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 80));
-        this->_backButton->SetPos(glm::fvec2(size.w / 2 - this->_quitButton->GetSize().w / 2, size.h - 40));
+            glm::translate<float>(size.x / 2, size.y / 2, 0)
+            * glm::scale<float>(size.x / 2 + 1, size.y / 2 + 1, 1);
+        this->_quitButton->SetPos(glm::fvec2(size.x / 2 - this->_quitButton->GetSize().x / 2, size.y - 80));
+        this->_backButton->SetPos(glm::fvec2(size.x / 2 - this->_quitButton->GetSize().x / 2, size.y - 40));
     }
 
     void MainMenu::_QuitButton()

@@ -79,11 +79,10 @@ namespace detail
 			struct{value_type r, g;};
 			struct{value_type s, t;};
 			struct{value_type x, y;};
-			struct{value_type w, h;};
 		};
 #	elif(GLM_COMPONENT == GLM_COMPONENT_CXX98)
-		union {value_type x, r, s, w;};
-		union {value_type y, g, t, h;};
+		union {value_type x, r, s;};
+		union {value_type y, g, t;};
 
 #		if(defined(GLM_SWIZZLE))
 			// Defines all he swizzle operator as functions
