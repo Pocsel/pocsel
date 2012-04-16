@@ -213,7 +213,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             if (c < Font::startChar || c > Font::endChar)
                 c = '?';
             CharInfo& info = this->_charInfos[c - Font::startChar];
-            if (info.size.w == 0)
+            if (info.size.x == 0)
             {
                 offsetX += this->_charInfos[i].advance.x;
                 continue;
@@ -222,26 +222,26 @@ namespace Tools { namespace Renderers { namespace Utils {
             vertices[vi++] = offsetX + info.offset.x; // X
             vertices[vi++] = info.offset.y; // Y
             vertices[vi++] = (i)*0.01f; // Z
-            vertices[vi++] = info.texUVmin.x / this->_texture->GetSize().w; // U
-            vertices[vi++] = info.texUVmin.y / this->_texture->GetSize().h; // V
+            vertices[vi++] = info.texUVmin.x / this->_texture->GetSize().x; // U
+            vertices[vi++] = info.texUVmin.y / this->_texture->GetSize().y; // V
 
             vertices[vi++] = offsetX + info.offset.x;
-            vertices[vi++] = info.offset.y + info.size.h; // Y
+            vertices[vi++] = info.offset.y + info.size.y; // Y
             vertices[vi++] = (i)*0.01f; // Z
-            vertices[vi++] = info.texUVmin.x / this->_texture->GetSize().w; // U
-            vertices[vi++] = info.texUVmax.y / this->_texture->GetSize().h; // V
+            vertices[vi++] = info.texUVmin.x / this->_texture->GetSize().x; // U
+            vertices[vi++] = info.texUVmax.y / this->_texture->GetSize().y; // V
 
-            vertices[vi++] = offsetX + info.offset.x + info.size.w; // X
+            vertices[vi++] = offsetX + info.offset.x + info.size.x; // X
             vertices[vi++] = info.offset.y; // Y
             vertices[vi++] = (i)*0.01f; // Z
-            vertices[vi++] = info.texUVmax.x / this->_texture->GetSize().w; // U
-            vertices[vi++] = info.texUVmin.y / this->_texture->GetSize().h; // V
+            vertices[vi++] = info.texUVmax.x / this->_texture->GetSize().x; // U
+            vertices[vi++] = info.texUVmin.y / this->_texture->GetSize().y; // V
 
-            vertices[vi++] = offsetX + info.offset.x + info.size.w; // X
-            vertices[vi++] = info.offset.y + info.size.h; // Y
+            vertices[vi++] = offsetX + info.offset.x + info.size.x; // X
+            vertices[vi++] = info.offset.y + info.size.y; // Y
             vertices[vi++] = (i)*0.01f; // Z
-            vertices[vi++] = info.texUVmax.x / this->_texture->GetSize().w; // U
-            vertices[vi++] = info.texUVmax.y / this->_texture->GetSize().h; // V
+            vertices[vi++] = info.texUVmax.x / this->_texture->GetSize().x; // U
+            vertices[vi++] = info.texUVmax.y / this->_texture->GetSize().y; // V
 
             if (invert)
             {

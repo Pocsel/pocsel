@@ -55,12 +55,12 @@ namespace Client { namespace Menu {
     void DisconnectedScreen::_Resize(glm::uvec2 const& sz)
     {
         glm::fvec2 size(sz);
-        this->_text1Matrix = glm::translate<float>(10, size.h - 80, 0) * glm::scale<float>(glm::fvec3(0.5f));
-        this->_text2Matrix = glm::translate<float>(10, size.h - 60, 0) * glm::scale<float>(glm::fvec3(0.5f));
+        this->_text1Matrix = glm::translate<float>(10, size.y - 80, 0) * glm::scale<float>(glm::fvec3(0.5f));
+        this->_text2Matrix = glm::translate<float>(10, size.y - 60, 0) * glm::scale<float>(glm::fvec3(0.5f));
         this->_backRectMatrix =
-            glm::translate<float>(size.w / 2, size.h / 2, 0)
-            * glm::scale<float>(size.w / 2 + 1, size.h / 2 + 1, 1);
-        this->_button->SetPos(glm::fvec2(10, size.h - 30));
+            glm::translate<float>(size.x / 2, size.y / 2, 0)
+            * glm::scale<float>(size.x / 2 + 1, size.y / 2 + 1, 1);
+        this->_button->SetPos(glm::fvec2(10, size.y - 30));
     }
 
     void DisconnectedScreen::Render()

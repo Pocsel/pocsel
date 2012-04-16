@@ -14,13 +14,13 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
         GLCHECK(glGenRenderbuffersEXT(1, &this->_renderBuffer));
         GLCHECK(glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, this->_renderBuffer));
-        GLCHECK(glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, size.w, size.h));
+        GLCHECK(glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, size.x, size.y));
         GLCHECK(glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0));
 
         GLuint textureId;
         GLCHECK(glGenTextures(1, &textureId));
         GLCHECK(glBindTexture(GL_TEXTURE_2D, textureId));
-        GLCHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.w, size.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0));
+        GLCHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0));
         GLCHECK(glBindTexture(GL_TEXTURE_2D, 0));
         this->_texture = new Texture2D(renderer, textureId);
 

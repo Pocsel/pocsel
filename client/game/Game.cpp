@@ -29,9 +29,9 @@ namespace Client { namespace Game {
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](glm::uvec2 const& size)
             {
-                this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.w / float(size.h), 0.02f, 500.0f);
+                this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.02f, 500.0f);
             });
-        this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, this->_client.GetWindow().GetSize().w / float(this->_client.GetWindow().GetSize().h), 0.02f, 500.0f);
+        this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, this->_client.GetWindow().GetSize().x / float(this->_client.GetWindow().GetSize().y), 0.02f, 500.0f);
         // XXX
         this->_renderTarget = this->_renderer.CreateRenderTarget(glm::uvec2(800, 600));
         this->_renderImage = std::unique_ptr<Tools::Renderers::Utils::Image>(new Tools::Renderers::Utils::Image(this->_renderer));

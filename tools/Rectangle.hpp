@@ -32,7 +32,7 @@ namespace Tools {
             return this->Contains(vec.x, vec.y);
         }
 
-        float GetRatio() const { return float(this->size.w) / float(this->size.h); }
+        float GetRatio() const { return float(this->size.x) / float(this->size.y); }
     };
 
 }

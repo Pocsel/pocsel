@@ -151,11 +151,11 @@ namespace Tools { namespace Renderers {
         this->_view = glm::translate<float>(0, 0, 1);
         this->_projection = glm::ortho<float>(
                 0,
-                this->_viewport.size.w,
-                this->_viewport.size.h,
+                this->_viewport.size.x,
+                this->_viewport.size.y,
                 0,
-                -float(this->_viewport.size.w),
-                float(this->_viewport.size.w));
+                -float(this->_viewport.size.x),
+                float(this->_viewport.size.x));
         this->_modelViewProjection = this->_projection * this->_view * this->_model;
 
         GLCHECK(glDisable(GL_DEPTH_TEST));
@@ -250,17 +250,17 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::SetViewport(Rectangle const& viewport)
     {
-        GLCHECK(::glViewport(viewport.pos.x, this->_screenSize.h - viewport.size.y - viewport.pos.y, viewport.size.x, viewport.size.y));
+        GLCHECK(::glViewport(viewport.pos.x, this->_screenSize.y - viewport.size.y - viewport.pos.y, viewport.size.x, viewport.size.y));
         this->_viewport = viewport;
         if (this->_state == Draw2D)
         {
             this->_projection = glm::ortho<float>(
                 0,
-                this->_viewport.size.w,
-                this->_viewport.size.h,
+                this->_viewport.size.x,
+                this->_viewport.size.y,
                 0,
-                -float(this->_viewport.size.w),
-                float(this->_viewport.size.w));
+                -float(this->_viewport.size.x),
+                float(this->_viewport.size.x));
             this->_modelViewProjection = this->_projection * this->_view * this->_model;
         }
     }
