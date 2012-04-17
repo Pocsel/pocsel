@@ -30,6 +30,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         virtual void Bind();
 
         virtual ITexture2D& GetTexture(int idx) { return *(this->_textures[idx].get()); }
+        virtual glm::uvec2 const& GetSize() const { return this->_size; }
     private:
         void _PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage);
     };

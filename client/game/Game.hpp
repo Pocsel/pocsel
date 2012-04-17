@@ -51,6 +51,7 @@ namespace Client { namespace Game {
         std::unique_ptr<Tools::Renderers::Utils::Image> _renderImage;
         Tools::Renderers::IShaderProgram* _renderShader;
         std::unique_ptr<Tools::Renderers::IShaderParameter> _renderParameter;
+        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderTimeParameter;
         // XXX
 
     public:

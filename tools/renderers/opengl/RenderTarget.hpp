@@ -22,6 +22,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         virtual void Bind();
 
         virtual ITexture2D& GetTexture(int idx) { return *(this->_textures[idx].get()); }
+        virtual glm::uvec2 const& GetSize() const { return this->_size; }
     };
 
 }}}

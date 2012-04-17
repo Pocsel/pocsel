@@ -59,7 +59,12 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::Initialise()
     {
-        this->_currentMatrixMode = -1;
+        RenderState rs;
+        rs.state = RenderState::None;
+        rs.matrixMode = -1;
+        rs.target = 0;
+        this->_PushState(rs);
+
         GLenum error = glewInit();
         if (error != GLEW_OK)
             throw std::runtime_error(ToString("glewInit() failed: ") + ToString(glewGetErrorString(error)));
@@ -70,8 +75,9 @@ namespace Tools { namespace Renderers {
         Tools::log << "OpenGL version: " << (char const*)glGetString(GL_VERSION) << "\n";
 
         GLCHECK(glEnable(GL_BLEND));
-        GLCHECK(glEnable(GL_ALPHA_TEST));
+        //GLCHECK(glEnable(GL_ALPHA_TEST));
         GLCHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        //GLCHECK(glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         if (this->_useShaders)
         {
@@ -141,22 +147,10 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::BeginDraw2D(IRenderTarget* target)
     {
-        assert(this->_state == 0 && "Operation invalide");
-        this->_state = Draw2D;
-
-        if (target != 0)
-            target->Bind();
-
-        this->_model = glm::detail::tmat4x4<float>::identity;
-        this->_view = glm::translate<float>(0, 0, 1);
-        this->_projection = glm::ortho<float>(
-                0,
-                this->_viewport.size.x,
-                this->_viewport.size.y,
-                0,
-                -float(this->_viewport.size.x),
-                float(this->_viewport.size.x));
-        this->_modelViewProjection = this->_projection * this->_view * this->_model;
+        RenderState rs;
+        rs.state = RenderState::Draw2D;
+        rs.target = target;
+        this->_PushState(rs);
 
         GLCHECK(glDisable(GL_DEPTH_TEST));
         GLCHECK(glDisable(GL_CULL_FACE));
@@ -164,18 +158,19 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::EndDraw2D()
     {
-        this->_state = DrawNone;
-        this->_currentProgram = 0;
-        GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0));
+        this->_PopState();
     }
 
     void GLRenderer::BeginDraw(IRenderTarget* target)
     {
-        assert(this->_state == 0 && "Operation invalide");
-        this->_state = Draw3D;
-
-        if (target != 0)
-            target->Bind();
+        RenderState rs;
+        rs.state = RenderState::Draw3D;
+        rs.target = target;
+        rs.model = this->_currentState->model;
+        rs.view = this->_currentState->view;
+        rs.projection = this->_currentState->projection;
+        rs.modelViewProjection = this->_currentState->modelViewProjection;
+        this->_PushState(rs);
 
         GLCHECK(glEnable(GL_DEPTH_TEST));
         GLCHECK(glEnable(GL_CULL_FACE));
@@ -183,9 +178,7 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::EndDraw()
     {
-        this->_state = DrawNone;
-        this->_currentProgram = 0;
-        GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0));
+        this->_PopState();
     }
 
     void GLRenderer::UpdateCurrentParameters()
@@ -214,17 +207,17 @@ namespace Tools { namespace Renderers {
     // Matrices
     void GLRenderer::SetModelMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_model = matrix;
+        this->_currentState->model = matrix;
         if (this->_currentProgram != 0)
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
+            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
     }
 
     void GLRenderer::SetViewMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_view = matrix;
+        this->_currentState->view = matrix;
         if (this->_currentProgram != 0)
         {
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
+            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
@@ -233,10 +226,10 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_projection = matrix;
+        this->_currentState->projection = matrix;
         if (this->_currentProgram != 0)
         {
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
+            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         }
@@ -246,23 +239,7 @@ namespace Tools { namespace Renderers {
     void GLRenderer::SetScreenSize(glm::uvec2 const& size)
     {
         this->_screenSize = size;
-    }
-
-    void GLRenderer::SetViewport(Rectangle const& viewport)
-    {
-        GLCHECK(::glViewport(viewport.pos.x, this->_screenSize.y - viewport.size.y - viewport.pos.y, viewport.size.x, viewport.size.y));
-        this->_viewport = viewport;
-        if (this->_state == Draw2D)
-        {
-            this->_projection = glm::ortho<float>(
-                0,
-                this->_viewport.size.x,
-                this->_viewport.size.y,
-                0,
-                -float(this->_viewport.size.x),
-                float(this->_viewport.size.x));
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
-        }
+        GLCHECK(::glViewport(0, 0, size.x, size.y));
     }
 
     void GLRenderer::SetClearColor(Color4f const& color)
@@ -324,10 +301,81 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::SetMatrixMode(unsigned int mode)
     {
-        if (this->_currentMatrixMode == mode)
+        if (this->_currentState->matrixMode == mode)
             return;
-        this->_currentMatrixMode = mode;
+        this->_currentState->matrixMode = mode;
         GLCHECK(glMatrixMode(mode));
+    }
+
+    void GLRenderer::_PushState(GLRenderer::RenderState const& state)
+    {
+        this->_states.push_front(state);
+        auto& rs = this->_states.front();
+        this->_currentState = &rs;
+
+        if (rs.target != 0)
+        {
+            rs.target->Bind();
+            GLCHECK(::glViewport(0, 0, rs.target->GetSize().x, rs.target->GetSize().y));
+        }
+
+        if (rs.state == GLRenderer::RenderState::Draw2D)
+        {
+            rs.view = glm::translate<float>(0, 0, 1);
+            auto size = rs.target == 0 ? this->_screenSize : rs.target->GetSize();
+            rs.projection = glm::ortho<float>(0, size.x, size.y, 0);
+            rs.modelViewProjection = rs.projection * rs.view * rs.model;
+        }
+    }
+
+    void GLRenderer::_PopState()
+    {
+        auto rsOld = this->_states.front();
+        this->_states.pop_front();
+        auto& rs = this->_states.front();
+        this->_currentState = &rs;
+
+        if (rsOld.target != 0)
+        {
+            if (rs.target != 0)
+            {
+                rs.target->Bind();
+                GLCHECK(::glViewport(0, 0, rs.target->GetSize().x, rs.target->GetSize().y));
+            }
+            else
+            {
+                bool reset = true;
+                for (auto it = this->_states.begin(), ite = this->_states.end(); it != ite; ++it)
+                {
+                    if (it->target)
+                    {
+                        it->target->Bind();
+                        GLCHECK(::glViewport(0, 0, it->target->GetSize().x, it->target->GetSize().y));
+                        reset = false;
+                        break;
+                    }
+                }
+                if (reset)
+                {
+                    GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0));
+                    GLCHECK(::glViewport(0, 0, this->_screenSize.x, this->_screenSize.y));
+                }
+            }
+        }
+
+        if (rsOld.state != rs.state)
+        {
+            if (rs.state == RenderState::Draw3D)
+            {
+                GLCHECK(glEnable(GL_DEPTH_TEST));
+                GLCHECK(glEnable(GL_CULL_FACE));
+            }
+            else if (rs.state == RenderState::Draw2D)
+            {
+                GLCHECK(glDisable(GL_DEPTH_TEST));
+                GLCHECK(glDisable(GL_CULL_FACE));
+            }
+        }
     }
 
 }}
