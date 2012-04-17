@@ -255,7 +255,7 @@ namespace Common {
         unsigned int count = 0;
 
         int cx, cy, cz;
-        double x, y, z;
+        int x, y, z;
 
         for (x = -distance; x < distance;)
         {
@@ -283,18 +283,18 @@ namespace Common {
                         ++count;
                     }
 
-                    if (z == -distance)
-                        z += (int)ChunkSize - (int)__GetCubePos((int)z + (int)GetCubeCoords(pos).z);
+                    if (z == (int)-distance)
+                        z += (int)ChunkSize - (int)__GetCubePos(z + (int)GetCubeCoordsInChunk(pos).z);
                     else
                         z += ChunkSize;
                 }
-                if (y == -distance)
-                    y += (int)ChunkSize - (int)__GetCubePos((int)y + (int)GetCubeCoords(pos).y);
+                if (y == (int)-distance)
+                    y += (int)ChunkSize - (int)__GetCubePos(y + (int)GetCubeCoordsInChunk(pos).y);
                 else
                     y += ChunkSize;
             }
-            if (x == -distance)
-                x += (int)ChunkSize - (int)__GetCubePos((int)x + (int)GetCubeCoords(pos).x);
+            if (x == (int)-distance)
+                x += (int)ChunkSize - (int)__GetCubePos(x + (int)GetCubeCoordsInChunk(pos).x);
             else
                 x += ChunkSize;
         }
@@ -306,8 +306,7 @@ namespace Common {
             res.insert(res.end(), it->second.begin(), it->second.end());
         }
 
-        std::cout << "CAP=" << res.capacity() << "\n";
-        std::cout << "SIZE=" << res.size() << "\n";
+        Tools::debug << "Explosion: " << res.size() << " chunks\n";
         return res;
     }
 
@@ -358,7 +357,7 @@ namespace Common {
         unsigned int count = 0;
 
         int cx, cy, cz;
-        double x, y, z;
+        int x, y, z;
 
         for (x = -distance; x < distance;)
         {
@@ -381,18 +380,18 @@ namespace Common {
                         preRes[BigChunk::GetId(cId)].push_back(new CastChunk(cId));
                     ++count;
 
-                    if (z == -distance)
-                        z += (int)ChunkSize - (int)__GetCubePos((int)z + (int)GetCubeCoords(pos).z);
+                    if (z == (int)-distance)
+                        z += (int)ChunkSize - (int)__GetCubePos((int)z + (int)GetCubeCoordsInChunk(pos).z);
                     else
                         z += ChunkSize;
                 }
-                if (y == -distance)
-                    y += (int)ChunkSize - (int)__GetCubePos((int)y + (int)GetCubeCoords(pos).y);
+                if (y == (int)-distance)
+                    y += (int)ChunkSize - (int)__GetCubePos((int)y + (int)GetCubeCoordsInChunk(pos).y);
                 else
                     y += ChunkSize;
             }
-            if (x == -distance)
-                x += (int)ChunkSize - (int)__GetCubePos((int)x + (int)GetCubeCoords(pos).x);
+            if (x == (int)-distance)
+                x += (int)ChunkSize - (int)__GetCubePos((int)x + (int)GetCubeCoordsInChunk(pos).x);
             else
                 x += ChunkSize;
         }
@@ -404,8 +403,7 @@ namespace Common {
             res.insert(res.end(), it->second.begin(), it->second.end());
         }
 
-        std::cout << "CAP=" << res.capacity() << "\n";
-        std::cout << "SIZE=" << res.size() << "\n";
+        Tools::debug << "Explosion: " << res.size() << " chunks\n";
         return res;
     }
 
