@@ -1,5 +1,5 @@
-#ifndef __CLIENT_RESOURCES_Md5MODEL_HPP__
-#define __CLIENT_RESOURCES_Md5MODEL_HPP__
+#ifndef __CLIENT_RESOURCES_MD5MODEL_HPP__
+#define __CLIENT_RESOURCES_MD5MODEL_HPP__
 
 #include "client/resources/Md5Animation.hpp"
 

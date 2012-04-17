@@ -7,6 +7,11 @@
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
 
+// define fait dans X11
+#ifdef None
+#undef None
+#endif
+
 namespace Tools { namespace Gui {
     class WindowImplem;
 }}
