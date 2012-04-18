@@ -296,6 +296,7 @@ namespace Tools {
         virtual void SetClearStencil(int value) = 0;
         virtual void SetNormaliseNormals(bool normalise) = 0;
         virtual void SetDepthTest(bool enabled) = 0;
+        virtual void SetDepthWrite(bool enabled) = 0;
         virtual void SetCullFace(bool enabled) = 0;
         virtual void SetRasterizationMode(Renderers::RasterizationMode::Type rasterizationMode) = 0;
 

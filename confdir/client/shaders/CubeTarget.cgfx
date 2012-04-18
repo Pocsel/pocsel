@@ -13,28 +13,37 @@ struct VSout
    float2 texCoord : TEXCOORD0;
 };
 
+struct FSout
+{
+    float4 color : COLOR0;
+    float4 normal : COLOR1;
+};
+
 VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 {
-   VSout vout;
-   vout.position = mul(mvp, position);
+    VSout vout;
+    vout.position = mul(mvp, position);
 
-   vout.texCoord = texCoord;
-   return vout;
+    vout.texCoord = texCoord;
+    return vout;
 }
 
-float4 fs(in VSout v) : COLOR
+FSout fs(in VSout v)
 {
-   v.texCoord.x = 0.5 - abs(v.texCoord.x - 0.5);
-   v.texCoord.y = 0.5 - abs(v.texCoord.y - 0.5);
+    v.texCoord.x = 0.5 - abs(v.texCoord.x - 0.5);
+    v.texCoord.y = 0.5 - abs(v.texCoord.y - 0.5);
 
-   float2 coord = float2((v.texCoord.x - 0.5) * 2.0, (v.texCoord.y - 0.5) * 2.0);
-   float tmp = (coord.x * coord.x);
-   coord.y = (coord.y * coord.y);
+    float2 coord = float2((v.texCoord.x - 0.5) * 2.0, (v.texCoord.y - 0.5) * 2.0);
+    float tmp = (coord.x * coord.x);
+    coord.y = (coord.y * coord.y);
 
-   coord.x = v.texCoord.x + coord.y * cos(time * 3.01) * (0.5 - abs(v.texCoord.x - 0.5));
-   coord.y = v.texCoord.y + tmp * cos(time * 3.01) * (0.5 - abs(v.texCoord.y - 0.5));
+    coord.x = v.texCoord.x + coord.y * cos(time * 3.01) * (0.5 - abs(v.texCoord.x - 0.5));
+    coord.y = v.texCoord.y + tmp * cos(time * 3.01) * (0.5 - abs(v.texCoord.y - 0.5));
 
-   return tex2D(baseTex, coord);
+    FSout f;
+    f.color = tex2D(baseTex, coord);
+    f.normal = float4(f.color.rgb, 1.0 - f.color.a);
+    return f;
 }
 
 #ifndef DIRECTX

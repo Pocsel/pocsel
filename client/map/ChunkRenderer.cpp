@@ -19,8 +19,6 @@ namespace Client { namespace Map {
         : _game(game),
         _renderer(game.GetClient().GetWindow().GetRenderer())
     {
-        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("Chunk.cgfx");
-        this->_shaderTexture = this->_shader->GetParameter("cubeTexture").release();
         auto const& cubeTypes = this->_game.GetCubeTypeManager().GetCubeTypes();
 
         for (size_t i = 0; i < cubeTypes.size(); ++i)
@@ -30,14 +28,20 @@ namespace Client { namespace Map {
                 Uint32 textureId = cubeTypes[i].textures.ids[j];
                 if (this->_textures.find(textureId) == this->_textures.end())
                     this->_textures[textureId] = this->_game.GetResourceManager().CreateTexture(textureId);
-                this->_cubeTypes[cubeTypes[i].effects.effects[j]][textureId] = this->_textures[textureId].get();
+                if (this->_cubeTypes.find(cubeTypes[i].effects.effects[j]) == this->_cubeTypes.end())
+                {
+                    this->_cubeTypes[cubeTypes[i].effects.effects[j]] =
+                        std::make_pair(
+                            cubeTypes[i].effects.effects[j]->GetParameter("cubeTexture"),
+                            std::map<Uint32, Resources::ITexture*>());
+                }
+                this->_cubeTypes[cubeTypes[i].effects.effects[j]].second[textureId] = this->_textures[textureId].get();
             }
         }
     }
 
     ChunkRenderer::~ChunkRenderer()
     {
-        Tools::Delete(this->_shaderTexture);
     }
 
     bool ChunkRenderer::RefreshGraphics(Chunk& chunk)
@@ -77,7 +81,7 @@ namespace Client { namespace Map {
             do
             {
                 effectIt->first->BeginPass();
-                for (auto texturesIt = effectIt->second.begin(), texturesIte = effectIt->second.end(); texturesIt != texturesIte; ++texturesIt)
+                for (auto texturesIt = effectIt->second.second.begin(), texturesIte = effectIt->second.second.end(); texturesIt != texturesIte; ++texturesIt)
                 {
                     if (texturesIt->second->HasAlpha())
                     {
@@ -93,7 +97,7 @@ namespace Client { namespace Map {
                     else
                     {
                         texturesIt->second->Bind();
-                        this->_shaderTexture->Set(texturesIt->second->GetCurrentTexture());
+                        effectIt->second.first->Set(texturesIt->second->GetCurrentTexture());
                         for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
                         {
                             if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
@@ -122,9 +126,9 @@ namespace Client { namespace Map {
                 effectIt->first->BeginPass();
                 for (auto it = this->_transparentChunks.begin(), ite = this->_transparentChunks.end(); it != ite; ++it)
                 {
-                    auto texture = effectIt->second[it->first];
+                    auto texture = effectIt->second.second[it->first];
                     texture->Bind();
-                    this->_shaderTexture->Set(texture->GetCurrentTexture());
+                    effectIt->second.first->Set(texture->GetCurrentTexture());
                     for (auto itChunk = it->second.begin(), iteChunk = it->second.end(); itChunk != iteChunk; ++itChunk)
                     {
                         auto mesh = itChunk->second->GetMesh();

@@ -273,6 +273,11 @@ namespace Tools { namespace Renderers {
             GLCHECK(glDisable(GL_DEPTH_TEST));
     }
 
+    void GLRenderer::SetDepthWrite(bool enabled)
+    {
+        GLCHECK(glDepthMask(enabled ? GL_TRUE : GL_FALSE));
+    }
+
     void GLRenderer::SetCullFace(bool enabled)
     {
         if (enabled)

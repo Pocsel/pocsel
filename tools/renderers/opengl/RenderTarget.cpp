@@ -32,15 +32,22 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             GetFormatFromPixelFormat(format),
             GetTypeFromPixelFormat(format),
             0));
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         GLCHECK(glBindTexture(GL_TEXTURE_2D, 0));
 
         GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER, this->_frameBuffer));
         if (usage == RenderTargetUsage::Color)
-            GLCHECK(glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0 + this->_colorCount++, GL_TEXTURE_2D, textureId, 0));
+        {
+            GLCHECK(glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT + this->_colorCount, GL_TEXTURE_2D, textureId, 0));
+            this->_colorCount++;
+        }
         if (usage == RenderTargetUsage::Depth || usage == RenderTargetUsage::DepthStencil)
-            GLCHECK(glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureId, 0));
+            GLCHECK(glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, textureId, 0));
         if (usage == RenderTargetUsage::Stencil || usage == RenderTargetUsage::DepthStencil)
-            GLCHECK(glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, textureId, 0));
+            GLCHECK(glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, textureId, 0));
         GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER, 0));
 
         int idx = (int)this->_textures.size();
@@ -50,7 +57,27 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     void RenderTarget::Bind()
     {
+        static const GLenum bufs[] = {
+            GL_COLOR_ATTACHMENT0_EXT,
+            GL_COLOR_ATTACHMENT1_EXT,
+            GL_COLOR_ATTACHMENT2_EXT,
+            GL_COLOR_ATTACHMENT3_EXT,
+            GL_COLOR_ATTACHMENT4_EXT,
+            GL_COLOR_ATTACHMENT5_EXT,
+            GL_COLOR_ATTACHMENT6_EXT,
+            GL_COLOR_ATTACHMENT7_EXT,
+            GL_COLOR_ATTACHMENT8_EXT,
+            GL_COLOR_ATTACHMENT9_EXT,
+            GL_COLOR_ATTACHMENT10_EXT,
+            GL_COLOR_ATTACHMENT11_EXT,
+            GL_COLOR_ATTACHMENT12_EXT,
+            GL_COLOR_ATTACHMENT13_EXT,
+            GL_COLOR_ATTACHMENT14_EXT,
+            GL_COLOR_ATTACHMENT15_EXT,
+        };
+
         GLCHECK(glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, this->_frameBuffer));
+        GLCHECK(glDrawBuffers(this->_colorCount, bufs));
     }
 
 }}}

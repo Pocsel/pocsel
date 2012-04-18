@@ -308,6 +308,11 @@ namespace Tools { namespace Renderers {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
     }
 
+    void DX9Renderer::SetDepthWrite(bool enabled)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZWRITEENABLE, enabled ? TRUE : FALSE));
+    }
+
     void DX9Renderer::SetCullFace(bool enabled)
     {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, enabled ? D3DCULL_CCW : D3DCULL_NONE));

@@ -35,7 +35,8 @@ namespace Client { namespace Game {
         this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.02f, 500.0f);
         // XXX
         this->_renderTarget = this->_renderer.CreateRenderTarget(glm::uvec2(size.x, size.y));
-        this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color);
+        Tools::log << " - " << this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color) << std::endl;
+        Tools::log << " - " << this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color) << std::endl;
         this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Depth24Stencil8, Tools::Renderers::RenderTargetUsage::DepthStencil);
         this->_renderImage = std::unique_ptr<Tools::Renderers::Utils::Image>(new Tools::Renderers::Utils::Image(this->_renderer));
         this->_renderShader = &this->_client.GetLocalResourceManager().GetShader("PostProcess.cgfx");
@@ -110,8 +111,8 @@ namespace Client { namespace Game {
         this->_renderShader->BeginPass();
         this->_renderTimeParameter->Set((float)this->_gameTimer.GetPreciseElapsedTime() * 0.000001f);
         this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(0));
-        //this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(3, 1, 0));
-        //this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(1));
+        this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(1, 1, 0));
+        this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(1));
         this->_renderShader->EndPass();
         this->_renderer.EndDraw2D();
         // XXX

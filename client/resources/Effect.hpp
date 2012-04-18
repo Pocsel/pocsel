@@ -30,6 +30,7 @@ namespace Client { namespace Resources {
 
         void BeginPass() { this->_shader->BeginPass(); }
         bool EndPass() { return this->_shader->EndPass(); }
+        std::unique_ptr<Tools::Renderers::IShaderParameter> GetParameter(std::string const& name) { return this->_shader->GetParameter(name); }
 
         std::string const& GetName() const { return this->_name; }
 

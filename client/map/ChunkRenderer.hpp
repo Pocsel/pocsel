@@ -28,10 +28,12 @@ namespace Client { namespace Map {
     private:
         Game::Game& _game;
         Tools::IRenderer& _renderer;
-        Tools::Renderers::IShaderProgram* _shader;
-        Tools::Renderers::IShaderParameter* _shaderTexture;
         std::map<Uint32, std::unique_ptr<Resources::ITexture>> _textures;
-        std::map<Resources::Effect*, std::map<Uint32, Resources::ITexture*>> _cubeTypes;
+        std::map<Resources::Effect*,
+            std::pair<
+                std::unique_ptr<Tools::Renderers::IShaderParameter>,
+                std::map<Uint32, Resources::ITexture*>
+            >> _cubeTypes;
         std::map<Uint32, std::multimap<double, Chunk*>> _transparentChunks;
 
     public:

@@ -106,6 +106,7 @@ namespace Tools { namespace Renderers {
         virtual void SetClearStencil(int value) { this->_clearStencil = value; }
         virtual void SetNormaliseNormals(bool normalise);
         virtual void SetDepthTest(bool enabled);
+        virtual void SetDepthWrite(bool enabled);
         virtual void SetCullFace(bool enabled);
         virtual void SetViewport(Rectangle const& viewport);
         virtual void SetRasterizationMode(Renderers::RasterizationMode::Type rasterizationMode);
