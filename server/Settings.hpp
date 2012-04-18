@@ -17,18 +17,22 @@ namespace Server {
         boost::filesystem::path worldFile;
         boost::filesystem::path worldDir; // trouvé a partir de worldFile
         boost::filesystem::path settingsFile;
+        boost::filesystem::path rconSettingsFile;
         std::string port;
         std::string udpPort;
         std::string host;
         std::string rconPort;
         std::string rconHost;
         // settings.lua (trouvé dans worldDir par défaut)
+        bool debug;
+        // rcon.lua (trouvé dans worldDir par défaut)
         std::map<std::string /* login */, RconUser> rconUsers;
 
     public:
         Settings(int ac, char** av);
     private:
         void _ReadSettings();
+        void _ReadRconSettings();
         void _DumpRconUsers() const;
     };
 

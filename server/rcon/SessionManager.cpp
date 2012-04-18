@@ -15,24 +15,35 @@ namespace Server { namespace Rcon {
     std::string SessionManager::NewSession(std::string const& login, std::string const& password, std::string const& userAgent, std::list<std::string>& rights)
     {
         this->_ExpireTokens();
-        // TODO retourner le meme token pour qqn de deja connecté
         auto it = this->_settings.rconUsers.find(login);
         if (it != this->_settings.rconUsers.end() && it->second.password == password && !it->second.password.empty())
         {
+            rights = it->second.rights; // retourne la liste des droits du user par reference
+
+            // ne crée pas de nouvelle session si le type était deja loggé (mais update son user-agent)
+            auto itSession = this->_sessions.begin();
+            auto itSessionEnd = this->_sessions.end();
+            for (; itSession != itSessionEnd; ++itSession)
+                if (itSession->second.login == login)
+                {
+                    itSession->second.userAgent = userAgent;
+                    return itSession->first;
+                }
+
+            // le mec n'était pas loggé, nouvelle session
             Session s;
             s.login = login;
             s.userAgent = userAgent;
             std::string token = boost::uuids::to_string(this->_tokenGenerator());
             this->_sessions[token] = s;
-            rights = it->second.rights;
             return token;
         }
-        return std::string(); // flag pour foirage
+        return std::string(); // flag "" pour foirage
     }
 
     bool SessionManager::HasRights(std::string const& token, std::string const& rights)
     {
-        this->_ExpireTokens();
+        this->_ExpireTokens(token);
         auto it = this->_sessions.find(token);
         if (it != this->_sessions.end())
         {
@@ -49,7 +60,7 @@ namespace Server { namespace Rcon {
         return false;
     }
 
-    void SessionManager::_ExpireTokens()
+    void SessionManager::_ExpireTokens(std::string const& recentToken /* = "" */)
     {
         // TODO expiration des sessions
     }
@@ -66,7 +77,7 @@ namespace Server { namespace Rcon {
             json +=
                 "\t{\n"
                 "\t\t\"login\": \"" + ToJsonStr(it->second.login) + "\",\n" +
-                "\t\t\"user_agent\": \"" + ToJsonStr(it->second.userAgent) + "\",\n" +
+                "\t\t\"user_agent\": \"" + ToJsonStr(it->second.userAgent) + "\"\n" +
                 "\t}";
         }
         json += "\n]\n";

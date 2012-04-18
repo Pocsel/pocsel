@@ -26,7 +26,7 @@
         </div>
         <div class="container">
 
-            <div id="login-form">
+            <form id="login-form">
                 <h3>Connect to server</h3>
                 <div class="well">
                     <div id="login-form_alert" class="alert alert-error hide">
@@ -42,14 +42,14 @@
                     <br />
                     <button id="login-form_submit" class="btn">Connect</button> <img id="login-form_preloader" class="hide" src="rcon-assets/img/preloader.gif" alt="" />
                 </div>
-            </div>
+            </form>
 
             <div id="category-server" class="accordion hide">
                 <h3 id="category-server_title"></h3>
 
                 <div class="accordion-group">
                     <div class="accordion-heading">
-                        <a class="accordion-toggle" href="#maps" data-toggle="collapse" data-target="#maps">
+                        <a class="accordion-toggle" data-toggle="collapse" data-target="#maps">
                             Maps
                         </a>
                     </div>
@@ -69,7 +69,7 @@
 
                 <div class="accordion-group">
                     <div class="accordion-heading">
-                        <a class="accordion-toggle" href="#plugins" data-toggle="collapse" data-target="#plugins">
+                        <a class="accordion-toggle" data-toggle="collapse" data-target="#plugins">
                             Plugins
                         </a>
                     </div>
@@ -87,9 +87,9 @@
                     </div>
                 </div>
 
-                <div class="accordion-group">
+                <div id="rcon-sessions_group" class="accordion-group hide">
                     <div class="accordion-heading">
-                        <a class="accordion-toggle" href="#rcon-sessions" data-toggle="collapse" data-target="#rcon-sessions">
+                        <a class="accordion-toggle" data-toggle="collapse" data-target="#rcon-sessions">
                             Rcon sessions
                         </a>
                     </div>
@@ -109,26 +109,28 @@
 
             </div>
 
-            <div id="category-logs">
+            <div id="category-logs" class="hide">
                 <h3>Logs</h3>
                 <ul class="nav nav-tabs">
-                    <li class="active"><a href="#category-logs" data-toggle="tab">All</a></li>
-                    <li><a href="#category-logs" data-toggle="tab">Warnings</a></li>
-                    <li><a href="#category-logs" data-toggle="tab">Errors</a></li>
+                    <li class="active"><a data-toggle="tab">All</a></li>
+                    <li><a data-toggle="tab">Warnings</a></li>
+                    <li><a data-toggle="tab">Errors</a></li>
                 </ul>
                 <textarea style="width: 100%; height: 200px;"></textarea>
             </div>
 
-            <div id="category-maps">
+            <div id="category-maps" class="hide">
                 <h3>Maps</h3>
-                <ul class="nav nav-tabs">
-                    <li class="active"><a id="ceci_test" href="#category-maps" data-toggle="tab">map1</a></li>
-                    <li><a href="#main" data-toggle="tab">map2</a></li>
+                <ul id="map_tabs" class="nav nav-tabs">
+                    <!--
+                    <li class="active"><a data-toggle="tab">map1</a></li>
+                    <li><a data-toggle="tab">map2</a></li>
+                    -->
                 </ul>
                 <div class="accordion">
                     <div class="accordion-group">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" href="#players" data-toggle="collapse" data-target="#players">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#players">
                                 Players
                             </a>
                         </div>
@@ -144,9 +146,9 @@
                             </table>
                         </div>
                     </div>
-                    <div class="accordion-group">
+                    <div id="entities_group" class="accordion-group hide">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" href="#entities" data-toggle="collapse" data-target="#entities">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#entities">
                                 Entity instances
                             </a>
                         </div>
@@ -166,9 +168,9 @@
                             </table>
                         </div>
                     </div>
-                    <div class="accordion-group">
+                    <div id="messages_group" class="accordion-group hide">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" href="#messages" data-toggle="collapse" data-target="#messages">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#messages">
                                 Pending messages
                             </a>
                         </div>
@@ -185,14 +187,14 @@
                                         <th>Notification arguments</th>
                                     </tr>
                                 </thead>
-                                <tbody id="entities_list">
+                                <tbody id="messages_list">
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="accordion-group">
+                    <div id="execute_group" class="accordion-group hide">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" href="#execute" data-toggle="collapse" data-target="#execute">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#execute">
                                 Execute Lua
                             </a>
                         </div>
@@ -206,12 +208,12 @@
                 </div>
             </div>
 
-            <div id="category-entities">
+            <div id="category-entities" class="hide">
                 <h3>Entities</h3>
                 <div class="accordion">
                     <div class="accordion-group">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" href="#entity-types" data-toggle="collapse" data-target="#entity-types">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#entity-types">
                                 Registered types
                             </a>
                         </div>
@@ -231,7 +233,7 @@
                     </div>
                     <div class="accordion-group">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" href="#entity-files" data-toggle="collapse" data-target="#entity-files">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#entity-files">
                                 Source files
                             </a>
                         </div>
@@ -255,6 +257,7 @@
         </div>
         <script src="rcon-assets/js/jquery-1.7.2.js"></script>
         <script src="rcon-assets/js/jquery.timer.js"></script>
+        <script src="rcon-assets/js/bootstrap-transition.js"></script>
         <script src="rcon-assets/js/bootstrap-alert.js"></script>
         <script src="rcon-assets/js/bootstrap-modal.js"></script>
         <script src="rcon-assets/js/bootstrap-dropdown.js"></script>

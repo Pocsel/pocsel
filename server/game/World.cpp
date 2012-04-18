@@ -5,6 +5,7 @@
 #include "server/game/PluginManager.hpp"
 
 #include "server/Server.hpp"
+#include "server/rcon/ToJsonStr.hpp"
 
 #include "server/database/WorldLoader.hpp"
 
@@ -60,6 +61,24 @@ namespace Server { namespace Game{
         {
             it->second->Save();
         }
+    }
+
+    std::string World::RconGetMaps() const
+    {
+        std::string json = "\t[\n";
+        auto it = this->_maps.begin();
+        auto itEnd = this->_maps.end();
+        for (; it != itEnd; ++it)
+        {
+            if (it != this->_maps.begin())
+                json += ",\n";
+            json += "\t\t{\n"
+                "\t\t\t\"identifier\": \"" + it->second->GetName() + "\",\n"
+                "\t\t\t\"fullname\": \"" + Rcon::ToJsonStr(it->second->GetFullName()) + "\"\n"
+                "\t\t}";
+        }
+        json += "\n\t],\n";
+        return json;
     }
 
 }}

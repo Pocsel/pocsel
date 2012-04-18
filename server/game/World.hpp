@@ -57,6 +57,8 @@ namespace Server { namespace Game {
         Uint32 GetVersion() const { return this->_version; }
         std::string const& GetBuildHash() const { return this->_buildHash; }
 
+        std::string RconGetMaps() const;
+
     private:
         friend class Database::WorldLoader;
     };

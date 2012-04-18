@@ -30,7 +30,7 @@ namespace Server { namespace Rcon {
         bool HasRights(std::string const& token, std::string const& rights);
         std::string RconGetSessions() const;
     private:
-        void _ExpireTokens();
+        void _ExpireTokens(std::string const& recentToken = "");
     };
 
 }}
