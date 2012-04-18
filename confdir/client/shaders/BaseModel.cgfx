@@ -42,7 +42,7 @@ VSout vs(
     vout.objPosition = mul(matTransform, position);
     vout.objNormal = mul(matTransform, float4(normal, 0.0f));
     vout.oTexCoord = texCoord;
-    
+
     vout.oPosition = mul(mvp, vout.objPosition);
     float fog = clamp(abs(vout.oPosition.z), 0, fogEnd);
     fog = (fogEnd - fog) / fogEnd;
@@ -55,7 +55,7 @@ float4 fs(VSout v) : COLOR
     float3 normal = normalize(v.objNormal.xyz);
     float4 c = tex2D(baseTex, v.oTexCoord);
     float lightIntensity = dot(-lightDirection, normal) * 0.35 + 0.65;
-    c.rgb = lightIntensity * lerp(fogColor, normal, v.ofogFactor);
+    c.rgb *= lightIntensity;// * lerp(fogColor, normal, v.ofogFactor);
     return c;
 }
 

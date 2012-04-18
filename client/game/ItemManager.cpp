@@ -31,7 +31,10 @@ namespace Client { namespace Game {
 
     void ItemManager::Update(Uint32 time)
     {
-        this->_renderer->Update(time);
+        if (this->_positions.empty() == false)
+            this->_renderer->Update(time, this->_positions.begin()->second.phi);
+        else
+            this->_renderer->Update(time, 0);
     }
 
 }}
