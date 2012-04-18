@@ -19,6 +19,10 @@ namespace Tools {
         {
             return this->pos == other.pos && this->size == other.size;
         }
+        bool operator !=(Rectangle const& other) const
+        {
+            return this->pos != other.pos || this->size != other.size;
+        }
         bool Contains(int x, int y) const
         {
             return

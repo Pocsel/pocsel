@@ -46,7 +46,7 @@ namespace Client { namespace Window { namespace Sdl {
 #endif
         this->_renderer->Initialise();
         this->_renderer->SetScreenSize(this->_size);
-        this->_renderer->SetViewport(Tools::Rectangle(glm::ivec2(0), this->_size));
+        //this->_renderer->SetViewport(Tools::Rectangle(glm::ivec2(0), this->_size));
     }
 
     Window::~Window()
@@ -74,7 +74,7 @@ namespace Client { namespace Window { namespace Sdl {
             }
             this->_size = this->_targetSize;
             this->_renderer->SetScreenSize(this->_size);
-            this->_renderer->SetViewport(Tools::Rectangle(glm::ivec2(0), this->_size));
+            //this->_renderer->SetViewport(Tools::Rectangle(glm::ivec2(0), this->_size));
             this->_OnResize(this->_size);
             this->_targetSize.x = 0;
             this->_targetSize.y = 0;

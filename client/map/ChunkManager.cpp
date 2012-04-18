@@ -50,7 +50,7 @@ namespace Client { namespace Map {
             boost::this_thread::yield();
             std::list<ChunkNode*> toDelete;
             for (auto it = this->_refreshTasks.begin(), ite = this->_refreshTasks.end(); it != ite; ++it)
-                if (it->second->IsExecuted())
+                if (it->second->IsExecuted() && it->second.unique())
                     toDelete.push_back(it->first);
             std::for_each(toDelete.begin(), toDelete.end(), [this](ChunkNode* node) { this->_refreshTasks.erase(node); });
         }
@@ -106,7 +106,7 @@ namespace Client { namespace Map {
         std::list<ChunkNode*> toDelete;
         for (auto it = this->_refreshTasks.begin(), ite = this->_refreshTasks.end(); it != ite && timer.GetElapsedTime() <= 10; ++it)
         {
-            if (it->second->IsExecuted() || it->second->IsCancelled())
+            if (it->second->IsExecuted() && it->second.unique())
             {
                 if (it->second->GetResult())
                 {
@@ -135,7 +135,7 @@ namespace Client { namespace Map {
         std::list<ChunkNode*> toDelete;
         for (auto it = this->_refreshTasks.begin(), ite = this->_refreshTasks.end(); it != ite && timer.GetElapsedTime() <= 10; ++it)
         {
-            if (it->second->IsExecuted() || it->second->IsCancelled())
+            if (it->second->IsExecuted() && it->second.unique())
             {
                 if (it->second->GetResult() && !it->second->IsCancelled())
                     this->_chunkRenderer.RefreshGraphics(*it->first->chunk);

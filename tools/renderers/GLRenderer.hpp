@@ -7,6 +7,11 @@
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
 
+// define fait dans X11
+#ifdef None
+#undef None
+#endif
+
 namespace Tools { namespace Gui {
     class WindowImplem;
 }}
@@ -21,25 +26,32 @@ namespace Tools { namespace Renderers {
     class GLRenderer : public Tools::IRenderer
     {
     private:
-        enum DrawState
+        struct RenderState
         {
-            DrawNone = 0,
-            Draw2D,
-            Draw3D
+            enum DrawState
+            {
+                None,
+                Draw2D,
+                Draw3D
+            };
+
+            DrawState state;
+            IRenderTarget* target;
+
+            glm::detail::tmat4x4<float> modelViewProjection;
+            glm::detail::tmat4x4<float> model;
+            glm::detail::tmat4x4<float> view;
+            glm::detail::tmat4x4<float> projection;
+            unsigned int matrixMode;
         };
 
     private:
         glm::uvec2 _screenSize;
-        Rectangle _viewport;
-        glm::detail::tmat4x4<float> _modelViewProjection;
-        glm::detail::tmat4x4<float> _model;
-        glm::detail::tmat4x4<float> _view;
-        glm::detail::tmat4x4<float> _projection;
-        unsigned int _currentMatrixMode;
         bool _useShaders;
         CGcontext _cgContext;
 
-        DrawState _state;
+        std::list<RenderState> _states;
+        RenderState* _currentState;
 
         IShaderProgram* _currentProgram;
 
@@ -47,7 +59,7 @@ namespace Tools { namespace Renderers {
         OpenGL::IndexBuffer* bindedIndexBuffer;
 
     public:
-        GLRenderer(bool useShaders = true) : _useShaders(useShaders), _state(DrawNone), _currentProgram(0), bindedIndexBuffer(0) {}
+        GLRenderer(bool useShaders = true) : _useShaders(useShaders), _currentProgram(0), bindedIndexBuffer(0) {}
         virtual ~GLRenderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -83,14 +95,13 @@ namespace Tools { namespace Renderers {
         virtual void SetViewMatrix(glm::detail::tmat4x4<float> const& matrix);
         virtual void SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix);
 
-        glm::detail::tmat4x4<float> const& GetModelViewProjectionMatrix() const { return this->_modelViewProjection; }
-        glm::detail::tmat4x4<float> const& GetModelMatrix() const { return this->_model; }
-        glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_view; }
-        glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_projection; }
+        glm::detail::tmat4x4<float> const& GetModelViewProjectionMatrix() const { return this->_states.front().modelViewProjection; }
+        glm::detail::tmat4x4<float> const& GetModelMatrix() const { return this->_states.front().model; }
+        glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_states.front().view; }
+        glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_states.front().projection; }
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size);
-        virtual void SetViewport(Rectangle const& viewport);
         virtual void SetClearColor(Color4f const& color);
         virtual void SetClearDepth(float value);
         virtual void SetClearStencil(int value);
@@ -104,9 +115,11 @@ namespace Tools { namespace Renderers {
         void SetCurrentProgram(IShaderProgram& program)
         {
             this->_currentProgram = &program;
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
         }
         CGcontext GetCgContext() const { return this->_cgContext; }
+    private:
+        void _PushState(RenderState const& state);
+        void _PopState();
     };
 
 }}
