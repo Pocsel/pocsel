@@ -15,28 +15,26 @@ namespace Client { namespace Resources {
             int flags;
             int startIndex;
         };
-        typedef std::vector<JointInfo> JointInfoList;
 
         struct Bound
         {
             glm::vec3 min;
             glm::vec3 max;
         };
-        typedef std::vector<Bound> BoundList;
 
         struct BaseFrame
         {
             glm::vec3 pos;
             glm::quat orient;
         };
-        typedef std::vector<BaseFrame> BaseFrameList;
 
         struct FrameData
         {
             int frameID;
             std::vector<float> frameData;
+//            glm::vec3 pos;
+//            glm::quat orient;
         };
-        typedef std::vector<FrameData> FrameDataList;
 
         // A Skeleton joint is a joint of the skeleton per frame
         struct SkeletonJoint
@@ -48,23 +46,21 @@ namespace Client { namespace Resources {
             glm::vec3 pos;
             glm::quat orient;
         };
-        typedef std::vector<SkeletonJoint> SkeletonJointList;
-        typedef std::vector<glm::mat4x4> SkeletonMatrixList;
 
         // A frame skeleton stores the joints of the skeleton for a single frame.
         struct FrameSkeleton
         {
-            SkeletonMatrixList boneMatrices;
-            SkeletonJointList joints;
+            std::vector<glm::mat4x4> boneMatrices;
+            std::vector<SkeletonJoint> joints;
+            int frameId;
         };
-        typedef std::vector<FrameSkeleton> FrameSkeletonList;
 
     protected:
-        JointInfoList _jointInfos;
-        BoundList _bounds;
-        BaseFrameList _baseFrames;
-        FrameDataList _frames;
-        FrameSkeletonList _skeletons;    // All the skeletons for all the frames
+        std::vector<JointInfo> _jointInfos;
+        std::vector<Bound> _bounds;
+        std::vector<BaseFrame> _baseFrames;
+        std::vector<FrameData> _frames;
+        std::vector<FrameSkeleton> _skeletons;    // All the skeletons for all the frames
         FrameSkeleton _animatedSkeleton;
 
     private:
@@ -84,13 +80,12 @@ namespace Client { namespace Resources {
         // Load an animation from the animation file
         bool LoadAnimation(boost::filesystem::path const& filePath);
         // Update this animation's joint set.
-        void Update(float deltaTime);
+        void Update(float deltaTime, float phi);
         // Draw the animated skeleton
         void Render();
 
-
         FrameSkeleton const& GetSkeleton() const { return this->_animatedSkeleton; }
-        const SkeletonMatrixList& GetSkeletonMatrixList() const { return this->_animatedSkeleton.boneMatrices; }
+        const std::vector<glm::mat4x4>& GetSkeletonMatrixList() const { return this->_animatedSkeleton.boneMatrices; }
         int GetNumJoints() const { return this->_numJoints; }
 
         JointInfo const& GetJointInfo(unsigned int index) const
@@ -101,8 +96,12 @@ namespace Client { namespace Resources {
 
     protected:
         // Build the frame skeleton for a particular frame
-        void _BuildFrameSkeleton(FrameSkeletonList& skeletons, JointInfoList const& jointInfo, BaseFrameList const& baseFrames, FrameData const& frameData);
-        void _InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton const& skeleton0, FrameSkeleton const& skeleton1, float fInterpolate);
+        void _BuildFrameSkeleton(
+                std::vector<FrameSkeleton>& skeletons,
+                std::vector<JointInfo> const& jointInfo,
+                std::vector<BaseFrame> const& baseFrames,
+                FrameData const& frameData);
+        void _InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton& skeleton0, FrameSkeleton& skeleton1, float fInterpolate, float phi);
     };
 
 }}

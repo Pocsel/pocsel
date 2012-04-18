@@ -55,7 +55,7 @@ namespace Client { namespace Game {
                 )
             *
             glm::yawPitchRoll<float>(
-                   pi / 2-pos.theta, -pi +pos.phi, 0.0f//-pos.phi
+                   pi / 2-pos.theta, -pi / 2 /* +pos.phi*/, 0.0f
                 )
             *
             glm::translate<float>(
@@ -102,9 +102,9 @@ namespace Client { namespace Game {
         this->_shader->EndPass();
     }
 
-    void ItemRenderer::Update(Uint32 time)
+    void ItemRenderer::Update(Uint32 time, float phi)
     {
-        this->_md5Model->Update(time);
+        this->_md5Model->Update(time, phi);
         //this->_elapsedTime += time;
     }
 

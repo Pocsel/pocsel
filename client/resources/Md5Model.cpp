@@ -431,21 +431,148 @@ namespace Client { namespace Resources {
         return true;
     }
 
-    void Md5Model::Update(Uint32 time)
+    void Md5Model::Update(Uint32 time, float phi)
     {
         if (this->_hasAnimation)
         {
             float deltaTime = (float)time / 1000.0f;
 
-            this->_animation.Update(deltaTime);
+            this->_animation.Update(deltaTime, phi);
 
             MatrixList const& animatedSkeleton = this->_animation.GetSkeletonMatrixList();
+
+//            float pi = std::atan2(0.0f, -1.0f);
+//
+//            std::vector<glm::mat4x4> parents;
+//            parents.reserve(this->_numJoints);
 
             // Multiply the animated skeleton joints by the inverse of the bind pose.
             for (int i = 0; i < this->_numJoints; ++i)
             {
                 this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i];
             }
+//                if (
+//                        this->_joints[i].name == "head"
+//                        ||
+//                        this->_joints[i].name == "neck"
+//                        ||
+//                        this->_joints[i].name == "pubis"
+//                        ||
+//                        this->_joints[i].name == "pelvis"
+//                        ||
+//                        this->_joints[i].name == "spine"
+//                        || true
+//                        ||
+//                        this->_joints[i].name == "upperarm.L"
+//                        ||
+//                        this->_joints[i].name == "forearm.L"
+//                        ||
+//                        this->_joints[i].name == "wrist.L"
+//                        ||
+//                        this->_joints[i].name == "thumb.L"
+//                        ||
+//                        this->_joints[i].name == "thm_end.L"
+//                        ||
+//                        this->_joints[i].name == "fingers.L"
+//                        ||
+//                        this->_joints[i].name == "fingerstip.L"
+//                        ||
+//                        this->_joints[i].name == "lamp"
+//                        ||
+//                        this->_joints[i].name == "upperarm.R"
+//                        ||
+//                        this->_joints[i].name == "forearm.R"
+//                        ||
+//                        this->_joints[i].name == "wrist.R"
+//                        ||
+//                        this->_joints[i].name == "thumb.R"
+//                        ||
+//                        this->_joints[i].name == "thm_end.R"
+//                        ||
+//                        this->_joints[i].name == "fingers.R"
+//                        ||
+//                        this->_joints[i].name == "fingerstip.R"
+//                   )
+//                   {
+//            if (animatedJoint.parent >= 0) // Has a parent joint
+//            {
+//                SkeletonJoint& parentJoint = skeleton.joints[animatedJoint.parent];
+//                glm::vec3 rotPos = parentJoint.orient * animatedJoint.pos;
+//
+//                animatedJoint.pos = parentJoint.pos + rotPos;
+//                animatedJoint.orient = parentJoint.orient * animatedJoint.orient;
+//
+//                animatedJoint.orient = glm::normalize(animatedJoint.orient);
+//            }
+//
+//                    glm::mat4x4 boneTranslation = glm::translate(this->_joints[i].pos);
+//                    glm::mat4x4 boneRotation = glm::toMat4(this->_joints[i].orient);
+//
+//                    glm::mat4x4 boneMatrix = boneTranslation * boneRotation
+//                        *
+//                        glm::yawPitchRoll<float>(0, 0, -(phi - pi / 2) / 2)
+//                        ;
+//
+//                    glm::mat4x4 inverseBoneMatrix = glm::inverse(boneMatrix);
+//
+//                    this->_animatedBones[i] =
+//                        animatedSkeleton[i]
+//                        *
+//                        inverseBoneMatrix
+//                        *
+//                        this->_animatedBones[this->_joints[i].parentID]
+//                        *
+//                        glm::translate<float>(0, 2.0, 0)
+//                        ;
+//
+//                    parents[i] = this->_inverseBindPose[i];
+//
+//                    if (this->_joints[i].parentID >= 0)
+//                    this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i]
+//                        *
+//                        this->_animatedBones[this->_joints[i].parentID]
+//                        ;
+//                    else
+//                    this->_animatedBones[i] = animatedSkeleton[i] * parents[i];
+//                   }
+//
+////                    this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i] *
+////                        glm::yawPitchRoll<float>(0, (phi - pi / 2) / 6, 0)
+////                        *
+////                        glm::translate<float>(0, 2.4, 0)
+////                        ;
+//                else if (this->_joints[i].name == "neck")
+//                    this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i] *
+//                        glm::yawPitchRoll<float>(0, (phi - pi / 2) / 6, 0)
+//                        *
+//                        glm::translate<float>(0, 2.4, 0)
+//                        ;
+//                else if (this->_joints[i].name == "spine")
+//                    this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i] *
+//                        glm::yawPitchRoll<float>(0, (phi - pi / 2) / 7, 0)
+//                        *
+//                        glm::translate<float>(0, 2.4, 0)
+//                        ;
+//                else if (this->_joints[i].name == "pelvis")
+//                    this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i] *
+//                        glm::yawPitchRoll<float>(0, (phi - pi / 2) / 7, 0)
+//                        *
+//                        glm::translate<float>(0, 2.4, 0)
+//                        ;
+//                else if (this->_joints[i].name == "pubis")
+//                    this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i] *
+//                        glm::yawPitchRoll<float>(0, (phi - pi / 2) / 7, 0)
+//                        *
+//                        glm::translate<float>(0, 2.4, 0)
+//                        ;
+//                else if (this->_joints[i].parentID >= 0)
+//                    this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i]
+//                        *
+//                        this->_animatedBones[this->_joints[i].parentID]
+//                        ;
+//                else
+//                    this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i];
+//            }
         }
 
          // pour afficher les normales il faut faire ça
