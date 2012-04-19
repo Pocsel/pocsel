@@ -329,19 +329,19 @@ namespace Common {
             {
                 for (zz = 0; zz < (int)ChunkSize; ++zz)
                 {
-                    if (((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
-                                (zy == 0 || zy == 1 || zy == ChunkSize - 2 || zy == ChunkSize - 1) &&
-                                (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1)) ||
-                            (zx == zy && zy == zz) ||
-                            (zx == (int)ChunkSize-1-zy && (int)ChunkSize-1-zy == zz) ||
-                            ((int)ChunkSize-1-zx == zy && zy == zz) ||
-                            (zx == zy && zy == (int)ChunkSize-1-zz) ||
+                    //if (((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
+                    //            (zy == 0 || zy == 1 || zy == ChunkSize - 2 || zy == ChunkSize - 1) &&
+                    //            (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1)) ||
+                    //        (zx == zy && zy == zz) ||
+                    //        (zx == (int)ChunkSize-1-zy && (int)ChunkSize-1-zy == zz) ||
+                    //        ((int)ChunkSize-1-zx == zy && zy == zz) ||
+                    //        (zx == zy && zy == (int)ChunkSize-1-zz) ||
 
-                            ((zx == 0 || zx == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1)) ||
-                            ((zx == 0 || zx == ChunkSize - 1) && (zy == 0 || zy == ChunkSize - 1)) ||
-                            ((zy == 0 || zy == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1))
-                       )
-                        continue;
+                    //        ((zx == 0 || zx == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1)) ||
+                    //        ((zx == 0 || zx == ChunkSize - 1) && (zy == 0 || zy == ChunkSize - 1)) ||
+                    //        ((zy == 0 || zy == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1))
+                    //   )
+                    //    continue;
 
                     if (__PointInSphere(Position(cx * ChunkSize + zx, cy * ChunkSize + zy, cz * ChunkSize + zz), pos, distance))
                         res.push_back(BaseChunk::CoordsType(zx, zy, zz));
@@ -428,19 +428,19 @@ namespace Common {
                 dy = (int)std::abs((cy * (int)ChunkSize + zy) - pos.y);
                 for (zz = 0; zz < (int)ChunkSize; ++zz)
                 {
-                    if (((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
-                                (zy == 0 || zy == 1 || zy == ChunkSize - 2 || zy == ChunkSize - 1) &&
-                                (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1)) ||
-                            (zx == zy && zy == zz) ||
-                            (zx == (int)ChunkSize-1-zy && (int)ChunkSize-1-zy == zz) ||
-                            ((int)ChunkSize-1-zx == zy && zy == zz) ||
-                            (zx == zy && zy == (int)ChunkSize-1-zz) ||
+                    //if (((zx == 0 || zx == 1 || zx == ChunkSize - 2 || zx == ChunkSize - 1) &&
+                    //            (zy == 0 || zy == 1 || zy == ChunkSize - 2 || zy == ChunkSize - 1) &&
+                    //            (zz == 0 || zz == 1 || zz == ChunkSize - 2 || zz == ChunkSize - 1)) ||
+                    //        (zx == zy && zy == zz) ||
+                    //        (zx == (int)ChunkSize-1-zy && (int)ChunkSize-1-zy == zz) ||
+                    //        ((int)ChunkSize-1-zx == zy && zy == zz) ||
+                    //        (zx == zy && zy == (int)ChunkSize-1-zz) ||
 
-                            ((zx == 0 || zx == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1)) ||
-                            ((zx == 0 || zx == ChunkSize - 1) && (zy == 0 || zy == ChunkSize - 1)) ||
-                            ((zy == 0 || zy == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1))
-                       )
-                        continue;
+                    //        ((zx == 0 || zx == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1)) ||
+                    //        ((zx == 0 || zx == ChunkSize - 1) && (zy == 0 || zy == ChunkSize - 1)) ||
+                    //        ((zy == 0 || zy == ChunkSize - 1) && (zz == 0 || zz == ChunkSize - 1))
+                    //   )
+                    //    continue;
                     dz = (int)std::abs((cz * (int)ChunkSize + zz) - pos.z);
                     if (dx <= distance && dy <= distance && dz <= distance)
                         res.push_back(BaseChunk::CoordsType(zx, zy, zz));
