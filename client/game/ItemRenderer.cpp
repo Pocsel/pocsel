@@ -1,6 +1,7 @@
 #include "client/game/ItemRenderer.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
+#include "client/game/Model.hpp"
 
 #include "tools/IRenderer.hpp"
 
@@ -9,6 +10,7 @@
 #include "client/Client.hpp"
 
 #include "client/resources/LocalResourceManager.hpp"
+#include "client/resources/Md5Model.hpp"
 
 #include "client/window/Window.hpp"
 
@@ -22,26 +24,15 @@ namespace Client { namespace Game {
         this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("BaseModel.cgfx");
         this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
         this->_shaderBoneMatrix = this->_shader->GetParameter("boneMatrix").release();
-        //this->_shaderTime = this->_shader->GetParameter("time").release();
-        this->_shaderTime = 0;
-
-        //this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("test.png");
-        this->_texture = 0;
-
-        this->_md5Model = this->_game.GetClient().GetLocalResourceManager().GetMd5Model("boblampclean");
-
-        //this->_md5Model.LoadModel("");
-        //this->_md5Model.LoadAnim("");
     }
 
     ItemRenderer::~ItemRenderer()
     {
         Tools::Delete(this->_shaderTexture);
-        Tools::Delete(this->_shaderTime);
-        Tools::Delete(this->_md5Model);
+        Tools::Delete(this->_shaderBoneMatrix);
     }
 
-    void ItemRenderer::Render(Common::OrientedPosition const& pos)
+    void ItemRenderer::Render(Model const& model, Common::OrientedPosition const& pos)
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
 
@@ -55,7 +46,7 @@ namespace Client { namespace Game {
                 )
             *
             glm::yawPitchRoll<float>(
-                   pi / 2-pos.theta, -pi / 2 /* +pos.phi*/, 0.0f
+                   pi / 2-pos.theta, -pi / 2, 0.0f
                 )
             *
             glm::translate<float>(
@@ -67,46 +58,29 @@ namespace Client { namespace Game {
                 )
             );
 
-        //this->_md5Model->Render(this->_renderer);
-
-        auto meshes = this->_md5Model->GetMeshes();
-        this->_shaderBoneMatrix->Set(this->_md5Model->GetAnimatedBones());
+        auto meshes = model.GetMeshes();
+        this->_shaderBoneMatrix->Set(model.GetAnimatedBones());
         for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
         {
             auto mesh = *it;
             mesh.texture->Bind();
             this->_shaderTexture->Set(*mesh.texture);
-//            this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
-
-//        glDisable(GL_CULL_FACE);
             mesh.vertexBuffer->Bind();
             mesh.indexBuffer->Bind();
 
             this->_renderer.DrawElements(mesh.indexes.size());
-
-//        glEnable(GL_CULL_FACE);
 
             mesh.indexBuffer->Unbind();
             mesh.vertexBuffer->Unbind();
             mesh.texture->Unbind();
         }
 
-//        this->_vertexBuffer->Bind();
-//        this->_texture->Bind();
-//        this->_shaderTexture->Set(*this->_texture);
-//        this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
-//        this->_renderer.DrawVertexBuffer(0, 6*6);
-//        this->_texture->Unbind();
-//        this->_vertexBuffer->Unbind();
-
         this->_shader->EndPass();
     }
 
-    void ItemRenderer::Update(Uint32 time, float phi)
+    void ItemRenderer::Update(Uint32 time)
     {
-        this->_md5Model->Update(time, phi);
-        //this->_elapsedTime += time;
+        this->_elapsedTime += time;
     }
 
 }}
-

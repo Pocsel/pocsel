@@ -431,23 +431,4 @@ namespace Client { namespace Resources {
         return true;
     }
 
-    void Md5Model::Update(Uint32 time, float phi)
-    {
-        if (this->_hasAnimation)
-        {
-            float deltaTime = (float)time / 1000.0f;
-
-            this->_animation.Update(deltaTime, phi);
-
-            std::vector<glm::mat4x4> const& animatedSkeleton = this->_animation.GetSkeletonMatrixList();
-
-            // Multiply the animated skeleton joints by the inverse of the bind pose.
-            for (int i = 0; i < this->_numJoints; ++i)
-            {
-                this->_animatedBones[i] = animatedSkeleton[i] * this->_inverseBindPose[i];
-            }
-        }
-
-    }
-
 }}

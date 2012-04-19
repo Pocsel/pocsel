@@ -59,7 +59,6 @@ namespace Client { namespace Resources {
         std::vector<BaseFrame> _baseFrames;
         std::vector<FrameData> _frames;
         std::vector<FrameSkeleton> _skeletons;    // All the skeletons for all the frames
-        FrameSkeleton _animatedSkeleton;
 
     private:
         int _md5Version;
@@ -69,7 +68,6 @@ namespace Client { namespace Resources {
         int _numAnimatedComponents;
         float _animDuration;
         float _frameDuration;
-        float _animTime;
 
     public:
         Md5Animation();
@@ -77,20 +75,20 @@ namespace Client { namespace Resources {
 
         // Load an animation from the animation file
         bool LoadAnimation(boost::filesystem::path const& filePath);
-        // Update this animation's joint set.
-        void Update(float deltaTime, float phi);
-        // Draw the animated skeleton
-        void Render();
-
-        FrameSkeleton const& GetSkeleton() const { return this->_animatedSkeleton; }
-        const std::vector<glm::mat4x4>& GetSkeletonMatrixList() const { return this->_animatedSkeleton.boneMatrices; }
-        int GetNumJoints() const { return this->_numJoints; }
 
         JointInfo const& GetJointInfo(unsigned int index) const
         {
             assert(index < this->_jointInfos.size());
             return this->_jointInfos[index];
         }
+
+        int GetMd5Version() const { return this->_md5Version; }
+        int GetNumFrames() const { return this->_numFrames; }
+        int GetNumJoints() const { return this->_numJoints; }
+        int GetFramRate() const { return this->_framRate; }
+        int GetNumAnimatedComponents() const { return this->_numAnimatedComponents; }
+        float GetAnimDuration() const { return this->_animDuration; }
+        float GetFrameDuration() const { return this->_frameDuration; }
 
     protected:
         // Build the frame skeleton for a particular frame
@@ -99,7 +97,6 @@ namespace Client { namespace Resources {
                 std::vector<JointInfo> const& jointInfo,
                 std::vector<BaseFrame> const& baseFrames,
                 FrameData const& frameData);
-        void _InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton& skeleton0, FrameSkeleton& skeleton1, float fInterpolate, float phi);
     };
 
 }}

@@ -97,7 +97,6 @@ namespace Client { namespace Resources {
         Md5Animation _animation;
         std::vector<glm::mat4x4> _bindPose;
         std::vector<glm::mat4x4> _inverseBindPose;
-        std::vector<glm::mat4x4> _animatedBones; // Animated bone matrix from the animation with the inverse bind pose applied.
         glm::mat4x4 _localToWorldMatrix;
         glm::mat4x4 _worldToLocalMatrix;
 
@@ -114,7 +113,6 @@ namespace Client { namespace Resources {
         void Render(Tools::IRenderer& renderer);
 
         std::vector<Mesh>& GetMeshes() { return this->_meshes; }
-        std::vector<glm::mat4x4>& GetAnimatedBones() { return this->_animatedBones; }
 
     protected:
         // Build the bind-pose and the inverse bind-pose matrix array for the model.
