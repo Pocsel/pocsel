@@ -1,7 +1,9 @@
 #include <boost/tokenizer.hpp>
 
 #include "server/rcon/Request.hpp"
+#include "server/rcon/Rcon.hpp"
 #include "server/rcon/SessionManager.hpp"
+#include "server/rcon/EntityFileManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "server/Server.hpp"
 #include "server/game/Game.hpp"
@@ -12,10 +14,9 @@
 
 namespace Server { namespace Rcon {
 
-    Request::Request(Server& server, boost::asio::ip::tcp::socket* socket, SessionManager& sessionManager) :
+    Request::Request(Server& server, boost::asio::ip::tcp::socket* socket) :
         _server(server),
-        _socket(socket),
-        _sessionManager(sessionManager)
+        _socket(socket)
     {
         Tools::debug << "Rcon: New request." << std::endl;
         this->_ReadHttpHeader();
@@ -208,6 +209,8 @@ namespace Server { namespace Rcon {
                 return this->_Login();
             else if (this->_url[0] == "rcon_sessions" && this->_method == "GET")
                 return this->_GetRconSessions();
+            else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "GET")
+                return this->_GetEntityFile(this->_url[1], this->_url[2]);
         }
         this->_WriteHttpResponse("404 Not Found");
     }
@@ -216,7 +219,7 @@ namespace Server { namespace Rcon {
     {
         // credentials checks
         std::list<std::string> rights;
-        std::string newToken = this->_sessionManager.NewSession(this->_content["login"], this->_content["password"], this->_userAgent, rights);
+        std::string newToken = this->_server.GetRcon().GetSessionManager().NewSession(this->_content["login"], this->_content["password"], this->_userAgent, rights);
         if (newToken.empty())
             return this->_WriteHttpResponse("401 Unauthorized");
 
@@ -242,11 +245,16 @@ namespace Server { namespace Rcon {
 
         // maps
         json += "\t\"maps\":\n";
-        json += this->_server.GetGame().GetWorld().RconGetMaps();
+        json += this->_server.GetGame().GetWorld().RconGetMaps() + ",\n";
 
         // plugins
         json += "\t\"plugins\":\n";
-        json += this->_server.GetGame().GetWorld().GetPluginManager().RconGetPlugins();
+        json += this->_server.GetGame().GetWorld().GetPluginManager().RconGetPlugins() + ",\n";
+
+        // entity files
+        json += "\t\"entity_files\":\n";
+        Tools::debug << "BITEBITE" << std::endl;
+        json += this->_server.GetRcon().GetEntityFileManager().RconGetEntityFiles();
 
         // send response
         json += "}\n";
@@ -255,16 +263,30 @@ namespace Server { namespace Rcon {
 
     void Request::_GetRconSessions()
     {
-        if (this->_sessionManager.HasRights(this->_token, "rcon_sessions"))
-            this->_WriteHttpResponse("200 OK", this->_sessionManager.RconGetSessions());
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "rcon_sessions"))
+            this->_WriteHttpResponse("200 OK", this->_server.GetRcon().GetSessionManager().RconGetSessions());
         else
             this->_WriteHttpResponse("401 Unauthorized");
     }
 
     void Request::_GetEntities(Game::Map::Map const& map)
     {
-        if (this->_sessionManager.HasRights(this->_token, "entities"))
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "entities"))
             map.RconGetEntities(std::bind(&Request::_JsonCallback, this, std::placeholders::_1));
+        else
+            this->_WriteHttpResponse("401 Unauthorized");
+    }
+
+    void Request::_GetEntityFile(std::string const& pluginIdentifier, std::string const& file)
+    {
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "hot_swap"))
+        {
+            std::string json = this->_server.GetRcon().GetEntityFileManager().GetFile(pluginIdentifier, file);
+            if (json.empty())
+                this->_WriteHttpResponse("401 Not Found");
+            else
+                this->_WriteHttpResponse("200 OK", json);
+        }
         else
             this->_WriteHttpResponse("401 Unauthorized");
     }

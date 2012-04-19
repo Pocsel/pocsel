@@ -1,5 +1,5 @@
 - POST /login
-    - Needed right:
+    - Needed rights:
     - Parameters: login, password
     - Returns: 200 (ok), 401 (incorrect login/password)
     - JSON:
@@ -25,11 +25,27 @@
                     "identifier": "<plugin_identifier>",
                     "fullname": "<plugin_fullname>"
                 }
+            ],
+            "entity_files":
+            [
+                {
+                    "plugin": "<plugin_identifier>",
+                    "file": "<file>"
+                }
             ]
         }
 
+- GET /entity_file/<plugin>/<file>
+    - Needed rights: "hot_swap"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights)
+    - JSON:
+        {
+            "lua": "<lua_source_code>"
+        }
+
 - GET /rcon_sessions
-    - Needed right: "rcon_sessions"
+    - Needed rights: "rcon_sessions"
     - Parameters:
     - Returns: 200 (ok), 401 (insufficient rights)
     - JSON:

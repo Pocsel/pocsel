@@ -1,6 +1,7 @@
 #include "server/rcon/Rcon.hpp"
 #include "server/rcon/Request.hpp"
 #include "server/rcon/SessionManager.hpp"
+#include "server/rcon/EntityFileManager.hpp"
 #include "server/Server.hpp"
 #include "server/Settings.hpp"
 
@@ -14,6 +15,7 @@ namespace Server { namespace Rcon {
         Tools::debug << "Rcon::Rcon()" << std::endl;
         Settings const& settings = this->_server.GetSettings();
         this->_sessionManager = new SessionManager(settings);
+        this->_entityFileManager = new EntityFileManager(this->_server);
         try
         {
             boost::asio::ip::tcp::resolver resolver(this->_ioService);
@@ -45,6 +47,7 @@ namespace Server { namespace Rcon {
     {
         Tools::debug << "Rcon::~Rcon()" << std::endl;
         this->Stop();
+        Tools::Delete(this->_entityFileManager);
         Tools::Delete(this->_sessionManager);
     }
 
@@ -87,7 +90,7 @@ namespace Server { namespace Rcon {
     {
         if (!e)
         {
-            new Request(this->_server, this->_newRequest, *this->_sessionManager);
+            new Request(this->_server, this->_newRequest);
         }
         else
         {

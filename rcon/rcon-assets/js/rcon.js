@@ -1,10 +1,15 @@
+var generatedIdCount = 0;
 var rconToken;
 var rconMaps;
 var rconRights;
 var rconPlugins;
 var rconUrl;
+var rconEntityFiles;
 
 $(document).ready(function() {
+
+    $('#lua-modal').modal({ keyboard: true, show: false, backdrop: true });
+
     $('#login-form_submit').attr('disabled', false);
     $('#login-form').submit(function() {
         $('#login-form_submit').attr('disabled', true);
@@ -28,6 +33,7 @@ $(document).ready(function() {
                 rconMaps = json.maps;
                 rconRights = json.rights;
                 rconPlugins = json.plugins;
+                rconEntityFiles = json.entity_files;
                 fillStaticTables();
                 $('#category-server_title').html(json.world_fullname + ' ("' + json.world_identifier + '", version ' + json.world_version + ')');
                 setTimeout(startFetchers, 1000);
@@ -44,10 +50,16 @@ $(document).ready(function() {
         });
         return false;
     });
+
 });
 
 function hasRight(str) {
     return rconRights.indexOf(str) >= 0;
+}
+
+function generateId(str) {
+    generatedIdCount++;
+    return str + "_" + generatedIdCount;
 }
 
 function fillStaticTables() {
@@ -58,6 +70,7 @@ function fillStaticTables() {
         $('#plugins_list').append('<tr><td>' + this.identifier + '</td><td>' + this.fullname + '</td></tr>');
     });
     $('#category-server').show('fast');
+
     for (var i = 0; i < rconMaps.length; i++) {
         console.log('map ' + i + ': ' + rconMaps[i].identifier);
         if (i == 0)
@@ -66,7 +79,43 @@ function fillStaticTables() {
             $('#map_tabs').append('<li><a data-toggle="tab">' + rconMaps[i].identifier + '</a></li>');
     }
     $('#category-maps').show('fast');
+
+    $.each(rconEntityFiles, function() {
+        if (hasRight("hot_swap")) {
+            var id = generateId("entity-files_edit");
+            $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td><a id="' + id + '">Edit</a></td></tr>');
+            $('#' + id).click({ plugin: this.plugin, file: this.file }, function(e) {
+                editLuaFile(e.data.plugin, e.data.file);
+            });
+        }
+        else
+            $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td>-</td></tr>');
+    });
     $('#category-entities').show('fast');
+}
+
+function editLuaFile(pluginIdentifier, filename) {
+    $('#lua-modal_title').html(pluginIdentifier + '/' + filename);
+    $('#lua-modal_preloader').show();
+    $('#lua-modal_text').hide();
+    $('#lua-modal').modal('show');
+    $.ajax({
+        url: rconUrl + 'entity_file/' + pluginIdentifier + '/' + filename,
+        headers: {
+            'Rcon-Token': rconToken
+        },
+        success: function(json) {
+            json = $.parseJSON(json);
+            $('#lua-modal_text').val(json.lua);
+            $('#lua-modal_preloader').hide('fast');
+            $('#lua-modal_text').show('fast');
+        },
+        error: function(json, errorType, httpError) {
+            $('#lua-modal_text').val('Failed to fetch file.');
+            $('#lua-modal_preloader').hide('fast');
+            $('#lua-modal_text').show('fast');
+        }
+    });
 }
 
 function startFetchers() {

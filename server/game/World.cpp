@@ -77,7 +77,7 @@ namespace Server { namespace Game{
                 "\t\t\t\"fullname\": \"" + Rcon::ToJsonStr(it->second->GetFullName()) + "\"\n"
                 "\t\t}";
         }
-        json += "\n\t],\n";
+        json += "\n\t]\n";
         return json;
     }
 

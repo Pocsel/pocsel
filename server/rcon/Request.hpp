@@ -24,7 +24,6 @@ namespace Server { namespace Rcon {
     private:
         Server& _server;
         boost::asio::ip::tcp::socket* _socket;
-        SessionManager& _sessionManager;
         boost::asio::streambuf _buffer;
         // ordre de remplissage
         std::string _header;
@@ -37,7 +36,7 @@ namespace Server { namespace Rcon {
         std::map<std::string, std::string> _content;
 
     public:
-        Request(Server& server, boost::asio::ip::tcp::socket* socket, SessionManager& sessionManager);
+        Request(Server& server, boost::asio::ip::tcp::socket* socket);
         ~Request();
     private:
         // ordre d'execution
@@ -52,6 +51,7 @@ namespace Server { namespace Rcon {
         void _Login();
         void _GetRconSessions();
         void _GetEntities(Game::Map::Map const& map);
+        void _GetEntityFile(std::string const& pluginIdentifier, std::string const& file);
 
         void _JsonCallback(std::string json);
         void _JsonCallbackDispatched(std::string const& json);
