@@ -217,6 +217,13 @@ namespace Server { namespace Game { namespace Engine {
         this->AddSpawnEvent(pluginId, "Init", this->_engine.GetInterpreter().MakeNil() /* arg */, 0 /* spawnerId */, 0 /* callbackId */);
     }
 
+    Uint32 EntityManager::GetRunningPluginId() const
+    {
+        if (this->_runningEntity)
+            return this->_runningEntity->GetType().GetPluginId();
+        return 0;
+    }
+
     Uint32 EntityManager::_CreateEntity(Uint32 pluginId, std::string entityName, bool positional /* = false */, Common::Position const& pos /* = Common::Position() */) throw(std::runtime_error)
     {
         // trouve le plugin

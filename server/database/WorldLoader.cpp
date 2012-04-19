@@ -215,7 +215,7 @@ namespace Server { namespace Database {
             Log::load << "[map: " << map.GetName() << "] Execute " << name << ".lua...\n";
             try
             {
-                map.GetEngine().SetRunningPluginId(currentPluginId);
+                map.GetEngine().OverrideRunningPluginId(currentPluginId);
                 lua.DoString(code);
             }
             catch (std::exception& e)
@@ -227,7 +227,7 @@ namespace Server { namespace Database {
         }
 
         cubeTypeNs.Set("Register", lua.MakeNil());
-        map.GetEngine().SetRunningPluginId(0);
+        map.GetEngine().OverrideRunningPluginId(0);
     }
 
     WorldLoader::LoadingMapConf WorldLoader::_LoadMapConf(Game::Map::Conf& conf, std::string const& name, std::string const& code)

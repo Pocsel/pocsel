@@ -73,6 +73,8 @@ namespace Server { namespace Game { namespace Engine {
         void BeginPluginRegistering(Uint32 pluginId, std::string const& pluginName);
         void EndPluginRegistering();
         void BootstrapPlugin(Uint32 pluginId);
+        Uint32 GetRunningEntityId() const { return this->_runningEntityId; }
+        Uint32 GetRunningPluginId() const;
 
         std::string RconGetEntities() const;
 
