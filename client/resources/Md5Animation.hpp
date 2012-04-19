@@ -32,8 +32,6 @@ namespace Client { namespace Resources {
         {
             int frameID;
             std::vector<float> frameData;
-//            glm::vec3 pos;
-//            glm::quat orient;
         };
 
         // A Skeleton joint is a joint of the skeleton per frame

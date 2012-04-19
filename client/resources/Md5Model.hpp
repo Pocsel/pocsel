@@ -40,13 +40,11 @@ namespace Client { namespace Resources {
             int startWeight;
             int weightCount;
         };
-        typedef std::vector<Vertex> VertexList;
 
         struct Triangle
         {
             int indices[3];
         };
-        typedef std::vector<Triangle> TriangleList;
 
         struct Weight
         {
@@ -54,7 +52,6 @@ namespace Client { namespace Resources {
             float bias;
             glm::vec3 pos;
         };
-        typedef std::vector<Weight> WeightList;
 
         struct Joint
         {
@@ -63,16 +60,15 @@ namespace Client { namespace Resources {
             glm::vec3 pos;
             glm::quat orient;
         };
-        typedef std::vector<Joint> JointList;
 
     public:
         struct Mesh
         {
             std::string shader;
             // This vertex list stores the vertices in the bind pose.
-            VertexList verts;
-            TriangleList tris;
-            WeightList weights;
+            std::vector<Vertex> verts;
+            std::vector<Triangle> tris;
+            std::vector<Weight> weights;
 
             // A texture ID for the material
             //GLuint texID;
@@ -90,22 +86,18 @@ namespace Client { namespace Resources {
             Tools::Renderers::IVertexBuffer* vertexBuffer;
             Tools::Renderers::IIndexBuffer* indexBuffer;
         };
-        typedef std::vector<Mesh> MeshList;
-
-    private:
-        typedef std::vector<glm::mat4x4> MatrixList;
 
     private:
         int _md5Version;
         int _numJoints;
         int _numMeshes;
         bool _hasAnimation;
-        JointList _joints;
-        MeshList _meshes;
+        std::vector<Joint> _joints;
+        std::vector<Mesh> _meshes;
         Md5Animation _animation;
-        MatrixList _bindPose;
-        MatrixList _inverseBindPose;
-        MatrixList _animatedBones; // Animated bone matrix from the animation with the inverse bind pose applied.
+        std::vector<glm::mat4x4> _bindPose;
+        std::vector<glm::mat4x4> _inverseBindPose;
+        std::vector<glm::mat4x4> _animatedBones; // Animated bone matrix from the animation with the inverse bind pose applied.
         glm::mat4x4 _localToWorldMatrix;
         glm::mat4x4 _worldToLocalMatrix;
 
@@ -121,12 +113,12 @@ namespace Client { namespace Resources {
         void Update(Uint32 time, float phi);
         void Render(Tools::IRenderer& renderer);
 
-        MeshList& GetMeshes() { return this->_meshes; }
-        MatrixList& GetAnimatedBones() { return this->_animatedBones; }
+        std::vector<Mesh>& GetMeshes() { return this->_meshes; }
+        std::vector<glm::mat4x4>& GetAnimatedBones() { return this->_animatedBones; }
 
     protected:
         // Build the bind-pose and the inverse bind-pose matrix array for the model.
-        void _BuildBindPose( const JointList& joints );
+        void _BuildBindPose( const std::vector<Joint>& joints );
 
         // Prepare the mesh for rendering
         // Compute vertex positions and normals
@@ -145,7 +137,7 @@ namespace Client { namespace Resources {
         void _RenderNormals(Mesh const& mesh);
 
         // Draw the skeleton of the mesh for debugging purposes.
-        void _RenderSkeleton(JointList const& joints);
+        void _RenderSkeleton(std::vector<Joint> const& joints);
 
         bool _CheckAnimation(Md5Animation const& animation) const;
     };
