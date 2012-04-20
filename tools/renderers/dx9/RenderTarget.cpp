@@ -16,6 +16,14 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->OnResetDevice();
     }
 
+    RenderTarget::RenderTarget(DX9Renderer& renderer, glm::uvec2 const& size, IDirect3DSurface9* color, IDirect3DSurface9* depthBuffer) :
+        _renderer(renderer),
+        _size(size),
+        _depthBuffer(depthBuffer)
+    {
+        this->_surfaces.push_back(color);
+    }
+
     RenderTarget::~RenderTarget()
     {
         this->_renderer.Unregister(*this);
@@ -50,10 +58,24 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     void RenderTarget::Bind()
     {
-        for (size_t i = 0; i < this->_surfaces.size(); ++i)
-            this->_renderer.GetDevice()->SetRenderTarget(i, this->_surfaces[i]);
+        size_t i;
+        for (i = 0; i < this->_surfaces.size(); ++i)
+            this->_renderer.GetDevice()->SetRenderTarget((DWORD)i, this->_surfaces[i]);
+        for (; i < DX9Renderer::MaxRenderTargets; ++i)
+            this->_renderer.GetDevice()->SetRenderTarget((DWORD)i, 0);
         if (this->_depthBuffer)
             this->_renderer.GetDevice()->SetDepthStencilSurface(this->_depthBuffer);
+    }
+
+    void RenderTarget::Resize(glm::uvec2 const& newSize)
+    {
+        this->_size = newSize;
+        if (this->_depthBuffer)
+            this->_depthBuffer->Release();
+        this->_surfaces.clear();
+        this->_textures.clear();
+        for (auto it = this->_targets.begin(), ite = this->_targets.end(); it != ite; ++it)
+            this->_PushRenderTarget(it->first, it->second);
     }
 
     void RenderTarget::_PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage)

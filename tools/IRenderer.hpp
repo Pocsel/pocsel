@@ -176,6 +176,7 @@ namespace Tools {
             virtual ITexture2D& GetTexture(int idx) = 0;
             virtual int PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage) = 0; // return an index for GetTexture
             virtual void Bind() = 0;
+            virtual void Resize(glm::uvec2 const& newSize) = 0; // slow !
             virtual glm::uvec2 const& GetSize() const = 0;
         };
 
@@ -296,6 +297,7 @@ namespace Tools {
         virtual void SetClearStencil(int value) = 0;
         virtual void SetNormaliseNormals(bool normalise) = 0;
         virtual void SetDepthTest(bool enabled) = 0;
+        virtual void SetDepthWrite(bool enabled) = 0;
         virtual void SetCullFace(bool enabled) = 0;
         virtual void SetRasterizationMode(Renderers::RasterizationMode::Type rasterizationMode) = 0;
 

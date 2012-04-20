@@ -14,17 +14,29 @@ namespace Tools { namespace Renderers {
 
     class DX9Renderer : public IRenderer
     {
-    private:
-        enum DrawState
-        {
-            DrawNone = 0,
-            Draw2D,
-            Draw3D
-        };
-
+    public:
         enum
         {
-            MaxVertexElements = 8
+            MaxVertexElements = 8,
+            MaxRenderTargets = 4,
+        };
+    private:
+        struct RenderState
+        {
+            enum DrawState
+            {
+                None,
+                Draw2D,
+                Draw3D
+            };
+
+            DrawState state;
+            IRenderTarget* target;
+
+            glm::detail::tmat4x4<float> modelViewProjection;
+            glm::detail::tmat4x4<float> model;
+            glm::detail::tmat4x4<float> view;
+            glm::detail::tmat4x4<float> projection;
         };
 
     private:
@@ -32,23 +44,16 @@ namespace Tools { namespace Renderers {
 
         glm::uvec2 _screenSize;
         bool _fullscreen;
-        Rectangle _viewport;
-        glm::detail::tmat4x4<float> _modelViewProjection;
-        glm::detail::tmat4x4<float> _model;
-        glm::detail::tmat4x4<float> _view;
-        glm::detail::tmat4x4<float> _projection;
-        unsigned int _currentMatrixMode;
         bool _useShaders;
-        DrawState _state;
 
         LPDIRECT3D9 _object;
         LPDIRECT3DDEVICE9 _device;
         LPD3DXEFFECTPOOL _effectPool;
         std::list<DX9::ShaderProgram*> _allPrograms;
         std::list<DX9::RenderTarget*> _allRenderTargets;
-        IDirect3DSurface9* _backBuffer;
-        IDirect3DSurface9* _backZBuffer;
-        bool _resetRenderTarget;
+
+        std::list<RenderState> _states;
+        RenderState* _currentState;
 
         IShaderProgram* _currentProgram;
         DX9::VertexBuffer* _vertexBuffer;
@@ -58,7 +63,7 @@ namespace Tools { namespace Renderers {
         int _clearStencil;
 
     public:
-        DX9Renderer(glm::uvec2 const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _state(DrawNone), _object(0), _device(0), _backBuffer(0), _backZBuffer(0), _currentProgram(0) {}
+        DX9Renderer(glm::uvec2 const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _object(0), _device(0), _currentProgram(0) {}
         virtual ~DX9Renderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -94,10 +99,10 @@ namespace Tools { namespace Renderers {
         virtual void SetViewMatrix(glm::detail::tmat4x4<float> const& matrix);
         virtual void SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix);
 
-        glm::detail::tmat4x4<float> const& GetModelViewProjectionMatrix() const { return this->_modelViewProjection; }
-        glm::detail::tmat4x4<float> const& GetModelMatrix() const { return this->_model; }
-        glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_view; }
-        glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_projection; }
+        glm::detail::tmat4x4<float> const& GetModelViewProjectionMatrix() const { return this->_states.front().modelViewProjection; }
+        glm::detail::tmat4x4<float> const& GetModelMatrix() const { return this->_states.front().model; }
+        glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_states.front().view; }
+        glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_states.front().projection; }
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size);
@@ -106,15 +111,14 @@ namespace Tools { namespace Renderers {
         virtual void SetClearStencil(int value) { this->_clearStencil = value; }
         virtual void SetNormaliseNormals(bool normalise);
         virtual void SetDepthTest(bool enabled);
+        virtual void SetDepthWrite(bool enabled);
         virtual void SetCullFace(bool enabled);
-        virtual void SetViewport(Rectangle const& viewport);
         virtual void SetRasterizationMode(Renderers::RasterizationMode::Type rasterizationMode);
 
         IShaderProgram& GetCurrentProgram() { return *this->_currentProgram; }
         void SetCurrentProgram(IShaderProgram& program)
         {
             this->_currentProgram = &program;
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
         }
         void SetVertexBuffer(DX9::VertexBuffer& vb) { this->_vertexBuffer = &vb; }
         LPDIRECT3DDEVICE9 GetDevice() const { return this->_device; }
@@ -122,7 +126,10 @@ namespace Tools { namespace Renderers {
         void Present();
         void Unregister(DX9::ShaderProgram& program);
         void Unregister(DX9::RenderTarget& renderTarget);
+    private:
         void _RefreshDevice();
+        void _PushState(RenderState const& state);
+        void _PopState();
     };
 
 }}

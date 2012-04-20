@@ -163,6 +163,8 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::BeginDraw(IRenderTarget* target)
     {
+        assert(this->_states.front().state == RenderState::None && "Operation invalide");
+
         RenderState rs;
         rs.state = RenderState::Draw3D;
         rs.target = target;
@@ -273,6 +275,11 @@ namespace Tools { namespace Renderers {
             GLCHECK(glDisable(GL_DEPTH_TEST));
     }
 
+    void GLRenderer::SetDepthWrite(bool enabled)
+    {
+        GLCHECK(glDepthMask(enabled ? GL_TRUE : GL_FALSE));
+    }
+
     void GLRenderer::SetCullFace(bool enabled)
     {
         if (enabled)
@@ -309,6 +316,10 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::_PushState(GLRenderer::RenderState const& state)
     {
+        RenderState rsOld;
+        if (this->_states.size() > 0)
+            rsOld = this->_states.front();
+
         this->_states.push_front(state);
         auto& rs = this->_states.front();
         this->_currentState = &rs;
@@ -325,6 +336,12 @@ namespace Tools { namespace Renderers {
             auto size = rs.target == 0 ? this->_screenSize : rs.target->GetSize();
             rs.projection = glm::ortho<float>(0, size.x, size.y, 0);
             rs.modelViewProjection = rs.projection * rs.view * rs.model;
+        }
+        else
+        {
+            rs.view = rsOld.view;
+            rs.projection = rsOld.projection;
+            rs.modelViewProjection = rs.projection * rs.view * rsOld.model;
         }
     }
 

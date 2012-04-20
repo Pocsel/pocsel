@@ -30,3 +30,4 @@ build_*
 *.swp
 *.manifest
 *.pch
+*.rule

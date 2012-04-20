@@ -1,5 +1,4 @@
 float4x4 mvp : WorldViewProjection;
-float time = 1.0;
 
 sampler2D baseTex = sampler_state
 {
@@ -7,30 +6,36 @@ sampler2D baseTex = sampler_state
    magFilter = Point;
 };
 
+float4 clearColor = float(0, 0, 0, 1);
+float4 clearNormal = float(0, 1, 0, 0);
+float4 clearPosition = float(0, 0, 0, 0);
+
 struct VSout
 {
    float4 position : POSITION;
-   float2 texCoord : TEXCOORD0;
 };
 
-VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
+struct FSout
+{
+    float4 color : COLOR0;
+    float4 normal : COLOR1;
+    float4 position : COLOR2;
+};
+
+VSout vs(in float4 position : POSITION)
 {
     VSout vout;
     vout.position = mul(mvp, position);
-#ifdef DIRECTX
-    vout.texCoord = texCoord;
-#else
-    vout.texCoord = float2(texCoord.x, 1-texCoord.y);
-#endif
     return vout;
 }
 
-float4 fs(in VSout v) : COLOR
+FSout fs(in VSout v)
 {
-    float4 c = tex2D(baseTex, v.texCoord);
-    //c = lerp(tex2D(baseTex, v.texCoord + 0.5), c, 10*sin(time*10));
-    c.a = 1;
-    return c;
+    FSout f;
+    f.color = clearColor;
+    f.normal = clearNormal;
+    f.position = clearPosition;
+    return f;
 }
 
 #ifndef DIRECTX

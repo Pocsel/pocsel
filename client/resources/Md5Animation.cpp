@@ -309,10 +309,8 @@ namespace Client { namespace Resources {
 
     void Md5Animation::_InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton& skeleton0, FrameSkeleton& skeleton1, float interpolate, float phi)
     {
-        std::vector<SkeletonJoint> parents0;
-        std::vector<SkeletonJoint> parents1;
-        parents0.reserve(this->_numJoints);
-        parents1.reserve(this->_numJoints);
+        std::vector<SkeletonJoint> parents0(this->_numJoints);
+        std::vector<SkeletonJoint> parents1(this->_numJoints);
         for (int i = 0; i < this->_numJoints; ++i)
         {
 //            JointInfo const& jointInfo = jointInfos[i];

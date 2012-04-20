@@ -12,9 +12,9 @@ float displacement = 4.0;
 #ifdef DIRECTX
 sampler2D cubeTexture = sampler_state
 {
-	MinFilter = Linear;
-	MagFilter = Point;
-	MipFilter = Linear;
+    MinFilter = Linear;
+    MagFilter = Point;
+    MipFilter = Linear;
 };
 #else
 sampler2D cubeTexture = sampler_state
@@ -30,8 +30,12 @@ struct VSout
    float2 texCoord : TEXCOORD0;
    float lightIntensity : TEXCOORD1;
    float fogFactor : TEXCOORD2;
-   // Water:
-   //float4 texProj;
+};
+
+struct FSout
+{
+    float4 color : COLOR0;
+    float4 normal : COLOR1;
 };
 
 VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
@@ -39,12 +43,6 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     VSout vout;
 
     vout.texCoord = texCoord;//frac(float2(1.0, 2.0) * texCoord);
-/*    
-    float3 normal = float3(1.0, 4.0, 16.0);
-    normal = frac(normal * inNormal);
-    //Unpack to the -1..1 range
-    normal = (normal * 2.0) - 1.0;
-*/
     vout.position = mul(mvp, position);
     float fog = clamp(abs(vout.position.z), 0, fogEnd);
     fog = (fogEnd - fog) / fogEnd;
@@ -53,32 +51,35 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     return vout;
 }
 
-float4 fs(in VSout v) : COLOR
+FSout fs(in VSout v)
 {
-	float4 c = tex2D(cubeTexture, v.texCoord);
-   
-	c.rgb = v.lightIntensity * lerp(fogColor, c.rgb, v.fogFactor);
+    FSout f;
 
-	return c;
+    f.color = tex2D(cubeTexture, v.texCoord);
+    f.color.rgb = v.lightIntensity * lerp(fogColor, f.color.rgb, v.fogFactor);
+
+    f.normal = float4(1.0 - f.color.rgb, 1.0);
+
+    return f;
 }
 
 #ifndef DIRECTX
 
 technique tech_glsl
 {
-	pass p0
-	{
-		VertexProgram = compile glslv vs();
+    pass p0
+    {
+        VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
-	}
+    }
 }
 technique tech
 {
-	pass p0
-	{
-		VertexProgram = compile arbvp1 vs();
+    pass p0
+    {
+        VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
-	}
+    }
 }
 
 #else

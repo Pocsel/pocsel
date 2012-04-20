@@ -145,6 +145,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     void Texture2D::Unbind()
     {
+        this->_renderer.GetDevice()->SetTexture(0, 0);
     }
 
     void Texture2D::SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter)

@@ -30,13 +30,15 @@ namespace Client { namespace Game {
             [this](glm::uvec2 const& size)
             {
                 this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.02f, 500.0f);
+                this->_renderTarget->Resize(size);
             });
         auto const& size = this->_client.GetWindow().GetSize();
         this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.02f, 500.0f);
         // XXX
         this->_renderTarget = this->_renderer.CreateRenderTarget(glm::uvec2(size.x, size.y));
-        this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color);
         this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Depth24Stencil8, Tools::Renderers::RenderTargetUsage::DepthStencil);
+        Tools::log << " - " << this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color) << std::endl;
+        Tools::log << " - " << this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color) << std::endl;
         this->_renderImage = std::unique_ptr<Tools::Renderers::Utils::Image>(new Tools::Renderers::Utils::Image(this->_renderer));
         this->_renderShader = &this->_client.GetLocalResourceManager().GetShader("PostProcess.cgfx");
         this->_renderParameter = this->_renderShader->GetParameter("baseTex");
@@ -80,6 +82,7 @@ namespace Client { namespace Game {
 
     void Game::Render()
     {
+        this->_renderer.BeginDraw();
         // XXX
         //this->_renderer.BeginDraw(this->_renderTarget.get());
         //this->_renderer.SetProjectionMatrix(glm::perspective<float>(90, 1, 0.02f, 500.0f));
@@ -92,10 +95,11 @@ namespace Client { namespace Game {
         this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
 
-        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+        //this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
         this->_renderer.BeginDraw(this->_renderTarget.get());
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
 
+        //this->_renderer.SetDepthTest(true);
         this->_map->GetChunkManager().Render();
         this->_itemManager->Render();
         this->_map->GetChunkManager().RenderAlpha();
@@ -109,12 +113,16 @@ namespace Client { namespace Game {
         this->_renderer.SetModelMatrix(glm::scale<float>(size.x / 2.0f, size.y / 2.0f, 1) * glm::translate<float>(1, 1, 0));
         this->_renderShader->BeginPass();
         this->_renderTimeParameter->Set((float)this->_gameTimer.GetPreciseElapsedTime() * 0.000001f);
+        this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(1));
+        this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(1, 1, 0));
+        this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(2));
+        this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(3, 1, 0));
         this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(0));
-        //this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(3, 1, 0));
-        //this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(1));
         this->_renderShader->EndPass();
         this->_renderer.EndDraw2D();
         // XXX
+
+        this->_renderer.EndDraw();
     }
 
 }}

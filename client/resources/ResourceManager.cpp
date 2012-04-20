@@ -92,6 +92,9 @@ namespace Client { namespace Resources {
                     Tools::Delete(it->second[i]);
         for (auto it = this->_shaders.begin(), ite = this->_shaders.end(); it != ite; ++it)
             Tools::Delete(it->second);
+        for (auto it = this->_effects.begin(), ite = this->_effects.end(); it != ite; ++it)
+            for (auto itEffect = it->second.begin(), iteEffect = it->second.end(); itEffect != iteEffect; ++itEffect)
+                Tools::Delete(itEffect->second);
     }
 
     Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 id)
