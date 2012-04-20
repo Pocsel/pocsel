@@ -1,6 +1,6 @@
-float4x4 mvp : WorldViewProjection;
-float4x4 mv : WorldView;
-float3 lightDirection = {-0.704, -0.704, 0};
+float4x4 worldViewProjection : WorldViewProjection;
+float4x4 viewProjection : ViewProjection;
+float4x4 world : World;
 
 float3 fogColor = float3(0.8, 0.8, 0.9);
 float fogEnd = 750.0f;
@@ -26,29 +26,33 @@ sampler2D cubeTexture = sampler_state
 
 struct VSout
 {
-   float4 position : POSITION;
-   float2 texCoord : TEXCOORD0;
-   float lightIntensity : TEXCOORD1;
-   float fogFactor : TEXCOORD2;
+   float4 position      : POSITION;
+   float2 texCoord      : TEXCOORD0;
+   float3 worldPosition : TEXCOORD1;
+   float3 normal        : TEXCOORD2;
 };
 
 struct FSout
 {
-    float4 color : COLOR0;
-    float4 normal : COLOR1;
+    float4 color    : COLOR0;
+    float4 normal   : COLOR1;
+    float4 position : COLOR2;
 };
 
 VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
 {
-    VSout vout;
+    VSout v;
 
-    vout.texCoord = texCoord;//frac(float2(1.0, 2.0) * texCoord);
-    vout.position = mul(mvp, position);
-    float fog = clamp(abs(vout.position.z), 0, fogEnd);
-    fog = (fogEnd - fog) / fogEnd;
-    vout.fogFactor = clamp(fog, 0, 1);
-    vout.lightIntensity = dot(-lightDirection, normal) * 0.35 + 0.65;
-    return vout;
+    v.texCoord = texCoord;
+    v.worldPosition = mul(world, position);
+    v.position = mul(worldViewProjection, position);
+    v.normal = normalize(mul(world, float4(normal, 0.0)).xyz);
+
+    // float fog = clamp(abs(v.position.z), 0, fogEnd);
+    // fog = (fogEnd - fog) / fogEnd;
+    // v.fogFactor = clamp(fog, 0, 1);
+    // v.lightIntensity = dot(-lightDirection, normal) * 0.35 + 0.65;
+    return v;
 }
 
 FSout fs(in VSout v)
@@ -56,9 +60,8 @@ FSout fs(in VSout v)
     FSout f;
 
     f.color = tex2D(cubeTexture, v.texCoord);
-    f.color.rgb = v.lightIntensity * lerp(fogColor, f.color.rgb, v.fogFactor);
-
-    f.normal = float4(1.0 - f.color.rgb, 1.0);
+    f.normal = float4(v.normal, 1.0);
+    f.position = float4(v.worldPosition, 1.0);
 
     return f;
 }

@@ -14,6 +14,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         _renderer(renderer),
         _nbTextures(0),
         _mvp(0),
+        _vp(0),
         _mv(0),
         _model(0),
         _view(0),
@@ -35,6 +36,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         DXCHECKERROR(this->_effect->FindNextValidTechnique(0, &this->_technique));
         
         this->_mvp = this->_effect->GetParameterBySemantic(0, "WorldViewProjection");
+        this->_vp = this->_effect->GetParameterBySemantic(0, "ViewProjection");
         this->_mv = this->_effect->GetParameterBySemantic(0, "WorldView");
         this->_model = this->_effect->GetParameterBySemantic(0, "World");
         this->_view = this->_effect->GetParameterBySemantic(0, "View");
@@ -65,6 +67,10 @@ namespace Tools { namespace Renderers { namespace DX9 {
             this->_mvp = this->_effect->GetParameterByName(0, identifier.c_str());
             break;
 
+        case ShaderParameterUsage::ViewProjectionMatrix:
+            this->_vp = this->_effect->GetParameterByName(0, identifier.c_str());
+            break;
+
         case ShaderParameterUsage::ModelViewMatrix:
             this->_mv = this->_effect->GetParameterByName(0, identifier.c_str());
             break;
@@ -88,7 +94,6 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     void ShaderProgram::UpdateParameter(ShaderParameterUsage::Type usage)
     {
-        glm::mat4 tmp;
         switch (usage)
         {
         case ShaderParameterUsage::ModelViewProjectionMatrix:
@@ -96,10 +101,20 @@ namespace Tools { namespace Renderers { namespace DX9 {
                 this->_effect->SetMatrixTranspose(this->_mvp, (D3DXMATRIX const*)&this->_renderer.GetModelViewProjectionMatrix()[0]);
             break;
 
+        case ShaderParameterUsage::ViewProjectionMatrix:
+            if (this->_vp)
+            {
+                auto tmp = this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix();
+                this->_effect->SetMatrixTranspose(this->_vp, (D3DXMATRIX const*)&tmp[0]);
+            }
+            break;
+
         case ShaderParameterUsage::ModelViewMatrix:
-            tmp = this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix();
             if (this->_mv)
+            {
+                auto tmp = this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix();
                 this->_effect->SetMatrixTranspose(this->_mv, (D3DXMATRIX const*)&tmp[0]);
+            }
             break;
 
         case ShaderParameterUsage::ModelMatrix:

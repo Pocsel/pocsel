@@ -8,7 +8,8 @@ namespace Tools { namespace Renderers { namespace Utils {
     class Image
     {
     private:
-        static Renderers::IVertexBuffer* _vertexBuffer;
+        static IVertexBuffer* _vertexBuffer;
+        static IIndexBuffer* _indexBuffer;
 
         IRenderer& _renderer;
 
@@ -19,7 +20,8 @@ namespace Tools { namespace Renderers { namespace Utils {
         void Render(IShaderParameter& textureParameter, ITexture2D& texture);
 
     private:
-        static void _InitVertexBuffer(IRenderer& renderer);
+        static void _InitBuffers(IRenderer& renderer);
+        static void _DeleteBuffers();
     };
 
 }}}

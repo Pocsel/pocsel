@@ -51,6 +51,7 @@ namespace Tools { namespace Renderers {
         LPD3DXEFFECTPOOL _effectPool;
         std::list<DX9::ShaderProgram*> _allPrograms;
         std::list<DX9::RenderTarget*> _allRenderTargets;
+        std::list<std::function<void()>> _shutdownCallbacks;
 
         std::list<RenderState> _states;
         RenderState* _currentState;
@@ -74,6 +75,9 @@ namespace Tools { namespace Renderers {
 
         virtual void Initialise();
         virtual void Shutdown();
+
+        // Callbacks
+        virtual void RegisterShutdownCallback(std::function<void()>&& callback) { this->_shutdownCallbacks.push_back(callback); }
 
         // Resources
         virtual std::unique_ptr<Renderers::IIndexBuffer> CreateIndexBuffer();

@@ -120,6 +120,7 @@ namespace Tools {
             enum Type
             {
                 ModelViewProjectionMatrix,
+                ViewProjectionMatrix,
                 ModelViewMatrix,
                 ModelMatrix,
                 ViewMatrix,
@@ -265,6 +266,9 @@ namespace Tools {
 
         virtual void Initialise() = 0;
         virtual void Shutdown() = 0;
+
+        // Callbacks
+        virtual void RegisterShutdownCallback(std::function<void()>&& callback) = 0;
 
         // Resources
         virtual std::unique_ptr<Renderers::IIndexBuffer> CreateIndexBuffer() = 0;

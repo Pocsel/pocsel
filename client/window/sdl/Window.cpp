@@ -39,10 +39,10 @@ namespace Client { namespace Window { namespace Sdl {
         if (directX)
             this->_renderer = new Tools::Renderers::DX9Renderer(this->_size, fullscreen);
         else
-            this->_renderer = new Tools::Renderers::GLRenderer(useShaders);
+            this->_renderer = new Tools::Renderers::GLRenderer();
 #else
         (void)directX;
-        this->_renderer = new Tools::Renderers::GLRenderer(useShaders);
+        this->_renderer = new Tools::Renderers::GLRenderer();
 #endif
         this->_renderer->Initialise();
         this->_renderer->SetScreenSize(this->_size);

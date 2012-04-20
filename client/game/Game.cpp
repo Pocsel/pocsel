@@ -2,6 +2,7 @@
 
 #include "tools/IRenderer.hpp"
 #include "tools/lua/utils/Utils.hpp"
+#include "tools/renderers/utils/GBuffer.hpp"
 #include "tools/renderers/utils/Image.hpp"
 
 #include "client/Client.hpp"
@@ -29,20 +30,19 @@ namespace Client { namespace Game {
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](glm::uvec2 const& size)
             {
-                this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.05f, 200.0f);
-                this->_renderTarget->Resize(size);
+                this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.05f, 300.0f);
+                this->_gBuffer->Resize(size);
             });
         auto const& size = this->_client.GetWindow().GetSize();
-        this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.05f, 200.0f);
+        this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.05f, 300.0f);
         // XXX
-        this->_renderTarget = this->_renderer.CreateRenderTarget(glm::uvec2(size.x, size.y));
-        this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Depth24Stencil8, Tools::Renderers::RenderTargetUsage::DepthStencil);
-        this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color);
-        this->_renderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color);
+        this->_gBuffer = std::unique_ptr<Tools::Renderers::Utils::GBuffer>(new Tools::Renderers::Utils::GBuffer(this->_renderer, size));
         this->_renderImage = std::unique_ptr<Tools::Renderers::Utils::Image>(new Tools::Renderers::Utils::Image(this->_renderer));
         this->_renderShader = &this->_client.GetLocalResourceManager().GetShader("PostProcess.cgfx");
-        this->_renderParameter = this->_renderShader->GetParameter("baseTex");
-        this->_renderTimeParameter = this->_renderShader->GetParameter("time");
+        this->_renderColorsParameter = this->_renderShader->GetParameter("colors");
+        this->_renderNormalsParameter = this->_renderShader->GetParameter("normals");
+        this->_renderPositionsParameter = this->_renderShader->GetParameter("positions");
+        //this->_renderTimeParameter = this->_renderShader->GetParameter("time");
         // XXX
     }
 
@@ -87,7 +87,9 @@ namespace Client { namespace Game {
         this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
 
-        this->_renderer.BeginDraw(this->_renderTarget.get());
+        //this->_renderer.BeginDraw(this->_renderTarget.get());
+        
+        this->_gBuffer->Bind();
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
 
         this->_map->GetChunkManager().Render();
@@ -95,19 +97,26 @@ namespace Client { namespace Game {
         this->_map->GetChunkManager().RenderAlpha();
         this->_player->Render();
 
-        this->_renderer.EndDraw();
+        this->_gBuffer->Unbind();
 
         // XXX
         this->_renderer.BeginDraw2D();
         auto const& size = this->GetClient().GetWindow().GetSize();
         this->_renderer.SetModelMatrix(glm::scale<float>(size.x / 2.0f, size.y / 2.0f, 1) * glm::translate<float>(1, 1, 0));
         this->_renderShader->BeginPass();
-        this->_renderTimeParameter->Set((float)this->_gameTimer.GetPreciseElapsedTime() * 0.000001f);
-        this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(1));
-        this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(1, 1, 0));
-        this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(2));
-        this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(3, 1, 0));
-        this->_renderImage->Render(*this->_renderParameter, this->_renderTarget->GetTexture(0));
+
+        this->_gBuffer->GetNormals().Bind();
+        this->_gBuffer->GetPositions().Bind();
+        this->_renderNormalsParameter->Set(this->_gBuffer->GetNormals());
+        this->_renderPositionsParameter->Set(this->_gBuffer->GetPositions());
+        this->_renderImage->Render(*this->_renderColorsParameter, this->_gBuffer->GetColors());
+        this->_gBuffer->GetPositions().Unbind();
+        this->_gBuffer->GetNormals().Unbind();
+
+        //this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(1, 1, 0));
+        //this->_renderImage->Render(*this->_renderParameter, this->_gBuffer->GetNormals());
+        //this->_renderer.SetModelMatrix(glm::scale<float>(128, 128, 1) * glm::translate<float>(3, 1, 0));
+        //this->_renderImage->Render(*this->_renderParameter, this->_gBuffer->GetPositions());
         this->_renderShader->EndPass();
         this->_renderer.EndDraw2D();
         // XXX

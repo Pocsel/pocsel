@@ -94,6 +94,8 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Shutdown()
     {
+        for (auto it = this->_shutdownCallbacks.begin(), ite = this->_shutdownCallbacks.end(); it != ite; ++it)
+            (*it)();
         delete this->_states.back().target;
         this->_states.clear();
         if (this->_device != 0)
@@ -182,7 +184,10 @@ namespace Tools { namespace Renderers {
     {
         assert(this->_currentProgram != 0 && "Il faut obligatoirement un shader !");
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewProjectionMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         this->_currentProgram->UpdateCurrentPass();
     }

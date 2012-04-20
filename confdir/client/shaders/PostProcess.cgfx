@@ -1,36 +1,68 @@
 float4x4 mvp : WorldViewProjection;
+float4x4 view : View;
+float4x4 viewInverse : ViewInverse;
 float time = 1.0;
 
-sampler2D baseTex = sampler_state
+sampler2D colors = sampler_state
 {
-   minFilter = Point;
    magFilter = Point;
+   minFilter = Point;
 };
+sampler2D normals = sampler_state
+{
+   magFilter = Point;
+   minFilter = Point;
+};
+sampler2D positions = sampler_state
+{
+   magFilter = Point;
+   minFilter = Point;
+};
+
+float3 lightPos = float3(0, 0, 0);
+float3 lightDiffuse = float3(0.3);
 
 struct VSout
 {
-   float4 position : POSITION;
-   float2 texCoord : TEXCOORD0;
+   float4 position  : POSITION;
+   float2 tex       : TEXCOORD0;
 };
 
-VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
+VSout vs(in float4 position : POSITION, in float2 tex : TEXCOORD0)
 {
     VSout vout;
     vout.position = mul(mvp, position);
 #ifdef DIRECTX
-    vout.texCoord = texCoord;
+    vout.tex = tex;
 #else
-    vout.texCoord = float2(texCoord.x, 1-texCoord.y);
+    vout.tex = float2(tex.x, 1 - tex.y);
 #endif
     return vout;
 }
 
-float4 fs(in VSout v) : COLOR
+float4 fs(in VSout i) : COLOR
 {
-    float4 c = tex2D(baseTex, v.texCoord);
-    //c = lerp(tex2D(baseTex, v.texCoord + 0.5), c, 10*sin(time*10));
-    c.a = 1;
-    return c;
+    float3 vDiffuseMaterial = tex2D(colors, i.tex).rgb;
+    //float3 vSpecularMaterial = tex2D(SceneMaterialSampler, i.vTex0).a;
+
+    // normals are stored in texture space [0,1] -> convert them back to [-1,+1] range
+    float3 vWorldNrm = tex2D(normals, i.tex).xyz;
+
+    float3 vWorldPos = tex2D(positions, i.tex).xyz;
+    float3 vLightDir = normalize(lightPos - vWorldPos);
+    float3 vEyeVec = normalize(vWorldPos - viewInverse[3].xyz);
+    float3 vDiffuseIntensity = dot(vLightDir, vWorldNrm);
+    //float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), c_fSpecularPower);
+
+    float4 color;
+    color.rgb = (vDiffuseIntensity * lightDiffuse + 0.2) * vDiffuseMaterial;
+        //vSpecularIntensity * c_vLightSpecular.xyz * vSpecularMaterial;
+    color.a = 1.0;
+
+    // here we add color to show how lighting pass affects the scene
+    //color.rgb += i.tex.rgr * 0.5;
+
+    return color;
 }
 
 #ifndef DIRECTX

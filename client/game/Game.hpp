@@ -24,6 +24,7 @@ namespace Tools {
         class IShaderProgram;
         class IShaderParameter;
         namespace Utils {
+            class GBuffer;
             class Image;
         }
     }
@@ -47,11 +48,12 @@ namespace Client { namespace Game {
         Tools::Timer _gameTimer;
         Tools::Lua::Interpreter _interpreter;
         // XXX
-        std::unique_ptr<Tools::Renderers::IRenderTarget> _renderTarget;
+        std::unique_ptr<Tools::Renderers::Utils::GBuffer> _gBuffer;
         std::unique_ptr<Tools::Renderers::Utils::Image> _renderImage;
         Tools::Renderers::IShaderProgram* _renderShader;
-        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderParameter;
-        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderTimeParameter;
+        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderColorsParameter;
+        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderNormalsParameter;
+        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderPositionsParameter;
         // XXX
 
     public:

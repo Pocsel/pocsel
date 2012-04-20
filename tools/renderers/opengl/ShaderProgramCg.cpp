@@ -12,10 +12,14 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         _ctx(_renderer.GetCgContext()),
         _nbTextures(0),
         _mvp(0),
+        _vp(0),
         _mv(0),
         _model(0),
         _view(0),
         _projection(0),
+        _modelInverse(0),
+        _viewInverse(0),
+        _projectionInverse(0),
         _pass(0)
     {
         this->_effect = cgCreateEffect(this->_ctx, effect.c_str(), 0);
@@ -25,16 +29,22 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         if (this->_technique == 0)
             throw std::runtime_error("Shaders: No valid technique");
         this->_mvp = cgGetEffectParameterBySemantic(this->_effect, "WorldViewProjection");
+        this->_vp = cgGetEffectParameterBySemantic(this->_effect, "ViewProjection");
         this->_mv = cgGetEffectParameterBySemantic(this->_effect, "WorldView");
         this->_model = cgGetEffectParameterBySemantic(this->_effect, "World");
         this->_view = cgGetEffectParameterBySemantic(this->_effect, "View");
         this->_projection = cgGetEffectParameterBySemantic(this->_effect, "Projection");
+        this->_modelInverse = cgGetEffectParameterBySemantic(this->_effect, "WorldInverse");
+        this->_viewInverse = cgGetEffectParameterBySemantic(this->_effect, "ViewInverse");
+        this->_projectionInverse = cgGetEffectParameterBySemantic(this->_effect, "ProjectionInverse");
     }
 
     ShaderProgramCg::~ShaderProgramCg()
     {
         if (this->_mvp)
             cgDestroyParameter(this->_mvp);
+        if (this->_vp)
+            cgDestroyParameter(this->_vp);
         if (this->_mv)
             cgDestroyParameter(this->_mv);
         if (this->_model)
@@ -43,6 +53,12 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             cgDestroyParameter(this->_view);
         if (this->_projection)
             cgDestroyParameter(this->_projection);
+        if (this->_modelInverse)
+            cgDestroyParameter(this->_modelInverse);
+        if (this->_viewInverse)
+            cgDestroyParameter(this->_viewInverse);
+        if (this->_projectionInverse)
+            cgDestroyParameter(this->_projectionInverse);
         cgDestroyEffect(this->_effect);
     }
 
@@ -62,6 +78,10 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         {
         case ShaderParameterUsage::ModelViewProjectionMatrix:
             this->_mvp = cgGetNamedEffectParameter(this->_effect, identifier.c_str());
+            break;
+
+        case ShaderParameterUsage::ViewProjectionMatrix:
+            this->_vp = cgGetNamedEffectParameter(this->_effect, identifier.c_str());
             break;
 
         case ShaderParameterUsage::ModelViewMatrix:
@@ -94,6 +114,14 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 cgSetMatrixParameterfc(this->_mvp, (float*)&this->_renderer.GetModelViewProjectionMatrix());
             break;
 
+        case ShaderParameterUsage::ViewProjectionMatrix:
+            if (this->_vp)
+            {
+                auto mat = this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix();
+                cgSetMatrixParameterfc(this->_vp, (float*)&mat);
+            }
+            break;
+
         case ShaderParameterUsage::ModelViewMatrix:
             if (this->_mv)
             {
@@ -105,16 +133,31 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         case ShaderParameterUsage::ModelMatrix:
             if (this->_model)
                 cgSetMatrixParameterfc(this->_model, (float*)&this->_renderer.GetModelMatrix());
+            if (this->_modelInverse)
+            {
+                auto tmp = glm::inverse(this->_renderer.GetModelMatrix());
+                cgSetMatrixParameterfc(this->_modelInverse, (float*)&tmp);
+            }
             break;
 
         case ShaderParameterUsage::ViewMatrix:
             if (this->_view)
                 cgSetMatrixParameterfc(this->_view, (float*)&this->_renderer.GetViewMatrix());
+            if (this->_viewInverse)
+            {
+                auto tmp = glm::inverse(this->_renderer.GetViewMatrix());
+                cgSetMatrixParameterfc(this->_viewInverse, (float*)&tmp);
+            }
             break;
 
         case ShaderParameterUsage::ProjectionMatrix:
             if (this->_projection)
                 cgSetMatrixParameterfc(this->_projection, (float*)&this->_renderer.GetProjectionMatrix());
+            if (this->_projectionInverse)
+            {
+                auto tmp = glm::inverse(this->_renderer.GetProjectionMatrix());
+                cgSetMatrixParameterfc(this->_projectionInverse, (float*)&tmp);
+            }
             break;
 
         default:

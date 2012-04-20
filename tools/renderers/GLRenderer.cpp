@@ -69,7 +69,7 @@ namespace Tools { namespace Renderers {
         if (error != GLEW_OK)
             throw std::runtime_error(ToString("glewInit() failed: ") + ToString(glewGetErrorString(error)));
         if (!(GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader))
-            this->_useShaders = false;
+            throw std::runtime_error("ARB_vertex_shader and ARB_fragment_shader are required");
 
         Tools::log << "Glew version: " << (char const*)glewGetString(GLEW_VERSION) << "\n";
         Tools::log << "OpenGL version: " << (char const*)glGetString(GL_VERSION) << "\n";
@@ -79,24 +79,24 @@ namespace Tools { namespace Renderers {
         GLCHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         //GLCHECK(glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        if (this->_useShaders)
-        {
-            if (_cgGlobalContext == 0)
-                _cgGlobalContext = cgCreateContext();
-            this->_cgContext = _cgGlobalContext;
-            ++_cgGlobalNbReferences;
-            cgSetErrorCallback(&ErrCallback);
-            cgGLSetDebugMode(CG_FALSE);
-            cgSetParameterSettingMode(this->_cgContext, CG_DEFERRED_PARAMETER_SETTING);
-            cgGLRegisterStates(this->_cgContext);
-            cgGLSetManageTextureParameters(this->_cgContext, CG_TRUE);
-        }
+        if (_cgGlobalContext == 0)
+            _cgGlobalContext = cgCreateContext();
+        this->_cgContext = _cgGlobalContext;
+        ++_cgGlobalNbReferences;
+        cgSetErrorCallback(&ErrCallback);
+        cgGLSetDebugMode(CG_FALSE);
+        cgSetParameterSettingMode(this->_cgContext, CG_DEFERRED_PARAMETER_SETTING);
+        cgGLRegisterStates(this->_cgContext);
+        cgGLSetManageTextureParameters(this->_cgContext, CG_TRUE);
+
         InitDevIL();
     }
 
     void GLRenderer::Shutdown()
     {
-        if (this->_useShaders && --_cgGlobalNbReferences == 0)
+        for (auto it = this->_shutdownCallbacks.begin(), ite = this->_shutdownCallbacks.end(); it != ite; ++it)
+            (*it)();
+        if (--_cgGlobalNbReferences == 0)
         {
             cgDestroyContext(this->_cgContext);
             _cgGlobalContext = 0;
@@ -130,10 +130,7 @@ namespace Tools { namespace Renderers {
 
     std::unique_ptr<IShaderProgram> GLRenderer::CreateProgram(std::string const& effect)
     {
-        if (this->_useShaders)
-            return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramCg(*this, effect));
-        else
-            return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramNull(*this));
+        return std::unique_ptr<IShaderProgram>(new OpenGL::ShaderProgramCg(*this, effect));
     }
 
     // Drawing
@@ -184,7 +181,10 @@ namespace Tools { namespace Renderers {
     void GLRenderer::UpdateCurrentParameters()
     {
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewProjectionMatrix);
         this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         if (this->_currentProgram != 0)
             this->_currentProgram->UpdateCurrentPass();

@@ -19,6 +19,7 @@ namespace Tools { namespace Renderers {
             int _nbTextures;
 
             D3DXHANDLE _mvp;
+            D3DXHANDLE _vp;
             D3DXHANDLE _mv;
             D3DXHANDLE _model;
             D3DXHANDLE _view;

@@ -20,10 +20,14 @@ namespace Tools { namespace Renderers {
             int _nbTextures;
 
             CGparameter _mvp;
+            CGparameter _vp;
             CGparameter _mv;
             CGparameter _model;
             CGparameter _view;
             CGparameter _projection;
+            CGparameter _modelInverse;
+            CGparameter _viewInverse;
+            CGparameter _projectionInverse;
 
             CGpass _pass;
 

@@ -47,8 +47,8 @@ namespace Tools { namespace Renderers {
 
     private:
         glm::uvec2 _screenSize;
-        bool _useShaders;
         CGcontext _cgContext;
+        std::list<std::function<void()>> _shutdownCallbacks;
 
         std::list<RenderState> _states;
         RenderState* _currentState;
@@ -59,7 +59,7 @@ namespace Tools { namespace Renderers {
         OpenGL::IndexBuffer* bindedIndexBuffer;
 
     public:
-        GLRenderer(bool useShaders = true) : _useShaders(useShaders), _currentProgram(0), bindedIndexBuffer(0) {}
+        GLRenderer() : _currentProgram(0), bindedIndexBuffer(0) {}
         virtual ~GLRenderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -70,6 +70,9 @@ namespace Tools { namespace Renderers {
 
         virtual void Initialise();
         virtual void Shutdown();
+
+        // Callbacks
+        virtual void RegisterShutdownCallback(std::function<void()>&& callback) { this->_shutdownCallbacks.push_back(callback); }
 
         // Resources
         virtual std::unique_ptr<IVertexBuffer> CreateVertexBuffer();
