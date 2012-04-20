@@ -3,10 +3,6 @@
 
 namespace Server { namespace Game {
 
-    PluginManager::PluginManager()
-    {
-    }
-
     void PluginManager::AddPlugin(Uint32 id, std::string const& fullname, std::string const& identifier) throw(std::runtime_error)
     {
         Plugin p;

@@ -105,7 +105,7 @@ namespace Server { namespace Database {
                 if (world._maps.find(conf.name) != world._maps.end())
                     throw std::runtime_error("A map " + Tools::ToString(conf.name) + " already exists");
 
-                auto map = new Game::Map::Map(conf, row->GetUint64(2), world._game, existingBigChunks);
+                auto map = new Game::Map::Map(conf, row->GetUint64(2), world, existingBigChunks);
                 if (world._maps.find(conf.name) != world._maps.end())
                     throw std::runtime_error("A map named \"" + conf.name + "\" already exists");
                 world._maps[conf.name] = map;
@@ -155,9 +155,11 @@ namespace Server { namespace Database {
                 auto itMapEnd = world._maps.end();
                 for (; itMap != itMapEnd; ++itMap)
                 {
-                    itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row->GetUint32(0), row->GetString(1));
+                    //itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row->GetUint32(0), row->GetString(1));
+                    itMap->second->GetEngine().OverrideRunningPluginId(row->GetUint32(0));
                     itMap->second->GetEngine().GetInterpreter().DoString(row->GetString(2));
-                    itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
+                    itMap->second->GetEngine().OverrideRunningPluginId(0);
+                    //itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
                 }
                 if (this->_world.GetGame().GetServer().GetSettings().debug)
                     this->_world.GetGame().GetServer().GetRcon().GetEntityFileManager().AddFile(row->GetUint32(0), row->GetString(1), row->GetString(2));

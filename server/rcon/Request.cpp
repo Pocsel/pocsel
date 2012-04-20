@@ -196,13 +196,15 @@ namespace Server { namespace Rcon {
             return this->_WriteHttpResponse("200 OK"); // pre-flight "allow cross-domain" ajax queries
         else if (!this->_url.empty())
         {
-            if (this->_url[0] == "map" && this->_url.size() == 3)
+            if (this->_url[0] == "map" && this->_url.size() >= 3)
             {
                 if (this->_server.GetGame().GetWorld().HasMap(this->_url[1]))
                 {
                     Game::Map::Map const& map = this->_server.GetGame().GetWorld().GetMap(this->_url[1]);
-                    if (this->_url[2] == "entities" && this->_method == "GET")
+                    if (this->_url[2] == "entities" && this->_url.size() == 3 && this->_method == "GET")
                         return this->_GetEntities(map); // GET /map/<map>/entities
+                    else if (this->_url[2] == "execute" && this->_url.size() == 4 && this->_method == "POST")
+                        return this->_PostExecute(map, this->_url[3], this->_content["lua"]); // POST /map/<map>/execute/<plugin>
                 }
             }
             else if (this->_url[0] == "login" && this->_method == "POST")
@@ -211,8 +213,8 @@ namespace Server { namespace Rcon {
                 return this->_GetRconSessions(); // GET /rcon_sessions
             else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "GET")
                 return this->_GetEntityFile(this->_url[1], this->_url[2]); // GET /entity_file/<plugin>/<file>
-            else if (this->_url[0] == "execute" && this->_url.size() == 2 && this->_method == "POST")
-                return this->_PostExecute(this->_url[1], this->_content["lua"]);
+            else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "POST")
+                return this->_PostEntityFile(this->_url[1], this->_url[2], this->_content["lua"]); // POST /entity_file/<plugin>/<file>
         }
         this->_WriteHttpResponse("404 Not Found");
     }
@@ -292,10 +294,28 @@ namespace Server { namespace Rcon {
             this->_WriteHttpResponse("401 Unauthorized");
     }
 
-    void Request::_PostExecute(std::string const& pluginIdentifier, std::string const& lua)
+    void Request::_PostEntityFile(std::string const& pluginIdentifier, std::string const& file, std::string const& lua)
     {
         if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "execute"))
         {
+            if (this->_server.GetRcon().GetEntityFileManager().UpdateFile(pluginIdentifier, file, lua))
+                this->_WriteHttpResponse("200 OK");
+            else
+                this->_WriteHttpResponse("404 Not Found");
+        }
+        else
+            this->_WriteHttpResponse("401 Unauthorized");
+    }
+
+    void Request::_PostExecute(Game::Map::Map const& map, std::string const& pluginIdentifier, std::string const& lua)
+    {
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "execute"))
+        {
+            Uint32 pluginId = this->_server.GetGame().GetWorld().GetPluginManager().GetPluginId(pluginIdentifier);
+            if (pluginId)
+                map.RconExecute(pluginId, lua, std::bind(&Request::_JsonCallback, this, std::placeholders::_1));
+            else
+                this->_WriteHttpResponse("404 Not Found");
         }
         else
             this->_WriteHttpResponse("401 Unauthorized");

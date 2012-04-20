@@ -13,7 +13,7 @@ namespace Server { namespace Game { namespace Engine {
         Common::Position _pos;
 
     public:
-        PositionalEntity(Engine& engine, Uint32 id, EntityType& type, Common::Position const& pos);
+        PositionalEntity(Engine& engine, Uint32 id, EntityType* type, Common::Position const& pos);
         Common::Position const& GetPosition() const { return this->_pos; }
     };
 

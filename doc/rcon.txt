@@ -35,20 +35,29 @@
             ]
         }
 
-- POST /execute/<plugin>
+- POST /map/<map>/execute/<plugin>
     - Needed rights: "execute"
     - Parameters: lua
-    - Returns: 200 (ok), 401 (insufficient rights)
+    - Returns: 200 (ok), 401 (insufficient rights), 404 (map/plugin not found)
     - JSON:
+        {
+            "log": "<lua error>"
+        }
 
 - GET /entity_file/<plugin>/<file>
     - Needed rights: "execute"
     - Parameters:
-    - Returns: 200 (ok), 401 (insufficient rights)
+    - Returns: 200 (ok), 401 (insufficient rights), 404 (plugin/file not found)
     - JSON:
         {
             "lua": "<lua_source_code>"
         }
+
+- POST /entity_file/<plugin>/<file>
+    - Needed rights: "execute"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights), 404 (plugin/file not found)
+    - JSON:
 
 - GET /rcon_sessions
     - Needed rights: "rcon_sessions"

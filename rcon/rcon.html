@@ -208,8 +208,16 @@
                         </div>
                         <div id="execute" class="accordion-body collapse">
                             <div class="well">
-                                <textarea style="width: 80%; height: 70px;"></textarea><br />
-                                <button class="btn">Run script on map1</button>
+                                <label>
+                                    In plugin:
+                                    <select id="execute_plugin">
+                                    </select>
+                                </label>
+                                <textarea id="execute_text" style="width: 80%; height: 70px;"></textarea><br />
+                                <button id="execute_submit" class="btn">Run script on map1</button>
+                                <img id="execute_preloader" class="hide" src="rcon-assets/img/preloader.gif" alt="" />
+                                <div id="execute_alert" class="alert alert-error hide">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -268,11 +276,13 @@
                     <h3 id="lua-modal_title"></h3>
                 </div>
                 <div class="modal-body">
+                    <div id="lua-modal_log"></div>
                     <textarea id="lua-modal_text" class="hide" style="width: 100%; height: 350px;"></textarea>
                 </div>
                 <div class="modal-footer">
                     <img id="lua-modal_preloader" class="hide" src="rcon-assets/img/preloader.gif" alt="" />
                     <a id="lua-modal_swap" class="btn btn-primary">Swap</a>
+                    <a id="lua-modal_ok" class="btn btn-primary hide">OK</a>
                 </div>
             </div>
 

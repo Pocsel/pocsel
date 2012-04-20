@@ -37,6 +37,20 @@ namespace Server { namespace Rcon {
         return std::string();
     }
 
+    bool EntityFileManager::UpdateFile(std::string const& pluginIdentifier, std::string const& file, std::string const& lua)
+    {
+        Uint32 pluginId = this->_server.GetGame().GetWorld().GetPluginManager().GetPluginId(pluginIdentifier);
+        auto it = this->_files.begin();
+        auto itEnd = this->_files.end();
+        for (; it != itEnd; ++it)
+            if (it->pluginId == pluginId && it->file == file)
+            {
+                it->lua = lua;
+                return true;
+            }
+        return false;
+    }
+
     std::string EntityFileManager::RconGetEntityFiles() const
     {
         std::string json = "\t[\n";
