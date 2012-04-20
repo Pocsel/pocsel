@@ -6,8 +6,8 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Engine::Engine(Map::Map& map) :
-        _map(map), _currentTime(0), _overriddenPluginId(0), _overriddenEntityId(0)
+    Engine::Engine(Map::Map& map, World& world) :
+        _map(map), _world(world), _currentTime(0), _overriddenPluginId(0), _overriddenEntityId(0)
     {
         Tools::debug << "Engine::Engine()\n";
         this->_interpreter = new Tools::Lua::Interpreter();

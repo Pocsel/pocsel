@@ -33,17 +33,18 @@ namespace Server { namespace Game { namespace Map {
 
     Map::Map(Conf const& conf,
             Uint64 currentTime,
-            Game& game,
+            World& world,
             std::vector<Chunk::IdType> const& existingBigChunks) :
         _conf(conf),
-        _game(game),
+        _world(world),
+        _game(world.GetGame()),
         _messageQueue(new Tools::SimpleMessageQueue(1)),
         _spawnPosition(0),
         _currentTime(currentTime)
     {
         Tools::debug << "Map::Map() -- " << this->_conf.name << "\n";
         this->_gen = new Gen::ChunkGenerator();
-        this->_engine = new Engine::Engine(*this);
+        this->_engine = new Engine::Engine(*this, this->_world);
         this->_chunkManager = new ChunkManager(*this, this->_game.GetServer().GetResourceManager().GetConnection(), existingBigChunks);
     }
 
@@ -470,7 +471,7 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_RconExecute(Uint32 pluginId, std::string const& lua, std::function<void(std::string)> cb) const
     {
-        cb("");
+        cb(this->_engine->GetEntityManager().RconExecute(pluginId, lua));
     }
 
     void Map::RconGetEntities(std::function<void(std::string)> cb) const

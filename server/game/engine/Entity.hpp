@@ -12,15 +12,16 @@ namespace Server { namespace Game { namespace Engine {
         private boost::noncopyable
     {
     protected:
-        EntityType& _type;
+        EntityType* _type;
         Tools::Lua::Ref _self;
         std::map<Uint64 /* time */, Uint32 /* callback */> _pendingCalls;
 
     public:
-        Entity(Engine& engine, Uint32 id, EntityType& type);
+        Entity(Engine& engine, Uint32 id, EntityType* type);
         virtual ~Entity();
-        EntityType const& GetType() const { return this->_type; }
+        EntityType const& GetType() const { return *this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
+        void SetType(EntityType* type); // TODO enlever la possibilité de changer de type =]
     };
 
 }}}

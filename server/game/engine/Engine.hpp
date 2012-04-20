@@ -11,9 +11,12 @@ namespace Tools { namespace Lua {
     class Interpreter;
 }}
 
-namespace Server { namespace Game { namespace Map {
-    class Map;
-}}}
+namespace Server { namespace Game {
+    namespace Map {
+        class Map;
+    }
+    class World;
+}}
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -25,6 +28,7 @@ namespace Server { namespace Game { namespace Engine {
     {
     private:
         Map::Map& _map;
+        World& _world;
         Tools::Lua::Interpreter* _interpreter;
         MessageManager* _messageManager;
         EntityManager* _entityManager;
@@ -34,7 +38,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 _overriddenEntityId;
 
     public:
-        Engine(Map::Map& map);
+        Engine(Map::Map& map, World& world);
         ~Engine();
         void Tick(Uint64 currentTime);
         void Save(Tools::Database::IConnection& conn);
@@ -44,6 +48,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
+        World& GetWorld() { return this->_world; }
         Uint32 GetRunningPluginId() { return this->_overriddenPluginId ? this->_overriddenPluginId : this->_entityManager->GetRunningPluginId(); }
         void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
         Uint32 GetRunningEntityId() { return this->_overriddenEntityId ? this->_overriddenEntityId : this->_entityManager->GetRunningEntityId(); }

@@ -16,7 +16,6 @@ namespace Server { namespace Game {
         std::map<Uint32, Plugin> _plugins;
 
     public:
-        PluginManager();
         void AddPlugin(Uint32 id, std::string const& fullname, std::string const& identifier) throw(std::runtime_error);
         Plugin const& GetPlugin(Uint32 id) const throw(std::runtime_error);
         std::map<Uint32, Plugin> const& GetPlugins() const { return this->_plugins; }

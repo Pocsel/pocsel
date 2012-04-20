@@ -26,6 +26,7 @@ namespace Tools {
 
 namespace Server { namespace Game {
     class Game;
+    class World;
     class Player;
     namespace Map { namespace Gen {
         class ChunkGenerator;
@@ -53,6 +54,7 @@ namespace Server { namespace Game { namespace Map {
             SaveRetryTime = 10
         };
         Conf _conf;
+        World& _world;
         Game& _game;
         Tools::SimpleMessageQueue* _messageQueue;
 
@@ -69,7 +71,7 @@ namespace Server { namespace Game { namespace Map {
     public:
         Map(Conf const& conf,
                 Uint64 currentTime,
-                Game& game,
+                World& world,
                 std::vector<Chunk::IdType> const& existingBigChunks);
         ~Map();
 
@@ -82,6 +84,7 @@ namespace Server { namespace Game { namespace Map {
         std::string const& GetFullName() const { return this->_conf.fullname; }
         Engine::Engine& GetEngine() { return *this->_engine; }
         Game& GetGame() { return this->_game; }
+        World& GetWorld() { return this->_world; }
 
         // threadsafe
         std::vector<CubeType> const& GetCubeTypes() const { return this->_conf.cubeTypes; }

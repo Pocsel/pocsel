@@ -25,6 +25,7 @@ namespace Server { namespace Rcon {
     public:
         EntityFileManager(Server& server);
         void AddFile(Uint32 pluginId, std::string const& file, std::string const& lua);
+        bool UpdateFile(std::string const& pluginIdentifier,  std::string const& file, std::string const& lua);
         std::string GetFile(std::string const& pluginIdentifier, std::string const& file) const; // retourne "" si erreur
         std::string RconGetEntityFiles() const;
     };
