@@ -61,11 +61,11 @@ namespace Client { namespace Resources {
         std::vector<FrameSkeleton> _skeletons;    // All the skeletons for all the frames
 
     private:
-        int _md5Version;
-        int _numFrames;
-        int _numJoints;
-        int _framRate;
-        int _numAnimatedComponents;
+        unsigned int _md5Version;
+        unsigned int _numFrames;
+        unsigned int _numJoints;
+        unsigned int _framRate;
+        unsigned int _numAnimatedComponents;
         float _animDuration;
         float _frameDuration;
 
@@ -82,13 +82,18 @@ namespace Client { namespace Resources {
             return this->_jointInfos[index];
         }
 
-        int GetMd5Version() const { return this->_md5Version; }
-        int GetNumFrames() const { return this->_numFrames; }
-        int GetNumJoints() const { return this->_numJoints; }
-        int GetFramRate() const { return this->_framRate; }
-        int GetNumAnimatedComponents() const { return this->_numAnimatedComponents; }
+        unsigned int GetMd5Version() const { return this->_md5Version; }
+        unsigned int GetNumFrames() const { return this->_numFrames; }
+        unsigned int GetNumJoints() const { return this->_numJoints; }
+        unsigned int GetFramRate() const { return this->_framRate; }
+        unsigned int GetNumAnimatedComponents() const { return this->_numAnimatedComponents; }
         float GetAnimDuration() const { return this->_animDuration; }
         float GetFrameDuration() const { return this->_frameDuration; }
+
+        FrameSkeleton const& GetSkeleton(unsigned int idx) const {
+            assert(idx < this->_skeletons.size() && "index out of bounds");
+            return this->_skeletons[idx];
+        }
 
     protected:
         // Build the frame skeleton for a particular frame

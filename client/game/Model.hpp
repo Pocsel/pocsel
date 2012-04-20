@@ -15,7 +15,6 @@ namespace Client { namespace Game {
     private:
         Resources::Md5Model const& _model;
         std::vector<glm::mat4x4> _animatedBones; // Animated bone matrix from the animation with the inverse bind pose applied.
-        std::vector<glm::mat4x4> _skeletion;
         float _animTime;
 
     public:

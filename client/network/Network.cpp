@@ -17,7 +17,8 @@ namespace Client { namespace Network {
         _sending(false),
         _isConnected(false),
         _isRunning(false),
-        _loading(0)
+        _loading(0),
+        _sendingUdp(false)
     {
         this->_udpStatus.canReceive = false;
         this->_udpStatus.canSend = false;

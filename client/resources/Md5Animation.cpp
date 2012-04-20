@@ -14,7 +14,7 @@ namespace Client { namespace Resources {
         _framRate(0),
         _numAnimatedComponents(0),
         _animDuration(0),
-        _frameDuration(0),
+        _frameDuration(0)
     {
     }
 
@@ -45,7 +45,6 @@ namespace Client { namespace Resources {
         this->_bounds.clear();
         this->_baseFrames.clear();
         this->_frames.clear();
-        this->_animatedSkeleton.joints.clear();
         this->_numFrames = 0;
 
         file >> param;
@@ -88,7 +87,7 @@ namespace Client { namespace Resources {
             else if (param == "hierarchy")
             {
                 file >> junk; // read in the '{' character
-                for (int i = 0; i < this->_numJoints; ++i)
+                for (unsigned int i = 0; i < this->_numJoints; ++i)
                 {
                     JointInfo joint;
                     file >> joint.name >> joint.parentID >> joint.flags >> joint.startIndex;
@@ -104,7 +103,7 @@ namespace Client { namespace Resources {
             {
                 file >> junk; // read in the '{' character
                 file.ignore(fileLength, '\n');
-                for (int i = 0; i < this->_numFrames; ++i)
+                for (unsigned int i = 0; i < this->_numFrames; ++i)
                 {
                     Bound bound;
                     file >> junk; // read in the '(' character
@@ -125,7 +124,7 @@ namespace Client { namespace Resources {
                 file >> junk; // read in the '{' character
                 file.ignore(fileLength, '\n');
 
-                for (int i = 0; i < this->_numJoints; ++i)
+                for (unsigned int i = 0; i < this->_numJoints; ++i)
                 {
                     BaseFrame baseFrame;
                     file >> junk;
@@ -145,7 +144,7 @@ namespace Client { namespace Resources {
                 file >> frame.frameID >> junk; // Read in the '{' character
                 file.ignore(fileLength, '\n');
 
-                for (int i = 0; i < this->_numAnimatedComponents; ++i)
+                for (unsigned int i = 0; i < this->_numAnimatedComponents; ++i)
                 {
                     float frameData;
                     file >> frameData;
@@ -164,39 +163,34 @@ namespace Client { namespace Resources {
             file >> param;
         } // while ( !file.eof )
 
-        // Make sure there are enough joints for the animated skeleton.
-        this->_animatedSkeleton.joints.assign(this->_numJoints, SkeletonJoint());
-        this->_animatedSkeleton.boneMatrices.assign(this->_numJoints, glm::mat4x4(1.0));
-
         this->_frameDuration = 1.0f / (float)this->_framRate;
         this->_animDuration = ( this->_frameDuration * (float)this->_numFrames );
-        this->_animTime = 0.0f;
 
-        if ((int)this->_jointInfos.size() != this->_numJoints)
+        if (this->_jointInfos.size() != this->_numJoints)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of joints not ok. (need " << this->_numJoints << ", has " << this->_jointInfos.size() << ")\n";
             return false;
         }
-        if ((int)this->_bounds.size() != this->_numFrames)
+        if (this->_bounds.size() != this->_numFrames)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of bounds not ok. (need " << this->_numFrames << ", has " << this->_bounds.size() << ")\n";
             return false;
         }
-        if ((int)this->_baseFrames.size() != this->_numJoints)
+        if (this->_baseFrames.size() != this->_numJoints)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of baseFrames not ok. (need " << this->_numJoints << ", has " << this->_baseFrames.size() << ")\n";
             return false;
         }
-        if ((int)this->_frames.size() != this->_numFrames)
+        if (this->_frames.size() != this->_numFrames)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of frames not ok. (need " << this->_numFrames << ", has " << this->_frames.size() << ")\n";
             return false;
         }
-        if ((int)this->_skeletons.size() != this->_numFrames)
+        if (this->_skeletons.size() != this->_numFrames)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of skels not ok. (need " << this->_numFrames << ", has " << this->_skeletons.size() << ")\n";

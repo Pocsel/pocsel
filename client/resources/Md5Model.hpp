@@ -53,6 +53,7 @@ namespace Client { namespace Resources {
             glm::vec3 pos;
         };
 
+    public:
         struct Joint
         {
             std::string name;
@@ -61,7 +62,6 @@ namespace Client { namespace Resources {
             glm::quat orient;
         };
 
-    public:
         struct Mesh
         {
             std::string shader;
@@ -88,9 +88,9 @@ namespace Client { namespace Resources {
         };
 
     private:
-        int _md5Version;
-        int _numJoints;
-        int _numMeshes;
+        unsigned int _md5Version;
+        unsigned int _numJoints;
+        unsigned int _numMeshes;
         bool _hasAnimation;
         std::vector<Joint> _joints;
         std::vector<Mesh> _meshes;
@@ -112,7 +112,12 @@ namespace Client { namespace Resources {
         void Update(Uint32 time, float phi);
         void Render(Tools::IRenderer& renderer);
 
-        std::vector<Mesh>& GetMeshes() { return this->_meshes; }
+        std::vector<Joint> const& GetJoints() const { return this->_joints; }
+        std::vector<Mesh> const& GetMeshes() const { return this->_meshes; }
+        Md5Animation const& GetAnimation() const { return this->_animation; }
+        bool HasAnimation() const { return this->_hasAnimation; }
+        unsigned int GetNumJoints() const { return this->_numJoints; }
+        std::vector<glm::mat4x4> const& GetInverseBindPose() const { return this->_inverseBindPose; }
 
     protected:
         // Build the bind-pose and the inverse bind-pose matrix array for the model.

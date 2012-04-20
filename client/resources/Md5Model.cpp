@@ -74,7 +74,6 @@ namespace Client { namespace Resources {
             {
                 file >> this->_numJoints;
                 this->_joints.reserve(this->_numJoints);
-                this->_animatedBones.assign(this->_numJoints, glm::mat4x4(1.0f));
             }
             else if (param == "numMeshes")
             {
@@ -85,7 +84,7 @@ namespace Client { namespace Resources {
             {
                 Joint joint;
                 file >> junk; // Read the '{' character
-                for (int i = 0; i < this->_numJoints; ++i)
+                for (unsigned int i = 0; i < this->_numJoints; ++i)
                 {
                     file
                         >> joint.name >> joint.parentID >> junk
@@ -212,13 +211,13 @@ namespace Client { namespace Resources {
             file >> param;
         }
 
-        if ((int)this->_joints.size() != this->_numJoints)
+        if (this->_joints.size() != this->_numJoints)
         {
             Tools::error << "Md5Model::LoadModel: " << filePath <<
                 ": number of joints not ok. (need " << this->_numJoints << ", has " << this->_joints.size() << ")\n";
             return false;
         }
-        if ((int)this->_meshes.size() != this->_numMeshes)
+        if (this->_meshes.size() != this->_numMeshes)
         {
             Tools::error << "Md5Model::LoadModel: " << filePath <<
                 ": number of meshes not ok. (need " << this->_numMeshes << ", has " << this->_meshes.size() << ")\n";
