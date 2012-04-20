@@ -4,9 +4,15 @@
 # define D3D_DEBUG_INFO
 #endif
 
+#ifdef new
+#undef new
+#endif
 #include <d3dx9.h>
 
 #include "DxErr.h"
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #include "tools/IRenderer.hpp"
 

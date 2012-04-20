@@ -42,7 +42,7 @@ FSout fs(in VSout v)
 
     FSout f;
     f.color = tex2D(baseTex, coord);
-    f.normal = float4(f.color.rgb, 1.0 - f.color.a);
+    f.normal = float4(1-f.color.rgb, f.color.a);
     return f;
 }
 

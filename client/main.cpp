@@ -5,7 +5,12 @@
 
 int main(int ac, char** av)
 {
-    auto settings = Client::Settings(ac, av);
-    Client::Client client(settings);
-    return client.Run();
+    int ret;
+    {
+        auto settings = Client::Settings(ac, av);
+        Client::Client client(settings);
+        ret = client.Run();
+    }
+    _CrtDumpMemoryLeaks();
+    return ret;
 }

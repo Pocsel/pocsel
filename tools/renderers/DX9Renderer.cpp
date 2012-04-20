@@ -6,6 +6,7 @@
 
 #include "tools/renderers/dx9/directx.hpp"
 #include "tools/renderers/dx9/IndexBuffer.hpp"
+#include "tools/renderers/dx9/RenderTarget.hpp"
 #include "tools/renderers/dx9/ShaderProgram.hpp"
 #include "tools/renderers/dx9/Texture2D.hpp"
 #include "tools/renderers/dx9/VertexBuffer.hpp"
@@ -45,7 +46,6 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Initialise()
     {
-        this->_currentMatrixMode = -1;
         this->_object = Direct3DCreate9(D3D_SDK_VERSION);
         if (this->_object == 0)
             throw std::runtime_error("DirectX: Could not create Direct3D Object");
@@ -75,8 +75,13 @@ namespace Tools { namespace Renderers {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
 
-        DXCHECKERROR(this->_device->GetRenderTarget(0, &this->_backBuffer));
-        DXCHECKERROR(this->_device->GetDepthStencilSurface(&this->_backZBuffer));
+        RenderState rs;
+        rs.state = RenderState::None;
+        IDirect3DSurface9 *backColor, *backZBuffer;
+        DXCHECKERROR(this->_device->GetRenderTarget(0, &backColor));
+        DXCHECKERROR(this->_device->GetDepthStencilSurface(&backZBuffer));
+        rs.target = new DX9::RenderTarget(*this, this->_screenSize, backColor, backZBuffer);
+        this->_PushState(rs);
 
         D3DXCreateEffectPool(&this->_effectPool);
 
@@ -89,8 +94,8 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::Shutdown()
     {
-        if (this->_backBuffer != 0)
-            this->_backBuffer->Release();
+        delete this->_states.back().target;
+        this->_states.clear();
         if (this->_device != 0)
             this->_device->Release();
         if (this->_object != 0)
@@ -143,67 +148,34 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::BeginDraw2D(IRenderTarget* target)
     {
-        assert(this->_state == 0 && "Operation invalide");
-        this->_state = Draw2D;
-
-        this->_resetRenderTarget = target != 0;
-        if (target != 0)
-            target->Bind();
-
-        this->_model = glm::detail::tmat4x4<float>::identity;
-        this->_view = glm::translate<float>(0, 0, 1);
-        this->_projection = DX9Renderer::_glToDirectX * glm::ortho<float>(
-                0,
-                this->_viewport.size.x,
-                this->_viewport.size.y,
-                0,
-                -float(this->_viewport.size.x),
-                float(this->_viewport.size.x));
-        this->_modelViewProjection = this->_projection * this->_view * this->_model;
+        RenderState rs;
+        rs.state = RenderState::Draw2D;
+        rs.target = target;
+        this->_PushState(rs);
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
-        DXCHECKERROR(this->_device->BeginScene());
     }
 
     void DX9Renderer::EndDraw2D()
     {
-        DXCHECKERROR(this->_device->EndScene());
-        if (this->_resetRenderTarget)
-        {
-            DXCHECKERROR(this->_device->SetRenderTarget(0, this->_backBuffer));
-            DXCHECKERROR(this->_device->SetDepthStencilSurface(this->_backZBuffer));
-        }
-        this->_currentProgram = 0;
-
-        this->_state = DrawNone;
+        this->_PopState();
     }
 
     void DX9Renderer::BeginDraw(IRenderTarget* target)
     {
-        assert(this->_state == 0 && "Operation invalide");
-        this->_state = Draw3D;
-
-        this->_resetRenderTarget = target != 0;
-        if (target != 0)
-            target->Bind();
+        RenderState rs;
+        rs.state = RenderState::Draw3D;
+        rs.target = target;
+        this->_PushState(rs);
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW));
-        DXCHECKERROR(this->_device->BeginScene());
     }
 
     void DX9Renderer::EndDraw()
     {
-        DXCHECKERROR(this->_device->EndScene());
-        if (this->_resetRenderTarget)
-        {
-            DXCHECKERROR(this->_device->SetRenderTarget(0, this->_backBuffer));
-            DXCHECKERROR(this->_device->SetDepthStencilSurface(this->_backZBuffer));
-        }
-        this->_currentProgram = 0;
-
-        this->_state = DrawNone;
+        this->_PopState();
     }
 
     void DX9Renderer::UpdateCurrentParameters()
@@ -239,17 +211,17 @@ namespace Tools { namespace Renderers {
     // Matrices
     void DX9Renderer::SetModelMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_model = matrix;
+        this->_currentState->model = matrix;
         if (this->_currentProgram != 0)
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
+            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
     }
 
     void DX9Renderer::SetViewMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_view = matrix;
+        this->_currentState->view = matrix;
         if (this->_currentProgram != 0)
         {
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
+            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
@@ -258,10 +230,10 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_projection = DX9Renderer::_glToDirectX * matrix;
+        this->_currentState->projection = DX9Renderer::_glToDirectX * matrix;
         if (this->_currentProgram != 0)
         {
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
+            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
             this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
         }
@@ -272,30 +244,6 @@ namespace Tools { namespace Renderers {
     {
         this->_screenSize = size;
         this->_RefreshDevice();
-    }
-
-    void DX9Renderer::SetViewport(Rectangle const& viewport)
-    {
-        D3DVIEWPORT9 vp;
-        vp.Width = viewport.size.x;
-        vp.Height = viewport.size.y;
-        vp.X = viewport.pos.x;
-        vp.Y = viewport.pos.y;
-        vp.MinZ = 0.0f;
-        vp.MaxZ = 1.0f;
-        DXCHECKERROR(this->_device->SetViewport(&vp));
-        this->_viewport = viewport;
-        if (this->_state == Draw2D)
-        {
-            this->_projection = DX9Renderer::_glToDirectX * glm::ortho<float>(
-                0,
-                this->_viewport.size.x,
-                this->_viewport.size.y,
-                0,
-                -float(this->_viewport.size.x),
-                float(this->_viewport.size.x));
-            this->_modelViewProjection = this->_projection * this->_view * this->_model;
-        }
     }
 
     void DX9Renderer::SetNormaliseNormals(bool normalise)
@@ -370,8 +318,8 @@ namespace Tools { namespace Renderers {
         Tools::debug << "ScreenSize = " << ToString(this->_screenSize) << std::endl;
 
         // Release...
-        this->_backBuffer->Release();
-        this->_backZBuffer->Release();
+        auto& rs = this->_states.back();
+        delete rs.target;
         for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
             (*it)->GetEffect()->OnLostDevice();
         for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
@@ -380,12 +328,14 @@ namespace Tools { namespace Renderers {
         DXCHECKERROR(this->_device->Reset(&present_parameters));
 
         // Recreate...
+        IDirect3DSurface9 *backColor, *backZBuffer;
+        DXCHECKERROR(this->_device->GetRenderTarget(0, &backColor));
+        DXCHECKERROR(this->_device->GetDepthStencilSurface(&backZBuffer));
+        rs.target = new DX9::RenderTarget(*this, this->_screenSize, backColor, backZBuffer);
         for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
             (*it)->OnResetDevice();
         for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
             (*it)->GetEffect()->OnResetDevice();
-        DXCHECKERROR(this->_device->GetRenderTarget(0, &this->_backBuffer));
-        DXCHECKERROR(this->_device->GetDepthStencilSurface(&this->_backZBuffer));
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));
@@ -393,6 +343,118 @@ namespace Tools { namespace Renderers {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
+    }
+
+    void DX9Renderer::_PushState(DX9Renderer::RenderState const& state)
+    {
+        bool startScene = true;
+
+        RenderState rsOld;
+        if (this->_states.size() > 0)
+        {
+            rsOld = this->_states.front();
+            if (state.target != 0)
+                DXCHECKERROR(this->_device->EndScene());
+            startScene = this->_states.size() == 1 || state.target != 0;
+        }
+        this->_states.push_front(state);
+        auto& rs = this->_states.front();
+        this->_currentState = &rs;
+
+        if (rs.target != 0)
+        {
+            rs.target->Bind();
+            D3DVIEWPORT9 vp;
+            vp.Width = rs.target->GetSize().x;
+            vp.Height = rs.target->GetSize().y;
+            vp.X = 0;
+            vp.Y = 0;
+            vp.MinZ = 0.0f;
+            vp.MaxZ = 1.0f;
+            DXCHECKERROR(this->_device->SetViewport(&vp));
+        }
+
+        if (rs.state == DX9Renderer::RenderState::Draw2D)
+        {
+            rs.view = glm::translate<float>(0, 0, 1);
+            auto size = rs.target == 0 ? this->_screenSize : rs.target->GetSize();
+            rs.projection = DX9Renderer::_glToDirectX * glm::ortho<float>(0, size.x, size.y, 0);
+            rs.modelViewProjection = rs.projection * rs.view * rs.model;
+        }
+        else
+        {
+            rs.view = rsOld.view;
+            rs.projection = rsOld.projection;
+            rs.modelViewProjection = rs.projection * rs.view * rsOld.model;
+        }
+
+        if (startScene)
+            DXCHECKERROR(this->_device->BeginScene());
+    }
+
+    void DX9Renderer::_PopState()
+    {
+        if (this->_states.size() <= 2)
+            DXCHECKERROR(this->_device->EndScene());
+        else if (this->_currentState->target != 0)
+        {
+            DXCHECKERROR(this->_device->EndScene());
+            DXCHECKERROR(this->_device->BeginScene());
+        }
+
+        auto rsOld = this->_states.front();
+        this->_states.pop_front();
+        auto& rs = this->_states.front();
+        this->_currentState = &rs;
+
+        if (rsOld.target != 0)
+        {
+            if (rs.target != 0)
+            {
+                rs.target->Bind();
+                D3DVIEWPORT9 vp;
+                vp.Width = rs.target->GetSize().x;
+                vp.Height = rs.target->GetSize().y;
+                vp.X = 0;
+                vp.Y = 0;
+                vp.MinZ = 0.0f;
+                vp.MaxZ = 1.0f;
+                DXCHECKERROR(this->_device->SetViewport(&vp));
+            }
+            else
+            {
+                for (auto it = this->_states.begin(), ite = this->_states.end(); it != ite; ++it)
+                {
+                    if (it->target)
+                    {
+                        it->target->Bind();
+                        D3DVIEWPORT9 vp;
+                        vp.Width = it->target->GetSize().x;
+                        vp.Height = it->target->GetSize().y;
+                        vp.X = 0;
+                        vp.Y = 0;
+                        vp.MinZ = 0.0f;
+                        vp.MaxZ = 1.0f;
+                        DXCHECKERROR(this->_device->SetViewport(&vp));
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (rsOld.state != rs.state)
+        {
+            if (rs.state == RenderState::Draw3D)
+            {
+                DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
+                DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW));
+            }
+            else if (rs.state == RenderState::Draw2D)
+            {
+                DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
+                DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
+            }
+        }
     }
 }}
 

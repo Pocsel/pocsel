@@ -98,6 +98,9 @@ namespace Tools { namespace Lua {
 
     Ref State::MakeFunction(std::function<void(CallHelper&)> val) throw()
     {
+#ifdef new
+#undef new
+#endif
         ClosureEnv* env = new (lua_newuserdata(*this, sizeof(ClosureEnv))) ClosureEnv;
         env->i = &this->_interpreter;
         env->f = new std::function<void(CallHelper&)>(val);

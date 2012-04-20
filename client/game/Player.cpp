@@ -47,6 +47,7 @@ namespace Client { namespace Game {
     Player::~Player()
     {
         Tools::Delete(this->_targetedCubeRenderer);
+        Tools::Delete(this->_targetedCube);
     }
 
     void Player::Render()
