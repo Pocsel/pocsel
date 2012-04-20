@@ -28,7 +28,7 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 #ifdef DIRECTX
 	vout.texCoord = texCoord;
 #else
-	vout.texCoord = float2(texCoord.x, -texCoord.y);
+	vout.texCoord = float2(texCoord.x, 1.0-texCoord.y);
 #endif
 	return vout;
 }

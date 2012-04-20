@@ -17,6 +17,7 @@ namespace Tools { namespace Renderers {
         glm::uvec2 _size;
         bool _hasAlpha;
         IDirect3DTexture9* _texture;
+        int _bindId;
 
     public:
         Texture2D(DX9Renderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0);
