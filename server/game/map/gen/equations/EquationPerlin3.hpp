@@ -94,26 +94,6 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             }
         }
 
-        //        virtual double Calc(double x, double y, double z) const
-        //        {
-        //            return _perlin.Noise3D(x * xn + xa,
-        //                                   y * yn + ya,
-        //                                   z * zn + za,
-        //                                   alpha,
-        //                                   beta,
-        //                                   n) * mul;
-        //        }
-        //
-        //        virtual bool Is2D() const
-        //        {
-        //            return false;
-        //        }
-        //
-        //        virtual bool ByChunkCalculation() const
-        //        {
-        //            return true;
-        //        }
-
         virtual void Calc(double x, double y, double z, Uint32 cx, Uint32 cy, Uint32 cz, double* res, unsigned int offset) const
         {
             unsigned int ix, iz, iy;
@@ -123,13 +103,13 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             {
                 for (ix = 0; ix < Common::ChunkSize; ++ix)
                 {
-                    xx = x + (double)ix / Common::ChunkSize;
+                    xx = x + (double)ix;// / Common::ChunkSize;
                     for (iz = 0; iz < Common::ChunkSize; ++iz)
                     {
-                        zz = z + (double)iz / Common::ChunkSize;
+                        zz = z + (double)iz;// / Common::ChunkSize;
                         for (iy = 0; iy < Common::ChunkSize; ++iy)
                         {
-                            yy = y + (double)iy / Common::ChunkSize;
+                            yy = y + (double)iy;// / Common::ChunkSize;
                             *res = _perlin.Noise3D(xx * xn + xa,
                                                    yy * yn + ya,
                                                    zz * zn + za,
@@ -147,7 +127,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 #define INIT_XDIFF_XNBCALCS(t) \
             int ipp##t = ipp * ippm##t; \
             int ipp1##t = ipp##t + 1; \
-            int t##Diff = -(int)(((Uint64)c##t * Common::ChunkSize) % ipp1##t); \
+            int t##Diff = -(int)(((Uint64)c##t) % ipp1##t); \
             unsigned int t##nbCalcs = 0; \
             int ii##t = t##Diff; \
             while (ii##t < (int)Common::ChunkSize) \
@@ -169,21 +149,21 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
             double calcs[(Common::ChunkSize / 2 + 1) * (Common::ChunkSize / 2 + 1) * (Common::ChunkSize / 2 + 1)];
             double* calcsPtr = calcs;
 
-            x += (double)xDiff / Common::ChunkSize;
-            z += (double)zDiff / Common::ChunkSize;
-            y += (double)yDiff / Common::ChunkSize;
+            x += (double)xDiff;// / Common::ChunkSize;
+            z += (double)zDiff;// / Common::ChunkSize;
+            y += (double)yDiff;// / Common::ChunkSize;
 
             for (ix = 0; ix < xnbCalcs; ++ix)
             {
-                xx = x + ((double)ix * ipp1x) / Common::ChunkSize;
+                xx = x + ((double)ix * ipp1x);// / Common::ChunkSize;
 
                 for (iz = 0; iz < znbCalcs; ++iz)
                 {
-                    zz = z + ((double)iz * ipp1z) / Common::ChunkSize;
+                    zz = z + ((double)iz * ipp1z);// / Common::ChunkSize;
 
                     for (iy = 0; iy < ynbCalcs; ++iy)
                     {
-                        yy = y + ((double)iy * ipp1y) / Common::ChunkSize;
+                        yy = y + ((double)iy * ipp1y);// / Common::ChunkSize;
 
                         *calcsPtr++ =
                             _perlin.Noise3D(xx * xn + xa,

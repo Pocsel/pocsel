@@ -4,15 +4,11 @@
 #include "server/game/map/Chunk.hpp"
 
 namespace Tools {
-
     class SimpleMessageQueue;
-
 }
 
 namespace Server { namespace Game { namespace Map {
-
     struct Conf;
-
 }}}
 
 namespace Server { namespace Game { namespace Map { namespace Gen {

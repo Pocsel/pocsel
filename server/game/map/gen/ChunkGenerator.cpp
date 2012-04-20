@@ -221,6 +221,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
         Chunk::CoordsType coords = Chunk::IdToCoords(id);
         Uint32 x, y, z;
         double xx, yy, zz;
+        double xx0, yy0, zz0;
         bool check;
         Chunk* nuChunk = new Chunk(coords);
 
@@ -238,9 +239,12 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
 
         unsigned int eqSize = (unsigned int)this->_equations.size();
 
-        xx = (double)((int)coords.x - (1 << 21));
-        zz = (double)((int)coords.z - (1 << 21));
-        yy = (double)((int)coords.y - (1 << 19));
+        xx0 = ((int)coords.x - (1 << 21)) * (int)Common::ChunkSize;
+        zz0 = ((int)coords.z - (1 << 21)) * (int)Common::ChunkSize;
+        yy0 = ((int)coords.y - (1 << 19)) * (int)Common::ChunkSize;
+        //xx0 = (double)((int)coords.x - (1 << 21));
+        //zz0 = (double)((int)coords.z - (1 << 21));
+        //yy0 = (double)((int)coords.y - (1 << 19));
 
         for (unsigned int i = 0; i < this->_equations.size(); ++i)
             rDone[i] = false;
@@ -248,13 +252,13 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
 
         for (x = 0 ; x < Common::ChunkSize ; ++x)
         {
-            xx = (double)((int)coords.x - (1 << 21)) + (double)x / Common::ChunkSize;
+            xx = xx0 + (double)x;// / Common::ChunkSize;
             for (z = 0 ; z < Common::ChunkSize ; ++z)
             {
-                zz = (double)((int)coords.z - (1 << 21)) + (double)z / Common::ChunkSize;
+                zz = zz0 + (double)z;// / Common::ChunkSize;
                 for (y = 0 ; y < Common::ChunkSize ; ++y)
                 {
-                    yy = (double)((int)coords.y - (1 << 19)) + (double)y / Common::ChunkSize;
+                    yy = yy0 + (double)y;// / Common::ChunkSize;
 
                     for (csi = csiBase; csi != csiEnd; ++csi)
                     {
@@ -265,9 +269,9 @@ namespace Server { namespace Game { namespace Map { namespace Gen {
                         {
                             if (!rDone[val->equationIndex])
                             {
-                                this->_equations[val->equationIndex]->Calc((double)((int)coords.x - (1 << 21)),
-                                                                           (double)((int)coords.y - (1 << 19)),
-                                                                           (double)((int)coords.z - (1 << 21)),
+                                this->_equations[val->equationIndex]->Calc(xx0,
+                                                                           yy0,
+                                                                           zz0,
                                                                            coords.x, coords.y, coords.z,
                                                                            resultsBase + val->equationIndex, eqSize);
                                 rDone[val->equationIndex] = true;

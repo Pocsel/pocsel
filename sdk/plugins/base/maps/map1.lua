@@ -6,11 +6,11 @@ is_default = true
 equations = {
     my_perlin2 = {
         function_name = "perlin2",
-        xn = 0.015,
+        xn = 0.015 / 32.0,
         xa = 0.0,
-        zn = 0.015,
+        zn = 0.015 / 32.0,
         za = 0.0,
-        mul = 10.0,
+        mul = 10.0 * 32.0,
         alpha = 1.5,
         beta = 1.8,
         n = 10,
@@ -21,13 +21,13 @@ equations = {
     },
     perlin3_caves = {
         function_name = "perlin3",
-        xn = 0.4,
+        xn = 0.4 / 32.0,
         xa = 0.0,
-        yn = 2.2,
+        yn = 2.2 / 32.0,
         ya = 0.0,
-        zn = 0.4,
+        zn = 0.4 / 32.0,
         za = 0.0,
-        mul = 1.0,
+        mul = 1.0 * 32.0,
         alpha = 2.2,
         beta = 1.8,
         n = 2,
@@ -39,13 +39,13 @@ equations = {
     },
     perlin3_iron = {
         function_name = "perlin3",
-        xn = 2.0,
+        xn = 2.0 / 32.0,
         xa = 0.0,
-        yn = 45.0,
+        yn = 45.0 / 32.0,
         ya = 0.0,
-        zn = 2.0,
+        zn = 2.0 / 32.0,
         za = 0.0,
-        mul = 1.0,
+        mul = 1.0 * 32.0,
         alpha = 2.0,
         beta = 2.0,
         n = 1,
@@ -64,23 +64,6 @@ cave_value = 0.22
 height_value = 0
 
 cubes = {
---    empty = {
---        priority = 0,
---        equation = "perlin3",
---        validator = {
---            name = "superior",
---            value = 0.19
---        }
---    },
-
---    water = {
---        priority = 0,
---        equation = "my_perlin2",
---        validator = {
---            name = "water_validator",
---            value = 28
---        }
---    },
 
     void = {
         {
@@ -145,7 +128,7 @@ cubes = {
                     equation = "my_perlin2",
                     validator = "ay+b>eq",
                     a = 1,
-                    b = 1.0 / 32.0
+                    b = 1.0
                 },
                 {
                     equation = "none",
@@ -162,8 +145,8 @@ cubes = {
                 {
                     equation = "my_perlin2",
                     validator = "ay+b>eq",
-                    a = 1,
-                    b = 1
+                    a = 1.2,
+                    b = 42
                 }
             }
         }
@@ -176,7 +159,7 @@ cubes = {
                     equation = "perlin3_iron",
                     validator = "ay+b<eq",
                     a=0.006,
-                    b=0.60
+                    b=0.60 * 32.0
                 }
             }
         }
