@@ -163,8 +163,6 @@ namespace Tools { namespace Renderers {
 
     void GLRenderer::BeginDraw(IRenderTarget* target)
     {
-        assert(this->_states.front().state == RenderState::None && "Operation invalide");
-
         RenderState rs;
         rs.state = RenderState::Draw3D;
         rs.target = target;
