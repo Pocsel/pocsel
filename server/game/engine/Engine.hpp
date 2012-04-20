@@ -30,7 +30,8 @@ namespace Server { namespace Game { namespace Engine {
         EntityManager* _entityManager;
         CallbackManager* _callbackManager;
         Uint64 _currentTime;
-        Uint32 _overridedPluginId;
+        Uint32 _overriddenPluginId;
+        Uint32 _overriddenEntityId;
 
     public:
         Engine(Map::Map& map);
@@ -43,8 +44,10 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
-        Uint32 GetRunningPluginId() { return this->_overridedPluginId; }// TODO: { return this->_overridedPluginId ? this->_overridedPluginId : this->_entityManager->... }
-        void SetRunningPluginId(Uint32 pluginId) { this->_overridedPluginId = pluginId; }
+        Uint32 GetRunningPluginId() { return this->_overriddenPluginId ? this->_overriddenPluginId : this->_entityManager->GetRunningPluginId(); }
+        void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
+        Uint32 GetRunningEntityId() { return this->_overriddenEntityId ? this->_overriddenEntityId : this->_entityManager->GetRunningEntityId(); }
+        void OverrideRunningEntityId(Uint32 entityId) { this->_overriddenEntityId = entityId; }
     };
 
 }}}

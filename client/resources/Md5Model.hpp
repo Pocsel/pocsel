@@ -118,7 +118,7 @@ namespace Client { namespace Resources {
                 boost::filesystem::path const& texturesPath,
                 LocalResourceManager& resourceManager);
         bool LoadAnim(boost::filesystem::path const& filePath);
-        void Update(Uint32 time);
+        void Update(Uint32 time, float phi);
         void Render(Tools::IRenderer& renderer);
 
         MeshList& GetMeshes() { return this->_meshes; }

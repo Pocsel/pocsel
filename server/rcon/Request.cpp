@@ -1,7 +1,9 @@
 #include <boost/tokenizer.hpp>
 
 #include "server/rcon/Request.hpp"
+#include "server/rcon/Rcon.hpp"
 #include "server/rcon/SessionManager.hpp"
+#include "server/rcon/EntityFileManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "server/Server.hpp"
 #include "server/game/Game.hpp"
@@ -12,10 +14,9 @@
 
 namespace Server { namespace Rcon {
 
-    Request::Request(Server& server, boost::asio::ip::tcp::socket* socket, SessionManager& sessionManager) :
+    Request::Request(Server& server, boost::asio::ip::tcp::socket* socket) :
         _server(server),
-        _socket(socket),
-        _sessionManager(sessionManager)
+        _socket(socket)
     {
         Tools::debug << "Rcon: New request." << std::endl;
         this->_ReadHttpHeader();
@@ -189,7 +190,11 @@ namespace Server { namespace Rcon {
 
     void Request::_Execute()
     {
-        if (!this->_url.empty())
+        Tools::debug << "Rcon: Header: \"" << this->_header << "\"" << std::endl;
+        Tools::debug << "Rcon: Body: \"" << this->_body << "\"" << std::endl;
+        if (this->_method == "OPTIONS")
+            return this->_WriteHttpResponse("200 OK");
+        else if (!this->_url.empty())
         {
             if (this->_url[0] == "map" && this->_url.size() == 3)
             {
@@ -204,6 +209,8 @@ namespace Server { namespace Rcon {
                 return this->_Login();
             else if (this->_url[0] == "rcon_sessions" && this->_method == "GET")
                 return this->_GetRconSessions();
+            else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "GET")
+                return this->_GetEntityFile(this->_url[1], this->_url[2]);
         }
         this->_WriteHttpResponse("404 Not Found");
     }
@@ -212,7 +219,7 @@ namespace Server { namespace Rcon {
     {
         // credentials checks
         std::list<std::string> rights;
-        std::string newToken = this->_sessionManager.NewSession(this->_content["login"], this->_content["password"], this->_userAgent, rights);
+        std::string newToken = this->_server.GetRcon().GetSessionManager().NewSession(this->_content["login"], this->_content["password"], this->_userAgent, rights);
         if (newToken.empty())
             return this->_WriteHttpResponse("401 Unauthorized");
 
@@ -221,15 +228,13 @@ namespace Server { namespace Rcon {
             "\t\"token\": \"" + newToken + "\",\n"
             "\t\"rights\":\n"
             "\t[\n";
+        auto it = rights.begin();
+        auto itEnd = rights.end();
+        for (; it != itEnd; ++it)
         {
-            auto it = rights.begin();
-            auto itEnd = rights.end();
-            for (; it != itEnd; ++it)
-            {
-                if (it != rights.begin())
-                    json += ",\n";
-                json += "\t\t\"" + ToJsonStr(*it) + "\"";
-            }
+            if (it != rights.begin())
+                json += ",\n";
+            json += "\t\t\"" + ToJsonStr(*it) + "\"";
         }
         json += "\n\t],\n";
 
@@ -239,42 +244,17 @@ namespace Server { namespace Rcon {
             "\t\"world_version\": " + Tools::ToString(this->_server.GetGame().GetWorld().GetVersion()) + ",\n";
 
         // maps
-        json += "\t\"maps\":\n"
-            "\t[\n";
-        {
-            auto const& maps = this->_server.GetGame().GetWorld().GetMaps();
-            auto it = maps.begin();
-            auto itEnd = maps.end();
-            for (; it != itEnd; ++it)
-            {
-                if (it != maps.begin())
-                    json += ",\n";
-                json += "\t\t{\n"
-                    "\t\t\t\"identifier\": \"" + it->second->GetName() + "\",\n"
-                    "\t\t\t\"fullname\": \"" + ToJsonStr(it->second->GetFullName()) + "\"\n"
-                    "\t\t}";
-            }
-        }
-        json += "\n\t],\n";
+        json += "\t\"maps\":\n";
+        json += this->_server.GetGame().GetWorld().RconGetMaps() + ",\n";
 
         // plugins
-        json += "\t\"plugins\":\n"
-            "\t[\n";
-        {
-            auto const& plugins = this->_server.GetGame().GetWorld().GetPluginManager().GetPlugins();
-            auto it = plugins.begin();
-            auto itEnd = plugins.end();
-            for (; it != itEnd; ++it)
-            {
-                if (it != plugins.begin())
-                    json += ",\n";
-                json += "\t\t{\n"
-                    "\t\t\t\"identifier\": \"" + it->second.identifier + "\",\n"
-                    "\t\t\t\"fullname\": \"" + ToJsonStr(it->second.fullname) + "\"\n"
-                    "\t\t}";
-            }
-        }
-        json += "\n\t]\n";
+        json += "\t\"plugins\":\n";
+        json += this->_server.GetGame().GetWorld().GetPluginManager().RconGetPlugins() + ",\n";
+
+        // entity files
+        json += "\t\"entity_files\":\n";
+        Tools::debug << "BITEBITE" << std::endl;
+        json += this->_server.GetRcon().GetEntityFileManager().RconGetEntityFiles();
 
         // send response
         json += "}\n";
@@ -283,16 +263,30 @@ namespace Server { namespace Rcon {
 
     void Request::_GetRconSessions()
     {
-        if (this->_sessionManager.HasRights(this->_token, "rcon_sessions"))
-            this->_WriteHttpResponse("200 OK", this->_sessionManager.RconGetSessions());
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "rcon_sessions"))
+            this->_WriteHttpResponse("200 OK", this->_server.GetRcon().GetSessionManager().RconGetSessions());
         else
             this->_WriteHttpResponse("401 Unauthorized");
     }
 
     void Request::_GetEntities(Game::Map::Map const& map)
     {
-        if (this->_sessionManager.HasRights(this->_token, "entities"))
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "entities"))
             map.RconGetEntities(std::bind(&Request::_JsonCallback, this, std::placeholders::_1));
+        else
+            this->_WriteHttpResponse("401 Unauthorized");
+    }
+
+    void Request::_GetEntityFile(std::string const& pluginIdentifier, std::string const& file)
+    {
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "hot_swap"))
+        {
+            std::string json = this->_server.GetRcon().GetEntityFileManager().GetFile(pluginIdentifier, file);
+            if (json.empty())
+                this->_WriteHttpResponse("401 Not Found");
+            else
+                this->_WriteHttpResponse("200 OK", json);
+        }
         else
             this->_WriteHttpResponse("401 Unauthorized");
     }
@@ -313,6 +307,9 @@ namespace Server { namespace Rcon {
         std::string response(
                 "HTTP/1.1 " + status + "\r\n"
                 "Access-Control-Allow-Origin: *\r\n"
+                "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n"
+                "Access-Control-Max-Age: 3600\r\n"
+                "Access-Control-Allow-Headers: Rcon-Token\r\n"
                 "Server: " PROJECT_NAME " " PROGRAM_NAME " " GIT_VERSION "\r\n"
                 "Content-Length: " + Tools::ToString(content.size()) + "\r\n"
                 "Connection: close\r\n"
@@ -321,6 +318,7 @@ namespace Server { namespace Rcon {
                 "Pragma: no-cache\r\n"
                 "\r\n");
         response += content;
+        Tools::debug << "Rcon: Response: \"" << response << "\"" << std::endl;
         boost::asio::async_write(*this->_socket, boost::asio::buffer(response),
                 boost::bind(&Request::_HttpResponseWritten, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
     }

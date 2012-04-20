@@ -11,6 +11,9 @@
 #include "common/Resource.hpp"
 
 #include "server/Server.hpp"
+#include "server/Settings.hpp"
+#include "server/rcon/Rcon.hpp"
+#include "server/rcon/EntityFileManager.hpp"
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
@@ -156,6 +159,8 @@ namespace Server { namespace Database {
                     itMap->second->GetEngine().GetInterpreter().DoString(row->GetString(2));
                     itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
                 }
+                if (this->_world.GetGame().GetServer().GetSettings().debug)
+                    this->_world.GetGame().GetServer().GetRcon().GetEntityFileManager().AddFile(row->GetUint32(0), row->GetString(1), row->GetString(2));
             }
             catch (std::exception& e)
             {
@@ -215,7 +220,7 @@ namespace Server { namespace Database {
             Log::load << "[map: " << map.GetName() << "] Execute " << name << ".lua...\n";
             try
             {
-                map.GetEngine().SetRunningPluginId(currentPluginId);
+                map.GetEngine().OverrideRunningPluginId(currentPluginId);
                 lua.DoString(code);
             }
             catch (std::exception& e)
@@ -227,7 +232,7 @@ namespace Server { namespace Database {
         }
 
         cubeTypeNs.Set("Register", lua.MakeNil());
-        map.GetEngine().SetRunningPluginId(0);
+        map.GetEngine().OverrideRunningPluginId(0);
     }
 
     WorldLoader::LoadingMapConf WorldLoader::_LoadMapConf(Game::Map::Conf& conf, std::string const& name, std::string const& code)

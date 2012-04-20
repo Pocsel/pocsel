@@ -1,0 +1,58 @@
+- POST /login
+    - Needed rights:
+    - Parameters: login, password
+    - Returns: 200 (ok), 401 (incorrect login/password)
+    - JSON:
+        {
+            "token": "<token>",
+            "rights":
+            [
+                "<right>"
+            ],
+            "world_identifier": "<world_identifier>",
+            "world_fullname": "<world_fullname>",
+            "world_version": <world_version>,
+            "maps":
+            [
+                {
+                    "identifier": "<map_identifier>",
+                    "fullname": "<map_fullname>"
+                }
+            ],
+            "plugins":
+            [
+                {
+                    "identifier": "<plugin_identifier>",
+                    "fullname": "<plugin_fullname>"
+                }
+            ],
+            "entity_files":
+            [
+                {
+                    "plugin": "<plugin_identifier>",
+                    "file": "<file>"
+                }
+            ]
+        }
+
+- GET /entity_file/<plugin>/<file>
+    - Needed rights: "hot_swap"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights)
+    - JSON:
+        {
+            "lua": "<lua_source_code>"
+        }
+
+- GET /rcon_sessions
+    - Needed rights: "rcon_sessions"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights)
+    - JSON:
+        [
+            {
+                "login": "<login>",
+                "user_agent": "<user_agent>"
+            }
+        ]
+

@@ -43,7 +43,7 @@ namespace Client { namespace Game {
         ItemRenderer(Game& game);
         ~ItemRenderer();
         void Render(Common::OrientedPosition const& pos);
-        void Update(Uint32 time);
+        void Update(Uint32 time, float phi);
 
     private:
     };

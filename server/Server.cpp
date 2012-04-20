@@ -16,10 +16,10 @@ namespace Server {
         _admMessageQueue(new Tools::SimpleMessageQueue(1))
     {
         Tools::debug << "Server::Server()\n";
+        this->_rcon = new Rcon::Rcon(*this);
         this->_resourceManager = new Database::ResourceManager(*this);
         this->_clientManager = new ClientManagement::ClientManager(*this, *this->_admMessageQueue);
         this->_game = new Game::Game(*this, *this->_admMessageQueue);
-        this->_rcon = new Rcon::Rcon(*this);
 
         Network::Network::NewConnectionHandler
             nch(std::bind(&ClientManagement::ClientManager::HandleNewClient,

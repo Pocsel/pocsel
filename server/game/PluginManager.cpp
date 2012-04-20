@@ -1,4 +1,5 @@
 #include "server/game/PluginManager.hpp"
+#include "server/rcon/ToJsonStr.hpp"
 
 namespace Server { namespace Game {
 
@@ -48,6 +49,24 @@ namespace Server { namespace Game {
             if (it->second.identifier == identifier)
                 return it->first;
         return 0;
+    }
+
+    std::string PluginManager::RconGetPlugins() const
+    {
+        std::string json = "\t[\n";
+        auto it = this->_plugins.begin();
+        auto itEnd = this->_plugins.end();
+        for (; it != itEnd; ++it)
+        {
+            if (it != this->_plugins.begin())
+                json += ",\n";
+            json += "\t\t{\n"
+                "\t\t\t\"identifier\": \"" + it->second.identifier + "\",\n"
+                "\t\t\t\"fullname\": \"" + Rcon::ToJsonStr(it->second.fullname) + "\"\n"
+                "\t\t}";
+        }
+        json += "\n\t]\n";
+        return json;
     }
 
 }}

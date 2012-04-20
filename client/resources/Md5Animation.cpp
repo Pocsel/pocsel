@@ -207,7 +207,11 @@ namespace Client { namespace Resources {
         return true;
     }
 
-    void Md5Animation::_BuildFrameSkeleton(FrameSkeletonList& skeletons, JointInfoList const& jointInfos, BaseFrameList const& baseFrames, FrameData const& frameData )
+    void Md5Animation::_BuildFrameSkeleton(
+            std::vector<FrameSkeleton>& skeletons,
+            std::vector<JointInfo> const& jointInfos,
+            std::vector<BaseFrame> const& baseFrames,
+            FrameData const& frameData )
     {
         FrameSkeleton skeleton;
 
@@ -223,56 +227,63 @@ namespace Client { namespace Resources {
 
             if (jointInfo.flags & 1) // Pos.x
             {
+//                frameData.pos[i].x = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.pos.x = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 2) // Pos.y
             {
+//                frameData.pos[i].y = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.pos.y = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 4) // Pos.x
             {
+//                frameData.pos[i].z  = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.pos.z  = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 8) // Orient.x
             {
+//                frameData.orient[i].x = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.orient.x = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 16) // Orient.y
             {
+//                frameData.orient[i].y = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.orient.y = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 32) // Orient.z
             {
+//                frameData.orient[i].z = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.orient.z = frameData.frameData[jointInfo.startIndex + j++];
             }
 
             Tools::Math::ComputeQuatW(animatedJoint.orient);
 
-            if (animatedJoint.parent >= 0) // Has a parent joint
-            {
-                SkeletonJoint& parentJoint = skeleton.joints[animatedJoint.parent];
-                glm::vec3 rotPos = parentJoint.orient * animatedJoint.pos;
-
-                animatedJoint.pos = parentJoint.pos + rotPos;
-                animatedJoint.orient = parentJoint.orient * animatedJoint.orient;
-
-                animatedJoint.orient = glm::normalize(animatedJoint.orient);
-            }
+//            if (animatedJoint.parent >= 0) // Has a parent joint
+//            {
+//                SkeletonJoint& parentJoint = skeleton.joints[animatedJoint.parent];
+//                glm::vec3 rotPos = parentJoint.orient * animatedJoint.pos;
+//
+//                animatedJoint.pos = parentJoint.pos + rotPos;
+//                animatedJoint.orient = parentJoint.orient * animatedJoint.orient;
+//
+//                animatedJoint.orient = glm::normalize(animatedJoint.orient);
+//            }
 
             skeleton.joints.push_back(animatedJoint);
 
             // Build the bone matrix for GPU skinning.
-            glm::mat4x4 boneTranslate = glm::translate(animatedJoint.pos);
-            glm::mat4x4 boneRotate = glm::toMat4(animatedJoint.orient);
-            glm::mat4x4 boneMatrix = boneTranslate * boneRotate;
-
-            skeleton.boneMatrices.push_back(boneMatrix);
+//            glm::mat4x4 boneTranslate = glm::translate(animatedJoint.pos);
+//            glm::mat4x4 boneRotate = glm::toMat4(animatedJoint.orient);
+//            glm::mat4x4 boneMatrix = boneTranslate * boneRotate;
+//
+//            skeleton.boneMatrices.push_back(boneMatrix);
         }
 
+        skeleton.frameId = frameData.frameID;
         skeletons.push_back(skeleton);
     }
 
-    void Md5Animation::Update(float deltaTime)
+    void Md5Animation::Update(float deltaTime, float phi)
     {
         if (this->_numFrames < 1)
             return;
@@ -293,26 +304,94 @@ namespace Client { namespace Resources {
 
         float interpolate = std::fmod(this->_animTime, this->_frameDuration ) / this->_frameDuration;
 
-        this->_InterpolateSkeletons(this->_animatedSkeleton, this->_skeletons[frame0], this->_skeletons[frame1], interpolate);
+        this->_InterpolateSkeletons(this->_animatedSkeleton, this->_skeletons[frame0], this->_skeletons[frame1], interpolate, phi);
     }
 
-    void Md5Animation::_InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton const& skeleton0, FrameSkeleton const& skeleton1, float interpolate)
+    void Md5Animation::_InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton& skeleton0, FrameSkeleton& skeleton1, float interpolate, float phi)
     {
+        std::vector<SkeletonJoint> parents0;
+        std::vector<SkeletonJoint> parents1;
+        parents0.reserve(this->_numJoints);
+        parents1.reserve(this->_numJoints);
         for (int i = 0; i < this->_numJoints; ++i)
         {
+//            JointInfo const& jointInfo = jointInfos[i];
+//            animatedJoint.parent = jointInfo.parentID;
+            SkeletonJoint& animatedJoint0 = parents0[i];
+            animatedJoint0 = skeleton0.joints[i];
+            if (animatedJoint0.parent >= 0) // Has a parent joint
+            {
+                SkeletonJoint const& parentJoint = parents0[animatedJoint0.parent];
+                glm::vec3 rotPos = parentJoint.orient * animatedJoint0.pos;
+                animatedJoint0.pos = parentJoint.pos + rotPos;
+                animatedJoint0.orient = parentJoint.orient * animatedJoint0.orient;
+                animatedJoint0.orient = glm::normalize(animatedJoint0.orient);
+            }
+            SkeletonJoint& animatedJoint1 = parents1[i];
+            animatedJoint1 = skeleton1.joints[i];
+            if (animatedJoint1.parent >= 0) // Has a parent joint
+            {
+                SkeletonJoint const& parentJoint = parents1[animatedJoint1.parent];
+                glm::vec3 rotPos = parentJoint.orient * animatedJoint1.pos;
+                animatedJoint1.pos = parentJoint.pos + rotPos;
+                animatedJoint1.orient = parentJoint.orient * animatedJoint1.orient;
+                animatedJoint1.orient = glm::normalize(animatedJoint1.orient);
+            }
+
+            if (
+                   this->_jointInfos[i].name == "pelvis"
+                   ||
+                   this->_jointInfos[i].name == "neck"
+                   ||
+                   this->_jointInfos[i].name == "head"
+                   ||
+                   this->_jointInfos[i].name == "spine"
+               )
+            {
+                float pi = std::atan2(0.0f, -1.0f);
+                animatedJoint0.orient = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint0.orient);
+                animatedJoint1.orient = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint1.orient);
+            }
+
+
+//            skeleton.joints.push_back(animatedJoint);
+
+            // Build the bone matrix for GPU skinning.
+//            glm::mat4x4 boneTranslate = glm::translate(animatedJoint.pos);
+//            glm::mat4x4 boneRotate = glm::toMat4(animatedJoint.orient);
+//            glm::mat4x4 boneMatrix = boneTranslate * boneRotate;
+//
+//            skeleton.boneMatrices.push_back(boneMatrix);
+
             SkeletonJoint& finalJoint = finalSkeleton.joints[i];
             glm::mat4x4& finalMatrix = finalSkeleton.boneMatrices[i];
 
-            SkeletonJoint const& joint0 = skeleton0.joints[i];
-            SkeletonJoint const& joint1 = skeleton1.joints[i];
+//            SkeletonJoint const& joint0 = skeleton0.joints[i];
+//            SkeletonJoint const& joint1 = skeleton1.joints[i];
 
-            finalJoint.parent = joint0.parent;
+            finalJoint.parent = animatedJoint0.parent;
 
-            finalJoint.pos = glm::lerp(joint0.pos, joint1.pos, interpolate);
-            finalJoint.orient = glm::shortMix(joint0.orient, joint1.orient, interpolate);
+            finalJoint.pos = glm::lerp(animatedJoint0.pos, animatedJoint1.pos, interpolate);
+            finalJoint.orient = glm::shortMix(animatedJoint0.orient, animatedJoint1.orient, interpolate);
 
             // Build the bone matrix for GPU skinning.
             finalMatrix = glm::translate(finalJoint.pos) * glm::toMat4(finalJoint.orient);
+
+            // OLD
+
+            //SkeletonJoint& finalJoint = finalSkeleton.joints[i];
+            //glm::mat4x4& finalMatrix = finalSkeleton.boneMatrices[i];
+
+            //SkeletonJoint const& joint0 = skeleton0.joints[i];
+            //SkeletonJoint const& joint1 = skeleton1.joints[i];
+
+            //finalJoint.parent = joint0.parent;
+
+            //finalJoint.pos = glm::lerp(joint0.pos, joint1.pos, interpolate);
+            //finalJoint.orient = glm::shortMix(joint0.orient, joint1.orient, interpolate);
+
+            //// Build the bone matrix for GPU skinning.
+            //finalMatrix = glm::translate(finalJoint.pos) * glm::toMat4(finalJoint.orient);
         }
     }
 

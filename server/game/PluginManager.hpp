@@ -23,6 +23,8 @@ namespace Server { namespace Game {
         std::string GetPluginFullname(Uint32 id) const;
         std::string GetPluginIdentifier(Uint32 id) const;
         Uint32 GetPluginId(std::string const& identifier) const; // retourne 0 quand le plugin n'est pas trouvé
+
+        std::string RconGetPlugins() const;
     };
 
 }}

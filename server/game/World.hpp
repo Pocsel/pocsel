@@ -46,6 +46,7 @@ namespace Server { namespace Game {
         Map::Map& GetDefaultMap() const { return *this->_defaultMap; }
         PluginManager& GetPluginManager() { return *this->_pluginManager; }
         std::unordered_map<std::string, Map::Map*> const& GetMaps() const { return this->_maps; }
+        Game& GetGame() { return this->_game; }
 
         void Start();
         void Stop();
@@ -56,6 +57,8 @@ namespace Server { namespace Game {
         std::string const& GetFullname() const { return this->_fullname; }
         Uint32 GetVersion() const { return this->_version; }
         std::string const& GetBuildHash() const { return this->_buildHash; }
+
+        std::string RconGetMaps() const;
 
     private:
         friend class Database::WorldLoader;
