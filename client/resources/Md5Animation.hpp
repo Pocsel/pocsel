@@ -32,8 +32,6 @@ namespace Client { namespace Resources {
         {
             int frameID;
             std::vector<float> frameData;
-//            glm::vec3 pos;
-//            glm::quat orient;
         };
 
         // A Skeleton joint is a joint of the skeleton per frame
@@ -61,17 +59,15 @@ namespace Client { namespace Resources {
         std::vector<BaseFrame> _baseFrames;
         std::vector<FrameData> _frames;
         std::vector<FrameSkeleton> _skeletons;    // All the skeletons for all the frames
-        FrameSkeleton _animatedSkeleton;
 
     private:
-        int _md5Version;
-        int _numFrames;
-        int _numJoints;
-        int _framRate;
-        int _numAnimatedComponents;
+        unsigned int _md5Version;
+        unsigned int _numFrames;
+        unsigned int _numJoints;
+        unsigned int _framRate;
+        unsigned int _numAnimatedComponents;
         float _animDuration;
         float _frameDuration;
-        float _animTime;
 
     public:
         Md5Animation();
@@ -79,19 +75,24 @@ namespace Client { namespace Resources {
 
         // Load an animation from the animation file
         bool LoadAnimation(boost::filesystem::path const& filePath);
-        // Update this animation's joint set.
-        void Update(float deltaTime, float phi);
-        // Draw the animated skeleton
-        void Render();
-
-        FrameSkeleton const& GetSkeleton() const { return this->_animatedSkeleton; }
-        const std::vector<glm::mat4x4>& GetSkeletonMatrixList() const { return this->_animatedSkeleton.boneMatrices; }
-        int GetNumJoints() const { return this->_numJoints; }
 
         JointInfo const& GetJointInfo(unsigned int index) const
         {
             assert(index < this->_jointInfos.size());
             return this->_jointInfos[index];
+        }
+
+        unsigned int GetMd5Version() const { return this->_md5Version; }
+        unsigned int GetNumFrames() const { return this->_numFrames; }
+        unsigned int GetNumJoints() const { return this->_numJoints; }
+        unsigned int GetFramRate() const { return this->_framRate; }
+        unsigned int GetNumAnimatedComponents() const { return this->_numAnimatedComponents; }
+        float GetAnimDuration() const { return this->_animDuration; }
+        float GetFrameDuration() const { return this->_frameDuration; }
+
+        FrameSkeleton const& GetSkeleton(unsigned int idx) const {
+            assert(idx < this->_skeletons.size() && "index out of bounds");
+            return this->_skeletons[idx];
         }
 
     protected:
@@ -101,7 +102,6 @@ namespace Client { namespace Resources {
                 std::vector<JointInfo> const& jointInfo,
                 std::vector<BaseFrame> const& baseFrames,
                 FrameData const& frameData);
-        void _InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton& skeleton0, FrameSkeleton& skeleton1, float fInterpolate, float phi);
     };
 
 }}

@@ -11,10 +11,9 @@ namespace Tools { namespace Logger {
     private:
         TLog& _parent;
 
-    protected:
+    public:
         NullWriter(TLog& log, std::string const&) : _parent(log) {}
 
-    public:
         void WriteFile(std::string const&) {}
         void Write(std::string const&) {}
         void WriteLine(std::string const&) {}
@@ -28,16 +27,17 @@ namespace Tools { namespace Logger {
             this->_parent << d;
             return *this;
         }
+        template<class T>
+        void RegisterCallback(T callback) { this->_parent.RegisterCallback(callback); }
     };
 
     template<>
     struct NullWriter<void>
     {
-    protected:
+    public:
         NullWriter(std::string const&) {}
         NullWriter(std::ostream&, std::string const&) {}
 
-    public:
         void WriteFile(std::string const&) {}
         void Write(std::string const&) {}
         void WriteLine(std::string const&) {}
@@ -45,39 +45,12 @@ namespace Tools { namespace Logger {
         NullWriter& operator <<(std::basic_ios<char>& (*)(std::basic_ios<char>&)) { return *this; }
         NullWriter& operator <<(std::ios_base& (*)(std::ios_base&)) { return *this; }
         template<class T> NullWriter& operator <<(T) { return *this; }
+        template<class T>
+        void RegisterCallback(T) {}
     };
 
-    template<class TWriter>
-    class _Logger : public TWriter
-    {
-    public:
-        typedef TWriter Writer;
-
-        explicit _Logger(std::string const& file)
-            : TWriter(file)
-        {
-        }
-
-        _Logger(std::ostream& outStream, std::string const& file)
-            : TWriter(outStream, file)
-        {
-        }
-
-        template<class TLog>
-        _Logger(TLog& parent, std::string const& file)
-            : TWriter(parent, file)
-        {
-        }
-
-        template<class TLog>
-        _Logger(TLog& parent, std::ostream& outStream, std::string const& file)
-            : TWriter(parent, outStream, file)
-        {
-        }
-    };
-
-    typedef _Logger<Writer<void>> Logger;
-    typedef _Logger<NullWriter<void>> NullLogger;
+    typedef Writer<void> Logger;
+    typedef NullWriter<void> NullLogger;
 
 #ifdef DEBUG
     typedef Logger DebugLogger;
@@ -86,8 +59,8 @@ namespace Tools { namespace Logger {
 #endif
 
     extern DebugLogger debug;
-    extern _Logger<Writer<DebugLogger::Writer>> log;
-    extern _Logger<Writer<_Logger<Writer<DebugLogger::Writer>>::Writer>> error;
+    extern Writer<DebugLogger> log;
+    extern Writer<Writer<DebugLogger>> error;
 
 }}
 

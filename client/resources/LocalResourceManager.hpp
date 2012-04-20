@@ -29,6 +29,7 @@ namespace Client { namespace Resources {
             std::map<std::string, Tools::Renderers::Utils::Font*> _fonts;
             std::map<std::string, Tools::Renderers::IShaderProgram*> _shaders;
             std::map<std::string, Tools::Renderers::ITexture2D*> _textures;
+            std::map<std::string, Md5Model*> _models;
 
         public:
             LocalResourceManager(Client& client);
@@ -37,7 +38,7 @@ namespace Client { namespace Resources {
             Tools::Renderers::Utils::Font& GetFont(std::string const& path, Uint32 size);
             Tools::Renderers::ITexture2D& GetTexture2D(std::string const& path);
             Tools::Renderers::IShaderProgram& GetShader(std::string const& path);
-            Md5Model* GetMd5Model(std::string const& path);
+            Md5Model const& GetMd5Model(std::string const& path);
 
             Tools::IRenderer& GetRenderer() { return this->_renderer; }
 

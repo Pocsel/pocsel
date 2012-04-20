@@ -9,6 +9,7 @@ namespace Common {
 namespace Client { namespace Game {
     class Game;
     class ItemRenderer;
+    class Model;
 }}
 
 namespace Client { namespace Game {
@@ -17,7 +18,7 @@ namespace Client { namespace Game {
     {
     private:
         Game& _game;
-        std::map<Uint32, Common::OrientedPosition> _positions;
+        std::map<Uint32, std::pair<Common::OrientedPosition, Model*>> _positions;
         ItemRenderer* _renderer;
 
     public:
