@@ -83,8 +83,9 @@ namespace Tools { namespace Logger {
         TLog& _parent;
         std::ostream* _output;
         std::ostream* _fileOutput;
+        std::list<std::function<void(std::string const&)>> _callbacks;
 
-    protected:
+    public:
         Writer(TLog& parent, std::string const& file)
             : _parent(parent),
             _fileOutput(new std::ofstream(file.c_str()))
@@ -103,7 +104,6 @@ namespace Tools { namespace Logger {
             Delete(this->_fileOutput);
         }
 
-    public:
         void WriteFile(std::string const& data)
         {
             this->_parent.WriteFile(data);
@@ -118,6 +118,8 @@ namespace Tools { namespace Logger {
                 *this->_output << data  << std::flush;
             if (this->_fileOutput)
                 *this->_fileOutput << data << std::flush;
+            for (auto it = this->_callbacks.begin(), ite = this->_callbacks.end(); it != ite; ++it)
+                (*it)(data);
         }
 
         void WriteLine(std::string const& line)
@@ -132,11 +134,16 @@ namespace Tools { namespace Logger {
         }
 
         template<class T>
-        Buffer<thisType> operator<<(T& (*manip)(T&))
+        Buffer<thisType> operator <<(T& (*manip)(T&))
         {
             Buffer<thisType> tmp(*this);
             tmp << manip;
             return tmp;
+        }
+
+        void RegisterCallback(std::function<void(std::string const&)>&& callback)
+        {
+            this->_callbacks.push_back(callback);
         }
     };
 
@@ -147,8 +154,9 @@ namespace Tools { namespace Logger {
     private:
         std::ostream* _output;
         std::ostream* _fileOutput;
+        std::list<std::function<void(std::string const&)>> _callbacks;
 
-    protected:
+    public:
         Writer(std::string const& file)
             : _fileOutput(new std::ofstream(file.c_str()))
         {
@@ -165,13 +173,6 @@ namespace Tools { namespace Logger {
             Delete(this->_fileOutput);
         }
 
-        void _Write(std::string const& data)
-        {
-            if (this->_fileOutput)
-                *this->_fileOutput << data << std::flush;
-        }
-
-    public:
         void WriteFile(std::string const& data)
         {
             if (this->_fileOutput)
@@ -184,6 +185,8 @@ namespace Tools { namespace Logger {
                 *this->_output << data  << std::flush;
             if (this->_fileOutput)
                 *this->_fileOutput << data << std::flush;
+            for (auto it = this->_callbacks.begin(), ite = this->_callbacks.end(); it != ite; ++it)
+                (*it)(data);
         }
 
         void WriteLine(std::string const& line)
@@ -198,11 +201,16 @@ namespace Tools { namespace Logger {
         }
 
         template<class T>
-        Buffer<Writer<void>> operator<<(T& (*manip)(T&))
+        Buffer<Writer<void>> operator <<(T& (*manip)(T&))
         {
             Buffer<Writer<void>> tmp(*this);
             tmp << manip;
             return tmp;
+        }
+
+        void RegisterCallback(std::function<void(std::string const&)>&& callback)
+        {
+            this->_callbacks.push_back(callback);
         }
     };
 

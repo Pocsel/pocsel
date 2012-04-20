@@ -7,8 +7,8 @@
 namespace Tools { namespace Logger {
 
     DebugLogger debug(std::cout, PROGRAM_NAME "_debug.log");
-    _Logger<Writer<DebugLogger::Writer>> log(debug, std::cout, PROGRAM_NAME ".log");
-    _Logger<Writer<_Logger<Writer<DebugLogger::Writer>>::Writer>> error(log, std::cerr, PROGRAM_NAME "_error.log");
+    Writer<DebugLogger> log(debug, std::cout, PROGRAM_NAME ".log");
+    Writer<Writer<DebugLogger>> error(log, std::cerr, PROGRAM_NAME "_error.log");
 
     namespace {
         struct Start
