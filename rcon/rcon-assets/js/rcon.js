@@ -174,6 +174,7 @@ function editLuaFile(plugin, file) {
             $('#lua-modal').modal('hide');
         }
     });
+    $('#lua-modal_swap').off('click');
     $('#lua-modal_swap').click({ plugin: plugin, file: file }, function(e) {
         $('#lua-modal_swap').hide('fast');
         $('#lua-modal_ok').show('fast');
