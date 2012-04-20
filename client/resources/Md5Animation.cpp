@@ -14,8 +14,7 @@ namespace Client { namespace Resources {
         _framRate(0),
         _numAnimatedComponents(0),
         _animDuration(0),
-        _frameDuration(0),
-        _animTime(0)
+        _frameDuration(0)
     {
     }
 
@@ -46,7 +45,6 @@ namespace Client { namespace Resources {
         this->_bounds.clear();
         this->_baseFrames.clear();
         this->_frames.clear();
-        this->_animatedSkeleton.joints.clear();
         this->_numFrames = 0;
 
         file >> param;
@@ -89,7 +87,7 @@ namespace Client { namespace Resources {
             else if (param == "hierarchy")
             {
                 file >> junk; // read in the '{' character
-                for (int i = 0; i < this->_numJoints; ++i)
+                for (unsigned int i = 0; i < this->_numJoints; ++i)
                 {
                     JointInfo joint;
                     file >> joint.name >> joint.parentID >> joint.flags >> joint.startIndex;
@@ -105,7 +103,7 @@ namespace Client { namespace Resources {
             {
                 file >> junk; // read in the '{' character
                 file.ignore(fileLength, '\n');
-                for (int i = 0; i < this->_numFrames; ++i)
+                for (unsigned int i = 0; i < this->_numFrames; ++i)
                 {
                     Bound bound;
                     file >> junk; // read in the '(' character
@@ -126,7 +124,7 @@ namespace Client { namespace Resources {
                 file >> junk; // read in the '{' character
                 file.ignore(fileLength, '\n');
 
-                for (int i = 0; i < this->_numJoints; ++i)
+                for (unsigned int i = 0; i < this->_numJoints; ++i)
                 {
                     BaseFrame baseFrame;
                     file >> junk;
@@ -146,7 +144,7 @@ namespace Client { namespace Resources {
                 file >> frame.frameID >> junk; // Read in the '{' character
                 file.ignore(fileLength, '\n');
 
-                for (int i = 0; i < this->_numAnimatedComponents; ++i)
+                for (unsigned int i = 0; i < this->_numAnimatedComponents; ++i)
                 {
                     float frameData;
                     file >> frameData;
@@ -165,39 +163,34 @@ namespace Client { namespace Resources {
             file >> param;
         } // while ( !file.eof )
 
-        // Make sure there are enough joints for the animated skeleton.
-        this->_animatedSkeleton.joints.assign(this->_numJoints, SkeletonJoint());
-        this->_animatedSkeleton.boneMatrices.assign(this->_numJoints, glm::mat4x4(1.0));
-
         this->_frameDuration = 1.0f / (float)this->_framRate;
         this->_animDuration = ( this->_frameDuration * (float)this->_numFrames );
-        this->_animTime = 0.0f;
 
-        if ((int)this->_jointInfos.size() != this->_numJoints)
+        if (this->_jointInfos.size() != this->_numJoints)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of joints not ok. (need " << this->_numJoints << ", has " << this->_jointInfos.size() << ")\n";
             return false;
         }
-        if ((int)this->_bounds.size() != this->_numFrames)
+        if (this->_bounds.size() != this->_numFrames)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of bounds not ok. (need " << this->_numFrames << ", has " << this->_bounds.size() << ")\n";
             return false;
         }
-        if ((int)this->_baseFrames.size() != this->_numJoints)
+        if (this->_baseFrames.size() != this->_numJoints)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of baseFrames not ok. (need " << this->_numJoints << ", has " << this->_baseFrames.size() << ")\n";
             return false;
         }
-        if ((int)this->_frames.size() != this->_numFrames)
+        if (this->_frames.size() != this->_numFrames)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of frames not ok. (need " << this->_numFrames << ", has " << this->_frames.size() << ")\n";
             return false;
         }
-        if ((int)this->_skeletons.size() != this->_numFrames)
+        if (this->_skeletons.size() != this->_numFrames)
         {
             Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
                 ": number of skels not ok. (need " << this->_numFrames << ", has " << this->_skeletons.size() << ")\n";
@@ -227,212 +220,36 @@ namespace Client { namespace Resources {
 
             if (jointInfo.flags & 1) // Pos.x
             {
-//                frameData.pos[i].x = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.pos.x = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 2) // Pos.y
             {
-//                frameData.pos[i].y = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.pos.y = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 4) // Pos.x
             {
-//                frameData.pos[i].z  = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.pos.z  = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 8) // Orient.x
             {
-//                frameData.orient[i].x = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.orient.x = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 16) // Orient.y
             {
-//                frameData.orient[i].y = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.orient.y = frameData.frameData[jointInfo.startIndex + j++];
             }
             if (jointInfo.flags & 32) // Orient.z
             {
-//                frameData.orient[i].z = frameData.frameData[jointInfo.startIndex + j];
                 animatedJoint.orient.z = frameData.frameData[jointInfo.startIndex + j++];
             }
 
             Tools::Math::ComputeQuatW(animatedJoint.orient);
 
-//            if (animatedJoint.parent >= 0) // Has a parent joint
-//            {
-//                SkeletonJoint& parentJoint = skeleton.joints[animatedJoint.parent];
-//                glm::vec3 rotPos = parentJoint.orient * animatedJoint.pos;
-//
-//                animatedJoint.pos = parentJoint.pos + rotPos;
-//                animatedJoint.orient = parentJoint.orient * animatedJoint.orient;
-//
-//                animatedJoint.orient = glm::normalize(animatedJoint.orient);
-//            }
-
             skeleton.joints.push_back(animatedJoint);
-
-            // Build the bone matrix for GPU skinning.
-//            glm::mat4x4 boneTranslate = glm::translate(animatedJoint.pos);
-//            glm::mat4x4 boneRotate = glm::toMat4(animatedJoint.orient);
-//            glm::mat4x4 boneMatrix = boneTranslate * boneRotate;
-//
-//            skeleton.boneMatrices.push_back(boneMatrix);
         }
 
         skeleton.frameId = frameData.frameID;
         skeletons.push_back(skeleton);
-    }
-
-    void Md5Animation::Update(float deltaTime, float phi)
-    {
-        if (this->_numFrames < 1)
-            return;
-
-        this->_animTime += deltaTime;
-
-        while (this->_animTime > this->_animDuration)
-            this->_animTime -= this->_animDuration;
-        while (this->_animTime < 0.0f)
-            this->_animTime += this->_animDuration;
-
-        // Figure out which frame we're on
-        float framNum = this->_animTime * (float)this->_framRate;
-        int frame0 = (int)std::floor(framNum);
-        int frame1 = (int)std::ceil(framNum);
-        frame0 = frame0 % this->_numFrames;
-        frame1 = frame1 % this->_numFrames;
-
-        float interpolate = std::fmod(this->_animTime, this->_frameDuration ) / this->_frameDuration;
-
-        this->_InterpolateSkeletons(this->_animatedSkeleton, this->_skeletons[frame0], this->_skeletons[frame1], interpolate, phi);
-    }
-
-    void Md5Animation::_InterpolateSkeletons(FrameSkeleton& finalSkeleton, FrameSkeleton& skeleton0, FrameSkeleton& skeleton1, float interpolate, float phi)
-    {
-        std::vector<SkeletonJoint> parents0(this->_numJoints);
-        std::vector<SkeletonJoint> parents1(this->_numJoints);
-        for (int i = 0; i < this->_numJoints; ++i)
-        {
-//            JointInfo const& jointInfo = jointInfos[i];
-//            animatedJoint.parent = jointInfo.parentID;
-            SkeletonJoint& animatedJoint0 = parents0[i];
-            animatedJoint0 = skeleton0.joints[i];
-            if (animatedJoint0.parent >= 0) // Has a parent joint
-            {
-                SkeletonJoint const& parentJoint = parents0[animatedJoint0.parent];
-                glm::vec3 rotPos = parentJoint.orient * animatedJoint0.pos;
-                animatedJoint0.pos = parentJoint.pos + rotPos;
-                animatedJoint0.orient = parentJoint.orient * animatedJoint0.orient;
-                animatedJoint0.orient = glm::normalize(animatedJoint0.orient);
-            }
-            SkeletonJoint& animatedJoint1 = parents1[i];
-            animatedJoint1 = skeleton1.joints[i];
-            if (animatedJoint1.parent >= 0) // Has a parent joint
-            {
-                SkeletonJoint const& parentJoint = parents1[animatedJoint1.parent];
-                glm::vec3 rotPos = parentJoint.orient * animatedJoint1.pos;
-                animatedJoint1.pos = parentJoint.pos + rotPos;
-                animatedJoint1.orient = parentJoint.orient * animatedJoint1.orient;
-                animatedJoint1.orient = glm::normalize(animatedJoint1.orient);
-            }
-
-            if (
-                   this->_jointInfos[i].name == "pelvis"
-                   ||
-                   this->_jointInfos[i].name == "neck"
-                   ||
-                   this->_jointInfos[i].name == "head"
-                   ||
-                   this->_jointInfos[i].name == "spine"
-               )
-            {
-                float pi = std::atan2(0.0f, -1.0f);
-                animatedJoint0.orient = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint0.orient);
-                animatedJoint1.orient = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint1.orient);
-            }
-
-
-//            skeleton.joints.push_back(animatedJoint);
-
-            // Build the bone matrix for GPU skinning.
-//            glm::mat4x4 boneTranslate = glm::translate(animatedJoint.pos);
-//            glm::mat4x4 boneRotate = glm::toMat4(animatedJoint.orient);
-//            glm::mat4x4 boneMatrix = boneTranslate * boneRotate;
-//
-//            skeleton.boneMatrices.push_back(boneMatrix);
-
-            SkeletonJoint& finalJoint = finalSkeleton.joints[i];
-            glm::mat4x4& finalMatrix = finalSkeleton.boneMatrices[i];
-
-//            SkeletonJoint const& joint0 = skeleton0.joints[i];
-//            SkeletonJoint const& joint1 = skeleton1.joints[i];
-
-            finalJoint.parent = animatedJoint0.parent;
-
-            finalJoint.pos = glm::lerp(animatedJoint0.pos, animatedJoint1.pos, interpolate);
-            finalJoint.orient = glm::shortMix(animatedJoint0.orient, animatedJoint1.orient, interpolate);
-
-            // Build the bone matrix for GPU skinning.
-            finalMatrix = glm::translate(finalJoint.pos) * glm::toMat4(finalJoint.orient);
-
-            // OLD
-
-            //SkeletonJoint& finalJoint = finalSkeleton.joints[i];
-            //glm::mat4x4& finalMatrix = finalSkeleton.boneMatrices[i];
-
-            //SkeletonJoint const& joint0 = skeleton0.joints[i];
-            //SkeletonJoint const& joint1 = skeleton1.joints[i];
-
-            //finalJoint.parent = joint0.parent;
-
-            //finalJoint.pos = glm::lerp(joint0.pos, joint1.pos, interpolate);
-            //finalJoint.orient = glm::shortMix(joint0.orient, joint1.orient, interpolate);
-
-            //// Build the bone matrix for GPU skinning.
-            //finalMatrix = glm::translate(finalJoint.pos) * glm::toMat4(finalJoint.orient);
-        }
-    }
-
-    void Md5Animation::Render()
-    {
-//        glPointSize(5.0f);
-//        glColor3f(1.0f, 0.0f, 0.0f);
-//
-//        glPushAttrib( GL_ENABLE_BIT );
-//
-//        glDisable(GL_LIGHTING );
-//        glDisable( GL_DEPTH_TEST );
-//
-//        const SkeletonJointList& joints = m_AnimatedSkeleton.m_Joints;
-//
-//        // Draw the joint positions
-//        glBegin( GL_POINTS );
-//        {
-//            for ( unsigned int i = 0; i < joints.size(); ++i )
-//            {
-//                glVertex3fv( glm::value_ptr(joints[i].m_Pos) );
-//            }
-//        }
-//        glEnd();
-//
-//        // Draw the bones
-//        glColor3f( 0.0f, 1.0f, 0.0f );
-//        glBegin( GL_LINES );
-//        {
-//            for ( unsigned int i = 0; i < joints.size(); ++i )
-//            {
-//                const SkeletonJoint& j0 = joints[i];
-//                if ( j0.m_Parent != -1 )
-//                {
-//                    const SkeletonJoint& j1 = joints[j0.m_Parent];
-//                    glVertex3fv( glm::value_ptr(j0.m_Pos) );
-//                    glVertex3fv( glm::value_ptr(j1.m_Pos) );
-//                }
-//            }
-//        }
-//        glEnd();
-//
-//        glPopAttrib();
     }
 
 }}

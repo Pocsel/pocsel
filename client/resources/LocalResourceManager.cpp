@@ -102,32 +102,39 @@ namespace Client { namespace Resources {
             return *it->second;
     }
 
-    Md5Model* LocalResourceManager::GetMd5Model(std::string const& path)
+    Md5Model const& LocalResourceManager::GetMd5Model(std::string const& path)
     {
-        Md5Model* model = new Md5Model();
-        try
+        auto it = this->_models.find(path);
+        if (it == this->_models.end())
         {
-            boost::filesystem::path texturesPath = path;
-            boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
-            modelPath.replace_extension(".md5mesh");
-            if (!model->LoadModel(
-                        modelPath,
-                        texturesPath,
-                        *this
-                        )
-                    )
-                throw std::runtime_error("cant load " + path);
-            boost::filesystem::path animPath = this->_client.GetSettings().confDir / "models" / path;
-            animPath.replace_extension(".md5anim");
-            model->LoadAnim(animPath);
+            Md5Model* model = new Md5Model();
+            try
+            {
+                boost::filesystem::path texturesPath = path;
+                boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
+                modelPath.replace_extension(".md5mesh");
+                if (!model->LoadModel(
+                            modelPath,
+                            texturesPath,
+                            *this
+                            )
+                   )
+                    throw std::runtime_error("cant load " + path);
+                boost::filesystem::path animPath = this->_client.GetSettings().confDir / "models" / path;
+                animPath.replace_extension(".md5anim");
+                model->LoadAnim(animPath);
+                this->_models[path] = model;
+                return *model;
+            }
+            catch (std::exception& ex)
+            {
+                Tools::error << "Can't load Md5Model \"" << path << "\", details: " << ex.what() << "\n";
+                Tools::Delete(model);
+                throw;
+            }
         }
-        catch (std::exception& ex)
-        {
-            Tools::error << "Can't load Md5Model \"" << path << "\", details: " << ex.what() << "\n";
-            Tools::Delete(model);
-            throw;
-        }
-        return model;
+        else
+            return *it->second;
     }
 
     void LocalResourceManager::_InitErrorTexture()
