@@ -29,36 +29,43 @@ namespace Server { namespace Rcon {
         std::string _header;
         std::string _method;
         std::string _urlString;
-        std::vector<std::string> _url;
+        std::vector<std::string> _url; // url découpée sur /
         std::string _token;
         std::string _userAgent;
         std::string _body;
-        std::map<std::string, std::string> _content;
+        std::map<std::string, std::string> _content; // données de formulaire (décodées)
 
     public:
         Request(Server& server, boost::asio::ip::tcp::socket* socket);
         ~Request();
     private:
-        // ordre d'execution
+        /*
+         * Methodes déclarées dans l'ordre d'execution
+         */
+        // lecture
         void _ReadHttpHeader();
         void _HttpHeaderReceived(boost::system::error_code const& error, std::size_t size);
         void _ParseHeader();
+        // optionel
         void _ReadHttpBody(std::size_t size);
         void _HttpBodyReceived(boost::system::error_code const& error, std::size_t size);
+
         void _ParseBody();
+        bool _DecodeUrl(std::string const& in, std::string& out); // utilisé dans _ParseBody() pour lire le x-www-form-urlencoded
+        void _Execute(); // lecture de l'url et choix de la methode à appeler
 
-        void _Execute();
-        void _Login();
-        void _GetRconSessions();
-        void _GetEntities(Game::Map::Map const& map);
-        void _GetEntityFile(std::string const& pluginIdentifier, std::string const& file);
+        // requetes exposées
+        void _PostLogin(std::string const& login, std::string const& password); // POST /login
+        void _GetRconSessions(); // GET /rcon_sessions
+        void _GetEntities(Game::Map::Map const& map); // GET /map/<map>/entities
+        void _GetEntityFile(std::string const& pluginIdentifier, std::string const& file); // GET /entity_file/<plugin>/<file>
+        void _PostExecute(std::string const& pluginIdentifier, std::string const& lua); // POST /execute/<plugin>
 
+        // réponse
         void _JsonCallback(std::string json);
         void _JsonCallbackDispatched(std::string const& json);
         void _WriteHttpResponse(std::string const& status, std::string const& content = std::string());
         void _HttpResponseWritten(boost::system::error_code const& error, std::size_t size);
-
-        bool _DecodeUrl(std::string const& in, std::string& out);
     };
 
 }}

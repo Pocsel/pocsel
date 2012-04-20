@@ -6,15 +6,14 @@
 --  - logs: viewing logs
 --  - entities: viewing entity instances
 --  - messages: viewing messages exchanged between entities
---  - execute: executing Lua code on any map
---  - hot_swap: editing entity source files live
+--  - execute: executing Lua code on any map & editing entity files
 --
 -- With no rights, a user with a password has still access to the list of maps,
 -- plugins, entity types, players and entity files (without edit).
 rconUsers = {
     paps = {
         password = "paps",
-        rights = { "rcon_sessions", "logs", "entities", "messages", "execute", "hot_swap" }
+        rights = { "rcon_sessions", "logs", "entities", "messages", "execute" }
     },
     plug = {
         password = "paps",

@@ -35,8 +35,14 @@
             ]
         }
 
+- POST /execute/<plugin>
+    - Needed rights: "execute"
+    - Parameters: lua
+    - Returns: 200 (ok), 401 (insufficient rights)
+    - JSON:
+
 - GET /entity_file/<plugin>/<file>
-    - Needed rights: "hot_swap"
+    - Needed rights: "execute"
     - Parameters:
     - Returns: 200 (ok), 401 (insufficient rights)
     - JSON:

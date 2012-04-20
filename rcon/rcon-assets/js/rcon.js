@@ -36,7 +36,7 @@ $(document).ready(function() {
                 rconEntityFiles = json.entity_files;
                 fillStaticTables();
                 $('#category-server_title').html(json.world_fullname + ' ("' + json.world_identifier + '", version ' + json.world_version + ')');
-                setTimeout(startFetchers, 1000);
+                setTimeout(startFetchers, 250);
             },
             error: function(json, errorType, httpError) {
                 $('#login-form_alert').html('Failed to login.');
@@ -81,7 +81,7 @@ function fillStaticTables() {
     $('#category-maps').show('fast');
 
     $.each(rconEntityFiles, function() {
-        if (hasRight("hot_swap")) {
+        if (hasRight("execute")) {
             var id = generateId("entity-files_edit");
             $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td><a id="' + id + '">Edit</a></td></tr>');
             $('#' + id).click({ plugin: this.plugin, file: this.file }, function(e) {
@@ -94,13 +94,14 @@ function fillStaticTables() {
     $('#category-entities').show('fast');
 }
 
-function editLuaFile(pluginIdentifier, filename) {
-    $('#lua-modal_title').html(pluginIdentifier + '/' + filename);
+function editLuaFile(plugin, file) {
+    $('#lua-modal_title').html(plugin + '/' + file);
     $('#lua-modal_preloader').show();
     $('#lua-modal_text').hide();
+    $('#lua-modal_swap').hide();
     $('#lua-modal').modal('show');
     $.ajax({
-        url: rconUrl + 'entity_file/' + pluginIdentifier + '/' + filename,
+        url: rconUrl + 'entity_file/' + plugin + '/' + file,
         headers: {
             'Rcon-Token': rconToken
         },
@@ -109,12 +110,33 @@ function editLuaFile(pluginIdentifier, filename) {
             $('#lua-modal_text').val(json.lua);
             $('#lua-modal_preloader').hide('fast');
             $('#lua-modal_text').show('fast');
+            $('#lua-modal_swap').show('fast');
         },
-        error: function(json, errorType, httpError) {
-            $('#lua-modal_text').val('Failed to fetch file.');
-            $('#lua-modal_preloader').hide('fast');
-            $('#lua-modal_text').show('fast');
+        error: function() {
+            alert("Failed to fetch entity file.");
         }
+    });
+    $('#lua-modal_swap').click({ plugin: plugin }, function(e) {
+        $('#lua-modal_swap').hide();
+        $('#lua-modal_preloader').show('fast');
+        $.ajax({
+            url: rconUrl + 'execute/' + e.data.plugin,
+            type: 'POST',
+            data: {
+                lua: $('#lua-modal_text').val()
+            },
+            headers: {
+                'Rcon-Token': rconToken
+            },
+            success: function(json) {
+                $('#lua-modal').modal('hide');
+            },
+            error: function() {
+                alert("Failed to swap entity file.");
+                $('#lua-modal_swap').show('fast');
+                $('#lua-modal_preloader').hide('fast');
+            }
+        });
     });
 }
 
@@ -161,12 +183,12 @@ function fetchRconSessions() {
             $.each(json, function() {
                 $('#rcon-sessions_list').append('<tr><td>' + this.login + '</td><td>' + this.user_agent + '</td></tr>');
             });
-            setTimeout(fetchRconSessions, 5000);
+            setTimeout(fetchRconSessions, 10000);
             $('#rcon-sessions_list').hide();
             $('#rcon-sessions_list').show();
         },
         error: function(json, errorType, httpError) {
-            setTimeout(fetchRconSessions, 10000);
+            setTimeout(fetchRconSessions, 20000);
         }
     });
 }

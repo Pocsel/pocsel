@@ -99,6 +99,7 @@ namespace Server { namespace Game { namespace Map {
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
 
         // rcon requests
+        void RconExecute(Uint32 pluginId, std::string lua, std::function<void(std::string)> cb) const;
         void RconGetEntities(std::function<void(std::string)> cb) const;
 
     private:
@@ -121,6 +122,7 @@ namespace Server { namespace Game { namespace Map {
         void _TimedSave();
 
         // rcon requests
+        void _RconExecute(Uint32 pluginId, std::string const& lua, std::function<void(std::string)> cb) const;
         void _RconGetEntities(std::function<void(std::string)> cb) const;
     };
 

@@ -193,7 +193,7 @@ namespace Server { namespace Rcon {
         Tools::debug << "Rcon: Header: \"" << this->_header << "\"" << std::endl;
         Tools::debug << "Rcon: Body: \"" << this->_body << "\"" << std::endl;
         if (this->_method == "OPTIONS")
-            return this->_WriteHttpResponse("200 OK");
+            return this->_WriteHttpResponse("200 OK"); // pre-flight "allow cross-domain" ajax queries
         else if (!this->_url.empty())
         {
             if (this->_url[0] == "map" && this->_url.size() == 3)
@@ -202,24 +202,26 @@ namespace Server { namespace Rcon {
                 {
                     Game::Map::Map const& map = this->_server.GetGame().GetWorld().GetMap(this->_url[1]);
                     if (this->_url[2] == "entities" && this->_method == "GET")
-                        return this->_GetEntities(map);
+                        return this->_GetEntities(map); // GET /map/<map>/entities
                 }
             }
             else if (this->_url[0] == "login" && this->_method == "POST")
-                return this->_Login();
+                return this->_PostLogin(this->_content["login"], this->_content["password"]); // POST /login
             else if (this->_url[0] == "rcon_sessions" && this->_method == "GET")
-                return this->_GetRconSessions();
+                return this->_GetRconSessions(); // GET /rcon_sessions
             else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "GET")
-                return this->_GetEntityFile(this->_url[1], this->_url[2]);
+                return this->_GetEntityFile(this->_url[1], this->_url[2]); // GET /entity_file/<plugin>/<file>
+            else if (this->_url[0] == "execute" && this->_url.size() == 2 && this->_method == "POST")
+                return this->_PostExecute(this->_url[1], this->_content["lua"]);
         }
         this->_WriteHttpResponse("404 Not Found");
     }
 
-    void Request::_Login()
+    void Request::_PostLogin(std::string const& login, std::string const& password)
     {
         // credentials checks
         std::list<std::string> rights;
-        std::string newToken = this->_server.GetRcon().GetSessionManager().NewSession(this->_content["login"], this->_content["password"], this->_userAgent, rights);
+        std::string newToken = this->_server.GetRcon().GetSessionManager().NewSession(login, password, this->_userAgent, rights);
         if (newToken.empty())
             return this->_WriteHttpResponse("401 Unauthorized");
 
@@ -253,7 +255,6 @@ namespace Server { namespace Rcon {
 
         // entity files
         json += "\t\"entity_files\":\n";
-        Tools::debug << "BITEBITE" << std::endl;
         json += this->_server.GetRcon().GetEntityFileManager().RconGetEntityFiles();
 
         // send response
@@ -279,13 +280,22 @@ namespace Server { namespace Rcon {
 
     void Request::_GetEntityFile(std::string const& pluginIdentifier, std::string const& file)
     {
-        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "hot_swap"))
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "execute"))
         {
             std::string json = this->_server.GetRcon().GetEntityFileManager().GetFile(pluginIdentifier, file);
             if (json.empty())
-                this->_WriteHttpResponse("401 Not Found");
+                this->_WriteHttpResponse("404 Not Found");
             else
                 this->_WriteHttpResponse("200 OK", json);
+        }
+        else
+            this->_WriteHttpResponse("401 Unauthorized");
+    }
+
+    void Request::_PostExecute(std::string const& pluginIdentifier, std::string const& lua)
+    {
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "execute"))
+        {
         }
         else
             this->_WriteHttpResponse("401 Unauthorized");

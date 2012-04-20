@@ -21,10 +21,6 @@ namespace Server { namespace Rcon {
         this->_files.push_back(f);
     }
 
-    void EntityFileManager::UpdateFile(std::string const& pluginIdentifier, std::string const& file, std::string const& lua)
-    {
-    }
-
     std::string EntityFileManager::GetFile(std::string const& pluginIdentifier, std::string const& file) const
     {
         Uint32 pluginId = this->_server.GetGame().GetWorld().GetPluginManager().GetPluginId(pluginIdentifier);
@@ -53,7 +49,7 @@ namespace Server { namespace Rcon {
             json +=
                 "\t\t{\n"
                 "\t\t\t\"plugin\": \"" + this->_server.GetGame().GetWorld().GetPluginManager().GetPluginIdentifier(it->pluginId) + "\",\n" +
-                "\t\t\t\"file\": \"" + ToJsonStr(it->file) + "\"\n" + // ptetre bien que JsonToStr n'est pas necessaire ici
+                "\t\t\t\"file\": \"" + ToJsonStr(it->file) + "\"\n" + // ptetre bien que ToJsonStr n'est pas necessaire ici
                 "\t\t}";
         }
         json += "\n\t]\n";
