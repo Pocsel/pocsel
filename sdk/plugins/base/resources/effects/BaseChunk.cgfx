@@ -48,10 +48,6 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     v.position = mul(worldViewProjection, position);
     v.normal = normalize(mul(world, float4(normal, 0.0)).xyz);
 
-    // float fog = clamp(abs(v.position.z), 0, fogEnd);
-    // fog = (fogEnd - fog) / fogEnd;
-    // v.fogFactor = clamp(fog, 0, 1);
-    // v.lightIntensity = dot(-lightDirection, normal) * 0.35 + 0.65;
     return v;
 }
 

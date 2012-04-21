@@ -129,17 +129,16 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     void Texture2D::Bind()
     {
-        if (nbBindedTexture == 0)
-            GLCHECK(glEnable(GL_TEXTURE_2D));
         this->_bindId = nbBindedTexture++;
         GLCHECK(glActiveTextureARB(GL_TEXTURE0 + this->_bindId));
+        GLCHECK(glEnable(GL_TEXTURE_2D));
         GLCHECK(glBindTexture(GL_TEXTURE_2D, this->_id));
     }
 
     void Texture2D::Unbind()
     {
-        GLCHECK(glBindTexture(GL_TEXTURE_2D, 0));
         GLCHECK(glActiveTextureARB(GL_TEXTURE0 + this->_bindId));
+        GLCHECK(glBindTexture(GL_TEXTURE_2D, 0));
         GLCHECK(glDisable(GL_TEXTURE_2D));
 
         this->_bindId = -1;

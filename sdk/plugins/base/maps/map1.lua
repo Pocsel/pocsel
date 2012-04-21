@@ -27,7 +27,7 @@ equations = {
         ya = 0.0,
         zn = 0.4 / 32.0,
         za = 0.0,
-        mul = 1.0 * 32.0,
+        mul = 1.0,
         alpha = 2.2,
         beta = 1.8,
         n = 2,
@@ -45,7 +45,7 @@ equations = {
         ya = 0.0,
         zn = 2.0 / 32.0,
         za = 0.0,
-        mul = 1.0 * 32.0,
+        mul = 1.0,
         alpha = 2.0,
         beta = 2.0,
         n = 1,
@@ -60,7 +60,7 @@ equations = {
     }
 }
 
-cave_value = 0.22
+cave_value = 0.18
 height_value = 0
 
 cubes = {
@@ -158,8 +158,8 @@ cubes = {
                 {
                     equation = "perlin3_iron",
                     validator = "ay+b<eq",
-                    a=0.006,
-                    b=0.60 * 32.0
+                    a = 0.0006,
+                    b = 0.6
                 }
             }
         }
@@ -172,7 +172,7 @@ cubes = {
                     equation = "my_perlin2",
                     validator = "ay+b<eq",
                     a = 1,
-                    b = 1
+                    b = 0
                 }
             }
         }

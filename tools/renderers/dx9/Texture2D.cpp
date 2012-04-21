@@ -140,12 +140,14 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     void Texture2D::Bind()
     {
-        this->_renderer.GetDevice()->SetTexture(0, this->_texture);
+        this->_bindId = nbBindedTexture++;
+        this->_renderer.GetDevice()->SetTexture(this->_bindId, this->_texture);
     }
 
     void Texture2D::Unbind()
     {
-        this->_renderer.GetDevice()->SetTexture(0, 0);
+        this->_renderer.GetDevice()->SetTexture(this->_bindId, 0);
+        nbBindedTexture--;
     }
 
     void Texture2D::SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter)

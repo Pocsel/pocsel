@@ -19,10 +19,10 @@ namespace Tools { namespace Renderers { namespace Utils {
         void Bind();
         void Unbind();
 
-        ITexture2D& GetDepth() { return this->_renderTarget->GetTexture(0); }
-        ITexture2D& GetColors() { return this->_renderTarget->GetTexture(1); }
-        ITexture2D& GetNormals() { return this->_renderTarget->GetTexture(2); }
-        ITexture2D& GetPositions() { return this->_renderTarget->GetTexture(3); }
+        ITexture2D& GetColors() { return this->_renderTarget->GetTexture(0); }
+        ITexture2D& GetNormals() { return this->_renderTarget->GetTexture(1); }
+        ITexture2D& GetPositions() { return this->_renderTarget->GetTexture(2); }
+        ITexture2D& GetDepth() { return this->_renderTarget->GetTexture(3); }
     };
 
 }}}

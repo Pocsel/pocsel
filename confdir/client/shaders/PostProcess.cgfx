@@ -3,11 +3,6 @@ float4x4 view : View;
 float4x4 viewInverse : ViewInverse;
 float time = 1.0;
 
-sampler2D colors = sampler_state
-{
-   magFilter = Point;
-   minFilter = Point;
-};
 sampler2D normals = sampler_state
 {
    magFilter = Point;
@@ -18,9 +13,15 @@ sampler2D positions = sampler_state
    magFilter = Point;
    minFilter = Point;
 };
+sampler2D colors = sampler_state
+{
+   magFilter = Point;
+   minFilter = Point;
+};
 
 float3 lightPos = float3(0, 0, 0);
-float3 lightDiffuse = float3(0.3);
+float3 lightDiffuse = float3(1.0, 1.0, 1.0);
+float3 lightSpecular = float3(0.9, 1.0, 0.8);
 
 struct VSout
 {
@@ -50,14 +51,16 @@ float4 fs(in VSout i) : COLOR
 
     float3 vWorldPos = tex2D(positions, i.tex).xyz;
     float3 vLightDir = normalize(lightPos - vWorldPos);
-    float3 vEyeVec = normalize(vWorldPos - viewInverse[3].xyz);
-    float3 vDiffuseIntensity = dot(vLightDir, vWorldNrm);
-    //float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), c_fSpecularPower);
+    float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
+    float3 vDiffuseIntensity = dot(vWorldNrm, vLightDir);
+    float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 150);
 
     float4 color;
-    color.rgb = (vDiffuseIntensity * lightDiffuse + 0.2) * vDiffuseMaterial;
-        //vSpecularIntensity * c_vLightSpecular.xyz * vSpecularMaterial;
+    color.rgb = (vDiffuseIntensity * lightDiffuse) * vDiffuseMaterial
+        + vSpecularIntensity * lightSpecular.xyz;// * vSpecularMaterial;
     color.a = 1.0;
+    
+    //color.rgb = vWorldNrm;
 
     // here we add color to show how lighting pass affects the scene
     //color.rgb += i.tex.rgr * 0.5;
