@@ -345,9 +345,9 @@ namespace Client { namespace Resources {
 
             glm::vec3 normal = glm::cross(v2 - v0, v1 - v0);
 
-            mesh.verts[tri.indices[0]].normal += normal;
-            mesh.verts[tri.indices[1]].normal += normal;
-            mesh.verts[tri.indices[2]].normal += normal;
+            mesh.verts[tri.indices[0]].normal += 1.0f - normal;
+            mesh.verts[tri.indices[1]].normal += 1.0f - normal;
+            mesh.verts[tri.indices[2]].normal += 1.0f - normal;
         }
 
         // Now normalize all the normals

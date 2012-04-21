@@ -2,11 +2,8 @@
 #define MAX_BONES 58
 #endif
 
-float4x4 mvp : WorldViewProjection;
-float3 lightDirection = {-0.704, -0.704, 0};
-
-float3 fogColor = float3(0.8, 0.8, 0.9);
-float fogEnd = 750.0f;
+float4x4 worldViewProjection : WorldViewProjection;
+float4x4 world : World;
 
 sampler2D baseTex = sampler_state
 {
@@ -18,11 +15,17 @@ float4x4 boneMatrix[MAX_BONES];
 
 struct VSout
 {
-    float4   oPosition   : POSITION;
-    float4   objNormal   : TEXCOORD3;
-    float2   oTexCoord   : TEXCOORD0;
-    float    ofogFactor  : TEXCOORD1;
-    float4   objPosition : TEXCOORD2;
+    float4 position      : POSITION;
+    float2 texCoord      : TEXCOORD0;
+    float4 worldPosition : TEXCOORD1;
+    float3 normal        : TEXCOORD2;
+};
+
+struct FSout
+{
+    float4 color    : COLOR0;
+    float4 normal   : COLOR1;
+    float4 position : COLOR2;
 };
 
 VSout vs(
@@ -35,28 +38,26 @@ VSout vs(
     float4x4 matTransform = boneMatrix[matrixIndex.x] * weight.x;
     matTransform += boneMatrix[matrixIndex.y] * weight.y;
     matTransform += boneMatrix[matrixIndex.z] * weight.z;
-    float finalWeight = 1.0f - ( weight.x + weight.y + weight.z );
+    float finalWeight = 1.0f - (weight.x + weight.y + weight.z);
     matTransform += boneMatrix[matrixIndex.w] * finalWeight;
+    //matTransform = mul(world, matTransform);
 
     VSout vout;
-    vout.objPosition = mul(matTransform, position);
-    vout.objNormal = mul(matTransform, float4(normal, 0.0f));
-    vout.oTexCoord = texCoord;
-
-    vout.oPosition = mul(mvp, vout.objPosition);
-    float fog = clamp(abs(vout.oPosition.z), 0, fogEnd);
-    fog = (fogEnd - fog) / fogEnd;
-    vout.ofogFactor = clamp(fog, 0, 1);
+    vout.worldPosition = mul(matTransform, position);
+    vout.position = mul(worldViewProjection, vout.worldPosition);
+    vout.texCoord = texCoord;
+    vout.normal = mul(world, mul(matTransform, float4(normal, 0.0f)));
+    vout.worldPosition = mul(world, vout.worldPosition);
     return vout;
 }
 
-float4 fs(VSout v) : COLOR
+FSout fs(VSout v)
 {
-    float3 normal = normalize(v.objNormal.xyz);
-    float4 c = tex2D(baseTex, v.oTexCoord);
-    float lightIntensity = dot(-lightDirection, normal) * 0.35 + 0.65;
-    c.rgb *= lightIntensity;// * lerp(fogColor, normal, v.ofogFactor);
-    return c;
+    FSout f;
+    f.color = tex2D(baseTex, v.texCoord);
+    f.normal = float4(normalize(v.normal), 1.0);
+    f.position = float4(v.worldPosition.xyz, 1.0);
+    return f;
 }
 
 #ifndef DIRECTX

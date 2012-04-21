@@ -5,6 +5,7 @@ var rconRights;
 var rconPlugins;
 var rconUrl;
 var rconEntityFiles;
+var rconDebug;
 var currentMap;
 
 $(document).ready(function() {
@@ -35,8 +36,15 @@ $(document).ready(function() {
                 rconRights = json.rights;
                 rconPlugins = json.plugins;
                 rconEntityFiles = json.entity_files;
+                rconDebug = json.debug;
                 fillStaticTables();
-                $('#category-server_title').html(json.world_fullname + ' ("' + json.world_identifier + '", version ' + json.world_version + ')');
+                var debugStr = "debugging ";
+                if (rconDebug)
+                    debugStr += "on";
+                else
+                    debugStr += "off";
+                $('#category-server_title').html(json.world_fullname +
+                    ' ("' + json.world_identifier + '", version ' + json.world_version + ', ' + debugStr + ')');
                 setTimeout(startFetchers, 250);
             },
             error: function(json, errorType, httpError) {
@@ -129,22 +137,25 @@ function fillStaticTables() {
             activateMap(e.data.map);
         });
     }
-    $('#category-maps').show('fast');
-
-    $.each(rconEntityFiles, function() {
-        if (hasRight("execute")) {
-            var id = generateId("entity-files_edit");
-            $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td><a id="' + id + '">Edit</a></td></tr>');
-            $('#' + id).click({ plugin: this.plugin, file: this.file }, function(e) {
-                editLuaFile(e.data.plugin, e.data.file);
-            });
-        }
-        else
-            $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td>-</td></tr>');
-    });
     $.each(rconPlugins, function() {
         $('#execute_plugin').append('<option>' + this.identifier + '</option>');
     });
+    $('#category-maps').show('fast');
+
+    if (rconDebug) {
+        $.each(rconEntityFiles, function() {
+            if (hasRight("execute")) {
+                var id = generateId("entity-files_edit");
+                $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td><a id="' + id + '">Edit</a></td></tr>');
+                $('#' + id).click({ plugin: this.plugin, file: this.file }, function(e) {
+                    editLuaFile(e.data.plugin, e.data.file);
+                });
+            }
+            else
+                $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td>-</td></tr>');
+        });
+        $('#entity-files_group').show();
+    }
     $('#category-entities').show('fast');
 }
 
