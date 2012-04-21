@@ -6,6 +6,7 @@
 #include "server/rcon/EntityFileManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "server/Server.hpp"
+#include "server/Settings.hpp"
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/map/Map.hpp"
@@ -245,7 +246,8 @@ namespace Server { namespace Rcon {
         // world
         json += "\t\"world_identifier\": \"" + this->_server.GetGame().GetWorld().GetIdentifier() + "\",\n"
             "\t\"world_fullname\": \"" + ToJsonStr(this->_server.GetGame().GetWorld().GetFullname()) + "\",\n"
-            "\t\"world_version\": " + Tools::ToString(this->_server.GetGame().GetWorld().GetVersion()) + ",\n";
+            "\t\"world_version\": " + Tools::ToString(this->_server.GetGame().GetWorld().GetVersion()) + ",\n"
+            "\t\"debug\": " + (this->_server.GetSettings().debug ? "true" : "false") + ",\n";
 
         // maps
         json += "\t\"maps\":\n";

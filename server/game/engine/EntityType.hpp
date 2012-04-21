@@ -19,6 +19,7 @@ namespace Server { namespace Game { namespace Engine {
         std::string const& GetName() const { return this->_name; }
         Uint32 GetPluginId() const { return this->_pluginId; }
         Tools::Lua::Ref const& GetPrototype() const { return this->_prototype; }
+        void SetPrototype(Tools::Lua::Ref const& prototype) { this->_prototype = prototype; }
         bool IsPositional() const { return this->_isPositional; }
     };
 

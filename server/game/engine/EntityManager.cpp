@@ -324,10 +324,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         Uint32 pluginId = this->_engine.GetRunningPluginId();
         if (!pluginId)
-        {
-            Tools::error << "EntityManager::_ApiRegister: Could not determine currently running plugin, aborting registration." << std::endl;
-            return;
-        }
+            throw std::runtime_error("Server.Entity.Register[Positional]: Could not determine currently running plugin, aborting registration.");
         std::string pluginName = this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(pluginId);
         Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
         std::string entityName;
@@ -336,7 +333,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             prototype = helper.PopArg();
             if (!prototype.IsTable())
-                throw std::runtime_error("Server.Entity.Register[Positional]: Argument \"prototype\" must be of type table");
+                throw std::runtime_error("Server.Entity.Register[Positional]: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
             if (!prototype["entityName"].IsString())
                 throw std::runtime_error("Server.Entity.Register[Positional]: Field \"entityName\" in prototype must exist and be of type string");
             if (!Common::FieldValidator::IsEntityType(entityName = prototype["entityName"].ToString()))
@@ -349,28 +346,24 @@ namespace Server { namespace Game { namespace Engine {
             Tools::error << "EntityManager::_ApiRegister: Failed to register new entity type from \"" << pluginName << "\": " << e.what() << " (plugin " << pluginId << ").\n";
             return;
         }
-        EntityType* type = new EntityType(entityName, pluginId, prototype, positional);
-
-        // remplacement de type
-        // TODO TODO empecher le remplacement par changement de type positinnel/non positionnel
-        if (this->_entityTypes[type->GetPluginId()].count(type->GetName()))
+        if (this->_entityTypes[pluginId].count(entityName)) // remplacement
         {
-            auto it = this->_entities.begin();
-            auto itEnd = this->_entities.end();
-            for (; it != itEnd; ++it)
-                if (it->second->GetType().GetName() == type->GetName())
-                    it->second->SetType(type);
-            Tools::log << "EntityManager::_ApiRegister: Replacing entity type \"" << type->GetName() << "\" with a newer type from \"" << pluginName << "\" (plugin " << type->GetPluginId() << ").\n";
-            delete this->_entityTypes[type->GetPluginId()][type->GetName()]; // TODO pas suprimmer mais sauvegarder dans une liste, puis supprimer lors de la destruction de la derniere entité de ce type
+            EntityType* type = this->_entityTypes[pluginId][entityName];
+            if (type->IsPositional() != positional)
+                throw std::runtime_error("Server.Entity.Register[Positional]: Cannot change the positional property of an entity type.");
+            type->SetPrototype(prototype);
+            Tools::log << "EntityManager::_ApiRegister: Replacing entity type \"" << entityName << "\" with a newer type from \"" << pluginName << "\" (plugin " << pluginId << ", positional: " << (positional ? "yes" : "no") << ").\n";
         }
-
-        this->_entityTypes[type->GetPluginId()][type->GetName()] = type;
-        Tools::debug << "EntityManager::_ApiRegister: New entity type \"" << type->GetName() << "\" registered from \"" << pluginName << "\" (plugin " << type->GetPluginId() << ", positional: " << (positional ? "yes" : "no") << ").\n";
+        else // nouveau type
+        {
+            this->_entityTypes[pluginId][entityName] = new EntityType(entityName, pluginId, prototype, positional);
+            Tools::debug << "EntityManager::_ApiRegister: New entity type \"" << entityName << "\" registered from \"" << pluginName << "\" (plugin " << pluginId << ", positional: " << (positional ? "yes" : "no") << ").\n";
+        }
     }
 
     void EntityManager::_ApiRegisterPositional(Tools::Lua::CallHelper& helper)
     {
-        helper.PushArg(this->_engine.GetInterpreter().MakeBoolean(true));
+        helper.GetArgList().push_back(this->_engine.GetInterpreter().MakeBoolean(true));
         this->_ApiRegister(helper);
     }
 
