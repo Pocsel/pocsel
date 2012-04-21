@@ -23,6 +23,11 @@ namespace Client { namespace Resources {
 
     Md5Model::~Md5Model()
     {
+        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
+        {
+            Tools::Delete(it->vertexBuffer);
+            Tools::Delete(it->indexBuffer);
+        }
     }
 
     bool Md5Model::LoadModel(
