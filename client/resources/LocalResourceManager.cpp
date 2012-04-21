@@ -28,6 +28,8 @@ namespace Client { namespace Resources {
             Tools::Delete(it->second);
         for (auto it = this->_fonts.begin(), ite = this->_fonts.end(); it != ite; ++it)
             Tools::Delete(it->second);
+        for (auto it = this->_models.begin(), ite = this->_models.end(); it != ite; ++it)
+            Tools::Delete(it->second);
     }
 
     Tools::Renderers::Utils::Font& LocalResourceManager::GetFont(std::string const& path, Uint32 size)
