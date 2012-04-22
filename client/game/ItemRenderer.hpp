@@ -17,7 +17,7 @@ namespace Tools {
 namespace Client {
     namespace Game {
         class Game;
-        class Model;
+        class Item;
     }
     namespace Resources {
         class ITexture;
@@ -39,7 +39,7 @@ namespace Client { namespace Game {
     public:
         ItemRenderer(Game& game);
         ~ItemRenderer();
-        void Render(Model const& model, Common::OrientedPosition const& pos);
+        void Render(Item const& item);
         void Update(Uint32 time);
 
     private:

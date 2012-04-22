@@ -1,6 +1,7 @@
 #include "client/game/ItemManager.hpp"
 #include "client/game/ItemRenderer.hpp"
 #include "client/game/Model.hpp"
+#include "client/game/Item.hpp"
 #include "client/game/Game.hpp"
 
 #include "common/MovingOrientedPosition.hpp"
@@ -20,33 +21,37 @@ namespace Client { namespace Game {
     ItemManager::~ItemManager()
     {
         Tools::Delete(this->_renderer);
+        for (auto it = this->_items.begin(), ite = this->_items.end(); it != ite; ++it)
+            Tools::Delete(it->second);
     }
 
     void ItemManager::MoveItem(Uint32 id, Common::MovingOrientedPosition const& pos)
     {
-        if (this->_positions.count(id) == 0)
+        if (this->_items.count(id) == 0)
         {
-            this->_positions[id].second =
+            std::unique_ptr<Model> model(
                 new Model(
-                        this->_game.GetClient().GetLocalResourceManager().GetMd5Model("boblampclean")
-                        );
+                    this->_game.GetClient().GetLocalResourceManager().GetMd5Model("boblampclean")
+                    ));
+            this->_items[id] =
+                new Item(model);
         }
-        this->_positions[id].first = pos.position;
+        this->_items[id]->position = pos.position;
     }
 
     void ItemManager::Render()
     {
-        for (auto it = this->_positions.begin(), ite = this->_positions.end(); it != ite; ++it)
+        for (auto it = this->_items.begin(), ite = this->_items.end(); it != ite; ++it)
         {
-            this->_renderer->Render(*it->second.second, it->second.first);
+            this->_renderer->Render(*it->second);
         }
     }
 
     void ItemManager::Update(Uint32 time)
     {
-        for (auto it = this->_positions.begin(), ite = this->_positions.end(); it != ite; ++it)
+        for (auto it = this->_items.begin(), ite = this->_items.end(); it != ite; ++it)
         {
-            it->second.second->Update(time, it->second.first.phi);
+            it->second->Update(time);
         }
         this->_renderer->Update(time);
     }
