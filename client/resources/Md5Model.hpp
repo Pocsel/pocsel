@@ -91,10 +91,10 @@ namespace Client { namespace Resources {
         unsigned int _md5Version;
         unsigned int _numJoints;
         unsigned int _numMeshes;
-        bool _hasAnimation;
+//        bool _hasAnimation;
         std::vector<Joint> _joints;
         std::vector<Mesh> _meshes;
-        Md5Animation _animation;
+//        Md5Animation _animation;
         std::vector<glm::mat4x4> _bindPose;
         std::vector<glm::mat4x4> _inverseBindPose;
         glm::mat4x4 _localToWorldMatrix;
@@ -108,14 +108,15 @@ namespace Client { namespace Resources {
                 boost::filesystem::path const& filePath,
                 boost::filesystem::path const& texturesPath,
                 LocalResourceManager& resourceManager);
-        bool LoadAnim(boost::filesystem::path const& filePath);
+        //bool LoadAnim(boost::filesystem::path const& filePath);
+        bool CheckAnimation(Md5Animation const& animation) const;
         void Update(Uint32 time, float phi);
         void Render(Tools::IRenderer& renderer);
 
         std::vector<Joint> const& GetJoints() const { return this->_joints; }
         std::vector<Mesh> const& GetMeshes() const { return this->_meshes; }
-        Md5Animation const& GetAnimation() const { return this->_animation; }
-        bool HasAnimation() const { return this->_hasAnimation; }
+//        Md5Animation const& GetAnimation() const { return this->_animation; }
+//        bool HasAnimation() const { return this->_hasAnimation; }
         unsigned int GetNumJoints() const { return this->_numJoints; }
         std::vector<glm::mat4x4> const& GetInverseBindPose() const { return this->_inverseBindPose; }
 
@@ -127,22 +128,11 @@ namespace Client { namespace Resources {
         // Compute vertex positions and normals
         bool _PrepareMesh(Mesh& mesh);
         //bool _PrepareMesh(Mesh& mesh, Md5Animation::FrameSkeleton const& skel);
-        bool _PrepareMesh(Mesh& mesh, std::vector<glm::mat4x4> const& skel);
+        //bool _PrepareMesh(Mesh& mesh, std::vector<glm::mat4x4> const& skel);
         bool _PrepareNormals(Mesh& mesh);
-
-        void _DestroyMesh(Mesh& mesh);
 
         // Create the VBOs that are used to render the mesh with shaders
         bool _CreateVertexBuffers(Mesh& mesh, Tools::IRenderer& renderer);
-
-        // Render a single mesh of the model
-        void _RenderMesh(Mesh const& mesh, Tools::IRenderer& renderer);
-        void _RenderNormals(Mesh const& mesh);
-
-        // Draw the skeleton of the mesh for debugging purposes.
-        void _RenderSkeleton(std::vector<Joint> const& joints);
-
-        bool _CheckAnimation(Md5Animation const& animation) const;
     };
 
 }}

@@ -16,7 +16,7 @@ namespace Client { namespace Resources {
         _md5Version(-1),
         _numJoints(0),
         _numMeshes(0),
-        _hasAnimation(false),
+//        _hasAnimation(false),
         _localToWorldMatrix(1)
     {
     }
@@ -232,18 +232,18 @@ namespace Client { namespace Resources {
         return true;
     }
 
-    bool Md5Model::LoadAnim(boost::filesystem::path const& filePath)
-    {
-        if (this->_animation.LoadAnimation(filePath))
-        {
-            // Check to make sure the animation is appropriate for this model
-            this->_hasAnimation = this->_CheckAnimation(this->_animation);
-        }
+    //bool Md5Model::LoadAnim(boost::filesystem::path const& filePath)
+    //{
+    //    if (this->_animation.LoadAnimation(filePath))
+    //    {
+    //        // Check to make sure the animation is appropriate for this model
+    //        this->_hasAnimation = this->_CheckAnimation(this->_animation);
+    //    }
 
-        return this->_hasAnimation;
-    }
+    //    return this->_hasAnimation;
+    //}
 
-    bool Md5Model::_CheckAnimation(Md5Animation const& animation) const
+    bool Md5Model::CheckAnimation(Md5Animation const& animation) const
     {
         if ( this->_numJoints != animation.GetNumJoints())
         {
@@ -362,28 +362,28 @@ namespace Client { namespace Resources {
         return true;
     }
 
-    bool Md5Model::_PrepareMesh(Mesh& mesh, std::vector<glm::mat4x4> const& skel)
-    {
-        for (unsigned int i = 0; i < mesh.verts.size(); ++i)
-        {
-            const Vertex& vert = mesh.verts[i];
-            glm::vec3& pos = mesh.positionBuffer[i];
-            glm::vec3& normal = mesh.normalBuffer[i];
-
-            pos = glm::vec3(0);
-            normal = glm::vec3(0);
-
-            for (int j = 0; j < vert.weightCount; ++j)
-            {
-                Weight const& weight = mesh.weights[vert.startWeight + j];
-                glm::mat4x4 const& boneMatrix = skel[weight.jointID];
-
-                pos += glm::vec3((boneMatrix * glm::vec4(vert.pos, 1.0f)) * weight.bias);
-                normal += glm::vec3((boneMatrix * glm::vec4(vert.normal, 0.0f)) * weight.bias);
-            }
-        }
-        return true;
-    }
+//    bool Md5Model::_PrepareMesh(Mesh& mesh, std::vector<glm::mat4x4> const& skel)
+//    {
+//        for (unsigned int i = 0; i < mesh.verts.size(); ++i)
+//        {
+//            const Vertex& vert = mesh.verts[i];
+//            glm::vec3& pos = mesh.positionBuffer[i];
+//            glm::vec3& normal = mesh.normalBuffer[i];
+//
+//            pos = glm::vec3(0);
+//            normal = glm::vec3(0);
+//
+//            for (int j = 0; j < vert.weightCount; ++j)
+//            {
+//                Weight const& weight = mesh.weights[vert.startWeight + j];
+//                glm::mat4x4 const& boneMatrix = skel[weight.jointID];
+//
+//                pos += glm::vec3((boneMatrix * glm::vec4(vert.pos, 1.0f)) * weight.bias);
+//                normal += glm::vec3((boneMatrix * glm::vec4(vert.normal, 0.0f)) * weight.bias);
+//            }
+//        }
+//        return true;
+//    }
 
     bool Md5Model::_CreateVertexBuffers(Mesh& mesh, Tools::IRenderer& renderer)
     {
