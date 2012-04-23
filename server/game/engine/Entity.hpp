@@ -21,7 +21,6 @@ namespace Server { namespace Game { namespace Engine {
         virtual ~Entity();
         EntityType const& GetType() const { return *this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
-        void SetType(EntityType* type); // TODO enlever la possibilité de changer de type =]
     };
 
 }}}
