@@ -13,7 +13,7 @@
 #include "server/Server.hpp"
 #include "server/Settings.hpp"
 #include "server/rcon/Rcon.hpp"
-#include "server/rcon/EntityFileManager.hpp"
+#include "server/rcon/EntityManager.hpp"
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
@@ -155,14 +155,12 @@ namespace Server { namespace Database {
                 auto itMapEnd = world._maps.end();
                 for (; itMap != itMapEnd; ++itMap)
                 {
-                    //itMap->second->GetEngine().GetEntityManager().BeginPluginRegistering(row->GetUint32(0), row->GetString(1));
                     itMap->second->GetEngine().OverrideRunningPluginId(row->GetUint32(0));
                     itMap->second->GetEngine().GetInterpreter().DoString(row->GetString(2));
                     itMap->second->GetEngine().OverrideRunningPluginId(0);
-                    //itMap->second->GetEngine().GetEntityManager().EndPluginRegistering();
                 }
-                if (this->_world.GetGame().GetServer().GetSettings().debug)
-                    this->_world.GetGame().GetServer().GetRcon().GetEntityFileManager().AddFile(row->GetUint32(0), row->GetString(1), row->GetString(2));
+                if (world.GetGame().GetServer().GetSettings().debug)
+                    world.GetGame().GetServer().GetRcon().GetEntityManager().AddFile(row->GetUint32(0), row->GetString(1), row->GetString(2));
             }
             catch (std::exception& e)
             {
@@ -170,6 +168,8 @@ namespace Server { namespace Database {
                 Tools::error << "WorldLoader: Failed to load entity file \"" << row->GetString(1) << "\": " << e.what() << std::endl;
             }
         }
+        if (!world._maps.empty())
+            world._maps.begin()->second->GetEngine().GetEntityManager().RconAddEntityTypes(world.GetGame().GetServer().GetRcon().GetEntityManager());
     }
 
     void WorldLoader::_RegisterResourcesFunctions(Game::Map::Map& map, Tools::Lua::Interpreter& lua)

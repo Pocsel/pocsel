@@ -2,6 +2,7 @@
 #include "server/game/engine/MessageManager.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
+#include "server/rcon/ToJsonStr.hpp"
 #include "tools/lua/Interpreter.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -42,6 +43,25 @@ namespace Server { namespace Game { namespace Engine {
     void Engine::Save(Tools::Database::IConnection& conn)
     {
         this->_entityManager->Save(conn);
+    }
+
+    std::string Engine::RconExecute(Uint32 pluginId, std::string const& lua)
+    {
+        std::string json = "{\n"
+            "\t\"log\": \"";
+        this->OverrideRunningPluginId(pluginId);
+        try
+        {
+            this->_interpreter->DoString(lua);
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "Engine::RconExecute: Error: " << e.what() << std::endl;
+            json += Rcon::ToJsonStr(e.what());
+        }
+        this->OverrideRunningPluginId(0);
+        json += "\"\n}\n";
+        return json;
     }
 
 }}}

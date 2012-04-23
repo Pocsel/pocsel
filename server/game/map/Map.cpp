@@ -471,7 +471,7 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_RconExecute(Uint32 pluginId, std::string const& lua, std::function<void(std::string)> cb) const
     {
-        cb(this->_engine->GetEntityManager().RconExecute(pluginId, lua));
+        cb(this->_engine->RconExecute(pluginId, lua));
     }
 
     void Map::RconGetEntities(std::function<void(std::string)> cb) const

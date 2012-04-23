@@ -14,6 +14,7 @@
 #include "server/game/map/Map.hpp"
 #include "common/FieldValidator.hpp"
 #include "server/rcon/ToJsonStr.hpp"
+#include "server/rcon/EntityManager.hpp"
 #include "tools/lua/utils/Vector.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -388,23 +389,17 @@ namespace Server { namespace Game { namespace Engine {
         return json;
     }
 
-    std::string EntityManager::RconExecute(Uint32 pluginId, std::string const& lua)
+    void EntityManager::RconAddEntityTypes(Rcon::EntityManager& manager) const
     {
-        std::string json = "{\n"
-            "\t\"log\": \"";
-        this->_engine.OverrideRunningPluginId(pluginId);
-        try
+        auto it = this->_entityTypes.begin();
+        auto itEnd = this->_entityTypes.end();
+        for (; it != itEnd; ++it)
         {
-            this->_engine.GetInterpreter().DoString(lua);
+            auto it2 = it->second.begin();
+            auto itEnd2 = it->second.end();
+            for (; it2 != itEnd2; ++it2)
+                manager.AddType(it2->second->GetPluginId(), it2->second->GetName(), it2->second->IsPositional());
         }
-        catch (std::exception& e)
-        {
-            Tools::error << "EntityManager::RconExecute: Error: " << e.what() << std::endl;
-            json += Rcon::ToJsonStr(e.what());
-        }
-        this->_engine.OverrideRunningPluginId(0);
-        json += "\"\n}\n";
-        return json;
     }
 
 }}}

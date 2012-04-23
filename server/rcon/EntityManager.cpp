@@ -1,4 +1,4 @@
-#include "server/rcon/EntityFileManager.hpp"
+#include "server/rcon/EntityManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "server/Server.hpp"
 #include "server/game/Game.hpp"
@@ -7,12 +7,12 @@
 
 namespace Server { namespace Rcon {
 
-    EntityFileManager::EntityFileManager(Server& server) :
+    EntityManager::EntityManager(Server& server) :
         _server(server)
     {
     }
 
-    void EntityFileManager::AddFile(Uint32 pluginId, std::string const& file, std::string const& lua)
+    void EntityManager::AddFile(Uint32 pluginId, std::string const& file, std::string const& lua)
     {
         EntityFile f;
         f.pluginId = pluginId;
@@ -21,7 +21,7 @@ namespace Server { namespace Rcon {
         this->_files.push_back(f);
     }
 
-    std::string EntityFileManager::GetFile(std::string const& pluginIdentifier, std::string const& file) const
+    std::string EntityManager::GetFile(std::string const& pluginIdentifier, std::string const& file) const
     {
         Uint32 pluginId = this->_server.GetGame().GetWorld().GetPluginManager().GetPluginId(pluginIdentifier);
         auto it = this->_files.begin();
@@ -37,7 +37,7 @@ namespace Server { namespace Rcon {
         return std::string();
     }
 
-    bool EntityFileManager::UpdateFile(std::string const& pluginIdentifier, std::string const& file, std::string const& lua)
+    bool EntityManager::UpdateFile(std::string const& pluginIdentifier, std::string const& file, std::string const& lua)
     {
         Uint32 pluginId = this->_server.GetGame().GetWorld().GetPluginManager().GetPluginId(pluginIdentifier);
         auto it = this->_files.begin();
@@ -51,7 +51,7 @@ namespace Server { namespace Rcon {
         return false;
     }
 
-    std::string EntityFileManager::RconGetEntityFiles() const
+    std::string EntityManager::RconGetEntityFiles() const
     {
         std::string json = "\t[\n";
         auto it = this->_files.begin();
@@ -64,6 +64,35 @@ namespace Server { namespace Rcon {
                 "\t\t{\n"
                 "\t\t\t\"plugin\": \"" + this->_server.GetGame().GetWorld().GetPluginManager().GetPluginIdentifier(it->pluginId) + "\",\n" +
                 "\t\t\t\"file\": \"" + ToJsonStr(it->file) + "\"\n" + // ptetre bien que ToJsonStr n'est pas necessaire ici
+                "\t\t}";
+        }
+        json += "\n\t]\n";
+        return json;
+    }
+
+    void EntityManager::AddType(Uint32 pluginId, std::string const& name, bool positional)
+    {
+        EntityType t;
+        t.pluginId = pluginId;
+        t.name = name;
+        t.positional = positional;
+        this->_types.push_back(t);
+    }
+
+    std::string EntityManager::RconGetEntityTypes() const
+    {
+        std::string json = "\t[\n";
+        auto it = this->_types.begin();
+        auto itEnd = this->_types.end();
+        for (; it != itEnd; ++it)
+        {
+            if (it != this->_types.begin())
+                json += ",\n";
+            json +=
+                "\t\t{\n"
+                "\t\t\t\"plugin\": \"" + this->_server.GetGame().GetWorld().GetPluginManager().GetPluginIdentifier(it->pluginId) + "\",\n" +
+                "\t\t\t\"name\": \"" + it->name + "\",\n" +
+                "\t\t\t\"positional\": " + (it->positional ? "true" : "false") + "\n" +
                 "\t\t}";
         }
         json += "\n\t]\n";

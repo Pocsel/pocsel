@@ -53,6 +53,9 @@ namespace Server { namespace Game { namespace Engine {
         void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
         Uint32 GetRunningEntityId() { return this->_overriddenEntityId ? this->_overriddenEntityId : this->_entityManager->GetRunningEntityId(); }
         void OverrideRunningEntityId(Uint32 entityId) { this->_overriddenEntityId = entityId; }
+
+        // rcon requests
+        std::string RconExecute(Uint32 pluginId, std::string const& lua);
     };
 
 }}}

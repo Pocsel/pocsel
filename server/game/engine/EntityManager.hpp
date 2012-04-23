@@ -8,6 +8,9 @@
 namespace Tools { namespace Database {
     class IConnection;
 }}
+namespace Server { namespace Rcon {
+    class EntityManager;
+}}
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -50,8 +53,6 @@ namespace Server { namespace Game { namespace Engine {
         std::map<Uint32 /* pluginId */, std::map<std::string /* entityName */, EntityType*>> _entityTypes;
         std::map<Uint32 /* entityId */, Entity*> _entities;
         std::map<Uint32 /* entityId */, PositionalEntity*> _positionalEntities;
-        //Uint32 _pluginIdForRegistering;
-        //std::string _pluginNameForRegistering;
         Uint32 _nextEntityId;
         Uint32 _runningEntityId; // 0 quand aucune entité n'est en cours d'éxécution
         Entity* _runningEntity; // nul quand aucune entité n'est en cours d'éxécution
@@ -70,15 +71,13 @@ namespace Server { namespace Game { namespace Engine {
         void DispatchSpawnEvents();
         void DispatchKillEvents();
         void Save(Tools::Database::IConnection& conn);
-        //void BeginPluginRegistering(Uint32 pluginId, std::string const& pluginName);
-        //void EndPluginRegistering();
         void BootstrapPlugin(Uint32 pluginId);
         Uint32 GetRunningEntityId() const { return this->_runningEntityId; }
         Uint32 GetRunningPluginId() const;
 
         // rcon requests
         std::string RconGetEntities() const;
-        std::string RconExecute(Uint32 pluginId, std::string const& lua);
+        void RconAddEntityTypes(Rcon::EntityManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon
 
     private:
         Uint32 _CreateEntity(Uint32 pluginId, std::string entityName, bool positional = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);

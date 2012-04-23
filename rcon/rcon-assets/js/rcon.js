@@ -5,13 +5,25 @@ var rconRights;
 var rconPlugins;
 var rconUrl;
 var rconEntityFiles;
+var rconEntityTypes;
 var rconDebug;
 var currentMap;
 
+/*
+ * On document ready
+ */
 $(document).ready(function() {
 
+    // "Edit lua file" popup configuration
     $('#lua-modal').modal({ keyboard: true, show: false, backdrop: true });
+    $('#lua-modal_ok').click(function() {
+        $('#lua-modal_log').hide('fast');
+        $('#lua-modal_text').show('fast');
+        $('#lua-modal_swap').show('fast');
+        $('#lua-modal_ok').hide('fast');
+    });
 
+    // Login form
     $('#login-form_submit').attr('disabled', false);
     $('#login-form').submit(function() {
         $('#login-form_submit').attr('disabled', true);
@@ -36,15 +48,11 @@ $(document).ready(function() {
                 rconRights = json.rights;
                 rconPlugins = json.plugins;
                 rconEntityFiles = json.entity_files;
+                rconEntityTypes = json.entity_types;
                 rconDebug = json.debug;
-                fillStaticTables();
-                var debugStr = "debugging ";
-                if (rconDebug)
-                    debugStr += "on";
-                else
-                    debugStr += "off";
                 $('#category-server_title').html(json.world_fullname +
-                    ' ("' + json.world_identifier + '", version ' + json.world_version + ', ' + debugStr + ')');
+                    ' ("' + json.world_identifier + '", version ' + json.world_version + ', debugging ' + (rconDebug ? 'on' : 'off') + ')');
+                fillStaticTables();
                 setTimeout(startFetchers, 250);
             },
             error: function(json, errorType, httpError) {
@@ -60,6 +68,7 @@ $(document).ready(function() {
         return false;
     });
 
+    // Execute form
     $('#execute_submit').click(function() {
         $('#execute_submit').hide();
         $('#execute_alert').hide('fast');
@@ -91,15 +100,11 @@ $(document).ready(function() {
         });
     });
 
-    $('#lua-modal_ok').click(function() {
-        $('#lua-modal_log').hide('fast');
-        $('#lua-modal_text').show('fast');
-        $('#lua-modal_swap').show('fast');
-        $('#lua-modal_ok').hide('fast');
-    });
-
 });
 
+/*
+ * Utility functions
+ */
 function hasRight(str) {
     return rconRights.indexOf(str) >= 0;
 }
@@ -109,6 +114,9 @@ function generateId(str) {
     return str + "_" + generatedIdCount;
 }
 
+/*
+ * Map switching (tabs)
+ */
 function activateMap(map) {
     currentMap = map;
     $('#execute_submit').html('Run script on ' + currentMap);
@@ -116,7 +124,11 @@ function activateMap(map) {
     // TODO clear les groupes de données de la map
 }
 
+/*
+ * Initial stuff done on successful login
+ */
 function fillStaticTables() {
+    // "world" category
     $.each(rconMaps, function() {
         $('#maps_list').append('<tr><td>' + this.identifier + '</td><td>' + this.fullname + '</td></tr>');
     });
@@ -125,6 +137,7 @@ function fillStaticTables() {
     });
     $('#category-server').show('fast');
 
+    // maps category
     for (var i = 0; i < rconMaps.length; i++) {
         var id = generateId("map_tab");
         if (!i) {
@@ -142,6 +155,7 @@ function fillStaticTables() {
     });
     $('#category-maps').show('fast');
 
+    // entities category
     if (rconDebug) {
         $.each(rconEntityFiles, function() {
             if (hasRight("execute")) {
@@ -156,9 +170,15 @@ function fillStaticTables() {
         });
         $('#entity-files_group').show();
     }
+    $.each(rconEntityTypes, function() {
+        $('#entity-type_list').append('<tr><td>' + this.plugin + '</td><td>' + this.name + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td></tr>');
+    });
     $('#category-entities').show('fast');
 }
 
+/*
+ * Lua file popup when "edit" is clicked
+ */
 function editLuaFile(plugin, file) {
     $('#lua-modal_title').html(plugin + '/' + file);
     $('#lua-modal_preloader').show();
@@ -230,6 +250,9 @@ function editLuaFile(plugin, file) {
     });
 }
 
+/*
+ * First setTimeouts to start fetching data regularly
+ */
 function startFetchers() {
     if (hasRight('logs')) {
         $('#category-logs').show('fast');
@@ -252,15 +275,27 @@ function startFetchers() {
     }
 }
 
+/*
+ * Fetches log messages regularly
+ */
 function fetchLogs() {
 }
 
+/*
+ * Fetches entity instances regularly
+ */
 function fetchEntities() {
 }
 
+/*
+ * Fetches pending messages regularly
+ */
 function fetchMessages() {
 }
 
+/*
+ * Fetches rcon sessions regularly
+ */
 function fetchRconSessions() {
     $.ajax({
         url: rconUrl + 'rcon_sessions',

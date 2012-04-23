@@ -3,7 +3,7 @@
 #include "server/rcon/Request.hpp"
 #include "server/rcon/Rcon.hpp"
 #include "server/rcon/SessionManager.hpp"
-#include "server/rcon/EntityFileManager.hpp"
+#include "server/rcon/EntityManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "server/Server.hpp"
 #include "server/Settings.hpp"
@@ -257,9 +257,13 @@ namespace Server { namespace Rcon {
         json += "\t\"plugins\":\n";
         json += this->_server.GetGame().GetWorld().GetPluginManager().RconGetPlugins() + ",\n";
 
+        // entity types
+        json += "\t\"entity_types\":\n";
+        json += this->_server.GetRcon().GetEntityManager().RconGetEntityTypes() + ",\n";
+
         // entity files
         json += "\t\"entity_files\":\n";
-        json += this->_server.GetRcon().GetEntityFileManager().RconGetEntityFiles();
+        json += this->_server.GetRcon().GetEntityManager().RconGetEntityFiles();
 
         // send response
         json += "}\n";
@@ -286,7 +290,7 @@ namespace Server { namespace Rcon {
     {
         if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "execute"))
         {
-            std::string json = this->_server.GetRcon().GetEntityFileManager().GetFile(pluginIdentifier, file);
+            std::string json = this->_server.GetRcon().GetEntityManager().GetFile(pluginIdentifier, file);
             if (json.empty())
                 this->_WriteHttpResponse("404 Not Found");
             else
@@ -300,7 +304,7 @@ namespace Server { namespace Rcon {
     {
         if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "execute"))
         {
-            if (this->_server.GetRcon().GetEntityFileManager().UpdateFile(pluginIdentifier, file, lua))
+            if (this->_server.GetRcon().GetEntityManager().UpdateFile(pluginIdentifier, file, lua))
                 this->_WriteHttpResponse("200 OK");
             else
                 this->_WriteHttpResponse("404 Not Found");

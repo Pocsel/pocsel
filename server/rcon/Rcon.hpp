@@ -8,7 +8,7 @@ namespace Server {
 namespace Server { namespace Rcon {
 
     class SessionManager;
-    class EntityFileManager;
+    class EntityManager;
 
     class Rcon :
         private boost::noncopyable
@@ -20,7 +20,7 @@ namespace Server { namespace Rcon {
         boost::asio::ip::tcp::socket* _newRequest;
         boost::thread* _thread;
         SessionManager* _sessionManager;
-        EntityFileManager* _entityFileManager;
+        EntityManager* _entityManager;
 
     public:
         Rcon(Server& server);
@@ -28,7 +28,7 @@ namespace Server { namespace Rcon {
         void Start();
         void Stop();
         SessionManager& GetSessionManager() { return *this->_sessionManager; }
-        EntityFileManager& GetEntityFileManager() { return *this->_entityFileManager; }
+        EntityManager& GetEntityManager() { return *this->_entityManager; }
     private:
         void _Run();
         void _ConnectAccept();
