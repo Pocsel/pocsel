@@ -29,12 +29,8 @@ namespace Client { namespace Game {
     {
         if (this->_items.count(id) == 0)
         {
-            std::unique_ptr<Model> model(
-                new Model(
-                    this->_game.GetClient().GetLocalResourceManager().GetMd5Model("boblampclean")
-                    ));
-            this->_items[id] =
-                new Item(model);
+            std::unique_ptr<Model> model(new Model(this->_game.GetClient().GetLocalResourceManager()));
+            this->_items[id] = new Item(model);
         }
         this->_items[id]->position = pos.position;
     }

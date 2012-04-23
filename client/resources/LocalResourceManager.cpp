@@ -6,6 +6,7 @@
 #include "client/network/PacketCreator.hpp"
 #include "client/resources/LocalResourceManager.hpp"
 #include "client/resources/Md5Model.hpp"
+#include "client/resources/Md5Animation.hpp"
 #include "client/window/Window.hpp"
 
 #include "tools/IRenderer.hpp"
@@ -30,6 +31,8 @@ namespace Client { namespace Resources {
             Tools::Delete(it->second);
         for (auto it = this->_models.begin(), ite = this->_models.end(); it != ite; ++it)
             Tools::Delete(it->second);
+        for (auto it = this->_animations.begin(), ite = this->_animations.end(); it != ite; ++it)
+            Tools::Delete(it->second);
     }
 
     Tools::Renderers::Utils::Font& LocalResourceManager::GetFont(std::string const& path, Uint32 size)
@@ -47,7 +50,7 @@ namespace Client { namespace Resources {
             }
             catch (std::exception& ex)
             {
-                Tools::error << "Can't load font \"" << path << "\", details: " << ex.what() << "\n";
+                Tools::error << "Can't load local font \"" << path << "\", details: " << ex.what() << "\n";
                 throw;
             }
         }
@@ -67,7 +70,7 @@ namespace Client { namespace Resources {
             }
             catch (std::exception& ex)
             {
-                Tools::error << "Can't load texture \"" << path << "\", details: " << ex.what() << "\n";
+                Tools::error << "Can't load local texture \"" << path << "\", details: " << ex.what() << "\n";
                 texture = this->_textures["__error__"];
             }
             if (texture == this->_textures["__error__"])
@@ -96,7 +99,7 @@ namespace Client { namespace Resources {
             }
             catch (std::exception& ex)
             {
-                Tools::error << "Can't load shader \"" << path << "\", details: " << ex.what() << "\n";
+                Tools::error << "Can't load local shader \"" << path << "\", details: " << ex.what() << "\n";
                 throw;
             }
         }
@@ -109,29 +112,41 @@ namespace Client { namespace Resources {
         auto it = this->_models.find(path);
         if (it == this->_models.end())
         {
-            Md5Model* model = new Md5Model();
             try
             {
                 boost::filesystem::path texturesPath = path;
                 boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
                 modelPath.replace_extension(".md5mesh");
-                if (!model->LoadModel(
-                            modelPath,
-                            texturesPath,
-                            *this
-                            )
-                   )
-                    throw std::runtime_error("cant load " + path);
-                boost::filesystem::path animPath = this->_client.GetSettings().confDir / "models" / path;
-                animPath.replace_extension(".md5anim");
-                model->LoadAnim(animPath);
+                Md5Model* model = new Md5Model(modelPath, texturesPath, *this);
                 this->_models[path] = model;
                 return *model;
             }
             catch (std::exception& ex)
             {
                 Tools::error << "Can't load Md5Model \"" << path << "\", details: " << ex.what() << "\n";
-                Tools::Delete(model);
+                throw;
+            }
+        }
+        else
+            return *it->second;
+    }
+
+    Md5Animation const& LocalResourceManager::GetMd5Animation(std::string const& path)
+    {
+        auto it = this->_animations.find(path);
+        if (it == this->_animations.end())
+        {
+            try
+            {
+                boost::filesystem::path animPath = this->_client.GetSettings().confDir / "models" / path;
+                animPath.replace_extension(".md5anim");
+                Md5Animation* anim = new Md5Animation(animPath);
+                this->_animations[path] = anim;
+                return *anim;
+            }
+            catch (std::exception& ex)
+            {
+                Tools::error << "Can't load Md5Anim \"" << path << "\", details: " << ex.what() << "\n";
                 throw;
             }
         }

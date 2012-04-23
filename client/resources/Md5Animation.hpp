@@ -70,11 +70,8 @@ namespace Client { namespace Resources {
         float _frameDuration;
 
     public:
-        Md5Animation();
-        virtual ~Md5Animation();
-
-        // Load an animation from the animation file
-        bool LoadAnimation(boost::filesystem::path const& filePath);
+        explicit Md5Animation(boost::filesystem::path const& filePath);
+        ~Md5Animation();
 
         JointInfo const& GetJointInfo(unsigned int index) const
         {

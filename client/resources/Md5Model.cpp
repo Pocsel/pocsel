@@ -4,6 +4,8 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "client/resources/Md5Model.hpp"
+#include "client/resources/Md5Animation.hpp"
+
 #include "client/resources/LocalResourceManager.hpp"
 
 #include "tools/Math.hpp"
@@ -11,15 +13,6 @@
 #include "tools/IRenderer.hpp"
 
 namespace Client { namespace Resources {
-
-    Md5Model::Md5Model() :
-        _md5Version(-1),
-        _numJoints(0),
-        _numMeshes(0),
-//        _hasAnimation(false),
-        _localToWorldMatrix(1)
-    {
-    }
 
     Md5Model::~Md5Model()
     {
@@ -30,16 +23,17 @@ namespace Client { namespace Resources {
         }
     }
 
-    bool Md5Model::LoadModel(
+    Md5Model::Md5Model(
             boost::filesystem::path const& filePath,
             boost::filesystem::path const& texturesPath,
-            LocalResourceManager& resourceManager)
+            LocalResourceManager& resourceManager) :
+        _md5Version(-1),
+        _numJoints(0),
+        _numMeshes(0),
+        _localToWorldMatrix(1)
     {
         if (!boost::filesystem::exists(filePath))
-        {
-            Tools::error << "Md5Model::LoadModel: Failed to find file: " << filePath << "\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Model::LoadModel: Failed to find file: " + filePath.string());
 
         // store the parent path used for loading images relative to this file.
         boost::filesystem::path parentPath = filePath.parent_path();
@@ -50,10 +44,7 @@ namespace Client { namespace Resources {
         boost::filesystem::ifstream file(filePath);
         int fileLength = (int)Tools::Filesystem::GetFileLength(file);
         if (fileLength <= 0)
-        {
-            Tools::error << "Md5Model::LoadModel: file " << filePath << " is empty\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Model::LoadModel: file " + filePath.string() + " is empty");
 
         this->_joints.clear();
         this->_meshes.clear();
@@ -66,10 +57,7 @@ namespace Client { namespace Resources {
             {
                 file >> this->_md5Version;
                 if (this->_md5Version != 10)
-                {
-                    Tools::error << "Md5Model::LoadModel: " << filePath << ": Only MD5 version 10 is supported\n";
-                    return false;
-                }
+                    throw std::runtime_error("Md5Model::LoadModel: " + filePath.string() + ": Only MD5 version 10 is supported");
             }
             else if (param == "commandline")
             {
@@ -217,31 +205,10 @@ namespace Client { namespace Resources {
         }
 
         if (this->_joints.size() != this->_numJoints)
-        {
-            Tools::error << "Md5Model::LoadModel: " << filePath <<
-                ": number of joints not ok. (need " << this->_numJoints << ", has " << this->_joints.size() << ")\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Model::LoadModel: " + filePath.string() + ": number of joints not ok. (need " + Tools::ToString(this->_numJoints) + ", has " + Tools::ToString(this->_joints.size()) + ")");
         if (this->_meshes.size() != this->_numMeshes)
-        {
-            Tools::error << "Md5Model::LoadModel: " << filePath <<
-                ": number of meshes not ok. (need " << this->_numMeshes << ", has " << this->_meshes.size() << ")\n";
-            return false;
-        }
-
-        return true;
+            throw std::runtime_error("Md5Model::LoadModel: " + filePath.string() + ": number of meshes not ok. (need " + Tools::ToString(this->_numMeshes) + ", has " + Tools::ToString(this->_meshes.size()) + ")");
     }
-
-    //bool Md5Model::LoadAnim(boost::filesystem::path const& filePath)
-    //{
-    //    if (this->_animation.LoadAnimation(filePath))
-    //    {
-    //        // Check to make sure the animation is appropriate for this model
-    //        this->_hasAnimation = this->_CheckAnimation(this->_animation);
-    //    }
-
-    //    return this->_hasAnimation;
-    //}
 
     bool Md5Model::CheckAnimation(Md5Animation const& animation) const
     {

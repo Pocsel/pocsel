@@ -5,6 +5,8 @@
 
 namespace Client { namespace Resources {
     class Md5Model;
+    class Md5Animation;
+    class LocalResourceManager;
     class Mesh;
 }}
 
@@ -14,11 +16,13 @@ namespace Client { namespace Game {
     {
     private:
         Resources::Md5Model const& _model;
+        std::map<std::string, Resources::Md5Animation const*> _animations;
+        Resources::Md5Animation const* _curAnimation;
         std::vector<glm::mat4x4> _animatedBones; // Animated bone matrix from the animation with the inverse bind pose applied.
         float _animTime;
 
     public:
-        Model(Resources::Md5Model const& model);
+        Model(Resources::LocalResourceManager& resourceManager);
 
         void Update(Uint32 time, float phi);
 

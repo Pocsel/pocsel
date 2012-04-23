@@ -1,8 +1,6 @@
 #ifndef __CLIENT_RESOURCES_MD5MODEL_HPP__
 #define __CLIENT_RESOURCES_MD5MODEL_HPP__
 
-#include "client/resources/Md5Animation.hpp"
-
 namespace Tools {
     class IRenderer;
     namespace Renderers {
@@ -14,6 +12,7 @@ namespace Tools {
 
 namespace Client { namespace Resources {
     class LocalResourceManager;
+    class Md5Animation;
 }}
 
 namespace Client { namespace Resources {
@@ -101,13 +100,12 @@ namespace Client { namespace Resources {
         glm::mat4x4 _worldToLocalMatrix;
 
     public:
-        Md5Model();
-        virtual ~Md5Model();
-
-        bool LoadModel(
+        explicit Md5Model(
                 boost::filesystem::path const& filePath,
                 boost::filesystem::path const& texturesPath,
                 LocalResourceManager& resourceManager);
+        ~Md5Model();
+
         //bool LoadAnim(boost::filesystem::path const& filePath);
         bool CheckAnimation(Md5Animation const& animation) const;
         void Update(Uint32 time, float phi);
