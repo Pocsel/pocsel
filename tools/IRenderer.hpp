@@ -46,21 +46,23 @@ namespace Tools {
         {
             /**
              * 0x<size><type><nb color><format>
-             * format: Alpha = 1, Rgb = 2, Rgba = 3, Luminance = 4, png = 5, LuminanceAlpha = 6, DepthStencil = 7
-             * type: 1*uint8 = 1, 4*uint8 = 2, 1*float = 3, 4*uint4 = 4, 2*uint8 = 5, others = 6
+             * format: Alpha = 1, Rgb = 2, Rgba = 3, Luminance = 4, png = 5, LuminanceAlpha = 6, DepthStencil = 7, Rg = 8, R = 9
+             * type: 1*uint8 = 1, 4*uint8 = 2, 1*float = 3, 4*uint4 = 4, 2*uint8 = 5, others = 6, 2*float = 7
              */
             enum Type
             {
-                Alpha8 = 0x01010101,
+                //Alpha8 = 0x01010101, // deprecated
                 Rgb8 = 0x03020302,
                 Rgba8 = 0x04020403,
-                Luminance = 0x04030104,
-                Luminance8 = 0x01010104,
-                Luminance8Alpha8 = 0x02050206,
+                //Luminance = 0x04030104, // deprecated
+                //Luminance8 = 0x01010104, // deprecated
+                //Luminance8Alpha8 = 0x02050206, // deprecated
                 Rgb4 = 0x02040302,
                 Rgba4 = 0x02040403,
                 Png = 0x00000405,
                 // Special
+                R32f = 0x04030109,
+                Rg16f = 0x04070208,
                 Rgba16f = 0x08060403,
                 Rgb10a2 = 0x04060403,
                 Depth24Stencil8 = 0x04060207

@@ -1,19 +1,20 @@
 float4x4 mvp : WorldViewProjection;
 float4x4 view : View;
 float4x4 viewInverse : ViewInverse;
+float4x4 worldViewProjectionInverse : WorldViewProjectionInverse;
 float time = 1.0;
 
+sampler2D colors = sampler_state
+{
+   magFilter = Point;
+   minFilter = Point;
+};
 sampler2D normals = sampler_state
 {
    magFilter = Point;
    minFilter = Point;
 };
 sampler2D positions = sampler_state
-{
-   magFilter = Point;
-   minFilter = Point;
-};
-sampler2D colors = sampler_state
 {
    magFilter = Point;
    minFilter = Point;
@@ -27,12 +28,14 @@ struct VSout
 {
    float4 position  : POSITION;
    float2 tex       : TEXCOORD0;
+   float4 pos       : TEXCOORD1;
 };
 
 VSout vs(in float4 position : POSITION, in float2 tex : TEXCOORD0)
 {
     VSout vout;
     vout.position = mul(mvp, position);
+    vout.pos = vout.position;
 #ifdef DIRECTX
     vout.tex = tex;
 #else
@@ -41,15 +44,32 @@ VSout vs(in float4 position : POSITION, in float2 tex : TEXCOORD0)
     return vout;
 }
 
+float3 decodeNormals(float4 enc, float3 view)
+{
+    float4 nn = enc*float4(2,2,0,0) + float4(-1,-1,1,-1);
+    float l = dot(nn.xyz, -nn.xyw);
+    nn.z = l;
+    nn.xy *= sqrt(l);
+    return nn.xyz * 2 + float3(0,0,-1);
+}
+
 float4 fs(in VSout i) : COLOR
 {
     float3 vDiffuseMaterial = tex2D(colors, i.tex).rgb;
     //float3 vSpecularMaterial = tex2D(SceneMaterialSampler, i.vTex0).a;
 
     // normals are stored in texture space [0,1] -> convert them back to [-1,+1] range
-    float3 vWorldNrm = tex2D(normals, i.tex).xyz;
+    float4 tmp = tex2D(normals, i.tex);
+    float3 vWorldNrm = decodeNormals(tmp, viewInverse[3].xyz);
 
-    float3 vWorldPos = tex2D(positions, i.tex).xyz;
+    float3 vWorldPos2 = tex2D(positions, i.tex).xyz;
+
+    tmp = mul(worldViewProjectionInverse, float4(i.pos.x, i.pos.y, tmp.w * i.pos.w, i.pos.w));
+    float3 vWorldPos = tmp.xyz / tmp.w;
+    
+    //if (i.pos.x < 0)
+        vWorldPos = vWorldPos2;
+
     float3 vLightDir = normalize(lightPos - vWorldPos);
     float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
     float3 vDiffuseIntensity = dot(vWorldNrm, vLightDir);
@@ -57,10 +77,10 @@ float4 fs(in VSout i) : COLOR
 
     float4 color;
     color.rgb = (vDiffuseIntensity * lightDiffuse) * vDiffuseMaterial
-        + vSpecularIntensity * lightSpecular.xyz;// * vSpecularMaterial;
+         + vSpecularIntensity * lightSpecular.xyz;// * vSpecularMaterial;
     color.a = 1.0;
     
-    //color.rgb = vWorldNrm;
+    //color.rgb = vWorldPos;//vDiffuseMaterial;
 
     // here we add color to show how lighting pass affects the scene
     //color.rgb += i.tex.rgr * 0.5;
