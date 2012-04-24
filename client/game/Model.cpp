@@ -17,7 +17,12 @@ namespace Client { namespace Game {
         this->_animations["boblampclean_move"] = &resourceManager.GetMd5Animation("boblampclean_move");
         if (!this->_model.CheckAnimation(*this->_animations["boblampclean_move"]))
             throw std::runtime_error("this animation is not compatible");
-        this->_curAnimation = this->_animations["boblampclean_move"];
+        this->_curAnimation = this->_animations["boblampclean"];
+    }
+
+    void Model::SetAnim(std::string const& anim)
+    {
+        this->_curAnimation = this->_animations[anim];
     }
 
     void Model::Update(Uint32 time, float phi)

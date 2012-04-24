@@ -18,12 +18,13 @@ namespace Client { namespace Game {
         Resources::Md5Model const& _model;
         std::map<std::string, Resources::Md5Animation const*> _animations;
         Resources::Md5Animation const* _curAnimation;
-        std::vector<glm::mat4x4> _animatedBones; // Animated bone matrix from the animation with the inverse bind pose applied.
+        std::vector<glm::mat4x4> _animatedBones;
         float _animTime;
 
     public:
         Model(Resources::LocalResourceManager& resourceManager);
 
+        void SetAnim(std::string const& anim);
         void Update(Uint32 time, float phi);
 
         std::vector<Resources::Md5Model::Mesh> const& GetMeshes() const { return this->_model.GetMeshes(); }

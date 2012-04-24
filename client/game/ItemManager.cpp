@@ -33,6 +33,7 @@ namespace Client { namespace Game {
             this->_items[id] = new Item(model);
         }
         this->_items[id]->position = pos.position;
+        this->_items[id]->SetMoving(pos.movement.x != 0 || pos.movement.y != 0 || pos.movement.z != 0);
     }
 
     void ItemManager::Render()
