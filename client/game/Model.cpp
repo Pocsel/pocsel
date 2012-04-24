@@ -1,21 +1,37 @@
 #include "client/game/Model.hpp"
 
+#include "client/resources/Md5Animation.hpp"
+#include "client/resources/LocalResourceManager.hpp"
+
 namespace Client { namespace Game {
 
-    Model::Model(Resources::Md5Model const& model) :
-        _model(model),
-        _animatedBones(model.GetNumJoints()),
+    Model::Model(Resources::LocalResourceManager& resourceManager) :
+        _model(resourceManager.GetMd5Model("boblampclean")),
+        _curAnimation(),
+        _animatedBones(_model.GetNumJoints()),
         _animTime(0)
     {
+        this->_animations["boblampclean"] = &resourceManager.GetMd5Animation("boblampclean");
+        if (!this->_model.CheckAnimation(*this->_animations["boblampclean"]))
+            throw std::runtime_error("this animation is not compatible");
+        this->_animations["boblampclean_move"] = &resourceManager.GetMd5Animation("boblampclean_move");
+        if (!this->_model.CheckAnimation(*this->_animations["boblampclean_move"]))
+            throw std::runtime_error("this animation is not compatible");
+        this->_curAnimation = this->_animations["boblampclean"];
+    }
+
+    void Model::SetAnim(std::string const& anim)
+    {
+        this->_curAnimation = this->_animations[anim];
     }
 
     void Model::Update(Uint32 time, float phi)
     {
-        if (this->_model.HasAnimation() && this->_model.GetAnimation().GetNumFrames() > 0)
+        if (this->_curAnimation != 0 && this->_curAnimation->GetNumFrames() > 0)
         {
             float deltaTime = (float)time / 1000.0f;
 
-            Resources::Md5Animation const& animation = this->_model.GetAnimation();
+            Resources::Md5Animation const& animation = *this->_curAnimation;
 
             this->_animTime = std::fmod(this->_animTime + deltaTime, animation.GetAnimDuration());
 

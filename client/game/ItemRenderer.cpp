@@ -2,6 +2,7 @@
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
 #include "client/game/Model.hpp"
+#include "client/game/Item.hpp"
 
 #include "tools/IRenderer.hpp"
 
@@ -32,13 +33,15 @@ namespace Client { namespace Game {
         Tools::Delete(this->_shaderBoneMatrix);
     }
 
-    void ItemRenderer::Render(Model const& model, Common::OrientedPosition const& pos)
+    void ItemRenderer::Render(Item const& item)
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
 
         this->_shader->BeginPass();
 
         float pi = std::atan2(0.0f, -1.0f);
+
+        Common::OrientedPosition const& pos = item.position;
 
         this->_renderer.SetModelMatrix(
             glm::translate<float>(
@@ -57,6 +60,8 @@ namespace Client { namespace Game {
                 glm::fvec3(0.1f, 0.1f, 0.1f)
                 )
             );
+
+        Model const& model = item.GetModel();
 
         auto meshes = model.GetMeshes();
         this->_shaderBoneMatrix->Set(model.GetAnimatedBones());

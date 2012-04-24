@@ -7,7 +7,11 @@
 
 namespace Client { namespace Resources {
 
-    Md5Animation::Md5Animation() :
+    Md5Animation::~Md5Animation()
+    {
+    }
+
+    Md5Animation::Md5Animation(boost::filesystem::path const& filePath) :
         _md5Version(0),
         _numFrames(0),
         _numJoints(0),
@@ -16,19 +20,8 @@ namespace Client { namespace Resources {
         _animDuration(0),
         _frameDuration(0)
     {
-    }
-
-    Md5Animation::~Md5Animation()
-    {
-    }
-
-    bool Md5Animation::LoadAnimation(boost::filesystem::path const& filePath)
-    {
         if (!boost::filesystem::exists(filePath))
-        {
-            Tools::error << "Md5Animation::LoadAnimation: Failed to find file: " << filePath << "\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Animation::LoadAnimation: Failed to find file: " + filePath.string() + "");
 
         std::string param;
         std::string junk;   // Read junk from the file
@@ -36,10 +29,7 @@ namespace Client { namespace Resources {
         boost::filesystem::ifstream file(filePath);
         auto fileLength = Tools::Filesystem::GetFileLength(file);
         if (fileLength <= 0)
-        {
-            Tools::error << "Md5Animation::LoadAnimation: file " << filePath << " is empty\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Animation::LoadAnimation: file " + filePath.string() + " is empty");
 
         this->_jointInfos.clear();
         this->_bounds.clear();
@@ -55,10 +45,7 @@ namespace Client { namespace Resources {
             {
                 file >> this->_md5Version;
                 if (this->_md5Version != 10)
-                {
-                    Tools::error << "Md5Animation::LoadAnimation: " << filePath << ": Only MD5 version 10 is supported\n";
-                    return false;
-                }
+                    throw std::runtime_error("Md5Animation::LoadAnimation: " + filePath.string() + ": Only MD5 version 10 is supported");
             }
             else if (param == "commandline")
             {
@@ -167,37 +154,15 @@ namespace Client { namespace Resources {
         this->_animDuration = ( this->_frameDuration * (float)this->_numFrames );
 
         if (this->_jointInfos.size() != this->_numJoints)
-        {
-            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
-                ": number of joints not ok. (need " << this->_numJoints << ", has " << this->_jointInfos.size() << ")\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Animation::LoadAnimation: " + filePath.string() + ": number of joints not ok. (need " + Tools::ToString(this->_numJoints) + ", has " + Tools::ToString(this->_jointInfos.size()) + ")");
         if (this->_bounds.size() != this->_numFrames)
-        {
-            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
-                ": number of bounds not ok. (need " << this->_numFrames << ", has " << this->_bounds.size() << ")\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Animation::LoadAnimation: " + filePath.string() + ": number of bounds not ok. (need " + Tools::ToString(this->_numFrames) + ", has " + Tools::ToString(this->_bounds.size()) + ")");
         if (this->_baseFrames.size() != this->_numJoints)
-        {
-            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
-                ": number of baseFrames not ok. (need " << this->_numJoints << ", has " << this->_baseFrames.size() << ")\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Animation::LoadAnimation: " + filePath.string() + ": number of baseFrames not ok. (need " + Tools::ToString(this->_numJoints) + ", has " + Tools::ToString(this->_baseFrames.size()) + ")");
         if (this->_frames.size() != this->_numFrames)
-        {
-            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
-                ": number of frames not ok. (need " << this->_numFrames << ", has " << this->_frames.size() << ")\n";
-            return false;
-        }
+            throw std::runtime_error("Md5Animation::LoadAnimation: " + filePath.string() + ": number of frames not ok. (need " + Tools::ToString(this->_numFrames) + ", has " + Tools::ToString(this->_frames.size()) + ")");
         if (this->_skeletons.size() != this->_numFrames)
-        {
-            Tools::error << "Md5Animation::LoadAnimation: " << filePath <<
-                ": number of skels not ok. (need " << this->_numFrames << ", has " << this->_skeletons.size() << ")\n";
-            return false;
-        }
-
-        return true;
+            throw std::runtime_error("Md5Animation::LoadAnimation: " + filePath.string() + ": number of skels not ok. (need " + Tools::ToString(this->_numFrames) + ", has " + Tools::ToString(this->_skeletons.size()) + ")");
     }
 
     void Md5Animation::_BuildFrameSkeleton(
