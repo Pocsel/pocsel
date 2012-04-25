@@ -48,17 +48,16 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     v.texCoord = texCoord;
     v.worldPosition = mul(world, position);
     v.position = mul(worldViewProjection, position);
-    v.normal = normalize(mul(world, float4(normal, 0.0)).xyz);
+    v.normal = mul(world, float4(normal, 0.0)).xyz;
     //v.pos = v.position;
 
     return v;
 }
 
-float2 encodeNormals(float3 n, float3 view)
+float4 encodeNormals(float3 n)
 {
-    float2 enc = normalize(n.xy) * (sqrt(-n.z*0.5 + 0.5));
-    enc = enc*0.5 + 0.5;
-    return enc;
+    float p = sqrt(n.z*8+8);
+    return float4(n.xy/p + 0.5,0,0);
 }
 
 FSout fs(in VSout v)
@@ -66,8 +65,8 @@ FSout fs(in VSout v)
     FSout f;
 
     f.color = tex2D(cubeTexture, v.texCoord);
-    f.normal = float4(1,1,1,1);
-    f.normal.rg = encodeNormals(v.normal, viewInverse[3].xyz);
+    //f.normal = float4(1,1,1,1);
+    f.normal = encodeNormals(v.normal);
     f.position = float4(v.worldPosition, 1.0);
 
     return f;

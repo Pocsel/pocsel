@@ -7,9 +7,9 @@ namespace Tools { namespace Renderers { namespace Utils {
         _renderer(renderer)
     {
         this->_gbufferRenderTarget = this->_renderer.CreateRenderTarget(size);
-        this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Colors
-        this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rg16f, Tools::Renderers::RenderTargetUsage::Color); // Normals
-        this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgb10a2, Tools::Renderers::RenderTargetUsage::Color); // Positions XYZ
+        this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba16f, Tools::Renderers::RenderTargetUsage::Color); // Colors
+        this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba16f, Tools::Renderers::RenderTargetUsage::Color); // Normals
+        this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba16f, Tools::Renderers::RenderTargetUsage::Color); // Positions XYZ
         this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Depth24Stencil8, Tools::Renderers::RenderTargetUsage::DepthStencil); // Z Buffer
         this->_lightRenderTarget = this->_renderer.CreateRenderTarget(size);
         this->_lightRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Light data
