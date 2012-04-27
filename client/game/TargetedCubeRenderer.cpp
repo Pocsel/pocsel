@@ -22,7 +22,7 @@ namespace Client { namespace Game {
         _renderer(game.GetClient().GetWindow().GetRenderer()),
         _elapsedTime(0)
     {
-        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.cgfx");
+        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fx");
         this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
         this->_shaderTime = this->_shader->GetParameter("time").release();
 

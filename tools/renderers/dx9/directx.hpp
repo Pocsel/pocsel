@@ -157,6 +157,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case PixelFormat::Rgba4: return D3DFMT_A4R4G4B4;
         case PixelFormat::Rgba8: return D3DFMT_A8R8G8B8;
         case PixelFormat::Depth24Stencil8: return D3DFMT_D24S8;
+        case PixelFormat::Depth32: return D3DFMT_D32;
         }
         throw std::runtime_error("Bad PixelFormat ?!");
     }

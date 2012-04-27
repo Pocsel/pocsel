@@ -25,8 +25,8 @@ namespace Tools { namespace Renderers { namespace Utils {
 
         ITexture2D& GetColors() { return this->_gbufferRenderTarget->GetTexture(0); }
         ITexture2D& GetNormals() { return this->_gbufferRenderTarget->GetTexture(1); }
-        ITexture2D& GetPositions() { return this->_gbufferRenderTarget->GetTexture(2); }
-        ITexture2D& GetDepth() { return this->_gbufferRenderTarget->GetTexture(3); }
+        ITexture2D& GetDepth() { return this->_gbufferRenderTarget->GetTexture(2); }
+        ITexture2D& GetInternalDepthBuffer() { return this->_gbufferRenderTarget->GetTexture(3); }
         ITexture2D& GetLighting() { return this->_lightRenderTarget->GetTexture(0); }
     };
 

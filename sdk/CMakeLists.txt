@@ -14,7 +14,8 @@ macro(MakePlugin target filename fullname identifier source_dir)
         COMMAND python2 "${plugin_creator}" --fullname "${fullname}" --identifier "${identifier}" "${source_dir}" "${plugins_dest_dir}"
         DEPENDS ${plugin_creator} ${plugin_source_files} ${sdk_files}
     )
-    add_custom_target(${target} ALL DEPENDS ${plugin_creator} ${plugin_source_files} ${sdk_files} ${plugin_dest_file})
+    CreateGroups("${plugin_source_files}")
+    add_custom_target(${target} ALL DEPENDS ${plugin_creator} ${plugin_source_files} ${sdk_files} ${plugin_dest_file} SOURCES ${plugin_source_files})
 endmacro()
 
 MakePlugin(base_plugin "base.tcplug" "Pocsel base plugin" "base" "${CMAKE_CURRENT_SOURCE_DIR}/plugins/base")
@@ -35,5 +36,7 @@ add_custom_command(
     COMMAND python2 "${plugin_installer}" --fullname "Dev World" --identifier "dev" --recreate "${world_dest_file}" "${world_source_dir}"
     DEPENDS ${plugin_installer} ${world_source_files} ${sdk_files}
 )
-add_custom_target(dev_world ALL DEPENDS ${plugin_installer} ${world_source_files} ${sdk_files} ${world_dest_file})
+CreateGroups("${sdk_files}")
+CreateGroups("${world_source_files}")
+add_custom_target(dev_world ALL DEPENDS ${plugin_installer} ${world_source_files} ${sdk_files} ${world_dest_file} SOURCES ${sdk_files} ${world_source_files})
 add_dependencies(dev_world base_plugin)

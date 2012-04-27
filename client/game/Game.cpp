@@ -38,12 +38,12 @@ namespace Client { namespace Game {
         // XXX
         this->_gBuffer = std::unique_ptr<Tools::Renderers::Utils::GBuffer>(new Tools::Renderers::Utils::GBuffer(this->_renderer, size));
         this->_renderImage = std::unique_ptr<Tools::Renderers::Utils::Image>(new Tools::Renderers::Utils::Image(this->_renderer));
-        this->_renderShader = &this->_client.GetLocalResourceManager().GetShader("PostProcess.cgfx");
+        this->_renderShader = &this->_client.GetLocalResourceManager().GetShader("PostProcess.fx");
         this->_renderColorsParameter = this->_renderShader->GetParameter("colors");
         this->_renderNormalsParameter = this->_renderShader->GetParameter("normals");
-        this->_renderPositionsParameter = this->_renderShader->GetParameter("positions");
+        this->_renderDepthParameter = this->_renderShader->GetParameter("depthBuffer");
 
-        this->_basicShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.cgfx");
+        this->_basicShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
         this->_basicParameter = this->_basicShader->GetParameter("baseTex");
         // XXX
     }
@@ -89,8 +89,6 @@ namespace Client { namespace Game {
         this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
 
-        //this->_renderer.BeginDraw(this->_renderTarget.get());
-        
         this->_gBuffer->Bind();
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
 
@@ -108,11 +106,11 @@ namespace Client { namespace Game {
 
         this->_renderShader->BeginPass();
         this->_gBuffer->GetNormals().Bind();
-        this->_gBuffer->GetPositions().Bind();
+        this->_gBuffer->GetDepth().Bind();
         this->_renderNormalsParameter->Set(this->_gBuffer->GetNormals());
-        this->_renderPositionsParameter->Set(this->_gBuffer->GetPositions());
+        this->_renderDepthParameter->Set(this->_gBuffer->GetDepth());
         this->_renderImage->Render(*this->_renderColorsParameter, this->_gBuffer->GetColors());
-        this->_gBuffer->GetPositions().Unbind();
+        this->_gBuffer->GetDepth().Unbind();
         this->_gBuffer->GetNormals().Unbind();
         this->_renderShader->EndPass();
 
@@ -120,7 +118,7 @@ namespace Client { namespace Game {
         this->_renderer.SetModelMatrix(glm::scale<float>(64, 64, 1) * glm::translate<float>(1, 1, 0));
         this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetNormals());
         this->_renderer.SetModelMatrix(glm::scale<float>(64, 64, 1) * glm::translate<float>(3, 1, 0));
-        this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetPositions());
+        this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetDepth());
         this->_renderer.SetModelMatrix(glm::scale<float>(64, 64, 1) * glm::translate<float>(5, 1, 0));
         this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetColors());
         this->_basicShader->EndPass();

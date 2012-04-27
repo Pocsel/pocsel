@@ -22,7 +22,7 @@ namespace Client { namespace Game {
         _renderer(game.GetClient().GetWindow().GetRenderer()),
         _elapsedTime(0)
     {
-        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("BaseModel.cgfx");
+        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("BaseModel.fx");
         this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
         this->_shaderBoneMatrix = this->_shader->GetParameter("boneMatrix").release();
     }

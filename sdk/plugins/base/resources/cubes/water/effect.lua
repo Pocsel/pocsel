@@ -1,6 +1,6 @@
 Client.Effect.Create{
     name = "water",
-    resource = "cubes/water/effect.cgfx",
+    resource = "cubes/water/effect.fx",
     initObject = function(effect, object)
         -- effect.id = current shader
     end,

@@ -82,7 +82,6 @@ namespace Client { namespace Resources {
         Tools::Renderers::ITexture2D* errTex = 0;
         if (this->_textures.find(0) != this->_textures.end())
             errTex = this->_textures[0];
-        delete errTex;
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
             if (it->second != errTex)
                 Tools::Delete(it->second);
@@ -95,6 +94,7 @@ namespace Client { namespace Resources {
         for (auto it = this->_effects.begin(), ite = this->_effects.end(); it != ite; ++it)
             for (auto itEffect = it->second.begin(), iteEffect = it->second.end(); itEffect != iteEffect; ++itEffect)
                 Tools::Delete(itEffect->second);
+        delete errTex;
     }
 
     Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 id)

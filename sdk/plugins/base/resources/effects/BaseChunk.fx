@@ -1,6 +1,7 @@
 float4x4 worldViewProjection : WorldViewProjection;
 float4x4 viewProjection : ViewProjection;
 float4x4 world : World;
+float4x4 worldView : WorldView;
 float4x4 viewInverse : ViewInverse;
 
 float3 fogColor = float3(0.8, 0.8, 0.9);
@@ -20,8 +21,8 @@ sampler2D cubeTexture = sampler_state
 #else
 sampler2D cubeTexture = sampler_state
 {
-   minFilter = LinearMipMapLinear;
-   magFilter = Nearest;
+    minFilter = LinearMipMapLinear;
+    magFilter = Nearest;
 };
 #endif
 
@@ -31,7 +32,7 @@ struct VSout
     float2 texCoord      : TEXCOORD0;
     float3 worldPosition : TEXCOORD1;
     float3 normal        : TEXCOORD2;
-    //float4 pos           : TEXCOORD3;
+    float4 pos           : TEXCOORD3;
 };
 
 struct FSout
@@ -48,16 +49,19 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     v.texCoord = texCoord;
     v.worldPosition = mul(world, position);
     v.position = mul(worldViewProjection, position);
-    v.normal = mul(world, float4(normal, 0.0)).xyz;
-    //v.pos = v.position;
+    v.normal = normalize(mul(world, float4(normal, 0.0)).xyz);
+    v.pos = mul(worldView, position);
 
     return v;
 }
 
 float4 encodeNormals(float3 n)
 {
-    float p = sqrt(n.z*8+8);
-    return float4(n.xy/p + 0.5,0,0);
+//    float f = n.z * -2 + 1;
+//    float g = dot(n, n);
+//    float p = sqrt(g + f);
+//    return float4(n.xy / p * 0.5 + 0.5, 1, 1);
+    return float4(n * 0.5 + 0.5, 1.0);
 }
 
 FSout fs(in VSout v)
@@ -65,9 +69,8 @@ FSout fs(in VSout v)
     FSout f;
 
     f.color = tex2D(cubeTexture, v.texCoord);
-    //f.normal = float4(1,1,1,1);
     f.normal = encodeNormals(v.normal);
-    f.position = float4(v.worldPosition, 1.0);
+    f.position = float4(v.pos.z / v.pos.w, v.worldPosition.x, v.worldPosition.y, v.worldPosition.z);
 
     return f;
 }
@@ -97,8 +100,9 @@ technique tech
 {
    pass p0
    {
-       VertexShader = compile vs_2_0 vs();
-       PixelShader = compile ps_2_0 fs();
+        AlphaBlendEnable = false;
+        VertexShader = compile vs_2_0 vs();
+        PixelShader = compile ps_2_0 fs();
    }
 }
 
