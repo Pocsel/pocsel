@@ -29,25 +29,25 @@ namespace Server { namespace Game { namespace Engine {
         return this->_nextCallbackId++;
     }
 
-    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, bool keepCallback /* = false */)
+    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref* ret /* = 0 */, bool keepCallback /* = false */)
     {
-        return this->TriggerCallback(callbackId, this->_engine.GetInterpreter().MakeNil(), keepCallback);
+        return this->TriggerCallback(callbackId, this->_engine.GetInterpreter().MakeNil(), ret, keepCallback);
     }
 
-    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, bool keepCallback /* = false */)
+    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */, bool keepCallback /* = false */)
     {
         if (!callbackId)
             return Ok;
         auto it = this->_callbacks.find(callbackId);
         if (it != this->_callbacks.end())
         {
-            Result ret = this->_engine.GetEntityManager().LuaFunctionCall(it->second->targetId, it->second->function, it->second->arg, bonusArg);
+            Result res = this->_engine.GetEntityManager().CallEntityFunction(it->second->targetId, it->second->function, it->second->arg, bonusArg, ret);
             if (!keepCallback)
             {
                 delete it->second;
                 this->_callbacks.erase(it);
             }
-            return ret;
+            return res;
         }
         Tools::error << "CallbackManager::TriggerCallback: Callback " << callbackId << " not found.\n";
         return CallbackNotFound;

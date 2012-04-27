@@ -44,13 +44,17 @@ namespace Server { namespace Game { namespace Engine {
             auto itMessageEnd = it->second.end();
             for (; itMessage != itMessageEnd; ++itMessage)
             {
-                CallbackManager::Result res = this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->callbackId);
+                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                CallbackManager::Result res = this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->callbackId, &ret);
                 if ((*itMessage)->notificationCallbackId)
                 {
                     auto resultTable = this->_engine.GetInterpreter().MakeTable();
                     resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber((*itMessage)->targetId));
                     if (res == CallbackManager::Ok || res == CallbackManager::Error)
+                    {
                         resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
+                        resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
+                    }
                     else
                         resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(false));
                     this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->notificationCallbackId, resultTable);

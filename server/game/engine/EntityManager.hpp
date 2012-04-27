@@ -64,7 +64,8 @@ namespace Server { namespace Game { namespace Engine {
         ~EntityManager();
 
         // peut retourner toutes les valeurs de CallbackManager::Result sauf CallbackNotFound (evidemment)
-        CallbackManager::Result LuaFunctionCall(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg);
+        // seul entry point Lua avec Engine::RconExecute()
+        CallbackManager::Result CallEntityFunction(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0);
 
         void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, Common::Position const& pos = Common::Position());
         void AddKillEvent(Uint32 targetId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId);
