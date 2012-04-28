@@ -3,10 +3,10 @@
 
 #include "common/Camera.hpp"
 #include "tools/Vector3.hpp"
-#include "client/ActionBinder.hpp"
+#include "tools/window/ActionBinder.hpp"
 #include "common/CubePosition.hpp"
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
     class InputManager;
     class Window;
 }}
@@ -23,7 +23,7 @@ namespace Client { namespace Game {
             Game& _game;
             std::string _nickname;
             Common::Camera _camera;
-            ActionBinder _actionBinder;
+            Tools::Window::ActionBinder _actionBinder;
             Uint32 _elapsedTime;
             bool _moved;
             Uint32 _movedTime;

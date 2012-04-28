@@ -1,12 +1,12 @@
 #ifndef __CLIENT_WINDOW_SDL_INPUTBINDER_HPP__
 #define __CLIENT_WINDOW_SDL_INPUTBINDER_HPP__
 
-#include "client/window/InputBinder.hpp"
+#include "tools/window/InputBinder.hpp"
 
-namespace Client { namespace Window { namespace Sdl {
+namespace Tools { namespace Window { namespace Sdl {
 
     class InputBinder :
-        public ::Client::Window::InputBinder
+        public ::Tools::Window::InputBinder
     {
         private:
             std::map<SDLKey, SpecialKey::SpecialKey> _specialKeys;

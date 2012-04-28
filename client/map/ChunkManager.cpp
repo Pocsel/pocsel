@@ -3,15 +3,14 @@
 #include "tools/Octree.hpp"
 #include "tools/Timer.hpp"
 #include "tools/thread/ThreadPool.hpp"
+#include "tools/window/Window.hpp"
+#include "tools/window/InputManager.hpp"
 
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/game/Game.hpp"
 #include "client/map/ChunkManager.hpp"
 #include "client/network/PacketCreator.hpp"
-
-#include "client/window/Window.hpp"
-#include "client/window/InputManager.hpp"
 
 namespace Client { namespace Map {
 
@@ -33,7 +32,7 @@ namespace Client { namespace Map {
             }
         }
 
-        game.GetClient().GetWindow().GetInputManager().Bind("dump-octree", BindAction::Released,
+        game.GetClient().GetWindow().GetInputManager().Bind("dump-octree", Tools::Window::BindAction::Released,
             [this]()
             {
                 for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)

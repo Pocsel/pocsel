@@ -1,14 +1,14 @@
-#ifndef __CLIENT_ACTIONBINDER_HPP__
-#define __CLIENT_ACTIONBINDER_HPP__
+#ifndef __TOOLS_WINDOW_ACTIONBINDER_HPP__
+#define __TOOLS_WINDOW_ACTIONBINDER_HPP__
 
-#include "client/BindAction.hpp"
-#include "client/window/InputBinder.hpp"
+#include "tools/window/BindAction.hpp"
+#include "tools/window/InputBinder.hpp"
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
     class InputManager;
 }}
 
-namespace Client {
+namespace Tools { namespace Window {
 
     class ActionBinder :
         private boost::noncopyable
@@ -22,11 +22,11 @@ namespace Client {
         std::map<BindAction::BindAction, std::list<std::function<void(void)>>> _releaseBinds;
     public:
         virtual ~ActionBinder() {}
-        void Dispatch(Window::InputManager& inputManager, bool catchAll = false);
+        void Dispatch(Tools::Window::InputManager& inputManager, bool catchAll = false);
         void Bind(std::string const& action, BindAction::Type type, std::function<void(void)> const& func);
         void Bind(BindAction::BindAction action, BindAction::Type type, std::function<void(void)> const& func);
     };
 
-}
+}}
 
 #endif

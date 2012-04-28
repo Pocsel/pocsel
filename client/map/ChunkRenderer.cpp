@@ -1,5 +1,8 @@
 #include "client/precompiled.hpp"
 
+#include "tools/window/Window.hpp"
+#include "tools/Frustum.hpp"
+
 #include "client/Client.hpp"
 #include "client/game/CubeType.hpp"
 #include "client/game/Game.hpp"
@@ -9,9 +12,6 @@
 #include "client/map/Map.hpp"
 #include "client/resources/Effect.hpp"
 #include "client/resources/LocalResourceManager.hpp"
-#include "client/window/Window.hpp"
-
-#include "tools/Frustum.hpp"
 
 namespace Client { namespace Map {
 

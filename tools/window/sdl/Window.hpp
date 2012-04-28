@@ -1,17 +1,17 @@
 #ifndef __CLIENT_WINDOW_SDL_WINDOW_HPP__
 #define __CLIENT_WINDOW_SDL_WINDOW_HPP__
 
-#include "client/window/Window.hpp"
+#include "tools/window/Window.hpp"
 #include "tools/Vector2.hpp"
 
 namespace Tools {
     class IRenderer;
 }
 
-namespace Client { namespace Window { namespace Sdl {
+namespace Tools { namespace Window { namespace Sdl {
 
     class Window :
-        public ::Client::Window::Window
+        public ::Tools::Window::Window
     {
     private:
         Tools::IRenderer* _renderer;

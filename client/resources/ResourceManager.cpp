@@ -2,6 +2,13 @@
 
 #include <IL/il.h>
 
+#include "tools/Color.hpp"
+#include "tools/IRenderer.hpp"
+#include "tools/renderers/utils/TextureAtlas.hpp"
+#include "tools/window/Window.hpp"
+
+#include "common/Resource.hpp"
+
 #include "client/Client.hpp"
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
@@ -12,14 +19,7 @@
 #include "client/resources/AnimatedTexture.hpp"
 #include "client/resources/Effect.hpp"
 #include "client/resources/Texture.hpp"
-#include "client/window/Window.hpp"
 #include "client/Settings.hpp"
-
-#include "tools/Color.hpp"
-#include "tools/IRenderer.hpp"
-#include "tools/renderers/utils/TextureAtlas.hpp"
-
-#include "common/Resource.hpp"
 
 namespace {
     inline void InitializeFrames(Tools::IRenderer& renderer, void const* data, std::size_t dataSize, std::vector<Tools::Renderers::ITexture2D*>& frames)

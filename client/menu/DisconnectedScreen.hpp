@@ -3,12 +3,16 @@
 
 #include "tools/Matrix4.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
-    class Rectangle;
-}}}
+namespace Tools {
+    namespace Renderers { namespace Utils {
+        class Rectangle;
+    }}
+    namespace Window {
+        class ActionBinder;
+    }
+}
 namespace Client {
     class Client;
-    class ActionBinder;
     namespace Menu { namespace Widget {
         class Button;
     }}
@@ -33,7 +37,7 @@ namespace Client { namespace Menu {
         Tools::Renderers::Utils::Rectangle* _backRect;
         int _callbackId;
         std::string _message;
-        ActionBinder* _actionBinder;
+        Tools::Window::ActionBinder* _actionBinder;
         Widget::Button* _button;
 
     public:

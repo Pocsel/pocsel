@@ -1,7 +1,7 @@
 #ifndef __CLIENT_WINDOW_INPUTS_HPP__
 #define __CLIENT_WINDOW_INPUTS_HPP__
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
 
     namespace Button {
         enum Button

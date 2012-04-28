@@ -1,14 +1,7 @@
 #ifndef __CLIENT_BINDACTION_HPP__
 #define __CLIENT_BINDACTION_HPP__
 
-namespace Client { namespace BindAction {
-
-    enum Type
-    {
-        Pressed,
-        Held,
-        Released,
-    };
+namespace Tools { namespace Window { namespace BindAction {
 
     enum BindAction
     {
@@ -29,6 +22,6 @@ namespace Client { namespace BindAction {
         NbBindActions
     };
 
-}}
+}}}
 
 #endif

@@ -10,7 +10,10 @@ set(src
     ${tools_lua_utils_src}
     ${tools_renderers_src}
     ${tools_thread_src}
+	${tools_window_src}
 )
+
+add_definitions(-DTOOLS_WINDOW_BINDACTION_HEADER="client/BindAction.hpp")
 
 CreateGroups("${src}")
 add_executable(client ${src})

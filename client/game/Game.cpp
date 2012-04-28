@@ -4,12 +4,12 @@
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/renderers/utils/GBuffer.hpp"
 #include "tools/renderers/utils/Image.hpp"
+#include "tools/window/Window.hpp"
 
 #include "client/Client.hpp"
 #include "client/network/Network.hpp"
 #include "client/game/Game.hpp"
 #include "client/map/Map.hpp"
-#include "client/window/Window.hpp"
 #include "client/game/Player.hpp"
 #include "client/game/ItemManager.hpp"
 #include "client/resources/LocalResourceManager.hpp"

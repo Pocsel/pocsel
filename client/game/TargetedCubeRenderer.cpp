@@ -1,19 +1,18 @@
 #include "client/precompiled.hpp"
 
-#include "client/game/TargetedCubeRenderer.hpp"
-#include "client/game/Game.hpp"
-#include "client/game/Player.hpp"
-
+#include "tools/window/Window.hpp"
 #include "tools/IRenderer.hpp"
 
 #include "common/CubePosition.hpp"
 #include "common/Position.hpp"
 
+#include "client/game/TargetedCubeRenderer.hpp"
+#include "client/game/Game.hpp"
+#include "client/game/Player.hpp"
+
 #include "client/Client.hpp"
 
 #include "client/resources/LocalResourceManager.hpp"
-
-#include "client/window/Window.hpp"
 
 namespace Client { namespace Game {
 

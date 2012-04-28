@@ -1,19 +1,19 @@
-#include "client/precompiled.hpp"
+#include "tools/precompiled.hpp"
 
-#include "client/window/sdl/Window.hpp"
-#include "client/window/sdl/InputManager.hpp"
-#include "client/window/sdl/InputBinder.hpp"
+#include "tools/window/sdl/Window.hpp"
+#include "tools/window/sdl/InputManager.hpp"
+#include "tools/window/sdl/InputBinder.hpp"
 #include "tools/renderers/DX9Renderer.hpp"
 #include "tools/renderers/GLRenderer.hpp"
 #include "ProgramInfo.hpp"
 
-namespace Client { namespace Window { namespace Sdl {
+namespace Tools { namespace Window { namespace Sdl {
 
     Window::Window(bool directX,
             glm::uvec2 const& size /* = glm::uvec2(800, 600) */,
             bool fullscreen /* = false */,
             bool useShaders /* = true */) :
-        ::Client::Window::Window(new InputManager(*this, new InputBinder())),
+        ::Tools::Window::Window(new InputManager(*this, new InputBinder())),
         _size(size),
         _targetSize(0)
 #ifdef _WIN32

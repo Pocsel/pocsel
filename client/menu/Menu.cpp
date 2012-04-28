@@ -1,8 +1,9 @@
+#include "tools/window/Window.hpp"
+#include "tools/IRenderer.hpp"
+
 #include "client/menu/Menu.hpp"
 #include "client/Client.hpp"
 #include "client/resources/LocalResourceManager.hpp"
-#include "client/window/Window.hpp"
-#include "tools/IRenderer.hpp"
 #include "client/menu/LoadingScreen.hpp"
 #include "client/menu/DisconnectedScreen.hpp"
 #include "client/menu/MainMenu.hpp"

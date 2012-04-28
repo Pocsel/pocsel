@@ -73,16 +73,15 @@ float3 decodeNormals(float4 enc)
     return enc.xyz * 2.0 - 1.0;
 }
 
-float3 decodePosition(float2 pos, float z)
+float3 decodePosition(float4 pos, float z)
 {
-    // Get x/w and y/w from the viewport position
-    float x = pos.x;// * 2 - 1;
-    float y = pos.y;//(1 - pos.y) * 2 - 1;
-    float4 vProjectedPos = float4(x, y, z, 1.0f);
-    // Transform by the inverse projection matrix
-    float4 vPositionVS = mul(projectionInverse, vProjectedPos);
-    // Divide by w to get the view-space position
-    return vPositionVS.xyz / vPositionVS.w;
+    //float2 tcoord = (pos.xy / pos.w).xy * 0.5 + float2(0.5);
+    //float3 viewray = float3(pos.xy * (-200 / pos.z ), -200);
+    return float3(pos.xy * (-200 / pos.z), -200) * z;
+    //float dlight = length(lightPosition - vscoord);
+    //float factor = 1.0 - dlight / lradius;
+    //if( dlight > lradius ) discard;
+    //gl_FragData[0] = vec4( gl_Color.rgb, factor );
 }
 
 float4 fs(in VSout i) : COLOR
@@ -100,7 +99,7 @@ float4 fs(in VSout i) : COLOR
         vWorldPos = tex2D(depthBuffer, i.tex).yzw;
     else
         //vWorldPos = -i.eyeRay.xyz * tex2D(depthBuffer, i.tex).x;
-        vWorldPos = decodePosition(i.pos.xy, tex2D(depthBuffer, i.tex).x);
+        vWorldPos = decodePosition(i.pos, tex2D(depthBuffer, i.tex).x);
 
     float3 vLightDir = normalize(lightPos - vWorldPos);
     float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);

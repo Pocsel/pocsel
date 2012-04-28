@@ -1,10 +1,12 @@
 #include <boost/cstdlib.hpp>
 
+#include "tools/window/sdl/Window.hpp"
+#include "tools/window/InputManager.hpp"
+#include "tools/Timer.hpp"
+
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/resources/LocalResourceManager.hpp"
-#include "client/window/sdl/Window.hpp"
-#include "client/window/InputManager.hpp"
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
 #include "client/network/PacketDispatcher.hpp"
@@ -14,8 +16,6 @@
 #include "client/menu/DisconnectedScreen.hpp"
 #include "client/menu/MainMenu.hpp"
 
-#include "tools/Timer.hpp"
-
 namespace Client {
 
     Client::Client(Settings& settings) :
@@ -23,14 +23,14 @@ namespace Client {
         _state(Connecting),
         _game(0)
     {
-        this->_window = new Window::Sdl::Window(this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
+        this->_window = new Tools::Window::Sdl::Window(this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
         this->_threadPool = new Tools::Thread::ThreadPool(2);
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
         this->_menu = new Menu::Menu(*this);
 
-        this->_window->GetInputManager().Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, this));
-        this->_window->GetInputManager().Bind(BindAction::Menu, BindAction::Released, std::bind(&Client::_MenuBind, this));
+        this->_window->GetInputManager().Bind(Tools::Window::BindAction::Quit, Tools::Window::BindAction::Released, std::bind(&Client::Quit, this));
+        this->_window->GetInputManager().Bind(Tools::Window::BindAction::Menu, Tools::Window::BindAction::Released, std::bind(&Client::_MenuBind, this));
         this->_window->GetInputManager().GetInputBinder().LoadFile(this->_settings.bindingsFile.string());
     }
 
