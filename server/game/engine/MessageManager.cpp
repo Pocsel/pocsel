@@ -50,11 +50,13 @@ namespace Server { namespace Game { namespace Engine {
                 {
                     auto resultTable = this->_engine.GetInterpreter().MakeTable();
                     resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber((*itMessage)->targetId));
-                    if (res == CallbackManager::Ok || res == CallbackManager::Error)
+                    if (res == CallbackManager::Ok)
                     {
                         resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
                         resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
                     }
+                    else if (res == CallbackManager::Error) // il y a eu une erreur du coté de la cible, mais le message à été envoyé quand meme donc success = true
+                        resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
                     else
                         resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(false));
                     this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->notificationCallbackId, resultTable);

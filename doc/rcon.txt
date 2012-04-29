@@ -12,6 +12,7 @@
             "world_identifier": "<world_identifier>",
             "world_fullname": "<world_fullname>",
             "world_version": <world_version>,
+            "debug": <true/false>,
             "maps":
             [
                 {
@@ -44,6 +45,20 @@
             "log": "<lua error>"
         }
 
+- GET /map/<map>/entities
+    - Needed rights: "entities"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights), 404 (map not found)
+    - JSON:
+        [
+            {
+                "id": <id>,
+                "type": "<type>",
+                "plugin": "<plugin>",
+                "positional": <true/false>
+            }
+        ]
+
 - GET /entity_file/<plugin>/<file>
     - Needed rights: "execute"
     - Parameters:
@@ -55,7 +70,7 @@
 
 - POST /entity_file/<plugin>/<file>
     - Needed rights: "execute"
-    - Parameters:
+    - Parameters: lua
     - Returns: 200 (ok), 401 (insufficient rights), 404 (plugin/file not found)
     - JSON:
 
@@ -70,4 +85,3 @@
                 "user_agent": "<user_agent>"
             }
         ]
-

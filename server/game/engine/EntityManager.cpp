@@ -126,19 +126,22 @@ namespace Server { namespace Game { namespace Engine {
         while (!this->_spawnEvents.empty())
         {
             SpawnEvent* e = this->_spawnEvents.front();
+            auto resultTable = this->_engine.GetInterpreter().MakeTable();
             try
             {
                 Uint32 newId = this->_CreateEntity(e->pluginId, e->entityName);
-                CallbackManager::Result res = this->CallEntityFunction(newId, "Spawn", e->arg, this->_engine.GetInterpreter().MakeNumber(e->spawnerId));
-                if (res == CallbackManager::FunctionNotFound || res == CallbackManager::Ok)
-                    this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, this->_engine.GetInterpreter().MakeNumber(newId));
-                else
-                    this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, this->_engine.GetInterpreter().MakeNumber(0));
+                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                if (this->CallEntityFunction(newId, "Spawn", e->arg, this->_engine.GetInterpreter().MakeNumber(e->spawnerId), &ret) == CallbackManager::Ok)
+                    resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
+                resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(newId));
+                resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
+                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
             }
             catch (std::exception& ex)
             {
                 Tools::error << "EntityManager::DispatchSpawnEvents: Cannot create entity \"" << e->entityName << "\" from plugin " << e->pluginId << ": " << ex.what() << std::endl;
-                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, this->_engine.GetInterpreter().MakeNumber(0));
+                resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(false));
+                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
             }
             delete e;
             this->_spawnEvents.pop();
@@ -155,7 +158,9 @@ namespace Server { namespace Game { namespace Engine {
             resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(e->targetId));
             if (it != this->_entities.end())
             {
-                this->CallEntityFunction(e->targetId, "Die", e->arg, this->_engine.GetInterpreter().MakeNumber(e->killerId));
+                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                if (this->CallEntityFunction(e->targetId, "Die", e->arg, this->_engine.GetInterpreter().MakeNumber(e->killerId), &ret) == CallbackManager::Ok)
+                    resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
                 this->_DeleteEntity(it->first, it->second);
                 resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true)); // meme si le call a fail, l'entité est tuée quand même alors on retourne true
                 this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
