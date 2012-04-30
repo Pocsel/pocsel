@@ -3,6 +3,8 @@ Server.Entity.Register{
     Spawn = function(self)
         self:Method()
         Server.Message.Later(5, self.id, "EventTest", 1)
+
+
     end,
     Method = function(self)
         print("hey from " .. self.entityName)

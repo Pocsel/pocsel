@@ -47,13 +47,22 @@
             - cbFunction [string]
             - cbArg [serializable]
                 Notification callback to be called just after the spawn event
-                is handled. The callback will receive the following parameters
-                (in addition to self): cbArg [serializable], entityId [number].
-                entityId will be set to the newly spawned entity id if the
-                creation was successful, or 0 if there was an error. entityId
-                will still contain an id if the new entity did not have a
-                Spawn() function (that is, arg was not passed to the new
-                entity).
+                is handled.
+                The callback will receive the following parameters (in addition
+                to self): cbArg [serializable], result [table].
+                result will have the following fields: "entityId" [number],
+                "success" [boolean], "ret" [serializable].
+                The "success" field will be set to true if the creation was
+                successful. This field will still be set to true if the new
+                entity did not have a Spawn() function (that is, arg was not
+                passed to the new entity), or even if the Spawn() function
+                triggered an error.
+                If "success" is true, the "entityId" field will be set to the
+                newly spawned entity id.
+                The "ret" field will store the (serialized) first returned value
+                of the Spawn() function of the new entity. If there was an error
+                or if there is no returned value, the field will not be set
+                (nil).
                 If the callback's target is unloaded or destroyed when the
                 callback is triggered, the callback fails silently.
 
@@ -74,16 +83,22 @@
             - cbFunction [string]
             - cbArg [serializable]
                 Notification callback to be called just after the kill event is
-                handled. The callback will receive the following parameters (in
-                addition to self): cbArg [serializable], result [table]. result
-                will have the following fields: "entityId" [number], "success"
-                [boolean]. The "entityId" field will be set to the id of the
-                target entity and the "success" field will be set to true if
-                the entity was found (kill successful) or false otherwise.
+                handled.
+                The callback will receive the following parameters (in addition
+                to self): cbArg [serializable], result[table].
+                result will have the following fields: "entityId" [number],
+                "success" [boolean], "ret" [serializable].
+                The "entityId" field will be set to the id of the target entity
+                and the "success" field will be set to true if the entity was
+                found (kill successful) or false otherwise.
                 The "success" field will still be set to true if the entity did
                 not have a Die() function (that is, arg was not passed to the
                 killed entity), or even if the Die() function triggered an
                 error.
+                The "ret" field will store the (serialized) first returned value
+                of the Die() function of the target entity. If there was an
+                error or if there is no returned value, the field will not be
+                set (nil).
                 If the callback's target is unloaded or destroyed when the
                 callback is triggered, the callback fails silently.
 
@@ -116,13 +131,21 @@
             - cbFunction [string]
             - cbArg [serializable]
                 Notification callback to be called just after the call event is
-                handled. The callback will receive the following parameters (in
-                addition to self): cbArg [serializable], result [table]. result
-                will have the following fields: "entityId" [number], "success"
-                [boolean]. The "entityId" field will be set to the id of the
-                target entity and the "success" field will be set to true if
-                the entity was found and the function was successfully called
-                or false otherwise.
+                handled.
+                The callback will receive the following parameters (in addition
+                to self): cbArg [serializable], result [table].
+                result will have the following fields: "entityId" [number],
+                "success" [boolean], "ret" [serializable].
+                The "entityId" field will be set to the id of the target entity
+                and the "success" field will be set to true if the entity was
+                found and the function was successfully called or false
+                otherwise.
+                The "success" will still be set to true if the called function
+                was found but triggered an error.
+                The "ret" field will store the (serialized) first returned value
+                of the called function of the target entity. If there was an
+                error or if there was no returned value, the field will not be
+                set (nil).
                 If the callback's target is unloaded or destroyed when the
                 callback is triggered, the callback fails silently.
 
@@ -144,7 +167,7 @@
             Creates a new color.
             - color [int]
                 ARGB color
-                
+
         - Create(float red, float green, float blue)
             Creates a new color.
             TODO

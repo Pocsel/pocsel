@@ -285,6 +285,23 @@ function fetchLogs() {
  * Fetches entity instances regularly
  */
 function fetchEntities() {
+    $.ajax({
+        url: rconUrl + 'map/' + currentMap + '/entities',
+        headers: {
+            'Rcon-Token': rconToken
+        },
+        success: function(json) {
+            json = $.parseJSON(json);
+            $('#entities_list').empty();
+            $.each(json, function() {
+                $('#entities_list').append('<tr><td>' + this.id + '</td><td>' + this.plugin + '</td><td>' + this.type + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td><td>-</td></tr>');
+            });
+            setTimeout(fetchEntities, 2500);
+        },
+        error: function() {
+            setTimeout(fetchEntities, 20000);
+        }
+    });
 }
 
 /*
@@ -309,8 +326,6 @@ function fetchRconSessions() {
                 $('#rcon-sessions_list').append('<tr><td>' + this.login + '</td><td>' + this.user_agent + '</td></tr>');
             });
             setTimeout(fetchRconSessions, 10000);
-            $('#rcon-sessions_list').hide();
-            $('#rcon-sessions_list').show();
         },
         error: function() {
             setTimeout(fetchRconSessions, 20000);

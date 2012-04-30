@@ -112,7 +112,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
 #define INIT_XDIFF_XNBCALCS(t) \
             int ipp##t = ipp * ippm##t; \
             int ipp1##t = ipp##t + 1; \
-            int t##Diff = -(int)(((Uint64)c##t) % ipp1##t); \
+            int t##Diff = -(int)(((Uint64)c##t * Common::ChunkSize) % ipp1##t); \
             unsigned int t##nbCalcs = 0; \
             int ii##t = t##Diff; \
             while (ii##t < (int)Common::ChunkSize) \
