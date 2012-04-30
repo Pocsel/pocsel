@@ -95,11 +95,11 @@ float4 fs(in VSout i) : COLOR
     //float3 vWorldPos = tex2D(positions, i.tex).xyz;
     float3 vWorldPos;
 
-    if (i.pos.x < 0)
+    //if (i.pos.x < 0)
         vWorldPos = tex2D(depthBuffer, i.tex).yzw;
-    else
-        //vWorldPos = -i.eyeRay.xyz * tex2D(depthBuffer, i.tex).x;
-        vWorldPos = decodePosition(i.pos, tex2D(depthBuffer, i.tex).x);
+    //else
+    //    //vWorldPos = -i.eyeRay.xyz * tex2D(depthBuffer, i.tex).x;
+    //    vWorldPos = decodePosition(i.pos, tex2D(depthBuffer, i.tex).x);
 
     float3 vLightDir = normalize(lightPos - vWorldPos);
     float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
@@ -107,12 +107,12 @@ float4 fs(in VSout i) : COLOR
     float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 150);
 
     float4 color;
-    color.rgb = (vDiffuseIntensity * lightDiffuse) * vDiffuseMaterial;
-         //+ vSpecularIntensity * lightSpecular.xyz;// * vSpecularMaterial;
+    color.rgb = (vDiffuseIntensity * lightDiffuse) * vDiffuseMaterial
+         + vSpecularIntensity * lightSpecular.xyz;// * vSpecularMaterial;
     color.a = 1.0;
 
-    if (i.tex.y < 0.5)
-        color.rgb = (vWorldPos);//tex2D(colors, i.tex).rgb;
+    //if (i.tex.y < 0.5)
+    //    color.rgb = (vWorldPos);//tex2D(colors, i.tex).rgb;
 
     // here we add color to show how lighting pass affects the scene
     //color.rgb += i.tex.rgr * 0.5;
