@@ -9,11 +9,12 @@
 
 namespace Tools { namespace Window { namespace Sdl {
 
-    Window::Window(bool directX,
-            glm::uvec2 const& size /* = glm::uvec2(800, 600) */,
-            bool fullscreen /* = false */,
-            bool useShaders /* = true */) :
-        ::Tools::Window::Window(new InputManager(*this, new InputBinder())),
+    Window::Window(std::map<std::string, Tools::Window::BindAction::BindAction> const& actions,
+            bool directX,
+            glm::uvec2 const& size,
+            bool fullscreen,
+            bool useShaders) :
+        ::Tools::Window::Window(new InputManager(*this, new InputBinder(actions))),
         _size(size),
         _targetSize(0)
 #ifdef _WIN32

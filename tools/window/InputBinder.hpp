@@ -33,7 +33,7 @@ namespace Tools { namespace Window {
             std::map<Button::Button, Action> _mouseBinds;
 
         public:
-            InputBinder();
+            InputBinder(std::map<std::string, Tools::Window::BindAction::BindAction> const& actions);
             virtual ~InputBinder();
             bool LoadFile(std::string const& path);
             bool Bind(std::string const& input, std::string const& action);
@@ -51,7 +51,6 @@ namespace Tools { namespace Window {
             void _Bind(Uint16 unicode, std::string const& action);
             void _PopulateSpecialKeys();
             void _PopulateButtons();
-            void _PopulateActions();
             void _StringToAction(std::string const& str, Action& action) const;
     };
 

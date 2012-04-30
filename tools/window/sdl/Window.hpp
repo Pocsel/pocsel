@@ -1,6 +1,7 @@
 #ifndef __CLIENT_WINDOW_SDL_WINDOW_HPP__
 #define __CLIENT_WINDOW_SDL_WINDOW_HPP__
 
+#include "tools/window/BindAction.hpp"
 #include "tools/window/Window.hpp"
 #include "tools/Vector2.hpp"
 
@@ -23,7 +24,11 @@ namespace Tools { namespace Window { namespace Sdl {
 #endif
 
     public:
-        Window(bool directX = false, glm::uvec2 const& size = glm::uvec2(800, 600), bool fullscreen = false, bool useShaders = true);
+        Window(std::map<std::string, Tools::Window::BindAction::BindAction> const& actions,
+            bool directX = false,
+            glm::uvec2 const& size = glm::uvec2(800, 600),
+            bool fullscreen = false,
+            bool useShaders = true);
         ~Window();
         virtual void Render();
         virtual Tools::IRenderer& GetRenderer() { return *this->_renderer; }

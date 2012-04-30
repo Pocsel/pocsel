@@ -5,31 +5,15 @@
 
 namespace Tools { namespace Window {
 
-    InputBinder::InputBinder()
+    InputBinder::InputBinder(std::map<std::string, Tools::Window::BindAction::BindAction> const& actions) :
+        _actions(actions)
     {
-        this->_PopulateActions();
         this->_PopulateSpecialKeys();
         this->_PopulateButtons();
     }
 
     InputBinder::~InputBinder()
     {
-    }
-
-    void InputBinder::_PopulateActions()
-    {
-        this->_actions["quit"] = BindAction::Quit;
-        this->_actions["menu"] = BindAction::Menu;
-        this->_actions["forward"] = BindAction::Forward;
-        this->_actions["backward"] = BindAction::Backward;
-        this->_actions["left"] = BindAction::Left;
-        this->_actions["right"] = BindAction::Right;
-        this->_actions["jump"] = BindAction::Jump;
-        this->_actions["crouch"] = BindAction::Crouch;
-        this->_actions["fire"] = BindAction::Fire;
-        this->_actions["altfire"] = BindAction::AltFire;
-        this->_actions["use"] = BindAction::Use;
-        this->_actions["togglesprint"] = BindAction::ToggleSprint;
     }
 
     InputBinder::Action::Action() :
