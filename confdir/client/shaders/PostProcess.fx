@@ -92,14 +92,14 @@ float4 fs(in VSout i) : COLOR
     // normals are stored in texture space [0,1] -> convert them back to [-1,+1] range
     float3 vWorldNrm = decodeNormals(tex2D(normals, i.tex));
 
-    //float3 vWorldPos = tex2D(positions, i.tex).xyz;
-    float3 vWorldPos;
+    float3 vWorldPos = tex2D(depthBuffer, i.tex).xyz;
+    //float3 vWorldPos;
 
     //if (i.pos.x < 0)
-        vWorldPos = tex2D(depthBuffer, i.tex).yzw;
+    //    vWorldPos = tex2D(depthBuffer, i.tex).xyz;
     //else
-    //    //vWorldPos = -i.eyeRay.xyz * tex2D(depthBuffer, i.tex).x;
-    //    vWorldPos = decodePosition(i.pos, tex2D(depthBuffer, i.tex).x);
+    //    //vWorldPos = -i.eyeRay.xyz * tex2D(depthBuffer, i.tex).w;
+    //    vWorldPos = decodePosition(i.pos, tex2D(depthBuffer, i.tex).w);
 
     float3 vLightDir = normalize(lightPos - vWorldPos);
     float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);

@@ -70,7 +70,7 @@ FSout fs(in VSout v)
 
     f.color = tex2D(cubeTexture, v.texCoord);
     f.normal = encodeNormals(v.normal);
-    f.position = float4(-v.pos.z / 200, v.worldPosition.x, v.worldPosition.y, v.worldPosition.z);
+    f.position = float4(v.worldPosition.x, v.worldPosition.y, v.worldPosition.z, 1.0); //-v.pos.z / 200);
 
     return f;
 }
