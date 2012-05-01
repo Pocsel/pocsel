@@ -185,8 +185,10 @@ function fillStaticTables() {
                     editLuaFile(e.data.plugin, e.data.file);
                 });
             }
-            else
-                $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td>-</td></tr>');
+            else {
+                $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td></td></tr>');
+                $('#entity-files_hot-swap').empty();
+            }
         });
         $('#entity-files_group').show();
     }
@@ -194,6 +196,16 @@ function fillStaticTables() {
         $('#entity-type_list').append('<tr><td>' + this.plugin + '</td><td>' + this.name + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td></tr>');
     });
     $('#category-entities').show('fast');
+
+    // logs 'Load' tab (only in debug)
+    if (rconDebug) {
+        $('#logs_tabs').append('<li><a id="logs_load-tab" data-toggle="tab">Load</a></li>');
+        $('#logs_load-tab').click(function () {
+            $('#logs_textareas > textarea').hide();
+            $('#logs_load').show();
+        });
+        setTimeout(fetchLoadLog, 3000);
+    }
 }
 
 /*
@@ -292,15 +304,6 @@ function startFetchers() {
     }
     if (hasRight('execute')) {
         $('#execute_group').show('fast');
-    }
-    // Logs 'Load' tab (only in debug)
-    if (rconDebug) {
-        $('#logs_tabs').append('<li><a id="logs_load-tab" data-toggle="tab">Load</a></li>');
-        $('#logs_load-tab').click(function () {
-            $('#logs_textareas > textarea').hide();
-            $('#logs_load').show();
-        });
-        setTimeout(fetchLoadLog, 3000);
     }
 }
 

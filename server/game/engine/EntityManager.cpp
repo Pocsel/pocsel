@@ -107,7 +107,7 @@ namespace Server { namespace Game { namespace Engine {
             this->_runningEntityId = 0;
             return CallbackManager::Error;
         }
-        Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\").\n";
+        //Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\").\n";
         return CallbackManager::Ok;
     }
 

@@ -3,6 +3,8 @@
 
 #include <boost/uuid/random_generator.hpp>
 
+#include "tools/Timer.hpp"
+
 namespace Server {
     class Settings;
 }
@@ -12,23 +14,24 @@ namespace Server { namespace Rcon {
     class SessionManager :
         private boost::noncopyable
     {
-    public:
+    private:
         enum LogLevel
         {
             Normal,
             Error,
         };
-    private:
         enum
         {
             LogLines = 100,
             LogLinesDebug = 1000,
+            SessionTimeout = 20, // seconds
         };
         struct Session
         {
+            Tools::Timer timer;
             std::string login;
             std::string userAgent;
-            bool logs;
+            bool logs; // true si le user à le droit "logs" (= il faut bufferiser les logs)
             std::list<std::string> errorLog;
             std::list<std::string> normalLog;
         };

@@ -110,7 +110,19 @@ namespace Server { namespace Rcon {
 
     void SessionManager::_ExpireTokens(std::string const& recentToken /* = "" */)
     {
-        // TODO expiration des sessions
+        std::list<std::string> killPool;
+        auto it = this->_sessions.begin();
+        auto itEnd = this->_sessions.end();
+        for (; it != itEnd; ++it)
+            if (it->second.timer.GetElapsedTime() > SessionTimeout * 1000)
+                killPool.push_back(it->first);
+        auto itKill = killPool.begin();
+        auto itKillEnd = killPool.end();
+        for (; itKill != itKillEnd; ++itKill)
+            this->_sessions.erase(*itKill);
+        auto itSession = this->_sessions.find(recentToken);
+        if (itSession != this->_sessions.end())
+            itSession->second.timer.Reset();
     }
 
     std::string SessionManager::RconGetLogs(std::string const& token)

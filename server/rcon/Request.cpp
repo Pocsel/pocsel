@@ -231,6 +231,7 @@ namespace Server { namespace Rcon {
         std::string newToken = this->_server.GetRcon().GetSessionManager().NewSession(login, password, this->_userAgent, rights);
         if (newToken.empty())
             return this->_WriteHttpResponse("401 Unauthorized");
+        Tools::log << "Rcon: New session for user \"" << login << "\"." << std::endl;
 
         // rights
         std::string json = "{\n"
