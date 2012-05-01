@@ -1,11 +1,11 @@
-#include "client/precompiled.hpp"
+#include "tools/precompiled.hpp"
 
-#include "client/window/InputManager.hpp"
-#include "client/window/InputBinder.hpp"
+#include "tools/window/InputManager.hpp"
+#include "tools/window/InputBinder.hpp"
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
 
-    InputManager::InputManager(::Client::Window::Window& window, InputBinder* inputBinder) :
+    InputManager::InputManager(::Tools::Window::Window& window, InputBinder* inputBinder) :
         _inputBinder(inputBinder),
         _window(window)
     {

@@ -28,6 +28,8 @@ namespace Tools { namespace Renderers {
             CGparameter _modelInverse;
             CGparameter _viewInverse;
             CGparameter _projectionInverse;
+            CGparameter _viewProjectionInverse;
+            CGparameter _mvpInverse;
 
             CGpass _pass;
 

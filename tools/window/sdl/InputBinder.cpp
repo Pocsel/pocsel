@@ -1,6 +1,8 @@
-#include "client/window/sdl/InputBinder.hpp"
+#include "tools/precompiled.hpp"
 
-namespace Client { namespace Window { namespace Sdl {
+#include "tools/window/sdl/InputBinder.hpp"
+
+namespace Tools { namespace Window { namespace Sdl {
 
     InputBinder::InputBinder()
     {

@@ -1,19 +1,18 @@
 #include "client/precompiled.hpp"
 
-#include "client/game/TargetedCubeRenderer.hpp"
-#include "client/game/Game.hpp"
-#include "client/game/Player.hpp"
-
+#include "tools/window/Window.hpp"
 #include "tools/IRenderer.hpp"
 
 #include "common/CubePosition.hpp"
 #include "common/Position.hpp"
 
+#include "client/game/TargetedCubeRenderer.hpp"
+#include "client/game/Game.hpp"
+#include "client/game/Player.hpp"
+
 #include "client/Client.hpp"
 
 #include "client/resources/LocalResourceManager.hpp"
-
-#include "client/window/Window.hpp"
 
 namespace Client { namespace Game {
 
@@ -22,7 +21,7 @@ namespace Client { namespace Game {
         _renderer(game.GetClient().GetWindow().GetRenderer()),
         _elapsedTime(0)
     {
-        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.cgfx");
+        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fx");
         this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
         this->_shaderTime = this->_shader->GetParameter("time").release();
 

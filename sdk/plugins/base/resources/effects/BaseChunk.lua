@@ -1,6 +1,6 @@
 Client.Effect.Create{
     name = "BaseChunk",
-    resource = "effects/BaseChunk.cgfx",
+    resource = "effects/BaseChunk.fx",
     initObject = nil,
     update = nil,
 	render = nil

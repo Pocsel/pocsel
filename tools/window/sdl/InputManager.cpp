@@ -1,13 +1,13 @@
-#include "client/precompiled.hpp"
+#include "tools/precompiled.hpp"
 
-#include "client/window/sdl/InputManager.hpp"
-#include "client/window/sdl/InputBinder.hpp"
-#include "client/window/Window.hpp"
+#include "tools/window/sdl/InputManager.hpp"
+#include "tools/window/sdl/InputBinder.hpp"
+#include "tools/window/Window.hpp"
 
-namespace Client { namespace Window { namespace Sdl {
+namespace Tools { namespace Window { namespace Sdl {
 
-    InputManager::InputManager(::Client::Window::Window& window, InputBinder* inputBinder) :
-        ::Client::Window::InputManager(window, inputBinder),
+    InputManager::InputManager(::Tools::Window::Window& window, InputBinder* inputBinder) :
+        ::Tools::Window::InputManager(window, inputBinder),
         _inputBinder(*inputBinder),
         _mousePos(0),
         _showMouse(false),

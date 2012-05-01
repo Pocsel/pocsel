@@ -1,14 +1,14 @@
-#ifndef __CLIENT_WINDOW_INPUTMANAGER_HPP__
-#define __CLIENT_WINDOW_INPUTMANAGER_HPP__
+#ifndef __TOOLS_WINDOW_INPUTMANAGER_HPP__
+#define __TOOLS_WINDOW_INPUTMANAGER_HPP__
 
-#include "client/ActionBinder.hpp"
+#include "tools/window/ActionBinder.hpp"
 #include "tools/Vector2.hpp"
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
     class Window;
 }}
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
 
     class InputManager :
         public ActionBinder
@@ -23,7 +23,7 @@ namespace Client { namespace Window {
         Window& _window;
 
     public:
-        InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
+        InputManager(::Tools::Window::Window& window, InputBinder* inputBinder);
         virtual ~InputManager();
         virtual void ProcessEvents() = 0;
         void TriggerAction(InputBinder::Action const& action, BindAction::Type type);

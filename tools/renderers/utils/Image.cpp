@@ -20,7 +20,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         texture.Bind();
         textureParameter.Set(texture);
 
-        this->_renderer.DrawElements(4, DataType::UnsignedShort, 0, DrawingMode::TrianglesStrip);
+        this->_renderer.DrawElements(6, DataType::UnsignedShort);
 
         texture.Unbind();
         Image::_indexBuffer->Unbind();
@@ -47,9 +47,9 @@ namespace Tools { namespace Renderers { namespace Utils {
         Image::_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::TexCoord, 2); // texCoord
         Image::_vertexBuffer->SetData(4*(3 + 2)*sizeof(*vertices), vertices, Renderers::VertexBufferUsage::Static);
 
-        static const unsigned short indices[] = { 0, 1, 3, 2 };
+        static const unsigned short indices[] = { 0, 1, 3, 1, 2, 3 };
         Image::_indexBuffer = renderer.CreateIndexBuffer().release();
-        Image::_indexBuffer->SetData(DataType::UnsignedShort, 4*sizeof(*indices), indices);
+        Image::_indexBuffer->SetData(DataType::UnsignedShort, 6*sizeof(*indices), indices);
 
         renderer.RegisterShutdownCallback([]()
             {

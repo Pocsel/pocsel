@@ -1,9 +1,9 @@
 #include <boost/algorithm/string.hpp>
 
-#include "client/window/InputBinder.hpp"
+#include "tools/window/InputBinder.hpp"
 #include "tools/lua/Interpreter.hpp"
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
 
     InputBinder::InputBinder()
     {

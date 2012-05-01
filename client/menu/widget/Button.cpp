@@ -1,16 +1,17 @@
-#include "client/menu/widget/Button.hpp"
-#include "client/ActionBinder.hpp"
-#include "client/window/InputManager.hpp"
-#include "client/menu/Menu.hpp"
 #include "tools/renderers/utils/Rectangle.hpp"
 #include "tools/renderers/utils/Font.hpp"
+#include "tools/window/ActionBinder.hpp"
+#include "tools/window/InputManager.hpp"
+
+#include "client/menu/widget/Button.hpp"
+#include "client/menu/Menu.hpp"
 
 namespace Client { namespace Menu { namespace Widget {
 
-    Button::Button(Window::InputManager const& inputManager,
+    Button::Button(Tools::Window::InputManager const& inputManager,
             Menu& menu,
             Tools::IRenderer& renderer,
-            ActionBinder& actionBinder,
+            Tools::Window::ActionBinder& actionBinder,
             std::function<void(void)>& callback,
             std::string const& text /* = "" */,
             glm::fvec2 const& size /* = glm::fvec2(50, 20) */,
@@ -24,8 +25,8 @@ namespace Client { namespace Menu { namespace Widget {
         _pos(pos),
         _pressed(false)
     {
-        actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Button::_PressedBind, this));
-        actionBinder.Bind(BindAction::Fire, BindAction::Released, std::bind(&Button::_ReleasedBind, this));
+        actionBinder.Bind(Tools::Window::BindAction::Fire, Tools::Window::BindAction::Pressed, std::bind(&Button::_PressedBind, this));
+        actionBinder.Bind(Tools::Window::BindAction::Fire, Tools::Window::BindAction::Released, std::bind(&Button::_ReleasedBind, this));
         this->_rect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
         this->_Update();
     }

@@ -9,20 +9,25 @@ namespace Tools { namespace Renderers { namespace Utils {
     {
     private:
         IRenderer& _renderer;
-        std::unique_ptr<IRenderTarget> _renderTarget;
+        std::unique_ptr<IRenderTarget> _gbufferRenderTarget;
+        std::unique_ptr<IRenderTarget> _lightRenderTarget;
 
     public:
         GBuffer(IRenderer& renderer, glm::uvec2 const& size);
 
-        void Resize(glm::uvec2 const& size) { this->_renderTarget->Resize(size); }
+        void Resize(glm::uvec2 const& size);
 
         void Bind();
         void Unbind();
 
-        ITexture2D& GetColors() { return this->_renderTarget->GetTexture(0); }
-        ITexture2D& GetNormals() { return this->_renderTarget->GetTexture(1); }
-        ITexture2D& GetPositions() { return this->_renderTarget->GetTexture(2); }
-        ITexture2D& GetDepth() { return this->_renderTarget->GetTexture(3); }
+        void BindLighting();
+        void UnbindLighting();
+
+        ITexture2D& GetColors() { return this->_gbufferRenderTarget->GetTexture(0); }
+        ITexture2D& GetNormals() { return this->_gbufferRenderTarget->GetTexture(1); }
+        ITexture2D& GetDepth() { return this->_gbufferRenderTarget->GetTexture(2); }
+        ITexture2D& GetInternalDepthBuffer() { return this->_gbufferRenderTarget->GetTexture(3); }
+        ITexture2D& GetLighting() { return this->_lightRenderTarget->GetTexture(0); }
     };
 
 }}}

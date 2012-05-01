@@ -28,10 +28,12 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
         switch (format)
         {
-        case PixelFormat::Luminance8Alpha8: return GL_LUMINANCE8_ALPHA8;
+        case PixelFormat::R32f: return GL_R32F;
+        case PixelFormat::Rg16f: return GL_RG16F;
         case PixelFormat::Rgba16f: return GL_RGBA16F_ARB;
         case PixelFormat::Rgb10a2: return GL_RGB10_A2;
         case PixelFormat::Depth24Stencil8: return GL_DEPTH24_STENCIL8;
+        case PixelFormat::Depth32: return GL_DEPTH_COMPONENT32;
         default: return (format >> 8) & 0x00FF;
         }
     }
@@ -41,14 +43,15 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         switch (format)
         {
         case PixelFormat::Depth24Stencil8: return GL_DEPTH_STENCIL;
+        case PixelFormat::Depth32: return GL_DEPTH_COMPONENT;
         default:
             switch (format & 0x0000FF)
             {
             case 1: return GL_ALPHA;
             case 2: return GL_RGB;
             case 3: return GL_RGBA;
-            case 4: return GL_LUMINANCE;
-            case 6: return GL_LUMINANCE_ALPHA;
+            case 8: return GL_RG;
+            case 9: return GL_RED;
             }
         }
         throw std::runtime_error("Bad PixelFormat ?!");
@@ -58,9 +61,12 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
         switch (format)
         {
+        case PixelFormat::R32f: return GL_FLOAT;
+        case PixelFormat::Rg16f: return GL_FLOAT;
         case PixelFormat::Rgba16f: return GL_FLOAT;
         case PixelFormat::Rgb10a2: return GL_UNSIGNED_INT_10_10_10_2;
         case PixelFormat::Depth24Stencil8: return GL_UNSIGNED_INT_24_8;
+        case PixelFormat::Depth32: return GL_FLOAT;
         default:
             switch ((format >> 16) & 0xFF)
             {
