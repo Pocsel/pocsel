@@ -10,6 +10,7 @@ namespace Server { namespace Rcon {
         for (; it != itEnd; ++it)
             switch (*it)
             {
+                // standard JSON
                 case '"':
                     ret += "\\u0022";
                     break;
@@ -33,6 +34,19 @@ namespace Server { namespace Rcon {
                     break;
                 case '\t':
                     ret += "\\u0009";
+                    break;
+                // pas standard mais cool pour pas faire chier le client
+                case '\'':
+                    ret += "&apos;";
+                    break;
+                case '&':
+                    ret += "&amp;";
+                    break;
+                case '<':
+                    ret += "&lt;";
+                    break;
+                case '>':
+                    ret += "&gt;";
                     break;
                 default:
                     ret += *it;

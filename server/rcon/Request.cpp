@@ -19,13 +19,13 @@ namespace Server { namespace Rcon {
         _server(server),
         _socket(socket)
     {
-        Tools::debug << "Rcon: New request." << std::endl;
+        //Tools::debug << "Rcon: New request." << std::endl;
         this->_ReadHttpHeader();
     }
 
     Request::~Request()
     {
-        Tools::debug << "Rcon: Request finished." << std::endl;
+        //Tools::debug << "Rcon: Request finished." << std::endl;
         Tools::Delete(this->_socket);
     }
 
@@ -191,13 +191,15 @@ namespace Server { namespace Rcon {
 
     void Request::_Execute()
     {
-        Tools::debug << "Rcon: Header: \"" << this->_header << "\"" << std::endl;
-        Tools::debug << "Rcon: Body: \"" << this->_body << "\"" << std::endl;
+        //Tools::debug << "Rcon: Header: \"" << this->_header << "\"" << std::endl;
+        //Tools::debug << "Rcon: Body: \"" << this->_body << "\"" << std::endl;
         if (this->_method == "OPTIONS")
             return this->_WriteHttpResponse("200 OK"); // pre-flight "allow cross-domain" ajax queries
         else if (!this->_url.empty())
         {
-            if (this->_url[0] == "map" && this->_url.size() >= 3)
+            if (this->_url[0] == "logs" && this->_url.size() == 1 && this->_method == "GET")
+                return this->_GetLogs(); // GET /logs
+            else if (this->_url[0] == "map" && this->_url.size() >= 3)
             {
                 if (this->_server.GetGame().GetWorld().HasMap(this->_url[1]))
                 {
@@ -208,14 +210,16 @@ namespace Server { namespace Rcon {
                         return this->_PostExecute(map, this->_url[3], this->_content["lua"]); // POST /map/<map>/execute/<plugin>
                 }
             }
-            else if (this->_url[0] == "login" && this->_method == "POST")
+            else if (this->_url[0] == "login" && this->_url.size() == 1 && this->_method == "POST")
                 return this->_PostLogin(this->_content["login"], this->_content["password"]); // POST /login
-            else if (this->_url[0] == "rcon_sessions" && this->_method == "GET")
+            else if (this->_url[0] == "rcon_sessions" && this->_url.size() == 1 && this->_method == "GET")
                 return this->_GetRconSessions(); // GET /rcon_sessions
             else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "GET")
                 return this->_GetEntityFile(this->_url[1], this->_url[2]); // GET /entity_file/<plugin>/<file>
             else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "POST")
                 return this->_PostEntityFile(this->_url[1], this->_url[2], this->_content["lua"]); // POST /entity_file/<plugin>/<file>
+            else if (this->_url[0] == "load_log" && this->_url.size() == 1 && this->_method == "GET")
+                return this->_GetLoadLog();
         }
         this->_WriteHttpResponse("404 Not Found");
     }
@@ -268,6 +272,22 @@ namespace Server { namespace Rcon {
         // send response
         json += "}\n";
         this->_WriteHttpResponse("200 OK", json);
+    }
+
+    void Request::_GetLogs()
+    {
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "logs"))
+            this->_WriteHttpResponse("200 OK", this->_server.GetRcon().GetSessionManager().RconGetLogs(this->_token));
+        else
+            this->_WriteHttpResponse("401 Unauthorized");
+    }
+
+    void Request::_GetLoadLog()
+    {
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "load_log"))
+            this->_WriteHttpResponse("200 OK", this->_server.GetGame().RconGetLoadLog());
+        else
+            this->_WriteHttpResponse("401 Unauthorized");
     }
 
     void Request::_GetRconSessions()
@@ -339,7 +359,7 @@ namespace Server { namespace Rcon {
 
     void Request::_WriteHttpResponse(std::string const& status, std::string const& content /* = std::string() */)
     {
-        Tools::log << "Rcon: Request for \"" << this->_urlString << "\" (" << this->_method << "): " << status << "." << std::endl;
+        //std::cout << "Rcon: Request for \"" << this->_urlString << "\" (" << this->_method << "): " << status << "." << std::endl;
         std::string response(
                 "HTTP/1.1 " + status + "\r\n"
                 "Access-Control-Allow-Origin: *\r\n"
@@ -354,7 +374,7 @@ namespace Server { namespace Rcon {
                 "Pragma: no-cache\r\n"
                 "\r\n");
         response += content;
-        Tools::debug << "Rcon: Response: \"" << response << "\"" << std::endl;
+        //std::cout << "Rcon: Response: \"" << response << "\"" << std::endl;
         boost::asio::async_write(*this->_socket, boost::asio::buffer(response),
                 boost::bind(&Request::_HttpResponseWritten, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
     }

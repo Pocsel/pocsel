@@ -57,6 +57,8 @@ namespace Server { namespace Rcon {
         // requetes exposées
         void _PostLogin(std::string const& login, std::string const& password); // POST /login
         void _GetRconSessions(); // GET /rcon_sessions
+        void _GetLogs(); // GET /logs
+        void _GetLoadLog(); // GET /load_log
         void _GetEntities(Game::Map::Map const& map); // GET /map/<map>/entities
         void _GetEntityFile(std::string const& pluginIdentifier, std::string const& file); // GET /entity_file/<plugin>/<file>
         void _PostEntityFile(std::string const& pluginIdentifier, std::string const& file, std::string const& lua); // POST /entity_file/<plugin>/<file>

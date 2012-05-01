@@ -123,12 +123,19 @@
 
             <div id="category-logs" class="hide">
                 <h3>Logs</h3>
-                <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab">All</a></li>
-                    <li><a data-toggle="tab">Warnings</a></li>
-                    <li><a data-toggle="tab">Errors</a></li>
+                <ul id="logs_tabs" class="nav nav-tabs">
+                    <li class="active"><a id="logs_all-tab" data-toggle="tab">All</a></li>
+                    <li><a id="logs_error-tab" data-toggle="tab">Errors</a></li>
                 </ul>
-                <textarea style="width: 100%; height: 200px;"></textarea>
+                <label class="checkbox">
+                    <input id="logs_scroll" type="checkbox" checked="checked"/>
+                    Scroll to bottom
+                </label>
+                <div id="logs_textareas">
+                    <textarea id="logs_all" style="width: 100%; height: 200px;"></textarea>
+                    <textarea id="logs_error" class="hide" style="width: 100%; height: 200px;"></textarea>
+                    <textarea id="logs_load" class="hide" style="width: 100%; height: 200px;"></textarea>
+                </div>
             </div>
 
             <div id="category-maps" class="hide">
@@ -277,7 +284,7 @@
                 </div>
                 <div class="modal-body">
                     <div id="lua-modal_log"></div>
-                    <textarea id="lua-modal_text" class="hide" style="width: 100%; height: 350px;"></textarea>
+                    <textarea id="lua-modal_text" class="hide" style="width: 98%; height: 350px;"></textarea>
                 </div>
                 <div class="modal-footer">
                     <img id="lua-modal_preloader" class="hide" src="rcon-assets/img/preloader.gif" alt="" />

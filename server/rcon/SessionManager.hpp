@@ -12,24 +12,42 @@ namespace Server { namespace Rcon {
     class SessionManager :
         private boost::noncopyable
     {
+    public:
+        enum LogLevel
+        {
+            Normal,
+            Error,
+        };
     private:
+        enum
+        {
+            LogLines = 100,
+            LogLinesDebug = 1000,
+        };
         struct Session
         {
             std::string login;
             std::string userAgent;
+            bool logs;
+            std::list<std::string> errorLog;
+            std::list<std::string> normalLog;
         };
 
     private:
         Settings const& _settings;
         boost::uuids::random_generator _tokenGenerator;
-        std::map<std::string /* token */, Session> _sessions;
+        std::map<std::string /* token */, Session> _sessions; // protégé par _lock
+        unsigned int _logLines;
+        mutable boost::shared_mutex _lock;
 
     public:
         SessionManager(Settings const& settings);
         std::string NewSession(std::string const& login, std::string const& password, std::string const& userAgent, std::list<std::string>& rights);
         bool HasRights(std::string const& token, std::string const& rights);
+        std::string RconGetLogs(std::string const& token);
         std::string RconGetSessions() const;
     private:
+        void _Log(std::string const& message, LogLevel level);
         void _ExpireTokens(std::string const& recentToken = "");
     };
 

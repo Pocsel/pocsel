@@ -85,3 +85,22 @@
                 "user_agent": "<user_agent>"
             }
         ]
+
+- GET /logs
+    - Needed rights: "logs"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights)
+    - JSON:
+        {
+            "normal": "<normal_log>",
+            "error": "<error_log>"
+        }
+
+- GET /load_log
+    - Needed rights: "load_log"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights)
+    JSON:
+        {
+            "log": "<load_log>"
+        }

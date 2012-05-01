@@ -35,6 +35,7 @@ namespace Server { namespace Game {
         Tools::SimpleMessageQueue& _messageQueue;
         World* _world;
         std::unordered_map<Uint32, std::shared_ptr<Player>> _players;
+        std::string _loadLog;
 
     public:
         Game(Server& server, Tools::SimpleMessageQueue& messageQueue);
@@ -60,11 +61,15 @@ namespace Server { namespace Game {
         void GetChunkPacket(Map::Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback);
         void RemovePlayer(Uint32 clientId);
 
+        // Rcon requests
+        std::string RconGetLoadLog() const;
+
     private:
         void _SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);
         void _PlayerTeleport(Uint32 id, std::string const& map, Common::Position const& position);
         void _GetChunkPacket(Map::Chunk::IdType id, Uint32 clientId, ChunkPacketCallback& callback);
         void _RemovePlayer(Uint32 clientId);
+        void _LoadLog(std::string const& message);
     };
 
 }}

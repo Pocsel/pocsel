@@ -13,6 +13,9 @@
 #include "tools/SimpleMessageQueue.hpp"
 
 #include "server/Server.hpp"
+#include "server/Settings.hpp"
+#include "server/Logger.hpp"
+#include "server/rcon/ToJsonStr.hpp"
 
 #include "server/clientmanagement/ClientManager.hpp"
 
@@ -25,6 +28,8 @@ namespace Server { namespace Game {
         _messageQueue(messageQueue)
     {
         Tools::debug << "Game::Game()\n";
+        if (this->_server.GetSettings().debug)
+            Log::load.RegisterCallback(std::bind(&Game::_LoadLog, this, std::placeholders::_1));
         this->_world = new World(*this, this->_messageQueue);
     }
 
@@ -191,6 +196,19 @@ namespace Server { namespace Game {
 
         player->RemoveFromMap();
         this->_players.erase(clientId);
+    }
+
+    void Game::_LoadLog(std::string const& message)
+    {
+        this->_loadLog += message;
+    }
+
+    std::string Game::RconGetLoadLog() const
+    {
+        std::string json = "{\n";
+        json += "\t\"log\": \"" + Rcon::ToJsonStr(this->_loadLog) + "\"\n";
+        json += "}\n";
+        return json;
     }
 
 }}
