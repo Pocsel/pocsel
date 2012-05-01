@@ -381,7 +381,7 @@ function fetchEntities() {
         success: function(json) {
             $('#entities_list').empty();
             $.each(json, function() {
-                $('#entities_list').append('<tr><td>' + this.id + '</td><td>' + this.plugin + '</td><td>' + this.type + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td><td>-</td></tr>');
+                $('#entities_list').append('<tr><td>' + this.id + '</td><td>' + this.plugin + '</td><td>' + this.type + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td><td>' + this.storage + '</td></tr>');
             });
             setTimeout(fetchEntities, 2500);
         },

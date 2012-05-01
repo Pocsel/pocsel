@@ -382,12 +382,24 @@ namespace Server { namespace Game { namespace Engine {
         {
             if (it != this->_entities.begin())
                 json += ",\n";
+            std::string storage;
+            if (it->second->GetSelf().IsTable())
+                try
+                {
+                    storage = this->_engine.GetInterpreter().GetSerializer().SerializeWithoutReturn(it->second->GetSelf()["storage"]);
+                }
+                catch (std::exception& e)
+                {
+                    // normalement on utilise nilOnError pour le storage, mais ici on debug donc on affiche plus de trucs
+                    storage = "Serialization error: " + std::string(e.what());
+                }
             json +=
                 "\t{\n"
                 "\t\t\"id\": " + Tools::ToString(it->first) + ",\n" +
                 "\t\t\"type\": \"" + it->second->GetType().GetName() + "\",\n" +
                 "\t\t\"plugin\": \"" + this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(it->second->GetType().GetPluginId()) + "\",\n" +
-                "\t\t\"positional\": " + (it->second->GetType().IsPositional() ? "true" : "false") + "\n" +
+                "\t\t\"positional\": " + (it->second->GetType().IsPositional() ? "true" : "false") + ",\n" +
+                "\t\t\"storage\": \"" + Rcon::ToJsonStr(storage) + "\"\n" +
                 "\t}";
         }
         json += "\n]\n";
