@@ -68,4 +68,12 @@ namespace Server { namespace Game { namespace Engine {
         return false;
     }
 
+    CallbackManager::Callback const& CallbackManager::GetCallback(Uint32 callbackId) const throw(std::runtime_error)
+    {
+        auto it = this->_callbacks.find(callbackId);
+        if (it == this->_callbacks.end())
+            throw std::runtime_error("CallbackManager: Callback not found.");
+        return *it->second;
+    }
+
 }}}

@@ -208,6 +208,14 @@ namespace Server { namespace Game { namespace Engine {
         return this->_runningEntity ? this->_runningEntity->GetType().GetPluginId() : 0;
     }
 
+    Entity const& EntityManager::GetEntity(Uint32 entityId) const throw(std::runtime_error)
+    {
+        auto it = this->_entities.find(entityId);
+        if (it == this->_entities.end())
+            throw std::runtime_error("EntityManager: Entity not found.");
+        return *it->second;
+    }
+
     Uint32 EntityManager::_CreateEntity(Uint32 pluginId, std::string entityName, bool positional /* = false */, Common::Position const& pos /* = Common::Position() */) throw(std::runtime_error)
     {
         // trouve le plugin

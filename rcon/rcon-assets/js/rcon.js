@@ -360,7 +360,7 @@ function fetchLogs() {
                 $('#logs_error').append(json.error);
                 $('#logs_error').scrollTop(pos);
             }
-            setTimeout(fetchLogs, 500);
+            setTimeout(fetchLogs, 1000);
         },
         error: function() {
             setTimeout(fetchLogs, 20000);
@@ -383,7 +383,7 @@ function fetchEntities() {
             $.each(json, function() {
                 $('#entities_list').append('<tr><td>' + this.id + '</td><td>' + this.plugin + '</td><td>' + this.type + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td><td>' + this.storage + '</td></tr>');
             });
-            setTimeout(fetchEntities, 2500);
+            setTimeout(fetchEntities, 2000);
         },
         error: function() {
             setTimeout(fetchEntities, 20000);
@@ -395,6 +395,23 @@ function fetchEntities() {
  * Fetches pending messages regularly
  */
 function fetchMessages() {
+    $.ajax({
+        url: rconUrl + 'map/' + currentMap + '/messages',
+        headers: {
+            'Rcon-Token': rconToken
+        },
+        dataType: 'json',
+        success: function(json) {
+            $('#messages_list').empty();
+            $.each(json, function() {
+                $('#messages_list').append('<tr><td>' + this.seconds + '</td><td>' + this.target + '</td><td>' + this.function + '</td><td>' + this.argument + '</td><td>' + this.notification_target + '</td><td>' + this.notification_function + '</td><td>' + this.notification_argument + '</td></tr>');
+            });
+            setTimeout(fetchMessages, 1750);
+        },
+        error: function() {
+            setTimeout(fetchMessages, 20000);
+        }
+    });
 }
 
 /*

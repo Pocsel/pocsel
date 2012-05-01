@@ -59,6 +59,23 @@
             }
         ]
 
+- GET /map/<map>/messages
+    - Needed rights: "messages"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights), 404 (map not found)
+    - JSON:
+        [
+            {
+                "seconds": "<time_left>",
+                "target": "<target>",
+                "function": "<function>",
+                "argument": "<argument>",
+                "notification_target": "<notification_target>",
+                "notification_function": "<notification_function>",
+                "notification_argument": "<notification_argument>"
+            }
+        ]
+
 - GET /entity_file/<plugin>/<file>
     - Needed rights: "execute"
     - Parameters:

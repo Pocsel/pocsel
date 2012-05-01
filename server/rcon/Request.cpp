@@ -206,6 +206,8 @@ namespace Server { namespace Rcon {
                     Game::Map::Map const& map = this->_server.GetGame().GetWorld().GetMap(this->_url[1]);
                     if (this->_url[2] == "entities" && this->_url.size() == 3 && this->_method == "GET")
                         return this->_GetEntities(map); // GET /map/<map>/entities
+                    else if (this->_url[2] == "messages" && this->_url.size() == 3 && this->_method == "GET")
+                        return this->_GetMessages(map); // GET /map/<map>/messages
                     else if (this->_url[2] == "execute" && this->_url.size() == 4 && this->_method == "POST")
                         return this->_PostExecute(map, this->_url[3], this->_content["lua"]); // POST /map/<map>/execute/<plugin>
                 }
@@ -295,6 +297,14 @@ namespace Server { namespace Rcon {
     {
         if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "rcon_sessions"))
             this->_WriteHttpResponse("200 OK", this->_server.GetRcon().GetSessionManager().RconGetSessions());
+        else
+            this->_WriteHttpResponse("401 Unauthorized");
+    }
+
+    void Request::_GetMessages(Game::Map::Map const& map)
+    {
+        if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "messages"))
+            map.RconGetMessages(std::bind(&Request::_JsonCallback, this, std::placeholders::_1));
         else
             this->_WriteHttpResponse("401 Unauthorized");
     }
