@@ -1,6 +1,5 @@
 #include "client/game/Model.hpp"
 
-#include "client/resources/Md5Animation.hpp"
 #include "client/resources/LocalResourceManager.hpp"
 
 namespace Client { namespace Game {

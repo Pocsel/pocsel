@@ -4,7 +4,6 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "client/resources/Md5Model.hpp"
-#include "client/resources/Md5Animation.hpp"
 
 #include "client/resources/LocalResourceManager.hpp"
 

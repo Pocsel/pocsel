@@ -10,7 +10,6 @@
 #include "client/network/PacketCreator.hpp"
 #include "client/resources/LocalResourceManager.hpp"
 #include "client/resources/Md5Model.hpp"
-#include "client/resources/Md5Animation.hpp"
 
 namespace Client { namespace Resources {
 
@@ -30,8 +29,6 @@ namespace Client { namespace Resources {
         for (auto it = this->_fonts.begin(), ite = this->_fonts.end(); it != ite; ++it)
             Tools::Delete(it->second);
         for (auto it = this->_models.begin(), ite = this->_models.end(); it != ite; ++it)
-            Tools::Delete(it->second);
-        for (auto it = this->_animations.begin(), ite = this->_animations.end(); it != ite; ++it)
             Tools::Delete(it->second);
     }
 
@@ -124,29 +121,6 @@ namespace Client { namespace Resources {
             catch (std::exception& ex)
             {
                 Tools::error << "Can't load Md5Model \"" << path << "\", details: " << ex.what() << "\n";
-                throw;
-            }
-        }
-        else
-            return *it->second;
-    }
-
-    Md5Animation const& LocalResourceManager::GetMd5Animation(std::string const& path)
-    {
-        auto it = this->_animations.find(path);
-        if (it == this->_animations.end())
-        {
-            try
-            {
-                boost::filesystem::path animPath = this->_client.GetSettings().confDir / "models" / path;
-                animPath.replace_extension(".md5anim");
-                Md5Animation* anim = new Md5Animation(animPath);
-                this->_animations[path] = anim;
-                return *anim;
-            }
-            catch (std::exception& ex)
-            {
-                Tools::error << "Can't load Md5Anim \"" << path << "\", details: " << ex.what() << "\n";
                 throw;
             }
         }

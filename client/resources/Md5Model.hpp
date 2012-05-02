@@ -14,7 +14,6 @@ namespace Tools {
 
 namespace Client { namespace Resources {
     class LocalResourceManager;
-    class Md5Animation;
 }}
 
 namespace Client { namespace Resources {
@@ -65,7 +64,6 @@ namespace Client { namespace Resources {
 
     private:
         //anim
-        //std::vector<glm::mat4x4> _frames;
         std::vector<std::vector<FrameJoint>> _frames;
         std::vector<Tools::Iqm::Pose> _poses;
         std::vector<Tools::Iqm::Anim> _anims;
@@ -85,7 +83,6 @@ namespace Client { namespace Resources {
                 Tools::IRenderer& renderer);
         void _LoadAnimations(Tools::Iqm::Header const& header, std::vector<char> const& data);
 
-        //std::vector<Tools::Iqm::Joint> const& GetJoints() const { return this->_joints; }
         std::vector<Tools::Iqm::Mesh> const& GetMeshes() const { return this->_meshes; }
         std::vector<glm::mat4x4> const& GetInverseBindPose() const { return this->_inverseBaseFrame; }
         std::vector<glm::mat4x4> const& GetBindPose() const { return this->_baseFrame; }
@@ -93,7 +90,6 @@ namespace Client { namespace Resources {
         std::vector<Tools::Renderers::ITexture2D*> const& GetTextures() const { return this->_textures; }
         Tools::Renderers::IVertexBuffer* GetVertexBuffer() const { return this->_vertexBuffer; }
         std::vector<Tools::Renderers::IIndexBuffer*> const& GetIndexBuffers() const { return this->_indexBuffers; }
-
 
         std::vector<std::vector<FrameJoint>> const& GetFrames() const { return this->_frames; }
         std::vector<AnimInfo> const& GetAnimInfos() const { return this->_animInfos; }

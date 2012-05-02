@@ -4,8 +4,6 @@
 #include "client/resources/Md5Model.hpp"
 
 namespace Client { namespace Resources {
-    class Md5Model;
-    class Md5Animation;
     class LocalResourceManager;
     class Mesh;
 }}

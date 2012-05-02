@@ -15,7 +15,6 @@ namespace Client {
     class Client;
     namespace Resources {
         class Md5Model;
-        class Md5Animation;
     }
 }
 
@@ -31,7 +30,6 @@ namespace Client { namespace Resources {
             std::map<std::string, Tools::Renderers::IShaderProgram*> _shaders;
             std::map<std::string, Tools::Renderers::ITexture2D*> _textures;
             std::map<std::string, Md5Model*> _models;
-            std::map<std::string, Md5Animation*> _animations;
 
         public:
             LocalResourceManager(Client& client);
@@ -41,7 +39,6 @@ namespace Client { namespace Resources {
             Tools::Renderers::ITexture2D& GetTexture2D(std::string const& path);
             Tools::Renderers::IShaderProgram& GetShader(std::string const& path);
             Md5Model const& GetMd5Model(std::string const& path);
-            Md5Animation const& GetMd5Animation(std::string const& path);
 
             Tools::IRenderer& GetRenderer() { return this->_renderer; }
 
