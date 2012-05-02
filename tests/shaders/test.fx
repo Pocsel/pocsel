@@ -1,4 +1,5 @@
-float4x4 mvp : WorldViewProjection;
+float4x4 worldViewProjection : WorldViewProjection;
+float4x4 world : World;
 
 sampler2D diffuse = sampler_state
 {
@@ -10,19 +11,36 @@ struct VSout
 {
    float4 position : POSITION;
    float2 texCoord : TEXCOORD0;
+   float3 normals : TEXCOORD1;
+   float3 worldPosition : TEXCOORD2;
 };
 
-VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
+struct FSout
+{
+    float4 diffuse : COLOR0;
+    float4 normals : COLOR1;
+    float4 depth : COLOR2;
+};
+
+VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0, in float3 normals : NORMAL)
 {
     VSout vout;
-    vout.position = mul(mvp, position);
+    vout.position = mul(worldViewProjection, position);
     vout.texCoord = texCoord;
+    vout.normals = normalize(mul(world, float4(normals, 0.0)).xyz);
+    vout.worldPosition = mul(world, position);
     return vout;
 }
 
-float4 fs(in VSout v) : COLOR
+FSout fs(in VSout v)
 {
-    return tex2D(diffuse, v.texCoord);
+    FSout f;
+
+    f.diffuse = tex2D(diffuse, v.texCoord);
+    f.normals = float4(v.normals * 0.5 + 0.5, 1.0);
+    f.depth = float4(v.worldPosition.x, v.worldPosition.y, v.worldPosition.z, 1.0);
+
+    return f;
 }
 
 #ifndef DIRECTX

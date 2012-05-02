@@ -2,6 +2,7 @@
 
 #include "tools/renderers/utils/GBuffer.hpp"
 #include "tools/renderers/utils/Image.hpp"
+#include "tools/renderers/utils/Rectangle.hpp"
 #include "tools/window/InputManager.hpp"
 #include "tools/window/sdl/Window.hpp"
 #include "tools/IRenderer.hpp"
@@ -16,6 +17,9 @@ using namespace Tools::Window;
 static std::string testShaderPath = "test.fx";
 static std::string combineShaderPath = "combine.fx";
 static std::string texturePath = "test.png";
+
+static std::string codeTestShader;
+static std::string codeCombineShader;
 
 static std::unique_ptr<IShaderProgram> testShader;
 static std::unique_ptr<IShaderParameter> diffuse;
@@ -109,18 +113,30 @@ static void CreateCube(IVertexBuffer& vertexBuffer, IIndexBuffer& indexBuffer)
 
 static void LoadShaders(IRenderer& renderer)
 {
+    try
     {
-        std::ifstream file(testShaderPath);
-        testShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
-        diffuse = testShader->GetParameter("diffuse");
+        {
+            std::ifstream file(testShaderPath);
+            testShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
+            codeTestShader = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        }
+        {
+            std::ifstream file(combineShaderPath);
+            combineShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
+            codeCombineShader = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        }
     }
+    catch (std::exception& ex)
     {
-        std::ifstream file(combineShaderPath);
-        combineShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
-        colors = combineShader->GetParameter("colors");
-        normals = combineShader->GetParameter("normals");
-        depth = combineShader->GetParameter("depthBuffer");
+        Tools::error << ex.what() << std::endl;
+        testShader = renderer.CreateProgram(codeTestShader);
+        combineShader = renderer.CreateProgram(codeCombineShader);
     }
+
+    diffuse = testShader->GetParameter("diffuse");
+    colors = combineShader->GetParameter("colors");
+    normals = combineShader->GetParameter("normals");
+    depth = combineShader->GetParameter("depthBuffer");
 }
 
 static void UnloadShaders()
@@ -181,7 +197,7 @@ int main(int ac, char *av[])
     actions["reloadshaders"] = BindAction::ReloadShaders;
     actions["togglecullface"] = BindAction::ToggleCullface;
 
-    Sdl::Window window(actions, false);
+    Sdl::Window window(actions, true);
     IRenderer& renderer = window.GetRenderer();
     bool run = true;
     bool reload = true;
@@ -250,6 +266,15 @@ int main(int ac, char *av[])
             auto halfSize = glm::vec2((float)window.GetSize().x * 0.5f, (float)window.GetSize().y * 0.5f);
             renderer.SetModelMatrix(glm::translate(halfSize.x, halfSize.y, 0.0f) * glm::scale(halfSize.x, halfSize.y, 1.0f));
             RenderGBuffer(renderer, gbuffer);
+
+            Utils::Rectangle rect(renderer);
+            rect.SetColor(
+                Color4f(1.0f, 0.0f, 0.0f, 1.0f),
+                Color4f(0.0f, 1.0f, 0.0f, 1.0f),
+                Color4f(0.0f, 0.0f, 1.0f, 1.0f),
+                Color4f(1.0f, 1.0f, 1.0f, 1.0f));
+            renderer.SetModelMatrix(glm::scale(100.0f, 100.0f, 1.0f));
+            rect.Render();
 
             renderer.EndDraw2D();
             renderer.EndDraw();

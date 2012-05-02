@@ -1,11 +1,11 @@
 float4x4 mvp : WorldViewProjection;
 
-sampler2D normals = sampler_state
+sampler2D depthBuffer = sampler_state
 {
    minFilter = Point;
    magFilter = Point;
 };
-sampler2D depthBuffer = sampler_state
+sampler2D normals = sampler_state
 {
    minFilter = Point;
    magFilter = Point;
@@ -36,19 +36,23 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 
 float4 fs(in VSout v) : COLOR
 {
+    return tex2D(colors, v.texCoord);
     float2 coords = v.texCoord * 2;
-    if (v.texCoord.y < 0.5)
+    //coords.y = 2 - coords.y;
+    if (coords.y < 1)
     {
-        if (v.texCoord.x < 0.5)
-            return tex2D(depthBuffer, coords);
-        return tex2D(normals, coords - float2(1, 0));
+        if (coords.x < 1)
+            return tex2D(depthBuffer, coords) * float4(1, 1, 1, 1.0);;
+        return tex2D(normals, coords - float2(1, 0)) * float4(0, 0, 1, 1.0);;
     }
     else
     {
         coords.y -= 1;
-        if (v.texCoord.x < 0.5)
-            return tex2D(colors, coords);
-        return tex2D(colors, coords - float2(1, 0));
+        if (coords.x < 1)
+            return tex2D(colors, coords) * float4(1.0, 0, 0, 1.0);
+
+        coords.x = coords.x - 1;
+        return tex2D(colors, coords) * float4(0, 1, 0, 1.0);
     }
 }
 
