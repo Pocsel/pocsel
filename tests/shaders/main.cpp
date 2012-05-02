@@ -14,9 +14,12 @@ using namespace Tools::Window;
 #undef main
 
 static std::string testShaderPath = "test.fx";
+static std::string combineShaderPath = "combine.fx";
 static std::string texturePath = "test.png";
 
 static std::unique_ptr<IShaderProgram> testShader;
+static std::unique_ptr<IShaderParameter> diffuse;
+static std::unique_ptr<IShaderProgram> combineShader;
 static std::unique_ptr<IShaderParameter> colors;
 static std::unique_ptr<IShaderParameter> normals;
 static std::unique_ptr<IShaderParameter> depth;
@@ -106,28 +109,37 @@ static void CreateCube(IVertexBuffer& vertexBuffer, IIndexBuffer& indexBuffer)
 
 static void LoadShaders(IRenderer& renderer)
 {
-    std::ifstream file(testShaderPath);
-    testShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
-    colors = testShader->GetParameter("colors");
-    //normals = testShader->GetParameter("normals");
-    //depth = testShader->GetParameter("depthBuffer");
+    {
+        std::ifstream file(testShaderPath);
+        testShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
+        diffuse = testShader->GetParameter("diffuse");
+    }
+    {
+        std::ifstream file(combineShaderPath);
+        combineShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
+        colors = combineShader->GetParameter("colors");
+        normals = combineShader->GetParameter("normals");
+        depth = combineShader->GetParameter("depthBuffer");
+    }
 }
 
 static void UnloadShaders()
 {
+    diffuse = 0;
     colors = 0;
     normals = 0;
     depth = 0;
+    combineShader = 0;
     testShader = 0;
 }
 
-static void RenderCube(IRenderer& renderer)
+static void RenderCube(IRenderer& renderer, ITexture2D& cubeTexture)
 {
     vertexBuffer->Bind();
     indexBuffer->Bind();
-    texture->Bind();
+    cubeTexture.Bind();
 
-    colors->Set(*texture);
+    diffuse->Set(cubeTexture);
 
     do
     {
@@ -135,18 +147,24 @@ static void RenderCube(IRenderer& renderer)
         renderer.DrawElements(6*3*2, DataType::UnsignedShort);
     } while (testShader->EndPass());
 
-    texture->Unbind();
+    cubeTexture.Unbind();
     indexBuffer->Unbind();
     vertexBuffer->Unbind();
 }
 
 static void RenderGBuffer(IRenderer& renderer, Utils::GBuffer& gbuffer)
 {
+    gbuffer.GetNormals().Bind();
+    gbuffer.GetDepth().Bind();
+    normals->Set(gbuffer.GetNormals());
+    depth->Set(gbuffer.GetDepth());
     do
     {
-        testShader->BeginPass();
+        combineShader->BeginPass();
         screenQuad->Render(*colors, gbuffer.GetColors());
-    } while (testShader->EndPass());
+    } while (combineShader->EndPass());
+    gbuffer.GetDepth().Unbind();
+    gbuffer.GetNormals().Unbind();
 }
 
 int main(int ac, char *av[])
@@ -154,7 +172,9 @@ int main(int ac, char *av[])
     if (ac > 1)
         testShaderPath = av[1];
     if (ac > 2)
-        texturePath = av[2];
+        combineShaderPath = av[2];
+    if (ac > 3)
+        texturePath = av[3];
 
     std::map<std::string, Tools::Window::BindAction::BindAction> actions;
     actions["quit"] = BindAction::Quit;
@@ -211,16 +231,24 @@ int main(int ac, char *av[])
 
             renderer.BeginDraw();
             gbuffer.Bind();
-
+            renderer.SetClearColor(Color4f(0.2f, 0.2f, 0.2f, 1.0f));
             renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
+
             renderer.SetCullFace(cullface);
 
-            RenderCube(renderer);
+            RenderCube(renderer, *texture);
 
             gbuffer.Unbind();
-            renderer.BeginDraw2D();
 
-            renderer.SetModelMatrix(glm::scale((float)window.GetSize().x, (float)window.GetSize().y, 1.0f));
+            //renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.0f, 1.0f));
+            //renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
+            //RenderCube(renderer, gbuffer.GetColors());
+
+            renderer.BeginDraw2D();
+            renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
+
+            auto halfSize = glm::vec2((float)window.GetSize().x * 0.5f, (float)window.GetSize().y * 0.5f);
+            renderer.SetModelMatrix(glm::translate(halfSize.x, halfSize.y, 0.0f) * glm::scale(halfSize.x, halfSize.y, 1.0f));
             RenderGBuffer(renderer, gbuffer);
 
             renderer.EndDraw2D();
