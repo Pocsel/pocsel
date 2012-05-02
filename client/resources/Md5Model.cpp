@@ -16,390 +16,325 @@ namespace Client { namespace Resources {
 
     Md5Model::~Md5Model()
     {
-        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
-        {
-            Tools::Delete(it->vertexBuffer);
-            Tools::Delete(it->indexBuffer);
-        }
+//        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
+//        {
+//            Tools::Delete(it->vertexBuffer);
+//            Tools::Delete(it->indexBuffer);
+//        }
     }
 
     Md5Model::Md5Model(
             boost::filesystem::path const& filePath,
             boost::filesystem::path const& texturesPath,
-            LocalResourceManager& resourceManager) :
-        _md5Version(-1),
-        _numJoints(0),
-        _numMeshes(0),
-        _localToWorldMatrix(1)
+            LocalResourceManager& resourceManager)
     {
         if (!boost::filesystem::exists(filePath))
             throw std::runtime_error("Md5Model::LoadModel: Failed to find file: " + filePath.string());
 
-        // store the parent path used for loading images relative to this file.
-        boost::filesystem::path parentPath = filePath.parent_path();
+        boost::filesystem::ifstream tmp(filePath);
 
-        std::string param;
-        std::string junk;   // Read junk from the file
+        std::vector<char> file((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
 
-        boost::filesystem::ifstream file(filePath);
-        int fileLength = (int)Tools::Filesystem::GetFileLength(file);
-        if (fileLength <= 0)
-            throw std::runtime_error("Md5Model::LoadModel: file " + filePath.string() + " is empty");
 
-        this->_joints.clear();
-        this->_meshes.clear();
+        Tools::Iqm::Header header;
 
-        file >> param;
+        if (file.size() < sizeof(header))
+            throw std::runtime_error("Md5Model::LoadModel: file is too short, can't contain header");
 
-        while (!file.eof())
-        {
-            if (param == "Md5Version")
-            {
-                file >> this->_md5Version;
-                if (this->_md5Version != 10)
-                    throw std::runtime_error("Md5Model::LoadModel: " + filePath.string() + ": Only MD5 version 10 is supported");
-            }
-            else if (param == "commandline")
-            {
-                Tools::Filesystem::IgnoreLine(file, fileLength); // Ignore the contents of the line
-            }
-            else if (param == "numJoints")
-            {
-                file >> this->_numJoints;
-                this->_joints.reserve(this->_numJoints);
-            }
-            else if (param == "numMeshes")
-            {
-                file >> this->_numMeshes;
-                this->_meshes.reserve(this->_numMeshes);
-            }
-            else if (param == "joints")
-            {
-                Joint joint;
-                file >> junk; // Read the '{' character
-                for (unsigned int i = 0; i < this->_numJoints; ++i)
-                {
-                    file
-                        >> joint.name >> joint.parentID >> junk
-                        >> joint.pos.x >> joint.pos.y >> joint.pos.z >> junk >> junk
-                        >> joint.orient.x >> joint.orient.y >> joint.orient.z >> junk;
+        std::memcpy(&header, file.data(), sizeof(header));
 
-                    Tools::Filesystem::RemoveQuotes(joint.name);
-                    Tools::Math::ComputeQuatW(joint.orient);
+        if (std::memcmp(header.magic, Tools::Iqm::Magic, sizeof(header.magic)))
+            throw std::runtime_error("Md5Model::LoadModel: magic is not good");
 
-                    this->_joints.push_back(joint);
-                    // Ignore everything else on the line up to the end-of-line character.
-                    Tools::Filesystem::IgnoreLine(file, fileLength);
-                }
-                file >> junk; // Read the '}' character
+        // lilswap(&header.version, (sizeof(hdr) - sizeof(header.magic))/sizeof(uint));
 
-                this->_BuildBindPose(this->_joints);
-            }
-            else if (param == "mesh")
-            {
-                Mesh mesh;
-                int numVerts, numTris, numWeights;
+        if (header.version != Tools::Iqm::Version)
+            throw std::runtime_error("Md5Model::LoadModel: version is not good");
 
-                file >> junk; // Read the '{' character
-                file >> param;
-                while (param != "}")  // Read until we get to the '}' character
-                {
-                    if (param == "shader")
-                    {
-                        file >> mesh.shader;
-                        Tools::Filesystem::RemoveQuotes(mesh.shader);
+        if (file.size() != header.filesize)
+            throw std::runtime_error("Md5Model::LoadModel: file size is not good");
 
-                        boost::filesystem::path shaderPath(mesh.shader);
-                        boost::filesystem::path texturePath;
-                        if (shaderPath.has_parent_path())
-                        {
-                            texturePath = shaderPath;
-                        }
-                        else
-                        {
-                            texturePath = parentPath / shaderPath;
-                        }
-
-                        //if (!texturePath.has_extension())
-                        //{
-                        //    texturePath.replace_extension(".tga");
-                        //}
-
-                        std::string texturePathStr = texturePath.string();
-                        Tools::Filesystem::ReplaceBackslashes(texturePathStr);
-
-                        texturePath = texturePathStr;
-
-                        mesh.texture = &resourceManager.GetTexture2D((texturesPath / texturePath.filename()).string());
-
-                        file.ignore(fileLength, '\n'); // Ignore everything else on the line
-                    }
-                    else if (param == "numverts")
-                    {
-                        file >> numVerts;               // Read in the vertices
-                        Tools::Filesystem::IgnoreLine(file, fileLength);
-                        for (int i = 0; i < numVerts; ++i)
-                        {
-                            Vertex vert;
-
-                            file >> junk >> junk >> junk                    // vert vertIndex (
-                                >> vert.tex0.x >> vert.tex0.y >> junk  //  s t )
-                                >> vert.startWeight >> vert.weightCount;
-
-                            Tools::Filesystem::IgnoreLine(file, fileLength);
-
-                            vert.tex0.y = 1.0f - vert.tex0.y;
-                            mesh.verts.push_back(vert);
-                            mesh.tex2DBuffer.push_back(vert.tex0);
-                        }
-                    }
-                    else if (param == "numtris")
-                    {
-                        file >> numTris;
-                        Tools::Filesystem::IgnoreLine(file, fileLength);
-                        for (int i = 0; i < numTris; ++i)
-                        {
-                            Triangle tri;
-                            // inversion de 1 et 2 pour le cullface
-                            file >> junk >> junk >> tri.indices[0] >> tri.indices[2] >> tri.indices[1];
-
-                            Tools::Filesystem::IgnoreLine(file, fileLength);
-
-                            mesh.tris.push_back(tri);
-                            mesh.indexes.push_back((GLuint)tri.indices[0]);
-                            mesh.indexes.push_back((GLuint)tri.indices[1]);
-                            mesh.indexes.push_back((GLuint)tri.indices[2]);
-                        }
-                    }
-                    else if (param == "numweights")
-                    {
-                        file >> numWeights;
-                        Tools::Filesystem::IgnoreLine(file, fileLength);
-                        for (int i = 0; i < numWeights; ++i)
-                        {
-                            Weight weight;
-                            file >> junk >> junk >> weight.jointID >> weight.bias >> junk
-                                >> weight.pos.x >> weight.pos.y >> weight.pos.z >> junk;
-
-                            Tools::Filesystem::IgnoreLine(file, fileLength);
-                            mesh.weights.push_back(weight);
-                        }
-                    }
-                    else
-                    {
-                        Tools::Filesystem::IgnoreLine(file, fileLength);
-                    }
-
-                    file >> param;
-                }
-
-                this->_PrepareMesh(mesh);
-                this->_PrepareNormals(mesh);
-                this->_CreateVertexBuffers(mesh, resourceManager.GetRenderer());
-
-                this->_meshes.push_back(mesh);
-
-            }
-
-            file >> param;
-        }
-
-        if (this->_joints.size() != this->_numJoints)
-            throw std::runtime_error("Md5Model::LoadModel: " + filePath.string() + ": number of joints not ok. (need " + Tools::ToString(this->_numJoints) + ", has " + Tools::ToString(this->_joints.size()) + ")");
-        if (this->_meshes.size() != this->_numMeshes)
-            throw std::runtime_error("Md5Model::LoadModel: " + filePath.string() + ": number of meshes not ok. (need " + Tools::ToString(this->_numMeshes) + ", has " + Tools::ToString(this->_meshes.size()) + ")");
+        this->_LoadMeshes(header, file, texturesPath, resourceManager, resourceManager.GetRenderer());
+        if (header.num_anims > 0)
+            this->_LoadAnimations(header, file);
     }
 
-    bool Md5Model::CheckAnimation(Md5Animation const& animation) const
+    void Md5Model::_LoadMeshes(
+            Tools::Iqm::Header const& header,
+            std::vector<char> const& data,
+            boost::filesystem::path const& texturesPath,
+            LocalResourceManager& resourceManager,
+            Tools::IRenderer& renderer)
     {
-        if ( this->_numJoints != animation.GetNumJoints())
-        {
-            return false;
-        }
+        // lilswap((uint *)&buf[header.ofs_vertexarrays], header.num_vertexarrays*sizeof(iqmvertexarray)/sizeof(uint));
+        // lilswap((uint *)&buf[header.ofs_triangles], header.num_triangles*sizeof(iqmtriangle)/sizeof(uint));
+        // lilswap((uint *)&buf[header.ofs_meshes], header.num_meshes*sizeof(iqmmesh)/sizeof(uint));
+        // lilswap((uint *)&buf[header.ofs_joints], header.num_joints*sizeof(iqmjoint)/sizeof(uint));
 
-        // Check to make sure the joints match up
-        for (unsigned int i = 0; i < this->_joints.size(); ++i)
-        {
-            Joint const& meshJoint = this->_joints[i];
-            Md5Animation::JointInfo const& animJoint = animation.GetJointInfo(i);
+        //meshdata = buf;
+        _numTris = header.num_triangles;
+        _numVerts = header.num_vertexes;
+        //_outFrame.resize(header.num_joints);
+        //_textures.resize(header.num_meshes);
 
-            if (meshJoint.name != animJoint.name || meshJoint.parentID != animJoint.parentID )
+        _meshes.resize(header.num_meshes);
+        // lilswap
+        std::memcpy(_meshes.data(), data.data() + header.ofs_meshes, header.num_meshes * sizeof(_meshes[0]));
+        _joints.resize(header.num_joints);
+        // lilswap
+        std::memcpy(_joints.data(), data.data() + header.ofs_joints, header.num_joints * sizeof(_joints[0]));
+
+        float const *inposition = NULL, *innormal = NULL, *intangent = NULL, *intexcoord = NULL;
+        Uint8 const *inblendindex = NULL, *inblendweight = NULL;
+        const char *str = header.ofs_text ? &data[header.ofs_text] : "";
+        Tools::Iqm::VertexArray const* vas = (Tools::Iqm::VertexArray const*)&data[header.ofs_vertexarrays];
+        for(int i = 0; i < (int)header.num_vertexarrays; i++)
+        {
+            Tools::Iqm::VertexArray const& va = vas[i];
+            switch(va.type)
             {
-                return false;
+                case Tools::Iqm::VertexArrayType::Position:
+                    if(va.format != Tools::Iqm::VertexArrayFormat::Float || va.size != 3)
+                        throw std::runtime_error("fail");
+                    inposition = (float const*)&data[va.offset];
+                    //lilswap(inposition, 3*header.num_vertexes);
+                    break;
+                case Tools::Iqm::VertexArrayType::Normal:
+                    if(va.format != Tools::Iqm::VertexArrayFormat::Float || va.size != 3)
+                        throw std::runtime_error("fail");
+                    innormal = (float const*)&data[va.offset];
+                    //lilswap(innormal, 3*header.num_vertexes);
+                    break;
+                case Tools::Iqm::VertexArrayType::Tangent:
+                    if(va.format != Tools::Iqm::VertexArrayFormat::Float || va.size != 4)
+                        throw std::runtime_error("fail");
+                    intangent = (float const*)&data[va.offset];
+                    //lilswap(intangent, 4*header.num_vertexes);
+                    break;
+                case Tools::Iqm::VertexArrayType::Texcoord:
+                    if(va.format != Tools::Iqm::VertexArrayFormat::Float || va.size != 2)
+                        throw std::runtime_error("fail");
+                    intexcoord = (float const*)&data[va.offset];
+                    //lilswap(intexcoord, 2*header.num_vertexes);
+                    break;
+                case Tools::Iqm::VertexArrayType::BlendIndexes:
+                    if(va.format != Tools::Iqm::VertexArrayFormat::Ubyte || va.size != 4)
+                        throw std::runtime_error("fail");
+                    inblendindex = (Uint8 const*)&data[va.offset];
+                    break;
+                case Tools::Iqm::VertexArrayType::BlendWeights:
+                    if(va.format != Tools::Iqm::VertexArrayFormat::Ubyte || va.size != 4)
+                        throw std::runtime_error("fail");
+                    inblendweight = (Uint8 const*)&data[va.offset];
+                    break;
             }
         }
 
-        return true;
-    }
+        this->_BuildBindPose(_joints);
 
-    void Md5Model::_BuildBindPose(std::vector<Joint> const& joints)
-    {
-        this->_bindPose.clear();
-        this->_inverseBindPose.clear();
+        Tools::Iqm::Triangle const* tris = (Tools::Iqm::Triangle const*)&data[header.ofs_triangles];
 
-        for (auto it = joints.begin(), ite = joints.end(); it != ite; ++it)
+        for(int i = 0; i < (int)header.num_meshes; i++)
         {
-            Joint const& joint = (*it);
+            Tools::Iqm::Mesh &mesh = _meshes[i];
+            //printf("%s: loaded mesh: %s\n", filename, &str[m.name]);
+            std::string textureStr(&str[mesh.material]);
+            boost::filesystem::path texturePath(textureStr);
+            std::string texturePathStr = texturePath.string();
+            Tools::Filesystem::ReplaceBackslashes(texturePathStr);
+            texturePath = texturePathStr;
+            _textures.push_back(&resourceManager.GetTexture2D((texturesPath / texturePath.filename()).string()));
 
-            glm::mat4x4 boneTranslation = glm::translate(joint.pos);
-            glm::mat4x4 boneRotation = glm::toMat4(joint.orient);
+            this->_indexBuffers.push_back(renderer.CreateIndexBuffer().release());
+            this->_indexBuffers.back()->SetData(
+                    Tools::Renderers::DataType::UnsignedInt,
+                    mesh.num_triangles * sizeof(Tools::Iqm::Triangle), &tris[mesh.first_triangle]);
 
-            glm::mat4x4 boneMatrix = boneTranslation * boneRotation;
-
-            glm::mat4x4 inverseBoneMatrix = glm::inverse(boneMatrix);
-
-            this->_bindPose.push_back(boneMatrix);
-            this->_inverseBindPose.push_back(inverseBoneMatrix);
-        }
-    }
-
-    // Compute the position of the vertices in object local space
-    // in the skeleton's bind pose
-    bool Md5Model::_PrepareMesh(Mesh& mesh)
-    {
-        mesh.positionBuffer.clear();
-        mesh.tex2DBuffer.clear();
-        mesh.boneIndex.clear();
-        mesh.boneWeights.clear();
-
-        // Compute vertex positions
-        for (auto it = mesh.verts.begin(), ite = mesh.verts.end(); it != ite; ++it)
-        {
-            glm::vec3 finalPos(0);
-            Vertex& vert = *it;
-
-            vert.pos = glm::vec3(0);
-            vert.normal = glm::vec3(0);
-            vert.boneWeights = glm::vec4(0);
-            vert.boneIndices = glm::vec4(0);
-
-            // Sum the position of the weights
-            for (int j = 0; j < vert.weightCount; ++j)
-            {
-                Weight& weight = mesh.weights[vert.startWeight + j];
-                Joint& joint = this->_joints[weight.jointID];
-
-                // Convert the weight position from Joint local space to object space
-                glm::vec3 rotPos = joint.orient * weight.pos;
-
-                vert.pos += (joint.pos + rotPos ) * weight.bias;
-                vert.boneIndices[j] = (float)weight.jointID;
-                vert.boneWeights[j] = weight.bias;
-            }
-
-            mesh.positionBuffer.push_back(vert.pos);
-            mesh.tex2DBuffer.push_back(vert.tex0);
-            mesh.boneIndex.push_back(vert.boneIndices);
-            mesh.boneWeights.push_back(vert.boneWeights);
+            std::cout << "mesh.first_triangle = " << mesh.first_triangle << ", num = " << mesh.num_triangles << "\n";
+            std::cout << "coords " << tris[mesh.first_triangle].vertex[0] << ", " << tris[mesh.first_triangle].vertex[1] << ", " << tris[mesh.first_triangle].vertex[2] << "\n";
         }
 
-        return true;
-    }
+        _CreateVertexBuffers(/*tris, */inposition, innormal, /*intangent,*/ intexcoord, inblendindex, inblendweight, renderer);
 
-    // Compute the vertex normals in the Mesh's bind pose
-    bool Md5Model::_PrepareNormals(Mesh& mesh)
-    {
-        mesh.normalBuffer.clear();
+#if 0
+//        if(!ebo) glGenBuffers_(1, &ebo);
+//        glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, ebo);
+//        glBufferData_(GL_ELEMENT_ARRAY_BUFFER, header.num_triangles*sizeof(iqmtriangle), tris, GL_STATIC_DRAW);
+//        glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        // Loop through all triangles and calculate the normal of each triangle
-        for (auto it = mesh.tris.begin(), ite = mesh.tris.end(); it != ite; ++it)
-        {
-            Triangle& tri = *it;
-
-            glm::vec3 v0 = mesh.verts[tri.indices[0]].pos;
-            glm::vec3 v1 = mesh.verts[tri.indices[1]].pos;
-            glm::vec3 v2 = mesh.verts[tri.indices[2]].pos;
-
-            glm::vec3 normal = glm::cross(v2 - v0, v1 - v0);
-
-            mesh.verts[tri.indices[0]].normal += 1.0f - normal;
-            mesh.verts[tri.indices[1]].normal += 1.0f - normal;
-            mesh.verts[tri.indices[2]].normal += 1.0f - normal;
-        }
-
-        // Now normalize all the normals
-        for (auto it = mesh.verts.begin(), ite = mesh.verts.end(); it != ite; ++it)
-        {
-            Vertex& vert = *it;
-
-            vert.normal = glm::normalize(vert.normal);
-            mesh.normalBuffer.push_back(vert.normal);
-        }
-
-        return true;
-    }
-
-//    bool Md5Model::_PrepareMesh(Mesh& mesh, std::vector<glm::mat4x4> const& skel)
-//    {
-//        for (unsigned int i = 0; i < mesh.verts.size(); ++i)
+//        vertex *verts = new vertex[header.num_vertexes];
+//        memset(verts, 0, header.num_vertexes*sizeof(vertex));
+//        for(int i = 0; i < (int)header.num_vertexes; i++)
 //        {
-//            const Vertex& vert = mesh.verts[i];
-//            glm::vec3& pos = mesh.positionBuffer[i];
-//            glm::vec3& normal = mesh.normalBuffer[i];
-//
-//            pos = glm::vec3(0);
-//            normal = glm::vec3(0);
-//
-//            for (int j = 0; j < vert.weightCount; ++j)
-//            {
-//                Weight const& weight = mesh.weights[vert.startWeight + j];
-//                glm::mat4x4 const& boneMatrix = skel[weight.jointID];
-//
-//                pos += glm::vec3((boneMatrix * glm::vec4(vert.pos, 1.0f)) * weight.bias);
-//                normal += glm::vec3((boneMatrix * glm::vec4(vert.normal, 0.0f)) * weight.bias);
-//            }
+//            vertex &v = verts[i];
+//            if(inposition) memcpy(v.position, &inposition[i*3], sizeof(v.position));
+//            if(innormal) memcpy(v.normal, &innormal[i*3], sizeof(v.normal));
+//            if(intangent) memcpy(v.tangent, &intangent[i*4], sizeof(v.tangent));
+//            if(intexcoord) memcpy(v.texcoord, &intexcoord[i*2], sizeof(v.texcoord));
+//            if(inblendindex) memcpy(v.blendindex, &inblendindex[i*4], sizeof(v.blendindex));
+//            if(inblendweight) memcpy(v.blendweight, &inblendweight[i*4], sizeof(v.blendweight));
 //        }
+//
+//        if(!vbo) glGenBuffers_(1, &vbo);
+//        glBindBuffer_(GL_ARRAY_BUFFER, vbo);
+//        glBufferData_(GL_ARRAY_BUFFER, header.num_vertexes*sizeof(vertex), verts, GL_STATIC_DRAW);
+//        glBindBuffer_(GL_ARRAY_BUFFER, 0);
+//        delete[] verts;
+//
 //        return true;
-//    }
+#endif
+    }
 
-    bool Md5Model::_CreateVertexBuffers(Mesh& mesh, Tools::IRenderer& renderer)
+    bool Md5Model::_CreateVertexBuffers(
+            //Tools::Iqm::Triangle const* triangles,
+            float const* inposition,
+            float const* innormal,
+            //float const* intangent,
+            float const* intexcoord,
+            Uint8 const* inblendindex,
+            Uint8 const* inblendweight,
+            Tools::IRenderer& renderer)
     {
-        mesh.vertexBuffer = renderer.CreateVertexBuffer().release();
-        mesh.indexBuffer = renderer.CreateIndexBuffer().release();
+        this->_vertexBuffer = renderer.CreateVertexBuffer().release();
+        //mesh.indexBuffer = renderer.CreateIndexBuffer().release();
 
         std::vector<float> vertexBuffer;
-        vertexBuffer.reserve(
-                sizeof(glm::vec3) * mesh.positionBuffer.size() +
-                sizeof(glm::vec3) * mesh.normalBuffer.size() +
-                sizeof(glm::vec2) * mesh.tex2DBuffer.size() +
-                sizeof(glm::vec4) * mesh.boneWeights.size() +
-                sizeof(glm::vec4) * mesh.boneIndex.size()
-                );
-        for (unsigned int i = 0; i < mesh.verts.size(); ++i)
+//        vertexBuffer.reserve(
+//                sizeof(glm::vec3) * mesh.positionBuffer.size() +
+//                sizeof(glm::vec3) * mesh.normalBuffer.size() +
+//                sizeof(glm::vec2) * mesh.tex2DBuffer.size() +
+//                sizeof(glm::vec4) * mesh.boneWeights.size() +
+//                sizeof(glm::vec4) * mesh.boneIndex.size()
+//                );
+
+        for (unsigned int i = 0; i < _numVerts; ++i)
         {
-            vertexBuffer.push_back(mesh.positionBuffer[i].x);
-            vertexBuffer.push_back(mesh.positionBuffer[i].y);
-            vertexBuffer.push_back(mesh.positionBuffer[i].z);
-            vertexBuffer.push_back(mesh.normalBuffer[i].x);
-            vertexBuffer.push_back(mesh.normalBuffer[i].y);
-            vertexBuffer.push_back(mesh.normalBuffer[i].z);
-            vertexBuffer.push_back(mesh.tex2DBuffer[i].x);
-            vertexBuffer.push_back(mesh.tex2DBuffer[i].y);
-            vertexBuffer.push_back(mesh.boneWeights[i].x);
-            vertexBuffer.push_back(mesh.boneWeights[i].y);
-            vertexBuffer.push_back(mesh.boneWeights[i].z);
-            vertexBuffer.push_back(mesh.boneWeights[i].w);
-            vertexBuffer.push_back(mesh.boneIndex[i].x);
-            vertexBuffer.push_back(mesh.boneIndex[i].y);
-            vertexBuffer.push_back(mesh.boneIndex[i].z);
-            vertexBuffer.push_back(mesh.boneIndex[i].w);
+            vertexBuffer.push_back(inposition[i*3+0]);
+            vertexBuffer.push_back(inposition[i*3+1]);
+            vertexBuffer.push_back(inposition[i*3+2]);
+            vertexBuffer.push_back(innormal[i*3+0]);
+            vertexBuffer.push_back(innormal[i*3+1]);
+            vertexBuffer.push_back(innormal[i*3+2]);
+            vertexBuffer.push_back(intexcoord[i*2+0]);
+            vertexBuffer.push_back(intexcoord[i*2+1]);
+            vertexBuffer.push_back((float)inblendweight[i*4+0] / (float)255);
+            vertexBuffer.push_back((float)inblendweight[i*4+1] / (float)255);
+            vertexBuffer.push_back((float)inblendweight[i*4+2] / (float)255);
+            vertexBuffer.push_back((float)inblendweight[i*4+3] / (float)255);
+            vertexBuffer.push_back((float)inblendindex[i*4+0]);
+            vertexBuffer.push_back((float)inblendindex[i*4+1]);
+            vertexBuffer.push_back((float)inblendindex[i*4+2]);
+            vertexBuffer.push_back((float)inblendindex[i*4+3]);
         }
 
-        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
                 Tools::Renderers::VertexAttributeUsage::Position, 3);
-        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
                 Tools::Renderers::VertexAttributeUsage::Normal, 3);
-        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
                 Tools::Renderers::VertexAttributeUsage::TexCoord, 2);
-        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
                 Tools::Renderers::VertexAttributeUsage::Custom1, 4);
-        mesh.vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
+        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
                 Tools::Renderers::VertexAttributeUsage::Custom2, 4);
-        mesh.vertexBuffer->SetData(sizeof(float) * vertexBuffer.size(), vertexBuffer.data(), Tools::Renderers::VertexBufferUsage::Static);
+        this->_vertexBuffer->SetData(sizeof(float) * vertexBuffer.size(), vertexBuffer.data(), Tools::Renderers::VertexBufferUsage::Static);
 
-        mesh.indexBuffer->SetData(Tools::Renderers::DataType::UnsignedInt, sizeof(GLuint) * mesh.indexes.size(), &(mesh.indexes[0]));
+        //mesh.indexBuffer->SetData(Tools::Renderers::DataType::UnsignedInt, sizeof(GLuint) * mesh.indexes.size(), &(mesh.indexes[0]));
 
         return true;
+    }
+
+    void Md5Model::_LoadAnimations(Tools::Iqm::Header const& header, std::vector<char> const& data)
+    {
+        if(header.num_poses != header.num_joints)
+            throw std::runtime_error("num_poses != num_joints");
+
+        // lilswap((uint *)&buf[header.ofs_poses], header.num_poses*sizeof(iqmpose)/sizeof(uint));
+        // lilswap((uint *)&buf[header.ofs_anims], header.num_anims*sizeof(iqmanim)/sizeof(uint));
+        // lilswap((ushort *)&buf[header.ofs_frames], header.num_frames*header.num_framechannels);
+
+        _anims.resize(header.num_anims);
+        std::memcpy(_anims.data(), data.data() + header.ofs_anims, header.num_anims * sizeof(_anims[0]));
+
+        _poses.resize(header.num_poses);
+        std::memcpy(_poses.data(), data.data() + header.ofs_poses, header.num_poses * sizeof(_poses[0]));
+
+        //_frames.resize(header.num_frames * header.num_poses);
+
+        const char *str = header.ofs_text ? (char *)&data[header.ofs_text] : "";
+        Uint16 const* framedata = (Uint16 const*)&data[header.ofs_frames];
+
+        for(int i = 0; i < (int)header.num_frames; i++)
+        {
+            _frames.push_back(std::vector<FrameJoint>());
+            for(int j = 0; j < (int)header.num_poses; j++)
+            {
+                Tools::Iqm::Pose &p = _poses[j];
+                glm::quat rotate(p.channeloffset[3], p.channeloffset[4], p.channeloffset[5], p.channeloffset[6]);
+                glm::vec3 translate;
+                glm::vec3 scale;
+                translate.x = p.channeloffset[0]; if(p.mask&0x01) translate.x += *framedata++ * p.channelscale[0];
+                translate.y = p.channeloffset[1]; if(p.mask&0x02) translate.y += *framedata++ * p.channelscale[1];
+                translate.z = p.channeloffset[2]; if(p.mask&0x04) translate.z += *framedata++ * p.channelscale[2];
+                rotate.x = p.channeloffset[3]; if(p.mask&0x08) rotate.x += *framedata++ * p.channelscale[3];
+                rotate.y = p.channeloffset[4]; if(p.mask&0x10) rotate.y += *framedata++ * p.channelscale[4];
+                rotate.z = p.channeloffset[5]; if(p.mask&0x20) rotate.z += *framedata++ * p.channelscale[5];
+                rotate.w = p.channeloffset[6]; if(p.mask&0x40) rotate.w += *framedata++ * p.channelscale[6];
+                scale.x = p.channeloffset[7]; if(p.mask&0x80) scale.x += *framedata++ * p.channelscale[7];
+                scale.y = p.channeloffset[8]; if(p.mask&0x100) scale.y += *framedata++ * p.channelscale[8];
+                scale.z = p.channeloffset[9]; if(p.mask&0x200) scale.z += *framedata++ * p.channelscale[9];
+                // Concatenate each pose with the inverse base pose to avoid doing this at animation time.
+                // If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
+                // Thus it all negates at animation time like so:
+                //   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
+                //   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
+                //   parentPose * childPose * childInverseBasePose
+
+                _frames.back().push_back(FrameJoint(translate, rotate, scale));
+
+                /*
+                glm::fmat4x4 m = glm::scale(scale) * glm::translate(translate) * glm::toMat4(rotate);
+                if (p.parent >= 0)
+                    _frames[i*header.num_poses + j] = _baseFrame[p.parent] * m * _inverseBaseFrame[j];
+                else
+                    _frames[i*header.num_poses + j] = m * _inverseBaseFrame[j];
+                    */
+            }
+        }
+
+        for (auto it = this->_anims.begin(), ite = this->_anims.end(); it != ite; ++it)
+        {
+            Tools::Iqm::Anim &a = *it;
+            this->_animInfos.push_back(AnimInfo(&str[a.name], a.first_frame, a.num_frames, a.framerate));
+        }
+        for (auto it = this->_joints.begin(), ite = this->_joints.end(); it != ite; ++it)
+        {
+            Tools::Iqm::Joint &j = *it;
+            this->_jointInfos.push_back(JointInfo(&str[j.name], j.parent, j.position, j.orientation, j.size));
+        }
+    }
+
+    void Md5Model::_BuildBindPose(std::vector<Tools::Iqm::Joint> const& joints)
+    {
+        _baseFrame.resize(joints.size());
+        _inverseBaseFrame.resize(joints.size());
+
+        for (unsigned int i = 0; i < joints.size(); ++i)
+        {
+            Tools::Iqm::Joint const& joint = joints[i];
+            _baseFrame[i] =
+                glm::scale(joint.size)
+                *
+                glm::translate(joint.position)
+                *
+                glm::toMat4(glm::quat(joint.orientation));
+            _inverseBaseFrame[i] = glm::inverse(_baseFrame[i]);
+            if (joint.parent >= 0)
+            {
+                _baseFrame[i] = _baseFrame[joint.parent] * _baseFrame[i];
+                _inverseBaseFrame[i] *= _inverseBaseFrame[joint.parent];
+            }
+        }
     }
 
 }}

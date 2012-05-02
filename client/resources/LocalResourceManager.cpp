@@ -116,7 +116,7 @@ namespace Client { namespace Resources {
             {
                 boost::filesystem::path texturesPath = path;
                 boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
-                modelPath.replace_extension(".md5mesh");
+                modelPath.replace_extension(".iqm");
                 Md5Model* model = new Md5Model(modelPath, texturesPath, *this);
                 this->_models[path] = model;
                 return *model;

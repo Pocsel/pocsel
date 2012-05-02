@@ -7,164 +7,165 @@ namespace Client { namespace Game {
 
     Model::Model(Resources::LocalResourceManager& resourceManager) :
         _model(resourceManager.GetMd5Model("boblampclean")),
-        _curAnimation(),
-        _animatedBones(_model.GetNumJoints()),
         _animTime(0)
     {
-        this->_animations["boblampclean"] = &resourceManager.GetMd5Animation("boblampclean");
-        if (!this->_model.CheckAnimation(*this->_animations["boblampclean"]))
-            throw std::runtime_error("this animation is not compatible");
-        this->_animations["boblampclean_move"] = &resourceManager.GetMd5Animation("boblampclean_move");
-        if (!this->_model.CheckAnimation(*this->_animations["boblampclean_move"]))
-            throw std::runtime_error("this animation is not compatible");
-        this->_curAnimation = this->_animations["boblampclean"];
+        auto anims = this->_model.GetAnimInfos();
+        for (auto it = anims.begin(), ite = anims.end(); it != ite; ++it)
+        {
+            this->_animations[it->name] = *it;
+        }
+        this->SetAnim("idle");
+
+        this->_animatedBones.assign(this->_model.GetJointInfos().size(), glm::mat4x4(1));
     }
 
     void Model::SetAnim(std::string const& anim)
     {
-        this->_curAnimation = this->_animations[anim];
+        if (this->_animations.count(anim))
+            this->_curAnimation = &this->_animations[anim];
+        else
+            this->_curAnimation = 0;
     }
 
     void Model::Update(Uint32 time, float phi)
     {
-        if (this->_curAnimation != 0 && this->_curAnimation->GetNumFrames() > 0)
+        auto joints = this->_model.GetJointInfos();
+
+        if (this->_curAnimation != 0 && this->_curAnimation->numFrames > 0)
         {
-            float deltaTime = (float)time / 1000.0f;
+            auto frames = this->_model.GetFrames();
 
-            Resources::Md5Animation const& animation = *this->_curAnimation;
+            _animTime += (float)time / 1000.0f;
 
-            this->_animTime = std::fmod(this->_animTime + deltaTime, animation.GetAnimDuration());
+            int frame1 = (int)_animTime;
+            int frame2 = frame1 + 1;
 
-            // Figure out which frame we're on
-            float framNum = this->_animTime * (float)animation.GetFramRate();
-            int frame0 = (int)std::floor(framNum) % animation.GetNumFrames();
-            int frame1 = (int)std::ceil(framNum) % animation.GetNumFrames();
+            float interpolate = std::fmod(_animTime, 1.0f);
 
-            float interpolate = std::fmod(this->_animTime, animation.GetFrameDuration()) / animation.GetFrameDuration();
+            frame1 %= this->_curAnimation->numFrames;//frames.size();
+            frame2 %= this->_curAnimation->numFrames;//frames.size();
+            std::vector<Resources::Md5Model::FrameJoint> const& mats1 = frames[frame1 + this->_curAnimation->firstFrame];
+            std::vector<Resources::Md5Model::FrameJoint> const& mats2 = frames[frame2 + this->_curAnimation->firstFrame];
 
-            Resources::Md5Animation::FrameSkeleton const& skeleton0 = animation.GetSkeleton(frame0);
-            Resources::Md5Animation::FrameSkeleton const& skeleton1 = animation.GetSkeleton(frame1);
-            std::vector<Resources::Md5Animation::SkeletonJoint> parents0(this->_model.GetNumJoints());
-            std::vector<Resources::Md5Animation::SkeletonJoint> parents1(this->_model.GetNumJoints());
+            std::vector<Resources::Md5Model::FrameJoint> parents0(joints.size());
+            std::vector<Resources::Md5Model::FrameJoint> parents1(joints.size());
 
-            for (unsigned int i = 0; i < this->_model.GetNumJoints(); ++i)
+            for (unsigned int i = 0; i < joints.size(); ++i)
             {
-                Resources::Md5Animation::SkeletonJoint& animatedJoint0 = parents0[i];
-                animatedJoint0 = skeleton0.joints[i];
-                Resources::Md5Animation::SkeletonJoint& animatedJoint1 = parents1[i];
-                animatedJoint1 = skeleton1.joints[i];
+                Resources::Md5Model::FrameJoint& animatedJoint0 = parents0[i];
+                animatedJoint0 = mats1[i];
+                Resources::Md5Model::FrameJoint& animatedJoint1 = parents1[i];
+                animatedJoint1 = mats2[i];
 
-                if (animatedJoint0.parent >= 0) // Has a parent joint
+                if (joints[i].parent >= 0) // Has a parent joint
                 {
-                    Resources::Md5Animation::SkeletonJoint const& parentJoint0 = parents0[animatedJoint0.parent];
-                    animatedJoint0.pos = parentJoint0.pos + parentJoint0.orient * animatedJoint0.pos;
-                    animatedJoint0.orient = glm::normalize(parentJoint0.orient * animatedJoint0.orient);
+                    Resources::Md5Model::FrameJoint const& parentJoint0 = parents0[joints[i].parent];
+                    animatedJoint0.position = parentJoint0.position + parentJoint0.orientation * animatedJoint0.position;
+                    animatedJoint0.orientation = glm::normalize(parentJoint0.orientation * animatedJoint0.orientation);
 
-                    Resources::Md5Animation::SkeletonJoint const& parentJoint1 = parents1[animatedJoint1.parent];
-                    animatedJoint1.pos = parentJoint1.pos + parentJoint1.orient * animatedJoint1.pos;
-                    animatedJoint1.orient = glm::normalize(parentJoint1.orient * animatedJoint1.orient);
+                    Resources::Md5Model::FrameJoint const& parentJoint1 = parents1[joints[i].parent];
+                    animatedJoint1.position = parentJoint1.position + parentJoint1.orientation * animatedJoint1.position;
+                    animatedJoint1.orientation = glm::normalize(parentJoint1.orientation * animatedJoint1.orientation);
                 }
 
                 if (
-                        animation.GetJointInfo(i).name == "pelvis"
+                        joints[i].name == "pelvis"
                         ||
-                        animation.GetJointInfo(i).name == "neck"
+                        joints[i].name == "neck"
                         ||
-                        animation.GetJointInfo(i).name == "head"
+                        joints[i].name == "head"
                         ||
-                        animation.GetJointInfo(i).name == "spine"
+                        joints[i].name == "spine"
                    )
                 {
                     float pi = std::atan2(0.0f, -1.0f);
-                    animatedJoint0.orient = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint0.orient);
-                    animatedJoint1.orient = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint1.orient);
+                    animatedJoint0.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint0.orientation);
+                    animatedJoint1.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint1.orientation);
                 }
 
                 this->_animatedBones[i] =
                     (
                      glm::translate(
-                         glm::lerp(animatedJoint0.pos, animatedJoint1.pos, interpolate) // finalPos
+                         glm::lerp(animatedJoint0.position, animatedJoint1.position, interpolate) // finalPos
                          )
                      *
                      glm::toMat4(
-                         glm::shortMix(animatedJoint0.orient, animatedJoint1.orient, interpolate) // finalOrient
+                         glm::shortMix(animatedJoint0.orientation, animatedJoint1.orientation, interpolate) // finalOrient
                          )
                     )
                     *
                     this->_model.GetInverseBindPose()[i]
                     ;
             }
-
         }
         else
         {
-            std::vector<Resources::Md5Model::Joint> parents(this->_model.GetNumJoints());
+            std::vector<Resources::Md5Model::FrameJoint> parents(joints.size());
 
-            for (unsigned int i = 0; i < this->_model.GetNumJoints(); ++i)
+            for (unsigned int i = 0; i < joints.size(); ++i)
             {
-                Resources::Md5Model::Joint& animatedJoint = parents[i];
-                animatedJoint = this->_model.GetJoints()[i];
+                Resources::Md5Model::FrameJoint& animatedJoint = parents[i];
+                animatedJoint = Resources::Md5Model::FrameJoint(joints[i].position, joints[i].orientation, joints[i].size);
 
-                if (animatedJoint.parentID >= 0) // Has a parent joint
+                if (joints[i].parent >= 0) // Has a parent joint
                 {
-                    Resources::Md5Model::Joint const& parentJoint = parents[animatedJoint.parentID];
-                    animatedJoint.pos = parentJoint.pos + parentJoint.orient * (animatedJoint.pos - this->_model.GetJoints()[animatedJoint.parentID].pos);
-                    animatedJoint.orient = glm::normalize(parentJoint.orient * animatedJoint.orient);
+                    Resources::Md5Model::FrameJoint const& parentJoint = parents[joints[i].parent];
+                    animatedJoint.position = parentJoint.position + parentJoint.orientation * (animatedJoint.position/* - joints[joints[i].parent].position*/);
+                    animatedJoint.orientation = glm::normalize(parentJoint.orientation * animatedJoint.orientation);
                 }
 
                 if (
-                        animatedJoint.name == "pelvis"
+                        joints[i].name == "pelvis"
                         ||
-                        animatedJoint.name == "neck"
+                        joints[i].name == "neck"
                         ||
-                        animatedJoint.name == "head"
+                        joints[i].name == "head"
                         ||
-                        animatedJoint.name == "spine"
+                        joints[i].name == "spine"
                    )
                 {
                     float pi = std::atan2(0.0f, -1.0f);
-                    animatedJoint.orient =
+                    animatedJoint.orientation =
                         glm::normalize(
                                 glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0)
                                 *
-                                animatedJoint.orient
+                                animatedJoint.orientation
                                 );
                 }
 
                 this->_animatedBones[i] =
                     (
-                     glm::translate(animatedJoint.pos)
+                     glm::translate(animatedJoint.position)
                      *
-                     glm::toMat4(animatedJoint.orient)
+                     glm::toMat4(animatedJoint.orientation)
                     )
                     *
                     this->_model.GetInverseBindPose()[i]
                     ;
 
-                animatedJoint.orient = glm::quat();
+                //animatedJoint.orientation = glm::quat();
 
-                if (animatedJoint.parentID >= 0) // Has a parent joint
-                {
-                    Resources::Md5Model::Joint const& parentJoint = parents[animatedJoint.parentID];
-                    animatedJoint.orient = glm::normalize(parentJoint.orient * animatedJoint.orient);
-                }
+                //if (joints[i].parent >= 0) // Has a parent joint
+                //{
+                //    Resources::Md5Model::FrameJoint const& parentJoint = parents[joints[i].parent];
+                //    animatedJoint.orientation = glm::normalize(parentJoint.orientation * animatedJoint.orientation);
+                //}
 
-                if (
-                        animatedJoint.name == "pelvis"
-                        ||
-                        animatedJoint.name == "neck"
-                        ||
-                        animatedJoint.name == "head"
-                        ||
-                        animatedJoint.name == "spine"
-                   )
-                {
-                    float pi = std::atan2(0.0f, -1.0f);
-                    animatedJoint.orient = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint.orient);
-                }
+                //if (
+                //        joints[i].name == "pelvis"
+                //        ||
+                //        joints[i].name == "neck"
+                //        ||
+                //        joints[i].name == "head"
+                //        ||
+                //        joints[i].name == "spine"
+                //   )
+                //{
+                //    float pi = std::atan2(0.0f, -1.0f);
+                //    animatedJoint.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint.orientation);
+                //}
 
             }
-
         }
     }
 

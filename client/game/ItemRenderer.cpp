@@ -63,23 +63,38 @@ namespace Client { namespace Game {
 
         Model const& model = item.GetModel();
 
+        auto textures =  model.GetTextures();
+        auto vertexBuffer =  model.GetVertexBuffer();
+        auto indexBuffers =  model.GetIndexBuffers();
         auto meshes = model.GetMeshes();
         this->_shaderBoneMatrix->Set(model.GetAnimatedBones());
-        for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
+//        std::cout << "biet0\n";
+        vertexBuffer->Bind();
+        for (unsigned int i = 0; i < meshes.size(); ++i)
         {
-            auto mesh = *it;
-            mesh.texture->Bind();
-            this->_shaderTexture->Set(*mesh.texture);
-            mesh.vertexBuffer->Bind();
-            mesh.indexBuffer->Bind();
+            auto mesh = meshes[i];
+//            mesh.texture->Bind();
+            textures[i]->Bind();
+            this->_shaderTexture->Set(*textures[i]);
+//            this->_shaderTexture->Set(*mesh.texture);
+//            mesh.vertexBuffer->Bind();
+//            mesh.indexBuffer->Bind();
 
-            this->_renderer.DrawElements(mesh.indexes.size());
+            indexBuffers[i]->Bind();
+//            this->_renderer.DrawElements(mesh.indexes.size());
+            this->_renderer.DrawElements(mesh.num_triangles*3);
 
-            mesh.indexBuffer->Unbind();
-            mesh.vertexBuffer->Unbind();
-            mesh.texture->Unbind();
+//        this->_renderer.DrawElements(6, Tools::Renderers::DataType::UnsignedInt, (int[6]){0, 1, 2, 3, 4, 5});
+
+            indexBuffers[i]->Unbind();
+            textures[i]->Unbind();
+//            mesh.indexBuffer->Unbind();
+//            mesh.vertexBuffer->Unbind();
+//            mesh.texture->Unbind();
+//        std::cout << mesh.num_triangles << "\n";
         }
 
+            vertexBuffer->Unbind();
         this->_shader->EndPass();
     }
 
