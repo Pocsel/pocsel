@@ -26,7 +26,7 @@ namespace Client { namespace Game {
             if (this->_moving != moving)
             {
                 this->_moving = moving;
-                this->_model->SetAnim(moving ? "boblampclean_move" : "boblampclean");
+                this->_model->SetAnim(moving ? "move" : "idle");
             }
         }
     };

@@ -13,6 +13,7 @@ namespace Client { namespace Game {
         for (auto it = anims.begin(), ite = anims.end(); it != ite; ++it)
         {
             this->_animations[it->name] = *it;
+        std::cout << "anim: " << it->name << "\n";
         }
         this->SetAnim("idle");
 
@@ -33,19 +34,17 @@ namespace Client { namespace Game {
 
         if (this->_curAnimation != 0 && this->_curAnimation->numFrames > 0)
         {
-            auto frames = this->_model.GetFrames();
+            float frameDuration = 1.0f / this->_curAnimation->frameRate;
 
-            _animTime += (float)time / 1000.0f;
+            this->_animTime += (float)time / 1000.0f;
+            this->_animTime = std::fmod(this->_animTime, this->_curAnimation->numFrames * frameDuration);
 
-            int frame1 = (int)_animTime;
-            int frame2 = frame1 + 1;
+            float interpolate = std::fmod(_animTime, frameDuration) / frameDuration;//* this->_curAnimation->frameRate;
 
-            float interpolate = std::fmod(_animTime, 1.0f);
-
-            frame1 %= this->_curAnimation->numFrames;//frames.size();
-            frame2 %= this->_curAnimation->numFrames;//frames.size();
-            std::vector<Resources::Md5Model::FrameJoint> const& mats1 = frames[frame1 + this->_curAnimation->firstFrame];
-            std::vector<Resources::Md5Model::FrameJoint> const& mats2 = frames[frame2 + this->_curAnimation->firstFrame];
+            int frame1 = (int)(this->_animTime * this->_curAnimation->frameRate) % this->_curAnimation->numFrames;
+            int frame2 = (frame1 + 1) % this->_curAnimation->numFrames;
+            std::vector<Resources::Md5Model::FrameJoint> const& frames1 = this->_model.GetFrames()[frame1 + this->_curAnimation->firstFrame];
+            std::vector<Resources::Md5Model::FrameJoint> const& frames2 = this->_model.GetFrames()[frame2 + this->_curAnimation->firstFrame];
 
             std::vector<Resources::Md5Model::FrameJoint> parents0(joints.size());
             std::vector<Resources::Md5Model::FrameJoint> parents1(joints.size());
@@ -53,9 +52,9 @@ namespace Client { namespace Game {
             for (unsigned int i = 0; i < joints.size(); ++i)
             {
                 Resources::Md5Model::FrameJoint& animatedJoint0 = parents0[i];
-                animatedJoint0 = mats1[i];
+                animatedJoint0 = frames1[i];
                 Resources::Md5Model::FrameJoint& animatedJoint1 = parents1[i];
-                animatedJoint1 = mats2[i];
+                animatedJoint1 = frames2[i];
 
                 if (joints[i].parent >= 0) // Has a parent joint
                 {
