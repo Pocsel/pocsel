@@ -1,7 +1,7 @@
 #ifndef __TOOLS_IQM_HPP__
 #define __TOOLS_IQM_HPP__
 
-namespace Tools { namespace Iqm {
+namespace Tools { namespace Models { namespace Iqm {
 
     static char const* const Magic = "INTERQUAKEMODEL";
     static Uint32 const Version = 2;
@@ -105,6 +105,6 @@ namespace Tools { namespace Iqm {
         float xyradius, radius;
     };
 
-}}
+}}}
 
 #endif

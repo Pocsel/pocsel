@@ -9,7 +9,7 @@
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
 #include "client/resources/LocalResourceManager.hpp"
-#include "client/resources/Md5Model.hpp"
+#include "tools/models/MqmModel.hpp"
 
 namespace Client { namespace Resources {
 
@@ -104,7 +104,7 @@ namespace Client { namespace Resources {
             return *it->second;
     }
 
-    Md5Model const& LocalResourceManager::GetMd5Model(std::string const& path)
+    Tools::Models::MqmModel const& LocalResourceManager::GetMqmModel(std::string const& path)
     {
         auto it = this->_models.find(path);
         if (it == this->_models.end())
@@ -114,13 +114,13 @@ namespace Client { namespace Resources {
                 boost::filesystem::path texturesPath = path;
                 boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
                 modelPath.replace_extension(".iqm");
-                Md5Model* model = new Md5Model(modelPath, texturesPath, *this);
+                Tools::Models::MqmModel* model = new Tools::Models::MqmModel(modelPath, texturesPath, *this);
                 this->_models[path] = model;
                 return *model;
             }
             catch (std::exception& ex)
             {
-                Tools::error << "Can't load Md5Model \"" << path << "\", details: " << ex.what() << "\n";
+                Tools::error << "Can't load MqmModel \"" << path << "\", details: " << ex.what() << "\n";
                 throw;
             }
         }

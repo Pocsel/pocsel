@@ -1,7 +1,7 @@
-#ifndef __CLIENT_RESOURCES_MD5MODEL_HPP__
-#define __CLIENT_RESOURCES_MD5MODEL_HPP__
+#ifndef __CLIENT_RESOURCES_MqmModel_HPP__
+#define __CLIENT_RESOURCES_MqmModel_HPP__
 
-#include "tools/Iqm.hpp"
+#include "tools/models/Iqm.hpp"
 
 namespace Tools {
     class IRenderer;
@@ -16,9 +16,9 @@ namespace Client { namespace Resources {
     class LocalResourceManager;
 }}
 
-namespace Client { namespace Resources {
+namespace Tools { namespace Models {
 
-    class Md5Model
+    class MqmModel
     {
     public:
         struct JointInfo
@@ -58,32 +58,32 @@ namespace Client { namespace Resources {
         std::vector<Tools::Renderers::ITexture2D*> _textures;
         Tools::Renderers::IVertexBuffer* _vertexBuffer;
         std::vector<Tools::Renderers::IIndexBuffer*> _indexBuffers;
-        std::vector<Tools::Iqm::Mesh> _meshes;
-        std::vector<Tools::Iqm::Joint> _joints;
+        std::vector<Tools::Models::Iqm::Mesh> _meshes;
+        std::vector<Tools::Models::Iqm::Joint> _joints;
         std::vector<JointInfo> _jointInfos;
 
     private:
         //anim
         std::vector<std::vector<FrameJoint>> _frames;
-        std::vector<Tools::Iqm::Pose> _poses;
-        std::vector<Tools::Iqm::Anim> _anims;
+        std::vector<Tools::Models::Iqm::Pose> _poses;
+        std::vector<Tools::Models::Iqm::Anim> _anims;
         std::vector<AnimInfo> _animInfos;
 
     public:
-        explicit Md5Model(
+        explicit MqmModel(
                 boost::filesystem::path const& filePath,
                 boost::filesystem::path const& texturesPath,
-                LocalResourceManager& resourceManager);
-        ~Md5Model();
+                Client::Resources::LocalResourceManager& resourceManager);
+        ~MqmModel();
 
-        void _LoadMeshes(Tools::Iqm::Header const& header,
+        void _LoadMeshes(Tools::Models::Iqm::Header const& header,
                 std::vector<char> const& data,
                 boost::filesystem::path const& texturesPath,
-                LocalResourceManager& resourceManager,
+                Client::Resources::LocalResourceManager& resourceManager,
                 Tools::IRenderer& renderer);
-        void _LoadAnimations(Tools::Iqm::Header const& header, std::vector<char> const& data);
+        void _LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data);
 
-        std::vector<Tools::Iqm::Mesh> const& GetMeshes() const { return this->_meshes; }
+        std::vector<Tools::Models::Iqm::Mesh> const& GetMeshes() const { return this->_meshes; }
         std::vector<glm::mat4x4> const& GetInverseBindPose() const { return this->_inverseBaseFrame; }
         std::vector<glm::mat4x4> const& GetBindPose() const { return this->_baseFrame; }
 
@@ -96,11 +96,11 @@ namespace Client { namespace Resources {
         std::vector<JointInfo> const& GetJointInfos() const { return this->_jointInfos; }
     protected:
         // Build the bind-pose and the inverse bind-pose matrix array for the model.
-        void _BuildBindPose( const std::vector<Tools::Iqm::Joint>& joints );
+        void _BuildBindPose( const std::vector<Tools::Models::Iqm::Joint>& joints );
 
         // Create the VBOs that are used to render the mesh with shaders
         bool _CreateVertexBuffers(
-            //Tools::Iqm::Triangle const* triangles,
+            //Tools::Models::Iqm::Triangle const* triangles,
             float const* inposition,
             float const* innormal,
             //float const* intangent,

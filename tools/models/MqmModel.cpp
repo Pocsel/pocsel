@@ -3,7 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "client/resources/Md5Model.hpp"
+#include "tools/models/MqmModel.hpp"
 
 #include "client/resources/LocalResourceManager.hpp"
 
@@ -11,9 +11,9 @@
 
 #include "tools/IRenderer.hpp"
 
-namespace Client { namespace Resources {
+namespace Tools { namespace Models {
 
-    Md5Model::~Md5Model()
+    MqmModel::~MqmModel()
     {
 //        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
 //        {
@@ -22,47 +22,47 @@ namespace Client { namespace Resources {
 //        }
     }
 
-    Md5Model::Md5Model(
+    MqmModel::MqmModel(
             boost::filesystem::path const& filePath,
             boost::filesystem::path const& texturesPath,
-            LocalResourceManager& resourceManager)
+            Client::Resources::LocalResourceManager& resourceManager)
     {
         if (!boost::filesystem::exists(filePath))
-            throw std::runtime_error("Md5Model::LoadModel: Failed to find file: " + filePath.string());
+            throw std::runtime_error("MqmModel::LoadModel: Failed to find file: " + filePath.string());
 
         boost::filesystem::ifstream tmp(filePath);
 
         std::vector<char> file((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
 
 
-        Tools::Iqm::Header header;
+        Tools::Models::Iqm::Header header;
 
         if (file.size() < sizeof(header))
-            throw std::runtime_error("Md5Model::LoadModel: file is too short, can't contain header");
+            throw std::runtime_error("MqmModel::LoadModel: file is too short, can't contain header");
 
         std::memcpy(&header, file.data(), sizeof(header));
 
-        if (std::memcmp(header.magic, Tools::Iqm::Magic, sizeof(header.magic)))
-            throw std::runtime_error("Md5Model::LoadModel: magic is not good");
+        if (std::memcmp(header.magic, Tools::Models::Iqm::Magic, sizeof(header.magic)))
+            throw std::runtime_error("MqmModel::LoadModel: magic is not good");
 
         // lilswap(&header.version, (sizeof(hdr) - sizeof(header.magic))/sizeof(uint));
 
-        if (header.version != Tools::Iqm::Version)
-            throw std::runtime_error("Md5Model::LoadModel: version is not good");
+        if (header.version != Tools::Models::Iqm::Version)
+            throw std::runtime_error("MqmModel::LoadModel: version is not good");
 
         if (file.size() != header.filesize)
-            throw std::runtime_error("Md5Model::LoadModel: file size is not good");
+            throw std::runtime_error("MqmModel::LoadModel: file size is not good");
 
         this->_LoadMeshes(header, file, texturesPath, resourceManager, resourceManager.GetRenderer());
         if (header.num_anims > 0)
             this->_LoadAnimations(header, file);
     }
 
-    void Md5Model::_LoadMeshes(
-            Tools::Iqm::Header const& header,
+    void MqmModel::_LoadMeshes(
+            Tools::Models::Iqm::Header const& header,
             std::vector<char> const& data,
             boost::filesystem::path const& texturesPath,
-            LocalResourceManager& resourceManager,
+            Client::Resources::LocalResourceManager& resourceManager,
             Tools::IRenderer& renderer)
     {
         // lilswap((uint *)&buf[header.ofs_vertexarrays], header.num_vertexarrays*sizeof(iqmvertexarray)/sizeof(uint));
@@ -86,43 +86,43 @@ namespace Client { namespace Resources {
         float const *inposition = NULL, *innormal = NULL, *intangent = NULL, *intexcoord = NULL;
         Uint8 const *inblendindex = NULL, *inblendweight = NULL;
         const char *str = header.ofs_text ? &data[header.ofs_text] : "";
-        Tools::Iqm::VertexArray const* vas = (Tools::Iqm::VertexArray const*)&data[header.ofs_vertexarrays];
+        Tools::Models::Iqm::VertexArray const* vas = (Tools::Models::Iqm::VertexArray const*)&data[header.ofs_vertexarrays];
         for(int i = 0; i < (int)header.num_vertexarrays; i++)
         {
-            Tools::Iqm::VertexArray const& va = vas[i];
+            Tools::Models::Iqm::VertexArray const& va = vas[i];
             switch(va.type)
             {
-                case Tools::Iqm::VertexArrayType::Position:
-                    if(va.format != Tools::Iqm::VertexArrayFormat::Float || va.size != 3)
+                case Tools::Models::Iqm::VertexArrayType::Position:
+                    if(va.format != Tools::Models::Iqm::VertexArrayFormat::Float || va.size != 3)
                         throw std::runtime_error("fail");
                     inposition = (float const*)&data[va.offset];
                     //lilswap(inposition, 3*header.num_vertexes);
                     break;
-                case Tools::Iqm::VertexArrayType::Normal:
-                    if(va.format != Tools::Iqm::VertexArrayFormat::Float || va.size != 3)
+                case Tools::Models::Iqm::VertexArrayType::Normal:
+                    if(va.format != Tools::Models::Iqm::VertexArrayFormat::Float || va.size != 3)
                         throw std::runtime_error("fail");
                     innormal = (float const*)&data[va.offset];
                     //lilswap(innormal, 3*header.num_vertexes);
                     break;
-                case Tools::Iqm::VertexArrayType::Tangent:
-                    if(va.format != Tools::Iqm::VertexArrayFormat::Float || va.size != 4)
+                case Tools::Models::Iqm::VertexArrayType::Tangent:
+                    if(va.format != Tools::Models::Iqm::VertexArrayFormat::Float || va.size != 4)
                         throw std::runtime_error("fail");
                     intangent = (float const*)&data[va.offset];
                     //lilswap(intangent, 4*header.num_vertexes);
                     break;
-                case Tools::Iqm::VertexArrayType::Texcoord:
-                    if(va.format != Tools::Iqm::VertexArrayFormat::Float || va.size != 2)
+                case Tools::Models::Iqm::VertexArrayType::Texcoord:
+                    if(va.format != Tools::Models::Iqm::VertexArrayFormat::Float || va.size != 2)
                         throw std::runtime_error("fail");
                     intexcoord = (float const*)&data[va.offset];
                     //lilswap(intexcoord, 2*header.num_vertexes);
                     break;
-                case Tools::Iqm::VertexArrayType::BlendIndexes:
-                    if(va.format != Tools::Iqm::VertexArrayFormat::Ubyte || va.size != 4)
+                case Tools::Models::Iqm::VertexArrayType::BlendIndexes:
+                    if(va.format != Tools::Models::Iqm::VertexArrayFormat::Ubyte || va.size != 4)
                         throw std::runtime_error("fail");
                     inblendindex = (Uint8 const*)&data[va.offset];
                     break;
-                case Tools::Iqm::VertexArrayType::BlendWeights:
-                    if(va.format != Tools::Iqm::VertexArrayFormat::Ubyte || va.size != 4)
+                case Tools::Models::Iqm::VertexArrayType::BlendWeights:
+                    if(va.format != Tools::Models::Iqm::VertexArrayFormat::Ubyte || va.size != 4)
                         throw std::runtime_error("fail");
                     inblendweight = (Uint8 const*)&data[va.offset];
                     break;
@@ -131,11 +131,11 @@ namespace Client { namespace Resources {
 
         this->_BuildBindPose(_joints);
 
-        Tools::Iqm::Triangle const* tris = (Tools::Iqm::Triangle const*)&data[header.ofs_triangles];
+        Tools::Models::Iqm::Triangle const* tris = (Tools::Models::Iqm::Triangle const*)&data[header.ofs_triangles];
 
         for(int i = 0; i < (int)header.num_meshes; i++)
         {
-            Tools::Iqm::Mesh &mesh = _meshes[i];
+            Tools::Models::Iqm::Mesh &mesh = _meshes[i];
             //printf("%s: loaded mesh: %s\n", filename, &str[m.name]);
             std::string textureStr(&str[mesh.material]);
             boost::filesystem::path texturePath(textureStr);
@@ -147,7 +147,7 @@ namespace Client { namespace Resources {
             this->_indexBuffers.push_back(renderer.CreateIndexBuffer().release());
             this->_indexBuffers.back()->SetData(
                     Tools::Renderers::DataType::UnsignedInt,
-                    mesh.num_triangles * sizeof(Tools::Iqm::Triangle), &tris[mesh.first_triangle]);
+                    mesh.num_triangles * sizeof(Tools::Models::Iqm::Triangle), &tris[mesh.first_triangle]);
 
             std::cout << "mesh.first_triangle = " << mesh.first_triangle << ", num = " << mesh.num_triangles << "\n";
             std::cout << "coords " << tris[mesh.first_triangle].vertex[0] << ", " << tris[mesh.first_triangle].vertex[1] << ", " << tris[mesh.first_triangle].vertex[2] << "\n";
@@ -184,8 +184,8 @@ namespace Client { namespace Resources {
 #endif
     }
 
-    bool Md5Model::_CreateVertexBuffers(
-            //Tools::Iqm::Triangle const* triangles,
+    bool MqmModel::_CreateVertexBuffers(
+            //Tools::Models::Iqm::Triangle const* triangles,
             float const* inposition,
             float const* innormal,
             //float const* intangent,
@@ -243,7 +243,7 @@ namespace Client { namespace Resources {
         return true;
     }
 
-    void Md5Model::_LoadAnimations(Tools::Iqm::Header const& header, std::vector<char> const& data)
+    void MqmModel::_LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data)
     {
         if(header.num_poses != header.num_joints)
             throw std::runtime_error("num_poses != num_joints");
@@ -268,7 +268,7 @@ namespace Client { namespace Resources {
             _frames.push_back(std::vector<FrameJoint>());
             for(int j = 0; j < (int)header.num_poses; j++)
             {
-                Tools::Iqm::Pose &p = _poses[j];
+                Tools::Models::Iqm::Pose &p = _poses[j];
                 glm::quat rotate(p.channeloffset[3], p.channeloffset[4], p.channeloffset[5], p.channeloffset[6]);
                 glm::vec3 translate;
                 glm::vec3 scale;
@@ -303,24 +303,24 @@ namespace Client { namespace Resources {
 
         for (auto it = this->_anims.begin(), ite = this->_anims.end(); it != ite; ++it)
         {
-            Tools::Iqm::Anim &a = *it;
+            Tools::Models::Iqm::Anim &a = *it;
             this->_animInfos.push_back(AnimInfo(&str[a.name], a.first_frame, a.num_frames, a.framerate));
         }
         for (auto it = this->_joints.begin(), ite = this->_joints.end(); it != ite; ++it)
         {
-            Tools::Iqm::Joint &j = *it;
+            Tools::Models::Iqm::Joint &j = *it;
             this->_jointInfos.push_back(JointInfo(&str[j.name], j.parent, j.position, j.orientation, j.size));
         }
     }
 
-    void Md5Model::_BuildBindPose(std::vector<Tools::Iqm::Joint> const& joints)
+    void MqmModel::_BuildBindPose(std::vector<Tools::Models::Iqm::Joint> const& joints)
     {
         _baseFrame.resize(joints.size());
         _inverseBaseFrame.resize(joints.size());
 
         for (unsigned int i = 0; i < joints.size(); ++i)
         {
-            Tools::Iqm::Joint const& joint = joints[i];
+            Tools::Models::Iqm::Joint const& joint = joints[i];
             _baseFrame[i] =
                 glm::scale(joint.size)
                 *

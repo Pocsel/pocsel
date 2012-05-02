@@ -5,14 +5,13 @@
 namespace Client { namespace Game {
 
     Model::Model(Resources::LocalResourceManager& resourceManager) :
-        _model(resourceManager.GetMd5Model("boblampclean")),
+        _model(resourceManager.GetMqmModel("boblampclean")),
         _animTime(0)
     {
         auto anims = this->_model.GetAnimInfos();
         for (auto it = anims.begin(), ite = anims.end(); it != ite; ++it)
         {
             this->_animations[it->name] = *it;
-        std::cout << "anim: " << it->name << "\n";
         }
         this->SetAnim("idle");
 
@@ -42,26 +41,26 @@ namespace Client { namespace Game {
 
             int frame1 = (int)(this->_animTime * this->_curAnimation->frameRate) % this->_curAnimation->numFrames;
             int frame2 = (frame1 + 1) % this->_curAnimation->numFrames;
-            std::vector<Resources::Md5Model::FrameJoint> const& frames1 = this->_model.GetFrames()[frame1 + this->_curAnimation->firstFrame];
-            std::vector<Resources::Md5Model::FrameJoint> const& frames2 = this->_model.GetFrames()[frame2 + this->_curAnimation->firstFrame];
+            std::vector<Tools::Models::MqmModel::FrameJoint> const& frames1 = this->_model.GetFrames()[frame1 + this->_curAnimation->firstFrame];
+            std::vector<Tools::Models::MqmModel::FrameJoint> const& frames2 = this->_model.GetFrames()[frame2 + this->_curAnimation->firstFrame];
 
-            std::vector<Resources::Md5Model::FrameJoint> parents0(joints.size());
-            std::vector<Resources::Md5Model::FrameJoint> parents1(joints.size());
+            std::vector<Tools::Models::MqmModel::FrameJoint> parents0(joints.size());
+            std::vector<Tools::Models::MqmModel::FrameJoint> parents1(joints.size());
 
             for (unsigned int i = 0; i < joints.size(); ++i)
             {
-                Resources::Md5Model::FrameJoint& animatedJoint0 = parents0[i];
+                Tools::Models::MqmModel::FrameJoint& animatedJoint0 = parents0[i];
                 animatedJoint0 = frames1[i];
-                Resources::Md5Model::FrameJoint& animatedJoint1 = parents1[i];
+                Tools::Models::MqmModel::FrameJoint& animatedJoint1 = parents1[i];
                 animatedJoint1 = frames2[i];
 
                 if (joints[i].parent >= 0) // Has a parent joint
                 {
-                    Resources::Md5Model::FrameJoint const& parentJoint0 = parents0[joints[i].parent];
+                    Tools::Models::MqmModel::FrameJoint const& parentJoint0 = parents0[joints[i].parent];
                     animatedJoint0.position = parentJoint0.position + parentJoint0.orientation * animatedJoint0.position;
                     animatedJoint0.orientation = glm::normalize(parentJoint0.orientation * animatedJoint0.orientation);
 
-                    Resources::Md5Model::FrameJoint const& parentJoint1 = parents1[joints[i].parent];
+                    Tools::Models::MqmModel::FrameJoint const& parentJoint1 = parents1[joints[i].parent];
                     animatedJoint1.position = parentJoint1.position + parentJoint1.orientation * animatedJoint1.position;
                     animatedJoint1.orientation = glm::normalize(parentJoint1.orientation * animatedJoint1.orientation);
                 }
@@ -98,16 +97,16 @@ namespace Client { namespace Game {
         }
         else
         {
-            std::vector<Resources::Md5Model::FrameJoint> parents(joints.size());
+            std::vector<Tools::Models::MqmModel::FrameJoint> parents(joints.size());
 
             for (unsigned int i = 0; i < joints.size(); ++i)
             {
-                Resources::Md5Model::FrameJoint& animatedJoint = parents[i];
-                animatedJoint = Resources::Md5Model::FrameJoint(joints[i].position, joints[i].orientation, joints[i].size);
+                Tools::Models::MqmModel::FrameJoint& animatedJoint = parents[i];
+                animatedJoint = Tools::Models::MqmModel::FrameJoint(joints[i].position, joints[i].orientation, joints[i].size);
 
                 if (joints[i].parent >= 0) // Has a parent joint
                 {
-                    Resources::Md5Model::FrameJoint const& parentJoint = parents[joints[i].parent];
+                    Tools::Models::MqmModel::FrameJoint const& parentJoint = parents[joints[i].parent];
                     animatedJoint.position = parentJoint.position + parentJoint.orientation * (animatedJoint.position/* - joints[joints[i].parent].position*/);
                     animatedJoint.orientation = glm::normalize(parentJoint.orientation * animatedJoint.orientation);
                 }
@@ -145,7 +144,7 @@ namespace Client { namespace Game {
 
                 //if (joints[i].parent >= 0) // Has a parent joint
                 //{
-                //    Resources::Md5Model::FrameJoint const& parentJoint = parents[joints[i].parent];
+                //    Tools::Models::MqmModel::FrameJoint const& parentJoint = parents[joints[i].parent];
                 //    animatedJoint.orientation = glm::normalize(parentJoint.orientation * animatedJoint.orientation);
                 //}
 

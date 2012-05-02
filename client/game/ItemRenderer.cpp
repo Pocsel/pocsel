@@ -1,7 +1,8 @@
 #include "client/precompiled.hpp"
 
-#include "tools/window/Window.hpp"
 #include "tools/IRenderer.hpp"
+#include "tools/window/Window.hpp"
+#include "tools/models/MqmModel.hpp"
 
 #include "client/game/ItemRenderer.hpp"
 #include "client/game/Game.hpp"
@@ -14,7 +15,6 @@
 #include "client/Client.hpp"
 
 #include "client/resources/LocalResourceManager.hpp"
-#include "client/resources/Md5Model.hpp"
 
 namespace Client { namespace Game {
 
