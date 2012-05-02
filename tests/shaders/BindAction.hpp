@@ -8,6 +8,7 @@ namespace Tools { namespace Window { namespace BindAction {
         None,
         ReloadShaders,
         Quit,
+        ToggleCullface,
         NbBindActions
     };
 

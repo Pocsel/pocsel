@@ -268,7 +268,7 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::SetCullFace(bool enabled)
     {
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, enabled ? D3DCULL_CCW : D3DCULL_NONE));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, enabled == true ? D3DCULL_CW : D3DCULL_NONE));
     }
 
     void DX9Renderer::SetRasterizationMode(RasterizationMode::Type rasterizationMode)

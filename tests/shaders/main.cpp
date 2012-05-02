@@ -1,9 +1,11 @@
 #include "tests/shaders/precompiled.hpp"
 
-#include "tools/IRenderer.hpp"
 #include "tools/renderers/utils/GBuffer.hpp"
+#include "tools/renderers/utils/Image.hpp"
 #include "tools/window/InputManager.hpp"
 #include "tools/window/sdl/Window.hpp"
+#include "tools/IRenderer.hpp"
+#include "tools/Timer.hpp"
 
 using namespace Tools;
 using namespace Tools::Renderers;
@@ -18,6 +20,18 @@ static std::unique_ptr<IShaderProgram> testShader;
 static std::unique_ptr<IShaderParameter> colors;
 static std::unique_ptr<IShaderParameter> normals;
 static std::unique_ptr<IShaderParameter> depth;
+
+static std::unique_ptr<ITexture2D> texture;
+static std::unique_ptr<IVertexBuffer> vertexBuffer;
+static std::unique_ptr<IIndexBuffer> indexBuffer;
+static std::unique_ptr<Utils::Image> screenQuad;
+
+struct RAII
+{
+    std::function<void(void)> destroy;
+    RAII(std::function<void(void)> destroy) : destroy(destroy) {}
+    ~RAII() { destroy(); }
+};
 
 static void CreateCube(IVertexBuffer& vertexBuffer, IIndexBuffer& indexBuffer)
 {
@@ -80,7 +94,12 @@ static void CreateCube(IVertexBuffer& vertexBuffer, IIndexBuffer& indexBuffer)
     vertexBuffer.SetData(offset * sizeof(Vertex), vertices.data(), VertexBufferUsage::Static);
 
     static unsigned short indices[] = {
-        0, 1, 2,  0, 2, 3
+         0,  1,  2,   0,  2,  3,
+         4,  5,  6,   4,  6,  7,
+         8,  9, 10,   8, 10, 11,
+        12, 13, 14,  12, 14, 15,
+        16, 17, 18,  16, 18, 19,
+        20, 21, 22,  20, 22, 23
     };
     indexBuffer.SetData(DataType::UnsignedShort, sizeof(indices), indices);
 }
@@ -90,8 +109,8 @@ static void LoadShaders(IRenderer& renderer)
     std::ifstream file(testShaderPath);
     testShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
     colors = testShader->GetParameter("colors");
-    normals = testShader->GetParameter("normals");
-    depth = testShader->GetParameter("depthBuffer");
+    //normals = testShader->GetParameter("normals");
+    //depth = testShader->GetParameter("depthBuffer");
 }
 
 static void UnloadShaders()
@@ -102,21 +121,32 @@ static void UnloadShaders()
     testShader = 0;
 }
 
-static void Render(IRenderer& renderer, Utils::GBuffer& gbuffer, ITexture2D& texture)
+static void RenderCube(IRenderer& renderer)
 {
-    texture.Bind();
+    vertexBuffer->Bind();
+    indexBuffer->Bind();
+    texture->Bind();
 
-    colors->Set(texture);
-    //normals->Set();
-    //depth->Set();
+    colors->Set(*texture);
 
     do
     {
         testShader->BeginPass();
-        renderer.DrawElements(1*3*2, DataType::UnsignedShort);
+        renderer.DrawElements(6*3*2, DataType::UnsignedShort);
     } while (testShader->EndPass());
 
-    texture.Unbind();
+    texture->Unbind();
+    indexBuffer->Unbind();
+    vertexBuffer->Unbind();
+}
+
+static void RenderGBuffer(IRenderer& renderer, Utils::GBuffer& gbuffer)
+{
+    do
+    {
+        testShader->BeginPass();
+        screenQuad->Render(*colors, gbuffer.GetColors());
+    } while (testShader->EndPass());
 }
 
 int main(int ac, char *av[])
@@ -129,25 +159,33 @@ int main(int ac, char *av[])
     std::map<std::string, Tools::Window::BindAction::BindAction> actions;
     actions["quit"] = BindAction::Quit;
     actions["reloadshaders"] = BindAction::ReloadShaders;
+    actions["togglecullface"] = BindAction::ToggleCullface;
 
-    Tools::Window::Window& window = *new Sdl::Window(actions, true);
+    Sdl::Window window(actions, false);
     IRenderer& renderer = window.GetRenderer();
     bool run = true;
     bool reload = true;
+    bool cullface = true;
 
-    window.GetInputManager().Bind(BindAction::ReloadShaders, BindAction::Released, [&]() { reload = true; Tools::log << "r\n"; });
+    window.GetInputManager().Bind(BindAction::ReloadShaders, BindAction::Released, [&]() { reload = true; });
     window.GetInputManager().Bind(BindAction::Quit, BindAction::Released, [&]() { run = false; Tools::log << "Quit\n"; });
+    window.GetInputManager().Bind(BindAction::ToggleCullface, BindAction::Released, [&]() { cullface = !cullface; });
 
     window.GetInputManager().GetInputBinder().Bind("r", "reloadshaders");
     window.GetInputManager().GetInputBinder().Bind("escape", "quit");
+    window.GetInputManager().GetInputBinder().Bind("f", "togglecullface");
 
     {
-        auto texture = renderer.CreateTexture2D(texturePath);
-        auto vertexBuffer = renderer.CreateVertexBuffer();
-        auto indexBuffer = renderer.CreateIndexBuffer();
-        CreateCube(*vertexBuffer, *indexBuffer);
+        Timer timer;
 
         Utils::GBuffer gbuffer(renderer, window.GetSize());
+        texture = renderer.CreateTexture2D(texturePath);
+        vertexBuffer = renderer.CreateVertexBuffer();
+        indexBuffer = renderer.CreateIndexBuffer();
+        screenQuad = std::unique_ptr<Utils::Image>(new Utils::Image(renderer));
+        RAII _shaders([&]() { UnloadShaders(); texture = 0; vertexBuffer = 0; indexBuffer = 0; screenQuad = 0; });
+
+        CreateCube(*vertexBuffer, *indexBuffer);
         while (run)
         {
             window.GetInputManager().ShowMouse();
@@ -159,32 +197,38 @@ int main(int ac, char *av[])
                 UnloadShaders();
                 LoadShaders(renderer);
                 reload = false;
+                Tools::log << "Reloading shaders...\n";
             }
+
+            renderer.SetProjectionMatrix(glm::perspective(90.0f, (float)window.GetSize().x / (float)window.GetSize().y, 0.001f, 500.0f));
+            renderer.SetViewMatrix(glm::lookAt(glm::vec3(0.001f), glm::vec3(1.0f), glm::vec3(0, 1, 0)));
+            renderer.SetModelMatrix(
+                glm::translate(glm::vec3(1.0f))
+                * glm::yawPitchRoll(
+                    timer.GetElapsedTime() * 0.001f,
+                    timer.GetElapsedTime() * 0.0001f,
+                    timer.GetElapsedTime() * 0.002f));
 
             renderer.BeginDraw();
             gbuffer.Bind();
-            gbuffer.Unbind();
 
             renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
+            renderer.SetCullFace(cullface);
 
-            renderer.SetProjectionMatrix(glm::perspective(90.0f, (float)window.GetSize().x / (float)window.GetSize().y, 0.01f, 50.0f));
-            renderer.SetViewMatrix(glm::lookAt(glm::vec3(0.0f), glm::vec3(5.0f), glm::vec3(0, 1, 0)));
-            renderer.SetModelMatrix(glm::translate(glm::vec3(1.0f) * 2.0f));
+            RenderCube(renderer);
 
-            //renderer.SetCullFace(false);
-            vertexBuffer->Bind();
-            indexBuffer->Bind();
-            Render(renderer, gbuffer, *texture);
-            indexBuffer->Unbind();
-            vertexBuffer->Unbind();
+            gbuffer.Unbind();
+            renderer.BeginDraw2D();
+
+            renderer.SetModelMatrix(glm::scale((float)window.GetSize().x, (float)window.GetSize().y, 1.0f));
+            RenderGBuffer(renderer, gbuffer);
+
+            renderer.EndDraw2D();
             renderer.EndDraw();
 
             window.Render();
         }
-
-        UnloadShaders();
     }
 
-    delete &window;
     return 0;
 }
