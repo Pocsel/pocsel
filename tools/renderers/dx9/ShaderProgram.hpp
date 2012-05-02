@@ -24,6 +24,11 @@ namespace Tools { namespace Renderers {
             D3DXHANDLE _model;
             D3DXHANDLE _view;
             D3DXHANDLE _projection;
+            D3DXHANDLE _modelInverse;
+            D3DXHANDLE _viewInverse;
+            D3DXHANDLE _projectionInverse;
+            D3DXHANDLE _mvpInverse;
+            D3DXHANDLE _viewProjectionInverse;
 
             UINT _pass;
             UINT _passCount;

@@ -3,7 +3,7 @@
 
 #undef main
 
-#ifdef _MSC_VER && DEBUG
+#if defined _MSC_VER && defined DEBUG
 static void DumpMemory()
 {
     _CrtDumpMemoryLeaks();
@@ -12,7 +12,7 @@ static void DumpMemory()
 
 int main(int ac, char** av)
 {
-#ifdef _MSC_VER && DEBUG
+#if defined _MSC_VER && defined DEBUG
     atexit(&DumpMemory);
 #endif
 

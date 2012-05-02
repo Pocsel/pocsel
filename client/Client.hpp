@@ -6,6 +6,12 @@
 #include "client/network/Network.hpp"
 #include "tools/thread/ThreadPool.hpp"
 
+namespace Tools {
+    namespace Window {
+        class Window;
+    }
+}
+
 namespace Client {
     class Settings;
     namespace Game {
@@ -16,9 +22,6 @@ namespace Client {
     }
     namespace Resources {
         class LocalResourceManager;
-    }
-    namespace Window {
-        class Window;
     }
     namespace Menu {
         class Menu;
@@ -46,7 +49,7 @@ namespace Client {
     private:
         Settings& _settings;
         Network::Network _network;
-        Window::Window* _window;
+        Tools::Window::Window* _window;
         Resources::LocalResourceManager* _resourceManager;
         Network::PacketDispatcher* _packetDispatcher;
         State _state;
@@ -67,7 +70,7 @@ namespace Client {
 
         Settings& GetSettings() { return this->_settings; }
         Network::Network& GetNetwork() { return this->_network; }
-        Window::Window& GetWindow() { return *this->_window; }
+        Tools::Window::Window& GetWindow() { return *this->_window; }
         Resources::LocalResourceManager& GetLocalResourceManager() { return *this->_resourceManager; }
         Game::Game& GetGame() { return *this->_game; }
         Menu::Menu& GetMenu() { return *this->_menu; }

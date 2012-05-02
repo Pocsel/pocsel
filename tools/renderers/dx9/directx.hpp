@@ -149,15 +149,15 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
         switch (format)
         {
-        case PixelFormat::Alpha8: return D3DFMT_A8;
-        case PixelFormat::Luminance8: return D3DFMT_L8;
-        case PixelFormat::Luminance8Alpha8: return D3DFMT_A8L8;
         case PixelFormat::Rgb10a2: return D3DFMT_A2R10G10B10;
         case PixelFormat::Rgb8: return D3DFMT_R8G8B8;
+        case PixelFormat::R32f: return D3DFMT_R32F;
+        case PixelFormat::Rg16f: return D3DFMT_G16R16F;
         case PixelFormat::Rgba16f: return D3DFMT_A16B16G16R16F;
         case PixelFormat::Rgba4: return D3DFMT_A4R4G4B4;
         case PixelFormat::Rgba8: return D3DFMT_A8R8G8B8;
         case PixelFormat::Depth24Stencil8: return D3DFMT_D24S8;
+        case PixelFormat::Depth32: return D3DFMT_D32;
         }
         throw std::runtime_error("Bad PixelFormat ?!");
     }

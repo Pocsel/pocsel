@@ -14,6 +14,7 @@ namespace Tools { namespace Lua {
     public:
         Serializer(Interpreter& interpreter);
         std::string Serialize(Ref const& ref, bool nilOnError = false) const throw(std::runtime_error);
+        std::string SerializeWithoutReturn(Ref const& ref, bool nilOnError = false) const throw(std::runtime_error);
         Ref Deserialize(std::string const& string) const throw(std::runtime_error);
         Ref MakeSerializableCopy(Ref const& ref, bool nilOnError = false) const throw(std::runtime_error);
     private:

@@ -2,6 +2,13 @@
 
 #include <IL/il.h>
 
+#include "tools/Color.hpp"
+#include "tools/IRenderer.hpp"
+#include "tools/renderers/utils/TextureAtlas.hpp"
+#include "tools/window/Window.hpp"
+
+#include "common/Resource.hpp"
+
 #include "client/Client.hpp"
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
@@ -12,14 +19,7 @@
 #include "client/resources/AnimatedTexture.hpp"
 #include "client/resources/Effect.hpp"
 #include "client/resources/Texture.hpp"
-#include "client/window/Window.hpp"
 #include "client/Settings.hpp"
-
-#include "tools/Color.hpp"
-#include "tools/IRenderer.hpp"
-#include "tools/renderers/utils/TextureAtlas.hpp"
-
-#include "common/Resource.hpp"
 
 namespace {
     inline void InitializeFrames(Tools::IRenderer& renderer, void const* data, std::size_t dataSize, std::vector<Tools::Renderers::ITexture2D*>& frames)
@@ -82,7 +82,6 @@ namespace Client { namespace Resources {
         Tools::Renderers::ITexture2D* errTex = 0;
         if (this->_textures.find(0) != this->_textures.end())
             errTex = this->_textures[0];
-        delete errTex;
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
             if (it->second != errTex)
                 Tools::Delete(it->second);
@@ -95,6 +94,7 @@ namespace Client { namespace Resources {
         for (auto it = this->_effects.begin(), ite = this->_effects.end(); it != ite; ++it)
             for (auto itEffect = it->second.begin(), iteEffect = it->second.end(); itEffect != iteEffect; ++itEffect)
                 Tools::Delete(itEffect->second);
+        delete errTex;
     }
 
     Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 id)

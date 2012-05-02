@@ -29,25 +29,25 @@ namespace Server { namespace Game { namespace Engine {
         return this->_nextCallbackId++;
     }
 
-    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, bool keepCallback /* = false */)
+    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref* ret /* = 0 */, bool keepCallback /* = false */)
     {
-        return this->TriggerCallback(callbackId, this->_engine.GetInterpreter().MakeNil(), keepCallback);
+        return this->TriggerCallback(callbackId, this->_engine.GetInterpreter().MakeNil(), ret, keepCallback);
     }
 
-    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, bool keepCallback /* = false */)
+    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */, bool keepCallback /* = false */)
     {
         if (!callbackId)
             return Ok;
         auto it = this->_callbacks.find(callbackId);
         if (it != this->_callbacks.end())
         {
-            Result ret = this->_engine.GetEntityManager().LuaFunctionCall(it->second->targetId, it->second->function, it->second->arg, bonusArg);
+            Result res = this->_engine.GetEntityManager().CallEntityFunction(it->second->targetId, it->second->function, it->second->arg, bonusArg, ret);
             if (!keepCallback)
             {
                 delete it->second;
                 this->_callbacks.erase(it);
             }
-            return ret;
+            return res;
         }
         Tools::error << "CallbackManager::TriggerCallback: Callback " << callbackId << " not found.\n";
         return CallbackNotFound;
@@ -66,6 +66,14 @@ namespace Server { namespace Game { namespace Engine {
         }
         Tools::error << "CallbackManager::CancelCallback: Callback " << callbackId << " not found.\n";
         return false;
+    }
+
+    CallbackManager::Callback const& CallbackManager::GetCallback(Uint32 callbackId) const throw(std::runtime_error)
+    {
+        auto it = this->_callbacks.find(callbackId);
+        if (it == this->_callbacks.end())
+            throw std::runtime_error("CallbackManager: Callback not found.");
+        return *it->second;
     }
 
 }}}

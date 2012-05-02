@@ -1,7 +1,8 @@
 #include "client/precompiled.hpp"
 
+#include "tools/window/Window.hpp"
+
 #include "client/Client.hpp"
-#include "client/window/Window.hpp"
 #include "client/game/CubeType.hpp"
 #include "client/game/Game.hpp"
 #include "client/map/Chunk.hpp"

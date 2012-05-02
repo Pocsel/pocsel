@@ -7,7 +7,7 @@ namespace Tools {
     class IRenderer;
 }
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
 
     class InputManager;
 

@@ -67,13 +67,13 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    CallbackManager::Result EntityManager::LuaFunctionCall(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg)
+    CallbackManager::Result EntityManager::CallEntityFunction(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */)
     {
         assert(!this->_runningEntityId && !this->_engine.GetRunningEntityId() && "chaînage de calls Lua, THIS IS BAD");
         auto it = this->_entities.find(targetId);
         if (it == this->_entities.end())
         {
-            Tools::error << "EntityManager::LuaFunctionCall: Call to \"" << function << "\" for entity " << targetId << " failed: entity not found.\n";
+            Tools::error << "EntityManager::CallEntityFunction: Call to \"" << function << "\" for entity " << targetId << " failed: entity not found.\n";
             return CallbackManager::EntityNotFound;
         }
         try
@@ -87,27 +87,27 @@ namespace Server { namespace Game { namespace Engine {
                 this->_runningEntityId = targetId;
                 this->_runningEntity = it->second;
                 if (bonusArg.Exists())
-                    f(it->second->GetSelf(), arg, bonusArg);
+                    ret ? *ret = f(it->second->GetSelf(), arg, bonusArg) : f(it->second->GetSelf(), arg, bonusArg);
                 else
-                    f(it->second->GetSelf(), arg);
+                    ret ? *ret = f(it->second->GetSelf(), arg) : f(it->second->GetSelf(), arg);
                 this->_runningEntity = 0;
                 this->_runningEntityId = 0;
             }
             else
             {
-                Tools::error << "EntityManager::LuaFunctionCall: Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\") failed: function not found (type: " << f.GetTypeName() << ").\n";
+                Tools::error << "EntityManager::CallEntityFunction: Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\") failed: function not found (type: " << f.GetTypeName() << ").\n";
                 return CallbackManager::FunctionNotFound;
             }
         }
         catch (std::exception& e)
         {
-            Tools::error << "EntityManager::LuaFunctionCall: Fatal (entity deleted): Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\") failed: " << e.what() << std::endl;
+            Tools::error << "EntityManager::CallEntityFunction: Fatal (entity deleted): Call to \"" << function << "\" for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\") failed: " << e.what() << std::endl;
             this->_DeleteEntity(it->first, it->second);
             this->_runningEntity = 0;
             this->_runningEntityId = 0;
             return CallbackManager::Error;
         }
-        Tools::debug << "EntityManager::LuaFunctionCall: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\").\n";
+        //Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\").\n";
         return CallbackManager::Ok;
     }
 
@@ -126,19 +126,22 @@ namespace Server { namespace Game { namespace Engine {
         while (!this->_spawnEvents.empty())
         {
             SpawnEvent* e = this->_spawnEvents.front();
+            auto resultTable = this->_engine.GetInterpreter().MakeTable();
             try
             {
                 Uint32 newId = this->_CreateEntity(e->pluginId, e->entityName);
-                CallbackManager::Result res = this->LuaFunctionCall(newId, "Spawn", e->arg, this->_engine.GetInterpreter().MakeNumber(e->spawnerId));
-                if (res == CallbackManager::FunctionNotFound || res == CallbackManager::Ok)
-                    this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, this->_engine.GetInterpreter().MakeNumber(newId));
-                else
-                    this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, this->_engine.GetInterpreter().MakeNumber(0));
+                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                if (this->CallEntityFunction(newId, "Spawn", e->arg, this->_engine.GetInterpreter().MakeNumber(e->spawnerId), &ret) == CallbackManager::Ok)
+                    resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
+                resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(newId));
+                resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
+                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
             }
             catch (std::exception& ex)
             {
                 Tools::error << "EntityManager::DispatchSpawnEvents: Cannot create entity \"" << e->entityName << "\" from plugin " << e->pluginId << ": " << ex.what() << std::endl;
-                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, this->_engine.GetInterpreter().MakeNumber(0));
+                resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(false));
+                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
             }
             delete e;
             this->_spawnEvents.pop();
@@ -155,7 +158,9 @@ namespace Server { namespace Game { namespace Engine {
             resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(e->targetId));
             if (it != this->_entities.end())
             {
-                this->LuaFunctionCall(e->targetId, "Die", e->arg, this->_engine.GetInterpreter().MakeNumber(e->killerId));
+                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                if (this->CallEntityFunction(e->targetId, "Die", e->arg, this->_engine.GetInterpreter().MakeNumber(e->killerId), &ret) == CallbackManager::Ok)
+                    resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
                 this->_DeleteEntity(it->first, it->second);
                 resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true)); // meme si le call a fail, l'entité est tuée quand même alors on retourne true
                 this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
@@ -201,6 +206,14 @@ namespace Server { namespace Game { namespace Engine {
     Uint32 EntityManager::GetRunningPluginId() const
     {
         return this->_runningEntity ? this->_runningEntity->GetType().GetPluginId() : 0;
+    }
+
+    Entity const& EntityManager::GetEntity(Uint32 entityId) const throw(std::runtime_error)
+    {
+        auto it = this->_entities.find(entityId);
+        if (it == this->_entities.end())
+            throw std::runtime_error("EntityManager: Entity not found.");
+        return *it->second;
     }
 
     Uint32 EntityManager::_CreateEntity(Uint32 pluginId, std::string entityName, bool positional /* = false */, Common::Position const& pos /* = Common::Position() */) throw(std::runtime_error)
@@ -377,12 +390,24 @@ namespace Server { namespace Game { namespace Engine {
         {
             if (it != this->_entities.begin())
                 json += ",\n";
+            std::string storage;
+            if (it->second->GetSelf().IsTable())
+                try
+                {
+                    storage = this->_engine.GetInterpreter().GetSerializer().SerializeWithoutReturn(it->second->GetSelf()["storage"]);
+                }
+                catch (std::exception& e)
+                {
+                    // normalement on utilise nilOnError pour le storage, mais ici on debug donc on affiche plus de trucs
+                    storage = "Serialization error: " + std::string(e.what());
+                }
             json +=
                 "\t{\n"
                 "\t\t\"id\": " + Tools::ToString(it->first) + ",\n" +
                 "\t\t\"type\": \"" + it->second->GetType().GetName() + "\",\n" +
                 "\t\t\"plugin\": \"" + this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(it->second->GetType().GetPluginId()) + "\",\n" +
-                "\t\t\"positional\": " + (it->second->GetType().IsPositional() ? "true" : "false") + "\n" +
+                "\t\t\"positional\": " + (it->second->GetType().IsPositional() ? "true" : "false") + ",\n" +
+                "\t\t\"storage\": \"" + Rcon::ToJsonStr(storage) + "\"\n" +
                 "\t}";
         }
         json += "\n]\n";

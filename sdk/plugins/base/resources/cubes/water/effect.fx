@@ -12,26 +12,26 @@ float displacement = 4.0;
 #ifdef DIRECTX
 sampler2D cubeTexture = sampler_state
 {
-	MinFilter = Linear;
-	MagFilter = Point;
-	MipFilter = Linear;
+    MinFilter = Linear;
+    MagFilter = Point;
+    MipFilter = Linear;
 };
 #else
 sampler2D cubeTexture = sampler_state
 {
-   minFilter = LinearMipMapLinear;
-   magFilter = Nearest;
+    minFilter = LinearMipMapLinear;
+    magFilter = Nearest;
 };
 #endif
 
 struct VSout
 {
-   float4 position : POSITION;
-   float2 texCoord : TEXCOORD0;
-   float lightIntensity : TEXCOORD1;
-   float fogFactor : TEXCOORD2;
-   // Water:
-   //float4 texProj;
+    float4 position : POSITION;
+    float2 texCoord : TEXCOORD0;
+    float lightIntensity : TEXCOORD1;
+    float fogFactor : TEXCOORD2;
+    // Water:
+    //float4 texProj;
 };
 
 VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
@@ -39,7 +39,7 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     VSout vout;
 
     vout.texCoord = texCoord;//frac(float2(1.0, 2.0) * texCoord);
-/*    
+/*
     float3 normal = float3(1.0, 4.0, 16.0);
     normal = frac(normal * inNormal);
     //Unpack to the -1..1 range
@@ -55,30 +55,30 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
 
 float4 fs(in VSout v) : COLOR
 {
-	float4 c = tex2D(cubeTexture, v.texCoord);
-   
-	c.rgb = v.lightIntensity * lerp(fogColor, c.rgb, v.fogFactor);
+    float4 c = tex2D(cubeTexture, v.texCoord);
 
-	return c;
+    c.rgb = v.lightIntensity * lerp(fogColor, c.rgb, v.fogFactor);
+
+    return c;
 }
 
 #ifndef DIRECTX
 
 technique tech_glsl
 {
-	pass p0
-	{
-		VertexProgram = compile glslv vs();
+    pass p0
+    {
+        VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
-	}
+    }
 }
 technique tech
 {
-	pass p0
-	{
-		VertexProgram = compile arbvp1 vs();
+    pass p0
+    {
+        VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
-	}
+    }
 }
 
 #else

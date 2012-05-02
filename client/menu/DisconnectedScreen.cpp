@@ -1,12 +1,15 @@
-#include "client/menu/DisconnectedScreen.hpp"
+#include "client/precompiled.hpp"
+
 #include "tools/renderers/utils/Rectangle.hpp"
 #include "tools/renderers/utils/Font.hpp"
-#include "client/Client.hpp"
-#include "client/window/Window.hpp"
-#include "client/menu/Menu.hpp"
+#include "tools/window/ActionBinder.hpp"
+#include "tools/window/InputManager.hpp"
+#include "tools/window/Window.hpp"
+
 #include "client/menu/widget/Button.hpp"
-#include "client/ActionBinder.hpp"
-#include "client/window/InputManager.hpp"
+#include "client/menu/DisconnectedScreen.hpp"
+#include "client/menu/Menu.hpp"
+#include "client/Client.hpp"
 
 namespace Client { namespace Menu {
 
@@ -15,7 +18,7 @@ namespace Client { namespace Menu {
         _menu(menu),
         _renderer(client.GetWindow().GetRenderer())
     {
-        this->_actionBinder = new ActionBinder();
+        this->_actionBinder = new Tools::Window::ActionBinder();
         std::function<void(void)> f = std::bind(&DisconnectedScreen::_RetryButton, this);
         this->_button = new Widget::Button(this->_client.GetWindow().GetInputManager(),
                 this->_menu,

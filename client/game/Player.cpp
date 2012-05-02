@@ -1,21 +1,21 @@
 #include "client/precompiled.hpp"
 
-#include "client/game/Player.hpp"
-#include "client/game/TargetedCubeRenderer.hpp"
-#include "client/network/PacketDispatcher.hpp"
-#include "client/window/InputManager.hpp"
-#include "client/window/Window.hpp"
-#include "client/game/Game.hpp"
-#include "client/Client.hpp"
-#include "client/Settings.hpp"
-#include "client/map/Chunk.hpp"
-#include "client/map/Map.hpp"
-
-#include "client/network/PacketCreator.hpp"
-#include "client/network/Network.hpp"
+#include "tools/window/InputManager.hpp"
+#include "tools/window/Window.hpp"
 
 #include "common/RayCast.hpp"
 #include "common/MovingOrientedPosition.hpp"
+
+#include "client/game/Game.hpp"
+#include "client/game/Player.hpp"
+#include "client/game/TargetedCubeRenderer.hpp"
+#include "client/map/Chunk.hpp"
+#include "client/map/Map.hpp"
+#include "client/network/Network.hpp"
+#include "client/network/PacketCreator.hpp"
+#include "client/network/PacketDispatcher.hpp"
+#include "client/Client.hpp"
+#include "client/Settings.hpp"
 
 namespace Client { namespace Game {
 
@@ -27,21 +27,21 @@ namespace Client { namespace Game {
         _targetedCube(0),
         _targetedCubeRenderer(new TargetedCubeRenderer(game))
     {
-        this->_actionBinder.Bind(BindAction::Forward, BindAction::Held, std::bind(&Player::MoveForward, this));
-        this->_actionBinder.Bind(BindAction::Backward, BindAction::Held, std::bind(&Player::MoveBackward, this));
-        this->_actionBinder.Bind(BindAction::Left, BindAction::Held, std::bind(&Player::StrafeLeft, this));
-        this->_actionBinder.Bind(BindAction::Right, BindAction::Held, std::bind(&Player::StrafeRight, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::Forward, Tools::Window::BindAction::Held, std::bind(&Player::MoveForward, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::Backward, Tools::Window::BindAction::Held, std::bind(&Player::MoveBackward, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::Left, Tools::Window::BindAction::Held, std::bind(&Player::StrafeLeft, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::Right, Tools::Window::BindAction::Held, std::bind(&Player::StrafeRight, this));
 
-        this->_actionBinder.Bind(BindAction::Jump, BindAction::Held, std::bind(&Player::Jump, this));
-        this->_actionBinder.Bind(BindAction::Crouch, BindAction::Held, std::bind(&Player::Crouch, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::Jump, Tools::Window::BindAction::Held, std::bind(&Player::Jump, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::Crouch, Tools::Window::BindAction::Held, std::bind(&Player::Crouch, this));
 
-        this->_actionBinder.Bind(BindAction::Fire, BindAction::Pressed, std::bind(&Player::Action, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::Fire, Tools::Window::BindAction::Pressed, std::bind(&Player::Action, this));
         //this->_actionBinder.Bind(BindAction::Fire, BindAction::Held, std::bind(&Player::Action, this));
 
-        this->_actionBinder.Bind(BindAction::AltFire, BindAction::Pressed, std::bind(&Player::SuperAction, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::AltFire, Tools::Window::BindAction::Pressed, std::bind(&Player::SuperAction, this));
         //this->_actionBinder.Bind(BindAction::AltFire, BindAction::Held, std::bind(&Player::SuperAction, this));
 
-        this->_actionBinder.Bind(BindAction::ToggleSprint, BindAction::Pressed, std::bind(&Player::ToggleSprint, this));
+        this->_actionBinder.Bind(Tools::Window::BindAction::ToggleSprint, Tools::Window::BindAction::Pressed, std::bind(&Player::ToggleSprint, this));
     }
 
     Player::~Player()

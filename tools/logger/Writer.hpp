@@ -5,9 +5,13 @@ namespace Tools { namespace Logger {
 
     template<class T> struct Writer;
 
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable: 4250) // inherits ... via dominance
+#endif
     namespace {
         template<class TWriter>
-        struct Buffer : public std::stringstream
+        struct Buffer : public virtual std::stringstream
         {
         private:
             TWriter& _writer;
@@ -74,6 +78,9 @@ namespace Tools { namespace Logger {
             }
         };
     }
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
 
     template<class TLog>
     struct Writer

@@ -12,6 +12,7 @@
             "world_identifier": "<world_identifier>",
             "world_fullname": "<world_fullname>",
             "world_version": <world_version>,
+            "debug": <true/false>,
             "maps":
             [
                 {
@@ -44,6 +45,37 @@
             "log": "<lua error>"
         }
 
+- GET /map/<map>/entities
+    - Needed rights: "entities"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights), 404 (map not found)
+    - JSON:
+        [
+            {
+                "id": <id>,
+                "type": "<type>",
+                "plugin": "<plugin>",
+                "positional": <true/false>
+            }
+        ]
+
+- GET /map/<map>/messages
+    - Needed rights: "messages"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights), 404 (map not found)
+    - JSON:
+        [
+            {
+                "seconds": "<time_left>",
+                "target": "<target>",
+                "function": "<function>",
+                "argument": "<argument>",
+                "notification_target": "<notification_target>",
+                "notification_function": "<notification_function>",
+                "notification_argument": "<notification_argument>"
+            }
+        ]
+
 - GET /entity_file/<plugin>/<file>
     - Needed rights: "execute"
     - Parameters:
@@ -55,7 +87,7 @@
 
 - POST /entity_file/<plugin>/<file>
     - Needed rights: "execute"
-    - Parameters:
+    - Parameters: lua
     - Returns: 200 (ok), 401 (insufficient rights), 404 (plugin/file not found)
     - JSON:
 
@@ -71,3 +103,21 @@
             }
         ]
 
+- GET /logs
+    - Needed rights: "logs"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights)
+    - JSON:
+        {
+            "normal": "<normal_log>",
+            "error": "<error_log>"
+        }
+
+- GET /load_log
+    - Needed rights: "load_log"
+    - Parameters:
+    - Returns: 200 (ok), 401 (insufficient rights)
+    JSON:
+        {
+            "log": "<load_log>"
+        }

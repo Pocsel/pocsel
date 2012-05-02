@@ -53,7 +53,7 @@ namespace Client { namespace Game {
         Tools::Renderers::IShaderProgram* _renderShader;
         std::unique_ptr<Tools::Renderers::IShaderParameter> _renderColorsParameter;
         std::unique_ptr<Tools::Renderers::IShaderParameter> _renderNormalsParameter;
-        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderPositionsParameter;
+        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderDepthParameter;
 
         Tools::Renderers::IShaderProgram* _basicShader;
         std::unique_ptr<Tools::Renderers::IShaderParameter> _basicParameter;

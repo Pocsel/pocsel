@@ -30,7 +30,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
         for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
             (*it)->Release();
         this->_textures.clear();
-        this->_depthBuffer->Release();
+        if (this->_depthBuffer != 0)
+            this->_depthBuffer->Release();
     }
 
     void RenderTarget::OnLostDevice()
@@ -38,7 +39,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
         for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
             (*it)->Release();
         this->_textures.clear();
-        this->_depthBuffer->Release();
+        if (this->_depthBuffer != 0)
+            this->_depthBuffer->Release();
         this->_depthBuffer = 0;
     }
 

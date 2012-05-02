@@ -8,13 +8,13 @@ namespace Tools {
     namespace Renderers { namespace Utils {
         class Rectangle;
     }}
+    namespace Window {
+        class ActionBinder;
+        class InputManager;
+    }
     class IRenderer;
 }
 namespace Client {
-    class ActionBinder;
-    namespace Window {
-        class InputManager;
-    }
     namespace Menu {
         class Menu;
     }
@@ -26,7 +26,7 @@ namespace Client { namespace Menu { namespace Widget {
         private boost::noncopyable
     {
     private:
-        Window::InputManager const& _inputManager;
+        Tools::Window::InputManager const& _inputManager;
         Menu& _menu;
         Tools::IRenderer& _renderer;
         std::function<void(void)> _callback;
@@ -39,10 +39,10 @@ namespace Client { namespace Menu { namespace Widget {
         glm::detail::tmat4x4<float> _textMatrix;
 
     public:
-        Button(Window::InputManager const& inputManager,
+        Button(Tools::Window::InputManager const& inputManager,
                 Menu& menu,
                 Tools::IRenderer& renderer,
-                ActionBinder& actionBinder,
+                Tools::Window::ActionBinder& actionBinder,
                 std::function<void(void)>& callback,
                 std::string const& text = "",
                 glm::fvec2 const& size = glm::fvec2(50, 20),

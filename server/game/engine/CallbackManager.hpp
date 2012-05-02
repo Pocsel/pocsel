@@ -39,9 +39,10 @@ namespace Server { namespace Game { namespace Engine {
         CallbackManager(Engine& engine);
         ~CallbackManager();
         Uint32 MakeCallback(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, bool serialize = true);
-        Result TriggerCallback(Uint32 callbackId, bool keepCallback = false);
-        Result TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, bool keepCallback = false);
+        Result TriggerCallback(Uint32 callbackId, Tools::Lua::Ref* ret = 0, bool keepCallback = false);
+        Result TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0, bool keepCallback = false);
         bool CancelCallback(Uint32 callbackId); // retourne true si callbackId est effectivement associé a une callback (annulation réussie)
+        Callback const& GetCallback(Uint32 callbackId) const throw(std::runtime_error); // ne pas garder de reference, la callback peut etre delete à tout moment
     };
 
 }}}

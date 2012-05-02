@@ -13,11 +13,10 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct Message
         {
-            Message(Uint32 targetId, Uint32 callbackId, Uint32 notificationCallbackId) :
-                targetId(targetId), callbackId(callbackId), notificationCallbackId(notificationCallbackId)
+            Message(Uint32 callbackId, Uint32 notificationCallbackId) :
+                callbackId(callbackId), notificationCallbackId(notificationCallbackId)
             {
             }
-            Uint32 targetId;
             Uint32 callbackId;
             Uint32 notificationCallbackId;
         };
@@ -30,6 +29,10 @@ namespace Server { namespace Game { namespace Engine {
         MessageManager(Engine& engine);
         ~MessageManager();
         void DispatchMessages();
+
+        // rcon requests
+        std::string RconGetMessages() const;
+
     private:
         void _ApiLater(Tools::Lua::CallHelper& helper);
         void _ApiNow(Tools::Lua::CallHelper& helper);

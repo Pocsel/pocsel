@@ -1,8 +1,10 @@
-#include "client/ActionBinder.hpp"
-#include "client/window/InputManager.hpp"
+#include "tools/window/ActionBinder.hpp"
+#include "tools/window/InputManager.hpp"
 
-namespace {
-    template <typename T, typename U>
+namespace Tools { namespace Window {
+
+    namespace {
+        template <typename T, typename U>
         void CallFunctions(T& map, U const& action, bool& bound)
         {
             auto list = map[action];
@@ -14,11 +16,9 @@ namespace {
                 bound = true;
             }
         }
-}
+    }
 
-namespace Client {
-
-    void ActionBinder::Dispatch(Window::InputManager& inputManager, bool catchAll /* = false */)
+    void ActionBinder::Dispatch(InputManager& inputManager, bool catchAll /* = false */)
     {
         bool bound;
         auto& actionList = inputManager.GetActionList();
@@ -95,4 +95,4 @@ namespace Client {
         }
     }
 
-}
+}}

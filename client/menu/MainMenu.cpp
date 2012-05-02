@@ -1,11 +1,12 @@
-#include "client/menu/MainMenu.hpp"
 #include "tools/renderers/utils/Rectangle.hpp"
+#include "tools/window/Window.hpp"
+#include "tools/window/ActionBinder.hpp"
+#include "tools/window/InputManager.hpp"
+
+#include "client/menu/MainMenu.hpp"
 #include "client/Client.hpp"
-#include "client/window/Window.hpp"
 #include "client/menu/Menu.hpp"
 #include "client/menu/widget/Button.hpp"
-#include "client/ActionBinder.hpp"
-#include "client/window/InputManager.hpp"
 
 namespace Client { namespace Menu {
 
@@ -22,9 +23,9 @@ namespace Client { namespace Menu {
                 Tools::Color4f(0.25f, 0.25f, 0.25f, 0.7f),
                 Tools::Color4f(0.25f, 0.25f, 0.25f, 0.7f));
 
-        this->_actionBinder = new ActionBinder();
-        this->_actionBinder->Bind(BindAction::Menu, BindAction::Released, std::bind(&MainMenu::_MenuBind, this));
-        this->_actionBinder->Bind(BindAction::Quit, BindAction::Released, std::bind(&Client::Quit, &this->_client));
+        this->_actionBinder = new Tools::Window::ActionBinder();
+        this->_actionBinder->Bind(Tools::Window::BindAction::Menu, Tools::Window::BindAction::Released, std::bind(&MainMenu::_MenuBind, this));
+        this->_actionBinder->Bind(Tools::Window::BindAction::Quit, Tools::Window::BindAction::Released, std::bind(&Client::Quit, &this->_client));
 
         std::function<void(void)> f = std::bind(&MainMenu::_QuitButton, this);
         this->_quitButton = new Widget::Button(this->_client.GetWindow().GetInputManager(),
@@ -97,7 +98,7 @@ namespace Client { namespace Menu {
 
     void MainMenu::_QuitButton()
     {
-        this->_client.GetWindow().GetInputManager().TriggerAction(BindAction::Quit, BindAction::Released);
+        this->_client.GetWindow().GetInputManager().TriggerAction(Tools::Window::BindAction::Quit, Tools::Window::BindAction::Released);
     }
 
     void MainMenu::_BackButton()

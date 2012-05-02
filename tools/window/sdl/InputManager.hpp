@@ -1,19 +1,19 @@
 #ifndef __CLIENT_WINDOW_SDL_INPUTMANAGER_HPP__
 #define __CLIENT_WINDOW_SDL_INPUTMANAGER_HPP__
 
-#include "client/window/InputManager.hpp"
+#include "tools/window/InputManager.hpp"
 #include "tools/Vector2.hpp"
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
     class Window;
 }}
 
-namespace Client { namespace Window { namespace Sdl {
+namespace Tools { namespace Window { namespace Sdl {
 
     class InputBinder;
 
     class InputManager :
-        public ::Client::Window::InputManager
+        public ::Tools::Window::InputManager
     {
     private:
         struct KeyHeld
@@ -38,7 +38,7 @@ namespace Client { namespace Window { namespace Sdl {
         bool _isMinimized;
 
     public:
-        InputManager(::Client::Window::Window& window, InputBinder* inputBinder);
+        InputManager(::Tools::Window::Window& window, InputBinder* inputBinder);
         virtual void ProcessEvents();
         virtual glm::ivec2 const& GetMousePos() const { return this->_mousePos; }
         virtual glm::ivec2 GetMousePosRealTime() const;

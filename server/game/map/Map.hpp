@@ -104,6 +104,7 @@ namespace Server { namespace Game { namespace Map {
         // rcon requests
         void RconExecute(Uint32 pluginId, std::string lua, std::function<void(std::string)> cb) const;
         void RconGetEntities(std::function<void(std::string)> cb) const;
+        void RconGetMessages(std::function<void(std::string)> cb) const;
 
     private:
         void _HandleNewChunk(Chunk* newChunk);
@@ -127,6 +128,7 @@ namespace Server { namespace Game { namespace Map {
         // rcon requests
         void _RconExecute(Uint32 pluginId, std::string const& lua, std::function<void(std::string)> cb) const;
         void _RconGetEntities(std::function<void(std::string)> cb) const;
+        void _RconGetMessages(std::function<void(std::string)> cb) const;
     };
 
 }}}

@@ -27,6 +27,6 @@ def getFileType(abspath):
         'lua': 'lua',
         'png': 'image',
         'md3': 'model',
-        'cgfx': 'effect',
+        'fx': 'effect',
     }[ext]
 

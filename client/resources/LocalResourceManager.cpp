@@ -1,5 +1,9 @@
 #include "client/precompiled.hpp"
 
+#include "tools/IRenderer.hpp"
+#include "tools/renderers/utils/Font.hpp"
+#include "tools/window/Window.hpp"
+
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/network/Network.hpp"
@@ -7,10 +11,6 @@
 #include "client/resources/LocalResourceManager.hpp"
 #include "client/resources/Md5Model.hpp"
 #include "client/resources/Md5Animation.hpp"
-#include "client/window/Window.hpp"
-
-#include "tools/IRenderer.hpp"
-#include "tools/renderers/utils/Font.hpp"
 
 namespace Client { namespace Resources {
 

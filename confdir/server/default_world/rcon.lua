@@ -3,7 +3,8 @@
 --
 -- Available rights:
 --  - rcon_sessions: viewing other connected rcon users
---  - logs: viewing logs
+--  - logs: viewing real time logs
+--  - load_log: viewing map loading log
 --  - entities: viewing entity instances
 --  - messages: viewing messages exchanged between entities
 --  - execute: executing Lua code on any map & editing entity files
@@ -13,7 +14,7 @@
 rconUsers = {
     paps = {
         password = "paps",
-        rights = { "rcon_sessions", "logs", "entities", "messages", "execute" }
+        rights = { "rcon_sessions", "logs", "load_log", "entities", "messages", "execute" }
     },
     plug = {
         password = "paps",

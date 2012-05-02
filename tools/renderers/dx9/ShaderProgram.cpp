@@ -41,6 +41,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_model = this->_effect->GetParameterBySemantic(0, "World");
         this->_view = this->_effect->GetParameterBySemantic(0, "View");
         this->_projection = this->_effect->GetParameterBySemantic(0, "Projection");
+        this->_modelInverse = this->_effect->GetParameterBySemantic(0, "WorldInverse");
+        this->_viewInverse = this->_effect->GetParameterBySemantic(0, "ViewInverse");
+        this->_projectionInverse = this->_effect->GetParameterBySemantic(0, "ProjectionInverse");
+        this->_mvpInverse = this->_effect->GetParameterBySemantic(0, "WorldViewProjectionInverse");
+        this->_viewProjectionInverse = this->_effect->GetParameterBySemantic(0, "ViewProjectionInverse");
     }
 
     ShaderProgram::~ShaderProgram()
@@ -99,6 +104,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case ShaderParameterUsage::ModelViewProjectionMatrix:
             if (this->_mvp)
                 this->_effect->SetMatrixTranspose(this->_mvp, (D3DXMATRIX const*)&this->_renderer.GetModelViewProjectionMatrix()[0]);
+            if (this->_mvpInverse)
+            {
+                auto tmp = glm::inverse(this->_renderer.GetProjectionMatrix());
+                this->_effect->SetMatrixTranspose(this->_mvpInverse, (D3DXMATRIX const*)&tmp[0]);
+            }
             break;
 
         case ShaderParameterUsage::ViewProjectionMatrix:
@@ -106,6 +116,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
             {
                 auto tmp = this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix();
                 this->_effect->SetMatrixTranspose(this->_vp, (D3DXMATRIX const*)&tmp[0]);
+            }
+            if (this->_viewProjectionInverse)
+            {
+                auto tmp = glm::inverse(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix());
+                this->_effect->SetMatrixTranspose(this->_viewProjectionInverse, (D3DXMATRIX const*)&tmp[0]);
             }
             break;
 
@@ -120,16 +135,31 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case ShaderParameterUsage::ModelMatrix:
             if (this->_model)
                 this->_effect->SetMatrixTranspose(this->_model, (D3DXMATRIX const*)&this->_renderer.GetModelMatrix()[0]);
+            if (this->_modelInverse)
+            {
+                auto tmp = glm::inverse(this->_renderer.GetModelMatrix());
+                this->_effect->SetMatrixTranspose(this->_modelInverse, (D3DXMATRIX const*)&tmp[0]);
+            }
             break;
 
         case ShaderParameterUsage::ViewMatrix:
             if (this->_view)
                 this->_effect->SetMatrixTranspose(this->_view, (D3DXMATRIX const*)&this->_renderer.GetViewMatrix()[0]);
+            if (this->_viewInverse)
+            {
+                auto tmp = glm::inverse(this->_renderer.GetViewMatrix());
+                this->_effect->SetMatrixTranspose(this->_viewInverse, (D3DXMATRIX const*)&tmp[0]);
+            }
             break;
 
         case ShaderParameterUsage::ProjectionMatrix:
             if (this->_projection)
                 this->_effect->SetMatrixTranspose(this->_projection, (D3DXMATRIX const*)&this->_renderer.GetProjectionMatrix()[0]);
+            if (this->_projectionInverse)
+            {
+                auto tmp = glm::inverse(this->_renderer.GetProjectionMatrix());
+                this->_effect->SetMatrixTranspose(this->_projectionInverse, (D3DXMATRIX const*)&tmp[0]);
+            }
             break;
 
         default:

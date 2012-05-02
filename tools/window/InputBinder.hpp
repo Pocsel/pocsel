@@ -1,14 +1,14 @@
-#ifndef __CLIENT_WINDOW_INPUTBINDER_HPP__
-#define __CLIENT_WINDOW_INPUTBINDER_HPP__
+#ifndef __TOOLS_WINDOW_INPUTBINDER_HPP__
+#define __TOOLS_WINDOW_INPUTBINDER_HPP__
 
-#include "client/window/Inputs.hpp"
-#include "client/BindAction.hpp"
+#include "tools/window/Inputs.hpp"
+#include "tools/window/BindAction.hpp"
 
 namespace Tools { namespace Lua {
     class CallHelper;
 }}
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
 
     class InputBinder :
         private boost::noncopyable
@@ -17,7 +17,7 @@ namespace Client { namespace Window {
             struct Action
             {
                 std::string string;
-                BindAction::BindAction action;
+                Tools::Window::BindAction::BindAction action;
 
                 Action();
                 bool operator ==(Action const&) const;
@@ -26,7 +26,7 @@ namespace Client { namespace Window {
         private:
             std::map<std::string, SpecialKey::SpecialKey> _specialKeys;
             std::map<std::string, Button::Button> _buttons;
-            std::map<std::string, BindAction::BindAction> _actions;
+            std::map<std::string, Tools::Window::BindAction::BindAction> _actions;
             std::map<SpecialKey::SpecialKey, Action> _specialKeyBinds;
             std::map<char, Action> _asciiBinds;
             std::map<Uint16, Action> _unicodeBinds;

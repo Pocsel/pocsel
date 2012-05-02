@@ -1,8 +1,8 @@
-#include "client/precompiled.hpp"
-#include "client/window/Window.hpp"
-#include "client/window/InputManager.hpp"
+#include "tools/precompiled.hpp"
+#include "tools/window/Window.hpp"
+#include "tools/window/InputManager.hpp"
 
-namespace Client { namespace Window {
+namespace Tools { namespace Window {
 
     Window::Window(InputManager* inputManager) :
         _inputManager(inputManager),
