@@ -2,8 +2,6 @@
 
 #include "tools/models/MqmModel.hpp"
 
-#include "client/resources/LocalResourceManager.hpp"
-
 #include "tools/Math.hpp"
 
 #include "tools/IRenderer.hpp"

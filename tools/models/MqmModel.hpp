@@ -12,10 +12,6 @@ namespace Tools {
     }
 }
 
-namespace Client { namespace Resources {
-    class LocalResourceManager;
-}}
-
 namespace Tools { namespace Models {
 
     class MqmModel
