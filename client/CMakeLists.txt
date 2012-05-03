@@ -9,6 +9,7 @@ set(src
     ${tools_lua_src}
     ${tools_lua_utils_src}
     ${tools_renderers_src}
+    ${tools_models_src}
     ${tools_thread_src}
     ${tools_window_src}
 )

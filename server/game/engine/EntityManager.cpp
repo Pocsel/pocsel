@@ -107,7 +107,7 @@ namespace Server { namespace Game { namespace Engine {
             this->_runningEntityId = 0;
             return CallbackManager::Error;
         }
-        Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\").\n";
+        //Tools::debug << "EntityManager::CallEntityFunction: Function \"" << function << "\" called for entity " << targetId << " (\"" << it->second->GetType().GetName() << "\").\n";
         return CallbackManager::Ok;
     }
 
@@ -206,6 +206,14 @@ namespace Server { namespace Game { namespace Engine {
     Uint32 EntityManager::GetRunningPluginId() const
     {
         return this->_runningEntity ? this->_runningEntity->GetType().GetPluginId() : 0;
+    }
+
+    Entity const& EntityManager::GetEntity(Uint32 entityId) const throw(std::runtime_error)
+    {
+        auto it = this->_entities.find(entityId);
+        if (it == this->_entities.end())
+            throw std::runtime_error("EntityManager: Entity not found.");
+        return *it->second;
     }
 
     Uint32 EntityManager::_CreateEntity(Uint32 pluginId, std::string entityName, bool positional /* = false */, Common::Position const& pos /* = Common::Position() */) throw(std::runtime_error)
@@ -382,12 +390,24 @@ namespace Server { namespace Game { namespace Engine {
         {
             if (it != this->_entities.begin())
                 json += ",\n";
+            std::string storage;
+            if (it->second->GetSelf().IsTable())
+                try
+                {
+                    storage = this->_engine.GetInterpreter().GetSerializer().SerializeWithoutReturn(it->second->GetSelf()["storage"]);
+                }
+                catch (std::exception& e)
+                {
+                    // normalement on utilise nilOnError pour le storage, mais ici on debug donc on affiche plus de trucs
+                    storage = "Serialization error: " + std::string(e.what());
+                }
             json +=
                 "\t{\n"
                 "\t\t\"id\": " + Tools::ToString(it->first) + ",\n" +
                 "\t\t\"type\": \"" + it->second->GetType().GetName() + "\",\n" +
                 "\t\t\"plugin\": \"" + this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(it->second->GetType().GetPluginId()) + "\",\n" +
-                "\t\t\"positional\": " + (it->second->GetType().IsPositional() ? "true" : "false") + "\n" +
+                "\t\t\"positional\": " + (it->second->GetType().IsPositional() ? "true" : "false") + ",\n" +
+                "\t\t\"storage\": \"" + Rcon::ToJsonStr(storage) + "\"\n" +
                 "\t}";
         }
         json += "\n]\n";

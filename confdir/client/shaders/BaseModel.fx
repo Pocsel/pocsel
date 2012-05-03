@@ -46,16 +46,26 @@ VSout vs(
     vout.worldPosition = mul(matTransform, position);
     vout.position = mul(worldViewProjection, vout.worldPosition);
     vout.texCoord = texCoord;
-    vout.normal = mul(world, mul(matTransform, float4(normal, 0.0f)));
+    vout.normal = normalize(mul(world, mul(matTransform, float4(normal, 0.0f))));
     vout.worldPosition = mul(world, vout.worldPosition);
     return vout;
+}
+
+float4 encodeNormals(float3 n)
+{
+//    float f = n.z * -2 + 1;
+//    float g = dot(n, n);
+//    float p = sqrt(g + f);
+//    return float4(n.xy / p * 0.5 + 0.5, 1, 1);
+    return float4(n * 0.5 + 0.5, 1.0);
 }
 
 FSout fs(VSout v)
 {
     FSout f;
     f.color = tex2D(baseTex, v.texCoord);
-    f.normal = float4(normalize(v.normal), 1.0);
+    //f.normal = float4(normalize(v.normal), 1.0);
+    f.normal = encodeNormals(v.normal);
     f.position = float4(v.worldPosition.xyz, 1.0);
     return f;
 }

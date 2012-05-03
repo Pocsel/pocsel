@@ -5,6 +5,11 @@
 #include "server/game/engine/Engine.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Ref.hpp"
+#include "server/rcon/ToJsonStr.hpp"
+#include "server/game/World.hpp"
+#include "server/game/PluginManager.hpp"
+#include "server/game/engine/Entity.hpp"
+#include "server/game/engine/EntityType.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -44,22 +49,33 @@ namespace Server { namespace Game { namespace Engine {
             auto itMessageEnd = it->second.end();
             for (; itMessage != itMessageEnd; ++itMessage)
             {
-                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
-                CallbackManager::Result res = this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->callbackId, &ret);
-                if ((*itMessage)->notificationCallbackId)
+                Uint32 targetId = 0;
+                try
                 {
-                    auto resultTable = this->_engine.GetInterpreter().MakeTable();
-                    resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber((*itMessage)->targetId));
-                    if (res == CallbackManager::Ok)
+                    targetId = this->_engine.GetCallbackManager().GetCallback((*itMessage)->callbackId).targetId;
+                }
+                catch (std::exception&)
+                {
+                }
+                if (targetId)
+                {
+                    Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                    CallbackManager::Result res = this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->callbackId, &ret);
+                    if ((*itMessage)->notificationCallbackId)
                     {
-                        resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
-                        resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
+                        auto resultTable = this->_engine.GetInterpreter().MakeTable();
+                        resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(targetId));
+                        if (res == CallbackManager::Ok)
+                        {
+                            resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
+                            resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
+                        }
+                        else if (res == CallbackManager::Error) // il y a eu une erreur du coté de la cible, mais le message à été envoyé quand meme donc success = true
+                            resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
+                        else
+                            resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(false));
+                        this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->notificationCallbackId, resultTable);
                     }
-                    else if (res == CallbackManager::Error) // il y a eu une erreur du coté de la cible, mais le message à été envoyé quand meme donc success = true
-                        resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
-                    else
-                        resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(false));
-                    this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->notificationCallbackId, resultTable);
                 }
                 Tools::Delete(*itMessage);
             }
@@ -93,13 +109,111 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 notificationCallbackId = 0;
         if (cbTargetId)
             notificationCallbackId = this->_engine.GetCallbackManager().MakeCallback(cbTargetId, cbFunction, cbArg);
-        this->_messages[this->_engine.GetCurrentTime() + static_cast<Uint64>(seconds * 1000000.0)].push_back(new Message(targetId, callbackId, notificationCallbackId));
+        this->_messages[this->_engine.GetCurrentTime() + static_cast<Uint64>(seconds * 1000000.0)].push_back(new Message(callbackId, notificationCallbackId));
     }
 
     void MessageManager::_ApiNow(Tools::Lua::CallHelper& helper)
     {
         helper.GetArgList().push_front(this->_engine.GetInterpreter().MakeNumber(0));
         this->_ApiLater(helper);
+    }
+
+    // fonctions pour faciliter le RconGetMessages() qui suit
+    namespace {
+
+        std::string _GetTimeLeft(Engine& engine, Uint64 time)
+        {
+            std::stringstream ss;
+            ss << std::setprecision(3) << ((time - engine.GetCurrentTime()) / 1000000.0) << " s";
+            return ss.str();
+        }
+
+        std::string _GetSerializedStringPlusError(Engine& engine, Tools::Lua::Ref const& ref)
+        {
+            try
+            {
+                return Rcon::ToJsonStr(engine.GetInterpreter().GetSerializer().SerializeWithoutReturn(ref));
+            }
+            catch (std::exception& e)
+            {
+                return Rcon::ToJsonStr("Serialization error: " + std::string(e.what()));
+            }
+        }
+
+        std::string _GetPrettyEntityName(Engine& engine, Uint32 entityId)
+        {
+            std::string ret = Tools::ToString(entityId) + " (";
+            try
+            {
+                Entity const& e = engine.GetEntityManager().GetEntity(entityId);
+                ret += engine.GetWorld().GetPluginManager().GetPluginIdentifier(e.GetType().GetPluginId());
+                ret += "/";
+                ret += e.GetType().GetName();
+            }
+            catch (std::exception&)
+            {
+                ret += "not found";
+            }
+            ret += ")";
+            return Rcon::ToJsonStr(ret);
+        }
+
+    }
+
+    std::string MessageManager::RconGetMessages() const
+    {
+        bool first = true;
+        std::string json = "[\n";
+        auto itMap = this->_messages.begin();
+        auto itMapEnd = this->_messages.end();
+        for (; itMap != itMapEnd; ++itMap)
+        {
+            auto it = itMap->second.begin();
+            auto itEnd = itMap->second.end();
+            for (; it != itEnd; ++it)
+            {
+                if (!first)
+                    json += ",\n";
+                first = false;
+                json +=
+                    "\t{\n"
+                    "\t\t\"seconds\": \"" + _GetTimeLeft(this->_engine, itMap->first) + "\",\n";
+                try
+                {
+                    CallbackManager::Callback const& c = this->_engine.GetCallbackManager().GetCallback((*it)->callbackId);
+                    json +=
+                        "\t\t\"target\": \"" + _GetPrettyEntityName(this->_engine, c.targetId) + "\",\n" +
+                        "\t\t\"function\": \"" + Rcon::ToJsonStr(c.function) + "\",\n" +
+                        "\t\t\"argument\": \"" + _GetSerializedStringPlusError(this->_engine, c.arg) + "\",\n";
+                }
+                catch (std::exception&)
+                {
+                    json +=
+                        "\t\t\"target\": \"?\",\n"
+                        "\t\t\"function\": \"?\",\n"
+                        "\t\t\"argument\": \"?\",\n";
+                }
+                try
+                {
+                    CallbackManager::Callback const& c = this->_engine.GetCallbackManager().GetCallback((*it)->notificationCallbackId);
+                    json +=
+                        "\t\t\"notification_target\": \"" + _GetPrettyEntityName(this->_engine, c.targetId) + "\",\n" +
+                        "\t\t\"notification_function\": \"" + Rcon::ToJsonStr(c.function) + "\",\n" +
+                        "\t\t\"notification_argument\": \"" + _GetSerializedStringPlusError(this->_engine, c.arg) + "\"\n";
+                }
+                catch (std::exception&)
+                {
+                    // pas de "?" car c'est normal, il n'y a pas toujours de notificationCallback
+                    json +=
+                        "\t\t\"notification_target\": \"\",\n"
+                        "\t\t\"notification_function\": \"\",\n"
+                        "\t\t\"notification_argument\": \"\"\n";
+                }
+                json += "\t}\n";
+            }
+        }
+        json += "\n]\n";
+        return json;
     }
 
 }}}

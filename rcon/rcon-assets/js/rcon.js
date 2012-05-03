@@ -1,4 +1,5 @@
 var generatedIdCount = 0;
+var logScrollToBottom = true;
 var rconToken;
 var rconMaps;
 var rconRights;
@@ -39,10 +40,10 @@ $(document).ready(function() {
                 login: $('#login-form_login').val(),
                 password: $('#login-form_password').val()
             },
+            dataType: 'json',
             success: function(json) {
                 $('#login-form').hide('fast');
                 $('#navbar_login').html('<a href="#">Connected as ' + $('#login-form_login').val() + '</a>');
-                json = $.parseJSON(json);
                 rconToken = json.token;
                 rconMaps = json.maps;
                 rconRights = json.rights;
@@ -83,8 +84,8 @@ $(document).ready(function() {
             headers: {
                 'Rcon-Token': rconToken
             },
+            dataType: 'json',
             success: function(json) {
-                json = $.parseJSON(json);
                 $('#execute_submit').show('fast');
                 $('#execute_preloader').hide('fast');
                 if (json.log) {
@@ -100,6 +101,21 @@ $(document).ready(function() {
         });
     });
 
+    // logs tabs
+    $('#logs_all-tab').click(function() {
+        $('#logs_textareas > textarea').hide();
+        $('#logs_all').show();
+    });
+    $('#logs_error-tab').click(function() {
+        $('#logs_textareas > textarea').hide();
+        $('#logs_error').show();
+    });
+
+    // logs scroll to bottom checkbox
+    $('#logs_scroll').click(function() {
+        logScrollToBottom = !logScrollToBottom;
+    });
+
 });
 
 /*
@@ -112,6 +128,10 @@ function hasRight(str) {
 function generateId(str) {
     generatedIdCount++;
     return str + "_" + generatedIdCount;
+}
+
+function scrollToBottom(textarea) {
+    textarea.scrollTop(textarea[0].scrollHeight - textarea.height());
 }
 
 /*
@@ -165,8 +185,10 @@ function fillStaticTables() {
                     editLuaFile(e.data.plugin, e.data.file);
                 });
             }
-            else
-                $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td>-</td></tr>');
+            else {
+                $('#entity-files_list').append('<tr><td>' + this.plugin + '</td><td>' + this.file + '</td><td></td></tr>');
+                $('#entity-files_hot-swap').empty();
+            }
         });
         $('#entity-files_group').show();
     }
@@ -174,6 +196,16 @@ function fillStaticTables() {
         $('#entity-type_list').append('<tr><td>' + this.plugin + '</td><td>' + this.name + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td></tr>');
     });
     $('#category-entities').show('fast');
+
+    // logs 'Load' tab (only in debug)
+    if (rconDebug) {
+        $('#logs_tabs').append('<li><a id="logs_load-tab" data-toggle="tab">Load</a></li>');
+        $('#logs_load-tab').click(function () {
+            $('#logs_textareas > textarea').hide();
+            $('#logs_load').show();
+        });
+        setTimeout(fetchLoadLog, 3000);
+    }
 }
 
 /*
@@ -193,8 +225,8 @@ function editLuaFile(plugin, file) {
         headers: {
             'Rcon-Token': rconToken
         },
+        dataType: 'json',
         success: function(json) {
-            json = $.parseJSON(json);
             $('#lua-modal_text').val(json.lua);
             $('#lua-modal_preloader').hide('fast');
             $('#lua-modal_text').show('fast');
@@ -224,8 +256,8 @@ function editLuaFile(plugin, file) {
                 headers: {
                     'Rcon-Token': rconToken
                 },
+                dataType: 'json',
                 success: function(json) {
-                    json = $.parseJSON(json);
                     if (json.log)
                         $('#lua-modal_log').append('<div id="execute_alert" class="alert alert-error">' + map + ': ' + json.log + '</div>');
                     else
@@ -276,9 +308,64 @@ function startFetchers() {
 }
 
 /*
+ * Fetches the load log
+ */
+function fetchLoadLog() {
+    $.ajax({
+        url: rconUrl + 'load_log',
+        headers: {
+            'Rcon-Token': rconToken
+        },
+        dataType: 'json',
+        success: function(json) {
+            if (logScrollToBottom) {
+                $('#logs_load').append(json.log);
+                scrollToBottom($('#logs_load'));
+            }
+            else {
+                var pos = $('#logs_load').scrollTop();
+                $('#logs_load').append(json.log);
+                $('#logs_load').scrollTop(pos);
+            }
+        },
+        error: function() {
+            setTimeout(fetchLoadLog, 20000);
+        }
+    });
+}
+
+/*
  * Fetches log messages regularly
  */
 function fetchLogs() {
+    $.ajax({
+        url: rconUrl + 'logs',
+        headers: {
+            'Rcon-Token': rconToken
+        },
+        dataType: 'json',
+        success: function(json) {
+            if (logScrollToBottom) {
+                $('#logs_all').append(json.normal);
+                scrollToBottom($('#logs_all'));
+                $('#logs_error').append(json.error);
+                scrollToBottom($('#logs_error'));
+            }
+            else {
+                var pos;
+                pos = $('#logs_all').scrollTop();
+                $('#logs_all').append(json.normal);
+                $('#logs_all').scrollTop(pos);
+                pos = $('#logs_error').scrollTop();
+                $('#logs_error').append(json.error);
+                $('#logs_error').scrollTop(pos);
+            }
+            setTimeout(fetchLogs, 1000);
+        },
+        error: function() {
+            setTimeout(fetchLogs, 20000);
+        }
+    });
 }
 
 /*
@@ -290,13 +377,13 @@ function fetchEntities() {
         headers: {
             'Rcon-Token': rconToken
         },
+        dataType: 'json',
         success: function(json) {
-            json = $.parseJSON(json);
             $('#entities_list').empty();
             $.each(json, function() {
-                $('#entities_list').append('<tr><td>' + this.id + '</td><td>' + this.plugin + '</td><td>' + this.type + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td><td>-</td></tr>');
+                $('#entities_list').append('<tr><td>' + this.id + '</td><td>' + this.plugin + '</td><td>' + this.type + '</td><td>' + (this.positional ? '<i class="icon-ok"></i>' : '') + '</td><td>' + this.storage + '</td></tr>');
             });
-            setTimeout(fetchEntities, 2500);
+            setTimeout(fetchEntities, 2000);
         },
         error: function() {
             setTimeout(fetchEntities, 20000);
@@ -308,6 +395,23 @@ function fetchEntities() {
  * Fetches pending messages regularly
  */
 function fetchMessages() {
+    $.ajax({
+        url: rconUrl + 'map/' + currentMap + '/messages',
+        headers: {
+            'Rcon-Token': rconToken
+        },
+        dataType: 'json',
+        success: function(json) {
+            $('#messages_list').empty();
+            $.each(json, function() {
+                $('#messages_list').append('<tr><td>' + this.seconds + '</td><td>' + this.target + '</td><td>' + this.function + '</td><td>' + this.argument + '</td><td>' + this.notification_target + '</td><td>' + this.notification_function + '</td><td>' + this.notification_argument + '</td></tr>');
+            });
+            setTimeout(fetchMessages, 1750);
+        },
+        error: function() {
+            setTimeout(fetchMessages, 20000);
+        }
+    });
 }
 
 /*
@@ -319,8 +423,8 @@ function fetchRconSessions() {
         headers: {
             'Rcon-Token': rconToken
         },
+        dataType: 'json',
         success: function(json) {
-            json = $.parseJSON(json);
             $('#rcon-sessions_list').empty();
             $.each(json, function() {
                 $('#rcon-sessions_list').append('<tr><td>' + this.login + '</td><td>' + this.user_agent + '</td></tr>');

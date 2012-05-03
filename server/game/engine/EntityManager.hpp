@@ -75,6 +75,7 @@ namespace Server { namespace Game { namespace Engine {
         void BootstrapPlugin(Uint32 pluginId);
         Uint32 GetRunningEntityId() const { return this->_runningEntityId; }
         Uint32 GetRunningPluginId() const;
+        Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
 
         // rcon requests
         std::string RconGetEntities() const;

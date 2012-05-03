@@ -24,6 +24,7 @@
 #include "server/game/Player.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
+#include "server/game/engine/MessageManager.hpp"
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/database/ResourceManager.hpp"
 #include "server/network/PacketCreator.hpp"
@@ -484,6 +485,18 @@ namespace Server { namespace Game { namespace Map {
     void Map::_RconGetEntities(std::function<void(std::string)> cb) const
     {
         cb(this->_engine->GetEntityManager().RconGetEntities());
+    }
+
+    void Map::RconGetMessages(std::function<void(std::string)> cb) const
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_RconGetMessages, this, cb));
+        this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::_RconGetMessages(std::function<void(std::string)> cb) const
+    {
+        cb(this->_engine->GetMessageManager().RconGetMessages());
     }
 
 }}}

@@ -7,8 +7,8 @@ namespace Server {
 
 namespace Server { namespace Rcon {
 
-    class SessionManager;
     class EntityManager;
+    class SessionManager;
 
     class Rcon :
         private boost::noncopyable
