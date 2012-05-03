@@ -10,12 +10,9 @@ namespace Tools { namespace Models {
 
     MqmModel::~MqmModel()
     {
-        // TODO delate EVARYTHING
-//        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
-//        {
-//            Tools::Delete(it->vertexBuffer);
-//            Tools::Delete(it->indexBuffer);
-//        }
+        Tools::Delete(this->_vertexBuffer);
+        for (auto it = this->_indexBuffers.begin(), ite = this->_indexBuffers.end(); it != ite; ++it)
+            Tools::Delete(*it);
     }
 
     MqmModel::MqmModel(std::vector<char> const& data,
@@ -58,8 +55,6 @@ namespace Tools { namespace Models {
         //meshdata = buf;
         _numTris = header.num_triangles;
         _numVerts = header.num_vertexes;
-        //_outFrame.resize(header.num_joints);
-        //_textures.resize(header.num_meshes);
 
         _meshes.resize(header.num_meshes);
         // lilswap
@@ -263,22 +258,8 @@ namespace Tools { namespace Models {
                 scale.x = p.channeloffset[7]; if(p.mask&0x80) scale.x += *framedata++ * p.channelscale[7];
                 scale.y = p.channeloffset[8]; if(p.mask&0x100) scale.y += *framedata++ * p.channelscale[8];
                 scale.z = p.channeloffset[9]; if(p.mask&0x200) scale.z += *framedata++ * p.channelscale[9];
-                // Concatenate each pose with the inverse base pose to avoid doing this at animation time.
-                // If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
-                // Thus it all negates at animation time like so:
-                //   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
-                //   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
-                //   parentPose * childPose * childInverseBasePose
 
                 _frames.back().push_back(FrameJoint(translate, rotate, scale));
-
-                /*
-                glm::fmat4x4 m = glm::scale(scale) * glm::translate(translate) * glm::toMat4(rotate);
-                if (p.parent >= 0)
-                    _frames[i*header.num_poses + j] = _baseFrame[p.parent] * m * _inverseBaseFrame[j];
-                else
-                    _frames[i*header.num_poses + j] = m * _inverseBaseFrame[j];
-                    */
             }
         }
 

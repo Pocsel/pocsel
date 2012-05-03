@@ -37,7 +37,7 @@ namespace Client { namespace Game {
             this->_animTime += (float)time / 1000.0f;
             this->_animTime = std::fmod(this->_animTime, this->_curAnimation->numFrames * frameDuration);
 
-            float interpolate = std::fmod(_animTime, frameDuration) / frameDuration;//* this->_curAnimation->frameRate;
+            float interpolate = std::fmod(_animTime, frameDuration) * this->_curAnimation->frameRate;
 
             int frame1 = (int)(this->_animTime * this->_curAnimation->frameRate) % this->_curAnimation->numFrames;
             int frame2 = (frame1 + 1) % this->_curAnimation->numFrames;
