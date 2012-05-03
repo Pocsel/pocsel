@@ -1,3 +1,6 @@
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include "client/precompiled.hpp"
 
 #include "tools/IRenderer.hpp"
@@ -114,7 +117,17 @@ namespace Client { namespace Resources {
                 boost::filesystem::path texturesPath = path;
                 boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
                 modelPath.replace_extension(".iqm");
-                Tools::Models::MqmModel* model = new Tools::Models::MqmModel(modelPath, texturesPath, *this);
+                if (!boost::filesystem::exists(modelPath))
+                    throw std::runtime_error("MqmModel::LoadModel: Failed to find file: " + modelPath.string());
+                boost::filesystem::ifstream tmp(modelPath);
+                std::vector<char> data((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
+
+                Tools::Models::MqmModel* model = new Tools::Models::MqmModel(
+                        data,
+                        std::bind(&LocalResourceManager::_GetTexture2D, this, texturesPath.string(), std::placeholders::_1),
+                        this->_renderer
+                        );
+
                 this->_models[path] = model;
                 return *model;
             }
@@ -137,6 +150,13 @@ namespace Client { namespace Resources {
             0, 0, 0, 255
         };
         this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 16, toto, glm::uvec2(2, 2)).release();
+    }
+
+    Tools::Renderers::ITexture2D& LocalResourceManager::_GetTexture2D(std::string const& path0, std::string const& path)
+    {
+        boost::filesystem::path texturePath(path);
+        boost::filesystem::path texturePath0(path0);
+        return this->GetTexture2D((texturePath0 / texturePath).string());
     }
 
 }}

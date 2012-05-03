@@ -1,8 +1,5 @@
 #include "client/precompiled.hpp"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-
 #include "tools/models/MqmModel.hpp"
 
 #include "client/resources/LocalResourceManager.hpp"
@@ -15,6 +12,7 @@ namespace Tools { namespace Models {
 
     MqmModel::~MqmModel()
     {
+        // TODO delate EVARYTHING
 //        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
 //        {
 //            Tools::Delete(it->vertexBuffer);
@@ -22,25 +20,16 @@ namespace Tools { namespace Models {
 //        }
     }
 
-    MqmModel::MqmModel(
-            boost::filesystem::path const& filePath,
-            boost::filesystem::path const& texturesPath,
-            Client::Resources::LocalResourceManager& resourceManager)
+    MqmModel::MqmModel(std::vector<char> const& data,
+            TextureCallback textureCallback,
+            Tools::IRenderer& renderer)
     {
-        if (!boost::filesystem::exists(filePath))
-            throw std::runtime_error("MqmModel::LoadModel: Failed to find file: " + filePath.string());
-
-        boost::filesystem::ifstream tmp(filePath);
-
-        std::vector<char> file((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
-
-
         Tools::Models::Iqm::Header header;
 
-        if (file.size() < sizeof(header))
-            throw std::runtime_error("MqmModel::LoadModel: file is too short, can't contain header");
+        if (data.size() < sizeof(header))
+            throw std::runtime_error("MqmModel::LoadModel: data is too short, can't contain header");
 
-        std::memcpy(&header, file.data(), sizeof(header));
+        std::memcpy(&header, data.data(), sizeof(header));
 
         if (std::memcmp(header.magic, Tools::Models::Iqm::Magic, sizeof(header.magic)))
             throw std::runtime_error("MqmModel::LoadModel: magic is not good");
@@ -50,19 +39,17 @@ namespace Tools { namespace Models {
         if (header.version != Tools::Models::Iqm::Version)
             throw std::runtime_error("MqmModel::LoadModel: version is not good");
 
-        if (file.size() != header.filesize)
-            throw std::runtime_error("MqmModel::LoadModel: file size is not good");
+        if (data.size() != header.filesize)
+            throw std::runtime_error("MqmModel::LoadModel: data size is not good");
 
-        this->_LoadMeshes(header, file, texturesPath, resourceManager, resourceManager.GetRenderer());
+        this->_LoadMeshes(header, data, textureCallback, renderer);
         if (header.num_anims > 0)
-            this->_LoadAnimations(header, file);
+            this->_LoadAnimations(header, data);
     }
 
-    void MqmModel::_LoadMeshes(
-            Tools::Models::Iqm::Header const& header,
+    void MqmModel::_LoadMeshes(Tools::Models::Iqm::Header const& header,
             std::vector<char> const& data,
-            boost::filesystem::path const& texturesPath,
-            Client::Resources::LocalResourceManager& resourceManager,
+            TextureCallback textureCallback,
             Tools::IRenderer& renderer)
     {
         // lilswap((uint *)&buf[header.ofs_vertexarrays], header.num_vertexarrays*sizeof(iqmvertexarray)/sizeof(uint));
@@ -138,11 +125,7 @@ namespace Tools { namespace Models {
             Tools::Models::Iqm::Mesh &mesh = _meshes[i];
             //printf("%s: loaded mesh: %s\n", filename, &str[m.name]);
             std::string textureStr(&str[mesh.material]);
-            boost::filesystem::path texturePath(textureStr);
-            std::string texturePathStr = texturePath.string();
-            Tools::Filesystem::ReplaceBackslashes(texturePathStr);
-            texturePath = texturePathStr;
-            _textures.push_back(&resourceManager.GetTexture2D((texturesPath / texturePath.filename()).string()));
+            _textures.push_back(&textureCallback(textureStr));
 
             this->_indexBuffers.push_back(renderer.CreateIndexBuffer().release());
             this->_indexBuffers.back()->SetData(

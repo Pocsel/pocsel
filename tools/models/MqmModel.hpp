@@ -21,6 +21,8 @@ namespace Tools { namespace Models {
     class MqmModel
     {
     public:
+        typedef std::function<Tools::Renderers::ITexture2D&(std::string const& name)> TextureCallback;
+    public:
         struct JointInfo
         {
             JointInfo(std::string const& n, Uint32 p, glm::vec3 const& pos, glm::quat const& o, glm::vec3 const& s) :
@@ -70,16 +72,14 @@ namespace Tools { namespace Models {
         std::vector<AnimInfo> _animInfos;
 
     public:
-        explicit MqmModel(
-                boost::filesystem::path const& filePath,
-                boost::filesystem::path const& texturesPath,
-                Client::Resources::LocalResourceManager& resourceManager);
+        explicit MqmModel(std::vector<char> const& data,
+                TextureCallback textureCallback,
+                Tools::IRenderer& renderer);
         ~MqmModel();
 
         void _LoadMeshes(Tools::Models::Iqm::Header const& header,
                 std::vector<char> const& data,
-                boost::filesystem::path const& texturesPath,
-                Client::Resources::LocalResourceManager& resourceManager,
+                TextureCallback textureCallback,
                 Tools::IRenderer& renderer);
         void _LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data);
 

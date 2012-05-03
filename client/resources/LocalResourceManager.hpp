@@ -44,6 +44,7 @@ namespace Client { namespace Resources {
 
         private:
             void _InitErrorTexture();
+            Tools::Renderers::ITexture2D& _GetTexture2D(std::string const& path0, std::string const& path);
     };
 
 }}
