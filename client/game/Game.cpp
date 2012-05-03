@@ -102,7 +102,7 @@ namespace Client { namespace Game {
         // XXX
         this->_renderer.BeginDraw2D();
         auto const& size = this->GetClient().GetWindow().GetSize();
-        this->_renderer.SetModelMatrix(glm::scale<float>(size.x / 2.0f, size.y / 2.0f, 1) * glm::translate<float>(1, 1, 0));
+        this->_renderer.SetModelMatrix(glm::scale(size.x * 0.5f, size.y * 0.5f, 1.0f) * glm::translate(1.0f, 1.0f, 0.0f));
 
         this->_renderShader->BeginPass();
         this->_gBuffer->GetNormals().Bind();
@@ -115,11 +115,11 @@ namespace Client { namespace Game {
         this->_renderShader->EndPass();
 
         this->_basicShader->BeginPass();
-        this->_renderer.SetModelMatrix(glm::scale<float>(64, 64, 1) * glm::translate<float>(1, 1, 0));
+        this->_renderer.SetModelMatrix(glm::scale(64.0f, 64.0f, 1.0f) * glm::translate<float>(1.0f, 1.0f, 0.0f));
         this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetNormals());
-        this->_renderer.SetModelMatrix(glm::scale<float>(64, 64, 1) * glm::translate<float>(3, 1, 0));
+        this->_renderer.SetModelMatrix(glm::scale(64.0f, 64.0f, 1.0f) * glm::translate<float>(3.0f, 1.0f, 0.0f));
         this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetDepth());
-        this->_renderer.SetModelMatrix(glm::scale<float>(64, 64, 1) * glm::translate<float>(5, 1, 0));
+        this->_renderer.SetModelMatrix(glm::scale(64.0f, 64.0f, 1.0f) * glm::translate<float>(5.0f, 1.0f, 0.0f));
         this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetColors());
         this->_basicShader->EndPass();
         

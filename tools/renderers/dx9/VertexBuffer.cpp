@@ -36,7 +36,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         //this->_attributes[this->_nbAttrib].type = GetTypeFromDataTypeAndNbElements(type, nbElements);
         this->_attributes[this->_nbAttrib].Stream = 0;
         this->_attributes[this->_nbAttrib].Offset = this->_stride;
-        this->_attributes[this->_nbAttrib].Type = GetTypeFromDataTypeAndNbElements(type, nbElements);
+        this->_attributes[this->_nbAttrib].Type = usage == VertexAttributeUsage::Color ? D3DDECLTYPE_D3DCOLOR : GetTypeFromDataTypeAndNbElements(type, nbElements);
         this->_attributes[this->_nbAttrib].Method = D3DDECLMETHOD_DEFAULT;
         this->_attributes[this->_nbAttrib].Usage = GetVertexAttributeUsage(usage);
         this->_attributes[this->_nbAttrib].UsageIndex = GetVertexAttributeUsageIndex(usage);

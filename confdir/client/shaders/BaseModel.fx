@@ -46,7 +46,7 @@ VSout vs(
     vout.worldPosition = mul(matTransform, position);
     vout.position = mul(worldViewProjection, vout.worldPosition);
     vout.texCoord = texCoord;
-    vout.normal = normalize(mul(world, mul(matTransform, float4(normal, 0.0f))));
+    vout.normal = normalize(mul(world, mul(matTransform, float4(normal, 0.0f))).xyz);
     vout.worldPosition = mul(world, vout.worldPosition);
     return vout;
 }
@@ -95,6 +95,7 @@ technique tech
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexShader = compile vs_3_0 vs();
         PixelShader = compile ps_3_0 fs();
     }

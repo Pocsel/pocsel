@@ -13,6 +13,7 @@ struct VSout
    float2 texCoord : TEXCOORD0;
    float3 normals : TEXCOORD1;
    float3 worldPosition : TEXCOORD2;
+   float4 pos : TEXCOORD3;
 };
 
 struct FSout
@@ -29,6 +30,7 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0, in float
     vout.texCoord = texCoord;
     vout.normals = normalize(mul(world, float4(normals, 0.0)).xyz);
     vout.worldPosition = mul(world, position);
+    vout.pos = vout.position;
     return vout;
 }
 
@@ -38,7 +40,7 @@ FSout fs(in VSout v)
 
     f.diffuse = tex2D(diffuse, v.texCoord);
     f.normals = float4(v.normals * 0.5 + 0.5, 1.0);
-    f.depth = float4(v.worldPosition.x, v.worldPosition.y, v.worldPosition.z, 1.0);
+    f.depth = float4(v.worldPosition.x, v.worldPosition.y, v.worldPosition.z, v.pos.z / v.pos.w);
 
     return f;
 }

@@ -7,6 +7,8 @@
 #include "tools/window/sdl/Window.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/Timer.hpp"
+#include "tools/Vector2.hpp"
+#include "tools/Vector3.hpp"
 
 using namespace Tools;
 using namespace Tools::Renderers;
@@ -117,13 +119,15 @@ static void LoadShaders(IRenderer& renderer)
     {
         {
             std::ifstream file(testShaderPath);
-            testShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
-            codeTestShader = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            auto tmp = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            testShader = renderer.CreateProgram(tmp);
+            codeTestShader = std::move(tmp);
         }
         {
             std::ifstream file(combineShaderPath);
-            combineShader = renderer.CreateProgram(std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>()));
-            codeCombineShader = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            auto tmp = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            combineShader = renderer.CreateProgram(tmp);
+            codeCombineShader = std::move(tmp);
         }
     }
     catch (std::exception& ex)
@@ -192,6 +196,9 @@ int main(int ac, char *av[])
     if (ac > 3)
         texturePath = av[3];
 
+    Tools::log << "Current directory " << boost::filesystem::current_path() << std::endl;
+    Tools::log << "Loading \"" << testShaderPath + "\", \"" << combineShaderPath << "\", \"" << texturePath << "\"\n";
+
     std::map<std::string, Tools::Window::BindAction::BindAction> actions;
     actions["quit"] = BindAction::Quit;
     actions["reloadshaders"] = BindAction::ReloadShaders;
@@ -222,6 +229,7 @@ int main(int ac, char *av[])
         RAII _shaders([&]() { UnloadShaders(); texture = 0; vertexBuffer = 0; indexBuffer = 0; screenQuad = 0; });
 
         CreateCube(*vertexBuffer, *indexBuffer);
+
         while (run)
         {
             window.GetInputManager().ShowMouse();
@@ -256,25 +264,17 @@ int main(int ac, char *av[])
 
             gbuffer.Unbind();
 
-            //renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.0f, 1.0f));
-            //renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
-            //RenderCube(renderer, gbuffer.GetColors());
+            renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.0f, 1.0f));
+            renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
+            RenderCube(renderer, gbuffer.GetNormals());
 
             renderer.BeginDraw2D();
+            renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.5f, 1.0f));
             renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
 
             auto halfSize = glm::vec2((float)window.GetSize().x * 0.5f, (float)window.GetSize().y * 0.5f);
             renderer.SetModelMatrix(glm::translate(halfSize.x, halfSize.y, 0.0f) * glm::scale(halfSize.x, halfSize.y, 1.0f));
             RenderGBuffer(renderer, gbuffer);
-
-            Utils::Rectangle rect(renderer);
-            rect.SetColor(
-                Color4f(1.0f, 0.0f, 0.0f, 1.0f),
-                Color4f(0.0f, 1.0f, 0.0f, 1.0f),
-                Color4f(0.0f, 0.0f, 1.0f, 1.0f),
-                Color4f(1.0f, 1.0f, 1.0f, 1.0f));
-            renderer.SetModelMatrix(glm::scale(100.0f, 100.0f, 1.0f));
-            rect.Render();
 
             renderer.EndDraw2D();
             renderer.EndDraw();
