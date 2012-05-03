@@ -69,33 +69,19 @@ namespace Client { namespace Game {
         auto indexBuffers =  model.GetIndexBuffers();
         auto meshes = model.GetMeshes();
         this->_shaderBoneMatrix->Set(model.GetAnimatedBones());
-//        std::cout << "biet0\n";
         vertexBuffer->Bind();
         for (unsigned int i = 0; i < meshes.size(); ++i)
         {
-            auto mesh = meshes[i];
-//            mesh.texture->Bind();
+            auto& mesh = meshes[i];
             textures[i]->Bind();
             this->_shaderTexture->Set(*textures[i]);
-//            this->_shaderTexture->Set(*mesh.texture);
-//            mesh.vertexBuffer->Bind();
-//            mesh.indexBuffer->Bind();
-
             indexBuffers[i]->Bind();
-//            this->_renderer.DrawElements(mesh.indexes.size());
-            this->_renderer.DrawElements(mesh.num_triangles*3);
-
-//        this->_renderer.DrawElements(6, Tools::Renderers::DataType::UnsignedInt, (int[6]){0, 1, 2, 3, 4, 5});
-
+            this->_renderer.DrawElements(mesh.num_triangles * 3);
             indexBuffers[i]->Unbind();
             textures[i]->Unbind();
-//            mesh.indexBuffer->Unbind();
-//            mesh.vertexBuffer->Unbind();
-//            mesh.texture->Unbind();
-//        std::cout << mesh.num_triangles << "\n";
         }
+        vertexBuffer->Unbind();
 
-            vertexBuffer->Unbind();
         this->_shader->EndPass();
     }
 
