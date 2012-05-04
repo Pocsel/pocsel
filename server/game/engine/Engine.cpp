@@ -2,6 +2,11 @@
 #include "server/game/engine/MessageManager.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
+#include "server/game/engine/Entity.hpp"
+#include "server/game/engine/EntityType.hpp"
+#include "server/game/World.hpp"
+#include "server/game/map/Map.hpp"
+#include "server/game/PluginManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "tools/lua/Interpreter.hpp"
 
@@ -13,11 +18,12 @@ namespace Server { namespace Game { namespace Engine {
         Tools::debug << "Engine::Engine()\n";
         this->_interpreter = new Tools::Lua::Interpreter();
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Base);
+        this->_interpreter->Globals().Set("print", this->_interpreter->MakeFunction(std::bind(&Engine::_ApiPrint, this, std::placeholders::_1)));
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
         auto namespaceTable = this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
-        this->_interpreter->Globals().Set("S", namespaceTable);
+        this->_interpreter->Globals().Set("Srv", namespaceTable);
         this->_callbackManager = new CallbackManager(*this);
         this->_entityManager = new EntityManager(*this);
         this->_messageManager = new MessageManager(*this);
@@ -43,6 +49,31 @@ namespace Server { namespace Game { namespace Engine {
     void Engine::Save(Tools::Database::IConnection& conn)
     {
         this->_entityManager->Save(conn);
+    }
+
+    void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)
+    {
+        std::string str = "[" + this->_map.GetName() + "/";
+        if (this->GetRunningPluginId())
+            str += this->_world.GetPluginManager().GetPluginIdentifier(this->GetRunningPluginId());
+        else
+            str += "?";
+        str += "/";
+        try
+        {
+            auto& e = this->_entityManager->GetEntity(this->GetRunningEntityId());
+            str += e.GetType().GetName() + "/" + Tools::ToString(this->GetRunningEntityId());
+        }
+        catch (std::exception&)
+        {
+            str += "?";
+        }
+        str += "] ";
+        auto it = helper.GetArgList().begin();
+        auto itEnd = helper.GetArgList().end();
+        for (; it != itEnd; ++it)
+            str += it->ToString();
+        Tools::log << str << std::endl;
     }
 
     std::string Engine::RconExecute(Uint32 pluginId, std::string const& lua)

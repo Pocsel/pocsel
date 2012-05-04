@@ -4,9 +4,7 @@
 #include "common/MovingOrientedPosition.hpp"
 
 namespace Server { namespace Game { namespace Map {
-
     class Map;
-
 }}}
 
 namespace Server { namespace Game {
