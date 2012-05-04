@@ -46,10 +46,13 @@ namespace PackagerQt { namespace Qt {
 
     void MainWindow::_Log(std::string const& message)
     {
+        // foireux
         QTextCursor cursor = this->logPlainTextEdit->textCursor();
         cursor.movePosition(QTextCursor::End);
         this->logPlainTextEdit->setTextCursor(cursor);
         this->logPlainTextEdit->insertPlainText(QString::fromStdString(message));
+
+        // foireux aussi
         this->_packager.GetApplication().processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
