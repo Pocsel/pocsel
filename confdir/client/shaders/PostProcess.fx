@@ -35,7 +35,7 @@ struct VSout
 };
 
 float3 CreateEyeRay(float4 p)
-{ 
+{
     const float FOV = 90;
     float ViewAspect = 800 / 600; //ScreenDim.x / ScreenDim.y;
     float TanHalfFOV = tan(radians(FOV*0.5));
@@ -104,7 +104,7 @@ float4 fs(in VSout i) : COLOR
     float3 vLightDir = normalize(lightPos - vWorldPos);
     float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
     float3 vDiffuseIntensity = dot(vWorldNrm, vLightDir);
-    float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 150);
+    float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 1);
 
     float4 color;
     color.rgb = (vDiffuseIntensity * lightDiffuse) * vDiffuseMaterial

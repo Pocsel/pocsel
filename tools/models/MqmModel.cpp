@@ -19,6 +19,8 @@ namespace Tools { namespace Models {
             TextureCallback textureCallback,
             Tools::IRenderer& renderer)
     {
+        Tools::debug << "MqmModel()\n";
+
         Tools::Models::Iqm::Header header;
 
         if (data.size() < sizeof(header))
@@ -51,6 +53,9 @@ namespace Tools { namespace Models {
         // lilswap((uint *)&buf[header.ofs_triangles], header.num_triangles*sizeof(iqmtriangle)/sizeof(uint));
         // lilswap((uint *)&buf[header.ofs_meshes], header.num_meshes*sizeof(iqmmesh)/sizeof(uint));
         // lilswap((uint *)&buf[header.ofs_joints], header.num_joints*sizeof(iqmjoint)/sizeof(uint));
+        Tools::debug << "MqmModel::LoadMeshes()\n";
+
+        const char *str = header.ofs_text ? &data[header.ofs_text] : "";
 
         _numTris = header.num_triangles;
         _numVerts = header.num_vertexes;
@@ -60,9 +65,15 @@ namespace Tools { namespace Models {
         _joints.resize(header.num_joints);
         std::memcpy(_joints.data(), data.data() + header.ofs_joints, header.num_joints * sizeof(_joints[0]));
 
+        Tools::debug << "joints: " << header.num_joints << "\n";
+
+        for (auto it = _joints.begin(), ite = _joints.end(); it != ite; ++it)
+        {
+            Tools::debug << "joint: " << &str[it->name] << "\n";
+        }
+
         float const *inposition = NULL, *innormal = NULL, *intangent = NULL, *intexcoord = NULL;
         Uint8 const *inblendindex = NULL, *inblendweight = NULL;
-        const char *str = header.ofs_text ? &data[header.ofs_text] : "";
         Tools::Models::Iqm::VertexArray const* vas = (Tools::Models::Iqm::VertexArray const*)&data[header.ofs_vertexarrays];
         for(int i = 0; i < (int)header.num_vertexarrays; i++)
         {
@@ -124,6 +135,12 @@ namespace Tools { namespace Models {
         }
 
         _CreateVertexBuffers(/*tris, */inposition, innormal, /*intangent,*/ intexcoord, inblendindex, inblendweight, renderer);
+
+        for (auto it = this->_joints.begin(), ite = this->_joints.end(); it != ite; ++it)
+        {
+            Tools::Models::Iqm::Joint &j = *it;
+            this->_jointInfos.push_back(JointInfo(&str[j.name], j.parent, j.position, j.orientation, j.size));
+        }
     }
 
     bool MqmModel::_CreateVertexBuffers(
@@ -180,7 +197,7 @@ namespace Tools { namespace Models {
 
     void MqmModel::_LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data)
     {
-        if(header.num_poses != header.num_joints)
+        if (header.num_poses != header.num_joints)
             throw std::runtime_error("num_poses != num_joints");
 
         // lilswap((uint *)&buf[header.ofs_poses], header.num_poses*sizeof(iqmpose)/sizeof(uint));
@@ -227,11 +244,7 @@ namespace Tools { namespace Models {
         {
             Tools::Models::Iqm::Anim &a = *it;
             this->_animInfos.push_back(AnimInfo(&str[a.name], a.first_frame, a.num_frames, a.framerate));
-        }
-        for (auto it = this->_joints.begin(), ite = this->_joints.end(); it != ite; ++it)
-        {
-            Tools::Models::Iqm::Joint &j = *it;
-            this->_jointInfos.push_back(JointInfo(&str[j.name], j.parent, j.position, j.orientation, j.size));
+            std::cout << &str[a.name] << ": framerate " << a.framerate << "\n";
         }
     }
 

@@ -50,16 +50,16 @@ namespace Client { namespace Game {
                 )
             *
             glm::yawPitchRoll<float>(
-                   pi / 2-pos.theta, -pi / 2, 0.0f
+                   /*pi / 2*/-pos.theta, -pi / 2, 0.0f
                 )
-            *
-            glm::translate<float>(
-                glm::fvec3(-0.5f, -0.5f, -3.5f)
-                )
-            *
-            glm::scale<float>(
-                glm::fvec3(0.1f, 0.1f, 0.1f)
-                )
+            //*
+            //glm::translate<float>(
+            //    glm::fvec3(-0.5f, -0.5f, -3.5f)
+            //    )
+            //*
+            //glm::scale<float>(
+            //    glm::fvec3(0.1f, 0.1f, 0.1f)
+            //    )
             );
 
         Model const& model = item.GetModel();

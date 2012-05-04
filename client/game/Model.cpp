@@ -16,6 +16,8 @@ namespace Client { namespace Game {
         this->SetAnim("idle");
 
         this->_animatedBones.assign(this->_model.GetJointInfos().size(), glm::mat4x4(1));
+        if (this->_model.GetJointInfos().size() == 0)
+            this->_animatedBones.assign(1, glm::mat4x4(1));
     }
 
     void Model::SetAnim(std::string const& anim)
@@ -78,8 +80,8 @@ namespace Client { namespace Game {
                    )
                 {
                     float pi = std::atan2(0.0f, -1.0f);
-                    animatedJoint0.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint0.orientation);
-                    animatedJoint1.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0) * animatedJoint1.orientation);
+                    animatedJoint0.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 0, 1, 0) * animatedJoint0.orientation);
+                    animatedJoint1.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 0, 1, 0) * animatedJoint1.orientation);
                 }
 
                 this->_animatedBones[i] =
@@ -115,7 +117,7 @@ namespace Client { namespace Game {
                     Tools::Models::MqmModel::FrameJoint const& parentJoint = parents[joints[i].parent];
                     animatedJoint.position = parentJoint.position + parentJoint.orientation * (animatedJoint.position/* - joints[joints[i].parent].position*/);
                     animatedJoint.orientation = glm::normalize(parentJoint.orientation * animatedJoint.orientation);
-                    animatedJoint.size = parentJoint.size * animatedJoint.size;
+                    //animatedJoint.size = parentJoint.size * animatedJoint.size;
                 }
 
                 if (
@@ -131,7 +133,7 @@ namespace Client { namespace Game {
                     float pi = std::atan2(0.0f, -1.0f);
                     animatedJoint.orientation =
                         glm::normalize(
-                                glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 1, 0, 0)
+                                glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 0, 1, 0)
                                 *
                                 animatedJoint.orientation
                                 );
@@ -139,8 +141,8 @@ namespace Client { namespace Game {
 
                 this->_animatedBones[i] =
                     (
-                     glm::scale(animatedJoint.size)
-                     *
+                     //glm::scale(animatedJoint.size)
+                     //*
                      glm::translate(animatedJoint.position)
                      *
                      glm::toMat4(animatedJoint.orientation)
