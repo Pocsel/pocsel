@@ -37,10 +37,10 @@ namespace Tools { namespace Renderers { namespace Utils {
 
         static const float vertices[] =
         {
-            -1,  1, 0,  0, 1, // left - top
-             1,  1, 0,  1, 1, // right - top
-             1, -1, 0,  1, 0, // right - bottom
-            -1, -1, 0,  0, 0, // left - bottom
+            -0.5f,  0.5f, 0,  0, 1, // left - top
+             0.5f,  0.5f, 0,  1, 1, // right - top
+             0.5f, -0.5f, 0,  1, 0, // right - bottom
+            -0.5f, -0.5f, 0,  0, 0, // left - bottom
         };
         Image::_vertexBuffer = renderer.CreateVertexBuffer().release();
         Image::_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Position, 3); // position

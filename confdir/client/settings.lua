@@ -3,7 +3,6 @@ fps = 60
 resX = 800
 resY = 600
 fullscreen = false
-useShaders = true
 useDirect3D9 = true
 chunkViewDistance = 2
 chunkCacheArea = 0

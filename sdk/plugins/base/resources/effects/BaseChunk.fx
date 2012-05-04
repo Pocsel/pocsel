@@ -3,6 +3,7 @@ float4x4 viewProjection : ViewProjection;
 float4x4 world : World;
 float4x4 worldView : WorldView;
 float4x4 viewInverse : ViewInverse;
+float4x4 worldViewInverseTranspose;
 
 float3 fogColor = float3(0.8, 0.8, 0.9);
 float fogEnd = 750.0f;
@@ -30,16 +31,14 @@ struct VSout
 {
     float4 position      : POSITION;
     float2 texCoord      : TEXCOORD0;
-    float3 worldPosition : TEXCOORD1;
-    float3 normal        : TEXCOORD2;
-    float4 pos           : TEXCOORD3;
+    float3 normal       : TEXCOORD1;
+    float4 pos           : TEXCOORD2;
 };
 
 struct FSout
 {
-    float4 color    : COLOR0;
-    float4 normal   : COLOR1;
-    float4 position : COLOR2;
+    float4 diffuse : COLOR0;
+    float4 normalsDepth : COLOR1;
 };
 
 VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
@@ -47,7 +46,6 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     VSout v;
 
     v.texCoord = texCoord;
-    v.worldPosition = mul(world, position);
     v.position = mul(worldViewProjection, position);
     v.normal = normalize(mul(world, float4(normal, 0.0)).xyz);
     v.pos = mul(worldViewProjection, position);
@@ -55,22 +53,19 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     return v;
 }
 
-float4 encodeNormals(float3 n)
+float2 encodeNormals(float3 n)
 {
-//    float f = n.z * -2 + 1;
-//    float g = dot(n, n);
-//    float p = sqrt(g + f);
-//    return float4(n.xy / p * 0.5 + 0.5, 1, 1);
-    return float4(n * 0.5 + 0.5, 1.0);
+   float f = n.z * 2 + 1;
+   float p = sqrt(dot(n, n) + f);
+   return n.xy / p * 0.5 + 0.5;
 }
 
 FSout fs(in VSout v)
 {
     FSout f;
 
-    f.color = tex2D(cubeTexture, v.texCoord);
-    f.normal = encodeNormals(v.normal);
-    f.position = float4(v.worldPosition.x, v.worldPosition.y, v.worldPosition.z, -v.pos.z / 200);
+    f.diffuse = tex2D(cubeTexture, v.texCoord);
+    f.normalsDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, 1.0);
 
     return f;
 }

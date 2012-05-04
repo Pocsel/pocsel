@@ -19,8 +19,8 @@ struct VSout
 struct FSout
 {
     float4 diffuse : COLOR0;
-    float4 normals : COLOR1;
-    float4 depth : COLOR2;
+    float4 normalsDepth : COLOR1;
+    //float4 depth : COLOR2;
 };
 
 VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0, in float3 normals : NORMAL)
@@ -34,7 +34,7 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0, in float
     return vout;
 }
 
-float4 encodeNormals(float3 n)
+float2 encodeNormals(float3 n)
 {
     float2 enc = normalize(n.xy) * (sqrt(-n.z*0.5+0.5));
     enc = enc*0.5+0.5;
@@ -46,8 +46,8 @@ FSout fs(in VSout v)
     FSout f;
 
     f.diffuse = tex2D(diffuse, v.texCoord);
-    f.normals = encodeNormals(v.normals);// float4(v.normals * 0.5 + 0.5, 1.0);
-    f.depth = float4(v.pos.z / v.pos.w, v.worldPosition.x, v.worldPosition.y, v.worldPosition.z);
+    f.normalsDepth = float4(encodeNormals(v.normals), v.pos.z / v.pos.w, 1.0);// float4(v.normals * 0.5 + 0.5, 1.0);
+    //f.depth = float4(v.pos.z / v.pos.w, v.worldPosition.x, v.worldPosition.y, v.worldPosition.z);
 
     return f;
 }

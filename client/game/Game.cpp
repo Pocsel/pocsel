@@ -36,15 +36,11 @@ namespace Client { namespace Game {
         auto const& size = this->_client.GetWindow().GetSize();
         this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.05f, 300.0f);
         // XXX
-        this->_gBuffer = std::unique_ptr<Tools::Renderers::Utils::GBuffer>(new Tools::Renderers::Utils::GBuffer(this->_renderer, size));
-        this->_renderImage = std::unique_ptr<Tools::Renderers::Utils::Image>(new Tools::Renderers::Utils::Image(this->_renderer));
-        this->_renderShader = &this->_client.GetLocalResourceManager().GetShader("PostProcess.fx");
-        this->_renderColorsParameter = this->_renderShader->GetParameter("colors");
-        this->_renderNormalsParameter = this->_renderShader->GetParameter("normals");
-        this->_renderDepthParameter = this->_renderShader->GetParameter("depthBuffer");
-
-        this->_basicShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
-        this->_basicParameter = this->_basicShader->GetParameter("baseTex");
+        this->_gBuffer = std::unique_ptr<Tools::Renderers::Utils::GBuffer>(
+            new Tools::Renderers::Utils::GBuffer(
+                this->_renderer,
+                size,
+                this->_client.GetLocalResourceManager().GetShader("PostProcess.fx")));
         // XXX
     }
 
@@ -99,32 +95,7 @@ namespace Client { namespace Game {
 
         this->_gBuffer->Unbind();
 
-        // XXX
-        this->_renderer.BeginDraw2D();
-        auto const& size = this->GetClient().GetWindow().GetSize();
-        this->_renderer.SetModelMatrix(glm::scale(size.x * 0.5f, size.y * 0.5f, 1.0f) * glm::translate(1.0f, 1.0f, 0.0f));
-
-        this->_renderShader->BeginPass();
-        this->_gBuffer->GetNormals().Bind();
-        this->_gBuffer->GetDepth().Bind();
-        this->_renderNormalsParameter->Set(this->_gBuffer->GetNormals());
-        this->_renderDepthParameter->Set(this->_gBuffer->GetDepth());
-        this->_renderImage->Render(*this->_renderColorsParameter, this->_gBuffer->GetColors());
-        this->_gBuffer->GetDepth().Unbind();
-        this->_gBuffer->GetNormals().Unbind();
-        this->_renderShader->EndPass();
-
-        this->_basicShader->BeginPass();
-        this->_renderer.SetModelMatrix(glm::scale(64.0f, 64.0f, 1.0f) * glm::translate<float>(1.0f, 1.0f, 0.0f));
-        this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetNormals());
-        this->_renderer.SetModelMatrix(glm::scale(64.0f, 64.0f, 1.0f) * glm::translate<float>(3.0f, 1.0f, 0.0f));
-        this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetDepth());
-        this->_renderer.SetModelMatrix(glm::scale(64.0f, 64.0f, 1.0f) * glm::translate<float>(5.0f, 1.0f, 0.0f));
-        this->_renderImage->Render(*this->_basicParameter, this->_gBuffer->GetColors());
-        this->_basicShader->EndPass();
-        
-        this->_renderer.EndDraw2D();
-        // XXX
+        this->_gBuffer->Render();
 
         this->_renderer.EndDraw();
     }
