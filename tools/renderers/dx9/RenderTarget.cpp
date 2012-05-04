@@ -38,6 +38,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
         for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
             (*it)->Release();
+        this->_surfaces.clear();
         this->_textures.clear();
         if (this->_depthBuffer != 0)
             this->_depthBuffer->Release();
@@ -46,6 +47,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     void RenderTarget::OnResetDevice()
     {
+        this->OnLostDevice();
         for (auto it = this->_targets.begin(), ite = this->_targets.end(); it != ite; ++it)
             this->_PushRenderTarget(it->first, it->second);
     }

@@ -99,7 +99,7 @@ float4 fs(in VSout i) : COLOR
     //    vWorldPos = tex2D(depthBuffer, i.tex).xyz;
     //else
     //    //vWorldPos = -i.eyeRay.xyz * tex2D(depthBuffer, i.tex).w;
-    //    vWorldPos = decodePosition(i.pos, tex2D(depthBuffer, i.tex).w);
+    //    vWorldPos = decodePosition(i.pos, -tex2D(depthBuffer, i.tex).w);
 
     float3 vLightDir = normalize(lightPos - vWorldPos);
     float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
@@ -145,6 +145,7 @@ technique tech
 {
    pass p0
    {
+       AlphaBlendEnable = false;
        VertexShader = compile vs_2_0 vs();
        PixelShader = compile ps_2_0 fs();
    }

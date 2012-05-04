@@ -70,7 +70,7 @@ FSout fs(in VSout v)
 
     f.color = tex2D(cubeTexture, v.texCoord);
     f.normal = encodeNormals(v.normal);
-    f.position = float4(v.worldPosition.x, v.worldPosition.y, v.worldPosition.z, 1.0); //-v.pos.z / 200);
+    f.position = float4(v.worldPosition.x, v.worldPosition.y, v.worldPosition.z, -v.pos.z / 200);
 
     return f;
 }
@@ -81,6 +81,7 @@ technique tech_glsl
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -89,6 +90,7 @@ technique tech
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }

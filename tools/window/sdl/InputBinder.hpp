@@ -13,7 +13,7 @@ namespace Tools { namespace Window { namespace Sdl {
             std::map<int, Button::Button> _buttons;
 
         public:
-            InputBinder();
+            InputBinder(std::map<std::string, Tools::Window::BindAction::BindAction> const& actions);
             bool GetSdlKeysymAction(SDLKey keysym, Action& action) const;
             bool GetSdlButtonAction(int button, Action& action) const;
             SpecialKey::SpecialKey SdlKeysymToSpecialKey(SDLKey keysym) const;

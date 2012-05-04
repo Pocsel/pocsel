@@ -6,7 +6,6 @@
 #include "tools/renderers/opengl/IndexBuffer.hpp"
 #include "tools/renderers/opengl/RenderTarget.hpp"
 #include "tools/renderers/opengl/ShaderProgramCg.hpp"
-#include "tools/renderers/opengl/ShaderProgramNull.hpp"
 #include "tools/renderers/opengl/Texture2D.hpp"
 #include "tools/renderers/opengl/VertexBuffer.hpp"
 #include "tools/renderers/GLRenderer.hpp"
@@ -208,31 +207,19 @@ namespace Tools { namespace Renderers {
     void GLRenderer::SetModelMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
         this->_currentState->model = matrix;
-        if (this->_currentProgram != 0)
-            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
+        this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
     }
 
     void GLRenderer::SetViewMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
         this->_currentState->view = matrix;
-        if (this->_currentProgram != 0)
-        {
-            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
-        }
+        this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
     }
 
     void GLRenderer::SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
         this->_currentState->projection = matrix;
-        if (this->_currentProgram != 0)
-        {
-            this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
-        }
+        this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
     }
 
     // States
@@ -333,13 +320,15 @@ namespace Tools { namespace Renderers {
             rs.view = glm::translate<float>(0, 0, 1);
             auto size = rs.target == 0 ? this->_screenSize : rs.target->GetSize();
             rs.projection = glm::ortho<float>(0, size.x, size.y, 0);
+            rs.model = rsOld.model;
             rs.modelViewProjection = rs.projection * rs.view * rs.model;
         }
         else
         {
             rs.view = rsOld.view;
             rs.projection = rsOld.projection;
-            rs.modelViewProjection = rs.projection * rs.view * rsOld.model;
+            rs.model = rsOld.model;
+            rs.modelViewProjection = rs.projection * rs.view * rs.model;
         }
     }
 
@@ -349,6 +338,7 @@ namespace Tools { namespace Renderers {
         this->_states.pop_front();
         auto& rs = this->_states.front();
         this->_currentState = &rs;
+        this->_currentProgram = 0;
 
         if (rsOld.target != 0)
         {
