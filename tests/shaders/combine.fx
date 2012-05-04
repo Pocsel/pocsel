@@ -1,6 +1,8 @@
 float4x4 mvp : WorldViewProjection;
 float4x4 viewInverse : ViewInverse;
 float4x4 projectionInverse : ProjectionInverse;
+float4x4 viewProjectionInverse : ViewProjectionInverse;
+float4x4 quadWorldViewProjection;
 
 float3 lightPos = float3(0, 0, 0);
 float3 lightDiffuse = float3(1.0, 1.0, 1.0);
@@ -32,27 +34,44 @@ struct VSout
 VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
-    vout.position = mul(mvp, position);
+    vout.position = mul(quadWorldViewProjection, position);
     vout.texCoord = texCoord;
     vout.pos = vout.position;
     return vout;
 }
 
-float3 decodePosition(float4 depth, float4 screenPos)
+float3 decodeNormals(float4 enc)
 {
-    return depth.xyz;
+    float4 nn = enc*float4(2,2,0,0) + float4(-1,-1,1,-1);
+    float l = dot(nn.xyz,-nn.xyw);
+    nn.z = l;
+    nn.xy *= sqrt(l);
+    return nn.xyz * 2 + float3(0,0,-1);
+}
+
+float3 decodePosition(float2 coords)
+{
+    float z = tex2D(depthBuffer, coords).r;
+    //return float4(z, z, z, 1.0);
+    //return float3(coords.x, coords.y, z);
+    //return tex2D(depthBuffer, coords).yzw;
+    float x = coords.x * 2 - 1;
+    float y = (1 - coords.y) * 2 - 1;
+    //return float3(abs(x), abs(y), z);
+    float4 projPos = float4(x, y, z, 1.0);
+    float4 pos = mul(viewProjectionInverse, projPos);
+    return pos.xyz / pos.w;
 }
 
 float4 fs(in VSout v) : COLOR
 {
     float2 coords = v.texCoord * 2;
-    //coords.y = 2 - coords.y;
     if (coords.y < 1)
     {
         if (coords.x < 1)
-            return tex2D(depthBuffer, coords);
+            return float4(decodePosition(coords), 1.0);
         coords.x = coords.x - 1;
-        return tex2D(normals, coords);
+        return float4(decodeNormals(tex2D(normals, coords)) * 0.5 + 0.5, 1.0); //tex2D(normals, coords);
     }
     else
     {
@@ -62,18 +81,18 @@ float4 fs(in VSout v) : COLOR
         coords.x = coords.x - 1;
 
         float3 diffuse = tex2D(colors, coords).rgb;
-        float3 vWorldNrm = tex2D(normals, coords).xyz * 2 - 1;
-        float3 vWorldPos = decodePosition(tex2D(depthBuffer, coords), v.pos);//tex2D(depthBuffer, coords).xyz;
+        float3 vWorldNrm = decodeNormals(tex2D(normals, coords));// * 2 - 1;
+        float3 vWorldPos = decodePosition(coords);
 
         float3 vLightDir = normalize(lightPos - vWorldPos);
         float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
         float3 vDiffuseIntensity = dot(vWorldNrm, vLightDir);
-        float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 150);
+        float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 5);
 
         float4 color;
         color.rgb = (vDiffuseIntensity * lightDiffuse) * diffuse
-             + vSpecularIntensity * lightSpecular.xyz;// * vSpecularMaterial;
-        color.a = 1.0;
+             + vSpecularIntensity * lightSpecular.xyz;
+        color.a = 1;
         return color;
     }
 }
@@ -103,9 +122,9 @@ technique tech
 {
    pass p0
    {
-       AlphaBlendEnable = false;
-       VertexShader = compile vs_2_0 vs();
-       PixelShader = compile ps_2_0 fs();
+       AlphaBlendEnable = true;
+       VertexShader = compile vs_3_0 vs();
+       PixelShader = compile ps_3_0 fs();
    }
 }
 

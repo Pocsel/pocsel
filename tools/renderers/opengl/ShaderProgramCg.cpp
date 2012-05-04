@@ -37,6 +37,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         this->_modelInverse = cgGetEffectParameterBySemantic(this->_effect, "WorldInverse");
         this->_viewInverse = cgGetEffectParameterBySemantic(this->_effect, "ViewInverse");
         this->_projectionInverse = cgGetEffectParameterBySemantic(this->_effect, "ProjectionInverse");
+        this->_viewProjectionInverse = cgGetEffectParameterBySemantic(this->_effect, "ViewProjectionInverse");
         this->_mvpInverse = cgGetEffectParameterBySemantic(this->_effect, "WorldViewProjectionInverse");
     }
 
@@ -60,6 +61,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             cgDestroyParameter(this->_viewInverse);
         if (this->_projectionInverse)
             cgDestroyParameter(this->_projectionInverse);
+        if (this->_viewProjectionInverse)
+            cgDestroyParameter(this->_viewProjectionInverse);
         if (this->_mvpInverse)
             cgDestroyParameter(this->_mvpInverse);
         cgDestroyEffect(this->_effect);
@@ -127,6 +130,11 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             {
                 auto mat = this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix();
                 cgSetMatrixParameterfc(this->_vp, (float*)&mat);
+            }
+            if (this->_viewProjectionInverse)
+            {
+                auto mat = glm::inverse(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix());
+                cgSetMatrixParameterfc(this->_viewProjectionInverse, (float*)&mat);
             }
             break;
 

@@ -42,7 +42,7 @@ namespace Tools { namespace Renderers {
         }
     }
 
-    const glm::mat4 DX9Renderer::_glToDirectX = glm::scale(1.0f, 1.0f, 0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
+    const glm::mat4 DX9Renderer::glToDirectX = glm::scale(1.0f, 1.0f, 0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
 
     void DX9Renderer::Initialise()
     {
@@ -230,7 +230,7 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix)
     {
-        this->_currentState->projection = DX9Renderer::_glToDirectX * matrix;
+        this->_currentState->projection = DX9Renderer::glToDirectX * matrix;
         this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
     }
 
@@ -373,7 +373,7 @@ namespace Tools { namespace Renderers {
         {
             rs.view = glm::translate<float>(0, 0, 1);
             auto size = rs.target == 0 ? this->_screenSize : rs.target->GetSize();
-            rs.projection = DX9Renderer::_glToDirectX * glm::ortho<float>(0, size.x, size.y, 0);
+            rs.projection = DX9Renderer::glToDirectX * glm::ortho<float>(0, size.x, size.y, 0);
             rs.model = rsOld.model;
             rs.modelViewProjection = rs.projection * rs.view * rs.model;
         }

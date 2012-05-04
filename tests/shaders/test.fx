@@ -34,13 +34,20 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0, in float
     return vout;
 }
 
+float4 encodeNormals(float3 n)
+{
+    float2 enc = normalize(n.xy) * (sqrt(-n.z*0.5+0.5));
+    enc = enc*0.5+0.5;
+    return float4(enc, 0, 1.0);
+}
+
 FSout fs(in VSout v)
 {
     FSout f;
 
     f.diffuse = tex2D(diffuse, v.texCoord);
-    f.normals = float4(v.normals * 0.5 + 0.5, 1.0);
-    f.depth = float4(v.worldPosition.x, v.worldPosition.y, v.worldPosition.z, v.pos.z / v.pos.w);
+    f.normals = encodeNormals(v.normals);// float4(v.normals * 0.5 + 0.5, 1.0);
+    f.depth = float4(v.pos.z / v.pos.w, v.worldPosition.x, v.worldPosition.y, v.worldPosition.z);
 
     return f;
 }
@@ -51,6 +58,7 @@ technique tech_glsl
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -59,6 +67,7 @@ technique tech
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }
@@ -68,11 +77,12 @@ technique tech
 
 technique tech
 {
-   pass p0
-   {
-       VertexShader = compile vs_2_0 vs();
-       PixelShader = compile ps_2_0 fs();
-   }
+    pass p0
+    {
+        AlphaBlendEnable = false;
+        VertexShader = compile vs_3_0 vs();
+        PixelShader = compile ps_3_0 fs();
+    }
 }
 
 #endif

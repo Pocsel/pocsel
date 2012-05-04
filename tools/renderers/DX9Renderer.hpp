@@ -39,9 +39,10 @@ namespace Tools { namespace Renderers {
             glm::detail::tmat4x4<float> projection;
         };
 
-    private:
-        static const glm::mat4 _glToDirectX;
+    public:
+        static const glm::mat4 glToDirectX;
 
+    private:
         glm::uvec2 _screenSize;
         bool _fullscreen;
         bool _useShaders;

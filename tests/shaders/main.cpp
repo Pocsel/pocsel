@@ -29,6 +29,7 @@ static std::unique_ptr<IShaderProgram> combineShader;
 static std::unique_ptr<IShaderParameter> colors;
 static std::unique_ptr<IShaderParameter> normals;
 static std::unique_ptr<IShaderParameter> depth;
+static std::unique_ptr<IShaderParameter> quadWorldViewProjection;
 
 static std::unique_ptr<ITexture2D> texture;
 static std::unique_ptr<IVertexBuffer> vertexBuffer;
@@ -141,10 +142,12 @@ static void LoadShaders(IRenderer& renderer)
     colors = combineShader->GetParameter("colors");
     normals = combineShader->GetParameter("normals");
     depth = combineShader->GetParameter("depthBuffer");
+    quadWorldViewProjection = combineShader->GetParameter("quadWorldViewProjection");
 }
 
 static void UnloadShaders()
 {
+    quadWorldViewProjection = 0;
     diffuse = 0;
     colors = 0;
     normals = 0;
@@ -195,7 +198,6 @@ int main(int ac, char *av[])
         combineShaderPath = av[2];
     if (ac > 3)
         texturePath = av[3];
-    combineShaderPath = "D:\\Programmation\\C++\\pocsel\\confdir\\client\\shaders\\BaseShaderColor.fx";
 
     Tools::log << "Current directory " << boost::filesystem::current_path() << std::endl;
     Tools::log << "Loading \"" << testShaderPath + "\", \"" << combineShaderPath << "\", \"" << texturePath << "\"\n";
@@ -222,7 +224,7 @@ int main(int ac, char *av[])
     {
         Timer timer;
 
-        Utils::GBuffer gbuffer(renderer, window.GetSize());
+        Utils::GBuffer gbuffer(renderer, window.GetSize() / 2u);
         texture = renderer.CreateTexture2D(texturePath);
         vertexBuffer = renderer.CreateVertexBuffer();
         indexBuffer = renderer.CreateIndexBuffer();
@@ -245,7 +247,7 @@ int main(int ac, char *av[])
                 Tools::log << "Reloading shaders...\n";
             }
 
-            renderer.SetProjectionMatrix(glm::perspective(90.0f, (float)window.GetSize().x / (float)window.GetSize().y, 0.001f, 500.0f));
+            renderer.SetProjectionMatrix(glm::perspective(90.0f, (float)window.GetSize().x / (float)window.GetSize().y, 0.01f, 5.0f));
             renderer.SetViewMatrix(glm::lookAt(glm::vec3(0.001f), glm::vec3(1.0f), glm::vec3(0, 1, 0)));
             renderer.SetModelMatrix(
                 glm::translate(glm::vec3(1.0f))
@@ -256,7 +258,7 @@ int main(int ac, char *av[])
 
             renderer.BeginDraw();
             gbuffer.Bind();
-            renderer.SetClearColor(Color4f(0.2f, 0.2f, 0.2f, 1.0f));
+            renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.0f, 0.0f));
             renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
 
             renderer.SetCullFace(cullface);
@@ -265,19 +267,16 @@ int main(int ac, char *av[])
 
             gbuffer.Unbind();
 
-            renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.0f, 1.0f));
-            renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
-            RenderCube(renderer, gbuffer.GetNormals());
-
-            renderer.BeginDraw2D();
             renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.5f, 1.0f));
             renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
+            RenderCube(renderer, gbuffer.GetColors());
 
-            auto halfSize = glm::vec2((float)window.GetSize().x * 0.5f, (float)window.GetSize().y * 0.5f) / 2.0f;
-            renderer.SetModelMatrix(glm::translate(halfSize.x, halfSize.y, 0.0f) * glm::scale(halfSize.x, halfSize.y, 1.0f));
+            auto halfSize = glm::vec2((float)window.GetSize().x * 0.5f, (float)window.GetSize().y * 0.5f);
+            quadWorldViewProjection->Set(glm::ortho<float>(0, window.GetSize().x, window.GetSize().y, 0)
+                * glm::translate<float>(0, 0, 1)
+                * glm::translate(halfSize.x, halfSize.y, 0.0f) * glm::scale(halfSize.x, halfSize.y, 1.0f), true);
             RenderGBuffer(renderer, gbuffer);
 
-            renderer.EndDraw2D();
             renderer.EndDraw();
 
             window.Render();
