@@ -56,6 +56,9 @@ namespace Server { namespace Game { namespace Engine {
 
         // rcon requests
         std::string RconExecute(Uint32 pluginId, std::string const& lua);
+
+    private:
+        void _ApiPrint(Tools::Lua::CallHelper& helper);
     };
 
 }}}

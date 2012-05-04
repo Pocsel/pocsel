@@ -49,14 +49,6 @@ namespace Client { namespace Game {
         Tools::Lua::Interpreter _interpreter;
         // XXX
         std::unique_ptr<Tools::Renderers::Utils::GBuffer> _gBuffer;
-        std::unique_ptr<Tools::Renderers::Utils::Image> _renderImage;
-        Tools::Renderers::IShaderProgram* _renderShader;
-        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderColorsParameter;
-        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderNormalsParameter;
-        std::unique_ptr<Tools::Renderers::IShaderParameter> _renderDepthParameter;
-
-        Tools::Renderers::IShaderProgram* _basicShader;
-        std::unique_ptr<Tools::Renderers::IShaderParameter> _basicParameter;
         // XXX
 
     public:

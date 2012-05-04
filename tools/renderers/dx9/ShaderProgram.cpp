@@ -46,6 +46,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_projectionInverse = this->_effect->GetParameterBySemantic(0, "ProjectionInverse");
         this->_mvpInverse = this->_effect->GetParameterBySemantic(0, "WorldViewProjectionInverse");
         this->_viewProjectionInverse = this->_effect->GetParameterBySemantic(0, "ViewProjectionInverse");
+        this->_worldViewInverseTranspose = this->_effect->GetParameterByName(0, "worldViewInverseTranspose");
     }
 
     ShaderProgram::~ShaderProgram()
@@ -121,6 +122,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
             {
                 auto tmp = glm::inverse(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix());
                 this->_effect->SetMatrixTranspose(this->_viewProjectionInverse, (D3DXMATRIX const*)&tmp[0]);
+            }
+            if (this->_worldViewInverseTranspose)
+            {
+                auto tmp = glm::transpose(glm::inverse(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix()));
+                this->_effect->SetMatrixTranspose(this->_worldViewInverseTranspose, (D3DXMATRIX const*)&tmp[0]);
             }
             break;
 

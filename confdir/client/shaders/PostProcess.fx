@@ -1,123 +1,106 @@
 float4x4 mvp : WorldViewProjection;
-float4x4 view : View;
 float4x4 viewInverse : ViewInverse;
 float4x4 projectionInverse : ProjectionInverse;
 float4x4 viewProjectionInverse : ViewProjectionInverse;
-float4x4 worldViewProjectionInverse : WorldViewProjectionInverse;
-float time = 1.0;
-
-sampler2D normals = sampler_state
-{
-   magFilter = Point;
-   minFilter = Point;
-};
-sampler2D depthBuffer = sampler_state
-{
-   magFilter = Point;
-   minFilter = Point;
-};
-sampler2D colors = sampler_state
-{
-   magFilter = Point;
-   minFilter = Point;
-};
+float4x4 quadWorldViewProjection;
 
 float3 lightPos = float3(0, 0, 0);
 float3 lightDiffuse = float3(1.0, 1.0, 1.0);
 float3 lightSpecular = float3(0.9, 1.0, 0.8);
 
-struct VSout
+sampler2D normalsDepth = sampler_state
 {
-   float4 position  : POSITION;
-   float2 tex       : TEXCOORD0;
-   float4 pos       : TEXCOORD1;
-   float3 eyeRay    : TEXCOORD2;
+   minFilter = Point;
+   magFilter = Point;
+};
+//sampler2D depthBuffer = sampler_state
+//{
+//   minFilter = Point;
+//   magFilter = Point;
+//};
+sampler2D diffuse = sampler_state
+{
+   minFilter = Point;
+   magFilter = Point;
 };
 
-float3 CreateEyeRay(float4 p)
+struct VSout
 {
-    const float FOV = 90;
-    float ViewAspect = 800 / 600; //ScreenDim.x / ScreenDim.y;
-    float TanHalfFOV = tan(radians(FOV*0.5));
+   float4 position : POSITION;
+   float2 texCoord : TEXCOORD0;
+   float4 pos : TEXCOORD1;
+};
 
-    float3 ViewSpaceRay = float3(p.x * TanHalfFOV * ViewAspect, p.y * TanHalfFOV, p.w);
-
-    return mul((float3x3)viewInverse, ViewSpaceRay);
-}
-
-VSout vs(in float4 position : POSITION, in float2 tex : TEXCOORD0)
+VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
-    vout.position = mul(mvp, position);
+    vout.position = mul(quadWorldViewProjection, position);
+    vout.texCoord = texCoord;
     vout.pos = vout.position;
-    vout.eyeRay = CreateEyeRay(vout.position);
-#ifdef DIRECTX
-    vout.tex = tex;
-#else
-    vout.tex = float2(tex.x, 1 - tex.y);
-#endif
     return vout;
 }
 
 float3 decodeNormals(float4 enc)
 {
-//    float2 normalInformation = enc.xy;
-//    float3 N;
-//    N.xy = -normalInformation * normalInformation + normalInformation;
-//    N.z = -1;
-//    float f = dot(N, float3(1, 1, 0.25));
-//    float m = sqrt(f);
-//    N.xy = (normalInformation * 8 - 4) * m;
-//    N.z = -(1 - 8 * f);
-//    return N;
-    return enc.xyz * 2.0 - 1.0;
+    float3 normal = float3(-enc.xy * enc.xy + enc.xy, -1);
+    float f = dot(normal, float3(1, 1, 0.25));
+    float m = sqrt(f);
+    normal.xy = (enc.xy * 8 - 4) * m;
+    normal.z = -(1 - 8 * f);
+    return normal;
 }
 
-float3 decodePosition(float4 pos, float z)
+float3 decodePosition(float4 enc, float2 coords)
 {
-    //float2 tcoord = (pos.xy / pos.w).xy * 0.5 + float2(0.5);
-    //float3 viewray = float3(pos.xy * (-200 / pos.z ), -200);
-    return float3(pos.xy * (-200 / pos.z), -200) * z;
-    //float dlight = length(lightPosition - vscoord);
-    //float factor = 1.0 - dlight / lradius;
-    //if( dlight > lradius ) discard;
-    //gl_FragData[0] = vec4( gl_Color.rgb, factor );
+    float z = enc.z;
+    //return float4(z, z, z, 1.0);
+    //return float3(coords.x, coords.y, z);
+    //return tex2D(depthBuffer, coords).yzw;
+    float x = coords.x * 2 - 1;
+    float y = (1 - coords.y) * 2 - 1;
+    //return float3(abs(x), abs(y), z);
+    float4 projPos = float4(x, y, 1-z, 1.0);
+    float4 pos = mul(viewProjectionInverse, projPos);
+    return pos.xyz / pos.w;
 }
 
-float4 fs(in VSout i) : COLOR
+float4 fs(in VSout v) : COLOR
 {
-    float3 vDiffuseMaterial = tex2D(colors, i.tex).rgb;
-    //float3 vSpecularMaterial = tex2D(SceneMaterialSampler, i.vTex0).a;
+    float2 coords = v.texCoord * 2;
+    if (coords.y < 1)
+    {
+        if (coords.x < 1)
+        {
+            float4 encNormalDepth = tex2D(normalsDepth, coords);
+            return float4(decodePosition(encNormalDepth, coords)*20, 1.0);
+        }
+        coords.x = coords.x - 1;
+        float4 encNormalDepth = tex2D(normalsDepth, coords);
+        return float4(decodeNormals(encNormalDepth) * 0.5 + 0.5, 1.0); //tex2D(normals, coords);
+    }
+    else
+    {
+        coords.y -= 1;
+        if (coords.x < 1)
+            return tex2D(diffuse, coords);
+        coords.x = coords.x - 1;
 
-    // normals are stored in texture space [0,1] -> convert them back to [-1,+1] range
-    float3 vWorldNrm = decodeNormals(tex2D(normals, i.tex));
+        float4 encNormalDepth = tex2D(normalsDepth, coords);
+        float3 diffuseColor = tex2D(diffuse, coords).rgb;
+        float3 vWorldNrm = decodeNormals(encNormalDepth);// * 2 - 1;
+        float3 vWorldPos = decodePosition(encNormalDepth, coords);
 
-    float3 vWorldPos = tex2D(depthBuffer, i.tex).xyz;
-    //float3 vWorldPos;
+        float3 vLightDir = normalize(lightPos - vWorldPos);
+        float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
+        float3 vDiffuseIntensity = dot(vWorldNrm, vLightDir);
+        float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 5);
 
-    //if (i.pos.x < 0)
-    //    vWorldPos = tex2D(depthBuffer, i.tex).xyz;
-    //else
-    //    //vWorldPos = -i.eyeRay.xyz * tex2D(depthBuffer, i.tex).w;
-    //    vWorldPos = decodePosition(i.pos, -tex2D(depthBuffer, i.tex).w);
-
-    float3 vLightDir = normalize(lightPos - vWorldPos);
-    float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
-    float3 vDiffuseIntensity = dot(vWorldNrm, vLightDir);
-    float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 1);
-
-    float4 color;
-    color.rgb = (vDiffuseIntensity * lightDiffuse) * vDiffuseMaterial
-         + vSpecularIntensity * lightSpecular.xyz;// * vSpecularMaterial;
-    color.a = 1.0;
-
-    //if (i.tex.y < 0.5)
-    //    color.rgb = (vWorldPos);//tex2D(colors, i.tex).rgb;
-
-    // here we add color to show how lighting pass affects the scene
-    //color.rgb += i.tex.rgr * 0.5;
-
-    return color;
+        float4 color;
+        color.rgb = (vDiffuseIntensity * lightDiffuse) * diffuseColor
+             + vSpecularIntensity * lightSpecular.xyz;
+        color.a = 1;
+        return color;
+    }
 }
 
 #ifndef DIRECTX
@@ -145,9 +128,9 @@ technique tech
 {
    pass p0
    {
-       AlphaBlendEnable = false;
-       VertexShader = compile vs_2_0 vs();
-       PixelShader = compile ps_2_0 fs();
+       AlphaBlendEnable = true;
+       VertexShader = compile vs_3_0 vs();
+       PixelShader = compile ps_3_0 fs();
    }
 }
 

@@ -1,4 +1,3 @@
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include "client/precompiled.hpp"
