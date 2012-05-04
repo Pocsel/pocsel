@@ -73,7 +73,7 @@ namespace Tools { namespace Logger {
             template<class T>
             Buffer& operator <<(T&& value)
             {
-                *(std::stringstream*)this << value;
+                *(std::stringstream*)this << ToString<T>(value);
                 return *this;
             }
         };

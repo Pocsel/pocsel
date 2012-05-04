@@ -39,9 +39,10 @@ namespace Tools { namespace Renderers {
             glm::detail::tmat4x4<float> projection;
         };
 
-    private:
-        static const glm::mat4 _glToDirectX;
+    public:
+        static const glm::mat4 glToDirectX;
 
+    private:
         glm::uvec2 _screenSize;
         bool _fullscreen;
         bool _useShaders;
@@ -103,10 +104,10 @@ namespace Tools { namespace Renderers {
         virtual void SetViewMatrix(glm::detail::tmat4x4<float> const& matrix);
         virtual void SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix);
 
-        glm::detail::tmat4x4<float> const& GetModelViewProjectionMatrix() const { return this->_states.front().modelViewProjection; }
-        glm::detail::tmat4x4<float> const& GetModelMatrix() const { return this->_states.front().model; }
-        glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_states.front().view; }
-        glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_states.front().projection; }
+        glm::detail::tmat4x4<float> const& GetModelViewProjectionMatrix() const { return this->_currentState->modelViewProjection; }
+        glm::detail::tmat4x4<float> const& GetModelMatrix() const { return this->_currentState->model; }
+        glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_currentState->view; }
+        glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_currentState->projection; }
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size);

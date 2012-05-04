@@ -23,7 +23,21 @@ namespace Client {
         _state(Connecting),
         _game(0)
     {
-        this->_window = new Tools::Window::Sdl::Window(this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
+        std::map<std::string, Tools::Window::BindAction::BindAction> actions;
+        actions["quit"] = Tools::Window::BindAction::Quit;
+        actions["menu"] = Tools::Window::BindAction::Menu;
+        actions["forward"] = Tools::Window::BindAction::Forward;
+        actions["backward"] = Tools::Window::BindAction::Backward;
+        actions["left"] = Tools::Window::BindAction::Left;
+        actions["right"] = Tools::Window::BindAction::Right;
+        actions["jump"] = Tools::Window::BindAction::Jump;
+        actions["crouch"] = Tools::Window::BindAction::Crouch;
+        actions["fire"] = Tools::Window::BindAction::Fire;
+        actions["altfire"] = Tools::Window::BindAction::AltFire;
+        actions["use"] = Tools::Window::BindAction::Use;
+        actions["togglesprint"] = Tools::Window::BindAction::ToggleSprint;
+
+        this->_window = new Tools::Window::Sdl::Window(actions, this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen, this->_settings.useShaders);
         this->_threadPool = new Tools::Thread::ThreadPool(2);
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);

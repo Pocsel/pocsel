@@ -30,6 +30,7 @@ technique tech_glsl
 {
     pass p0
     {
+        AlphaBlendEnable = true;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -38,6 +39,7 @@ technique tech
 {
     pass p0
     {
+        AlphaBlendEnable = true;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }

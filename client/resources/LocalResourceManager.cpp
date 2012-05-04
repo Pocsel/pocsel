@@ -119,7 +119,7 @@ namespace Client { namespace Resources {
                 modelPath.replace_extension(".iqm");
                 if (!boost::filesystem::exists(modelPath))
                     throw std::runtime_error("MqmModel::LoadModel: Failed to find file: " + modelPath.string());
-                boost::filesystem::ifstream tmp(modelPath);
+                std::ifstream tmp(modelPath.string(), std::ios::binary | std::ios::in);
                 std::vector<char> data((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
 
                 Tools::Models::MqmModel* model = new Tools::Models::MqmModel(

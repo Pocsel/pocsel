@@ -11,12 +11,14 @@ struct VSout
 {
    float4 position : POSITION;
    float2 texCoord : TEXCOORD0;
+   float4 worldPosition : TEXCOORD1;
 };
 
 struct FSout
 {
     float4 color : COLOR0;
     float4 normal : COLOR1;
+    float4 depth : COLOR2;
 };
 
 VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
@@ -25,6 +27,8 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
     vout.position = mul(mvp, position);
 
     vout.texCoord = texCoord;
+    vout.worldPosition = vout.position;
+
     return vout;
 }
 
@@ -42,7 +46,8 @@ FSout fs(in VSout v)
 
     FSout f;
     f.color = tex2D(baseTex, coord);
-    f.normal = float4(1-f.color.rgb, f.color.a);
+    f.normal = float4(1, 0, 0, f.color.a);
+    f.depth = float4(v.worldPosition.xyz, 0);
     return f;
 }
 
@@ -50,19 +55,21 @@ FSout fs(in VSout v)
 
 technique tech_glsl
 {
-	pass p0
-	{
-		VertexProgram = compile glslv vs();
+    pass p0
+    {
+        AlphaBlendEnable = true;
+        VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
-	}
+    }
 }
 technique tech
 {
-	pass p0
-	{
-		VertexProgram = compile arbvp1 vs();
+    pass p0
+    {
+        AlphaBlendEnable = true;
+        VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
-	}
+    }
 }
 
 #else
@@ -71,6 +78,7 @@ technique tech
 {
    pass p0
    {
+       AlphaBlendEnable = true;
        VertexShader = compile vs_2_0 vs();
        PixelShader = compile ps_2_0 fs();
    }

@@ -6,7 +6,7 @@
 #include "tools/Matrix4.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
-
+#include "tools/renderers/DX9Renderer.hpp"
 #include "tools/renderers/dx9/directx.hpp"
 #include "tools/renderers/dx9/Texture2D.hpp"
 #include "tools/renderers/dx9/ShaderProgram.hpp"
@@ -60,9 +60,15 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_effect->SetFloatArray(this->_param, (float const*)&vector, 3);
     }
 
-    void ShaderParameter::Set(glm::detail::tmat4x4<float> const& matrix)
+    void ShaderParameter::Set(glm::detail::tmat4x4<float> const& matrix, bool isProjection)
     {
-        this->_effect->SetMatrixTranspose(this->_param, (D3DXMATRIX const*)&matrix);
+        if (isProjection)
+        {
+            auto tmp = DX9Renderer::glToDirectX * matrix;
+            this->_effect->SetMatrixTranspose(this->_param, (D3DXMATRIX const*)&tmp);
+        }
+        else
+            this->_effect->SetMatrixTranspose(this->_param, (D3DXMATRIX const*)&matrix);
     }
 
     void ShaderParameter::Set(std::vector<glm::mat4x4> const& matrices)

@@ -4,7 +4,8 @@
 
 namespace Tools { namespace Window { namespace Sdl {
 
-    InputBinder::InputBinder()
+    InputBinder::InputBinder(std::map<std::string, Tools::Window::BindAction::BindAction> const& actions) :
+        Tools::Window::InputBinder(actions)
     {
         this->_PopulateSpecialKeys();
         this->_PopulateButtons();

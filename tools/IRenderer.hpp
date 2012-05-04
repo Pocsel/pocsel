@@ -228,7 +228,7 @@ namespace Tools {
             virtual void Set(Color4<float> const& color) = 0;
             virtual void Set(glm::detail::tvec2<float> const& vector) = 0;
             virtual void Set(glm::detail::tvec3<float> const& vector) = 0;
-            virtual void Set(glm::detail::tmat4x4<float> const& matrix) = 0;
+            virtual void Set(glm::detail::tmat4x4<float> const& matrix, bool isProjection = false) = 0;
             virtual void Set(std::vector<glm::mat4x4> const& matrices) = 0;
             virtual void Set(ITexture2D& texture) = 0;
 
