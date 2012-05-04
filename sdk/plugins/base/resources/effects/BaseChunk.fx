@@ -1,16 +1,5 @@
 float4x4 worldViewProjection : WorldViewProjection;
-float4x4 viewProjection : ViewProjection;
 float4x4 world : World;
-float4x4 worldView : WorldView;
-float4x4 viewInverse : ViewInverse;
-float4x4 worldViewInverseTranspose;
-
-float3 fogColor = float3(0.8, 0.8, 0.9);
-float fogEnd = 750.0f;
-
-// Water
-float time = 0;
-float displacement = 4.0;
 
 #ifdef DIRECTX
 sampler2D cubeTexture = sampler_state
@@ -31,7 +20,7 @@ struct VSout
 {
     float4 position      : POSITION;
     float2 texCoord      : TEXCOORD0;
-    float3 normal       : TEXCOORD1;
+    float3 normal        : TEXCOORD1;
     float4 pos           : TEXCOORD2;
 };
 
@@ -48,7 +37,7 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
     v.texCoord = texCoord;
     v.position = mul(worldViewProjection, position);
     v.normal = normalize(mul(world, float4(normal, 0.0)).xyz);
-    v.pos = mul(worldViewProjection, position);
+    v.pos = v.position;
 
     return v;
 }
