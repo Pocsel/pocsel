@@ -38,9 +38,9 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
     return vout;
 }
 
-float3 decodePosition(float depth, float4 screenPos)
+float3 decodePosition(float4 depth, float4 screenPos)
 {
-
+    return depth.xyz;
 }
 
 float4 fs(in VSout v) : COLOR
@@ -63,7 +63,7 @@ float4 fs(in VSout v) : COLOR
 
         float3 diffuse = tex2D(colors, coords).rgb;
         float3 vWorldNrm = tex2D(normals, coords).xyz * 2 - 1;
-        float3 vWorldPos = decodePosition(tex2D(depthBuffer, coords).w);//tex2D(depthBuffer, coords).xyz;
+        float3 vWorldPos = decodePosition(tex2D(depthBuffer, coords), v.pos);//tex2D(depthBuffer, coords).xyz;
 
         float3 vLightDir = normalize(lightPos - vWorldPos);
         float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);

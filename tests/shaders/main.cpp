@@ -195,6 +195,7 @@ int main(int ac, char *av[])
         combineShaderPath = av[2];
     if (ac > 3)
         texturePath = av[3];
+    combineShaderPath = "D:\\Programmation\\C++\\pocsel\\confdir\\client\\shaders\\BaseShaderColor.fx";
 
     Tools::log << "Current directory " << boost::filesystem::current_path() << std::endl;
     Tools::log << "Loading \"" << testShaderPath + "\", \"" << combineShaderPath << "\", \"" << texturePath << "\"\n";
@@ -272,7 +273,7 @@ int main(int ac, char *av[])
             renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.5f, 1.0f));
             renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
 
-            auto halfSize = glm::vec2((float)window.GetSize().x * 0.5f, (float)window.GetSize().y * 0.5f);
+            auto halfSize = glm::vec2((float)window.GetSize().x * 0.5f, (float)window.GetSize().y * 0.5f) / 2.0f;
             renderer.SetModelMatrix(glm::translate(halfSize.x, halfSize.y, 0.0f) * glm::scale(halfSize.x, halfSize.y, 1.0f));
             RenderGBuffer(renderer, gbuffer);
 
