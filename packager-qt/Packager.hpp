@@ -21,6 +21,7 @@ namespace PackagerQt {
         ~Packager();
         int Run();
         Qt::MainWindow& GetMainWindow();
+        QApplication& GetApplication() { return this->_app; }
     };
 
 }

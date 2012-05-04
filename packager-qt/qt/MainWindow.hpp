@@ -16,12 +16,17 @@ namespace PackagerQt { namespace Qt {
 
     private:
         Packager& _packager;
+        bool _replaceWithoutAsking;
     private slots:
         void on_pluginRootPushButton_clicked();
         void on_destFilePushButton_clicked();
+        void on_packagePushButton_clicked();
+        void on_replaceCheckBox_stateChanged(int state);
 
     public:
         MainWindow(Packager& packager);
+    private:
+        void _Log(std::string const& message);
     };
 
 }}

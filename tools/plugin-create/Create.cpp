@@ -224,7 +224,7 @@ namespace Tools { namespace PluginCreate {
         // check de base des chemins
         if (!boost::filesystem::is_directory(pluginRoot))
         {
-            Tools::log << "Error: " << pluginRoot << " is not a valid plugin root directory." << pluginRoot.filename() << std::endl;
+            Tools::log << "Error: " << pluginRoot << " is not a valid plugin root directory." << std::endl;
             return false;
         }
         if (boost::filesystem::is_directory(destFile))
