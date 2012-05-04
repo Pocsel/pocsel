@@ -80,10 +80,10 @@ namespace Client { namespace Game {
 
     void Game::Render()
     {
-        this->_renderer.BeginDraw();
-
         this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
+
+        this->_renderer.BeginDraw();
 
         this->_gBuffer->Bind();
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
@@ -95,6 +95,8 @@ namespace Client { namespace Game {
 
         this->_gBuffer->Unbind();
 
+        //_renderer.SetClearColor(TooColor4f(0.0f, 0.0f, 0.5f, 1.0f));
+        _renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
         this->_gBuffer->Render();
 
         this->_renderer.EndDraw();

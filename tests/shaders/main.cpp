@@ -209,7 +209,7 @@ int main(int ac, char *av[])
     actions["reloadshaders"] = BindAction::ReloadShaders;
     actions["togglecullface"] = BindAction::ToggleCullface;
 
-    Sdl::Window window(actions, true);
+    Sdl::Window window(actions, false);
     IRenderer& renderer = window.GetRenderer();
     bool run = true;
     bool reload = true;

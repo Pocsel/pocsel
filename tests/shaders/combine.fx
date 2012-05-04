@@ -18,7 +18,7 @@ sampler2D normalsDepth = sampler_state
 //   minFilter = Point;
 //   magFilter = Point;
 //};
-sampler2D colors = sampler_state
+sampler2D diffuse = sampler_state
 {
    minFilter = Point;
    magFilter = Point;
@@ -81,11 +81,11 @@ float4 fs(in VSout v) : COLOR
     {
         coords.y -= 1;
         if (coords.x < 1)
-            return tex2D(colors, coords);
+            return tex2D(diffuse, coords);
         coords.x = coords.x - 1;
 
         float4 encNormalDepth = tex2D(normalsDepth, coords);
-        float3 diffuse = tex2D(colors, coords).rgb;
+        float3 diffuseColor = tex2D(diffuse, coords).rgb;
         float3 vWorldNrm = decodeNormals(encNormalDepth);// * 2 - 1;
         float3 vWorldPos = decodePosition(encNormalDepth, coords);
 
@@ -95,7 +95,7 @@ float4 fs(in VSout v) : COLOR
         float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 5);
 
         float4 color;
-        color.rgb = (vDiffuseIntensity * lightDiffuse) * diffuse
+        color.rgb = (vDiffuseIntensity * lightDiffuse) * diffuseColor
              + vSpecularIntensity * lightSpecular.xyz;
         color.a = 1;
         return color;

@@ -25,7 +25,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     ShaderParameterCg::~ShaderParameterCg()
     {
-        cgDestroyParameter(this->_param);
+        if (this->_param != 0)
+            cgDestroyParameter(this->_param);
     }
 
     void ShaderParameterCg::Set(bool value)

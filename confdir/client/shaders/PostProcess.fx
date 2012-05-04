@@ -35,7 +35,11 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
     vout.position = mul(quadWorldViewProjection, position);
+#ifdef DIRECTX
     vout.texCoord = texCoord;
+#else
+    vout.texCoord = float2(texCoord.x, 1-texCoord.y);
+#endif
     vout.pos = vout.position;
     return vout;
 }
@@ -52,7 +56,11 @@ float3 decodeNormals(float4 enc)
 
 float3 decodePosition(float4 enc, float2 coords)
 {
+#ifdef DIRECTX
     float z = enc.z;
+#else
+    float z = enc.z * -0.5 + 0.5;
+#endif
     //return float4(z, z, z, 1.0);
     //return float3(coords.x, coords.y, z);
     //return tex2D(depthBuffer, coords).yzw;
@@ -109,6 +117,7 @@ technique tech_glsl
 {
     pass p0
     {
+        AlphaBlendEnable = true;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -117,6 +126,7 @@ technique tech
 {
     pass p0
     {
+        AlphaBlendEnable = true;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }

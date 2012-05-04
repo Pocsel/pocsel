@@ -12,8 +12,7 @@ struct VSout
    float4 position : POSITION;
    float2 texCoord : TEXCOORD0;
    float3 normals : TEXCOORD1;
-   float3 worldPosition : TEXCOORD2;
-   float4 pos : TEXCOORD3;
+   float4 pos : TEXCOORD2;
 };
 
 struct FSout
@@ -23,13 +22,12 @@ struct FSout
     //float4 depth : COLOR2;
 };
 
-VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0, in float3 normals : NORMAL)
+VSout vs(in float4 position : POSITION, in float3 normals : NORMAL, in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
     vout.position = mul(worldViewProjection, position);
     vout.texCoord = texCoord;
     vout.normals = normalize(mul(world, float4(normals, 0.0)).xyz);
-    vout.worldPosition = mul(world, position);
     vout.pos = vout.position;
     return vout;
 }
