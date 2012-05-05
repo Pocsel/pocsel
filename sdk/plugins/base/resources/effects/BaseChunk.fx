@@ -1,5 +1,4 @@
 float4x4 worldViewProjection : WorldViewProjection;
-float4x4 world : World;
 float4x4 worldViewInverseTranspose;
 
 #ifdef DIRECTX
@@ -19,16 +18,16 @@ sampler2D cubeTexture = sampler_state
 
 struct VSout
 {
-    float4 position      : POSITION;
-    float2 texCoord      : TEXCOORD0;
-    float3 normal        : TEXCOORD1;
-    float4 pos           : TEXCOORD2;
+    float4 position     : POSITION;
+    float2 texCoord     : TEXCOORD0;
+    float3 normal       : TEXCOORD1;
+    float4 pos          : TEXCOORD2;
 };
 
 struct FSout
 {
-    float4 diffuse : COLOR0;
-    float4 normalsDepth : COLOR1;
+    float4 diffuse      : COLOR0;
+    float4 normalDepth  : COLOR1;
 };
 
 VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
@@ -55,7 +54,7 @@ FSout fs(in VSout v)
     FSout f;
 
     f.diffuse = tex2D(cubeTexture, v.texCoord);
-    f.normalsDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, 1.0);
+    f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, 1.0);
 
     return f;
 }

@@ -89,14 +89,13 @@ namespace Client { namespace Game {
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
 
         this->_map->GetChunkManager().Render();
-        //this->_itemManager->Render();
-        //this->_map->GetChunkManager().RenderAlpha();
-        //this->_player->Render();
+        this->_itemManager->Render();
+        this->_map->GetChunkManager().RenderAlpha();
+        this->_player->Render();
 
         this->_gBuffer->Unbind();
 
-        //_renderer.SetClearColor(TooColor4f(0.0f, 0.0f, 0.5f, 1.0f));
-        _renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
         this->_gBuffer->Render();
 
         this->_renderer.EndDraw();
