@@ -261,6 +261,16 @@ namespace Tools { namespace PluginCreate {
             Tools::log << "Error: Failed to read plugin configuration file: " << e.what() << std::endl;
             return false;
         }
+        if (!Common::FieldValidator::IsPluginIdentifier(identifier))
+        {
+            Tools::log << "Error: Invalid plugin identifier \"" << identifier << "\" (must be alphanumeric, 20 characters max.)." << std::endl;
+            return false;
+        }
+        if (!Common::FieldValidator::IsPluginFullname(fullname))
+        {
+            Tools::log << "Error: Invalid plugin fullname \"" << fullname << "\" (100 characters max.)." << std::endl;
+            return false;
+        }
         Tools::log << "Packaging plugin \"" << identifier << "\" (fullname: \"" << fullname << "\") from " << pluginRoot << " in " << destFile << "." << std::endl;
 
         // debut d'utilisation de la base
