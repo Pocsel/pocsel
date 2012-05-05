@@ -59,7 +59,7 @@ float3 decodePosition(float4 enc, float2 coords)
     float y = (1 - coords.y) * 2 - 1;
     //return float3(abs(x), abs(y), z);
     float4 projPos = float4(x, y, z, 1.0);
-    float4 pos = mul(viewProjectionInverse, projPos);
+    float4 pos = mul(projectionInverse, projPos);
     return pos.xyz / pos.w;
 }
 

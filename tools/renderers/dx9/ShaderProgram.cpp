@@ -125,8 +125,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
             }
             if (this->_worldViewInverseTranspose)
             {
-                auto tmp = glm::transpose(glm::inverse(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix()));
-                this->_effect->SetMatrixTranspose(this->_worldViewInverseTranspose, (D3DXMATRIX const*)&tmp[0]);
+                auto tmp = glm::inverse(this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix());
+                this->_effect->SetMatrix(this->_worldViewInverseTranspose, (D3DXMATRIX const*)&tmp[0]);
             }
             break;
 

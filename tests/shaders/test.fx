@@ -1,5 +1,6 @@
 float4x4 worldViewProjection : WorldViewProjection;
 float4x4 world : World;
+float4x4 worldViewInverseTranspose;
 
 sampler2D diffuse = sampler_state
 {
@@ -27,14 +28,14 @@ VSout vs(in float4 position : POSITION, in float3 normals : NORMAL, in float2 te
     VSout vout;
     vout.position = mul(worldViewProjection, position);
     vout.texCoord = texCoord;
-    vout.normals = normalize(mul(world, float4(normals, 0.0)).xyz);
+    vout.normals = normalize(mul((float3x3)worldViewInverseTranspose, normals));
     vout.pos = vout.position;
     return vout;
 }
 
 float2 encodeNormals(float3 n)
 {
-    float2 enc = normalize(n.xy) * (sqrt(-n.z*0.5+0.5));
+    float2 enc = normalize(n.xy) * (sqrt(n.z*-0.5+0.5));
     enc = enc*0.5+0.5;
     return float4(enc, 0, 1.0);
 }

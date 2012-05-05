@@ -13,11 +13,6 @@ sampler2D normalsDepth = sampler_state
    minFilter = Point;
    magFilter = Point;
 };
-//sampler2D depthBuffer = sampler_state
-//{
-//   minFilter = Point;
-//   magFilter = Point;
-//};
 sampler2D diffuse = sampler_state
 {
    minFilter = Point;
@@ -46,29 +41,28 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 
 float3 decodeNormals(float4 enc)
 {
-    float3 normal = float3(-enc.xy * enc.xy + enc.xy, -1);
-    float f = dot(normal, float3(1, 1, 0.25));
-    float m = sqrt(f);
-    normal.xy = (enc.xy * 8 - 4) * m;
-    normal.z = -(1 - 8 * f);
-    return normal;
+    float4 nn = enc*float4(2,2,0,0) + float4(-1,-1,1,-1);
+    float l = dot(nn.xyz,-nn.xyw);
+    nn.z = l;
+    nn.xy *= sqrt(l);
+    return nn.xyz * 2 + float3(0,0,-1);
 }
 
 float3 decodePosition(float4 enc, float2 coords)
 {
-#ifdef DIRECTX
     float z = enc.z;
-#else
-    float z = enc.z * -0.5 + 0.5;
-#endif
     //return float4(z, z, z, 1.0);
     //return float3(coords.x, coords.y, z);
     //return tex2D(depthBuffer, coords).yzw;
     float x = coords.x * 2 - 1;
+#ifdef DIRECTX
     float y = (1 - coords.y) * 2 - 1;
+#else
+    float y = coords.y * 2 - 1;
+#endif
     //return float3(abs(x), abs(y), z);
-    float4 projPos = float4(x, y, 1-z, 1.0);
-    float4 pos = mul(viewProjectionInverse, projPos);
+    float4 projPos = float4(x, y, z, 1.0);
+    float4 pos = mul(projectionInverse, projPos);
     return pos.xyz / pos.w;
 }
 
@@ -80,7 +74,7 @@ float4 fs(in VSout v) : COLOR
         if (coords.x < 1)
         {
             float4 encNormalDepth = tex2D(normalsDepth, coords);
-            return float4(decodePosition(encNormalDepth, coords)*20, 1.0);
+            return float4(decodePosition(encNormalDepth, coords), 1.0);
         }
         coords.x = coords.x - 1;
         float4 encNormalDepth = tex2D(normalsDepth, coords);

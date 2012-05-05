@@ -1,5 +1,6 @@
 float4x4 worldViewProjection : WorldViewProjection;
 float4x4 world : World;
+float4x4 worldViewInverseTranspose;
 
 #ifdef DIRECTX
 sampler2D cubeTexture = sampler_state
@@ -36,7 +37,7 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
 
     v.texCoord = texCoord;
     v.position = mul(worldViewProjection, position);
-    v.normal = normalize(mul(world, float4(normal, 0.0)).xyz);
+    v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
     v.pos = v.position;
 
     return v;
@@ -44,9 +45,9 @@ VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 tex
 
 float2 encodeNormals(float3 n)
 {
-   float f = n.z * 2 + 1;
-   float p = sqrt(dot(n, n) + f);
-   return n.xy / p * 0.5 + 0.5;
+    float2 enc = normalize(n.xy) * (sqrt(n.z*-0.5+0.5));
+    enc = enc*0.5+0.5;
+    return float4(enc, 0, 1.0);
 }
 
 FSout fs(in VSout v)
