@@ -3,9 +3,9 @@
 #endif
 
 float4x4 worldViewProjection : WorldViewProjection;
-float4x4 world : World;
+float4x4 worldViewInverseTranspose;
 
-sampler2D baseTex = sampler_state
+sampler2D diffuseTexture = sampler_state
 {
     minFilter = Linear;
     magFilter = Linear;
@@ -15,17 +15,16 @@ float4x4 boneMatrix[MAX_BONES];
 
 struct VSout
 {
-    float4 position      : POSITION;
-    float2 texCoord      : TEXCOORD0;
-    float4 worldPosition : TEXCOORD1;
-    float3 normal        : TEXCOORD2;
+    float4 position     : POSITION;
+    float2 texCoord     : TEXCOORD0;
+    float3 normal       : TEXCOORD1;
+    float4 pos          : TEXCOORD2;
 };
 
 struct FSout
 {
-    float4 color    : COLOR0;
-    float4 normal   : COLOR1;
-    float4 position : COLOR2;
+    float4 diffuse      : COLOR0;
+    float4 normalDepth  : COLOR1;
 };
 
 VSout vs(
@@ -40,33 +39,29 @@ VSout vs(
     matTransform += boneMatrix[matrixIndex.z] * weight.z;
     float finalWeight = 1.0f - (weight.x + weight.y + weight.z);
     matTransform += boneMatrix[matrixIndex.w] * finalWeight;
-    //matTransform = mul(world, matTransform);
 
-    VSout vout;
-    vout.worldPosition = mul(matTransform, position);
-    vout.position = mul(worldViewProjection, vout.worldPosition);
-    vout.texCoord = texCoord;
-    vout.normal = normalize(mul(world, mul(matTransform, float4(normal, 0.0f))).xyz);
-    vout.worldPosition = mul(world, vout.worldPosition);
-    return vout;
+    VSout v;
+    v.position = mul(worldViewProjection, mul(matTransform, position));
+    v.texCoord = texCoord;
+    v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
+    v.pos = v.position;
+    return v;
 }
 
-float4 encodeNormals(float3 n)
+float2 encodeNormals(float3 n)
 {
-//    float f = n.z * -2 + 1;
-//    float g = dot(n, n);
-//    float p = sqrt(g + f);
-//    return float4(n.xy / p * 0.5 + 0.5, 1, 1);
-    return float4(n * 0.5 + 0.5, 1.0);
+    float2 enc = normalize(n.xy) * (sqrt(n.z*-0.5+0.5));
+    enc = enc*0.5+0.5;
+    return float4(enc, 0, 1.0);
 }
 
-FSout fs(VSout v)
+FSout fs(in VSout v)
 {
     FSout f;
-    f.color = tex2D(baseTex, v.texCoord);
-    //f.normal = float4(normalize(v.normal), 1.0);
-    f.normal = encodeNormals(v.normal);
-    f.position = float4(v.worldPosition.xyz, 1.0);
+
+    f.diffuse = tex2D(diffuseTexture, v.texCoord);
+    f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, 1.0);
+
     return f;
 }
 
@@ -76,6 +71,7 @@ technique tech_glsl
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -84,6 +80,7 @@ technique tech
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }
