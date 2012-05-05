@@ -10,35 +10,34 @@ namespace Tools { namespace Models {
 
     MqmModel::~MqmModel()
     {
-        // TODO delate EVARYTHING
-//        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
-//        {
-//            Tools::Delete(it->vertexBuffer);
-//            Tools::Delete(it->indexBuffer);
-//        }
+        Tools::Delete(this->_vertexBuffer);
+        for (auto it = this->_indexBuffers.begin(), ite = this->_indexBuffers.end(); it != ite; ++it)
+            Tools::Delete(*it);
     }
 
     MqmModel::MqmModel(std::vector<char> const& data,
             TextureCallback textureCallback,
             Tools::IRenderer& renderer)
     {
+        Tools::debug << "MqmModel()\n";
+
         Tools::Models::Iqm::Header header;
 
         if (data.size() < sizeof(header))
-            throw std::runtime_error("MqmModel::LoadModel: data is too short, can't contain header");
+            throw std::runtime_error("MqmModel:: is too short, can't contain header");
 
         std::memcpy(&header, data.data(), sizeof(header));
 
         if (std::memcmp(header.magic, Tools::Models::Iqm::Magic, sizeof(header.magic)))
-            throw std::runtime_error("MqmModel::LoadModel: magic is not good");
+            throw std::runtime_error("MqmModel:: magic is not good");
 
         // lilswap(&header.version, (sizeof(hdr) - sizeof(header.magic))/sizeof(uint));
 
         if (header.version != Tools::Models::Iqm::Version)
-            throw std::runtime_error("MqmModel::LoadModel: version is not good");
+            throw std::runtime_error("MqmModel:: version is not good");
 
         if (data.size() != header.filesize)
-            throw std::runtime_error("MqmModel::LoadModel: data size is not good");
+            throw std::runtime_error("MqmModel:: data size is not good");
 
         this->_LoadMeshes(header, data, textureCallback, renderer);
         if (header.num_anims > 0)
@@ -54,23 +53,27 @@ namespace Tools { namespace Models {
         // lilswap((uint *)&buf[header.ofs_triangles], header.num_triangles*sizeof(iqmtriangle)/sizeof(uint));
         // lilswap((uint *)&buf[header.ofs_meshes], header.num_meshes*sizeof(iqmmesh)/sizeof(uint));
         // lilswap((uint *)&buf[header.ofs_joints], header.num_joints*sizeof(iqmjoint)/sizeof(uint));
+        Tools::debug << "MqmModel::LoadMeshes()\n";
 
-        //meshdata = buf;
+        const char *str = header.ofs_text ? &data[header.ofs_text] : "";
+
         _numTris = header.num_triangles;
         _numVerts = header.num_vertexes;
-        //_outFrame.resize(header.num_joints);
-        //_textures.resize(header.num_meshes);
 
         _meshes.resize(header.num_meshes);
-        // lilswap
         std::memcpy(_meshes.data(), data.data() + header.ofs_meshes, header.num_meshes * sizeof(_meshes[0]));
         _joints.resize(header.num_joints);
-        // lilswap
         std::memcpy(_joints.data(), data.data() + header.ofs_joints, header.num_joints * sizeof(_joints[0]));
+
+        Tools::debug << "joints: " << header.num_joints << "\n";
+
+        for (auto it = _joints.begin(), ite = _joints.end(); it != ite; ++it)
+        {
+            Tools::debug << "joint: " << &str[it->name] << "\n";
+        }
 
         float const *inposition = NULL, *innormal = NULL, *intangent = NULL, *intexcoord = NULL;
         Uint8 const *inblendindex = NULL, *inblendweight = NULL;
-        const char *str = header.ofs_text ? &data[header.ofs_text] : "";
         Tools::Models::Iqm::VertexArray const* vas = (Tools::Models::Iqm::VertexArray const*)&data[header.ofs_vertexarrays];
         for(int i = 0; i < (int)header.num_vertexarrays; i++)
         {
@@ -129,40 +132,15 @@ namespace Tools { namespace Models {
             this->_indexBuffers.back()->SetData(
                     Tools::Renderers::DataType::UnsignedInt,
                     mesh.num_triangles * sizeof(Tools::Models::Iqm::Triangle), &tris[mesh.first_triangle]);
-
-            std::cout << "mesh.first_triangle = " << mesh.first_triangle << ", num = " << mesh.num_triangles << "\n";
-            std::cout << "coords " << tris[mesh.first_triangle].vertex[0] << ", " << tris[mesh.first_triangle].vertex[1] << ", " << tris[mesh.first_triangle].vertex[2] << "\n";
         }
 
         _CreateVertexBuffers(/*tris, */inposition, innormal, /*intangent,*/ intexcoord, inblendindex, inblendweight, renderer);
 
-#if 0
-//        if(!ebo) glGenBuffers_(1, &ebo);
-//        glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, ebo);
-//        glBufferData_(GL_ELEMENT_ARRAY_BUFFER, header.num_triangles*sizeof(iqmtriangle), tris, GL_STATIC_DRAW);
-//        glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-//        vertex *verts = new vertex[header.num_vertexes];
-//        memset(verts, 0, header.num_vertexes*sizeof(vertex));
-//        for(int i = 0; i < (int)header.num_vertexes; i++)
-//        {
-//            vertex &v = verts[i];
-//            if(inposition) memcpy(v.position, &inposition[i*3], sizeof(v.position));
-//            if(innormal) memcpy(v.normal, &innormal[i*3], sizeof(v.normal));
-//            if(intangent) memcpy(v.tangent, &intangent[i*4], sizeof(v.tangent));
-//            if(intexcoord) memcpy(v.texcoord, &intexcoord[i*2], sizeof(v.texcoord));
-//            if(inblendindex) memcpy(v.blendindex, &inblendindex[i*4], sizeof(v.blendindex));
-//            if(inblendweight) memcpy(v.blendweight, &inblendweight[i*4], sizeof(v.blendweight));
-//        }
-//
-//        if(!vbo) glGenBuffers_(1, &vbo);
-//        glBindBuffer_(GL_ARRAY_BUFFER, vbo);
-//        glBufferData_(GL_ARRAY_BUFFER, header.num_vertexes*sizeof(vertex), verts, GL_STATIC_DRAW);
-//        glBindBuffer_(GL_ARRAY_BUFFER, 0);
-//        delete[] verts;
-//
-//        return true;
-#endif
+        for (auto it = this->_joints.begin(), ite = this->_joints.end(); it != ite; ++it)
+        {
+            Tools::Models::Iqm::Joint &j = *it;
+            this->_jointInfos.push_back(JointInfo(&str[j.name], j.parent, j.position, j.orientation, j.size));
+        }
     }
 
     bool MqmModel::_CreateVertexBuffers(
@@ -176,16 +154,9 @@ namespace Tools { namespace Models {
             Tools::IRenderer& renderer)
     {
         this->_vertexBuffer = renderer.CreateVertexBuffer().release();
-        //mesh.indexBuffer = renderer.CreateIndexBuffer().release();
 
         std::vector<float> vertexBuffer;
-//        vertexBuffer.reserve(
-//                sizeof(glm::vec3) * mesh.positionBuffer.size() +
-//                sizeof(glm::vec3) * mesh.normalBuffer.size() +
-//                sizeof(glm::vec2) * mesh.tex2DBuffer.size() +
-//                sizeof(glm::vec4) * mesh.boneWeights.size() +
-//                sizeof(glm::vec4) * mesh.boneIndex.size()
-//                );
+        vertexBuffer.reserve(_numVerts * 3 * 3 * 2 * 4 * 4);
 
         for (unsigned int i = 0; i < _numVerts; ++i)
         {
@@ -226,7 +197,7 @@ namespace Tools { namespace Models {
 
     void MqmModel::_LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data)
     {
-        if(header.num_poses != header.num_joints)
+        if (header.num_poses != header.num_joints)
             throw std::runtime_error("num_poses != num_joints");
 
         // lilswap((uint *)&buf[header.ofs_poses], header.num_poses*sizeof(iqmpose)/sizeof(uint));
@@ -239,7 +210,7 @@ namespace Tools { namespace Models {
         _poses.resize(header.num_poses);
         std::memcpy(_poses.data(), data.data() + header.ofs_poses, header.num_poses * sizeof(_poses[0]));
 
-        //_frames.resize(header.num_frames * header.num_poses);
+        _frames.reserve(header.num_frames);
 
         const char *str = header.ofs_text ? (char *)&data[header.ofs_text] : "";
         Uint16 const* framedata = (Uint16 const*)&data[header.ofs_frames];
@@ -247,6 +218,7 @@ namespace Tools { namespace Models {
         for(int i = 0; i < (int)header.num_frames; i++)
         {
             _frames.push_back(std::vector<FrameJoint>());
+            _frames.back().reserve(header.num_poses);
             for(int j = 0; j < (int)header.num_poses; j++)
             {
                 Tools::Models::Iqm::Pose &p = _poses[j];
@@ -263,22 +235,8 @@ namespace Tools { namespace Models {
                 scale.x = p.channeloffset[7]; if(p.mask&0x80) scale.x += *framedata++ * p.channelscale[7];
                 scale.y = p.channeloffset[8]; if(p.mask&0x100) scale.y += *framedata++ * p.channelscale[8];
                 scale.z = p.channeloffset[9]; if(p.mask&0x200) scale.z += *framedata++ * p.channelscale[9];
-                // Concatenate each pose with the inverse base pose to avoid doing this at animation time.
-                // If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
-                // Thus it all negates at animation time like so:
-                //   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
-                //   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
-                //   parentPose * childPose * childInverseBasePose
 
                 _frames.back().push_back(FrameJoint(translate, rotate, scale));
-
-                /*
-                glm::fmat4x4 m = glm::scale(scale) * glm::translate(translate) * glm::toMat4(rotate);
-                if (p.parent >= 0)
-                    _frames[i*header.num_poses + j] = _baseFrame[p.parent] * m * _inverseBaseFrame[j];
-                else
-                    _frames[i*header.num_poses + j] = m * _inverseBaseFrame[j];
-                    */
             }
         }
 
@@ -286,11 +244,7 @@ namespace Tools { namespace Models {
         {
             Tools::Models::Iqm::Anim &a = *it;
             this->_animInfos.push_back(AnimInfo(&str[a.name], a.first_frame, a.num_frames, a.framerate));
-        }
-        for (auto it = this->_joints.begin(), ite = this->_joints.end(); it != ite; ++it)
-        {
-            Tools::Models::Iqm::Joint &j = *it;
-            this->_jointInfos.push_back(JointInfo(&str[j.name], j.parent, j.position, j.orientation, j.size));
+            std::cout << &str[a.name] << ": framerate " << a.framerate << "\n";
         }
     }
 

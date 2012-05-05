@@ -197,7 +197,7 @@ namespace Client { namespace Map {
         std::deque<Common::BaseChunk::IdType> tmp;
         int cacheDistance = (int)this->_game.GetClient().GetSettings().chunkViewDistance;
         int min = -cacheDistance;
-        int max = cacheDistance;
+        int max = cacheDistance + 1;
 
         Common::BaseChunk::CoordsType const& coords = Common::GetChunkCoords(playerPosition);
         Common::BaseChunk::CoordsType pos;

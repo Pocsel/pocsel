@@ -52,7 +52,7 @@ namespace Tools { namespace Models {
     private:
         unsigned int _numTris;
         unsigned int _numVerts;
-        std::vector<glm::mat4x4> /*_outFrame,*/ _baseFrame, _inverseBaseFrame;//, frames;
+        std::vector<glm::mat4x4> _baseFrame, _inverseBaseFrame;
         std::vector<Tools::Renderers::ITexture2D*> _textures;
         Tools::Renderers::IVertexBuffer* _vertexBuffer;
         std::vector<Tools::Renderers::IIndexBuffer*> _indexBuffers;
