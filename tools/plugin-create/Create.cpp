@@ -276,6 +276,8 @@ namespace Tools { namespace PluginCreate {
             conn->CreateQuery("CREATE TABLE entity_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
             conn->CreateQuery("CREATE TABLE cube_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
 
+            conn->BeginTransaction(); // zomg
+
             // remplissage
             FillTablePlugin(*conn, identifier, fullname);
             FillTableResource(pluginRoot, *conn);
@@ -283,6 +285,8 @@ namespace Tools { namespace PluginCreate {
             FillTableCubeFile(pluginRoot, *conn);
             FillTableMap(pluginRoot, *conn);
 
+            Tools::log << "Finishing writing to database..." << std::endl;
+            conn->EndTransaction();
             Tools::Delete(conn);
         }
         catch (std::exception& e)
