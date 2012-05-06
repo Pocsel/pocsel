@@ -39,13 +39,13 @@ namespace Client { namespace Resources {
         CacheDatabaseProxy _database;
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
-        std::map<Uint32, Uint32> _resourceToPluginId;
-        std::map<Uint32, std::map<std::string, Uint32>> _resourceIds;
-        std::map<Uint32, Tools::Renderers::ITexture2D*> _textures;
-        std::map<Uint32, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextures;
-        std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
-        std::map<Uint32, std::map<std::string, Effect*>> _effects;
-        std::map<Uint32, std::string> _scripts;
+        std::map<Uint32 /* resourceId */, Uint32 /* pluginId */> _resourceToPluginId;
+        std::map<Uint32 /* pluginId */, std::map<std::string /* filename */, Uint32 /* resourceId */>> _resourceIds;
+        std::map<Uint32 /* pluginId */, Tools::Renderers::ITexture2D*> _textures;
+        std::map<Uint32 /* pluginId */, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextures;
+        std::map<Uint32 /* pluginId */, Tools::Renderers::IShaderProgram*> _shaders;
+        std::map<Uint32 /* pluginId */, std::map<std::string, Effect*>> _effects;
+        std::map<Uint32 /* pluginId */, std::string> _scripts;
 
     public:
         ResourceManager(Game::Game& game,
