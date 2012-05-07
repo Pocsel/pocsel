@@ -1,5 +1,4 @@
-find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
-set(QT_USE_QTNETWORK TRUE)
+find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 file(GLOB qthpp "qt/*.hpp")
 file(GLOB qtforms "ui/*.ui")
 file(GLOB qtres "res/*.qrc")
