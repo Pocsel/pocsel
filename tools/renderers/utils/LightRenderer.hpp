@@ -22,10 +22,11 @@ namespace Tools { namespace Renderers { namespace Utils {
             std::unique_ptr<IShaderProgram> shader;
             std::unique_ptr<IShaderParameter> direction;
             std::unique_ptr<IShaderParameter> diffuseColor;
-            std::unique_ptr<IShaderParameter> diffusePower;
             std::unique_ptr<IShaderParameter> specularColor;
             std::unique_ptr<IShaderParameter> specularPower;
-            Rectangle screen;
+            glm::mat4 modelViewProjection;
+            std::unique_ptr<IShaderParameter> screenModelViewProjection;
+            std::unique_ptr<Rectangle> screen;
         } _directionnal;
         struct
         {
@@ -33,7 +34,6 @@ namespace Tools { namespace Renderers { namespace Utils {
             std::unique_ptr<IShaderParameter> position;
             std::unique_ptr<IShaderParameter> radius;
             std::unique_ptr<IShaderParameter> diffuseColor;
-            std::unique_ptr<IShaderParameter> diffusePower;
             std::unique_ptr<IShaderParameter> specularColor;
             std::unique_ptr<IShaderParameter> specularPower;
         } _point;

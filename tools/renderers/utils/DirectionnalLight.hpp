@@ -11,23 +11,17 @@ namespace Tools { namespace Renderers { namespace Utils {
     public:
         glm::vec3 direction;
         glm::vec3 diffuseColor;
-        float diffusePower;
         glm::vec3 specularColor;
-        float specularPower;
     private:
         IShaderParameter& _direction;
         IShaderParameter& _diffuseColor;
-        IShaderParameter& _diffusePower;
         IShaderParameter& _specularColor;
-        IShaderParameter& _specularPower;
 
     public:
         DirectionnalLight(
             IShaderParameter& direction,
             IShaderParameter& diffuseColor,
-            IShaderParameter& diffusePower,
-            IShaderParameter& specularColor,
-            IShaderParameter& specularPower);
+            IShaderParameter& specularColor);
 
         void SetParameters();
     };

@@ -209,7 +209,7 @@ int main(int ac, char *av[])
     actions["reloadshaders"] = BindAction::ReloadShaders;
     actions["togglecullface"] = BindAction::ToggleCullface;
 
-    Sdl::Window window(actions, false);
+    Sdl::Window window(actions, true);
     IRenderer& renderer = window.GetRenderer();
     bool run = true;
     bool reload = true;
@@ -272,7 +272,6 @@ int main(int ac, char *av[])
             renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
             RenderCube(renderer, gbuffer->GetColors());
 
-            //RenderGBuffer(renderer);
             gbuffer->Render();
 
             renderer.EndDraw();
