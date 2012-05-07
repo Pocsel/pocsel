@@ -14,6 +14,7 @@ namespace Common {
         static bool IsPluginFullname(std::string const& str);
         static bool IsEntityType(std::string const& str);
         static bool IsMapName(std::string const& str);
+        static bool IsPluginBuildHash(std::string const& str);
     private:
         static bool _IsAlNum(std::string const& str, std::string const& allowed);
     };

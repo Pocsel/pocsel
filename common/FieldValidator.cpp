@@ -42,6 +42,11 @@ namespace Common {
         return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
+    bool IsPluginBuildHash(std::string const& str)
+    {
+        return FieldValidator::IsAlNumDash(str) && str.size() >= 10 && str.size() <= 100; // regles arbitraires
+    }
+
     bool FieldValidator::_IsAlNum(std::string const& str, std::string const& allowed)
     {
         auto it = str.begin();

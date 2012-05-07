@@ -33,6 +33,15 @@ namespace Tools { namespace PluginInstall {
             }
             else
                 throw std::runtime_error("no metatada");
+            pluginBuildHash = row->GetString(0);
+            if (!Common::FieldValidator::IsPluginBuildHash(pluginBuildHash))
+                throw std::runtime_error("invalid build hash");
+            pluginFullname = row->GetString(1);
+            if (!Common::FieldValidator::IsPluginFullname(pluginFullname))
+                throw std::runtime_error("invalid plugin fullname");
+            pluginIdentifier = row->GetString(2);
+            if (!Common::FieldValidator::IsPluginIdentifier(pluginIdentifier))
+                throw std::runtime_error("invalid plugin identifier");
         }
         catch (std::exception& e)
         {

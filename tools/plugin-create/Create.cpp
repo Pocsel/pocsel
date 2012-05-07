@@ -7,7 +7,7 @@
 #include "tools/lua/Interpreter.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 #include "common/FieldValidator.hpp"
-#include "common/Constants.hpp"
+#include "common/constants.hpp"
 
 namespace boost { namespace filesystem3 {
 

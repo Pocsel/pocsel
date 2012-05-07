@@ -7,7 +7,7 @@ namespace Common {
     static Uint32 const ChunkSize2 = ChunkSize * ChunkSize;
     static Uint32 const ChunkSize3 = ChunkSize2 * ChunkSize;
 
-    static Uint32 PluginFormatVersion = 1;
+    static Uint32 const PluginFormatVersion = 1;
 
     extern char const* const PluginFileExt;
     extern char const* const WorldFileExt;
