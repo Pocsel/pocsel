@@ -43,6 +43,7 @@ VSout vs(
     VSout v;
     v.position = mul(worldViewProjection, mul(matTransform, position));
     v.texCoord = texCoord;
+    normal = mul((float3x3)matTransform, normal);
     v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
     v.pos = v.position;
     return v;
