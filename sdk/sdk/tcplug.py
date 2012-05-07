@@ -7,13 +7,11 @@ import sqlite3
 from sdk import tools
 from sdk.constants import FORMAT_VERSION
 
-def prepareType(conn, type, name, lua):
+def prepareType(curs, type, name, lua):
     print "Add %s type '%s'" % (type, name)
-    curs = conn.cursor()
     curs.execute("INSERT INTO %s (name, lua) VALUES (?, ?)" % type, (name, lua))
-    conn.commit()
 
-def addResource(connector, root, relpath, filename):
+def addResource(curs, root, relpath, filename):
     abspath = os.path.join(root, filename)
     filename = os.path.join(relpath, filename).replace('\\', '/')
     try:
@@ -22,26 +20,20 @@ def addResource(connector, root, relpath, filename):
         print "Ignoring unknown resource", abspath
         return
     print "Add resource", filename
-    conn = connector()
-    curs = conn.cursor()
     curs.execute("INSERT INTO resource (filename, type) VALUES (?, ?)", (filename, file_type))
-    conn.commit()
 
-    conn = connector()
-    conn.text_factory = str
-    curs = conn.cursor()
     with open(abspath, 'rb') as f:
         data = f.read()
     data_hash = hashlib.md5(data).hexdigest()
     curs.execute("UPDATE resource SET data = ?, data_hash = ? WHERE filename = ?", (buffer(data), data_hash, filename))
-    conn.commit()
 
-def prepareMap(conn, name, lua):
-    with conn:
-        curs = conn.cursor()
-        curs.execute("INSERT INTO map (name, lua) VALUES (?, ?)", (name, lua))
+def prepareMap(curs, name, lua):
+    curs.execute("INSERT INTO map (name, lua) VALUES (?, ?)", (name, lua))
 
 def preparePlugin(connector, plugin_dir):
+    conn = connector()
+    conn.text_factory = str
+    curs = conn.cursor()
     entities_dir = os.path.join(plugin_dir, 'entities')
     nb_entity = 0
     if os.path.isdir(entities_dir):
@@ -50,7 +42,7 @@ def preparePlugin(connector, plugin_dir):
             if entity.endswith('.lua'):
                 with open(os.path.join(entities_dir, entity)) as f:
                     data = f.read()
-                prepareType(connector(), 'entity_file', entity[:-4], data)
+                prepareType(curs, 'entity_file', entity[:-4], data)
                 nb_entity += 1
             else:
                 print "ignoring '%s' in entities folder" % entity
@@ -69,7 +61,7 @@ def preparePlugin(connector, plugin_dir):
             if cube.endswith('.lua'):
                 with open(os.path.join(cubes_dir, cube)) as f:
                     data = f.read()
-                prepareType(connector(), 'cube_type', cube[:-4], data)
+                prepareType(curs, 'cube_type', cube[:-4], data)
                 nb_cubes += 1
             else:
                 print "ignoring '%s' in cubes folder" % cube
@@ -87,7 +79,7 @@ def preparePlugin(connector, plugin_dir):
         for root, dirs, files in os.walk(resources_dir, topdown=True):
             relpath = os.path.relpath(root, start=resources_dir)
             for filename in files:
-                addResource(connector, root, relpath, filename)
+                addResource(curs, root, relpath, filename)
                 nb_resources += 1
         if nb_resources == 0:
             print "No resource in this plugin"
@@ -103,11 +95,12 @@ def preparePlugin(connector, plugin_dir):
         for m in maps_files:
             with open(os.path.join(maps_dir, m)) as f:
                 data = f.read()
-            prepareMap(connector(), m.split('.')[0], data)
+            prepareMap(curs, m.split('.')[0], data)
             nb_maps += 1
         print "Found %d maps" % nb_maps
     else:
         print "No 'maps' directory"
+    conn.commit()
 
 def finalizePlugin(conn, fullname, identifier, build_hash):
     curs = conn.cursor()
