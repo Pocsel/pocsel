@@ -3,7 +3,9 @@
 
 namespace Tools { namespace PluginInstall {
 
-    bool Install();
+    bool Install(boost::filesystem::path const& pluginFile, boost::filesystem::path const& worldFile);
+
+    bool Uninstall(std::string const& pluginIdentifier, boost::filesystem::path const& worldFile);
 
 }}
 

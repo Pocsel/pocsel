@@ -3,11 +3,6 @@
 
 namespace Tools { namespace PluginCreate {
 
-    enum
-    {
-        FormatVersion = 1,
-    };
-
     bool Create(boost::filesystem::path const& pluginRootDir, boost::filesystem::path const& destFile);
 
 }}

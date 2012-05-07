@@ -7,6 +7,7 @@
 #include "tools/lua/Interpreter.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 #include "common/FieldValidator.hpp"
+#include "common/Constants.hpp"
 
 namespace boost { namespace filesystem3 {
 
@@ -89,7 +90,7 @@ namespace Tools { namespace PluginCreate {
         {
             boost::uuids::random_generator buildHashGenerator;
             conn.CreateQuery("INSERT INTO plugin (build_hash, fullname, identifier, format_version) VALUES (?, ?, ?, ?);")->
-                Bind(boost::uuids::to_string(buildHashGenerator())).Bind(fullname).Bind(identifier).Bind(FormatVersion).ExecuteNonSelect();
+                Bind(boost::uuids::to_string(buildHashGenerator())).Bind(fullname).Bind(identifier).Bind(Common::PluginFormatVersion).ExecuteNonSelect();
         }
 
         void FillTableResource(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn)
