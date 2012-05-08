@@ -2,43 +2,29 @@
 
 from sdk import tools, tcplug
 
-def insertResource(worldconn, pluginconn, plugin_id, filename, version):
+def insertResource(wcurs, pluginconn, plugin_id, filename, version):
     print "Insert new resource '%s'" % filename
     with pluginconn() as pconn:
         pcurs = pconn.cursor()
         pcurs.execute(
-            "SELECT type, data_hash FROM resource WHERE filename = ?",
+            "SELECT type, data_hash, data FROM resource WHERE filename = ?",
             (filename,)
         )
         res = pcurs.fetchone()
         assert res is not None
         type = res[0]
         data_hash = res[1]
+        data = res[2]
 
-    with worldconn() as wconn:
-        wcurs = wconn.cursor()
-        wcurs.execute(
-            """
-                INSERT INTO resource
-                    (id, plugin_id, version, filename, data_hash, type, data)
-                VALUES (NULL, ?, ?, ?, ?, ?, NULL)
-            """,
-            (plugin_id, version, filename, data_hash, type)
-        )
-        resource_id = wcurs.lastrowid
-        wconn.commit()
-
-    with pluginconn() as pconn:
-        pconn.text_factory = str
-        pcurs = pconn.cursor()
-        pcurs.execute("SELECT data FROM resource WHERE filename = ?", (filename,))
-        data = pcurs.fetchone()[0]
-
-    with worldconn() as wconn:
-        wconn.text_factory = str
-        wcurs = wconn.cursor()
-        wcurs.execute("UPDATE resource SET data = ? WHERE id = ?", (data, resource_id))
-        wconn.commit()
+    wcurs.execute(
+        """
+            INSERT INTO resource
+                (id, plugin_id, version, filename, data_hash, type, data)
+            VALUES (NULL, ?, ?, ?, ?, ?, ?)
+        """,
+        (plugin_id, version, filename, data_hash, type, data)
+    )
+    resource_id = wcurs.lastrowid
 
 def installPlugin(worldconn, pluginconn, server_version):
     plugin_infos = tcplug.getInfos(pluginconn())
@@ -100,20 +86,24 @@ def installPlugin(worldconn, pluginconn, server_version):
         pcurs.execute("SELECT filename, data_hash FROM resource")
         plugin_resources = pcurs.fetchall()
 
-    for filename, data_hash in plugin_resources:
-        if filename not in world_resources:
-            insertResource(worldconn, pluginconn, plugin_id, filename, server_version)
-        elif data_hash != plugin_infos['build_hash']:
-            updateResource(worldconn, pluginconn, plugin_id, filename, server_version)
-        else:
-            print "File '%s' is up-to-date" % filename
+    with worldconn() as wconn:
+        wcurs = wconn.cursor()
+        wconn.text_factory = str
+        for filename, data_hash in plugin_resources:
+            if filename not in world_resources:
+                insertResource(wcurs, pluginconn, plugin_id, filename, server_version)
+            elif data_hash != plugin_infos['build_hash']:
+                updateResource(wcurs, pluginconn, plugin_id, filename, server_version)
+            else:
+                print "File '%s' is up-to-date" % filename
+        wconn.commit()
 
-    for obj in ['cube_type', 'entity_file']:
-        with pluginconn() as pconn:
-            pcurs = pconn.cursor()
-            pcurs.execute("SELECT name, lua FROM %s" % obj)
-            with worldconn() as wconn:
-                wcurs = wconn.cursor()
+    with worldconn() as wconn:
+        wcurs = wconn.cursor()
+        for obj in ['cube_type', 'entity_file']:
+            with pluginconn() as pconn:
+                pcurs = pconn.cursor()
+                pcurs.execute("SELECT name, lua FROM %s" % obj)
                 for name, lua in pcurs:
                     wcurs.execute(
                         "SELECT name FROM %s WHERE plugin_id = ? AND name = ?" % obj,
@@ -139,7 +129,7 @@ def installPlugin(worldconn, pluginconn, server_version):
                             """ % obj,
                             (lua, plugin_id, name)
                         )
-                wconn.commit()
+        wconn.commit()
 
 def finalizeWorld(worldconn, fullname, identifier, format_version, build_hash):
     conn = worldconn()
