@@ -24,8 +24,11 @@ namespace Tools {
         class IShaderProgram;
         class IShaderParameter;
         namespace Utils {
+            class DirectionnalLight;
             class GBuffer;
             class Image;
+            class LightRenderer;
+            class PointLight;
         }
     }
 }
@@ -49,6 +52,9 @@ namespace Client { namespace Game {
         Tools::Lua::Interpreter _interpreter;
         // XXX
         std::unique_ptr<Tools::Renderers::Utils::GBuffer> _gBuffer;
+        std::unique_ptr<Tools::Renderers::Utils::LightRenderer> _lightRenderer;
+        std::list<Tools::Renderers::Utils::DirectionnalLight> _directionnalLights;
+        std::list<Tools::Renderers::Utils::PointLight> _pointLights;
         // XXX
 
     public:

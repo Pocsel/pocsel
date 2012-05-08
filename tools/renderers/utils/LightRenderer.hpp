@@ -3,7 +3,9 @@
 
 #include "tools/IRenderer.hpp"
 #include "tools/renderers/utils/DirectionnalLight.hpp"
-#include "tools/renderers/utils/Rectangle.hpp"
+#include "tools/renderers/utils/Image.hpp"
+#include "tools/renderers/utils/PointLight.hpp"
+#include "tools/renderers/utils/Sphere.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils {
     class GBuffer;
@@ -19,37 +21,45 @@ namespace Tools { namespace Renderers { namespace Utils {
         IRenderer& _renderer;
         struct
         {
-            std::unique_ptr<IShaderProgram> shader;
+            IShaderProgram* shader;
+            std::unique_ptr<IShaderParameter> normalDepth;
+            std::unique_ptr<IShaderParameter> ambientColor;
             std::unique_ptr<IShaderParameter> direction;
             std::unique_ptr<IShaderParameter> diffuseColor;
             std::unique_ptr<IShaderParameter> specularColor;
-            std::unique_ptr<IShaderParameter> specularPower;
             glm::mat4 modelViewProjection;
             std::unique_ptr<IShaderParameter> screenModelViewProjection;
-            std::unique_ptr<Rectangle> screen;
+            std::unique_ptr<Image> screen;
         } _directionnal;
         struct
         {
-            std::unique_ptr<IShaderProgram> shader;
+            IShaderProgram* shader;
+            std::unique_ptr<IShaderParameter> normalDepth;
             std::unique_ptr<IShaderParameter> position;
-            std::unique_ptr<IShaderParameter> radius;
+            std::unique_ptr<IShaderParameter> range;
             std::unique_ptr<IShaderParameter> diffuseColor;
             std::unique_ptr<IShaderParameter> specularColor;
-            std::unique_ptr<IShaderParameter> specularPower;
+            std::unique_ptr<Sphere> sphere;
         } _point;
 
     public:
-        LightRenderer(IRenderer& renderer, std::string const& directionnalShader, std::string const& pointShader);
+        LightRenderer(IRenderer& renderer, IShaderProgram& directionnalShader, IShaderProgram& pointShader);
 
         DirectionnalLight CreateDirectionnalLight();
-        //PointLight CreatePointLight();
+        PointLight CreatePointLight();
         void Render(
             GBuffer& gbuffer,
             std::list<DirectionnalLight*> const& directionnalLights,
             std::list<PointLight*> const& pointLights);
+        void Render(
+            GBuffer& gbuffer,
+            std::list<DirectionnalLight> const& directionnalLights,
+            std::list<PointLight> const& pointLights);
     private:
-        void _RenderDirectionnalLights(std::list<DirectionnalLight*> const& lights);
-        void _RenderPointLights(std::list<PointLight*> const& lights);
+        void _RenderDirectionnalLights(GBuffer& gbuffer, std::list<DirectionnalLight*> const& lights);
+        void _RenderPointLights(GBuffer& gbuffer, std::list<PointLight*> const& lights);
+        void _RenderDirectionnalLights(GBuffer& gbuffer, std::list<DirectionnalLight> const& lights);
+        void _RenderPointLights(GBuffer& gbuffer, std::list<PointLight> const& lights);
     };
 
 }}}

@@ -4,6 +4,7 @@
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/renderers/utils/GBuffer.hpp"
 #include "tools/renderers/utils/Image.hpp"
+#include "tools/renderers/utils/LightRenderer.hpp"
 #include "tools/window/Window.hpp"
 
 #include "client/Client.hpp"
@@ -41,6 +42,21 @@ namespace Client { namespace Game {
                 this->_renderer,
                 size,
                 this->_client.GetLocalResourceManager().GetShader("PostProcess.fx")));
+        this->_lightRenderer.reset(
+            new Tools::Renderers::Utils::LightRenderer(
+                this->_renderer,
+                this->_client.GetLocalResourceManager().GetShader("DirectionnalLight.fx"),
+                this->_client.GetLocalResourceManager().GetShader("PointLight.fx")));
+        this->_directionnalLights.push_back(this->_lightRenderer->CreateDirectionnalLight());
+        this->_directionnalLights.back().direction = glm::normalize(glm::vec3(1, -1, 0));
+        this->_directionnalLights.back().ambientColor = glm::vec3(0.2f, 0.2f, 0.2f);
+        this->_directionnalLights.back().diffuseColor =  glm::vec3(0.8f, 0.9f, 1.0f);
+        this->_directionnalLights.back().specularColor = glm::vec3(0.8f, 0.9f, 1.0f);
+
+        this->_pointLights.push_back(this->_lightRenderer->CreatePointLight());
+        this->_pointLights.back().range = 200;
+        this->_pointLights.back().diffuseColor =  glm::vec3(0.8f, 0.9f, 1.0f);
+        this->_pointLights.back().specularColor = glm::vec3(0.8f, 0.9f, 1.0f);
         // XXX
     }
 
@@ -95,7 +111,8 @@ namespace Client { namespace Game {
 
         this->_gBuffer->Unbind();
 
-        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+        //this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+        this->_lightRenderer->Render(*this->_gBuffer, this->_directionnalLights, this->_pointLights);
         this->_gBuffer->Render();
 
         this->_renderer.EndDraw();

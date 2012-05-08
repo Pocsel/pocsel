@@ -60,6 +60,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_effect->SetFloatArray(this->_param, (float const*)&vector, 3);
     }
 
+    void ShaderParameter::Set(glm::detail::tvec4<float> const& vector)
+    {
+        this->_effect->SetFloatArray(this->_param, (float const*)&vector, 4);
+    }
+
     void ShaderParameter::Set(glm::detail::tmat4x4<float> const& matrix, bool isProjection)
     {
         if (isProjection)

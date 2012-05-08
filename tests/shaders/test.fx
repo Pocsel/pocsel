@@ -79,6 +79,7 @@ technique tech
     pass p0
     {
         AlphaBlendEnable = false;
+        AlphaTestEnable = false;
         VertexShader = compile vs_3_0 vs();
         PixelShader = compile ps_3_0 fs();
     }

@@ -8,7 +8,12 @@ float3 lightPos = float3(0, 0, 0);
 float3 lightDiffuse = float3(1.0, 1.0, 1.0);
 float3 lightSpecular = float3(0.9, 1.0, 0.8);
 
-sampler2D normalsDepth = sampler_state
+sampler2D lighting = sampler_state
+{
+   minFilter = Point;
+   magFilter = Point;
+};
+sampler2D specular = sampler_state
 {
    minFilter = Point;
    magFilter = Point;
@@ -23,66 +28,34 @@ struct VSout
 {
    float4 position : POSITION;
    float2 texCoord : TEXCOORD0;
-   float4 pos : TEXCOORD1;
 };
 
 VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
     vout.position = mul(quadWorldViewProjection, position);
-#ifdef DIRECTX
     vout.texCoord = texCoord;
-#else
-    vout.texCoord = float2(texCoord.x, 1-texCoord.y);
-#endif
-    vout.pos = vout.position;
     return vout;
-}
-
-float3 decodeNormals(float4 enc)
-{
-    float4 nn = enc*float4(2,2,0,0) + float4(-1,-1,1,-1);
-    float l = dot(nn.xyz,-nn.xyw);
-    nn.z = l;
-    nn.xy *= sqrt(l);
-    return nn.xyz * 2 + float3(0,0,-1);
-}
-
-float3 decodePosition(float4 enc, float2 coords)
-{
-    float z = enc.z;
-    //return float4(z, z, z, 1.0);
-    //return float3(coords.x, coords.y, z);
-    //return tex2D(depthBuffer, coords).yzw;
-    float x = coords.x * 2 - 1;
-#ifdef DIRECTX
-    float y = (1 - coords.y) * 2 - 1;
-#else
-    float y = coords.y * 2 - 1;
-#endif
-    //return float3(abs(x), abs(y), z);
-    float4 projPos = float4(x, y, z, 1.0);
-    float4 pos = mul(projectionInverse, projPos);
-    return pos.xyz / pos.w;
 }
 
 float4 fs(in VSout v) : COLOR
 {
-    float4 encNormalDepth = tex2D(normalsDepth, v.texCoord);
-    float3 diffuseColor = tex2D(diffuse, v.texCoord).rgb;
-    float3 vWorldNrm = decodeNormals(encNormalDepth);// * 2 - 1;
-    float3 vWorldPos = decodePosition(encNormalDepth, v.texCoord);
+    if (v.texCoord.y < 0.25)
+    {
+        float2 coord = v.texCoord * 4;
+        if (coord.x < 1)
+            return float4(tex2D(lighting, coord).rgb, 1);
+        if (coord.x < 2)
+            return float4(tex2D(specular, coord + float2(-1, 0)).rgb, 1);
+        if (coord.x < 3)
+            return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
+    }
+    float4 diff = tex2D(diffuse, v.texCoord);
+    float4 spec = tex2D(specular, v.texCoord);
 
-    float3 vLightDir = normalize(lightPos - vWorldPos);
-    float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
-    float3 vDiffuseIntensity = dot(vWorldNrm, vLightDir);
-    float3 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-vLightDir, vWorldNrm))), 5);
-
-    float4 color;
-    color.rgb = (vDiffuseIntensity * lightDiffuse) * diffuseColor
-            + vSpecularIntensity * lightSpecular.xyz;
-    color.a = 1;
-    return color;
+    float3 color = tex2D(lighting, v.texCoord).rgb * diff.rgb;
+    color += spec.rgb;
+    return float4(color, diff.a);
 }
 
 #ifndef DIRECTX
@@ -112,7 +85,7 @@ technique tech
 {
    pass p0
    {
-       AlphaBlendEnable = true;
+       AlphaBlendEnable = false;
        VertexShader = compile vs_3_0 vs();
        PixelShader = compile ps_3_0 fs();
    }

@@ -1,16 +1,19 @@
 float4x4 mvp : WorldViewProjection;
+float4x4 view : View;
 float4x4 viewProjection : ViewProjection;
 float4x4 viewInverse : ViewInverse;
 float4x4 projectionInverse : ProjectionInverse;
 float4x4 viewProjectionInverse : ViewProjectionInverse;
+float4x4 worldView : WorldView;
 float4x4 screenWorldViewProjection;
 
+float3  lightAmbientColor = float3(0.2f, 0.2f, 0.2f);
 float3  lightDirection = float3(0.0, 0.0, 0.0);
-float4  lightDiffuseColor = float4(1.0, 1.0, 1.0, 1.0);
-float4  lightSpecularColor = float4(0.9, 1.0, 0.8, 1.0);
+float3  lightDiffuseColor = float3(1.0, 1.0, 1.0);
+float3  lightSpecularColor = float3(0.9, 1.0, 0.8);
 
 // TODO:
-float   materialSpecularPower = 5.0;
+float   materialShininess = 5.0;
 
 sampler2D normalDepth = sampler_state
 {
@@ -59,17 +62,24 @@ float3 decodePosition(float4 enc, float2 coords)
 
 FSout fs(in VSout v)
 {
-    float4 encNormalDepth = tex2D(normalDepth, v.texCoord);
-    float3 vWorldNrm = decodeNormals(encNormalDepth);// * 2 - 1;
-    float3 vWorldPos = decodePosition(encNormalDepth, v.texCoord);
+    float3 viewLightDirection = normalize(mul((float3x3)worldView, -lightDirection));
 
-    float3 vEyeVec = normalize(viewInverse[3].xyz - vWorldPos);
-    float4 vDiffuseIntensity = dot(vWorldNrm, mul((float3x3)viewProjection, lightDirection));
-    float4 vSpecularIntensity = pow(max(0, dot(vEyeVec, reflect(-lightDirection, vWorldNrm))), materialSpecularPower);
+    float4 encNormalDepth = tex2D(normalDepth, v.texCoord);
+    float3 viewNormal = decodeNormals(encNormalDepth);// * 2 - 1;
+    float3 viewPosition = decodePosition(encNormalDepth, v.texCoord);
+
+    float NdL = max(0, dot(viewNormal, viewLightDirection));
+
+    float3 viewDirection = normalize(viewPosition);
+    float3 reflection = reflect(viewLightDirection, viewNormal);
+    float specular = pow(max(0.0, dot(reflection, viewDirection)), materialShininess);
 
     FSout f;
-    f.diffuse = vDiffuseIntensity * lightDiffuseColor;
-    f.specular = vSpecularIntensity * lightSpecularColor;
+    f.diffuse.rgb = NdL * lightDiffuseColor;
+    f.diffuse.rgb += lightAmbientColor;
+    f.specular.rgb = specular * lightSpecularColor;
+    f.diffuse.a = NdL;
+    f.specular.a = specular;
     return f;
 }
 
@@ -100,10 +110,14 @@ technique tech
 {
    pass p0
    {
-       AlphaBlendEnable = true;
-       AlphaTestEnable = true;
-       VertexShader = compile vs_3_0 vs();
-       PixelShader = compile ps_3_0 fs();
+        AlphaBlendEnable = True;
+        AlphaTestEnable = True;
+        AlphaRef = 0;
+        SrcBlend = One;
+        DestBlend = One;
+        ZEnable = false;
+        VertexShader = compile vs_3_0 vs();
+        PixelShader = compile ps_3_0 fs();
    }
 }
 
