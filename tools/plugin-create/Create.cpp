@@ -86,7 +86,7 @@ namespace Tools { namespace PluginCreate {
             return Tools::ToString(result.checksum());
         }
 
-        void FillTablePlugin(Tools::Database::IConnection& conn, std::string const& identifier, std::string const& fullname)
+        void FillTablePlugin(std::string const& identifier, std::string const& fullname, Tools::Database::IConnection& conn)
         {
             boost::uuids::random_generator buildHashGenerator;
             conn.CreateQuery("INSERT INTO plugin (build_hash, fullname, identifier, format_version) VALUES (?, ?, ?, ?);")->
@@ -125,7 +125,7 @@ namespace Tools { namespace PluginCreate {
                 std::string hash = HashFile(data);
                 conn.CreateQuery("INSERT INTO resource (name, type, data_hash, data) VALUES (?, ?, ?, ?);")->
                     Bind(name).Bind(type).Bind(hash).Bind(data.data(), data.size()).ExecuteNonSelect();
-                Tools::log << "Added client file \"" << name << "\" (size: " << data.size() << " bytes, hash: " << hash << ", type: " << type << ")." << std::endl;
+                Tools::log << "Added client file \"" << name << "\" (size: " << data.size() << " bytes, hash: \"" << hash << "\", type: \"" << type << "\")." << std::endl;
             }
         }
 
@@ -208,7 +208,7 @@ namespace Tools { namespace PluginCreate {
                 std::string name = it->stem().string();
                 if (!Common::FieldValidator::IsMapName(name))
                 {
-                    Tools::log << "Invalid map name \"" << name << "\", map ignored." << std::endl;
+                    Tools::log << "Invalid map name \"" << name << "\", map ignored (must be alphamumeric, 20 characters max.)." << std::endl;
                     continue;
                 }
                 auto data = ReadFile(*it);
@@ -216,6 +216,15 @@ namespace Tools { namespace PluginCreate {
                     Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect();
                 Tools::log << "Added map \"" << name << "\" (size: " << data.size() << " bytes)." << std::endl;
             }
+        }
+
+        void CreatePluginTables(Tools::Database::IConnection& conn)
+        {
+            conn.CreateQuery("CREATE TABLE plugin (build_hash TEXT, fullname TEXT, identifier TEXT, format_version INTEGER);")->ExecuteNonSelect();
+            conn.CreateQuery("CREATE TABLE resource (name TEXT, type TEXT, data_hash TEXT, data BLOB);")->ExecuteNonSelect();
+            conn.CreateQuery("CREATE TABLE map (name TEXT, lua TEXT);")->ExecuteNonSelect();
+            conn.CreateQuery("CREATE TABLE entity_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
+            conn.CreateQuery("CREATE TABLE cube_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
         }
 
     }
@@ -279,18 +288,11 @@ namespace Tools { namespace PluginCreate {
         try
         {
             conn = new Tools::Database::Sqlite::Connection(destFile.string());
-
-            // structure de la base
-            conn->CreateQuery("CREATE TABLE plugin (build_hash TEXT, fullname TEXT, identifier TEXT, format_version INTEGER);")->ExecuteNonSelect();
-            conn->CreateQuery("CREATE TABLE resource (name TEXT, type TEXT, data_hash TEXT, data BLOB);")->ExecuteNonSelect();
-            conn->CreateQuery("CREATE TABLE map (name TEXT, lua TEXT);")->ExecuteNonSelect();
-            conn->CreateQuery("CREATE TABLE entity_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
-            conn->CreateQuery("CREATE TABLE cube_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
-
-            conn->BeginTransaction(); // zomg
+            CreatePluginTables(*conn);
+            conn->BeginTransaction();
 
             // remplissage
-            FillTablePlugin(*conn, identifier, fullname);
+            FillTablePlugin(identifier, fullname, *conn);
             FillTableResource(pluginRoot, *conn);
             FillTableEntityFile(pluginRoot, *conn);
             FillTableCubeFile(pluginRoot, *conn);

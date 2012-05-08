@@ -21,6 +21,7 @@ namespace Tools { namespace Database {
         virtual IQuery& Bind(double val) = 0;
         virtual IQuery& Bind(std::string const& val) = 0;
         virtual IQuery& Bind(void const* tab, std::size_t size) = 0;
+        virtual IQuery& Bind(std::vector<char> const& data) = 0;
         virtual IQuery& ExecuteNonSelect() = 0;
         virtual std::unique_ptr<IRow> Fetch() = 0;
         virtual void Reset() = 0;

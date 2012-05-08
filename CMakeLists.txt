@@ -109,6 +109,7 @@ configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/De
 add_subdirectory(sdk)
 add_subdirectory(packager-qt)
 add_subdirectory(packager-cli)
+add_subdirectory(installer-cli)
 add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(tests)

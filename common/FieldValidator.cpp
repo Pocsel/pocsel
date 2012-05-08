@@ -27,7 +27,17 @@ namespace Common {
         return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
+    bool FieldValidator::IsWorldIdentifier(std::string const& str)
+    {
+        return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
+    }
+
     bool FieldValidator::IsPluginFullname(std::string const& str)
+    {
+        return str.size() <= 100;
+    }
+
+    bool FieldValidator::IsWorldFullname(std::string const& str)
     {
         return str.size() <= 100;
     }
@@ -42,7 +52,12 @@ namespace Common {
         return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
-    bool IsPluginBuildHash(std::string const& str)
+    bool FieldValidator::IsPluginBuildHash(std::string const& str)
+    {
+        return FieldValidator::IsAlNumDash(str) && str.size() >= 10 && str.size() <= 100; // regles arbitraires
+    }
+
+    bool FieldValidator::IsWorldBuildHash(std::string const& str)
     {
         return FieldValidator::IsAlNumDash(str) && str.size() >= 10 && str.size() <= 100; // regles arbitraires
     }
@@ -54,12 +69,17 @@ namespace Common {
         for (; it != itEnd; ++it)
             if (!isalnum(*it))
             {
+                bool found = false;
                 auto itAllowed = allowed.begin();
                 auto itAllowedEnd = allowed.end();
                 for (; itAllowed != itAllowedEnd; ++itAllowed)
                     if (*it == *itAllowed)
-                        continue;
-                return false;
+                    {
+                        found = true;
+                        break;
+                    }
+                if (!found)
+                    return false;
             }
         return true;
     }
