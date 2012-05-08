@@ -30,6 +30,13 @@ namespace Tools { namespace Models { namespace Iqm {
         Uint32 material;
         Uint32 first_vertex, num_vertexes;
         Uint32 first_triangle, num_triangles;
+
+        Mesh() :
+            name(0),
+            material(0),
+            first_vertex(0), num_vertexes(0),
+            first_triangle(0), num_triangles(0)
+        {}
     };
 
     namespace VertexArrayType {
@@ -63,6 +70,14 @@ namespace Tools { namespace Models { namespace Iqm {
     struct Triangle
     {
         Uint32 vertex[3];
+
+        Triangle() {}
+        Triangle(Uint32 v0, Uint32 v1, Uint32 v2)
+        {
+            vertex[0] = v0;
+            vertex[1] = v1;
+            vertex[2] = v2;
+        }
     };
 
     struct Joint
@@ -72,6 +87,14 @@ namespace Tools { namespace Models { namespace Iqm {
         glm::fvec3 position;
         glm::fquat orientation;
         glm::fvec3 size;
+
+        Joint() :
+            name(0),
+            parent(-1),
+            position(0, 0, 0),
+            orientation(0, 0, 0, 0),
+            size(0, 0, 0)
+        {}
     };
 
     struct Pose
@@ -80,6 +103,17 @@ namespace Tools { namespace Models { namespace Iqm {
         Uint32 mask;
         float channeloffset[10];
         float channelscale[10];
+
+        Pose() :
+            parent(-1),
+            mask(0)
+        {
+            for (unsigned int i = 0; i < 10; ++i)
+            {
+                channeloffset[i] = 0;
+                channelscale[i] = 0;
+            }
+        }
     };
 
     struct Anim
@@ -88,6 +122,13 @@ namespace Tools { namespace Models { namespace Iqm {
         Uint32 first_frame, num_frames;
         float framerate;
         Uint32 flags;
+
+        Anim() :
+            name(0),
+            first_frame(0), num_frames(0),
+            framerate(0),
+            flags(0)
+        {}
     };
 
     struct VertexArray
@@ -99,11 +140,11 @@ namespace Tools { namespace Models { namespace Iqm {
         Uint32 offset;
     };
 
-    struct Bounds
-    {
-        float bbmin[3], bbmax[3];
-        float xyradius, radius;
-    };
+    //struct Bounds
+    //{
+    //    float bbmin[3], bbmax[3];
+    //    float xyradius, radius;
+    //};
 
 }}}
 
