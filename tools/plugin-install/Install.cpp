@@ -29,8 +29,9 @@ namespace Tools { namespace PluginInstall {
         void FillTableWorld(std::string const& identifier, std::string const& fullname, Tools::Database::IConnection& wconn)
         {
             boost::uuids::random_generator buildHashGenerator;
+            // version mise à 0 car elle sera update après à 1
             wconn.CreateQuery("INSERT INTO world (build_hash, fullname, identifier, version, format_version) VALUES (?, ?, ?, ?, ?);")->
-                Bind(boost::uuids::to_string(buildHashGenerator())).Bind(fullname).Bind(identifier).Bind(1).Bind(Common::WorldFormatVersion).ExecuteNonSelect();
+                Bind(boost::uuids::to_string(buildHashGenerator())).Bind(fullname).Bind(identifier).Bind(0).Bind(Common::WorldFormatVersion).ExecuteNonSelect();
         }
 
         Uint32 UpdateTablePlugin(std::string const& pluginBuildHash, std::string const& pluginIdentifier, std::string const& pluginFullname, Tools::Database::IConnection& wconn)
@@ -144,6 +145,38 @@ namespace Tools { namespace PluginInstall {
             }
         }
 
+        void UpdateTableMap(Uint32 pluginId, std::string const& pluginIdentifier, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
+        {
+            auto pluginQuery = pconn.CreateQuery("SELECT name, lua FROM map;");
+            while (auto pluginRow = pluginQuery->Fetch())
+            {
+                std::string name = pluginIdentifier + "_" + pluginRow->GetString(0);
+                if (!Common::FieldValidator::IsMapName(name))
+                    throw std::runtime_error("Invalid map name \"" + name + "\".");
+                std::string lua = pluginRow->GetString(1);
+
+                auto worldQuery = wconn.CreateQuery("SELECT 1 FROM map WHERE name = ? AND plugin_id = ?;");
+                worldQuery->Bind(name).Bind(pluginId);
+                if (worldQuery->Fetch())
+                {
+                    wconn.CreateQuery("UPDATE map SET lua = ? WHERE name = ? AND plugin_id = ?;")->Bind(lua).Bind(name).Bind(pluginId).ExecuteNonSelect();
+                    Tools::log << "Updated map \"" << name << "\" (size: " << lua.size() << ")." << std::endl;
+                }
+                else
+                {
+                    wconn.CreateQuery("CREATE TABLE " + name + "_bigchunk (id INTEGER PRIMARY KEY, data BLOB);")->ExecuteNonSelect();
+                    wconn.CreateQuery("INSERT INTO map (name, plugin_id, lua, tick) VALUES (?, ?, ?, ?);")->
+                        Bind(name).Bind(pluginId).Bind(lua).Bind(0).ExecuteNonSelect();
+                    Tools::log << "Added map \"" << name << "\" (size: " << lua.size() << ")." << std::endl;
+                }
+            }
+        }
+
+        void UpdateTableWorld(Uint32 worldVersion, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
+        {
+            wconn.CreateQuery("UPDATE world SET version = ?;")->Bind(worldVersion).ExecuteNonSelect();
+        }
+
     }
 
     bool Install(boost::filesystem::path const& pluginFile, boost::filesystem::path const& worldFile, std::string const& identifier /* = "" */, std::string const& fullname /* = "" */)
@@ -249,6 +282,8 @@ namespace Tools { namespace PluginInstall {
             UpdateTableCubeFile(pluginId, *wconn, *pconn);
             UpdateTableEntityFile(pluginId, *wconn, *pconn);
             UpdateTableResource(pluginId, *wconn, *pconn);
+            UpdateTableMap(pluginId, pluginIdentifier, *wconn, *pconn);
+            UpdateTableWorld(worldVersion + 1, *wconn, *pconn);
 
             Tools::log << "Finishing writing to database..." << std::endl;
             wconn->EndTransaction();
