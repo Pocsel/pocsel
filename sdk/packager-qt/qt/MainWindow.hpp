@@ -1,13 +1,13 @@
-#ifndef __PACKAGER_QT_QT_MAINWINDOW_HPP__
-#define __PACKAGER_QT_QT_MAINWINDOW_HPP__
+#ifndef __SDK_PACKAGER_QT_QT_MAINWINDOW_HPP__
+#define __SDK_PACKAGER_QT_QT_MAINWINDOW_HPP__
 
-#include "packager-qt/ui_MainWindow.h"
+#include "sdk/packager-qt/ui_MainWindow.h"
 
-namespace PackagerQt {
+namespace Sdk { namespace PackagerQt {
     class Packager;
-}
+}}
 
-namespace PackagerQt { namespace Qt {
+namespace Sdk { namespace PackagerQt { namespace Qt {
 
     class MainWindow :
         public QMainWindow, private ::Ui::MainWindow
@@ -29,6 +29,6 @@ namespace PackagerQt { namespace Qt {
         void _Log(std::string const& message);
     };
 
-}}
+}}}
 
 #endif

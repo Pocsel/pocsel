@@ -1,9 +1,9 @@
-#ifndef __PACKAGER_QT_PACKAGER_HPP__
-#define __PACKAGER_QT_PACKAGER_HPP__
+#ifndef __SDK_PACKAGER_QT_PACKAGER_HPP__
+#define __SDK_PACKAGER_QT_PACKAGER_HPP__
 
 #include <QApplication>
 
-namespace PackagerQt {
+namespace Sdk { namespace PackagerQt {
 
     namespace Qt {
         class MainWindow;
@@ -24,6 +24,6 @@ namespace PackagerQt {
         QApplication& GetApplication() { return this->_app; }
     };
 
-}
+}}
 
 #endif

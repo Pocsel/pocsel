@@ -1,8 +1,7 @@
-#include "packager-qt/Packager.hpp"
-#include "packager-qt/qt/MainWindow.hpp"
+#include "sdk/packager-qt/Packager.hpp"
+#include "sdk/packager-qt/qt/MainWindow.hpp"
 
-namespace PackagerQt
-{
+namespace Sdk { namespace PackagerQt {
 
     Packager::Packager(int& ac, char** av) :
         _app(ac, av)
@@ -26,4 +25,4 @@ namespace PackagerQt
         return *this->_mainWindow;
     }
 
-}
+}}

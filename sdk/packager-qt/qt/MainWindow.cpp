@@ -1,12 +1,12 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "packager-qt/qt/MainWindow.hpp"
-#include "packager-qt/Packager.hpp"
+#include "sdk/packager-qt/qt/MainWindow.hpp"
+#include "sdk/packager-qt/Packager.hpp"
 #include "common/constants.hpp"
 #include "tools/plugin-create/Create.hpp"
 
-namespace PackagerQt { namespace Qt {
+namespace Sdk { namespace PackagerQt { namespace Qt {
 
     MainWindow::MainWindow(Packager& packager) :
         _packager(packager), _replaceWithoutAsking(false)
@@ -56,4 +56,4 @@ namespace PackagerQt { namespace Qt {
         this->_packager.GetApplication().processEvents(QEventLoop::ExcludeUserInputEvents);
     }
 
-}}
+}}}
