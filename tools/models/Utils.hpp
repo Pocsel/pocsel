@@ -8,6 +8,60 @@ namespace Tools { namespace Models {
     class Utils
     {
     public:
+        template<typename T>
+        struct UnionFind
+        {
+            struct Ufval
+            {
+                int rank, next;
+                T val;
+
+                Ufval(T const& val) : rank(0), next(-1), val(val) {}
+            };
+
+            std::vector<Ufval> ufvals;
+
+            void Clear() { ufvals.clear(); }
+
+            T const& Find(int k, T const& noval, T const& initval)
+            {
+                if (k >= (int)ufvals.size())
+                    return initval;
+                while (ufvals[k].next >= 0)
+                    k = ufvals[k].next;
+                if (ufvals[k].val == noval)
+                    ufvals[k].val = initval;
+                return ufvals[k].val;
+            }
+
+            int CompressFind(int k)
+            {
+                if (ufvals[k].next < 0)
+                    return k;
+                return ufvals[k].next = CompressFind(ufvals[k].next);
+            }
+
+            void Unite(int x, int y, const T &noval)
+            {
+                while ((int)ufvals.size() <= std::max(x, y))
+                    ufvals.push_back(Ufval(noval));
+                x = CompressFind(x);
+                y = CompressFind(y);
+                if (x == y)
+                    return;
+                Ufval& xval = ufvals[x];
+                Ufval& yval = ufvals[y];
+                if (xval.rank < yval.rank)
+                    xval.next = y;
+                else
+                {
+                    yval.next = x;
+                    if (xval.rank == yval.rank)
+                        yval.rank++;
+                }
+            }
+        };
+
         static int FindVarrayType(const char *name)
         {
             static const struct _VarrayType
@@ -299,7 +353,6 @@ namespace Tools { namespace Models {
             b.Finalize();
             return b;
         }
-
     };
 
 }}
