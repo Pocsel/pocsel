@@ -24,6 +24,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         virtual void Set(Color4<float> const& color);
         virtual void Set(glm::detail::tvec2<float> const& vector);
         virtual void Set(glm::detail::tvec3<float> const& vector);
+        virtual void Set(glm::detail::tvec4<float> const& vector);
         virtual void Set(glm::detail::tmat4x4<float> const& matrix, bool isProjection = false);
         virtual void Set(std::vector<glm::mat4x4> const& matrices);
         virtual void Set(ITexture2D& texture);

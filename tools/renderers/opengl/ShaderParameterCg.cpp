@@ -59,6 +59,11 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         cgSetParameter3fv(this->_param, (float*)&vector);
     }
 
+    void ShaderParameterCg::Set(glm::detail::tvec4<float> const& vector)
+    {
+        cgSetParameter4fv(this->_param, (float*)&vector);
+    }
+
     void ShaderParameterCg::Set(glm::detail::tmat4x4<float> const& matrix, bool)
     {
         cgSetMatrixParameterfc(this->_param, (float*)&matrix);

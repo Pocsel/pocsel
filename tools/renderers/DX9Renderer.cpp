@@ -333,7 +333,7 @@ namespace Tools { namespace Renderers {
             (*it)->GetEffect()->OnResetDevice();
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE));
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
@@ -342,7 +342,7 @@ namespace Tools { namespace Renderers {
 
     void DX9Renderer::_PushState(DX9Renderer::RenderState const& state)
     {
-        bool startScene = true;
+        bool startScene = false;
 
         RenderState rsOld;
         if (this->_states.size() > 0)
