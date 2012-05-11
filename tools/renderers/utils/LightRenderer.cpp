@@ -1,5 +1,6 @@
 #include "tools/precompiled.hpp"
 
+#include "tools/Vector3.hpp"
 #include "tools/renderers/utils/DirectionnalLight.hpp"
 #include "tools/renderers/utils/ILight.hpp"
 #include "tools/renderers/utils/GBuffer.hpp"
@@ -57,8 +58,8 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_renderer.SetClearColor(Color4f(.0f, .0f, .0f, 1.0f));
         this->_renderer.Clear(ClearFlags::Color);
         this->_renderer.SetDepthTest(false);
-        this->_RenderDirectionnalLights(gbuffer, directionnalLights);
         this->_RenderPointLights(gbuffer, pointLights);
+        this->_RenderDirectionnalLights(gbuffer, directionnalLights);
         gbuffer.EndLighting();
     }
 
@@ -71,8 +72,8 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_renderer.SetClearColor(Color4f(.0f, .0f, .0f, 1.0f));
         this->_renderer.Clear(ClearFlags::Color);
         this->_renderer.SetDepthTest(false);
-        this->_RenderDirectionnalLights(gbuffer, directionnalLights);
         this->_RenderPointLights(gbuffer, pointLights);
+        this->_RenderDirectionnalLights(gbuffer, directionnalLights);
         gbuffer.EndLighting();
     }
 
@@ -136,7 +137,6 @@ namespace Tools { namespace Renderers { namespace Utils {
     {
         if (lights.size() == 0)
             return;
-        this->_renderer.SetCullFace(false);
         gbuffer.GetNormalsDepth().Bind();
         this->_point.normalDepth->Set(gbuffer.GetNormalsDepth());
         do
@@ -145,13 +145,12 @@ namespace Tools { namespace Renderers { namespace Utils {
             for (auto it = lights.begin(), ite = lights.end(); it != ite; ++it)
             {
                 auto& light = *it;
-                this->_renderer.SetModelMatrix(glm::scale(glm::vec3(light.range)) * glm::translate(light.position));
+                this->_renderer.SetModelMatrix(glm::scale(glm::translate(light.position), glm::vec3(light.range)));
                 light.SetParameters();
                 this->_point.sphere->Render();
             }
         } while (this->_point.shader->EndPass());
         gbuffer.GetNormalsDepth().Unbind();
-        this->_renderer.SetCullFace(true);
     }
 
 }}}

@@ -52,12 +52,24 @@ float3 decodeNormals(float4 enc)
 
 float3 decodePosition(float4 enc, float2 coords)
 {
-    float z = enc.z;
+    float z = 1-enc.z;
     float x = coords.x * 2 - 1;
+#ifdef DIRECTX
     float y = (1 - coords.y) * 2 - 1;
+#else
+    float y = coords.y * 2 - 1;
+#endif
     float4 projPos = float4(x, y, z, 1.0);
     float4 pos = mul(projectionInverse, projPos);
     return pos.xyz / pos.w;
+}
+
+float doAmbientOcclusion(in float2 tcoord, in float2 uv, in float3 p, in float3 cnorm)
+{
+    float3 diff = decodePosition(tex2D(normalDepth, tcoord + uv), tcoord + uv) - p;
+    const float3 v = normalize(diff);
+    const float d = length(diff)*1.0;
+    return max(0.0,dot(cnorm,v)-0.001)*(1.0/(1.0+d))*2;
 }
 
 FSout fs(in VSout v)
@@ -74,10 +86,31 @@ FSout fs(in VSout v)
     float3 reflection = reflect(viewLightDirection, viewNormal);
     float specular = pow(max(0.0, dot(reflection, viewDirection)), materialShininess);
 
+    // SSAO
+    const float2 vec[4] = {float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
+
+    float ao = 0.0f;
+    float rad = 1.5f / viewPosition.z;
+
+    int iterations = 4;
+    for (int j = 0; j < iterations; ++j)
+    {
+        float2 coord1 = reflect(vec[j], normalize(float2(0, 1))) * rad;
+        float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
+
+        ao += doAmbientOcclusion(v.texCoord, coord1*0.25, viewPosition, viewNormal);
+        ao += doAmbientOcclusion(v.texCoord, coord2*0.5, viewPosition, viewNormal);
+        ao += doAmbientOcclusion(v.texCoord, coord1*0.75, viewPosition, viewNormal);
+        ao += doAmbientOcclusion(v.texCoord, coord2, viewPosition, viewNormal);
+    }
+    ao/=(float)iterations*4.0;
+    //ao = 1 - ao;
+    // END
+
     FSout f;
-    f.diffuse.rgb = NdL * lightDiffuseColor;
+    f.diffuse.rgb = NdL * lightDiffuseColor - ao;
     f.diffuse.rgb += lightAmbientColor;
-    f.specular.rgb = specular * lightSpecularColor;
+    f.specular.rgb = 0*specular * lightSpecularColor * ao;
     f.diffuse.a = NdL;
     f.specular.a = specular;
     return f;
@@ -90,6 +123,11 @@ technique tech_glsl
     pass p0
     {
         AlphaBlendEnable = true;
+        AlphaTestEnable = true;
+        AlphaRef = 0;
+        SrcBlend = 1;
+        DestBlend = 1;
+        ZEnable = false;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -99,6 +137,11 @@ technique tech
     pass p0
     {
         AlphaBlendEnable = true;
+        AlphaTestEnable = true;
+        AlphaRef = 0;
+        SrcBlend = 1;
+        DestBlend = 1;
+        ZEnable = false;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }
@@ -110,8 +153,8 @@ technique tech
 {
    pass p0
    {
-        AlphaBlendEnable = True;
-        AlphaTestEnable = True;
+        AlphaBlendEnable = true;
+        AlphaTestEnable = true;
         AlphaRef = 0;
         SrcBlend = One;
         DestBlend = One;

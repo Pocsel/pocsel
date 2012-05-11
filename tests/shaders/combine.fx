@@ -40,8 +40,6 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 
 float4 fs(in VSout v) : COLOR
 {
-    if (v.texCoord.x >= v.texCoord.y - 0.001 && v.texCoord.x <= v.texCoord.y + 0.001)
-        return float4(0, 0, 0, 1);
     if (v.texCoord.y < 0.25)
     {
         float2 coord = v.texCoord * 4;

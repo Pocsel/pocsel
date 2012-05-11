@@ -15,6 +15,13 @@
 
 namespace Client { namespace Map {
 
+    namespace {
+        bool compareDistances(std::pair<double, Chunk*> const& p1, std::pair<double, Chunk*> const& p2)
+        {
+            return p1.first > p2.first;
+        }
+    }
+
     ChunkRenderer::ChunkRenderer(Game::Game& game)
         : _game(game),
         _renderer(game.GetClient().GetWindow().GetRenderer())
@@ -63,18 +70,22 @@ namespace Client { namespace Map {
             glm::detail::tmat4x4<double>(camera.projection)
             * glm::lookAt<double>(pos, glm::dvec3(pos + glm::dvec3(camera.direction)), glm::dvec3(0, 1, 0));
 
-        std::list<Chunk*> visibleChunks;
+        static std::vector<std::pair<double, Chunk*>> visibleChunks;
+        visibleChunks.clear();
         this->_game.GetMap().GetChunkManager().ForeachIn(Tools::Frustum(viewProj),
             [&](Chunk& chunk)
             {
                 if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount() == 0)
                     return;
-                visibleChunks.push_back(&chunk);
+                auto const& relativePosition = (Common::GetChunkPosition(chunk.coords) + glm::dvec3(Common::ChunkSize / 2.0f)) - camera.position;
+                auto dist = glm::lengthSquared(relativePosition);
+                visibleChunks.push_back(std::make_pair(dist, &chunk));
             });
 
         this->_transparentChunks.clear();
         if (visibleChunks.size() == 0)
             return;
+        std::sort(visibleChunks.begin(), visibleChunks.end(), &compareDistances);
 
         for (auto effectIt = this->_cubeTypes.begin(), effectIte = this->_cubeTypes.end(); effectIt != effectIte; ++effectIt)
         {
@@ -87,11 +98,10 @@ namespace Client { namespace Map {
                     {
                         for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
                         {
-                            if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
+                            auto& chunk = chunkIt->second;
+                            if (chunk->GetMesh() == 0 || chunk->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
                                 continue;
-                            auto const& relativePosition = (Common::GetChunkPosition((*chunkIt)->coords) + glm::dvec3(Common::ChunkSize / 2.0f)) - camera.position;
-                            auto dist = glm::lengthSquared(relativePosition);
-                            this->_transparentChunks[texturesIt->first].insert(std::multimap<double, Chunk*>::value_type(-dist, *chunkIt));
+                            this->_transparentChunks[texturesIt->first].insert(std::multimap<double, Chunk*>::value_type(-chunkIt->first/*dist*/, chunk));
                         }
                     }
                     else
@@ -100,11 +110,12 @@ namespace Client { namespace Map {
                         effectIt->second.first->Set(texturesIt->second->GetCurrentTexture());
                         for (auto chunkIt = visibleChunks.begin(), chunkIte = visibleChunks.end(); chunkIt != chunkIte; ++chunkIt)
                         {
-                            if ((*chunkIt)->GetMesh() == 0 || (*chunkIt)->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
+                            auto& chunk = chunkIt->second;
+                            if (chunk->GetMesh() == 0 || chunk->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
                                 continue;
                             effectIt->first->Update(this->_game.GetInterpreter().MakeNil()); // TODO: biome data
-                            this->_renderer.SetModelMatrix(glm::translate<float>(glm::fvec3(Common::GetChunkPosition((*chunkIt)->coords) - camera.position)));
-                            (*chunkIt)->GetMesh()->Render(texturesIt->first, this->_renderer);
+                            this->_renderer.SetModelMatrix(glm::translate<float>(glm::fvec3(Common::GetChunkPosition(chunk->coords) - camera.position)));
+                            chunk->GetMesh()->Render(texturesIt->first, this->_renderer);
                         }
                         texturesIt->second->Unbind();
                     }

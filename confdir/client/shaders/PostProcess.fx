@@ -40,17 +40,21 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 
 float4 fs(in VSout v) : COLOR
 {
-    if (v.texCoord.y < 0.25)
-    {
-        float2 coord = v.texCoord * 4;
-        if (coord.x < 1)
-            return float4(tex2D(lighting, coord).rgb, 1);
-        if (coord.x < 2)
-            return float4(tex2D(specular, coord + float2(-1, 0)).rgb, 1);
-        if (coord.x < 3)
-            return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
-    }
+    //if (v.texCoord.y < 0.25)
+    //{
+    //    float2 coord = v.texCoord * 4;
+    //    if (coord.x < 1)
+    //        return float4(tex2D(lighting, coord).rgb, 1);
+    //    if (coord.x < 2)
+    //        return float4(tex2D(specular, coord + float2(-1, 0)).rgb, 1);
+    //    if (coord.x < 3)
+    //        return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
+    //}
+#ifdef DIRECTX
     float4 diff = tex2D(diffuse, v.texCoord);
+#else
+    float4 diff = tex2D(diffuse, float2(v.texCoord.x, 1-v.texCoord.y));
+#endif
     float4 spec = tex2D(specular, v.texCoord);
 
     float3 color = tex2D(lighting, v.texCoord).rgb * diff.rgb;

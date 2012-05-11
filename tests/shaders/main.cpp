@@ -19,11 +19,13 @@ using namespace Tools::Window;
 
 static std::string testShaderPath = "test.fx";
 static std::string directionnalLightShaderPath = "DirectionnalLight.fx";
+static std::string pointLightShaderPath = "DirectionnalLight.fx";//"PointLight.fx";
 static std::string combineShaderPath = "combine.fx";
 static std::string texturePath = "test.png";
 
 static std::string codeTestShader;
 static std::string codeDirectionnalLightShader;
+static std::string codePointLightShader;
 static std::string codeCombineShader;
 
 static std::unique_ptr<Utils::GBuffer> gbuffer;
@@ -35,6 +37,8 @@ static std::unique_ptr<IShaderParameter> normals;
 static std::unique_ptr<IShaderParameter> depth;
 static std::unique_ptr<IShaderParameter> quadWorldViewProjection;
 static std::unique_ptr<Utils::LightRenderer> lightRenderer;
+static std::unique_ptr<IShaderProgram> lightDirecShader;
+static std::unique_ptr<IShaderProgram> lightPointShader;
 
 static std::unique_ptr<ITexture2D> texture;
 static std::unique_ptr<IVertexBuffer> vertexBuffer;
@@ -128,11 +132,14 @@ static void LoadShaders(Sdl::Window& window)
 
         auto tmpTest = std::string((std::istreambuf_iterator<char>(std::ifstream(testShaderPath))), std::istreambuf_iterator<char>());
         auto tmpDirectionnal = std::string((std::istreambuf_iterator<char>(std::ifstream(directionnalLightShaderPath))), std::istreambuf_iterator<char>());
+        auto tmpPoint = std::string((std::istreambuf_iterator<char>(std::ifstream(pointLightShaderPath))), std::istreambuf_iterator<char>());
         auto tmpCombine = std::string((std::istreambuf_iterator<char>(std::ifstream(combineShaderPath))), std::istreambuf_iterator<char>());
 
         testShader = renderer.CreateProgram(tmpTest);
         combineShader = renderer.CreateProgram(tmpCombine);
-        lightRenderer = std::unique_ptr<Utils::LightRenderer>(new Utils::LightRenderer(renderer, tmpDirectionnal, ""));
+        lightDirecShader = renderer.CreateProgram(tmpDirectionnal);
+        lightPointShader = renderer.CreateProgram(tmpPoint);
+        lightRenderer = std::unique_ptr<Utils::LightRenderer>(new Utils::LightRenderer(renderer, *lightDirecShader, *lightPointShader));
 
         diffuse = testShader->GetParameter("diffuse");
 
@@ -140,6 +147,7 @@ static void LoadShaders(Sdl::Window& window)
 
         codeTestShader = std::move(tmpTest);
         codeDirectionnalLightShader = std::move(tmpDirectionnal);
+        codePointLightShader = std::move(tmpPoint);
         codeCombineShader = std::move(tmpCombine);
     }
     catch (std::exception& ex)
@@ -147,8 +155,9 @@ static void LoadShaders(Sdl::Window& window)
         Tools::error << ex.what() << std::endl;
         testShader = renderer.CreateProgram(codeTestShader);
         combineShader = renderer.CreateProgram(codeCombineShader);
-        
-        lightRenderer = std::unique_ptr<Utils::LightRenderer>(new Utils::LightRenderer(renderer, codeDirectionnalLightShader, ""));
+        lightDirecShader = renderer.CreateProgram(codeDirectionnalLightShader);
+        lightPointShader = renderer.CreateProgram(codePointLightShader);
+        lightRenderer = std::unique_ptr<Utils::LightRenderer>(new Utils::LightRenderer(renderer, *lightDirecShader, *lightPointShader));
 
         diffuse = testShader->GetParameter("diffuse");
 
@@ -158,18 +167,18 @@ static void LoadShaders(Sdl::Window& window)
     // Lights
     directionnalLights.push_back(lightRenderer->CreateDirectionnalLight());
     directionnalLights.back().direction = glm::normalize(glm::vec3(1, 0, 0));
-    directionnalLights.back().diffuseColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-    directionnalLights.back().specularColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    directionnalLights.back().diffuseColor = glm::vec3(0.0f, 0.0f, 1.0f);
+    directionnalLights.back().specularColor = glm::vec3(0.0f, 0.0f, 1.0f);
 
     directionnalLights.push_back(lightRenderer->CreateDirectionnalLight());
     directionnalLights.back().direction = glm::normalize(glm::vec3(0, 0, 1));
-    directionnalLights.back().diffuseColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    directionnalLights.back().specularColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    directionnalLights.back().diffuseColor = glm::vec3(1.0f, 0.0f, 0.0f);
+    directionnalLights.back().specularColor = glm::vec3(1.0f, 0.0f, 0.0f);
 
     directionnalLights.push_back(lightRenderer->CreateDirectionnalLight());
     directionnalLights.back().direction = glm::normalize(glm::vec3(0, 1, 0));
-    directionnalLights.back().diffuseColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    directionnalLights.back().specularColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    directionnalLights.back().diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
+    directionnalLights.back().specularColor = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
 static void UnloadShaders()
@@ -182,7 +191,10 @@ static void UnloadShaders()
     depth = 0;
     combineShader = 0;
     testShader = 0;
+
     lightRenderer = 0;
+    lightDirecShader = 0;
+    lightPointShader = 0;
     directionnalLights.clear();
 }
 
@@ -249,6 +261,7 @@ int main(int ac, char *av[])
         RAII _shaders([&]() { UnloadShaders(); texture = 0; vertexBuffer = 0; indexBuffer = 0; screenQuad = 0; });
 
         CreateCube(*vertexBuffer, *indexBuffer);
+        Utils::Sphere sphere(renderer);
 
         while (run)
         {
@@ -267,7 +280,7 @@ int main(int ac, char *av[])
             renderer.SetProjectionMatrix(glm::perspective(90.0f, (float)window.GetSize().x / (float)window.GetSize().y, 0.01f, 5.0f));
             renderer.SetViewMatrix(glm::lookAt(glm::vec3(0.001f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)));
             renderer.SetModelMatrix(
-                glm::translate(glm::vec3(1.0f, 0.0f, 0.0f))
+                glm::translate(glm::vec3(2.0f, 0.0f, 0.0f))
                 * glm::yawPitchRoll(
                     timer.GetElapsedTime() * 0.0001f,
                     timer.GetElapsedTime() * 0.00001f,
@@ -281,12 +294,18 @@ int main(int ac, char *av[])
 
             renderer.SetCullFace(cullface);
 
-            RenderCube(renderer, *texture);
+            do
+            {
+                testShader->BeginPass();
+                sphere.Render();
+            } while (testShader->EndPass());
+
+            //RenderCube(renderer, *texture);
             gbuffer->Unbind();
 
             renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.5f, 1.0f));
             renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
-            RenderCube(renderer, gbuffer->GetColors());
+            //RenderCube(renderer, gbuffer->GetColors());
 
             lightRenderer->Render(*gbuffer, directionnalLights, std::list<Utils::PointLight>());
             gbuffer->Render();

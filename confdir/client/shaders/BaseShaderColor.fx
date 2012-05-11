@@ -26,6 +26,8 @@ technique tech_glsl
     pass p0
     {
         AlphaBlendEnable = true;
+        AlphaTestEnable = true;
+        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -35,6 +37,8 @@ technique tech
     pass p0
     {
         AlphaBlendEnable = true;
+        AlphaTestEnable = true;
+        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }
