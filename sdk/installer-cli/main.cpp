@@ -55,7 +55,10 @@ int main(int ac, char** av)
             if (std::string(av[5]) == "--recreate")
             {
                 if (boost::filesystem::is_regular_file(av[2]))
+                {
                     boost::filesystem::remove(av[2]);
+                    Tools::log << "Removed old world \"" << av[2] << "\"." << std::endl;
+                }
                 success = Install(av[1], av[2], av[3], av[4]);
                 break;
             }

@@ -17,9 +17,8 @@ namespace Tools { namespace PluginInstall {
             //wconn.CreateQuery("CREATE TABLE base_map1_entity_callback (id INTEGER, target_id INTEGER, function TEXT, arg TEXT);")->ExecuteNonSelect();
             //wconn.CreateQuery("CREATE TABLE base_map1_entity_type (type TEXT, storage TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE cube_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
-            wconn.CreateQuery("CREATE TABLE cube_id (plugin_id INTEGER, name TEXT, id INTEGER);")->ExecuteNonSelect();
+            wconn.CreateQuery("CREATE TABLE cube_id (id INTEGER PRIMARY KEY, plugin_id INTEGER, name TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE entity_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
-            wconn.CreateQuery("CREATE TABLE entity_id (plugin_id INTEGER, name TEXT, id INTEGER);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE map (name TEXT, plugin_id INTEGER, lua TEXT, tick INTEGER);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE plugin (id INTEGER PRIMARY KEY, build_hash TEXT, fullname TEXT, identifier TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE resource (id INTEGER PRIMARY KEY, plugin_id INTEGER, version INTEGER, name TEXT, type TEXT, data_hash TEXT, data BLOB);")->ExecuteNonSelect();

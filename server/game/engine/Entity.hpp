@@ -14,7 +14,7 @@ namespace Server { namespace Game { namespace Engine {
     protected:
         EntityType* _type;
         Tools::Lua::Ref _self;
-        std::map<Uint64 /* time */, Uint32 /* callback */> _pendingCalls;
+        //std::map<Uint64 /* time */, Uint32 /* callback */> _pendingCalls;
 
     public:
         Entity(Engine& engine, Uint32 id, EntityType* type);

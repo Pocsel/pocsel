@@ -178,6 +178,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::Save(Tools::Database::IConnection& conn)
     {
+        /*
         conn.CreateQuery("DELETE FROM " + this->_engine.GetMap().GetName() + "_entity")->ExecuteNonSelect();
         conn.BeginTransaction();
         auto query = conn.CreateQuery("INSERT INTO " + this->_engine.GetMap().GetName() + "_entity (id, type, storage) VALUES (?, ?, ?)");
@@ -195,6 +196,7 @@ namespace Server { namespace Game { namespace Engine {
             }
         }
         conn.EndTransaction();
+        */
     }
 
     void EntityManager::BootstrapPlugin(Uint32 pluginId)
@@ -351,7 +353,7 @@ namespace Server { namespace Game { namespace Engine {
             if (!prototype["entityName"].IsString())
                 throw std::runtime_error("Server.Entity.Register[Positional]: Field \"entityName\" in prototype must exist and be of type string");
             if (!Common::FieldValidator::IsEntityType(entityName = prototype["entityName"].ToString()))
-                throw std::runtime_error("Server.Entity.Register[Positional]: Invalid entity name");
+                throw std::runtime_error("Server.Entity.Register[Positional]: Invalid entity name \"" + entityName + "\"");
             if (helper.GetNbArgs() && helper.PopArg().ToBoolean()) // bool flag en deuxieme parametre pour indiquer que c'est RegisterPositional()
                 positional = true;
         }

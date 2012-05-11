@@ -93,22 +93,24 @@ namespace Server { namespace Database {
         query = this->_connection.CreateQuery("SELECT name, lua, tick FROM map");
         while (auto row = query->Fetch())
         {
+            std::string name = row->GetString(0);
+            std::string lua = row->GetString(1);
+            Uint64 tick = row->GetUint64(2);
             try
             {
                 std::vector<Game::Map::Chunk::IdType> existingBigChunks;
-                auto q = this->_connection.CreateQuery("SELECT id FROM " + row->GetString(0) + "_bigchunk");
+                auto q = this->_connection.CreateQuery("SELECT id FROM " + name + "_bigchunk");
                 while (auto r = q->Fetch())
                     existingBigChunks.push_back(r->GetUint64(0));
 
                 Game::Map::Conf conf;
-                auto lmc = WorldLoader::_LoadMapConf(conf, row->GetString(0), row->GetString(1));
-                if (world._maps.find(conf.name) != world._maps.end())
-                    throw std::runtime_error("A map " + Tools::ToString(conf.name) + " already exists");
+                auto lmc = WorldLoader::_LoadMapConf(conf, name, lua);
+                auto map = new Game::Map::Map(conf, tick, world, existingBigChunks);
 
-                auto map = new Game::Map::Map(conf, row->GetUint64(2), world, existingBigChunks);
                 if (world._maps.find(conf.name) != world._maps.end())
                     throw std::runtime_error("A map named \"" + conf.name + "\" already exists");
                 world._maps[conf.name] = map;
+
                 WorldLoader::_RegisterResourcesFunctions(*map, map->GetEngine().GetInterpreter());
                 if (conf.is_default)
                     world._defaultMap = world._maps[conf.name];
@@ -118,8 +120,8 @@ namespace Server { namespace Database {
             }
             catch (std::exception& e)
             {
-                Log::load << "WorldLoader: Failed to load map \"" << row->GetString(0) << "\": " << e.what() << std::endl;
-                Tools::error << "WorldLoader: Failed to load map \"" << row->GetString(0) << "\": " << e.what() << std::endl;
+                Log::load << "WorldLoader: Failed to load map \"" << name << "\": " << e.what() << std::endl;
+                Tools::error << "WorldLoader: Failed to load map \"" << name << "\": " << e.what() << std::endl;
             }
         }
         if (world._defaultMap == 0)
@@ -197,13 +199,13 @@ namespace Server { namespace Database {
         cubeTypeNs.Set("Register", lua.MakeFunction([&](Tools::Lua::CallHelper& helper)
             {
                 Tools::Lua::Ref cubeType = helper.PopArg();
-                auto id = (Common::BaseChunk::CubeType)map.GetConfiguration().cubeTypes.size() + 1;
-                std::string name = cubeType["name"].Check<std::string>();
+                std::string name = cubeType["name"].Check<std::string>("Server.CubeType.Register: Field \"name\" must be a string");
+                auto id = this->_GetCubeTypeId(map.GetEngine().GetRunningPluginId(), name);
 
                 Game::Map::CubeType desc(id, name, cubeType);
                 desc.solid = cubeType["solid"].To<bool>();
                 desc.transparent = cubeType["transparent"].To<bool>();
-                desc.visualEffect = cubeType["visualEffect"].Check<Uint32>();
+                desc.visualEffect = cubeType["visualEffect"].Check<Uint32>("Server.CubeType.Register: Field \"visualEffect\" must be a number");
                 map.GetConfiguration().cubeTypes.push_back(desc);
 
                 Log::load << "[map: " << map.GetName() << "] " <<
@@ -212,14 +214,14 @@ namespace Server { namespace Database {
                     ", name: " << name << "\n";
             }));
 
-        auto query = this->_connection.CreateQuery("SELECT plugin_id, name, lua FROM cube_type ORDER BY id, plugin_id");
+        auto query = this->_connection.CreateQuery("SELECT plugin_id, name, lua FROM cube_file");
         while (auto row = query->Fetch())
         {
             currentPluginId = row->GetUint32(0);
             std::string name = row->GetString(1);
             std::string code = row->GetString(2);
 
-            Log::load << "[map: " << map.GetName() << "] Execute " << name << ".lua...\n";
+            Log::load << "[map: " << map.GetName() << "] Execute " << name << " from plugin " << currentPluginId << "...\n";
             try
             {
                 map.GetEngine().OverrideRunningPluginId(currentPluginId);
@@ -235,6 +237,23 @@ namespace Server { namespace Database {
 
         cubeTypeNs.Set("Register", lua.MakeNil());
         map.GetEngine().OverrideRunningPluginId(0);
+    }
+
+    Common::BaseChunk::CubeType WorldLoader::_GetCubeTypeId(Uint32 pluginId, std::string const& name)
+    {
+        auto query = this->_connection.CreateQuery("SELECT id FROM cube_id WHERE plugin_id = ? AND name = ?;");
+        query->Bind(pluginId).Bind(name);
+        static_assert(sizeof(Common::BaseChunk::CubeType) == sizeof(Uint16), "cette fonction assume un maximum de ~65000 types de cubes");
+        if (auto row = query->Fetch())
+            return row->GetUint16(0);
+        else
+        {
+            this->_connection.CreateQuery("INSERT INTO cube_id (plugin_id, name) VALUES (?, ?);")->Bind(pluginId).Bind(name).ExecuteNonSelect();
+            auto id = this->_connection.GetLastInsertedId();
+            if (id >= 256 * 256) // XXX
+                throw std::runtime_error("too many types of cubes to load, you should uninstall a plugin");
+            return id;
+        }
     }
 
     WorldLoader::LoadingMapConf WorldLoader::_LoadMapConf(Game::Map::Conf& conf, std::string const& name, std::string const& code)
