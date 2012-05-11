@@ -396,7 +396,7 @@ namespace Server { namespace Game { namespace Engine {
             if (it->second->GetSelf().IsTable())
                 try
                 {
-                    storage = this->_engine.GetInterpreter().GetSerializer().SerializeWithoutReturn(it->second->GetSelf()["storage"]);
+                    storage = this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->GetSelf()["storage"]);
                 }
                 catch (std::exception& e)
                 {

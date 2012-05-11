@@ -23,12 +23,13 @@ namespace Server { namespace Game { namespace Engine {
 
     private:
         Engine& _engine;
-        std::map<Uint64, std::list<Message*>> _messages;
+        std::map<Uint64 /* time */, std::list<Message*>> _messages;
 
     public:
         MessageManager(Engine& engine);
         ~MessageManager();
         void DispatchMessages();
+        void Save(Tools::Database::IConnection& conn);
 
         // rcon requests
         std::string RconGetMessages() const;
@@ -36,9 +37,9 @@ namespace Server { namespace Game { namespace Engine {
     private:
         void _ApiLater(Tools::Lua::CallHelper& helper);
         void _ApiNow(Tools::Lua::CallHelper& helper);
+        void _Load(Tools::Database::IConnection& conn);
     };
 
 }}}
 
 #endif
-

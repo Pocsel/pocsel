@@ -1,6 +1,9 @@
 #include "server/game/engine/CallbackManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
+#include "server/game/map/Map.hpp"
+#include "tools/database/IConnection.hpp"
+#include "tools/database/IConnection.hpp"
 #include "tools/lua/Interpreter.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -74,6 +77,46 @@ namespace Server { namespace Game { namespace Engine {
         if (it == this->_callbacks.end())
             throw std::runtime_error("CallbackManager: Callback not found.");
         return *it->second;
+    }
+
+    void CallbackManager::Save(Tools::Database::IConnection& conn)
+    {
+        std::string table = this->_engine.GetMap().GetName() + "_callback";
+        conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
+        auto query = conn.CreateQuery("INSERT INTO " + table + " (id, target_id, function, arg) VALUES (?, ?, ?, ?);");
+        auto it = this->_callbacks.begin();
+        auto itEnd = this->_callbacks.end();
+        for (; it != itEnd; ++it)
+            try
+            {
+                std::string arg = this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->arg, true /* nilOnError */);
+                query->Bind(it->first).Bind(it->second->targetId).Bind(it->second->function).Bind(arg).ExecuteNonSelect().Reset();
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "CallbackManager::Save: Could not save callback " << it->first << ": " << e.what() << std::endl;
+            }
+    }
+
+    void CallbackManager::_Load(Tools::Database::IConnection& conn)
+    {
+        std::string table = this->_engine.GetMap().GetName() + "_callback";
+        auto query = conn.CreateQuery("SELECT id, target_id, function, arg FROM " + table);
+        while (auto row = query->Fetch())
+        {
+            Uint32 id = row->GetUint32(0);
+            Uint32 targetId = row->GetUint32(1);
+            std::string function = row->GetString(2);
+            try
+            {
+                Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(3));
+                this->_callbacks[id] = new Callback(targetId, function, arg);
+            }
+            catch (std::exception& e) // erreur de deserialization
+            {
+                Tools::error << "CallbackManager::_Load: Could not load callback " << id << ": " << e.what() << std::endl;
+            }
+        }
     }
 
 }}}

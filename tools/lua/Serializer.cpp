@@ -11,12 +11,6 @@ namespace Tools { namespace Lua {
     std::string Serializer::Serialize(Ref const& ref, bool nilOnError /* = false */) const throw(std::runtime_error)
     {
         std::list<Ref> tables;
-        return "return " + this->_Serialize(ref, tables, 1, nilOnError);
-    }
-
-    std::string Serializer::SerializeWithoutReturn(Ref const& ref, bool nilOnError /* = false */) const throw(std::runtime_error)
-    {
-        std::list<Ref> tables;
         return this->_Serialize(ref, tables, 1, nilOnError);
     }
 
@@ -24,7 +18,7 @@ namespace Tools { namespace Lua {
     {
         if (string.empty())
             return Ref(this->_interpreter.GetState());
-        return this->_interpreter.LoadString(string)();
+        return this->_interpreter.LoadString("return " + string)();
     }
 
     Ref Serializer::MakeSerializableCopy(Ref const& ref, bool nilOnError /* = false */) const throw(std::runtime_error)

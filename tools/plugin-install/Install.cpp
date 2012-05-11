@@ -19,7 +19,7 @@ namespace Tools { namespace PluginInstall {
             wconn.CreateQuery("CREATE TABLE cube_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE cube_id (id INTEGER PRIMARY KEY, plugin_id INTEGER, name TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE entity_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
-            wconn.CreateQuery("CREATE TABLE map (name TEXT, plugin_id INTEGER, lua TEXT, tick INTEGER);")->ExecuteNonSelect();
+            wconn.CreateQuery("CREATE TABLE map (name TEXT, plugin_id INTEGER, lua TEXT, time INTEGER);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE plugin (id INTEGER PRIMARY KEY, build_hash TEXT, fullname TEXT, identifier TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE resource (id INTEGER PRIMARY KEY, plugin_id INTEGER, version INTEGER, name TEXT, type TEXT, data_hash TEXT, data BLOB);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE world (version INTEGER, fullname TEXT, format_version INTEGER, identifier TEXT, build_hash TEXT);")->ExecuteNonSelect();
@@ -144,6 +144,18 @@ namespace Tools { namespace PluginInstall {
             }
         }
 
+        void CreateMap(Uint32 pluginId, std::string const& name, std::string const& lua, Tools::Database::IConnection& wconn)
+        {
+            wconn.CreateQuery("CREATE TABLE " + name + "_bigchunk (id INTEGER PRIMARY KEY, data BLOB);")->ExecuteNonSelect();
+            wconn.CreateQuery("CREATE TABLE " + name + "_callback (id INTEGER, target_id INTEGER, function TEXT, arg TEXT);")->ExecuteNonSelect();
+            wconn.CreateQuery("CREATE TABLE " + name + "_message (time INTEGER, callback_id INTEGER, notification_callback_id TEXT);")->ExecuteNonSelect();
+
+            wconn.CreateQuery("INSERT INTO map (name, plugin_id, lua, time) VALUES (?, ?, ?, ?);")->
+                Bind(name).Bind(pluginId).Bind(lua).Bind(0).ExecuteNonSelect();
+
+            Tools::log << "Added map \"" << name << "\" (size: " << lua.size() << ")." << std::endl;
+        }
+
         void UpdateTableMap(Uint32 pluginId, std::string const& pluginIdentifier, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
         {
             auto pluginQuery = pconn.CreateQuery("SELECT name, lua FROM map;");
@@ -162,12 +174,7 @@ namespace Tools { namespace PluginInstall {
                     Tools::log << "Updated map \"" << name << "\" (size: " << lua.size() << ")." << std::endl;
                 }
                 else
-                {
-                    wconn.CreateQuery("CREATE TABLE " + name + "_bigchunk (id INTEGER PRIMARY KEY, data BLOB);")->ExecuteNonSelect();
-                    wconn.CreateQuery("INSERT INTO map (name, plugin_id, lua, tick) VALUES (?, ?, ?, ?);")->
-                        Bind(name).Bind(pluginId).Bind(lua).Bind(0).ExecuteNonSelect();
-                    Tools::log << "Added map \"" << name << "\" (size: " << lua.size() << ")." << std::endl;
-                }
+                    CreateMap(pluginId, name, lua, wconn);
             }
         }
 
