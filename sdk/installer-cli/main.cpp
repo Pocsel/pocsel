@@ -8,11 +8,11 @@ namespace {
 
     void Usage()
     {
-        Tools::log << "Usage: " PROGRAM_NAME " PLUGIN_FILE WORLD_FILE [WORLD_IDENTIFIER WORLD_FULLNAME]" << std::endl;
+        Tools::log << "Usage: " PROGRAM_NAME " PLUGIN_FILE WORLD_FILE [WORLD_IDENTIFIER WORLD_FULLNAME [--recreate]]" << std::endl;
         exit(boost::exit_failure);
     }
 
-    bool Install(boost::filesystem::path const& pluginFile, boost::filesystem::path const& worldFile, std::string const& identifier, std::string const& fullname)
+    bool Install(boost::filesystem::path const& pluginFile, boost::filesystem::path const& worldFile, std::string const& identifier = "", std::string const& fullname = "")
     {
         if (boost::filesystem::is_directory(pluginFile))
         {
@@ -46,11 +46,19 @@ int main(int ac, char** av)
     switch (ac)
     {
         case 3:
-            success = Install(av[1], av[2], "", "");
+            success = Install(av[1], av[2]);
             break;
         case 5:
             success = Install(av[1], av[2], av[3], av[4]);
             break;
+        case 6:
+            if (std::string(av[5]) == "--recreate")
+            {
+                if (boost::filesystem::is_regular_file(av[2]))
+                    boost::filesystem::remove(av[2]);
+                success = Install(av[1], av[2], av[3], av[4]);
+                break;
+            }
         default:
             Usage();
             success = false;

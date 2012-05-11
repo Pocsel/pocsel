@@ -31,7 +31,7 @@ file(GLOB_RECURSE world_source_files "${world_source_dir}/*")
 
 add_custom_command(
     OUTPUT ${world_dest_file}
-    COMMAND installer-cli "${world_source_dir}" "${world_dest_file}" "dev" "Dev World"
+    COMMAND installer-cli "${world_source_dir}" "${world_dest_file}" "dev" "Dev World" "--recreate"
     DEPENDS installer-cli ${world_source_files}
 )
 CreateGroups("${world_source_files}")
