@@ -87,23 +87,23 @@ FSout fs(in VSout v)
     float specular = pow(max(0.0, dot(reflection, viewDirection)), materialShininess);
 
     // SSAO
-    const float2 vec[4] = {float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
-
+//    const float2 vec[4] = {float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
+//
     float ao = 0.0f;
-    float rad = 1.5f / viewPosition.z;
-
-    int iterations = 4;
-    for (int j = 0; j < iterations; ++j)
-    {
-        float2 coord1 = reflect(vec[j], normalize(float2(0, 1))) * rad;
-        float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
-
-        ao += doAmbientOcclusion(v.texCoord, coord1*0.25, viewPosition, viewNormal);
-        ao += doAmbientOcclusion(v.texCoord, coord2*0.5, viewPosition, viewNormal);
-        ao += doAmbientOcclusion(v.texCoord, coord1*0.75, viewPosition, viewNormal);
-        ao += doAmbientOcclusion(v.texCoord, coord2, viewPosition, viewNormal);
-    }
-    ao/=(float)iterations*4.0;
+//    float rad = 1.5f / viewPosition.z;
+//
+//    int iterations = 4;
+//    for (int j = 0; j < iterations; ++j)
+//    {
+//        float2 coord1 = reflect(vec[j], normalize(float2(0, 1))) * rad;
+//        float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
+//
+//        ao += doAmbientOcclusion(v.texCoord, coord1*0.25, viewPosition, viewNormal);
+//        ao += doAmbientOcclusion(v.texCoord, coord2*0.5, viewPosition, viewNormal);
+//        ao += doAmbientOcclusion(v.texCoord, coord1*0.75, viewPosition, viewNormal);
+//        ao += doAmbientOcclusion(v.texCoord, coord2, viewPosition, viewNormal);
+//    }
+//    ao/=(float)iterations*4.0;
     //ao = 1 - ao;
     // END
 
