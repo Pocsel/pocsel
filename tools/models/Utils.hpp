@@ -3,12 +3,9 @@
 
 #include "tools/models/Iqm.hpp"
 
-namespace Tools { namespace Models {
+namespace Tools { namespace Models { namespace Utils {
 
-    class Utils
-    {
-    public:
-        template<typename T>
+    template<typename T>
         struct UnionFind
         {
             struct Ufval
@@ -62,299 +59,360 @@ namespace Tools { namespace Models {
             }
         };
 
-        static int FindVarrayType(const char *name)
-        {
-            static const struct _VarrayType
-            {
-                const char *name;
-                int code;
-            } _vatypes[] =
-            {
-                { "position", Iqm::VertexArrayType::Position },
-                { "texcoord", Iqm::VertexArrayType::Texcoord },
-                { "normal", Iqm::VertexArrayType::Normal  },
-                { "tangent", Iqm::VertexArrayType::Tangent },
-                { "blendindexes", Iqm::VertexArrayType::BlendIndexes },
-                { "blendweights", Iqm::VertexArrayType::BlendWeights },
-                { "color", Iqm::VertexArrayType::Color },
-                { "custom0", Iqm::VertexArrayType::Custom + 0 },
-                { "custom1", Iqm::VertexArrayType::Custom + 1 },
-                { "custom2", Iqm::VertexArrayType::Custom + 2 },
-                { "custom3", Iqm::VertexArrayType::Custom + 3 },
-                { "custom4", Iqm::VertexArrayType::Custom + 4 },
-                { "custom5", Iqm::VertexArrayType::Custom + 5 },
-                { "custom6", Iqm::VertexArrayType::Custom + 6 },
-                { "custom7", Iqm::VertexArrayType::Custom + 7 },
-                { "custom8", Iqm::VertexArrayType::Custom + 8 },
-                { "custom9", Iqm::VertexArrayType::Custom + 9 }
-            };
+    int FindVarrayType(char const* name);
 
-            for (unsigned int i = 0; i < sizeof(_vatypes)/sizeof(_vatypes[0]); ++i)
-            {
-                if (!strcasecmp(_vatypes[i].name, name))
-                    return _vatypes[i].code;
-            }
-            return -1;
+    int FindVarrayFormat(char const* name);
+    int GetVarrayFormatSize(int format);
+
+    struct TriangleInfo
+    {
+        bool used;
+        float score;
+        unsigned int vert[3];
+
+        TriangleInfo() {}
+        TriangleInfo(unsigned int v0, unsigned int v1, unsigned int v2)
+        {
+            vert[0] = v0;
+            vert[1] = v1;
+            vert[2] = v2;
+        }
+    };
+
+    struct SharedVert
+    {
+        int index;
+        int weld;
+
+        SharedVert() {}
+        SharedVert(int index, int weld) : index(index), weld(weld) {}
+
+        bool operator < (SharedVert const& other) const
+        {
+            return index < other.index ||
+                (index == other.index && weld < other.weld);
         }
 
-        static int FindVarrayFormat(const char *name)
-        {
-            static const struct _VarrayFormat
-            {
-                const char *name;
-                int code;
-                int size;
-            } _vaformats[] =
-            {
-                { "byte", Iqm::VertexArrayFormat::Byte, 1 },
-                { "ubyte", Iqm::VertexArrayFormat::Ubyte, 1 },
-                { "short", Iqm::VertexArrayFormat::Short, 2 },
-                { "ushort", Iqm::VertexArrayFormat::Ushort, 2 },
-                { "int", Iqm::VertexArrayFormat::Int, 4 },
-                { "uint", Iqm::VertexArrayFormat::Uint, 4 },
-                { "half", Iqm::VertexArrayFormat::Half, 2 },
-                { "float", Iqm::VertexArrayFormat::Float, 4 },
-                { "double", Iqm::VertexArrayFormat::Double, 8 }
-            };
+        template<int TYPE> int RemapIndex(int) const;
+    };
 
-            for (unsigned int i = 0; i < sizeof(_vaformats)/sizeof(_vaformats[0]); ++i)
+    struct VertexCache
+    {
+        enum
+        {
+            MaxVcache = 32
+        };
+
+        int index, rank;
+        float score;
+        int numuses;
+        TriangleInfo** uses;
+
+        VertexCache() : index(-1), rank(-1), score(-1.0f), numuses(0), uses(0) {}
+
+        void CalcScore()
+        {
+            if (numuses > 0)
             {
-                if (!strcasecmp(_vaformats[i].name, name))
-                    return _vaformats[i].code;
+                score = 2.0f * std::pow(numuses, -0.5f);
+                if (rank >= 3)
+                    score += std::pow(1.0f - (rank - 3)/float(MaxVcache - 3), 1.5f);
+                else if (rank >= 0)
+                    score += 0.75f;
             }
-            return -1;
+            else
+                score = -1.0f;
         }
 
-        struct Ejoint
+        void RemoveUse(TriangleInfo *t)
         {
-            std::string name;
-            int parent;
-
-            Ejoint() : name(NULL), parent(-1) {}
-        };
-
-        struct Eanim
-        {
-            std::string name;
-            int startframe, endframe;
-            double fps;
-            Uint32 flags;
-
-            Eanim() : name(NULL), startframe(0), endframe(INT_MAX), fps(0), flags(0) {}
-        };
-
-        struct Emesh
-        {
-            std::string name;
-            std::string material;
-            int firsttri;
-            bool used;
-
-            Emesh() : name(NULL), material(NULL), firsttri(0), used(false) {}
-            Emesh(std::string const& name, std::string const& material, int firsttri = 0) : name(name), material(material), firsttri(firsttri), used(false) {}
-        };
-
-        struct Evarray
-        {
-            std::string name;
-            int type, format, size;
-
-            Evarray() : type(Iqm::VertexArrayType::Position), format(Iqm::VertexArrayFormat::Float), size(3) { name[0] = '\0'; }
-            Evarray(int type, int format, int size, std::string const& initname = "") : name(initname), type(type), format(format), size(size) {}
-        };
-
-        struct Esmoothgroup
-        {
-            enum
+            for (int i = 0; i < numuses; ++i)
             {
-                F_USED     = 1<<0,
-                F_UVSMOOTH = 1<<1
-            };
-
-            int key;
-            float angle;
-            int flags;
-
-            Esmoothgroup() : key(-1), angle(-1), flags(0) {}
-        };
-
-        struct Etriangle
-        {
-            int smoothgroup;
-            uint vert[3], weld[3];
-
-            Etriangle()
-                : smoothgroup(-1)
-            {
-            }
-            Etriangle(int v0, int v1, int v2, int smoothgroup = -1)
-                : smoothgroup(smoothgroup)
-            {
-                vert[0] = v0;
-                vert[1] = v1;
-                vert[2] = v2;
-            }
-        };
-        struct BlendCombo
-        {
-            int sorted;
-            double weights[4];
-            Uint8 bones[4];
-
-            BlendCombo() : sorted(0) {}
-
-            void Reset() { sorted = 0; }
-
-            void AddWeight(double weight, int bone)
-            {
-                if(weight <= 1e-3) return;
-                for (int k = 0; k<(sorted); ++k) if(weight > weights[k])
+                if (uses[i] == t)
                 {
-                    for(int l = std::min(sorted-1, 2); l >= k; l--)
-                    {
-                        weights[l+1] = weights[l];
-                        bones[l+1] = bones[l];
-                    }
-                    weights[k] = weight;
-                    bones[k] = bone;
-                    if(sorted<4) sorted++;
+                    uses[i] = uses[--numuses];
                     return;
                 }
-                if(sorted>=4) return;
-                weights[sorted] = weight;
-                bones[sorted] = bone;
-                sorted++;
             }
+        }
+    };
 
-            void Finalize()
-            {
-                for (int j = 0; j<(4-sorted); ++j) { weights[sorted+j] = 0; bones[sorted+j] = 0; }
-                if(sorted <= 0) return;
-                double total = 0;
-                for (int j = 0; j<(sorted); ++j) total += weights[j];
-                total = 1.0/total;
-                for (int j = 0; j<(sorted); ++j) weights[j] *= total;
-            }
+    struct NeighborKey
+    {
+        unsigned int e0, e1;
 
-            void Serialize(Uint8 *vweights) const
-            {
-                int total = 0;
-                for (unsigned int k = 0; k<(4); ++k) total += (vweights[k] = Uint8(weights[k]*255));
-                if(sorted <= 0) return;
-                while(total > 255)
-                {
-                    for (unsigned int k = 0; k<(4); ++k) if(vweights[k] > 0 && total > 255) { vweights[k]--; total--; }
-                }
-                while(total < 255)
-                {
-                    for (unsigned int k = 0; k<(4); ++k) if(vweights[k] < 255 && total < 255) { vweights[k]++; total++; }
-                }
-            }
+        NeighborKey() {}
+        NeighborKey(unsigned int e0, unsigned int e1) : e0(std::min(e0, e1)), e1(std::max(e0, e1)) {}
 
-            bool operator==(const BlendCombo &c) { for (unsigned int i = 0; i<(4); ++i) if(weights[i] != c.weights[i] || bones[i] != c.bones[i]) return false; return true; }
-            bool operator!=(const BlendCombo &c) { for (unsigned int i = 0; i<(4); ++i) if(weights[i] != c.weights[i] || bones[i] != c.bones[i]) return true; return false; }
+        bool operator < (NeighborKey const& other) const
+        {
+            return e0 < other.e0 || (e0 == other.e0 && e1 < other.e1);
+        }
+    };
+
+    struct NeighborVal
+    {
+        unsigned int tris[2];
+
+        NeighborVal() {}
+        NeighborVal(unsigned int i) { tris[0] = i; tris[1] = 0xFFFFFFFFU; }
+
+        void Add(unsigned int i)
+        {
+            if (tris[1] != 0xFFFFFFFFU)
+                tris[0] = tris[1] = 0xFFFFFFFFU;
+            else if (tris[0] != 0xFFFFFFFFU)
+                tris[1] = i;
+        }
+
+        int Opposite(unsigned int i) const
+        {
+            return tris[0] == i ? tris[1] : tris[0];
+        }
+    };
+
+    struct Ejoint
+    {
+        std::string name;
+        int parent;
+
+        Ejoint() : name(NULL), parent(-1) {}
+    };
+
+    struct Eanim
+    {
+        std::string name;
+        int startframe, endframe;
+        double fps;
+        Uint32 flags;
+
+        Eanim() : name(NULL), startframe(0), endframe(INT_MAX), fps(0), flags(0) {}
+    };
+
+    struct Emesh
+    {
+        std::string name;
+        std::string material;
+        int firsttri;
+        bool used;
+
+        Emesh() : name(NULL), material(NULL), firsttri(0), used(false) {}
+        Emesh(std::string const& name, std::string const& material, int firsttri = 0) : name(name), material(material), firsttri(firsttri), used(false) {}
+    };
+
+    struct Evarray
+    {
+        std::string name;
+        int type, format, size;
+
+        Evarray() : type(Iqm::VertexArrayType::Position), format(Iqm::VertexArrayFormat::Float), size(3) { name[0] = '\0'; }
+        Evarray(int type, int format, int size, std::string const& initname = "") : name(initname), type(type), format(format), size(size) {}
+    };
+
+    struct Esmoothgroup
+    {
+        enum
+        {
+            F_USED     = 1<<0,
+            F_UVSMOOTH = 1<<1
         };
 
-        static void IgnoreSpaces(char*& c)
-        {
-            while (std::isspace(*c))
-                ++c;
-        }
+        int key;
+        float angle;
+        int flags;
 
-        static bool ParseIndex(char*& c, Int32& val)
-        {
-            IgnoreSpaces(c);
-            char* end = 0;
-            Int32 rval = std::strtol(c, &end, 10);
-            if (c == end)
-                return false;
-            val = rval;
-            c = end;
-            return true;
-        }
+        Esmoothgroup() : key(-1), angle(-1), flags(0) {}
+    };
 
-        static double ParseAttrib(char*& c, double ival = 0)
-        {
-            IgnoreSpaces(c);
-            char *end = NULL;
-            double val = std::strtod(c, &end);
-            if (c == end)
-                val = ival;
-            c = end;
-            return val;
-        }
+    struct Etriangle
+    {
+        int smoothgroup;
+        uint vert[3], weld[3];
 
-        static bool MaybeParseAttrib(char*& c, double& result)
+        Etriangle()
+            : smoothgroup(-1)
         {
-            IgnoreSpaces(c);
-            char *end = NULL;
-            double val = std::strtod(c, &end);
-            if (c == end)
-                return false;
-            c = end;
-            result = val;
-            return true;
         }
-
-        static char* TrimName(char*& c)
+        Etriangle(int v0, int v1, int v2, int smoothgroup = -1)
+            : smoothgroup(smoothgroup)
         {
-            IgnoreSpaces(c);
-            char* start;
-            char* end;
-            if (*c == '"')
+            vert[0] = v0;
+            vert[1] = v1;
+            vert[2] = v2;
+        }
+    };
+    struct BlendCombo
+    {
+        int sorted;
+        double weights[4];
+        Uint8 bones[4];
+
+        BlendCombo() : sorted(0) {}
+
+        void Reset() { sorted = 0; }
+
+        void AddWeight(double weight, int bone)
+        {
+            if(weight <= 1e-3) return;
+            for (int k = 0; k<(sorted); ++k) if(weight > weights[k])
             {
-                ++c;
-                start = end = c;
-                while (*end && *end != '"')
-                    ++end;
-                if (*end)
+                for(int l = std::min(sorted-1, 2); l >= k; l--)
                 {
-                    *end = '\0';
-                    ++end;
+                    weights[l+1] = weights[l];
+                    bones[l+1] = bones[l];
+                }
+                weights[k] = weight;
+                bones[k] = bone;
+                if(sorted<4) sorted++;
+                return;
+            }
+            if(sorted>=4) return;
+            weights[sorted] = weight;
+            bones[sorted] = bone;
+            sorted++;
+        }
+
+        void Finalize()
+        {
+            for (int j = 0; j<(4-sorted); ++j) { weights[sorted+j] = 0; bones[sorted+j] = 0; }
+            if(sorted <= 0) return;
+            double total = 0;
+            for (int j = 0; j<(sorted); ++j) total += weights[j];
+            total = 1.0/total;
+            for (int j = 0; j<(sorted); ++j) weights[j] *= total;
+        }
+
+        void Serialize(Uint8 *vweights) const
+        {
+            int total = 0;
+            for (unsigned int k = 0; k<(4); ++k) total += (vweights[k] = Uint8(weights[k]*255));
+            if(sorted <= 0) return;
+            while(total > 255)
+            {
+                for (unsigned int k = 0; k<(4); ++k) if(vweights[k] > 0 && total > 255) { vweights[k]--; total--; }
+            }
+            while(total < 255)
+            {
+                for (unsigned int k = 0; k<(4); ++k) if(vweights[k] < 255 && total < 255) { vweights[k]++; total++; }
+            }
+        }
+
+        bool operator==(const BlendCombo &c) { for (unsigned int i = 0; i<(4); ++i) if(weights[i] != c.weights[i] || bones[i] != c.bones[i]) return false; return true; }
+        bool operator!=(const BlendCombo &c) { for (unsigned int i = 0; i<(4); ++i) if(weights[i] != c.weights[i] || bones[i] != c.bones[i]) return true; return false; }
+    };
+
+    void IgnoreSpaces(char*& c);
+    bool ParseIndex(char*& c, Int32& val);
+    double ParseAttrib(char*& c, double ival = 0);
+    bool MaybeParseAttrib(char*& c, double& result);
+    char* TrimName(char*& c);
+    glm::dvec4 ParseAttribs4(char*& c, glm::dvec4 const& ival = glm::dvec4(0, 0, 0, 0));
+    glm::dvec3 ParseAttribs3(char*& c, glm::dvec3 const& ival = glm::dvec3(0, 0, 0));
+    BlendCombo ParseBlends(char*& c);
+
+
+    template<class T, class U>
+        static inline void PutAttrib(T &out, const U &val) { out = T(val); }
+
+    template<class T, class U>
+        static inline void ScaleAttrib(T &out, const U &val) { PutAttrib(out, val); }
+    template<class U>
+        static inline void ScaleAttrib(Int8 &out, const U &val) { out = Int8(glm::clamp(val*255.0 - 0.5, -128.0, 127.0)); }
+    template<class U>
+        static inline void ScaleAttrib(Int16 &out, const U &val) { out = Int16(glm::clamp(val*65535.0 - 0.5, -32768.0, 32767.0)); }
+    template<class U>
+        static inline void ScaleAttrib(Int32 &out, const U &val) { out = Int32(glm::clamp(val*4294967295.0 - 0.5, -2147483648.0, 2147483647.0)); }
+    template<class U>
+        static inline void ScaleAttrib(Uint8 &out, const U &val) { out = Uint8(glm::clamp(val*255.0, 0.0, 255.0)); }
+    template<class U>
+        static inline void ScaleAttrib(Uint16 &out, const U &val) { out = Uint16(glm::clamp(val*65535.0, 0.0, 65535.0)); }
+    template<class U>
+        static inline void ScaleAttrib(Uint32 &out, const U &val) { out = Uint32(glm::clamp(val*4294967295.0, 0.0, 4294967295.0)); }
+
+    template<int T>
+        static inline bool NormalizedAttrib() { return true; }
+
+    template<int TYPE, int FMT, class T, class U>
+        static inline void SerializeAttrib(Iqm::VertexArray const& va, T* data, U const& attrib)
+        {
+            static_assert(sizeof(U) == 0, "le truc pas défaut est pas sensé être utilisé");
+        }
+
+    template<int TYPE, int FMT, class T, class GLM_T>
+        static inline void SerializeAttrib(Iqm::VertexArray const& va, T* data, typename glm::detail::tvec4<GLM_T> const& attrib)
+        {
+            if (NormalizedAttrib<TYPE>()) switch (va.size)
+            {
+                case 4: ScaleAttrib(data[3], attrib.w);
+                case 3: ScaleAttrib(data[2], attrib.z);
+                case 2: ScaleAttrib(data[1], attrib.y);
+                case 1: ScaleAttrib(data[0], attrib.x);
+            }
+            else switch (va.size)
+            {
+                case 4: PutAttrib(data[3], attrib.w);
+                case 3: PutAttrib(data[2], attrib.z);
+                case 2: PutAttrib(data[1], attrib.y);
+                case 1: PutAttrib(data[0], attrib.x);
+            }
+            //lilswap(data, va.size);
+        }
+
+    template<int TYPE, int FMT, class T, class GLM_T>
+        static inline void SerializeAttrib(Iqm::VertexArray const& va, T* data, typename glm::detail::tvec3<GLM_T> const& attrib)
+        {
+            if (NormalizedAttrib<TYPE>()) switch (va.size)
+            {
+                case 3: ScaleAttrib(data[2], attrib.z);
+                case 2: ScaleAttrib(data[1], attrib.y);
+                case 1: ScaleAttrib(data[0], attrib.x);
+            }
+            else switch (va.size)
+            {
+                case 3: PutAttrib(data[2], attrib.z);
+                case 2: PutAttrib(data[1], attrib.y);
+                case 1: PutAttrib(data[0], attrib.x);
+            }
+            //lilswap(data, va.size);
+        }
+
+    template<int TYPE, int FMT, class T>
+        static inline void SerializeAttrib(Iqm::VertexArray const& va, T* data, BlendCombo const& blend)
+        {
+            if (TYPE == Iqm::VertexArrayType::BlendIndexes)
+            {
+                switch (va.size)
+                {
+                    case 4: PutAttrib(data[3], blend.bones[3]);
+                    case 3: PutAttrib(data[2], blend.bones[2]);
+                    case 2: PutAttrib(data[1], blend.bones[1]);
+                    case 1: PutAttrib(data[0], blend.bones[0]);
+                }
+            }
+            else if(FMT == Iqm::VertexArrayFormat::Ubyte)
+            {
+                Uint8 weights[4];
+                blend.Serialize(weights);
+                switch (va.size)
+                {
+                    case 4: PutAttrib(data[3], weights[3]);
+                    case 3: PutAttrib(data[2], weights[2]);
+                    case 2: PutAttrib(data[1], weights[1]);
+                    case 1: PutAttrib(data[0], weights[0]);
                 }
             }
             else
             {
-                start = end = c;
-                while (*end && !isspace(*end))
-                    ++end;
-                if (*end)
+                switch (va.size)
                 {
-                    *end = '\0';
-                    ++end;
+                    case 4: ScaleAttrib(data[3], blend.weights[3]);
+                    case 3: ScaleAttrib(data[2], blend.weights[2]);
+                    case 2: ScaleAttrib(data[1], blend.weights[1]);
+                    case 1: ScaleAttrib(data[0], blend.weights[0]);
                 }
             }
-            c = end;
-            return start;
+            //lilswap(data, va.size);
         }
-
-        static glm::dvec4 ParseAttribs4(char*& c, glm::dvec4 const& ival = glm::dvec4(0, 0, 0, 0))
-        {
-            glm::dvec4 val;
-            for (unsigned int k = 0; k < 4; ++k)
-                val[k] = ParseAttrib(c, ival[k]);
-            return val;
-        }
-
-        static glm::dvec3 ParseAttribs3(char*& c, glm::dvec3 const& ival = glm::dvec3(0, 0, 0))
-        {
-            glm::dvec3 val;
-            for (unsigned int k = 0; k < 4; ++k)
-                val[k] = ParseAttrib(c, ival[k]);
-            return val;
-        }
-
-        static BlendCombo ParseBlends(char*& c)
-        {
-            BlendCombo b;
-            int index;
-            while (ParseIndex(c, index))
-                b.AddWeight(ParseAttrib(c, 0), index);
-            b.Finalize();
-            return b;
-        }
-    };
-
-}}
+}}}
 
 #endif

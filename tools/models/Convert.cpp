@@ -21,6 +21,112 @@ namespace Tools { namespace Models {
         return pos;
     }
 
+    void Convert::_MakeAnims()
+    {
+        if (_escale != 1)
+        {
+            for (unsigned int i = 0; i < _eposes.size(); ++i)
+            {
+                _eposes[i].pos *= _escale;
+            }
+        }
+
+        int numbasejoints = _eframes.size() ? _eframes[0] : _eposes.size();
+        if (_meshes.size() && _joints.empty())
+        {
+            _mjoints.resize(0);
+            for (unsigned int i = 0; i < _ejoints.size(); ++i)
+            {
+                Utils::Ejoint& ej = _ejoints[i];
+                _joints.emplace_back();
+                Iqm::Joint& j = _joints.back();
+                j.name = _ShareString(ej.name);
+                j.parent = ej.parent;
+                if ((int)i < numbasejoints)
+                {
+                    //glm::mat3x3 mat33;//(_eposes[i].orient, _eposes[i].scale);
+
+                    _mjoints.push_back(glm::mat3x3(glm::inverse(glm::mat4x4(
+                                        glm::scale(_eposes[i].scale) *
+                                        glm::translate(_eposes[i].pos) *
+                                        glm::toMat4(_eposes[i].orient)
+                                        ))));
+
+                                        //glm::vec4(mat33[0], _eposes[i].pos.x),
+                                        //glm::vec4(mat33[1], _eposes[i].pos.y),
+                                        //glm::vec4(mat33[2], _eposes[i].pos.z),
+                                        //glm::vec4(0)
+                    //_mjoints.back() = glm::inverse(glm::mat3x4(glm::mat3x3(_eposes[i].orient, _eposes[i].scale), _eposes[i].pos));
+
+                    for (unsigned int k = 0; k < 3; ++k)
+                        j.position[k] = _eposes[i].pos[k];
+                    for (unsigned int k = 0; k < 4; ++k)
+                        j.orientation[k] = _eposes[i].orient[k];
+                    for (unsigned int k = 0; k < 3; ++k)
+                        j.size[k] = _eposes[i].scale[k];
+                }
+                else
+                {
+                    //glm::mat3x3 mat33;//glm::mat3x3(glm::inverse(glm::mat3x4(glm::quat(0, 0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(1, 1, 1)))));
+                    _mjoints.push_back(glm::mat3x3(glm::inverse(glm::mat4x4(
+                                        glm::scale(glm::vec3(1, 1, 1)) *
+                                        glm::translate(glm::vec3(0, 0, 0)) *
+                                        glm::toMat4(glm::quat(0, 0, 0, 1))
+                                        //glm::vec4(mat33[0], _eposes[i].pos.x),
+                                        //glm::vec4(mat33[1], _eposes[i].pos.y),
+                                        //glm::vec4(mat33[2], _eposes[i].pos.z),
+                                        //glm::vec4(0)
+                                        ))));
+                }
+                if (ej.parent >= 0)
+                    _mjoints[i] *= _mjoints[ej.parent];
+            }
+        }
+        if (_eanims.empty())
+            return;
+        if (_poses.empty())
+        {
+            for (unsigned int i = 0; i < _ejoints.size(); ++i)
+            {
+                Utils::Ejoint& ej = _ejoints[i];
+                _poses.emplace_back();
+                Iqm::Pose &p = _poses.back();
+                p.parent = ej.parent;
+            }
+        }
+        if (_poses.empty())
+            return;
+        int totalframes = _frames.size() / _poses.size();
+        //glm::mat3x4 *mbuf = _mpositions.size() && _mblends.size() && _mjoints.size() ? new glm::mat3x4[_poses.size()] : 0;
+        for (unsigned int i = 0; i < _eanims.size(); ++i)
+        {
+            Utils::Eanim& ea = _eanims[i];
+            _anims.emplace_back();
+            Iqm::Anim &a = _anims.back();
+            a.name = _ShareString(ea.name);
+            a.first_frame = totalframes;
+            a.num_frames = 0;
+            a.framerate = ea.fps;
+            a.flags = ea.flags;
+            for (int j = ea.startframe, end = (i+1 < _eanims.size()) ? _eanims[i+1].startframe : _eframes.size(); j < end && j <= ea.endframe; ++j)
+            {
+                int offset = _eframes[j];
+                int range = (j+1<(int)_eframes.size() ? _eframes[j+1] : _eposes.size()) - offset;
+                if (range <= 0)
+                    continue;
+                for (int k = 0; k < std::min(range, (int)_poses.size()); ++k)
+                    _frames.push_back(_eposes[offset + k]);
+                for (int k = 0; k < std::max((int)_poses.size() - (int)range, 0); ++k)
+                    _frames.push_back(Transform(glm::vec3(0, 0, 0), glm::quat(0, 0, 0, 1), glm::vec3(1, 1, 1)));
+                //if (mbuf)
+                //    _MakeBounds(_bounds.push_back(), mbuf, mjoints.getbuf(), &frames[frames.size() - poses.size()]);
+                a.num_frames++;
+            }
+            totalframes += a.num_frames;
+        }
+        //if(mbuf) delete[] mbuf;
+    }
+
     void Convert::_WeldVert(std::vector<glm::vec3> const& norms, WeldInfo* welds, int& numwelds, Utils::UnionFind<int>& welder)
     {
         welder.Clear();
@@ -161,6 +267,277 @@ namespace Tools { namespace Models {
         }
     }
 
+    void Convert::_MakeNeighbors()
+    {
+        std::map<Utils::NeighborKey, Utils::NeighborVal> nhash;
+
+        for (unsigned int i = 0; i < _triangles.size(); ++i)
+        {
+            Iqm::Triangle& t = _triangles[i];
+            for (int j = 0, p = 2; j < 3; p = j++)
+            {
+                Utils::NeighborKey key(t.vertex[p], t.vertex[j]);
+                if (nhash.count(key))
+                    nhash[key].Add(i);
+                else
+                    nhash[key] = Utils::NeighborVal(i);
+            }
+        }
+
+        for (unsigned int i = 0; i < _triangles.size(); ++i)
+        {
+            Iqm::Triangle& t = _triangles[i];
+            _neighbors.emplace_back();
+            Iqm::Triangle& n = _neighbors.back();
+            for(int j = 0, p = 2; j < 3; p = j, j++)
+                n.vertex[p] = nhash[Utils::NeighborKey(t.vertex[p], t.vertex[j])].Opposite(i);
+        }
+    }
+
+    void Convert::_MakeTriangles(std::vector<Utils::TriangleInfo>& tris, std::vector<Utils::SharedVert> const& mmap)
+    {
+        Utils::TriangleInfo** uses = new Utils::TriangleInfo*[3*tris.size()];
+        Utils::VertexCache *verts = new Utils::VertexCache[mmap.size()];
+        std::list<Utils::VertexCache*> vcache;
+
+        //std::vector<std::vector<Utils::TriangleInfo>> uses(3*tris.size());
+        //std::list<Utils::VertexCache> vcache;
+
+        for (unsigned int i = 0; i < tris.size(); ++i)
+        {
+            Utils::TriangleInfo& t = tris[i];
+            t.used = t.vert[0] == t.vert[1] || t.vert[1] == t.vert[2] || t.vert[2] == t.vert[0];
+            if (t.used)
+                continue;
+            for (unsigned int k = 0; k < 3; ++k)
+                verts[t.vert[k]].numuses++;
+        }
+        Utils::TriangleInfo **curuse = uses;
+        for (int i = tris.size() - 1; i >= 0; --i)
+        {
+            Utils::TriangleInfo &t = tris[i];
+            if (t.used)
+                continue;
+            for (unsigned int k = 0; k < 3; ++k)
+            {
+                Utils::VertexCache &v = verts[t.vert[k]];
+                if (!v.uses)
+                {
+                    curuse += v.numuses;
+                    v.uses = curuse;
+                }
+                *--v.uses = &t;
+            }
+        }
+        for (unsigned int i = 0; i < mmap.size(); ++i)
+            verts[i].CalcScore();
+        Utils::TriangleInfo* besttri = 0;
+        float bestscore = -1e16f;
+        for (unsigned int i = 0; i < tris.size(); ++i)
+        {
+            Utils::TriangleInfo &t = tris[i];
+            if (t.used)
+                continue;
+            t.score = verts[t.vert[0]].score + verts[t.vert[1]].score + verts[t.vert[2]].score;
+            if (t.score > bestscore)
+            {
+                besttri = &t;
+                bestscore = t.score;
+            }
+        }
+
+        //int reloads = 0, n = 0;
+        while (besttri)
+        {
+            besttri->used = true;
+            _triangles.emplace_back();
+            Iqm::Triangle& t = _triangles.back();
+            for (unsigned int k = 0; k < 3; ++k)
+            {
+                Utils::VertexCache& v = verts[besttri->vert[k]];
+                if (v.index < 0)
+                {
+                    v.index = _vmap.size();
+                    _vmap.push_back(mmap[besttri->vert[k]]);
+                }
+                t.vertex[k] = v.index;
+                v.RemoveUse(besttri);
+                if (v.rank >= 0)
+                {
+                    for (auto it = vcache.begin(), ite = vcache.end(); it != ite; ++it)
+                    {
+                        if (*it == &v)
+                        {
+                            vcache.erase(it);
+                            v.rank = -1;
+                            break;
+                        }
+                    }
+                }
+                if (v.numuses <= 0)
+                    continue;
+                vcache.push_front(&v);
+                v.rank = 0;
+            }
+            int rank = 0;
+            for (auto it = vcache.begin(), ite = vcache.end(); it != ite; ++it)
+            {
+                Utils::VertexCache* v = *it;
+                v->rank = rank++;
+                v->CalcScore();
+            }
+            besttri = 0;
+            bestscore = -1e16f;
+            for (auto it = vcache.begin(), ite = vcache.end(); it != ite; ++it)
+            {
+                Utils::VertexCache* v = *it;
+                for (int i = 0; i < v->numuses; ++i)
+                {
+                    Utils::TriangleInfo& t = *v->uses[i];
+                    t.score = verts[t.vert[0]].score + verts[t.vert[1]].score + verts[t.vert[2]].score;
+                    if (t.score > bestscore)
+                    {
+                        besttri = &t;
+                        bestscore = t.score;
+                    }
+                }
+            }
+            while (vcache.size() > Utils::VertexCache::MaxVcache)
+            {
+                vcache.back()->rank = -1;
+                vcache.pop_back();
+            }
+            if (!besttri)
+            {
+                for (unsigned int i = 0; i < tris.size(); ++i)
+                {
+                    Utils::TriangleInfo &t = tris[i];
+                    if (!t.used && t.score > bestscore)
+                    {
+                        besttri = &t;
+                        bestscore = t.score;
+                    }
+                }
+            }
+        }
+
+        Tools::Delete(uses);
+        Tools::Delete(verts);
+    }
+
+    void Convert::_MakeMeshes()
+    {
+        _meshes.resize(0);
+        _triangles.resize(0);
+        _neighbors.resize(0);
+        _vmap.resize(0);
+        _varrays.resize(0);
+        _vdata.resize(0);
+
+        std::map<Utils::SharedVert, unsigned int> mshare;
+        std::vector<Utils::SharedVert> mmap;
+        std::vector<Utils::TriangleInfo> tinfo;
+
+        for (unsigned int i = 0; i < _emeshes.size(); ++i)
+        {
+            Utils::Emesh& em1 = _emeshes[i];
+            if (em1.used)
+                continue;
+            for (unsigned int j = i; j < _emeshes.size(); ++j)
+            {
+                Utils::Emesh& em = _emeshes[j];
+                if (em.name != em1.name || em.material != em1.material)
+                    continue;
+                int lasttri = (i+1<_emeshes.size()) ? _emeshes[i+1].firsttri : _etriangles.size();
+                for(int k = em.firsttri; k < lasttri; ++k)
+                {
+                    Utils::Etriangle& et = _etriangles[k];
+                    tinfo.emplace_back();
+                    Utils::TriangleInfo& t = tinfo.back();
+                    for (unsigned int l = 0; l < 3; ++l)
+                    {
+                        Utils::SharedVert v(et.vert[l], et.weld[l]);
+                        if (mshare.count(v))
+                            t.vert[l] = mshare[v];
+                        else
+                        {
+                            mshare[v] = mmap.size();
+                            t.vert[l] = mshare[v];
+                        }
+                        if (!(t.vert[l] < mmap.size()))
+                            mmap.push_back(v);
+                    }
+                }
+                em.used = true;
+            }
+            if(tinfo.empty()) continue;
+            _meshes.emplace_back();
+            Iqm::Mesh &m = _meshes.back();
+            m.name = _ShareString(em1.name);
+            m.material = _ShareString(em1.material);
+            m.first_triangle = _triangles.size();
+            m.first_vertex = _vmap.size();
+            _MakeTriangles(tinfo, mmap);
+            m.num_triangles = _triangles.size() - m.first_triangle;
+            m.num_vertexes = _vmap.size() - m.first_vertex;
+
+            mshare.clear();
+            mmap.resize(0);
+            tinfo.resize(0);
+        }
+
+        if (_triangles.size())
+            _MakeNeighbors();
+
+        if (_escale != 1)
+        {
+            for (auto it = _epositions.begin(), ite = _epositions.end(); it != ite; ++it)
+                *it *= _escale;
+        }
+        if (_epositions.size())
+            _SetupVertexArray<Iqm::VertexArrayType::Position, Iqm::VertexArrayFormat::Float>(_epositions, 3);
+        if (_etexcoords.size())
+            _SetupVertexArray<Iqm::VertexArrayType::Texcoord, Iqm::VertexArrayFormat::Float>(_etexcoords, 2);
+        if (_enormals.size())
+            _SetupVertexArray<Iqm::VertexArrayType::Normal, Iqm::VertexArrayFormat::Float>(_enormals, 3);
+        //if (_etangents.size())
+        //{
+        //    if (_ebitangents.size() && _enormals.size())
+        //    {
+        //        for (unsigned int i = 0; i < _etangents.size(); ++i)
+        //        {
+        //            if (i < _ebitangents.size() && i < _enormals.size())
+        //                _etangents[i].w = glm::dot(glm::cross(_enormals[i], glm::dvec3(_etangents[i])), (_ebitangents[i])) < 0 ? -1 : 1;
+        //        }
+        //    }
+        //    _SetupVertexArray<Iqm::VertexArrayType::Tangent, Iqm::VertexArrayFormat::Float>(_etangents, 4);
+        //}
+        //else if (_enormals.size() && _etexcoords.size())
+        //{
+        //    _CalcTangents();
+        //    _SetupVertexArray<Iqm::VertexArrayType::Tangent, Iqm::VertexArrayFormat::Float>(_etangents, 4);
+        //}
+        if (_eblends.size())
+        {
+            _SetupVertexArray<Iqm::VertexArrayType::BlendIndexes, Iqm::VertexArrayFormat::Ubyte>(_eblends, 4);
+            _SetupVertexArray<Iqm::VertexArrayType::BlendWeights, Iqm::VertexArrayFormat::Ubyte>(_eblends, 4);
+        }
+        //if (_ecolors.size())
+        //    _SetupVertexArray<Iqm::VertexArrayType::Color, Iqm::VertexArrayFormat::Ubyte>(_ecolors, 4);
+        //loopi(10) if(ecustom[i].size()) setupvertexarray<IQM_CUSTOM>(ecustom[i], IQM_CUSTOM + i, IQM_FLOAT, 4);
+
+        if (_epositions.size())
+        {
+            _mpositions.resize(0);
+            _mpositions.swap(_epositions);
+        }
+        if (_eblends.size())
+        {
+            _mblends.resize(0);
+            _mblends.swap(_eblends);
+        }
+    }
+
     bool Convert::_LoadIqe(std::string const& path)
     {
         std::ifstream f(path);
@@ -203,17 +580,17 @@ namespace Tools { namespace Models {
                         _enormals.push_back(Utils::ParseAttribs3(c)); continue;
                     case 'x':
                         {
-                            glm::dvec4 tangent(Utils::ParseAttribs3(c), 0);
-                            glm::dvec3 bitangent(0, 0, 0);
-                            bitangent.x = Utils::ParseAttrib(c);
-                            if (Utils::MaybeParseAttrib(c, bitangent.y))
-                            {
-                                bitangent.z = Utils::ParseAttrib(c);
-                                _ebitangents.push_back(bitangent);
-                            }
-                            else
-                                tangent.w = bitangent.x;
-                            _etangents.push_back(tangent);
+                            //glm::dvec4 tangent(Utils::ParseAttribs3(c), 0);
+                            //glm::dvec3 bitangent(0, 0, 0);
+                            //bitangent.x = Utils::ParseAttrib(c);
+                            //if (Utils::MaybeParseAttrib(c, bitangent.y))
+                            //{
+                            //    bitangent.z = Utils::ParseAttrib(c);
+                            //    _ebitangents.push_back(bitangent);
+                            //}
+                            //else
+                            //    tangent.w = bitangent.x;
+                            //_etangents.push_back(tangent);
                             continue;
                         }
                     case 'b':
@@ -247,7 +624,8 @@ namespace Tools { namespace Models {
                                     t.orient.w = w;
                                     t.orient = glm::normalize(t.orient);
                                 }
-                                //if (t.orient.w > 0) t.orient.flip(); XXX
+                                if (t.orient.w > 0)
+                                    t.orient *= -1;
                                 t.scale = Utils::ParseAttribs3(c, glm::dvec3(1, 1, 1));
                                 _eposes.push_back(t);
                                 continue;
@@ -268,7 +646,8 @@ namespace Tools { namespace Models {
                                 for (unsigned int k = 0; k < 3; ++k)
                                     m[k] /= mscale;
                                 t.orient = glm::toQuat(m);
-                                //if (t.orient.w > 0) t.orient.flip(); XXX
+                                if (t.orient.w > 0)
+                                    t.orient *= -1;
                                 t.scale = Utils::ParseAttribs3(c, glm::dvec3(1, 1, 1)) * mscale;
                                 _eposes.push_back(t);
                                 continue;
@@ -284,7 +663,8 @@ namespace Tools { namespace Models {
                                         cx*sy*cz + sx*cy*sz,
                                         cx*cy*sz - sx*sy*cz,
                                         cx*cy*cz + sx*sy*sz);
-                                //if (t.orient.w > 0) t.orient.flip(); XXX
+                                if (t.orient.w > 0)
+                                    t.orient *= -1;
                                 t.scale = Utils::ParseAttribs3(c, glm::dvec3(1, 1, 1));
                                 _eposes.push_back(t);
                                 continue;
@@ -449,8 +829,8 @@ namespace Tools { namespace Models {
         }
 
         _SmoothVerts();
-        //makemeshes();
-        //makeanims();
+        _MakeMeshes();
+        _MakeAnims();
 
         return true;
     }

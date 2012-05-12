@@ -138,6 +138,11 @@ namespace Tools { namespace Models { namespace Iqm {
         Uint32 format;
         Uint32 size;
         Uint32 offset;
+
+        VertexArray() {}
+        VertexArray(Uint32 type, Uint32 format, Uint32 size, Uint32 offset) :
+            type(type), flags(0), format(format), size(size), offset(offset)
+        {}
     };
 
     //struct Bounds
