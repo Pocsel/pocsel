@@ -11,8 +11,8 @@ sampler2D cubeTexture = sampler_state
 #else
 sampler2D cubeTexture = sampler_state
 {
-    minFilter = LinearMipMapLinear;
-    magFilter = Nearest;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Nearest;
 };
 #endif
 
@@ -54,7 +54,7 @@ FSout fs(in VSout v)
     FSout f;
 
     f.diffuse = tex2D(cubeTexture, v.texCoord);
-    f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, 1.0);
+    f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, 1.0);
 
     return f;
 }

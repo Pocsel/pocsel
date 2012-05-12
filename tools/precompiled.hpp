@@ -84,4 +84,15 @@
 #define THREAD_LOCAL __thread
 #endif
 
+#ifdef _MSC_VER
+namespace detail {
+  template <class T>
+  struct type_helper {
+    typedef T type;
+  };
+}
+
+#define decltype(...) detail::type_helper<decltype(__VA_ARGS__)>::type
+#endif
+
 #endif

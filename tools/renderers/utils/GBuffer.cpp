@@ -14,10 +14,12 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Depth24Stencil8, Tools::Renderers::RenderTargetUsage::DepthStencil); // Z Buffer
         this->_lightRenderTarget = this->_renderer.CreateRenderTarget(size);
         this->_lightRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Light data
+        this->_lightRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Specular data
 
         this->_quadModelViewProj = this->_combineShader.GetParameter("quadWorldViewProjection");
         this->_diffuseTexture = this->_combineShader.GetParameter("diffuse");
-        this->_normalsDepthTexture = this->_combineShader.GetParameter("normalsDepth");
+        this->_lightTexture = this->_combineShader.GetParameter("lighting");
+        this->_specularTexture = this->_combineShader.GetParameter("specular");
 
         glm::fvec2 sizef(size);
         this->_mvp = glm::ortho(0.0f, sizef.x, sizef.y, 0.0f)
@@ -31,9 +33,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_lightRenderTarget->Resize(size);
 
         glm::fvec2 sizef(size);
-        this->_mvp = glm::ortho(0.0f, sizef.x, sizef.y, 0.0f)
-            * glm::scale(sizef.x, sizef.y, 1.0f)
-            * glm::translate(0.5f, 0.5f, 1.0f);
+        this->_mvp = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
     }
 
     void GBuffer::Bind()
@@ -65,10 +65,13 @@ namespace Tools { namespace Renderers { namespace Utils {
         {
             this->_combineShader.BeginPass();
 
-            this->GetNormalsDepth().Bind();
-            this->_normalsDepthTexture->Set(this->GetNormalsDepth());
+            this->GetLighting().Bind();
+            this->_lightTexture->Set(this->GetLighting());
+            this->GetSpecular().Bind();
+            this->_specularTexture->Set(this->GetSpecular());
             this->_quad.Render(*this->_diffuseTexture, this->GetColors());
-            this->GetNormalsDepth().Unbind();
+            this->GetSpecular().Unbind();
+            this->GetLighting().Unbind();
 
         } while (this->_combineShader.EndPass());
     }

@@ -17,8 +17,9 @@ namespace Tools { namespace Renderers { namespace Utils {
         IShaderProgram& _combineShader;
         std::unique_ptr<IShaderParameter> _quadModelViewProj;
         std::unique_ptr<IShaderParameter> _diffuseTexture;
-        std::unique_ptr<IShaderParameter> _normalsDepthTexture;
-        //std::unique_ptr<IShaderParameter> _lightTexture; // TODO
+        //std::unique_ptr<IShaderParameter> _normalsDepthTexture;
+        std::unique_ptr<IShaderParameter> _lightTexture;
+        std::unique_ptr<IShaderParameter> _specularTexture;
         //std::unique_ptr<IShaderParameter> _materialTexture; // TODO
 
         Image _quad;
@@ -41,6 +42,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         ITexture2D& GetNormalsDepth() { return this->_gbufferRenderTarget->GetTexture(1); }
         ITexture2D& GetInternalDepthBuffer() { return this->_gbufferRenderTarget->GetTexture(2); }
         ITexture2D& GetLighting() { return this->_lightRenderTarget->GetTexture(0); }
+        ITexture2D& GetSpecular() { return this->_lightRenderTarget->GetTexture(1); }
     };
 
 }}}

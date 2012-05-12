@@ -11,14 +11,13 @@ struct VSout
 {
    float4 position : POSITION;
    float2 texCoord : TEXCOORD0;
-   float4 worldPosition : TEXCOORD1;
+   float4 screenPosition : TEXCOORD1;
 };
 
 struct FSout
 {
     float4 color : COLOR0;
-    float4 normal : COLOR1;
-    float4 depth : COLOR2;
+    float4 normalDepth : COLOR1;
 };
 
 VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
@@ -27,7 +26,7 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
     vout.position = mul(mvp, position);
 
     vout.texCoord = texCoord;
-    vout.worldPosition = vout.position;
+    vout.screenPosition = vout.position;
 
     return vout;
 }
@@ -46,8 +45,7 @@ FSout fs(in VSout v)
 
     FSout f;
     f.color = tex2D(baseTex, coord);
-    f.normal = float4(1, 0, 0, f.color.a);
-    f.depth = float4(v.worldPosition.xyz, 0);
+    f.normalDepth = float4(1, 0, v.screenPosition.z / v.screenPosition.w, 0);
     return f;
 }
 
@@ -58,6 +56,8 @@ technique tech_glsl
     pass p0
     {
         AlphaBlendEnable = true;
+        AlphaTestEnable = true;
+        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -67,6 +67,8 @@ technique tech
     pass p0
     {
         AlphaBlendEnable = true;
+        AlphaTestEnable = true;
+        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }
