@@ -44,7 +44,10 @@ namespace Tools { namespace Models {
         std::vector<Iqm::VertexArray> _varrays;
         std::vector<Uint8> _vdata;
 
-        std::vector<glm::dvec4> _mpositions, _epositions, _etexcoords, /*_etangents, */_ecolors, _ecustom[10];
+        int _framesize;
+        std::vector<Uint16> _animdata;
+
+        std::vector<glm::dvec4> _mpositions, _epositions, _etexcoords, /*_etangents, */_ecolors;//, _ecustom[10];
         std::vector<glm::dvec3> _enormals;//, _ebitangents;
         std::vector<Utils::BlendCombo> _mblends, _eblends;
         std::vector<Utils::Etriangle> _etriangles;
@@ -64,6 +67,7 @@ namespace Tools { namespace Models {
     public:
 //        Convert() {
 //            _escale = 1;
+//                _framesize = 0;
 //        }
 
     private:
@@ -77,6 +81,8 @@ namespace Tools { namespace Models {
         void _MakeTriangles(std::vector<Utils::TriangleInfo>& tris, std::vector<Utils::SharedVert> const& mmap);
         void _MakeMeshes();
         bool _LoadIqe(std::string const& path);
+
+        void _CalcAnimData();
         bool _WriteMqm(std::string const& path);
 
         template<int TYPE, int FORMAT, class T>

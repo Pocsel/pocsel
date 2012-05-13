@@ -835,9 +835,268 @@ namespace Tools { namespace Models {
         return true;
     }
 
+    void Convert::_CalcAnimData()
+    {
+        if (_frames.size())
+        {
+            for (unsigned int i = 0; i < _poses.size(); ++i)
+            {
+                Iqm::Pose &j = _poses[i];
+                for (unsigned int k = 0; k < 10; ++k)
+                {
+                    j.channeloffset[k] = 1e16f;
+                    j.channelscale[k] = -1e16f;
+                }
+            }
+        }
+        for (unsigned int i = 0; i < _frames.size(); ++i)
+        {
+            Iqm::Pose &j = _poses[i%_poses.size()];
+            Transform &f = _frames[i];
+            for (unsigned int k = 0; k < 3; ++k)
+            {
+                j.channeloffset[k] = std::min(j.channeloffset[k], float(f.pos[k]));
+                j.channelscale[k] = std::max(j.channelscale[k], float(f.pos[k]));
+            }
+            for (unsigned int k = 0; k < 4; ++k)
+            {
+                j.channeloffset[3+k] = std::min(j.channeloffset[3+k], float(f.orient[k]));
+                j.channelscale[3+k] = std::max(j.channelscale[3+k], float(f.orient[k]));
+            }
+            for (unsigned int k = 0; k < 3; ++k)
+            {
+                j.channeloffset[7+k] = std::min(j.channeloffset[7+k], float(f.scale[k]));
+                j.channelscale[7+k] = std::max(j.channelscale[7+k], float(f.scale[k]));
+            }
+        }
+        for (unsigned int i = 0; i < _poses.size(); ++i)
+        {
+            Iqm::Pose &j = _poses[i];
+            for (unsigned int k = 0; k < 10; ++k)
+            {
+                j.channelscale[k] -= j.channeloffset[k];
+                if (j.channelscale[k] >= 1e-10f)
+                {
+                    ++_framesize;
+                    j.channelscale[k] /= 0xFFFF;
+                    j.mask |= 1<<k;
+                }
+                else j.channelscale[k] = 0.0f;
+            }
+        }
+        for (unsigned int i = 0; i < _frames.size(); ++i)
+        {
+            Iqm::Pose &j = _poses[i%_poses.size()];
+            Transform &f = _frames[i];
+            for (unsigned int k = 0; k < 3; ++k)
+            {
+                if (j.mask & (0x01<<k))
+                    _animdata.push_back(Uint16((float(f.pos[k]) - j.channeloffset[k]) / j.channelscale[k]));
+            }
+            for (unsigned int k = 0; k < 4; ++k)
+            {
+                if (j.mask & (0x08<<k))
+                    _animdata.push_back(Uint16((float(f.orient[k]) - j.channeloffset[3+k]) / j.channelscale[3+k]));
+            }
+            for (unsigned int k = 0; k < 3; ++k)
+            {
+                if (j.mask & (0x80<<k))
+                    _animdata.push_back(Uint16((float(f.scale[k]) - j.channeloffset[7+k]) / j.channelscale[7+k]));
+            }
+        }
+        while (_vdata.size() % 4)
+            _vdata.push_back(0);
+        while (_stringData.size() % 4)
+            _stringData.push_back('\0');
+        //while (_commentdata.size() % 4)
+        //    _commentdata.push_back('\0');
+        while (_animdata.size() % 2)
+            _animdata.push_back(0);
+    }
+
     bool Convert::_WriteMqm(std::string const& file)
     {
+        _CalcAnimData();
 
+        std::ofstream f(file);
+        if (!f)
+            return false;
+
+        Iqm::Header hdr;
+        std::memset(&hdr, 0, sizeof(hdr));
+        std::memcpy(hdr.magic, Iqm::Magic, sizeof(hdr.magic));
+        hdr.filesize = sizeof(hdr);
+        hdr.version = Iqm::Version;
+
+        if (_stringData.size())
+            hdr.ofs_text = hdr.filesize;
+        hdr.num_text = _stringData.size();
+        hdr.filesize += hdr.num_text;
+
+        if (_meshes.size())
+            hdr.ofs_meshes = hdr.filesize;
+        hdr.num_meshes = _meshes.size();
+        hdr.filesize += _meshes.size() * sizeof(Iqm::Mesh);
+
+        Uint32 voffset = hdr.filesize + _varrays.size() * sizeof(Iqm::VertexArray);
+        if (_varrays.size())
+            hdr.ofs_vertexarrays = hdr.filesize;
+        hdr.num_vertexarrays = _varrays.size();
+        hdr.filesize += _varrays.size() * sizeof(Iqm::VertexArray);
+
+        Uint32 valign = (8 - (hdr.filesize % 8)) % 8;
+        voffset += valign;
+        hdr.filesize += valign + _vdata.size();
+
+        hdr.num_vertexes = _vmap.size();
+        if (_triangles.size())
+            hdr.ofs_triangles = hdr.filesize;
+        hdr.num_triangles = _triangles.size();
+        hdr.filesize += _triangles.size() * sizeof(Iqm::Triangle);
+
+        if (_neighbors.size())
+            hdr.ofs_adjacency = hdr.filesize;
+        hdr.filesize += _neighbors.size() * sizeof(Iqm::Triangle);
+
+        if (_joints.size())
+            hdr.ofs_joints = hdr.filesize;
+        hdr.num_joints = _joints.size();
+        hdr.filesize += _joints.size() * sizeof(Iqm::Joint);
+
+        if (_poses.size())
+            hdr.ofs_poses = hdr.filesize;
+        hdr.num_poses = _poses.size();
+        hdr.filesize += _poses.size() * sizeof(Iqm::Pose);
+
+        if (_anims.size())
+            hdr.ofs_anims = hdr.filesize;
+        hdr.num_anims = _anims.size();
+        hdr.filesize += _anims.size() * sizeof(Iqm::Anim);
+
+        hdr.num_frames = _poses.size() ? _frames.size() / _poses.size() : 0;
+        hdr.num_framechannels = _framesize;
+
+        if (_animdata.size())
+            hdr.ofs_frames = hdr.filesize;
+        hdr.filesize += _animdata.size() * sizeof(Uint16);
+
+        //if(bounds.size()) hdr.ofs_bounds = hdr.filesize; hdr.filesize += bounds.size() * sizeof(float[8]);
+        //if(commentdata.size()) hdr.ofs_comment = hdr.filesize; hdr.num_comment = commentdata.size(); hdr.filesize += hdr.num_comment;
+
+        //lilswap(&hdr.version, (sizeof(hdr) - sizeof(hdr.magic))/sizeof(uint));
+
+        f.write((char*)&hdr, sizeof(hdr));
+
+        if (_stringData.size())
+            f.write(_stringData.data(), _stringData.size());
+
+        if (_meshes.size())
+            f.write((char*)_meshes.data(), _meshes.size() * sizeof(Iqm::Mesh));
+        //loopv(_meshes)
+        //{
+        //    mesh &m = _meshes[i];
+        //    f->putlil(m.name);
+        //    f->putlil(m.material);
+        //    f->putlil(m.firstvert);
+        //    f->putlil(m.numverts);
+        //    f->putlil(m.firsttri);
+        //    f->putlil(m.numtris);
+        //}
+
+        if (_varrays.size())
+            f.write((char*)_varrays.data(), _varrays.size() * sizeof(Iqm::VertexArray));
+        //loopv(_varrays)
+        //{
+        //    vertexarray &v = _varrays[i];
+        //    f->putlil(v.type);
+        //    f->putlil(v.flags);
+        //    f->putlil(v.format);
+        //    f->putlil(v.size);
+        //    f->putlil(voffset + v.offset);
+        //}
+
+        char align[8];
+        std::memset(align, 0, 8);
+        f.write(align, valign);
+        //loopi(valign) f->putchar(0);
+        f.write((char*)_vdata.data(), _vdata.size());
+
+        if (_triangles.size())
+            f.write((char*)_triangles.data(), _triangles.size() * sizeof(Iqm::Triangle));
+        //loopv(_triangles)
+        //{
+        //    triangle &t = triangles[i];
+        //    loopk(3)
+        //        f->putlil(t.vert[k]);
+        //}
+
+        if (_neighbors.size())
+            f.write((char*)_neighbors.data(), _neighbors.size() * sizeof(Iqm::Triangle));
+        //loopv(_neighbors)
+        //{
+        //    triangle &t = _neighbors[i];
+        //    loopk(3)
+        //        f->putlil(t.vert[k]);
+        //}
+
+        if (_joints.size())
+            f.write((char*)_joints.data(), _joints.size() * sizeof(Iqm::Joint));
+        //loopv(_joints)
+        //{
+        //    joint &j = _joints[i];
+        //    f->putlil(j.name);
+        //    f->putlil(j.parent);
+        //    loopk(3)
+        //        f->putlil(float(j.pos[k]));
+        //    loopk(4)
+        //        f->putlil(float(j.orient[k]));
+        //    loopk(3)
+        //        f->putlil(float(j.scale[k]));
+        //}
+
+        if (_poses.size())
+            f.write((char*)_poses.data(), _poses.size() * sizeof(Iqm::Pose));
+        //loopv(_poses)
+        //{
+        //    pose &p = _poses[i];
+        //    f->putlil(p.parent);
+        //    f->putlil(p.flags);
+        //    loopk(10)
+        //        f->putlil(p.offset[k]);
+        //    loopk(10)
+        //        f->putlil(p.scale[k]);
+        //}
+
+        if (_anims.size())
+            f.write((char*)_anims.data(), _anims.size() * sizeof(Iqm::Anim));
+        //loopv(_anims)
+        //{
+        //    anim &a = _anims[i];
+        //    f->putlil(a.name);
+        //    f->putlil(a.firstframe);
+        //    f->putlil(a.numframes);
+        //    f->putlil(a.fps);
+        //    f->putlil(a.flags);
+        //}
+
+        if (_animdata.size())
+            f.write((char*)_animdata.data(), _animdata.size() * sizeof(Uint16));
+        //loopv(_animdata)
+        //    f->putlil(_animdata[i]);
+
+        //loopv(bounds)
+        //{
+        //    framebounds &b = bounds[i];
+        //    loopk(3) f->putlil(float(b.bbmin[k]));
+        //    loopk(3) f->putlil(float(b.bbmax[k]));
+        //    f->putlil(float(b.xyradius));
+        //    f->putlil(float(b.radius));
+        //}
+
+        //if(commentdata.size()) f->write(commentdata.getbuf(), commentdata.size());
+
+        //delete f;
+        return true;
     }
 
 }}
