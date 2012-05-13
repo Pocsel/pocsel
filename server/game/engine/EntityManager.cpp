@@ -139,10 +139,12 @@ namespace Server { namespace Game { namespace Engine {
                     ++this->_nextEntityId;
                 Uint32 newId = this->_nextEntityId++;
 
-                this->_CreateEntity(newId, e->pluginId, e->entityName);
+                // XXX Spawn() hook
                 Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                this->_CreateEntity(newId, e->pluginId, e->entityName);
                 if (this->CallEntityFunction(newId, "Spawn", e->arg, this->_engine.GetInterpreter().MakeNumber(e->spawnerId), &ret) == CallbackManager::Ok)
                     resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
+
                 resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(newId));
                 resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
                 notifications.push(std::make_pair(e->notificationCallbackId, resultTable));
@@ -182,6 +184,8 @@ namespace Server { namespace Game { namespace Engine {
             if (it != this->_entities.end() && it->second)
             {
                 Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+
+                // XXX Die() hook
                 if (this->CallEntityFunction(e->targetId, "Die", e->arg, this->_engine.GetInterpreter().MakeNumber(e->killerId), &ret) == CallbackManager::Ok)
                     resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
                 this->_DeleteEntity(it->first, it->second);
@@ -212,7 +216,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             std::string table = this->_engine.GetMap().GetName() + "_entity";
             conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
-            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, plugin_id, entity_name, disabled, storage, pos_x, pos_y, pos_z) VALUES (?, ?, ?, ?, ?, ?, ?);");
+            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, plugin_id, entity_name, disabled, storage, pos_x, pos_y, pos_z) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
             // non positional entities
             {
                 auto it = this->_entities.begin();
@@ -422,9 +426,13 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    void EntityManager::BootstrapPlugin(Uint32 pluginId)
+    void EntityManager::BootstrapPlugin(Uint32 pluginId, Tools::Database::IConnection& conn)
     {
-        // TODO rajouter un "if !(le plugin a deja ete charge une fois dans cette map)"
+        std::string table = this->_engine.GetMap().GetName() + "_initialized_plugin";
+        auto query = conn.CreateQuery("SELECT 1 FROM " + table + " WHERE id = ?;");
+        query->Bind(pluginId);
+        if (query->Fetch())
+            return;
         this->AddSpawnEvent(pluginId, "Init", this->_engine.GetInterpreter().MakeNil() /* arg */, 0 /* spawnerId */, 0 /* callbackId */);
     }
 

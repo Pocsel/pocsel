@@ -71,7 +71,7 @@ namespace Server { namespace Game { namespace Map {
         auto it = plugins.begin();
         auto itEnd = plugins.end();
         for (; it != itEnd; ++it)
-            this->_engine->GetEntityManager().BootstrapPlugin(it->first);
+            this->_engine->GetEntityManager().BootstrapPlugin(it->first, this->_world.GetGame().GetServer().GetResourceManager().GetConnection());
 
         // tick toutes les 10 ms
         Tools::SimpleMessageQueue::TimerLoopMessage

@@ -12,10 +12,6 @@ namespace Tools { namespace PluginInstall {
 
         void CreateWorldTables(Tools::Database::IConnection& wconn)
         {
-            //wconn.CreateQuery("CREATE TABLE base_map1_bigchunk (id INTEGER PRIMARY KEY, data BLOB);")->ExecuteNonSelect();
-            //wconn.CreateQuery("CREATE TABLE base_map1_entity (id INTEGER, type TEXT, storage TEXT);")->ExecuteNonSelect();
-            //wconn.CreateQuery("CREATE TABLE base_map1_entity_callback (id INTEGER, target_id INTEGER, function TEXT, arg TEXT);")->ExecuteNonSelect();
-            //wconn.CreateQuery("CREATE TABLE base_map1_entity_type (type TEXT, storage TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE cube_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE cube_id (id INTEGER PRIMARY KEY, plugin_id INTEGER, name TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE entity_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
@@ -152,6 +148,7 @@ namespace Tools { namespace PluginInstall {
             wconn.CreateQuery("CREATE TABLE " + name + "_spawn_event (id INTEGER, plugin_id INTEGER, entity_name TEXT, arg TEXT, spawner_id INTEGER, notification_callback_id INTEGER, pos_x REAL, pos_y REAL, pos_z REAL);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE " + name + "_kill_event (id INTEGER, target_id INTEGER, arg TEXT, killer_id INTEGER, notification_callback_id INTEGER);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE " + name + "_entity (id INTEGER, plugin_id INTEGER, entity_name TEXT, disabled INTEGER, storage TEXT, pos_x REAL, pos_y REAL, pos_z REAL);")->ExecuteNonSelect();
+            wconn.CreateQuery("CREATE TABLE " + name + "_initialized_plugin (id INTEGER);")->ExecuteNonSelect();
 
             wconn.CreateQuery("INSERT INTO map (name, plugin_id, lua, time) VALUES (?, ?, ?, ?);")->
                 Bind(name).Bind(pluginId).Bind(lua).Bind(0).ExecuteNonSelect();

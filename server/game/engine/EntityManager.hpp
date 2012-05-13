@@ -73,7 +73,7 @@ namespace Server { namespace Game { namespace Engine {
         void DispatchSpawnEvents();
         void DispatchKillEvents();
         void Save(Tools::Database::IConnection& conn);
-        void BootstrapPlugin(Uint32 pluginId);
+        void BootstrapPlugin(Uint32 pluginId, Tools::Database::IConnection& conn);
         Uint32 GetRunningEntityId() const { return this->_runningEntityId; }
         Uint32 GetRunningPluginId() const;
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
