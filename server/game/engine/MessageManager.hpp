@@ -3,6 +3,10 @@
 
 #include "tools/lua/Ref.hpp"
 
+namespace Tools { namespace Database {
+    class IConnection;
+}}
+
 namespace Server { namespace Game { namespace Engine {
 
     class Engine;

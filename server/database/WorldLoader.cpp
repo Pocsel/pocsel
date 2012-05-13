@@ -78,12 +78,12 @@ namespace Server { namespace Database {
             throw std::runtime_error("WorldLoader::Load: World file is missing metadata (invalid or corrupt world file).");
 
         // Maps
-        query = this->_connection.CreateQuery("SELECT name, lua, tick FROM map");
+        query = this->_connection.CreateQuery("SELECT name, lua, time FROM map");
         while (auto row = query->Fetch())
         {
             std::string name = row->GetString(0);
             std::string lua = row->GetString(1);
-            Uint64 tick = row->GetUint64(2);
+            Uint64 time = row->GetUint64(2);
             try
             {
                 std::vector<Game::Map::Chunk::IdType> existingBigChunks;
@@ -93,7 +93,7 @@ namespace Server { namespace Database {
 
                 Game::Map::Conf conf;
                 auto lmc = WorldLoader::_LoadMapConf(conf, name, lua);
-                auto map = new Game::Map::Map(conf, tick, world, existingBigChunks);
+                auto map = new Game::Map::Map(conf, time, world, existingBigChunks);
 
                 if (world._maps.find(conf.name) != world._maps.end())
                     throw std::runtime_error("A map named \"" + conf.name + "\" already exists");

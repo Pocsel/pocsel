@@ -49,6 +49,7 @@ namespace Server { namespace Game { namespace Engine {
     void Engine::Save(Tools::Database::IConnection& conn)
     {
         this->_callbackManager->Save(conn);
+        this->_messageManager->Save(conn);
         this->_entityManager->Save(conn);
     }
 

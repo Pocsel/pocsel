@@ -56,8 +56,8 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 _nextEntityId;
         Uint32 _runningEntityId; // 0 quand aucune entité n'est en cours d'éxécution
         Entity* _runningEntity; // nul quand aucune entité n'est en cours d'éxécution
-        std::queue<SpawnEvent*> _spawnEvents;
-        std::queue<KillEvent*> _killEvents;
+        std::list<SpawnEvent*> _spawnEvents;
+        std::list<KillEvent*> _killEvents;
 
     public:
         EntityManager(Engine& engine);
@@ -90,6 +90,7 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
+        void _Load(Tools::Database::IConnection& conn);
     };
 
 }}}

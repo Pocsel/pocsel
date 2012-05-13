@@ -96,7 +96,7 @@ namespace Server { namespace Game { namespace Map {
         std::cout << "MapSave\n";
 
         auto& conn = this->_game.GetServer().GetResourceManager().GetConnection();
-        conn.CreateQuery("UPDATE map SET tick = ? WHERE name = ?")->Bind(this->_currentTime).Bind(this->_conf.name).ExecuteNonSelect();
+        conn.CreateQuery("UPDATE map SET time = ? WHERE name = ?")->Bind(this->_currentTime).Bind(this->_conf.name).ExecuteNonSelect();
 
         this->_chunkManager->Save(conn);
         this->_engine->Save(conn);

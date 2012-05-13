@@ -10,6 +10,8 @@
 #include "server/game/PluginManager.hpp"
 #include "server/game/engine/Entity.hpp"
 #include "server/game/engine/EntityType.hpp"
+#include "tools/database/IConnection.hpp"
+#include "server/game/map/Map.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -132,9 +134,9 @@ namespace Server { namespace Game { namespace Engine {
             for (; itMessage != itMessageEnd; ++itMessage)
                 try
                 {
-                    query->Bind(it->first).Bind(itMessage->callbackId).Bind(itMessage->notificationCallbackId).ExecuteNonSelect().Reset();
+                    query->Bind(it->first).Bind((*itMessage)->callbackId).Bind((*itMessage)->notificationCallbackId).ExecuteNonSelect().Reset();
                 }
-                catch (std::excetion& e)
+                catch (std::exception& e)
                 {
                     Tools::error << "MessageManager::Save: Could not save message due at " << it->first << ": " << e.what() << std::endl;
                 }
@@ -150,6 +152,7 @@ namespace Server { namespace Game { namespace Engine {
             Uint64 time = row->GetUint64(0);
             Uint32 callbackId = row->GetUint32(1);
             Uint32 notificationCallbackId = row->GetUint32(2);
+            this->_messages[time].push_back(new Message(callbackId, notificationCallbackId));
         }
     }
 

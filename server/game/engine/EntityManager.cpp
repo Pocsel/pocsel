@@ -54,17 +54,15 @@ namespace Server { namespace Game { namespace Engine {
                 Tools::Delete(itType->second);
         }
         // spawn events
-        while (!this->_spawnEvents.empty())
-        {
-            Tools::Delete(this->_spawnEvents.front());
-            this->_spawnEvents.pop();
-        }
+        auto itSpawn = this->_spawnEvents.begin();
+        auto itSpawnEnd = this->_spawnEvents.end();
+        for (; itSpawn != itSpawnEnd; ++itSpawn)
+            Tools::Delete(*itSpawn);
         // kill events
-        while (!this->_killEvents.empty())
-        {
-            Tools::Delete(this->_killEvents.front());
-            this->_killEvents.pop();
-        }
+        auto itKill = this->_killEvents.begin();
+        auto itKillEnd = this->_killEvents.end();
+        for (; itKill != itKillEnd; ++itKill)
+            Tools::Delete(*itKill);
     }
 
     CallbackManager::Result EntityManager::CallEntityFunction(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */)
@@ -113,19 +111,25 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, Common::Position const& pos /* = Common::Position() */)
     {
-        this->_spawnEvents.push(new SpawnEvent(pluginId, entityName, arg, spawnerId, notificationCallbackId, pos));
+        this->_spawnEvents.push_back(new SpawnEvent(pluginId, entityName, arg, spawnerId, notificationCallbackId, pos));
     }
 
     void EntityManager::AddKillEvent(Uint32 targetId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId)
     {
-        this->_killEvents.push(new KillEvent(targetId, arg, killerId, notificationCallbackId));
+        this->_killEvents.push_back(new KillEvent(targetId, arg, killerId, notificationCallbackId));
     }
 
     void EntityManager::DispatchSpawnEvents()
     {
-        while (!this->_spawnEvents.empty())
+        // buffer pour les callbacks de notification de spawn
+        // evite de niquer le parcours de _spawnEvents quand un spawn est demandé dans une callback de notification
+        std::queue<std::pair<Uint32 /* notificationCallbackId */, Tools::Lua::Ref /* resultTable */>> notifications;
+
+        auto it = this->_spawnEvents.begin();
+        auto itEnd = this->_spawnEvents.end();
+        for (; it != itEnd; ++it)
         {
-            SpawnEvent* e = this->_spawnEvents.front();
+            SpawnEvent* e = *it;
             auto resultTable = this->_engine.GetInterpreter().MakeTable();
             try
             {
@@ -135,24 +139,37 @@ namespace Server { namespace Game { namespace Engine {
                     resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
                 resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(newId));
                 resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
-                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
+                notifications.push(std::make_pair(e->notificationCallbackId, resultTable));
             }
             catch (std::exception& ex)
             {
                 Tools::error << "EntityManager::DispatchSpawnEvents: Cannot create entity \"" << e->entityName << "\" from plugin " << e->pluginId << ": " << ex.what() << std::endl;
                 resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(false));
-                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
+                notifications.push(std::make_pair(e->notificationCallbackId, resultTable));
             }
             delete e;
-            this->_spawnEvents.pop();
+        }
+        this->_spawnEvents.clear();
+
+        while (!notifications.empty())
+        {
+            auto const& notif = notifications.front();
+            this->_engine.GetCallbackManager().TriggerCallback(notif.first, notif.second);
+            notifications.pop();
         }
     }
 
     void EntityManager::DispatchKillEvents()
     {
-        while (!this->_killEvents.empty())
+        // buffer pour les callbacks de notification de kill
+        // evite de niquer le parcours de _killEvents quand un kill est demandé dans une callback de notification
+        std::queue<std::pair<Uint32 /* notificationCallbackId */, Tools::Lua::Ref /* resultTable */>> notifications;
+
+        auto it = this->_killEvents.begin();
+        auto itEnd = this->_killEvents.end();
+        for (; it != itEnd; ++it)
         {
-            KillEvent* e = this->_killEvents.front();
+            KillEvent* e = *it;
             auto it = this->_entities.find(e->targetId);
             auto resultTable = this->_engine.GetInterpreter().MakeTable();
             resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(e->targetId));
@@ -163,40 +180,170 @@ namespace Server { namespace Game { namespace Engine {
                     resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
                 this->_DeleteEntity(it->first, it->second);
                 resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true)); // meme si le call a fail, l'entité est tuée quand même alors on retourne true
-                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
+                notifications.push(std::make_pair(e->notificationCallbackId, resultTable));
             }
             else
             {
                 Tools::error << "EntityManager::DispatchKillEvents: Cannot kill entity " << e->targetId << ": entity not found.\n";
                 resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(false));
-                this->_engine.GetCallbackManager().TriggerCallback(e->notificationCallbackId, resultTable);
+                notifications.push(std::make_pair(e->notificationCallbackId, resultTable));
             }
             delete e;
-            this->_killEvents.pop();
+        }
+        this->_killEvents.clear();
+
+        while (!notifications.empty())
+        {
+            auto const& notif = notifications.front();
+            this->_engine.GetCallbackManager().TriggerCallback(notif.first, notif.second);
+            notifications.pop();
         }
     }
 
     void EntityManager::Save(Tools::Database::IConnection& conn)
     {
-        /*
-        conn.CreateQuery("DELETE FROM " + this->_engine.GetMap().GetName() + "_entity")->ExecuteNonSelect();
-        conn.BeginTransaction();
-        auto query = conn.CreateQuery("INSERT INTO " + this->_engine.GetMap().GetName() + "_entity (id, type, storage) VALUES (?, ?, ?)");
-        auto it = this->_entities.begin();
-        auto itEnd = this->_entities.end();
-        for (; it != itEnd; ++it)
+        // entities
         {
-            try
+            std::string table = this->_engine.GetMap().GetName() + "_entity";
+            conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
+            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, plugin_id, entity_name, storage, pos_x, pos_y, pos_z) VALUES (?, ?, ?, ?, ?, ?, ?);");
+            // non positional entities
             {
-                query->Bind(it->first).Bind(it->second->GetType().GetName()).Bind(this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->GetSelf()["storage"])).ExecuteNonSelect().Reset();
+                auto it = this->_entities.begin();
+                auto itEnd = this->_entities.end();
+                for (; it != itEnd; ++it)
+                {
+                    Entity* entity = it->second;
+                    std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);
+                    auto const& type = entity->GetType();
+                    if (!type.IsPositional())
+                        try
+                        {
+                            query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(storage).Bind(0).Bind(0).Bind(0).ExecuteNonSelect().Reset();
+                        }
+                        catch (std::exception& e)
+                        {
+                            Tools::log << "EntityManager::Save: Could not save non positional entity " << it->first << ": " << e.what() << std::endl;
+                        }
+                }
             }
-            catch (std::exception& e)
+            // positional entities
             {
-                Tools::error << "EntityManager::Save: Could not save entity " << it->first << " (of type \"" << it->second->GetType().GetName() << "\"): " << e.what() << std::endl;
+                auto it = this->_positionalEntities.begin();
+                auto itEnd = this->_positionalEntities.end();
+                for (; it != itEnd; ++it)
+                {
+                    PositionalEntity* entity = it->second;
+                    std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);
+                    auto const& pos = entity->GetPosition();
+                    auto const& type = entity->GetType();
+                    try
+                    {
+                        query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(storage).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
+                    }
+                    catch (std::exception& e)
+                    {
+                        Tools::error << "EntityManager::Save: Could not save positional entity " << it->first << ": " << e.what() << std::endl;
+                    }
+                }
             }
         }
-        conn.EndTransaction();
-        */
+
+        // spawn events
+        {
+            std::string table = this->_engine.GetMap().GetName() + "_spawn_event";
+            conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
+            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, plugin_id, entity_name, arg, spawner_id, notification_callback_id, pos_x, pos_y, pos_z) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
+            unsigned int id = 0;
+            auto it = this->_spawnEvents.begin();
+            auto itEnd = this->_spawnEvents.end();
+            for (; it != itEnd; ++it)
+            {
+                ++id; // juste pour conserver l'ordre au chargement
+                auto e = *it;
+                std::string arg = this->_engine.GetInterpreter().GetSerializer().Serialize(e->arg, true /* nilOnError */);
+                auto const& pos = e->pos;
+                try
+                {
+                    query->Bind(id).Bind(e->pluginId).Bind(e->entityName).Bind(arg).Bind(e->spawnerId).Bind(e->notificationCallbackId).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
+                }
+                catch (std::exception& ex)
+                {
+                    Tools::error << "EntityManager::Save: Could not save spawn event for entity \"" << e->entityName << "\" (plugin " << e->pluginId << "): " << ex.what() << std::endl;
+                }
+            }
+        }
+
+        // kill events
+        {
+            std::string table = this->_engine.GetMap().GetName() + "_kill_event";
+            conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
+            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, target_id, arg, killer_id, notification_callback_id) VALUES (?, ?, ?, ?, ?);");
+            unsigned int id = 0;
+            auto it = this->_killEvents.begin();
+            auto itEnd = this->_killEvents.end();
+            for (; it != itEnd; ++it)
+            {
+                ++id; // juste pour conserver l'ordre au chargement
+                auto e = *it;
+                std::string arg = this->_engine.GetInterpreter().GetSerializer().Serialize(e->arg, true /* nilOnError */);
+                try
+                {
+                    query->Bind(id).Bind(e->targetId).Bind(arg).Bind(e->killerId).Bind(e->notificationCallbackId).ExecuteNonSelect().Reset();
+                }
+                catch (std::exception& ex)
+                {
+                    Tools::error << "EntityManager::Save: Could not save a kill event for entity " << e->targetId << ": " << ex.what() << std::endl;
+                }
+            }
+        }
+    }
+
+    void EntityManager::_Load(Tools::Database::IConnection& conn)
+    {
+        // spawn events
+        {
+            std::string table = this->_engine.GetMap().GetName() + "_spawn_event";
+            auto query = conn.CreateQuery("SELECT plugin_id, entity_name, arg, spawner_id, notification_callback_id, pos_x, pos_y, pos_z FROM " + table + " ORDER BY id;");
+            while (auto row = query->Fetch())
+            {
+                Uint32 pluginId = row->GetUint32(0);
+                std::string entityName = row->GetString(1);
+                Uint32 spawnerId = row->GetUint32(3);
+                Uint32 notificationCallbackId = row->GetUint32(4);
+                Common::Position pos(row->GetUint32(5), row->GetUint32(6), row->GetUint32(7));
+                try
+                {
+                    Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(2));
+                    this->AddSpawnEvent(pluginId, entityName, arg, spawnerId, notificationCallbackId, pos);
+                }
+                catch (std::exception& e) // erreur de deserialization
+                {
+                    Tools::error << "EntityManager::_Load: Could not load spawn event for entity \"" << entityName << "\" (plugin " << pluginId << "): " << e.what() << std::endl;
+                }
+            }
+        }
+
+        // kill events
+        {
+            std::string table = this->_engine.GetMap().GetName() + "_kill_event";
+            auto query = conn.CreateQuery("SELECT target_id, arg, killer_id, notification_callback_id FROM " + table + " ORDER BY id;");
+            while (auto row = query->Fetch())
+            {
+                Uint32 targetId = row->GetUint32(0);
+                Uint32 killerId = row->GetUint32(2);
+                Uint32 notificationCallbackId = row->GetUint32(3);
+                try
+                {
+                    Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(1));
+                    this->AddKillEvent(targetId, arg, killerId, notificationCallbackId);
+                }
+                catch (std::exception& e)
+                {
+                    Tools::error << "EntityManager::_Load: Could not load kill event for entity " << targetId << ": " << e.what() << std::endl;
+                }
+            }
+        }
     }
 
     void EntityManager::BootstrapPlugin(Uint32 pluginId)
