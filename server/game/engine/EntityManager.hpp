@@ -53,6 +53,7 @@ namespace Server { namespace Game { namespace Engine {
         std::map<Uint32 /* pluginId */, std::map<std::string /* entityName */, EntityType*>> _entityTypes;
         std::map<Uint32 /* entityId */, Entity*> _entities;
         std::map<Uint32 /* entityId */, PositionalEntity*> _positionalEntities;
+        std::map<Uint32 /* entityId */, PositionalEntity*> _disabledEntities;
         Uint32 _nextEntityId;
         Uint32 _runningEntityId; // 0 quand aucune entité n'est en cours d'éxécution
         Entity* _runningEntity; // nul quand aucune entité n'est en cours d'éxécution
@@ -76,13 +77,16 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 GetRunningEntityId() const { return this->_runningEntityId; }
         Uint32 GetRunningPluginId() const;
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
+        void DisableEntity(Uint32 entityId, bool callSave = true) throw(std::runtime_error);
+        void EnableEntity(Uint32 entityId) throw(std::runtime_error);
+        bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
 
         // rcon requests
         std::string RconGetEntities() const;
         void RconAddEntityTypes(Rcon::EntityManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon
 
     private:
-        Uint32 _CreateEntity(Uint32 pluginId, std::string entityName, bool positional = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
+        Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool positional = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper);

@@ -26,4 +26,10 @@ namespace Server { namespace Game { namespace Engine {
         return Tools::Lua::Ref(this->_self.GetState()); // nil
     }
 
+    void Entity::SetStorage(Tools::Lua::Ref const& storage)
+    {
+        if (this->_self.IsTable())
+            this->_self.Set("storage", storage);
+    }
+
 }}}

@@ -22,6 +22,7 @@ namespace Server { namespace Game { namespace Engine {
         EntityType const& GetType() const { return *this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
         Tools::Lua::Ref GetStorage() const;
+        void SetStorage(Tools::Lua::Ref const& storage);
     };
 
 }}}
