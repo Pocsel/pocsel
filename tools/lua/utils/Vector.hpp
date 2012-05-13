@@ -22,7 +22,7 @@ namespace Tools { namespace Lua { namespace Utils { namespace Vector {
         }
 
     template<typename T>
-        void Vec3ToTable(glm::detail::tvec3<T> v, Ref& ref) throw(std::runtime_error)
+        void Vec3ToTable(glm::detail::tvec3<T> const& v, Ref& ref) throw(std::runtime_error)
         {
             ref = ref.GetState().MakeTable();
             ref.Set("x", v.x);
@@ -43,7 +43,7 @@ namespace Tools { namespace Lua { namespace Utils { namespace Vector {
         }
 
     template<typename T>
-        void Vec2ToTable(glm::detail::tvec2<T> v, Ref& ref) throw(std::runtime_error)
+        void Vec2ToTable(glm::detail::tvec2<T> const& v, Ref& ref) throw(std::runtime_error)
         {
             ref = ref.GetState().MakeTable();
             ref.Set("x", v.x);
