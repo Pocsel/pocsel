@@ -65,12 +65,10 @@ namespace Tools { namespace Models {
         double _escale;
 
     public:
-//        Convert() {
-//            _escale = 1;
-//                _framesize = 0;
-//        }
+        bool Work(std::string const& out, std::string const& in);
 
     private:
+        void _Reset();
         Uint32 _ShareString(std::string const& str);
         Uint32 _PushString(std::string const& str);
 
@@ -122,7 +120,7 @@ namespace Tools { namespace Models {
 
                 int totalsize = Utils::GetVarrayFormatSize(va.format) * va.size * _vmap.size();
                 size_t vdatasize = _vdata.size();
-                _vdata.resize(totalsize);
+                _vdata.resize(_vdata.size() + totalsize);
                 Uint8* data = _vdata.data() + vdatasize;
                 for (unsigned int i = 0; i < _vmap.size(); ++i)
                 {

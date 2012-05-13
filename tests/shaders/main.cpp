@@ -130,10 +130,14 @@ static void LoadShaders(Sdl::Window& window)
     try
     {
 
-        auto tmpTest = std::string((std::istreambuf_iterator<char>(std::ifstream(testShaderPath))), std::istreambuf_iterator<char>());
-        auto tmpDirectionnal = std::string((std::istreambuf_iterator<char>(std::ifstream(directionnalLightShaderPath))), std::istreambuf_iterator<char>());
-        auto tmpPoint = std::string((std::istreambuf_iterator<char>(std::ifstream(pointLightShaderPath))), std::istreambuf_iterator<char>());
-        auto tmpCombine = std::string((std::istreambuf_iterator<char>(std::ifstream(combineShaderPath))), std::istreambuf_iterator<char>());
+        std::ifstream fileTest(testShaderPath);
+        auto tmpTest = std::string((std::istreambuf_iterator<char>(fileTest)), std::istreambuf_iterator<char>());
+        std::ifstream fileDirectionnal(directionnalLightShaderPath);
+        auto tmpDirectionnal = std::string((std::istreambuf_iterator<char>(fileDirectionnal)), std::istreambuf_iterator<char>());
+        std::ifstream filePoint(pointLightShaderPath);
+        auto tmpPoint = std::string((std::istreambuf_iterator<char>(filePoint)), std::istreambuf_iterator<char>());
+        std::ifstream fileCombine(combineShaderPath);
+        auto tmpCombine = std::string((std::istreambuf_iterator<char>(fileCombine)), std::istreambuf_iterator<char>());
 
         testShader = renderer.CreateProgram(tmpTest);
         combineShader = renderer.CreateProgram(tmpCombine);

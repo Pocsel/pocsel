@@ -176,7 +176,7 @@ namespace Tools { namespace Models { namespace Utils {
         std::string name;
         int parent;
 
-        Ejoint() : name(NULL), parent(-1) {}
+        Ejoint() : name(""), parent(-1) {}
     };
 
     struct Eanim
@@ -186,7 +186,7 @@ namespace Tools { namespace Models { namespace Utils {
         double fps;
         Uint32 flags;
 
-        Eanim() : name(NULL), startframe(0), endframe(INT_MAX), fps(0), flags(0) {}
+        Eanim() : name(""), startframe(0), endframe(INT_MAX), fps(0), flags(0) {}
     };
 
     struct Emesh
@@ -196,7 +196,7 @@ namespace Tools { namespace Models { namespace Utils {
         int firsttri;
         bool used;
 
-        Emesh() : name(NULL), material(NULL), firsttri(0), used(false) {}
+        Emesh() : name(""), material(""), firsttri(0), used(false) {}
         Emesh(std::string const& name, std::string const& material, int firsttri = 0) : name(name), material(material), firsttri(firsttri), used(false) {}
     };
 

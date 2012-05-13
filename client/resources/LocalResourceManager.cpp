@@ -111,13 +111,13 @@ namespace Client { namespace Resources {
         auto it = this->_models.find(path);
         if (it == this->_models.end())
         {
-            try
-            {
+            //try
+            //{
                 boost::filesystem::path texturesPath = path;
                 boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
                 modelPath.replace_extension(".iqm");
                 if (!boost::filesystem::exists(modelPath))
-                    throw std::runtime_error("MqmModel::LoadModel: Failed to find file: " + modelPath.string());
+                    throw std::runtime_error("GetMqmModel: Failed to find file: " + modelPath.string());
                 std::ifstream tmp(modelPath.string(), std::ios::binary | std::ios::in);
                 std::vector<char> data((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
 
@@ -129,12 +129,12 @@ namespace Client { namespace Resources {
 
                 this->_models[path] = model;
                 return *model;
-            }
-            catch (std::exception& ex)
-            {
-                Tools::error << "Can't load MqmModel \"" << path << "\", details: " << ex.what() << "\n";
-                throw;
-            }
+            //}
+            //catch (std::exception& ex)
+            //{
+            //    Tools::error << "Can't load MqmModel \"" << path << "\", details: " << ex.what() << "\n";
+            //    throw;
+            //}
         }
         else
             return *it->second;

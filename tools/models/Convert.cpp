@@ -6,6 +6,55 @@
 
 namespace Tools { namespace Models {
 
+    bool Convert::Work(std::string const& out, std::string const& in)
+    {
+        _Reset();
+
+        return _LoadIqe(in) && _WriteMqm(out);
+    }
+
+    void Convert::_Reset()
+    {
+        _triangles.clear();
+        _neighbors.clear();
+        _meshes.clear();
+        _anims.clear();
+        _joints.clear();
+        _poses.clear();
+        _frames.clear();
+        _stringData.clear();
+        _sharedStrings.clear();
+
+        _vmap.clear();
+        _varrays.clear();
+        _vdata.clear();
+
+        _framesize = 0;
+        _animdata.clear();
+
+        _mpositions.clear();
+        _epositions.clear();
+        _etexcoords.clear();
+        _ecolors.clear();
+        _enormals.clear();
+        _mblends.clear();
+        _eblends.clear();
+        _etriangles.clear();
+        _esmoothgroups.clear();
+        _esmoothgroups.emplace_back();
+        _esmoothindexes.clear();
+        _esmoothedges.clear();
+        _ejoints.clear();
+        _eposes.clear();
+        _mjoints.clear();
+        _eframes.clear();
+        _eanims.clear();
+        _emeshes.clear();
+        _evarrays.clear();
+        _enames.clear();
+        _escale = 1;
+    }
+
     Uint32 Convert::_ShareString(std::string const& str)
     {
         if (this->_sharedStrings.count(str))
@@ -448,7 +497,8 @@ namespace Tools { namespace Models {
                 Utils::Emesh& em = _emeshes[j];
                 if (em.name != em1.name || em.material != em1.material)
                     continue;
-                int lasttri = (i+1<_emeshes.size()) ? _emeshes[i+1].firsttri : _etriangles.size();
+                //int lasttri = (i+1<_emeshes.size()) ? _emeshes[i+1].firsttri : _etriangles.size();
+                int lasttri = (j+1<_emeshes.size()) ? _emeshes[j+1].firsttri : _etriangles.size();
                 for(int k = em.firsttri; k < lasttri; ++k)
                 {
                     Utils::Etriangle& et = _etriangles[k];
@@ -1021,14 +1071,21 @@ namespace Tools { namespace Models {
         //loopi(valign) f->putchar(0);
         f.write((char*)_vdata.data(), _vdata.size());
 
-        if (_triangles.size())
-            f.write((char*)_triangles.data(), _triangles.size() * sizeof(Iqm::Triangle));
+        //if (_triangles.size())
+        //    f.write((char*)_triangles.data(), _triangles.size() * sizeof(Iqm::Triangle));
         //loopv(_triangles)
         //{
         //    triangle &t = triangles[i];
         //    loopk(3)
         //        f->putlil(t.vert[k]);
         //}
+        for (auto it = _triangles.begin(), ite = _triangles.end(); it != ite; ++it)
+        {
+            Iqm::Triangle& t = *it;
+            f.write((char*)&t.vertex[0], sizeof(*t.vertex));
+            f.write((char*)&t.vertex[2], sizeof(*t.vertex));
+            f.write((char*)&t.vertex[1], sizeof(*t.vertex));
+        }
 
         if (_neighbors.size())
             f.write((char*)_neighbors.data(), _neighbors.size() * sizeof(Iqm::Triangle));
