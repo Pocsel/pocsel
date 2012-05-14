@@ -371,7 +371,7 @@ namespace Server { namespace Rcon {
     void Request::_WriteHttpResponse(std::string const& status, std::string const& content /* = std::string() */)
     {
         //std::cout << "Rcon: Request for \"" << this->_urlString << "\" (" << this->_method << "): " << status << "." << std::endl;
-        std::string response(
+        this->_response =
                 "HTTP/1.1 " + status + "\r\n"
                 "Access-Control-Allow-Origin: *\r\n"
                 "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n"
@@ -383,10 +383,10 @@ namespace Server { namespace Rcon {
                 "Content-Type: application/json; charset=utf-8\r\n"
                 "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\n"
                 "Pragma: no-cache\r\n"
-                "\r\n");
-        response += content;
+                "\r\n";
+        this->_response += content;
         //std::cout << "Rcon: Response: \"" << response << "\"" << std::endl;
-        boost::asio::async_write(*this->_socket, boost::asio::buffer(response),
+        boost::asio::async_write(*this->_socket, boost::asio::buffer(this->_response),
                 boost::bind(&Request::_HttpResponseWritten, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
     }
 
