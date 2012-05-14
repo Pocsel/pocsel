@@ -48,8 +48,7 @@ namespace Server { namespace Game { namespace Engine {
         bool CancelCallback(Uint32 callbackId); // retourne true si callbackId est effectivement associé a une callback (annulation réussie)
         Callback const& GetCallback(Uint32 callbackId) const throw(std::runtime_error); // ne pas garder de reference, la callback peut etre delete à tout moment
         void Save(Tools::Database::IConnection& conn);
-    private:
-        void _Load(Tools::Database::IConnection& conn);
+        void Load(Tools::Database::IConnection& conn);
     };
 
 }}}

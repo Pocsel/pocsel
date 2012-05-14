@@ -47,6 +47,20 @@ namespace Server { namespace Game { namespace Engine {
         this->_messageManager->DispatchMessages();
     }
 
+    void Engine::Load(Tools::Database::IConnection& conn)
+    {
+        // load managers
+        this->_callbackManager->Load(conn);
+        this->_messageManager->Load(conn);
+        this->_entityManager->Load(conn);
+        // initializes any plugin that needs it
+        auto const& plugins = this->_world.GetPluginManager().GetPlugins();
+        auto it = plugins.begin();
+        auto itEnd = plugins.end();
+        for (; it != itEnd; ++it)
+            this->_entityManager->BootstrapPlugin(it->first, conn);
+    }
+
     void Engine::Save(Tools::Database::IConnection& conn)
     {
         // save managers
@@ -63,6 +77,7 @@ namespace Server { namespace Game { namespace Engine {
         for (; it != itEnd; ++it)
             try
             {
+                Tools::debug << ">> Save >> " << table << " >> Initialized Plugin (pluginId: " << it->first << ")" << std::endl;
                 query->Bind(it->first).ExecuteNonSelect().Reset();
             }
             catch (std::exception& e)

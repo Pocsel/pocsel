@@ -134,6 +134,7 @@ namespace Server { namespace Game { namespace Engine {
             for (; itMessage != itMessageEnd; ++itMessage)
                 try
                 {
+                    Tools::debug << ">> Save >> " << table << " >> Message (time: " << it->first << ", callbackId: " << (*itMessage)->callbackId << ", notificationCallbackId: " << (*itMessage)->notificationCallbackId << ")" << std::endl;
                     query->Bind(it->first).Bind((*itMessage)->callbackId).Bind((*itMessage)->notificationCallbackId).ExecuteNonSelect().Reset();
                 }
                 catch (std::exception& e)
@@ -143,7 +144,7 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    void MessageManager::_Load(Tools::Database::IConnection& conn)
+    void MessageManager::Load(Tools::Database::IConnection& conn)
     {
         std::string table = this->_engine.GetMap().GetName() + "_message";
         auto query = conn.CreateQuery("SELECT time, callback_id, notification_callback_id FROM " + table);
@@ -152,6 +153,7 @@ namespace Server { namespace Game { namespace Engine {
             Uint64 time = row->GetUint64(0);
             Uint32 callbackId = row->GetUint32(1);
             Uint32 notificationCallbackId = row->GetUint32(2);
+            Tools::debug << "<< Load << " << table << " << Message (time: " << time << ", callbackId: " << callbackId << ", notificationCallbackId: " << notificationCallbackId << ")" << std::endl;
             this->_messages[time].push_back(new Message(callbackId, notificationCallbackId));
         }
     }

@@ -73,6 +73,7 @@ namespace Server { namespace Game { namespace Engine {
         void DispatchSpawnEvents();
         void DispatchKillEvents();
         void Save(Tools::Database::IConnection& conn);
+        void Load(Tools::Database::IConnection& conn);
         void BootstrapPlugin(Uint32 pluginId, Tools::Database::IConnection& conn);
         Uint32 GetRunningEntityId() const { return this->_runningEntityId; }
         Uint32 GetRunningPluginId() const;
@@ -94,7 +95,6 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
-        void _Load(Tools::Database::IConnection& conn);
     };
 
 }}}

@@ -226,15 +226,17 @@ namespace Server { namespace Game { namespace Engine {
                     {
                         Entity* entity = it->second;
                         auto const& type = entity->GetType();
-                        if (!type.IsPositional())
+                        if (!type.IsPositional()) // saute les entités positionnelles, elles sont gérées differement après
                             try
                             {
                                 // XXX Save() database hook
                                 // (peut delete l'entité, mais les iterateurs restent valident pour la map)
-                                if (this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil()) == CallbackManager::Error)
+                                CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+                                if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                     throw std::runtime_error("call to Save() failed");
                                 std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);
 
+                                Tools::debug << ">> Save >> " << table << " >> Enabled Non-Positional Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes)" << std::endl;
                                 query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(0).Bind(0).Bind(0).ExecuteNonSelect().Reset();
                             }
                             catch (std::exception& e)
@@ -257,10 +259,12 @@ namespace Server { namespace Game { namespace Engine {
                         {
                             // XXX Save() database hook
                             // (peut delete l'entité, mais les iterateurs restent valident pour la map)
-                            if (this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil()) == CallbackManager::Error)
+                            CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+                            if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                 throw std::runtime_error("call to Save() failed");
                             std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);
 
+                            Tools::debug << ">> Save >> " << table << " >> Enabled Positional Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes, x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
                             query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
                         }
                         catch (std::exception& e)
@@ -281,6 +285,7 @@ namespace Server { namespace Game { namespace Engine {
                     auto const& type = entity->GetType();
                     try
                     {
+                        Tools::debug << ">> Save >> " << table << " >> Disabled Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes, x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
                         query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(1).Bind(storage).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
                     }
                     catch (std::exception& e)
@@ -307,6 +312,7 @@ namespace Server { namespace Game { namespace Engine {
                 auto const& pos = e->pos;
                 try
                 {
+                    Tools::debug << ">> Save >> " << table << " >> Spawn Event (id: " << id << ", pluginId: " << e->pluginId << ", entityName: \"" << e->entityName << "\", spawnerId: " << e->spawnerId << ", notificationCallbackId: " << e->notificationCallbackId << ", x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
                     query->Bind(id).Bind(e->pluginId).Bind(e->entityName).Bind(arg).Bind(e->spawnerId).Bind(e->notificationCallbackId).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
                 }
                 catch (std::exception& ex)
@@ -331,6 +337,7 @@ namespace Server { namespace Game { namespace Engine {
                 std::string arg = this->_engine.GetInterpreter().GetSerializer().Serialize(e->arg, true /* nilOnError */);
                 try
                 {
+                    Tools::debug << ">> Save >> " << table << " >> Kill Event (id: " << id << ", targetId: " << e->targetId << ", arg: " << arg.size() << " bytes, killerId: " << e->killerId << ", notificationCallbackId: " << e->notificationCallbackId << ")" << std::endl;
                     query->Bind(id).Bind(e->targetId).Bind(arg).Bind(e->killerId).Bind(e->notificationCallbackId).ExecuteNonSelect().Reset();
                 }
                 catch (std::exception& ex)
@@ -341,7 +348,7 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    void EntityManager::_Load(Tools::Database::IConnection& conn)
+    void EntityManager::Load(Tools::Database::IConnection& conn)
     {
         // entities
         {
@@ -356,6 +363,7 @@ namespace Server { namespace Game { namespace Engine {
                 Common::Position pos(row->GetDouble(5), row->GetDouble(6), row->GetDouble(7));
                 try
                 {
+                    Tools::debug << "<< Load << " << table << " << " << (disabled ? "Disabled" : "Enabled") << " Entity (id: " << entityId << ", pluginId: " << pluginId << ", entityName: \"" << entityName << "\", storage: <lua>, x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
                     Entity* e = this->_CreateEntity(entityId, pluginId, entityName, this->IsEntityTypePositional(pluginId, entityName), pos);
 
                     // XXX Load() database hook
@@ -371,12 +379,16 @@ namespace Server { namespace Game { namespace Engine {
                             callLoad = true; // l'entité est crée mais n'a pas pu être désactivée : c'est donc une entité non positionnelle, on va appeler Load()
                                              // (ne devrait jamais arriver, seulement si un boloss change le flag 'disabled' dans la base)
                         }
-                    if (callLoad && this->CallEntityFunction(entityId, "Load", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil()) == CallbackManager::Error)
-                        throw std::runtime_error("call to Load() failed");
+                    if (callLoad)
+                    {
+                        CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Load", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+                        if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
+                            throw std::runtime_error("call to Load() failed");
+                    }
                 }
                 catch (std::exception& e)
                 {
-                    Tools::error << "EntityManager::_Load: Could not load entity \"" << entityName << "\" (plugin " << pluginId << "): " << e.what() << std::endl;
+                    Tools::error << "EntityManager::Load: Could not load entity \"" << entityName << "\" (plugin " << pluginId << "): " << e.what() << std::endl;
                 }
             }
         }
@@ -394,12 +406,13 @@ namespace Server { namespace Game { namespace Engine {
                 Common::Position pos(row->GetDouble(5), row->GetDouble(6), row->GetDouble(7));
                 try
                 {
+                    Tools::debug << "<< Load << " << table << " << Spawn Event (pluginId: " << pluginId << ", entityName: \"" << entityName << "\", spawnerId: " << spawnerId << ", notificationCallbackId: " << notificationCallbackId << ", x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
                     Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(2));
                     this->AddSpawnEvent(pluginId, entityName, arg, spawnerId, notificationCallbackId, pos);
                 }
                 catch (std::exception& e) // erreur de deserialization
                 {
-                    Tools::error << "EntityManager::_Load: Could not load spawn event for entity \"" << entityName << "\" (plugin " << pluginId << "): " << e.what() << std::endl;
+                    Tools::error << "EntityManager::Load: Could not load spawn event for entity \"" << entityName << "\" (plugin " << pluginId << "): " << e.what() << std::endl;
                 }
             }
         }
@@ -415,12 +428,13 @@ namespace Server { namespace Game { namespace Engine {
                 Uint32 notificationCallbackId = row->GetUint32(3);
                 try
                 {
+                    Tools::debug << "<< Load << " << table << " << Kill Event (targetId: " << targetId << ", arg: <lua>, killerId: " << killerId << ", notificationCallbackId: " << notificationCallbackId << ")" << std::endl;
                     Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(1));
                     this->AddKillEvent(targetId, arg, killerId, notificationCallbackId);
                 }
-                catch (std::exception& e)
+                catch (std::exception& e) // erreur de deserialization
                 {
-                    Tools::error << "EntityManager::_Load: Could not load kill event for entity " << targetId << ": " << e.what() << std::endl;
+                    Tools::error << "EntityManager::Load: Could not load kill event for entity " << targetId << ": " << e.what() << std::endl;
                 }
             }
         }
@@ -432,7 +446,11 @@ namespace Server { namespace Game { namespace Engine {
         auto query = conn.CreateQuery("SELECT 1 FROM " + table + " WHERE id = ?;");
         query->Bind(pluginId);
         if (query->Fetch())
+        {
+            Tools::debug << "<< Load << " << table << " << Initialized Plugin (pluginId: " << pluginId << ", no entity spawned)" << std::endl;
             return;
+        }
+        Tools::debug << "<< Load << " << table << " << Non-Initialized Plugin (pluginId: " << pluginId << ", spawning entity)" << std::endl;
         this->AddSpawnEvent(pluginId, "Init", this->_engine.GetInterpreter().MakeNil() /* arg */, 0 /* spawnerId */, 0 /* callbackId */);
     }
 
@@ -460,8 +478,11 @@ namespace Server { namespace Game { namespace Engine {
 
         // XXX Save() activation hook
         if (callSave)
-            if (this->CallEntityFunction(entityId, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil()) == CallbackManager::Error)
-                return;
+        {
+            CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+            if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
+                throw std::runtime_error("EntityManager: Could not disable entity: call to Save() failed (entity deleted).");
+        }
 
         // ajoute l'entité dans la map des entités désactivées
         assert(!this->_disabledEntities.count(entityId) && "une entité positionnelle était déjà dans la map des entités désactivées");
@@ -497,7 +518,9 @@ namespace Server { namespace Game { namespace Engine {
         this->_disabledEntities.erase(itDisabled);
 
         // XXX Load() deactivation hook
-        this->CallEntityFunction(entityId, "Load", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+        CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Load", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+        if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
+            throw std::runtime_error("EntityManager: Could not enable entity: call to Load() failed (entity deleted).");
     }
 
     bool EntityManager::IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const

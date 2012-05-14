@@ -67,11 +67,8 @@ namespace Server { namespace Game { namespace Map {
         this->_gen->Start(this->_conf);
         this->_messageQueue->Start();
 
-        auto& plugins = this->_game.GetWorld().GetPluginManager().GetPlugins();
-        auto it = plugins.begin();
-        auto itEnd = plugins.end();
-        for (; it != itEnd; ++it)
-            this->_engine->GetEntityManager().BootstrapPlugin(it->first, this->_world.GetGame().GetServer().GetResourceManager().GetConnection());
+        // charge de la base entités, plugins, messages, etc.
+        this->_engine->Load(this->_game.GetServer().GetResourceManager().GetConnection());
 
         // tick toutes les 10 ms
         Tools::SimpleMessageQueue::TimerLoopMessage

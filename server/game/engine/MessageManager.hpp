@@ -34,6 +34,7 @@ namespace Server { namespace Game { namespace Engine {
         ~MessageManager();
         void DispatchMessages();
         void Save(Tools::Database::IConnection& conn);
+        void Load(Tools::Database::IConnection& conn);
 
         // rcon requests
         std::string RconGetMessages() const;
@@ -41,7 +42,6 @@ namespace Server { namespace Game { namespace Engine {
     private:
         void _ApiLater(Tools::Lua::CallHelper& helper);
         void _ApiNow(Tools::Lua::CallHelper& helper);
-        void _Load(Tools::Database::IConnection& conn);
     };
 
 }}}

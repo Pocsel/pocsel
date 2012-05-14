@@ -90,6 +90,7 @@ namespace Server { namespace Game { namespace Engine {
             try
             {
                 std::string arg = this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->arg, true /* nilOnError */);
+                Tools::debug << ">> Save >> " << table << " >> Callback (id: " << it->first << ", targetId: " << it->second->targetId << ", function: \"" << it->second->function << "\", arg: " << arg.size() << " bytes)" << std::endl;
                 query->Bind(it->first).Bind(it->second->targetId).Bind(it->second->function).Bind(arg).ExecuteNonSelect().Reset();
             }
             catch (std::exception& e)
@@ -98,7 +99,7 @@ namespace Server { namespace Game { namespace Engine {
             }
     }
 
-    void CallbackManager::_Load(Tools::Database::IConnection& conn)
+    void CallbackManager::Load(Tools::Database::IConnection& conn)
     {
         std::string table = this->_engine.GetMap().GetName() + "_callback";
         auto query = conn.CreateQuery("SELECT id, target_id, function, arg FROM " + table);
@@ -110,11 +111,12 @@ namespace Server { namespace Game { namespace Engine {
             try
             {
                 Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(3));
+                Tools::debug << "<< Load << " << table << " << Callback (id: " << id << ", targetId: " << targetId << ", function: \"" << function << "\", arg: <lua>)" << std::endl;
                 this->_callbacks[id] = new Callback(targetId, function, arg);
             }
             catch (std::exception& e) // erreur de deserialization
             {
-                Tools::error << "CallbackManager::_Load: Could not load callback " << id << ": " << e.what() << std::endl;
+                Tools::error << "CallbackManager::Load: Could not load callback " << id << ": " << e.what() << std::endl;
             }
         }
     }
