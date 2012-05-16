@@ -12,6 +12,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_self.SetMetaTable(metatable);
         this->_self.Set("id", id);
         this->_self.Set("prototype", this->_type->GetPrototype());
+        this->_self.Set("storage", engine.GetInterpreter().MakeTable());
         metatable.Set("__index", this->_type->GetPrototype());
     }
 

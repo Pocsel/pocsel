@@ -14,9 +14,16 @@ namespace Server { namespace Rcon {
             this->_logLines = LogLinesDebug;
         else
             this->_logLines = LogLines;
-        Tools::debug.RegisterCallback(std::bind(&SessionManager::_Log, this, std::placeholders::_1, Normal));
-        Tools::log.RegisterCallback(std::bind(&SessionManager::_Log, this, std::placeholders::_1, Normal));
-        Tools::error.RegisterCallback(std::bind(&SessionManager::_Log, this, std::placeholders::_1, Error));
+        this->_debugCallback = Tools::debug.RegisterCallback(std::bind(&SessionManager::_Log, this, std::placeholders::_1, Normal));
+        this->_logCallback = Tools::log.RegisterCallback(std::bind(&SessionManager::_Log, this, std::placeholders::_1, Normal));
+        this->_errorCallback = Tools::error.RegisterCallback(std::bind(&SessionManager::_Log, this, std::placeholders::_1, Error));
+    }
+
+    SessionManager::~SessionManager()
+    {
+        Tools::debug.UnregisterCallback(this->_debugCallback);
+        Tools::log.UnregisterCallback(this->_logCallback);
+        Tools::error.UnregisterCallback(this->_errorCallback);
     }
 
     std::string SessionManager::NewSession(std::string const& login, std::string const& password, std::string const& userAgent, std::list<std::string>& rights)

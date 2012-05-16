@@ -47,7 +47,7 @@ namespace Tools { namespace Logger {
         NullWriter& operator <<(std::ios_base& (*)(std::ios_base&)) { return *this; }
         template<class T> NullWriter& operator <<(T) { return *this; }
         template<class T>
-        void RegisterCallback(T) {}
+        int RegisterCallback(T) { return 0; }
         void UnregisterCallback(int) {}
     };
 
