@@ -34,6 +34,7 @@ namespace Server { namespace Rcon {
         std::string _userAgent;
         std::string _body;
         std::map<std::string, std::string> _content; // données de formulaire (décodées)
+        std::string _response;
 
     public:
         Request(Server& server, boost::asio::ip::tcp::socket* socket);

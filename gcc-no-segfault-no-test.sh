@@ -9,5 +9,8 @@ make server_gccPCH_fc
 #make test_udp_cl_gccPCH_fc
 #make sdk_gccPCH_fc
 
-make client server base_plugin dev_world $1
+make client $1
+make server $1
+make base_plugin
+make dev_world
 #make $1
