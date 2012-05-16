@@ -120,7 +120,7 @@ namespace Tools { namespace PluginCreate {
                     continue;
                 }
                 auto data = ReadFile(*it);
-                std::string name = MakeRelative(clientRoot, *it).string();
+                std::string name = MakeRelative(clientRoot, *it).generic_string();
                 std::string type = itType->second;
                 std::string hash = HashFile(data);
                 conn.CreateQuery("INSERT INTO resource (name, type, data_hash, data) VALUES (?, ?, ?, ?);")->
@@ -150,7 +150,7 @@ namespace Tools { namespace PluginCreate {
                     continue;
                 }
                 auto data = ReadFile(*it);
-                std::string name = MakeRelative(entitiesRoot, *it).string();
+                std::string name = MakeRelative(entitiesRoot, *it).generic_string();
                 conn.CreateQuery("INSERT INTO entity_file (name, lua) VALUES (?, ?);")->
                     Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect();
                 Tools::log << "Added entity file \"" << name << "\" (size: " << data.size() << " bytes)." << std::endl;
@@ -178,7 +178,7 @@ namespace Tools { namespace PluginCreate {
                     continue;
                 }
                 auto data = ReadFile(*it);
-                std::string name = MakeRelative(cubesRoot, *it).string();
+                std::string name = MakeRelative(cubesRoot, *it).generic_string();
                 conn.CreateQuery("INSERT INTO cube_file (name, lua) VALUES (?, ?);")->
                     Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect();
                 Tools::log << "Added cube file \"" << name << "\" (size: " << data.size() << " bytes)." << std::endl;
