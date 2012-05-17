@@ -2,6 +2,7 @@
 #define __SERVER_DATABASE_WORLDLOADER_HPP__
 
 #include "tools/lua/Ref.hpp"
+#include "common/BaseChunk.hpp"
 
 namespace Tools {
     namespace Database {
@@ -59,6 +60,7 @@ namespace Server { namespace Database {
         LoadingMapConf _LoadMapConf(Game::Map::Conf& conf, std::string const& name, std::string const& code);
         void _LoadMapCubeTypes();
         Game::Map::CubeType const* _GetCubeTypeByName(std::string const& name);
+        Common::BaseChunk::CubeType _GetCubeTypeId(Uint32 pluginId, std::string const& name);
     };
 
 }}

@@ -67,11 +67,8 @@ namespace Server { namespace Game { namespace Map {
         this->_gen->Start(this->_conf);
         this->_messageQueue->Start();
 
-        auto& plugins = this->_game.GetWorld().GetPluginManager().GetPlugins();
-        auto it = plugins.begin();
-        auto itEnd = plugins.end();
-        for (; it != itEnd; ++it)
-            this->_engine->GetEntityManager().BootstrapPlugin(it->first);
+        // charge de la base entités, plugins, messages, etc.
+        this->_engine->Load(this->_game.GetServer().GetResourceManager().GetConnection());
 
         // tick toutes les 10 ms
         Tools::SimpleMessageQueue::TimerLoopMessage
@@ -96,7 +93,7 @@ namespace Server { namespace Game { namespace Map {
         std::cout << "MapSave\n";
 
         auto& conn = this->_game.GetServer().GetResourceManager().GetConnection();
-        conn.CreateQuery("UPDATE map SET tick = ? WHERE name = ?")->Bind(this->_currentTime).Bind(this->_conf.name).ExecuteNonSelect();
+        conn.CreateQuery("UPDATE map SET time = ? WHERE name = ?")->Bind(this->_currentTime).Bind(this->_conf.name).ExecuteNonSelect();
 
         this->_chunkManager->Save(conn);
         this->_engine->Save(conn);

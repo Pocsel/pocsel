@@ -13,6 +13,7 @@ namespace Tools { namespace Database {
         virtual void BeginTransaction() = 0;
         virtual void EndTransaction() = 0;
         virtual bool HasTable(std::string const& table) = 0;
+        virtual Int64 GetLastInsertedId() = 0;
     };
 
 }}

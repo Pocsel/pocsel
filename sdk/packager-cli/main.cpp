@@ -1,6 +1,6 @@
 #include <boost/cstdlib.hpp>
 
-#include "packager-cli/ProgramInfo.hpp"
+#include "sdk/packager-cli/ProgramInfo.hpp"
 #include "tools/plugin-create/Create.hpp"
 
 namespace {

@@ -95,6 +95,11 @@ namespace Tools { namespace Database { namespace Sqlite {
         return *this;
     }
 
+    IQuery& Query::Bind(std::vector<char> const& data)
+    {
+        return this->Bind(data.data(), data.size());
+    }
+
     IQuery& Query::ExecuteNonSelect()
     {
         int ret = sqlite3_step(this->_stmt);

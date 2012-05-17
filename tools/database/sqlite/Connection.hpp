@@ -21,6 +21,7 @@ namespace Tools { namespace Database { namespace Sqlite {
         virtual void BeginTransaction();
         virtual void EndTransaction();
         virtual bool HasTable(std::string const& table);
+        virtual Int64 GetLastInsertedId();
         sqlite3* GetSqliteHandler() { return this->_sqliteDb; }
     };
 

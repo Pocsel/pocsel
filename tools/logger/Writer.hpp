@@ -90,19 +90,22 @@ namespace Tools { namespace Logger {
         TLog& _parent;
         std::ostream* _output;
         std::ostream* _fileOutput;
-        std::list<std::function<void(std::string const&)>> _callbacks;
+        int _callbackId;
+        std::map<int, std::function<void(std::string const&)>> _callbacks;
 
     public:
         Writer(TLog& parent, std::string const& file)
             : _parent(parent),
-            _fileOutput(new std::ofstream(file.c_str()))
+            _fileOutput(new std::ofstream(file.c_str())),
+            _callbackId(0)
         {
         }
 
         Writer(TLog& parent, std::ostream& stream, std::string const& file)
             : _parent(parent),
             _output(&stream),
-            _fileOutput(new std::ofstream(file.c_str()))
+            _fileOutput(new std::ofstream(file.c_str())),
+            _callbackId(0)
         {
         }
 
@@ -126,7 +129,7 @@ namespace Tools { namespace Logger {
             if (this->_fileOutput)
                 *this->_fileOutput << data << std::flush;
             for (auto it = this->_callbacks.begin(), ite = this->_callbacks.end(); it != ite; ++it)
-                (*it)(data);
+                it->second(data);
         }
 
         void WriteLine(std::string const& line)
@@ -148,9 +151,15 @@ namespace Tools { namespace Logger {
             return tmp;
         }
 
-        void RegisterCallback(std::function<void(std::string const&)>&& callback)
+        int RegisterCallback(std::function<void(std::string const&)>&& callback)
         {
-            this->_callbacks.push_back(callback);
+            this->_callbacks[this->_callbackId] = callback;
+            return this->_callbackId++;
+        }
+
+        void UnregisterCallback(int callbackId)
+        {
+            this->_callbacks.erase(callbackId);
         }
     };
 
@@ -161,17 +170,20 @@ namespace Tools { namespace Logger {
     private:
         std::ostream* _output;
         std::ostream* _fileOutput;
-        std::list<std::function<void(std::string const&)>> _callbacks;
+        int _callbackId;
+        std::map<int, std::function<void(std::string const&)>> _callbacks;
 
     public:
         Writer(std::string const& file)
-            : _fileOutput(new std::ofstream(file.c_str()))
+            : _fileOutput(new std::ofstream(file.c_str())),
+            _callbackId(0)
         {
         }
 
         Writer(std::ostream& stream, std::string const& file)
             : _output(&stream),
-            _fileOutput(new std::ofstream(file.c_str()))
+            _fileOutput(new std::ofstream(file.c_str())),
+            _callbackId(0)
         {
         }
 
@@ -193,7 +205,7 @@ namespace Tools { namespace Logger {
             if (this->_fileOutput)
                 *this->_fileOutput << data << std::flush;
             for (auto it = this->_callbacks.begin(), ite = this->_callbacks.end(); it != ite; ++it)
-                (*it)(data);
+                it->second(data);
         }
 
         void WriteLine(std::string const& line)
@@ -215,9 +227,15 @@ namespace Tools { namespace Logger {
             return tmp;
         }
 
-        void RegisterCallback(std::function<void(std::string const&)>&& callback)
+        int RegisterCallback(std::function<void(std::string const&)>&& callback)
         {
-            this->_callbacks.push_back(callback);
+            this->_callbacks[this->_callbackId] = callback;
+            return this->_callbackId++;
+        }
+
+        void UnregisterCallback(int callbackId)
+        {
+            this->_callbacks.erase(callbackId);
         }
     };
 

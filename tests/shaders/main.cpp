@@ -129,7 +129,6 @@ static void LoadShaders(Sdl::Window& window)
     IRenderer& renderer = window.GetRenderer();
     try
     {
-
         std::ifstream fileTest(testShaderPath);
         auto tmpTest = std::string((std::istreambuf_iterator<char>(fileTest)), std::istreambuf_iterator<char>());
         std::ifstream fileDirectionnal(directionnalLightShaderPath);

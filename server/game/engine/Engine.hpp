@@ -41,6 +41,7 @@ namespace Server { namespace Game { namespace Engine {
         Engine(Map::Map& map, World& world);
         ~Engine();
         void Tick(Uint64 currentTime);
+        void Load(Tools::Database::IConnection& conn);
         void Save(Tools::Database::IConnection& conn);
         MessageManager& GetMessageManager() { return *this->_messageManager; }
         EntityManager& GetEntityManager() { return *this->_entityManager; }

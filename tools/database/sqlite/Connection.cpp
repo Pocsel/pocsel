@@ -51,4 +51,9 @@ namespace Tools { namespace Database { namespace Sqlite {
         return query->Fetch().get() != 0;
     }
 
+    Int64 Connection::GetLastInsertedId()
+    {
+        return sqlite3_last_insert_rowid(this->_sqliteDb);
+    }
+
 }}}

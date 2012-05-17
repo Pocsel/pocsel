@@ -3,6 +3,10 @@
 
 #include "tools/lua/Ref.hpp"
 
+namespace Tools { namespace Database {
+    class IConnection;
+}}
+
 namespace Server { namespace Game { namespace Engine {
 
     class Engine;
@@ -43,6 +47,8 @@ namespace Server { namespace Game { namespace Engine {
         Result TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0, bool keepCallback = false);
         bool CancelCallback(Uint32 callbackId); // retourne true si callbackId est effectivement associé a une callback (annulation réussie)
         Callback const& GetCallback(Uint32 callbackId) const throw(std::runtime_error); // ne pas garder de reference, la callback peut etre delete à tout moment
+        void Save(Tools::Database::IConnection& conn);
+        void Load(Tools::Database::IConnection& conn);
     };
 
 }}}

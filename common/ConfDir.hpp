@@ -39,6 +39,7 @@ namespace Common { namespace ConfDir {
     {
         return Base() / "server";
     }
+
 }}
 
 #endif

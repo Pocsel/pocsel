@@ -10,6 +10,8 @@
 #include "server/game/PluginManager.hpp"
 #include "server/game/engine/Entity.hpp"
 #include "server/game/engine/EntityType.hpp"
+#include "tools/database/IConnection.hpp"
+#include "server/game/map/Map.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -118,6 +120,44 @@ namespace Server { namespace Game { namespace Engine {
         this->_ApiLater(helper);
     }
 
+    void MessageManager::Save(Tools::Database::IConnection& conn)
+    {
+        std::string table = this->_engine.GetMap().GetName() + "_message";
+        conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
+        auto query = conn.CreateQuery("INSERT INTO " + table + " (time, callback_id, notification_callback_id) VALUES (?, ?, ?);");
+        auto it = this->_messages.begin();
+        auto itEnd = this->_messages.end();
+        for (; it != itEnd; ++it)
+        {
+            auto itMessage = it->second.begin();
+            auto itMessageEnd = it->second.end();
+            for (; itMessage != itMessageEnd; ++itMessage)
+                try
+                {
+                    Tools::debug << ">> Save >> " << table << " >> Message (time: " << it->first << ", callbackId: " << (*itMessage)->callbackId << ", notificationCallbackId: " << (*itMessage)->notificationCallbackId << ")" << std::endl;
+                    query->Bind(it->first).Bind((*itMessage)->callbackId).Bind((*itMessage)->notificationCallbackId).ExecuteNonSelect().Reset();
+                }
+                catch (std::exception& e)
+                {
+                    Tools::error << "MessageManager::Save: Could not save message due at " << it->first << ": " << e.what() << std::endl;
+                }
+        }
+    }
+
+    void MessageManager::Load(Tools::Database::IConnection& conn)
+    {
+        std::string table = this->_engine.GetMap().GetName() + "_message";
+        auto query = conn.CreateQuery("SELECT time, callback_id, notification_callback_id FROM " + table);
+        while (auto row = query->Fetch())
+        {
+            Uint64 time = row->GetUint64(0);
+            Uint32 callbackId = row->GetUint32(1);
+            Uint32 notificationCallbackId = row->GetUint32(2);
+            Tools::debug << "<< Load << " << table << " << Message (time: " << time << ", callbackId: " << callbackId << ", notificationCallbackId: " << notificationCallbackId << ")" << std::endl;
+            this->_messages[time].push_back(new Message(callbackId, notificationCallbackId));
+        }
+    }
+
     // fonctions pour faciliter le RconGetMessages() qui suit
     namespace {
 
@@ -132,7 +172,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             try
             {
-                return Rcon::ToJsonStr(engine.GetInterpreter().GetSerializer().SerializeWithoutReturn(ref));
+                return Rcon::ToJsonStr(engine.GetInterpreter().GetSerializer().Serialize(ref));
             }
             catch (std::exception& e)
             {

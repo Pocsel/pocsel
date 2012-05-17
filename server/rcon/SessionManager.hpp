@@ -42,9 +42,13 @@ namespace Server { namespace Rcon {
         std::map<std::string /* token */, Session> _sessions; // protégé par _lock
         unsigned int _logLines;
         mutable boost::shared_mutex _lock;
+        int _debugCallback;
+        int _logCallback;
+        int _errorCallback;
 
     public:
         SessionManager(Settings const& settings);
+        ~SessionManager();
         std::string NewSession(std::string const& login, std::string const& password, std::string const& userAgent, std::list<std::string>& rights);
         bool HasRights(std::string const& token, std::string const& rights);
         std::string RconGetLogs(std::string const& token);

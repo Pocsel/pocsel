@@ -22,7 +22,7 @@ namespace Server { namespace Database {
         if (nbResources == 0)
             Tools::error << "No resource found on the server !\n";
         this->_resources.resize(nbResources + 1);
-        auto query = this->_connection->CreateQuery("SELECT id, plugin_id, version, type, filename, data FROM resource");
+        auto query = this->_connection->CreateQuery("SELECT id, plugin_id, version, type, name, data FROM resource");
         while (auto row = query->Fetch())
         {
             Uint32 id = row->GetUint32(0);

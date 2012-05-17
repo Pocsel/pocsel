@@ -28,6 +28,7 @@ namespace Tools { namespace Database { namespace Sqlite {
         virtual IQuery& Bind(double val);
         virtual IQuery& Bind(std::string const& val);
         virtual IQuery& Bind(void const* tab, std::size_t size);
+        virtual IQuery& Bind(std::vector<char> const& data);
         virtual IQuery& ExecuteNonSelect();
         virtual std::unique_ptr<IRow> Fetch();
         virtual void Reset();

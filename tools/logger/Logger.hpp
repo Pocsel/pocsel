@@ -28,7 +28,8 @@ namespace Tools { namespace Logger {
             return *this;
         }
         template<class T>
-        void RegisterCallback(T callback) { this->_parent.RegisterCallback(callback); }
+        int RegisterCallback(T callback) { return this->_parent.RegisterCallback(callback); }
+        void UnregisterCallback(int callbackId) { this->_parent.UnregisterCallback(callbackId); }
     };
 
     template<>
@@ -46,7 +47,8 @@ namespace Tools { namespace Logger {
         NullWriter& operator <<(std::ios_base& (*)(std::ios_base&)) { return *this; }
         template<class T> NullWriter& operator <<(T) { return *this; }
         template<class T>
-        void RegisterCallback(T) {}
+        int RegisterCallback(T) { return 0; }
+        void UnregisterCallback(int) {}
     };
 
     typedef Writer<void> Logger;
