@@ -1,8 +1,9 @@
 #include <boost/cstdlib.hpp>
 
+#include "tools/Timer.hpp"
+#include "tools/stat/StatManager.hpp"
 #include "tools/window/sdl/Window.hpp"
 #include "tools/window/InputManager.hpp"
-#include "tools/Timer.hpp"
 
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
@@ -151,6 +152,8 @@ namespace Client {
             int timeLeft = 1000 / this->_settings.fps - frameTimer.GetElapsedTime();
             if (timeLeft > 2)
                 frameTimer.Sleep(timeLeft);
+
+            Tools::Stat::statManager.Update();
         }
 
         if (this->_network.IsRunning())

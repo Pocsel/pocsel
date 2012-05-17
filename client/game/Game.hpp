@@ -2,8 +2,11 @@
 #define __CLIENT_GAME_GAME_HPP__
 
 #include "common/Position.hpp"
+
 #include "tools/Timer.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/stat/Timer.hpp"
+
 #include "client/game/CubeTypeManager.hpp"
 #include "client/resources/ResourceManager.hpp"
 
@@ -50,6 +53,9 @@ namespace Client { namespace Game {
         Tools::Timer _updateTimer;
         Tools::Timer _gameTimer;
         Tools::Lua::Interpreter _interpreter;
+        Tools::Stat::Timer _statUpdateTime;
+        Tools::Stat::Timer _statRenderTime;
+        Tools::Stat::Timer _statOutTime;
         // XXX
         std::unique_ptr<Tools::Renderers::Utils::GBuffer> _gBuffer;
         std::unique_ptr<Tools::Renderers::Utils::LightRenderer> _lightRenderer;

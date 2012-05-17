@@ -5,6 +5,7 @@
 #include "tools/renderers/utils/GBuffer.hpp"
 #include "tools/renderers/utils/Image.hpp"
 #include "tools/renderers/utils/LightRenderer.hpp"
+#include "tools/stat/StatManager.hpp"
 #include "tools/window/Window.hpp"
 
 #include "client/Client.hpp"
@@ -21,7 +22,10 @@ namespace Client { namespace Game {
         _client(client),
         _renderer(client.GetWindow().GetRenderer()),
         _cubeTypeManager(client, nbCubeTypes),
-        _map(0)
+        _map(0),
+        _statUpdateTime("Game update"),
+        _statRenderTime("Game render"),
+        _statOutTime("Not game time")
     {
         Tools::Lua::Utils::RegisterColor(this->_interpreter);
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
@@ -88,15 +92,21 @@ namespace Client { namespace Game {
 
     void Game::Update()
     {
+        this->_statUpdateTime.Begin();
+
         this->_map->GetChunkManager().Update(this->_gameTimer.GetPreciseElapsedTime(), this->_player->GetPosition());
         Uint32 time = this->_updateTimer.GetElapsedTime();
         this->_player->UpdateMovements(time);
         this->_itemManager->Update(time);
         this->_updateTimer.Reset();
+
+        this->_statUpdateTime.End();
     }
 
     void Game::Render()
     {
+        this->_statRenderTime.Begin();
+
         this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
         this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
 
@@ -117,6 +127,8 @@ namespace Client { namespace Game {
         this->_gBuffer->Render();
 
         this->_renderer.EndDraw();
+
+        this->_statRenderTime.End();
     }
 
 }}
