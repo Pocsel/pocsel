@@ -11,8 +11,11 @@
 #include "common/RayCast.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
+#include "tools/database/IConnection.hpp"
+#include "tools/database/sqlite/Connection.hpp"
 
 #include "server/Server.hpp"
+#include "server/database/ResourceManager.hpp"
 #include "server/Settings.hpp"
 #include "server/Logger.hpp"
 #include "server/rcon/ToJsonStr.hpp"
@@ -54,7 +57,10 @@ namespace Server { namespace Game {
     void Game::Save()
     {
         Tools::debug << "Game::Save()\n";
-        this->_world->Save();
+        auto& conn = this->_server.GetResourceManager().GetConnection();
+        conn.BeginTransaction();
+        this->_world->Save(conn);
+        conn.EndTransaction();
     }
 
     void Game::PlayerTeleportOk(Uint32 id)

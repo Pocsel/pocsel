@@ -77,7 +77,7 @@ namespace Server { namespace Game { namespace Map {
 
         void Start();
         void Stop();
-        void Save();
+        void Save(Tools::Database::IConnection& conn);
 
         std::string const& GetName() const { return this->_conf.name; }
         Conf& GetConfiguration() { return this->_conf; }

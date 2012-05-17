@@ -10,8 +10,7 @@ namespace Tools { namespace Database { namespace Sqlite {
     {
     private:
         sqlite3* _sqliteDb;
-        IQuery* _beginTransaction;
-        IQuery* _endTransaction;
+        bool _isInTransaction;
 
     public:
         Connection(std::string const& settings);
@@ -22,6 +21,7 @@ namespace Tools { namespace Database { namespace Sqlite {
         virtual void EndTransaction();
         virtual bool HasTable(std::string const& table);
         virtual Int64 GetLastInsertedId();
+        virtual bool IsInTransaction() const { return this->_isInTransaction; }
         sqlite3* GetSqliteHandler() { return this->_sqliteDb; }
     };
 

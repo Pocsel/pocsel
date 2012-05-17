@@ -88,15 +88,23 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->Stop();
     }
 
-    void Map::Save()
+    void Map::Save(Tools::Database::IConnection& conn)
     {
         std::cout << "MapSave\n";
 
-        auto& conn = this->_game.GetServer().GetResourceManager().GetConnection();
-        conn.CreateQuery("UPDATE map SET time = ? WHERE name = ?")->Bind(this->_currentTime).Bind(this->_conf.name).ExecuteNonSelect();
+        bool endTransaction = false;
+        if (!conn.IsInTransaction())
+        {
+            conn.BeginTransaction();
+            endTransaction = true;
+        }
 
+        conn.CreateQuery("UPDATE map SET time = ? WHERE name = ?")->Bind(this->_currentTime).Bind(this->_conf.name).ExecuteNonSelect();
         this->_chunkManager->Save(conn);
         this->_engine->Save(conn);
+
+        if (endTransaction)
+            conn.EndTransaction();
     }
 
     void Map::HandleNewChunk(Chunk* chunk)
@@ -452,7 +460,7 @@ namespace Server { namespace Game { namespace Map {
         }
         boost::lock_guard<boost::mutex> lock(mutex, boost::adopt_lock);
         Tools::log << this->GetName() << ": Saving.\n";
-        this->Save();
+        this->Save(this->_game.GetServer().GetResourceManager().GetConnection());
 
         // resave
         Tools::SimpleMessageQueue::Message

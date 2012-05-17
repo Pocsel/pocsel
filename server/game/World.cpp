@@ -54,13 +54,11 @@ namespace Server { namespace Game{
             it->second->Stop();
     }
 
-    void World::Save()
+    void World::Save(Tools::Database::IConnection& conn)
     {
         Tools::debug << "World::Save()\n";
         for (auto it = this->_maps.begin(), ite = this->_maps.end(); it != ite; ++it)
-        {
-            it->second->Save();
-        }
+            it->second->Save(conn);
     }
 
     std::string World::RconGetMaps() const
