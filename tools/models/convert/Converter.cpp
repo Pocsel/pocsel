@@ -1,4 +1,5 @@
-#include "util.h"
+#include "tools/models/convert/Converter.hpp"
+#include "tools/models/convert/Util.hpp"
 
 namespace Tools { namespace Models { namespace Convert {
 
@@ -319,7 +320,7 @@ namespace Tools { namespace Models { namespace Convert {
         weldinfo *next;
     };
 
-    void weldvert(const vector<Vec3> &norms, const Vec4 &pos, weldinfo *welds, int &numwelds, unionfind<int> &welder)
+    void weldvert(const vector<Vec3> &norms, const Vec4 &/*pos*/, weldinfo *welds, int &numwelds, unionfind<int> &welder)
     {
         welder.clear();
         int windex = 0;
@@ -404,7 +405,8 @@ namespace Tools { namespace Models { namespace Convert {
             {
                 weldinfo **next = &welds.access(epositions[t.vert[k]], NULL);
                 if(! (nextalloc % 1024)) allocs.add(new weldinfo[1024]);
-                weldinfo &w = allocs[nextalloc/1024][nextalloc++%1024];
+                weldinfo &w = allocs[nextalloc/1024][nextalloc%1024];
+                ++nextalloc;
                 w.tri = i;
                 w.vert = k;
                 w.next = *next;
@@ -567,9 +569,9 @@ namespace Tools { namespace Models { namespace Convert {
 
     template<> inline halfdata endianswap<halfdata>(halfdata n) { n.val = endianswap16(n.val); return n; }
 
-    template<int TYPE> static inline int remapindex(int i, const sharedvert &v) { return v.index; }
-    template<> inline int remapindex<IQM_NORMAL>(int i, const sharedvert &v) { return v.weld; }
-    template<> inline int remapindex<IQM_TANGENT>(int i, const sharedvert &v) { return i; }
+    template<int TYPE> static inline int remapindex(int, const sharedvert &v) { return v.index; }
+    template<> inline int remapindex<IQM_NORMAL>(int, const sharedvert &v) { return v.weld; }
+    template<> inline int remapindex<IQM_TANGENT>(int i, const sharedvert &) { return i; }
 
     template<class T, class U>
         static inline void putattrib(T &out, const U &val) { out = T(val); }
@@ -973,7 +975,7 @@ namespace Tools { namespace Models { namespace Convert {
             {
                 emesh &em = emeshes[j];
                 if(em.name != em1.name || em.material != em1.material) continue;
-                int lasttri = emeshes.inrange(i+1) ? emeshes[i+1].firsttri : etriangles.length();
+                int lasttri = emeshes.inrange(j+1) ? emeshes[j+1].firsttri : etriangles.length();
                 for(int k = em.firsttri; k < lasttri; k++)
                 {
                     etriangle &et = etriangles[k];
@@ -1003,33 +1005,33 @@ namespace Tools { namespace Models { namespace Convert {
             tinfo.setsize(0);
         }
 
-        if(triangles.length()) makeneighbors();
+        //if(triangles.length()) makeneighbors();
 
         if(escale != 1) loopv(epositions) epositions[i] *= escale;
         if(epositions.length()) setupvertexarray<IQM_POSITION>(epositions, IQM_POSITION, IQM_FLOAT, 3);
         if(etexcoords.length()) setupvertexarray<IQM_TEXCOORD>(etexcoords, IQM_TEXCOORD, IQM_FLOAT, 2);
         if(enormals.length()) setupvertexarray<IQM_NORMAL>(enormals, IQM_NORMAL, IQM_FLOAT, 3);
-        if(etangents.length())
-        {
-            if(ebitangents.length() && enormals.length())
-            {
-                loopv(etangents) if(ebitangents.inrange(i) && enormals.inrange(i))
-                    etangents[i].w = enormals[i].cross(Vec3(etangents[i])).dot(ebitangents[i]) < 0 ? -1 : 1;
-            }
-            setupvertexarray<IQM_TANGENT>(etangents, IQM_TANGENT, IQM_FLOAT, 4);
-        }
-        else if(enormals.length() && etexcoords.length())
-        {
-            calctangents();
-            setupvertexarray<IQM_TANGENT>(etangents, IQM_TANGENT, IQM_FLOAT, 4);
-        }
+        //if(etangents.length())
+        //{
+        //    if(ebitangents.length() && enormals.length())
+        //    {
+        //        loopv(etangents) if(ebitangents.inrange(i) && enormals.inrange(i))
+        //            etangents[i].w = enormals[i].cross(Vec3(etangents[i])).dot(ebitangents[i]) < 0 ? -1 : 1;
+        //    }
+        //    setupvertexarray<IQM_TANGENT>(etangents, IQM_TANGENT, IQM_FLOAT, 4);
+        //}
+        //else if(enormals.length() && etexcoords.length())
+        //{
+        //    calctangents();
+        //    setupvertexarray<IQM_TANGENT>(etangents, IQM_TANGENT, IQM_FLOAT, 4);
+        //}
         if(eblends.length())
         {
             setupvertexarray<IQM_BLENDINDEXES>(eblends, IQM_BLENDINDEXES, IQM_UBYTE, 4);
             setupvertexarray<IQM_BLENDWEIGHTS>(eblends, IQM_BLENDWEIGHTS, IQM_UBYTE, 4);
         }
-        if(ecolors.length()) setupvertexarray<IQM_COLOR>(ecolors, IQM_COLOR, IQM_UBYTE, 4);
-        loopi(10) if(ecustom[i].length()) setupvertexarray<IQM_CUSTOM>(ecustom[i], IQM_CUSTOM + i, IQM_FLOAT, 4);
+        //if(ecolors.length()) setupvertexarray<IQM_COLOR>(ecolors, IQM_COLOR, IQM_UBYTE, 4);
+        //loopi(10) if(ecustom[i].length()) setupvertexarray<IQM_CUSTOM>(ecustom[i], IQM_CUSTOM + i, IQM_FLOAT, 4);
 
         if(epositions.length())
         {
@@ -1043,40 +1045,40 @@ namespace Tools { namespace Models { namespace Convert {
         }
     }
 
-    void makebounds(framebounds &bb, Matrix3x4 *buf, Matrix3x4 *invbase, transform *frame)
-    {
-        loopv(ejoints)
-        {
-            ejoint &j = ejoints[i];
-            if(j.parent >= 0) buf[i] = buf[j.parent] * Matrix3x4(frame[i].orient, frame[i].pos, frame[i].scale);
-            else buf[i] = Matrix3x4(frame[i].orient, frame[i].pos, frame[i].scale);
-        }
-        loopv(ejoints) buf[i] *= invbase[i];
-        loopv(mpositions)
-        {
-            const blendcombo &c = mblends[i];
-            Matrix3x4 m(Vec4(0, 0, 0, 0), Vec4(0, 0, 0, 0), Vec4(0, 0, 0, 0));
-            loopk(4) if(c.weights[k] > 0)
-                m += buf[c.bones[k]] * c.weights[k];
-            Vec3 p = m.transform(Vec3(mpositions[i]));
+    //void makebounds(framebounds &bb, Matrix3x4 *buf, Matrix3x4 *invbase, transform *frame)
+    //{
+    //    loopv(ejoints)
+    //    {
+    //        ejoint &j = ejoints[i];
+    //        if(j.parent >= 0) buf[i] = buf[j.parent] * Matrix3x4(frame[i].orient, frame[i].pos, frame[i].scale);
+    //        else buf[i] = Matrix3x4(frame[i].orient, frame[i].pos, frame[i].scale);
+    //    }
+    //    loopv(ejoints) buf[i] *= invbase[i];
+    //    loopv(mpositions)
+    //    {
+    //        const blendcombo &c = mblends[i];
+    //        Matrix3x4 m(Vec4(0, 0, 0, 0), Vec4(0, 0, 0, 0), Vec4(0, 0, 0, 0));
+    //        loopk(4) if(c.weights[k] > 0)
+    //            m += buf[c.bones[k]] * c.weights[k];
+    //        Vec3 p = m.transform(Vec3(mpositions[i]));
 
-            if(!i) bb.bbmin = bb.bbmax = p;
-            else
-            {
-                bb.bbmin.x = min(bb.bbmin.x, p.x);
-                bb.bbmin.y = min(bb.bbmin.y, p.y);
-                bb.bbmin.z = min(bb.bbmin.z, p.z);
-                bb.bbmax.x = max(bb.bbmax.x, p.x);
-                bb.bbmax.y = max(bb.bbmax.y, p.y);
-                bb.bbmax.z = max(bb.bbmax.z, p.z);
-            }
-            double xyradius = p.x*p.x + p.y*p.y;
-            bb.xyradius = max(bb.xyradius, xyradius);
-            bb.radius = max(bb.radius, xyradius + p.z*p.z);
-        }
-        if(bb.xyradius > 0) bb.xyradius = sqrt(bb.xyradius);
-        if(bb.radius > 0) bb.radius = sqrt(bb.radius);
-    }
+    //        if(!i) bb.bbmin = bb.bbmax = p;
+    //        else
+    //        {
+    //            bb.bbmin.x = min(bb.bbmin.x, p.x);
+    //            bb.bbmin.y = min(bb.bbmin.y, p.y);
+    //            bb.bbmin.z = min(bb.bbmin.z, p.z);
+    //            bb.bbmax.x = max(bb.bbmax.x, p.x);
+    //            bb.bbmax.y = max(bb.bbmax.y, p.y);
+    //            bb.bbmax.z = max(bb.bbmax.z, p.z);
+    //        }
+    //        double xyradius = p.x*p.x + p.y*p.y;
+    //        bb.xyradius = max(bb.xyradius, xyradius);
+    //        bb.radius = max(bb.radius, xyradius + p.z*p.z);
+    //    }
+    //    if(bb.xyradius > 0) bb.xyradius = sqrt(bb.xyradius);
+    //    if(bb.radius > 0) bb.radius = sqrt(bb.radius);
+    //}
 
     void makerelativebasepose()
     {
@@ -1141,7 +1143,7 @@ namespace Tools { namespace Models { namespace Convert {
                 if(range <= 0) continue;
                 loopk(min(range, poses.length())) frames.add(eposes[offset + k]);
                 loopk(max(poses.length() - range, 0)) frames.add(transform(Vec3(0, 0, 0), Quat(0, 0, 0, 1), Vec3(1, 1, 1)));
-                if(mbuf) makebounds(bounds.add(), mbuf, mjoints.getbuf(), &frames[frames.length() - poses.length()]);
+                //if(mbuf) makebounds(bounds.add(), mbuf, mjoints.getbuf(), &frames[frames.length() - poses.length()]);
                 a.numframes++;
             }
             totalframes += a.numframes;
@@ -1170,28 +1172,6 @@ namespace Tools { namespace Models { namespace Convert {
         emeshes.setsize(0);
         evarrays.setsize(0);
     }
-
-    struct filespec
-    {
-        const char *file;
-        const char *name;
-        double fps;
-        uint flags;
-        int startframe;
-        int endframe;
-
-        filespec() { reset(); }
-
-        void reset()
-        {
-            file = NULL;
-            name = NULL;
-            fps = 0;
-            flags = 0;
-            startframe = 0;
-            endframe = -1;
-        }
-    };
 
     bool loadiqe(const char *filename, const filespec &spec)
     {
@@ -1608,7 +1588,7 @@ error:
         if(numtris && numverts) emeshes.add(m);
     }
 
-    bool loadmd5mesh(const char *filename, const filespec &spec)
+    bool loadmd5mesh(const char *filename, const filespec &/*spec*/)
     {
         stream *f = openfile(filename, "r");
         if(!f) return false;
@@ -2211,6 +2191,8 @@ endsection:
 
     bool writeiqm(const char *filename)
     {
+        calcanimdata();
+
         stream *f = openfile(filename, "wb");
         if(!f) return false;
 
@@ -2228,14 +2210,14 @@ endsection:
         hdr.filesize += valign + vdata.length();
         hdr.num_vertexes = vmap.length();
         hdr.num_triangles = triangles.length(); if(triangles.length()) hdr.ofs_triangles = hdr.filesize; hdr.filesize += triangles.length() * sizeof(triangle);
-        if(neighbors.length()) hdr.ofs_adjacency = hdr.filesize; hdr.filesize += neighbors.length() * sizeof(triangle);
+        //if(neighbors.length()) hdr.ofs_adjacency = hdr.filesize; hdr.filesize += neighbors.length() * sizeof(triangle);
         hdr.num_joints = joints.length(); if(joints.length()) hdr.ofs_joints = hdr.filesize; hdr.filesize += joints.length() * sizeof(joint);
         hdr.num_poses = poses.length(); if(poses.length()) hdr.ofs_poses = hdr.filesize; hdr.filesize += poses.length() * sizeof(pose);
         hdr.num_anims = anims.length(); if(anims.length()) hdr.ofs_anims = hdr.filesize; hdr.filesize += anims.length() * sizeof(anim);
         hdr.num_frames = poses.length() ? frames.length()/poses.length() : 0; hdr.num_framechannels = framesize;
         if(animdata.length()) hdr.ofs_frames = hdr.filesize; hdr.filesize += animdata.length() * sizeof(ushort);
-        if(bounds.length()) hdr.ofs_bounds = hdr.filesize; hdr.filesize += bounds.length() * sizeof(float[8]);
-        if(commentdata.length()) hdr.ofs_comment = hdr.filesize; hdr.num_comment = commentdata.length(); hdr.filesize += hdr.num_comment;
+        //if(bounds.length()) hdr.ofs_bounds = hdr.filesize; hdr.filesize += bounds.length() * sizeof(float[8]);
+        //if(commentdata.length()) hdr.ofs_comment = hdr.filesize; hdr.num_comment = commentdata.length(); hdr.filesize += hdr.num_comment;
 
         lilswap(&hdr.version, (sizeof(hdr) - sizeof(hdr.magic))/sizeof(uint));
         f->write(&hdr, sizeof(hdr));
@@ -2253,6 +2235,8 @@ endsection:
             f->putlil(m.numtris);
         }
 
+        float* texcoords = 0;
+
         loopv(varrays)
         {
             vertexarray &v = varrays[i];
@@ -2261,6 +2245,35 @@ endsection:
             f->putlil(v.format);
             f->putlil(v.size);
             f->putlil(voffset + v.offset);
+
+            if (v.type == IQM_TEXCOORD)
+                texcoords = (float*)(vdata.getbuf() + v.offset);
+            else if (texcoords != 0)
+            {
+                float* the_end = (float*)(vdata.getbuf() + v.offset);
+                bool yyy = false;
+                while (texcoords < the_end)
+                {
+                    if (yyy)
+                        *texcoords = 1.0f - *texcoords;
+                    yyy = !yyy;
+                    texcoords += 1;
+                }
+                texcoords = 0;
+            }
+        }
+        if (texcoords != 0)
+        {
+            float* the_end = (float*)(vdata.getbuf() + vdata.length());
+            bool yyy = false;
+            while (texcoords < the_end)
+            {
+                if (yyy)
+                    *texcoords = 1.0f - *texcoords;
+                yyy = !yyy;
+                texcoords += 1;
+            }
+            texcoords = 0;
         }
 
         loopi(valign) f->putchar(0);
@@ -2269,14 +2282,16 @@ endsection:
         loopv(triangles)
         {
             triangle &t = triangles[i];
-            loopk(3) f->putlil(t.vert[k]);
+            f->putlil(t.vert[0]);
+            f->putlil(t.vert[2]);
+            f->putlil(t.vert[1]);
         }
 
-        loopv(neighbors)
-        {
-            triangle &t = neighbors[i];
-            loopk(3) f->putlil(t.vert[k]);
-        }
+        //loopv(neighbors)
+        //{
+        //    triangle &t = neighbors[i];
+        //    loopk(3) f->putlil(t.vert[k]);
+        //}
 
         loopv(joints)
         {
@@ -2309,16 +2324,16 @@ endsection:
 
         loopv(animdata) f->putlil(animdata[i]);
 
-        loopv(bounds)
-        {
-            framebounds &b = bounds[i];
-            loopk(3) f->putlil(float(b.bbmin[k]));
-            loopk(3) f->putlil(float(b.bbmax[k]));
-            f->putlil(float(b.xyradius));
-            f->putlil(float(b.radius));
-        }
+        //loopv(bounds)
+        //{
+        //    framebounds &b = bounds[i];
+        //    loopk(3) f->putlil(float(b.bbmin[k]));
+        //    loopk(3) f->putlil(float(b.bbmax[k]));
+        //    f->putlil(float(b.xyradius));
+        //    f->putlil(float(b.radius));
+        //}
 
-        if(commentdata.length()) f->write(commentdata.getbuf(), commentdata.length());
+        //if(commentdata.length()) f->write(commentdata.getbuf(), commentdata.length());
 
         delete f;
         return true;

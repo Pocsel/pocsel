@@ -9,40 +9,13 @@
 #include <stdarg.h>
 #include <limits.h>
 #include <assert.h>
-#include "iqm.h"
+#include "tools/models/convert/Iqm.hpp"
 
 namespace Tools { namespace Models { namespace Convert {
-
-#define ASSERT(c) if(c) {}
-
-#ifdef NULL
-#undef NULL
-#endif
-#define NULL 0
 
     typedef unsigned char uchar;
     typedef unsigned short ushort;
     typedef unsigned int uint;
-
-    //inline void *operator new(size_t size)
-    //{
-    //    void *p = malloc(size);
-    //    if(!p) abort();
-    //    return p;
-    //}
-    //inline void *operator new[](size_t size)
-    //{
-    //    void *p = malloc(size);
-    //    if(!p) abort();
-    //    return p;
-    //}
-    //inline void operator delete(void *p) { if(p) free(p); }
-    //inline void operator delete[](void *p) { if(p) free(p); }
-
-    //inline void *operator new(size_t, void *p) { return p; }
-    //inline void *operator new[](size_t, void *p) { return p; }
-    //inline void operator delete(void *, void *) {}
-    //inline void operator delete[](void *, void *) {}
 
 #ifdef swap
 #undef swap
@@ -194,10 +167,10 @@ namespace Tools { namespace Models { namespace Convert {
         bool empty() const { return ulen==0; }
         int capacity() const { return alen; }
         int length() const { return ulen; }
-        T &operator[](int i) { ASSERT(i>=0 && i<ulen); return buf[i]; }
-        const T &operator[](int i) const { ASSERT(i >= 0 && i<ulen); return buf[i]; }
+        T &operator[](int i) { assert(i>=0 && i<ulen); return buf[i]; }
+        const T &operator[](int i) const { assert(i >= 0 && i<ulen); return buf[i]; }
 
-        void setsize(int i) { ASSERT(i <= ulen); ulen = i; }
+        void setsize(int i) { assert(i <= ulen); ulen = i; }
 
         void swap(vector<T> &v)
         {
@@ -544,16 +517,16 @@ namespace Tools { namespace Models { namespace Convert {
         virtual void close() = 0;
         virtual bool end() = 0;
         virtual long tell() { return -1; }
-        virtual bool seek(long offset, int whence = SEEK_SET) { return false; }
+        virtual bool seek(long /*offset*/, int /*whence = SEEK_SET*/) { return false; }
         virtual long size();
-        virtual int read(void *buf, int len) { return 0; }
-        virtual int write(const void *buf, int len) { return 0; }
+        virtual int read(void* /*buf*/, int /*len*/) { return 0; }
+        virtual int write(const void* /*buf*/, int /*len*/) { return 0; }
         virtual int getchar() { uchar c; return read(&c, 1) == 1 ? c : -1; }
         virtual bool putchar(int n) { uchar c = n; return write(&c, 1) == 1; }
         virtual bool getline(char *str, int len);
         virtual bool putstring(const char *str) { int len = strlen(str); return write(str, len) == len; }
         virtual bool putline(const char *str) { return putstring(str) && putchar('\n'); }
-        virtual int printf(const char *fmt, ...) { return -1; }
+        virtual int printf(const char* /*fmt*/, ...) { return -1; }
 
         template<class T> bool put(T n) { return write(&n, sizeof(n)) == sizeof(n); }
         template<class T> bool putlil(T n) { return put<T>(lilswap(n)); }
@@ -662,7 +635,7 @@ namespace Tools { namespace Models { namespace Convert {
         return s;
     }
 
-    char *path(const char *s, bool copy)
+    char *path(const char *s, bool /*copy*/)
     {
         static string tmp;
         copystring(tmp, s);
