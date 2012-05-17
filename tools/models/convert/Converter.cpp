@@ -1,6 +1,8 @@
 #include "tools/models/convert/Converter.hpp"
 #include "tools/models/convert/Util.hpp"
 
+#include "tools/models/Mqm.hpp"
+
 namespace Tools { namespace Models { namespace Convert {
 
     struct triangle { uint vert[3]; triangle() {} triangle(uint v0, uint v1, uint v2) { vert[0] = v0; vert[1] = v1; vert[2] = v2; } };
@@ -2198,9 +2200,9 @@ endsection:
 
         iqmheader hdr;
         memset(&hdr, 0, sizeof(hdr));
-        copystring(hdr.magic, IQM_MAGIC, sizeof(hdr.magic));
+        copystring(hdr.magic, Mqm::Magic, sizeof(hdr.magic));
         hdr.filesize = sizeof(hdr);
-        hdr.version = IQM_VERSION;
+        hdr.version = Mqm::Version;
         if(stringdata.length()) hdr.ofs_text = hdr.filesize; hdr.num_text = stringdata.length(); hdr.filesize += hdr.num_text;
         hdr.num_meshes = meshes.length(); if(meshes.length()) hdr.ofs_meshes = hdr.filesize; hdr.filesize += meshes.length() * sizeof(mesh);
         uint voffset = hdr.filesize + varrays.length() * sizeof(vertexarray);
@@ -2332,6 +2334,9 @@ endsection:
 
         if (data.size() != header.filesize)
             throw std::runtime_error("MqmModel:: data size is not good");
+
+        std::memcpy(header.magic, Mqm::Magic, sizeof(header.magic));
+        header.version = Mqm::Version;
 
        iqmvertexarray* vas = (iqmvertexarray*)(data.data() + header.ofs_vertexarrays);
        for (int i = 0; i < (int)header.num_vertexarrays; ++i)

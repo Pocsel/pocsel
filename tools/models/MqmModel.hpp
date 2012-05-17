@@ -1,7 +1,7 @@
 #ifndef __CLIENT_RESOURCES_MqmModel_HPP__
 #define __CLIENT_RESOURCES_MqmModel_HPP__
 
-#include "tools/models/Iqm.hpp"
+#include "tools/models/Mqm.hpp"
 
 namespace Tools {
     class IRenderer;
