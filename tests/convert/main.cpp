@@ -40,38 +40,7 @@ int main(int argc, char **argv)
     if(!outfile) throw std::runtime_error("no output file specified");
     else if(infiles.empty()) throw std::runtime_error("no input files specified");
 
-    //if(escale != 1) printf("scale: %f\n", escale);
-
-    for (unsigned int i = 0; i < infiles.size(); ++i)
-    {
-        const Tools::Models::Convert::filespec &inspec = infiles[i];
-        const char *infile = inspec.file, *type = strrchr(infile, '.');
-        if(!type) throw std::runtime_error(std::string("no file type: ") + infile);
-        else if(!strcasecmp(type, ".md5mesh"))
-        {
-            if(Tools::Models::Convert::loadmd5mesh(infile, inspec)) printf("imported: %s\n", infile);
-            else throw std::runtime_error(std::string("failed reading: ") + infile);
-        }
-        else if(!strcasecmp(type, ".md5anim"))
-        {
-            if(Tools::Models::Convert::loadmd5anim(infile, inspec)) printf("imported: %s\n", infile);
-            else throw std::runtime_error(std::string("failed reading: ") + infile);
-        }
-        else if(!strcasecmp(type, ".iqe"))
-        {
-            if(Tools::Models::Convert::loadiqe(infile, inspec)) printf("imported: %s\n", infile);
-            else throw std::runtime_error(std::string("failed reading: ") + infile);
-        }
-        else if(!strcasecmp(type, ".smd"))
-        {
-            if(Tools::Models::Convert::loadsmd(infile, inspec)) printf("imported: %s\n", infile);
-            else throw std::runtime_error(std::string("failed reading: ") + infile);
-        }
-        else throw std::runtime_error(std::string("unknown file type: ") + type);
-    }
-
-    if(Tools::Models::Convert::writeiqm(outfile)) printf("exported: %s\n", outfile);
-    else throw std::runtime_error(std::string("failed writing: ") + outfile);
+    Tools::Models::Convert::convert(outfile, infiles);
 
     return EXIT_SUCCESS;
 }

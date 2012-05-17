@@ -30,6 +30,7 @@ namespace Tools { namespace Models { namespace Convert {
     bool loadmd5mesh(const char *filename, const filespec &spec);
     bool loadmd5anim(const char *filename, const filespec &spec);
     bool loadiqe(const char *filename, const filespec &spec);
+    void convert(char const* outfile, std::vector<filespec> const& infiles);
 
 }}}
 

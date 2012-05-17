@@ -2235,8 +2235,6 @@ endsection:
             f->putlil(m.numtris);
         }
 
-        float* texcoords = 0;
-
         loopv(varrays)
         {
             vertexarray &v = varrays[i];
@@ -2247,33 +2245,11 @@ endsection:
             f->putlil(voffset + v.offset);
 
             if (v.type == IQM_TEXCOORD)
-                texcoords = (float*)(vdata.getbuf() + v.offset);
-            else if (texcoords != 0)
             {
-                float* the_end = (float*)(vdata.getbuf() + v.offset);
-                bool yyy = false;
-                while (texcoords < the_end)
-                {
-                    if (yyy)
-                        *texcoords = 1.0f - *texcoords;
-                    yyy = !yyy;
-                    texcoords += 1;
-                }
-                texcoords = 0;
+                float* texcoords = (float*)(vdata.getbuf() + v.offset);
+                for (unsigned int i = 0; i < hdr.num_vertexes; ++i)
+                    texcoords[i*2 + 1] = 1.0f - texcoords[i*2 + 1];
             }
-        }
-        if (texcoords != 0)
-        {
-            float* the_end = (float*)(vdata.getbuf() + vdata.length());
-            bool yyy = false;
-            while (texcoords < the_end)
-            {
-                if (yyy)
-                    *texcoords = 1.0f - *texcoords;
-                yyy = !yyy;
-                texcoords += 1;
-            }
-            texcoords = 0;
         }
 
         loopi(valign) f->putchar(0);
@@ -2337,6 +2313,93 @@ endsection:
 
         delete f;
         return true;
+    }
+
+    void convertiqm(char const* outfile, char const* infile)
+    {
+        std::ifstream inStream(infile);
+        std::vector<char> data((std::istreambuf_iterator<char>(inStream)), std::istreambuf_iterator<char>());
+
+        iqmheader& header = *(iqmheader*)data.data();
+
+        if (std::memcmp(header.magic, IQM_MAGIC, sizeof(header.magic)))
+            throw std::runtime_error("MqmModel:: magic is not good");
+
+        // lilswap(&header.version, (sizeof(hdr) - sizeof(header.magic))/sizeof(uint));
+
+        if (header.version != IQM_VERSION)
+            throw std::runtime_error("MqmModel:: version is not good");
+
+        if (data.size() != header.filesize)
+            throw std::runtime_error("MqmModel:: data size is not good");
+
+       iqmvertexarray* vas = (iqmvertexarray*)(data.data() + header.ofs_vertexarrays);
+       for (int i = 0; i < (int)header.num_vertexarrays; ++i)
+       {
+           iqmvertexarray& va = vas[i];
+           if (va.type == IQM_TEXCOORD)
+           {
+               float* texcoords = (float*)(data.data() + va.offset);
+               for (unsigned int i = 0; i < header.num_vertexes; ++i)
+                   texcoords[i*2+1] = 1.0f - texcoords[i*2+1];
+           }
+       }
+
+       iqmtriangle* tris = (iqmtriangle*)(data.data() + header.ofs_triangles);
+       for (unsigned int i = 0; i < header.num_triangles; ++i)
+       {
+           iqmtriangle& tri = tris[i];
+           Uint32 vertexOne = tri.vertex[1];
+           tri.vertex[1] = tri.vertex[2];
+           tri.vertex[2] = vertexOne;
+       }
+
+       std::ofstream outStream(outfile);
+       outStream.write(data.data(), data.size());
+    }
+
+    void convert(char const* outfile, std::vector<filespec> const& infiles)
+    {
+        if(!outfile) throw std::runtime_error("no output file specified");
+        else if(infiles.empty()) throw std::runtime_error("no input files specified");
+
+        //if(escale != 1) printf("scale: %f\n", escale);
+
+        for (unsigned int i = 0; i < infiles.size(); ++i)
+        {
+            const Tools::Models::Convert::filespec &inspec = infiles[i];
+            const char *infile = inspec.file, *type = strrchr(infile, '.');
+            if(!type) throw std::runtime_error(std::string("no file type: ") + infile);
+            else if(!strcasecmp(type, ".md5mesh"))
+            {
+                if(Tools::Models::Convert::loadmd5mesh(infile, inspec)) printf("imported: %s\n", infile);
+                else throw std::runtime_error(std::string("failed reading: ") + infile);
+            }
+            else if(!strcasecmp(type, ".md5anim"))
+            {
+                if(Tools::Models::Convert::loadmd5anim(infile, inspec)) printf("imported: %s\n", infile);
+                else throw std::runtime_error(std::string("failed reading: ") + infile);
+            }
+            else if(!strcasecmp(type, ".iqe"))
+            {
+                if(Tools::Models::Convert::loadiqe(infile, inspec)) printf("imported: %s\n", infile);
+                else throw std::runtime_error(std::string("failed reading: ") + infile);
+            }
+            else if(!strcasecmp(type, ".smd"))
+            {
+                if(Tools::Models::Convert::loadsmd(infile, inspec)) printf("imported: %s\n", infile);
+                else throw std::runtime_error(std::string("failed reading: ") + infile);
+            }
+            else if (!strcasecmp(type, ".iqm"))
+            {
+                convertiqm(outfile, infile);
+                return;
+            }
+            else throw std::runtime_error(std::string("unknown file type: ") + type);
+        }
+
+        if(Tools::Models::Convert::writeiqm(outfile)) printf("exported: %s\n", outfile);
+        else throw std::runtime_error(std::string("failed writing: ") + outfile);
     }
 
 }}}
