@@ -13,8 +13,6 @@ namespace Tools { namespace Lua { namespace Utils { namespace Vector {
         {
             if (!ref.IsTable())
                 throw std::runtime_error("TableToVector3: Value is of " + ref.GetTypeName() + " type (expected table)");
-            if (ref.GetLength() != 3)
-                throw std::runtime_error("TableToVector3: Table has a length of " + ToString(ref.GetLength()) + " (expected 3)");
             return glm::detail::tvec3<T>(
                     ref["x"].Check<T>("TableToVector3: Invalid type for field \"x\""),
                     ref["y"].Check<T>("TableToVector3: Invalid type for field \"y\""),
@@ -35,8 +33,6 @@ namespace Tools { namespace Lua { namespace Utils { namespace Vector {
         {
             if (!ref.IsTable())
                 throw std::runtime_error("TableToVector2: Value is of " + ref.GetTypeName() + " type (expected table)");
-            if (ref.GetLength() != 2)
-                throw std::runtime_error("TableToVector2: Table has a length of " + ToString(ref.GetLength()) + " (expected 2)");
             return glm::detail::tvec2<T>(
                     ref["x"].Check<T>("TableToVector2: Invalid type for field \"x\""),
                     ref["y"].Check<T>("TableToVector2: Invalid type for field \"y\""));

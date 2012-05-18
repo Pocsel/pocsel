@@ -25,7 +25,7 @@ namespace Server { namespace Game { namespace Engine {
     Uint32 CallbackManager::MakeCallback(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, bool serialize /* = true */)
     {
         while (!this->_nextCallbackId // 0 est la valeur spéciale "pas de callback", on la saute
-                && this->_callbacks.count(this->_nextCallbackId))
+                || this->_callbacks.count(this->_nextCallbackId))
             ++this->_nextCallbackId;
         this->_callbacks[this->_nextCallbackId] = new Callback(targetId, function,
                 serialize ? this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(arg, true) : arg);

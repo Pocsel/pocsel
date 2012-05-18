@@ -1,6 +1,6 @@
 add_subdirectory(database)
 add_subdirectory(logger)
 add_subdirectory(lua)
-add_subdirectory(shaders)
+#add_subdirectory(shaders)
 add_subdirectory(udp)
 add_subdirectory(convert)

@@ -25,8 +25,8 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct SpawnEvent
         {
-            SpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, Common::Position const& pos) :
-                pluginId(pluginId), entityName(entityName), arg(arg), spawnerId(spawnerId), notificationCallbackId(notificationCallbackId), pos(pos)
+            SpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position()) :
+                pluginId(pluginId), entityName(entityName), arg(arg), spawnerId(spawnerId), notificationCallbackId(notificationCallbackId), hasPosition(hasPosition), pos(pos)
             {
             }
             Uint32 pluginId;
@@ -34,6 +34,7 @@ namespace Server { namespace Game { namespace Engine {
             Tools::Lua::Ref arg;
             Uint32 spawnerId;
             Uint32 notificationCallbackId;
+            bool hasPosition;
             Common::Position pos;
         };
         struct KillEvent
@@ -68,7 +69,7 @@ namespace Server { namespace Game { namespace Engine {
         // seul entry point Lua avec Engine::RconExecute()
         CallbackManager::Result CallEntityFunction(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0);
 
-        void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, Common::Position const& pos = Common::Position());
+        void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position());
         void AddKillEvent(Uint32 targetId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId);
         void DispatchSpawnEvents();
         void DispatchKillEvents();
@@ -87,11 +88,11 @@ namespace Server { namespace Game { namespace Engine {
         void RconAddEntityTypes(Rcon::EntityManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon
 
     private:
-        Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool positional = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
+        Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool hasPosition = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper);
-        void _SpawnFromPlugin(Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper);
+        void _SpawnFromPlugin(bool hasPosition, Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
