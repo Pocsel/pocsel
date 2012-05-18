@@ -115,7 +115,7 @@ namespace Client { namespace Resources {
             //{
                 boost::filesystem::path texturesPath = path;
                 boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
-                modelPath.replace_extension(".iqm");
+                modelPath.replace_extension(".mqm");
                 if (!boost::filesystem::exists(modelPath))
                     throw std::runtime_error("GetMqmModel: Failed to find file: " + modelPath.string());
                 std::ifstream tmp(modelPath.string(), std::ios::binary | std::ios::in);
