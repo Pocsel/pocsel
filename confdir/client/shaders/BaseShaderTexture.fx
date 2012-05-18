@@ -35,7 +35,7 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 
 float4 fs(in VSout v) : COLOR
 {
-	return tex2D(baseTex, v.texCoord);
+	return tex2D(baseTex, v.texCoord).rrrr;
 }
 
 #ifndef DIRECTX

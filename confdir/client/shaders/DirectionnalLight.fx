@@ -7,15 +7,22 @@ float4x4 viewProjectionInverse : ViewProjectionInverse;
 float4x4 worldView : WorldView;
 float4x4 screenWorldViewProjection;
 
-float3  lightAmbientColor = float3(0.2f, 0.2f, 0.2f);
-float3  lightDirection = float3(0.0, 0.0, 0.0);
-float3  lightDiffuseColor = float3(1.0, 1.0, 1.0);
-float3  lightSpecularColor = float3(0.9, 1.0, 0.8);
+float3   lightAmbientColor = float3(0.2f, 0.2f, 0.2f);
+float3   lightDirection = float3(0.0, 0.0, 0.0);
+float3   lightDiffuseColor = float3(1.0, 1.0, 1.0);
+float3   lightSpecularColor = float3(0.9, 1.0, 0.8);
+float4x4 lightViewProjection;
 
 // TODO:
 float   materialShininess = 5.0;
 
 sampler2D normalDepth = sampler_state
+{
+    minFilter = Point;
+    magFilter = Point;
+};
+
+sampler2D shadowMap = sampler_state
 {
     minFilter = Point;
     magFilter = Point;
@@ -72,6 +79,43 @@ float doAmbientOcclusion(in float2 tcoord, in float2 uv, in float3 p, in float3 
     return max(0.0,dot(cnorm,v)-0.001)*(1.0/(1.0+d))*2;
 }
 
+float screenSpaceAmbientOcclusion(float2 texCoord, float3 viewPosition, float3 viewNormal)
+{
+    // SSAO
+    const float2 vec[4] = {float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
+
+    float ao = 0.0f;
+    float rad = 1.5f / viewPosition.z;
+
+    int iterations = 4;
+    for (int j = 0; j < iterations; ++j)
+    {
+        float2 coord1 = reflect(vec[j], normalize(float2(0, 1))) * rad;
+        float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
+
+        ao += doAmbientOcclusion(texCoord, coord1*0.25, viewPosition, viewNormal);
+        ao += doAmbientOcclusion(texCoord, coord2*0.5, viewPosition, viewNormal);
+        ao += doAmbientOcclusion(texCoord, coord1*0.75, viewPosition, viewNormal);
+        ao += doAmbientOcclusion(texCoord, coord2, viewPosition, viewNormal);
+    }
+    ao /= (float)iterations*4.0;
+    //ao = 1 - ao;
+    return ao;
+}
+
+float calculateShadowMap(float3 viewPosition)
+{
+    float4 lightingPosition = mul(mul(view, lightViewProjection), float4(viewPosition, 1.0));
+    float2 shadowTexCoord = 0.5f * lightingPosition.xy / lightingPosition.w + float2(0.5, 0.5);
+    shadowTexCoord.y = 1.0f - shadowTexCoord.y;
+
+    float shadowDepth = tex2D(shadowMap, shadowTexCoord).r;
+    float ourDepth = lightingPosition.z / lightingPosition.w;
+    if (shadowDepth + 0.000006 < ourDepth)
+        return 0.3;
+    return 1.0;
+}
+
 FSout fs(in VSout v)
 {
     float3 viewLightDirection = normalize(mul((float3x3)worldView, -lightDirection));
@@ -86,33 +130,15 @@ FSout fs(in VSout v)
     float3 reflection = reflect(viewLightDirection, viewNormal);
     float specular = pow(max(0.0, dot(reflection, viewDirection)), materialShininess);
 
-    // SSAO
-//    const float2 vec[4] = {float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
-//
-    float ao = 0.0f;
-//    float rad = 1.5f / viewPosition.z;
-//
-//    int iterations = 4;
-//    for (int j = 0; j < iterations; ++j)
-//    {
-//        float2 coord1 = reflect(vec[j], normalize(float2(0, 1))) * rad;
-//        float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
-//
-//        ao += doAmbientOcclusion(v.texCoord, coord1*0.25, viewPosition, viewNormal);
-//        ao += doAmbientOcclusion(v.texCoord, coord2*0.5, viewPosition, viewNormal);
-//        ao += doAmbientOcclusion(v.texCoord, coord1*0.75, viewPosition, viewNormal);
-//        ao += doAmbientOcclusion(v.texCoord, coord2, viewPosition, viewNormal);
-//    }
-//    ao/=(float)iterations*4.0;
-    //ao = 1 - ao;
-    // END
+    float ao = 0;//screenSpaceAmbientOcclusion(v.texCoord, viewPosition, viewNormal);
+    float shadowMap = calculateShadowMap(viewPosition);
 
     FSout f;
-    f.diffuse.rgb = NdL * lightDiffuseColor - ao;
+    f.diffuse.rgb = (NdL * lightDiffuseColor - ao) * shadowMap;
     f.diffuse.rgb += lightAmbientColor;
-    f.specular.rgb = 0*specular * lightSpecularColor * ao;
-    f.diffuse.a = NdL;
-    f.specular.a = specular;
+    f.specular.rgb = (0*specular * lightSpecularColor * ao) * shadowMap;
+    f.diffuse.a = 1.0;
+    f.specular.a = 1.0;
     return f;
 }
 

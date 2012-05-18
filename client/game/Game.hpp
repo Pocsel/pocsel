@@ -61,6 +61,10 @@ namespace Client { namespace Game {
         std::unique_ptr<Tools::Renderers::Utils::LightRenderer> _lightRenderer;
         std::list<Tools::Renderers::Utils::DirectionnalLight> _directionnalLights;
         std::list<Tools::Renderers::Utils::PointLight> _pointLights;
+
+        std::unique_ptr<Tools::Renderers::Utils::Image> _testImage;
+        Tools::Renderers::IShaderProgram* _testShader;
+        std::unique_ptr<Tools::Renderers::IShaderParameter> _testTexture;
         // XXX
 
     public:

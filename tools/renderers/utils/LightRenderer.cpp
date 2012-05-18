@@ -21,6 +21,10 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_directionnal.diffuseColor = this->_directionnal.shader->GetParameter("lightDiffuseColor");
         this->_directionnal.specularColor = this->_directionnal.shader->GetParameter("lightSpecularColor");
         this->_directionnal.screenModelViewProjection = this->_directionnal.shader->GetParameter("screenWorldViewProjection");
+        this->_directionnal.shadowMap = this->_directionnal.shader->GetParameter("shadowMap");
+        this->_directionnal.lightViewProjection = this->_directionnal.shader->GetParameter("lightViewProjection");
+
+        this->_directionnal.depthShader = &depthShader;
         this->_directionnal.screen.reset(new Image(renderer));
         this->_directionnal.modelViewProjection = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
         for (int i = 0; i < nbDirectionnalShadowMap; ++i)
@@ -28,7 +32,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             auto ptr = renderer.CreateRenderTarget(glm::uvec2(512, 512));
             ptr->PushRenderTarget(PixelFormat::R32f, RenderTargetUsage::Color);
             ptr->PushRenderTarget(PixelFormat::Depth24Stencil8, RenderTargetUsage::DepthStencil);
-            this->_directionnal.shadowMaps.push_back(std::move(ptr));
+            this->_directionnal.shadowMaps.push_back(std::make_pair(glm::mat4(), std::move(ptr)));
         }
 
         this->_point.shader = &pointShader;
@@ -37,6 +41,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_point.range = this->_point.shader->GetParameter("lightRange");
         this->_point.diffuseColor = this->_point.shader->GetParameter("lightDiffuseColor");
         this->_point.specularColor = this->_point.shader->GetParameter("lightSpecularColor");
+
         this->_point.sphere.reset(new Sphere(renderer));
     }
 
@@ -86,9 +91,15 @@ namespace Tools { namespace Renderers { namespace Utils {
         do
         {
             this->_directionnal.shader->BeginPass();
+            int i = 0;
             for (auto it = lights.begin(), ite = lights.end(); it != ite; ++it)
             {
                 it->SetParameters();
+                if (i < this->_directionnal.shadowMaps.size())
+                {
+                    this->_directionnal.lightViewProjection->Set(this->_directionnal.shadowMaps[i].first);
+                    this->_directionnal.shadowMap->Set(this->_directionnal.shadowMaps[i].second->GetTexture(0));
+                }
                 this->_directionnal.screen->Render(*this->_directionnal.normalDepth, gbuffer.GetNormalsDepth());
             }
         } while (this->_directionnal.shader->EndPass());
@@ -149,8 +160,13 @@ namespace Tools { namespace Renderers { namespace Utils {
             }
             auto lightViewProjection = glm::ortho(min.x, max.x, min.z, max.z, min.y, max.y) * lightView;
 
-            this->_renderer.BeginDraw(this->_directionnal.shadowMaps[i].get());
-            renderScene(lightViewProjection);
+            this->_directionnal.shadowMaps[i].first = glm::mat4(lightViewProjection);
+            this->_renderer.BeginDraw(this->_directionnal.shadowMaps[i].second.get());
+            do
+            {
+                this->_directionnal.depthShader->BeginPass();
+                renderScene(lightViewProjection);
+            } while (this->_directionnal.depthShader->EndPass());
             this->_renderer.EndDraw();
         }
     }

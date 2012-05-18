@@ -29,10 +29,10 @@ namespace Tools { namespace Renderers { namespace Utils {
             std::unique_ptr<IShaderParameter> diffuseColor;
             std::unique_ptr<IShaderParameter> specularColor;
             std::unique_ptr<IShaderParameter> shadowMap;
+            std::unique_ptr<IShaderParameter> lightViewProjection;
 
             IShaderProgram* depthShader;
-            std::unique_ptr<IShaderParameter> depthDirection;
-            std::vector<std::unique_ptr<IRenderTarget>> shadowMaps;
+            std::vector<std::pair<glm::mat4, std::unique_ptr<IRenderTarget>>> shadowMaps;
 
             glm::mat4 modelViewProjection;
             std::unique_ptr<IShaderParameter> screenModelViewProjection;
@@ -49,7 +49,6 @@ namespace Tools { namespace Renderers { namespace Utils {
             std::unique_ptr<IShaderParameter> shadowMap;
 
             IShaderProgram* depthShader;
-            std::unique_ptr<IShaderParameter> depthPosition;
             std::vector<std::unique_ptr<IRenderTarget>> shadowMaps;
 
             std::unique_ptr<Sphere> sphere;
@@ -66,6 +65,8 @@ namespace Tools { namespace Renderers { namespace Utils {
             std::function<void(glm::dmat4)>& renderScene,
             std::list<DirectionnalLight> const& directionnalLights,
             std::list<PointLight> const& pointLights);
+
+        ITexture2D& GetDirectionnalShadowMap(int idx) { return this->_directionnal.shadowMaps[idx].second->GetTexture(0); }
     private:
         void _RenderDirectionnalLights(GBuffer& gbuffer, std::list<DirectionnalLight> const& lights);
         void _RenderPointLights(GBuffer& gbuffer, std::list<PointLight> const& lights);
