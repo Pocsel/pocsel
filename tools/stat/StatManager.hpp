@@ -33,7 +33,7 @@ namespace Tools { namespace Stat {
         std::list<std::pair<IStat*, std::list<double>>> const& GetDebugStats() const { return this->_counters; }
 #else
         std::list<std::pair<IStat*, double>> const& GetStats() const { return this->_counters; }
-        std::list<std::pair<IStat*, std::list<double>>> GetDebugStats() const { return std::vector<std::pair<IStat*, std::list<double>>>(); }
+        std::list<std::pair<IStat*, std::list<double>>> GetDebugStats() const { return std::list<std::pair<IStat*, std::list<double>>>(); }
 #endif
         // Met à jour les stats (à appeler par tick ou frame)
         void Update();
