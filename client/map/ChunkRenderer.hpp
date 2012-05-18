@@ -42,8 +42,8 @@ namespace Client { namespace Map {
 
         bool RefreshGraphics(Chunk& chunk);
         void Update(Uint64 totalTime);
-        void Render();
-        void RenderAlpha();
+        void Render(Common::Position const& position, glm::dmat4 viewProj);
+        void RenderAlpha(Common::Position const& position);
         Tools::Renderers::ITexture2D& GetTexture(Uint32 id)
         {
             auto it = this->_textures.find(id);

@@ -62,13 +62,13 @@ namespace Client { namespace Map {
             texturesIt->second->Update(totalTime);
     }
 
-    void ChunkRenderer::Render()
+    void ChunkRenderer::Render(Common::Position const& position, glm::dmat4 viewProj)
     {
-        auto const& camera = this->_game.GetPlayer().GetCamera();
-        auto pos = camera.position;
-        auto viewProj =
-            glm::detail::tmat4x4<double>(camera.projection)
-            * glm::lookAt<double>(pos, glm::dvec3(pos + glm::dvec3(camera.direction)), glm::dvec3(0, 1, 0));
+        //auto const& camera = this->_game.GetPlayer().GetCamera();
+        //auto pos = camera.position;
+        //auto viewProj =
+        //    glm::detail::tmat4x4<double>(camera.projection)
+        //    * glm::lookAt<double>(pos, glm::dvec3(pos + glm::dvec3(camera.direction)), glm::dvec3(0, 1, 0));
 
         static std::vector<std::pair<double, Chunk*>> visibleChunks;
         visibleChunks.clear();
@@ -77,7 +77,7 @@ namespace Client { namespace Map {
             {
                 if (chunk.GetMesh() == 0 || chunk.GetMesh()->GetTriangleCount() == 0)
                     return;
-                auto const& relativePosition = (Common::GetChunkPosition(chunk.coords) + glm::dvec3(Common::ChunkSize / 2.0f)) - camera.position;
+                auto const& relativePosition = (Common::GetChunkPosition(chunk.coords) + glm::dvec3(Common::ChunkSize / 2.0f)) - position;
                 auto dist = glm::lengthSquared(relativePosition);
                 visibleChunks.push_back(std::make_pair(dist, &chunk));
             });
@@ -114,7 +114,7 @@ namespace Client { namespace Map {
                             if (chunk->GetMesh() == 0 || chunk->GetMesh()->GetTriangleCount(texturesIt->first) == 0)
                                 continue;
                             effectIt->first->Update(this->_game.GetInterpreter().MakeNil()); // TODO: biome data
-                            this->_renderer.SetModelMatrix(glm::translate<float>(glm::fvec3(Common::GetChunkPosition(chunk->coords) - camera.position)));
+                            this->_renderer.SetModelMatrix(glm::translate<float>(glm::fvec3(Common::GetChunkPosition(chunk->coords) - position)));
                             chunk->GetMesh()->Render(texturesIt->first, this->_renderer);
                         }
                         texturesIt->second->Unbind();
@@ -124,12 +124,12 @@ namespace Client { namespace Map {
         }
     }
 
-    void ChunkRenderer::RenderAlpha()
+    void ChunkRenderer::RenderAlpha(Common::Position const& position)
     {
         if (this->_transparentChunks.size() == 0)
             return;
 
-        auto const& camera = this->_game.GetPlayer().GetCamera();
+        //auto const& camera = this->_game.GetPlayer().GetCamera();
         for (auto effectIt = this->_cubeTypes.begin(), effectIte = this->_cubeTypes.end(); effectIt != effectIte; ++effectIt)
         {
             do
@@ -145,7 +145,7 @@ namespace Client { namespace Map {
                         auto mesh = itChunk->second->GetMesh();
                         if (!mesh)
                             continue;
-                        this->_renderer.SetModelMatrix(glm::translate<float>(glm::fvec3(Common::GetChunkPosition(itChunk->second->coords) - camera.position)));
+                        this->_renderer.SetModelMatrix(glm::translate<float>(glm::fvec3(Common::GetChunkPosition(itChunk->second->coords) - position)));
                         mesh->Render(it->first, this->_renderer);
                     }
                     texture->Unbind();

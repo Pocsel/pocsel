@@ -41,7 +41,6 @@ namespace Tools { namespace Stat {
             double value = it->first->GetValue();
 #ifdef DEBUG
             it->second.push_back(value);
-            Tools::debug << it->first->GetName() << " = " << value << std::endl;
 #else
             it->second = value;
 #endif

@@ -139,21 +139,24 @@ namespace Tools { namespace Models { namespace Convert {
         T &add(const T &x)
         {
             if(ulen==alen) growbuf(ulen+1);
-            new (&buf[ulen]) T(x);
+            buf[ulen] = T(x);
+            //new (&buf[ulen]) T(x);
             return buf[ulen++];
         }
 
         T &add()
         {
             if(ulen==alen) growbuf(ulen+1);
-            new (&buf[ulen]) T;
+            buf[ulen] = T();
+            //new (&buf[ulen]) T(0);
             return buf[ulen++];
         }
 
         T &dup()
         {
             if(ulen==alen) growbuf(ulen+1);
-            new (&buf[ulen]) T(buf[ulen-1]);
+            buf[ulen] = T(buf[ulen-1]);
+            //new (&buf[ulen]) T(buf[ulen-1]);
             return buf[ulen++];
         }
 

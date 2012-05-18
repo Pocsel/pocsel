@@ -22,7 +22,7 @@ VSout vs(in float4 position : POSITION)
 
 float4 fs(in VSout v) : COLOR
 {
-    return float4(screenPosition.z / screenPosition.w, 0, 0, 0);
+    return float4(v.screenPosition.z / v.screenPosition.w, 0, 0, 0);
 }
 
 #ifndef DIRECTX

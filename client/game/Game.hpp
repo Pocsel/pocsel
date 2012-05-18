@@ -80,6 +80,8 @@ namespace Client { namespace Game {
         Map::Map& GetMap() { return *this->_map; }
         Tools::Lua::Interpreter& GetInterpreter() { return this->_interpreter; }
         float GetLoadingProgression() const { return (this->_cubeTypeManager.GetLoadingProgression() + this->_resourceManager->GetLoadingProgression()) / 2.0f; }
+    private:
+        void _RenderScene(glm::dmat4 viewProjection);
     };
 
 }}

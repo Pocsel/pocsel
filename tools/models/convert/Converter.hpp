@@ -8,7 +8,7 @@ namespace Tools { namespace Models { namespace Convert {
         const char *file;
         const char *name;
         double fps;
-        uint flags;
+        unsigned int flags;
         int startframe;
         int endframe;
 

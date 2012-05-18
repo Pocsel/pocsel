@@ -49,6 +49,7 @@ namespace Client { namespace Game {
         this->_lightRenderer.reset(
             new Tools::Renderers::Utils::LightRenderer(
                 this->_renderer,
+                this->_client.GetLocalResourceManager().GetShader("DirectionnalDepth.fx"),
                 this->_client.GetLocalResourceManager().GetShader("DirectionnalLight.fx"),
                 this->_client.GetLocalResourceManager().GetShader("PointLight.fx")));
         this->_directionnalLights.push_back(this->_lightRenderer->CreateDirectionnalLight());
@@ -107,28 +108,43 @@ namespace Client { namespace Game {
     {
         this->_statRenderTime.Begin();
 
-        this->_renderer.SetProjectionMatrix(this->GetPlayer().GetCamera().projection);
-        this->_renderer.SetViewMatrix(this->GetPlayer().GetCamera().GetViewMatrix());
+        auto& camera = this->GetPlayer().GetCamera();
+        this->_renderer.SetProjectionMatrix(camera.projection);
+        this->_renderer.SetViewMatrix(camera.GetViewMatrix());
+
+        auto viewProjection = glm::dmat4x4(camera.projection)
+            * glm::lookAt(camera.position, camera.position + glm::dvec3(camera.direction), glm::dvec3(0, 1, 0));
 
         this->_renderer.BeginDraw();
 
         this->_gBuffer->Bind();
-        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
+        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
 
-        this->_map->GetChunkManager().Render();
-        this->_itemManager->Render();
-        this->_map->GetChunkManager().RenderAlpha();
+        this->_RenderScene(viewProjection);
+        this->_map->GetChunkManager().RenderAlpha(this->GetPlayer().GetCamera().position);
         this->_player->Render();
 
         this->_gBuffer->Unbind();
 
-        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth);
-        this->_lightRenderer->Render(*this->_gBuffer, this->_directionnalLights, this->_pointLights);
+        std::function<void(glm::dmat4)> renderScene = std::bind(&Game::_RenderScene, this, std::placeholders::_1);
+        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
+        this->_lightRenderer->Render(
+            *this->_gBuffer,
+            Tools::Frustum(viewProjection),
+            renderScene,
+            this->_directionnalLights,
+            this->_pointLights);
         this->_gBuffer->Render();
 
         this->_renderer.EndDraw();
 
         this->_statRenderTime.End();
+    }
+
+    void Game::_RenderScene(glm::dmat4 viewProjection)
+    {
+        this->_map->GetChunkManager().Render(this->GetPlayer().GetCamera().position, viewProjection);
+        this->_itemManager->Render();
     }
 
 }}

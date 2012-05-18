@@ -31,6 +31,8 @@ namespace Tools {
         Frustum(glm::detail::tmat4x4<double> const& view);
 
         glm::dvec3 const* GetCorners() const { return this->_corners; }
+        glm::dvec3 const& GetCenter() const { return this->_center; }
+        double GetRadius() const { return std::sqrt(this->_radiusSquared); }
 
         virtual IntersectionType Contains(glm::dvec3 const& object) const;
         virtual IntersectionType Contains(AlignedBox const& object) const;
