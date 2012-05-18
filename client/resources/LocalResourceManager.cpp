@@ -5,13 +5,15 @@
 #include "tools/IRenderer.hpp"
 #include "tools/renderers/utils/Font.hpp"
 #include "tools/window/Window.hpp"
+#include "tools/models/MqmModel.hpp"
+#include "tools/models/ErrorModel.hpp"
+
 
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
 #include "client/resources/LocalResourceManager.hpp"
-#include "tools/models/MqmModel.hpp"
 
 namespace Client { namespace Resources {
 
@@ -20,6 +22,7 @@ namespace Client { namespace Resources {
         _renderer(client.GetWindow().GetRenderer())
     {
         this->_InitErrorTexture();
+        this->_InitErrorModel();
     }
 
     LocalResourceManager::~LocalResourceManager()
@@ -111,8 +114,9 @@ namespace Client { namespace Resources {
         auto it = this->_models.find(path);
         if (it == this->_models.end())
         {
-            //try
-            //{
+            Tools::Models::MqmModel* model = 0;
+            try
+            {
                 boost::filesystem::path texturesPath = path;
                 boost::filesystem::path modelPath = this->_client.GetSettings().confDir / "models" / path;
                 modelPath.replace_extension(".mqm");
@@ -121,23 +125,34 @@ namespace Client { namespace Resources {
                 std::ifstream tmp(modelPath.string(), std::ios::binary | std::ios::in);
                 std::vector<char> data((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
 
-                Tools::Models::MqmModel* model = new Tools::Models::MqmModel(
+                model = new Tools::Models::MqmModel(
                         data,
                         std::bind(&LocalResourceManager::_GetTexture2D, this, texturesPath.string(), std::placeholders::_1),
                         this->_renderer
                         );
-
+            }
+            catch (std::exception& ex)
+            {
+                Tools::error << "Can't load MqmModel \"" << path << "\", details: " << ex.what() << "\n";
+                model = this->_models["__error__"];
+            }
+            if (model == this->_models["__error__"])
+                this->_models[path] = 0;
+            else
                 this->_models[path] = model;
-                return *model;
-            //}
-            //catch (std::exception& ex)
-            //{
-            //    Tools::error << "Can't load MqmModel \"" << path << "\", details: " << ex.what() << "\n";
-            //    throw;
-            //}
+            return *model;
         }
-        else
+        else if (it->second != 0)
             return *it->second;
+        return *this->_models["__error__"];
+    }
+
+    void LocalResourceManager::_InitErrorModel()
+    {
+        this->_models["__error__"] = Tools::Models::ErrorModel(
+                std::bind(&LocalResourceManager::GetTexture2D, this, std::placeholders::_1),
+                this->_renderer
+                ).release();
     }
 
     void LocalResourceManager::_InitErrorTexture()
