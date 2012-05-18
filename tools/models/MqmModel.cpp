@@ -28,12 +28,12 @@ namespace Tools { namespace Models {
 
         std::memcpy(&header, data.data(), sizeof(header));
 
-        if (std::memcmp(header.magic, Tools::Models::Iqm::Magic, sizeof(header.magic)))
+        if (std::memcmp(header.magic, Mqm::Magic, sizeof(header.magic)))
             throw std::runtime_error("MqmModel:: magic is not good");
 
         // lilswap(&header.version, (sizeof(hdr) - sizeof(header.magic))/sizeof(uint));
 
-        if (header.version != Tools::Models::Iqm::Version)
+        if (header.version != Mqm::Version)
             throw std::runtime_error("MqmModel:: version is not good");
 
         if (data.size() != header.filesize)

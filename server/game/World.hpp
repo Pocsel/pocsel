@@ -14,6 +14,9 @@ namespace Server {
         class WorldLoader;
     }
 }
+namespace Tools { namespace Database {
+    class IConnection;
+}}
 
 namespace Server { namespace Game {
 
@@ -50,7 +53,7 @@ namespace Server { namespace Game {
 
         void Start();
         void Stop();
-        void Save();
+        void Save(Tools::Database::IConnection& conn);
 
         // Appelable d'un autre thread, que des trucs const qui ne peuvent pas disparaitre
         std::string const& GetIdentifier() const { return this->_identifier; }

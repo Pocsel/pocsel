@@ -6,7 +6,8 @@
 
 namespace Tools { namespace Database { namespace Sqlite {
 
-    Connection::Connection(std::string const& settings)
+    Connection::Connection(std::string const& settings) :
+        _isInTransaction(false)
     {
         if (sqlite3_open(settings.c_str(), &this->_sqliteDb) != SQLITE_OK)
         {
@@ -15,14 +16,10 @@ namespace Tools { namespace Database { namespace Sqlite {
             this->_sqliteDb = 0;
             throw std::runtime_error("Cannot open sqlite database (settings: '" + settings + "'): " + msg);
         }
-        this->_beginTransaction = this->CreateQuery("BEGIN").release();
-        this->_endTransaction = this->CreateQuery("COMMIT").release();
     }
 
     Connection::~Connection()
     {
-        Tools::Delete(this->_beginTransaction);
-        Tools::Delete(this->_endTransaction);
         if (this->_sqliteDb != 0)
             if (sqlite3_close(this->_sqliteDb) != SQLITE_OK)
                 throw std::runtime_error("Cannot close sqlite database");
@@ -36,12 +33,14 @@ namespace Tools { namespace Database { namespace Sqlite {
 
     void Connection::BeginTransaction()
     {
-        this->_beginTransaction->ExecuteNonSelect();
+        this->CreateQuery("BEGIN")->ExecuteNonSelect();
+        this->_isInTransaction = true;
     }
 
     void Connection::EndTransaction()
     {
-        this->_endTransaction->ExecuteNonSelect();
+        this->CreateQuery("COMMIT")->ExecuteNonSelect();
+        this->_isInTransaction = false;
     }
 
     bool Connection::HasTable(std::string const& table)

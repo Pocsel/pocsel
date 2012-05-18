@@ -78,12 +78,10 @@ namespace Server { namespace Game { namespace Map {
 
         auto query = conn.CreateQuery(std::string("REPLACE INTO ") + this->_map.GetName() + "_bigchunk (id, data) VALUES (?, ?)");
 
-        conn.BeginTransaction();
         for (auto it = deflatedBigChunks.begin(), ite = deflatedBigChunks.end(); it != ite; ++it)
             query->Bind(it->first).Bind((void const*)it->second->GetData(), it->second->GetSize()).ExecuteNonSelect().Reset();
         for (auto it = this->_deflatedBigChunks.begin(), ite = this->_deflatedBigChunks.end(); it != ite; ++it)
             query->Bind(it->first).Bind((void const*)it->second->GetData(), it->second->GetSize()).ExecuteNonSelect().Reset();
-        conn.EndTransaction();
 
         for (auto it = bigChunks.begin(), ite = bigChunks.end(); it != ite; ++it)
             Tools::Delete(it->second);

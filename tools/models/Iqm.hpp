@@ -99,11 +99,11 @@ namespace Tools { namespace Models { namespace Iqm {
         Uint32 offset;
     };
 
-    struct Bounds
-    {
-        float bbmin[3], bbmax[3];
-        float xyradius, radius;
-    };
+    //struct Bounds
+    //{
+    //    float bbmin[3], bbmax[3];
+    //    float xyradius, radius;
+    //};
 
 }}}
 
