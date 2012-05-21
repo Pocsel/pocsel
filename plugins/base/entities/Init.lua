@@ -6,8 +6,8 @@ Server.Entity.Register{
         print("Spawn()")
         self.i = 0
         self:Loop()
-        for i = 0, 3 do
-            Srv.Entity.Spawn("Blob", self.id)
+        for i = 0, math.random() * 8 do
+            Srv.Entity.Spawn({ x = math.random() * 10, y = math.random() * 10, z = math.random() * 10 }, "Blob", self.id)
         end
     end,
 
@@ -16,8 +16,18 @@ Server.Entity.Register{
     end,
 
     Save = function(self) -- save to database
-        print("Save()")
         self.storage.i = self.i
+        if not self.storage.nbSaves then
+            self.storage.nbSaves = 1
+        else
+            self.storage.nbSaves = self.storage.nbSaves + 1
+        end
+        print("number of saves: ", self.storage.nbSaves)
+        Srv.Entity.Kill(self.storage.nbSaves + 1)
+        Srv.Entity.Kill(self.storage.nbSaves + 2)
+        for i = 0, math.random() * 6 do
+            Srv.Entity.Spawn({ x = math.random() * 10, y = math.random() * 10, z = math.random() * 10 }, "Blob", self.id)
+        end
     end,
 
     Load = function(self) -- load from database
@@ -36,12 +46,18 @@ Server.Entity.Register{
 
 }
 
-Server.Entity.Register{
+Server.Entity.RegisterPositional{
 
     entityName = "Blob",
 
     Spawn = function(self, initEntity)
         self:Loop(initEntity)
+
+
+        -- self.d = Srv.Doodad.Spawn("Pelleteuse", {"PelleteuseBase", "PelleteusePelle"})
+        -- Srv.Doodad.RotateBody(self.d, "PelleteusePelle", Utils.Quat(5, 0, 0, 0))
+
+
     end,
 
     Loop = function(self, initEntity)
@@ -54,3 +70,22 @@ Server.Entity.Register{
     end,
 
 }
+
+-- Server.Body.Register{
+--
+--     bodyName = "monBody",
+--
+--     -- definitions bounding boxes
+--
+-- }
+--
+-- Client.Doodad.Register{
+--
+--     doodadName = "Chicken",
+--
+--     Spawn = function(self)
+--         self.m = Client.Model.Spawn("Chicken")
+--         self.s = Client.Sound.Spawn("CACA")
+--     end,
+--
+-- }
