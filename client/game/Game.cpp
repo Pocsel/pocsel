@@ -116,32 +116,36 @@ namespace Client { namespace Game {
         this->_renderer.SetProjectionMatrix(camera.projection);
         this->_renderer.SetViewMatrix(camera.GetViewMatrix());
 
-        auto viewProjection = glm::dmat4x4(camera.projection)
-            * glm::lookAt(camera.position, camera.position + glm::dvec3(camera.direction), glm::dvec3(0, 1, 0));
+        auto absoluteViewProjection = glm::dmat4x4(camera.projection) * glm::lookAt(camera.position, camera.position + glm::dvec3(camera.direction), glm::dvec3(0, 1, 0));
 
         this->_renderer.BeginDraw();
+        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
 
         this->_gBuffer->Bind();
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
 
-        this->_RenderScene(viewProjection);
+        this->_RenderScene(absoluteViewProjection);
         this->_map->GetChunkManager().RenderAlpha(this->GetPlayer().GetCamera().position);
         this->_player->Render();
 
         this->_gBuffer->Unbind();
 
+        // XXX
         std::function<void(glm::dmat4)> renderScene = std::bind(&Game::_RenderScene, this, std::placeholders::_1);
-        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
         this->_lightRenderer->Render(
             *this->_gBuffer,
-            Tools::Frustum(viewProjection),
+            Tools::Frustum(absoluteViewProjection),
+            camera.position,
             renderScene,
             this->_directionnalLights,
             this->_pointLights);
+        // XXX
+
         this->_gBuffer->Render();
 
         this->_renderer.EndDraw();
 
+        // XXX
         this->_renderer.BeginDraw2D();
         this->_renderer.SetModelMatrix(glm::scale(128.0f, 128.0f, 1.0f) * glm::translate(1.0f, 1.0f, 0.0f));
         do
@@ -150,6 +154,7 @@ namespace Client { namespace Game {
             this->_testImage->Render(*this->_testTexture, this->_lightRenderer->GetDirectionnalShadowMap(0));
         } while (this->_testShader->EndPass());
         this->_renderer.EndDraw2D();
+        // XXX
 
         this->_statRenderTime.End();
     }

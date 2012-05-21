@@ -9,6 +9,41 @@
 
 namespace Tools { namespace Renderers { namespace Utils {
 
+    namespace {
+        void _CalculateLightViewAndProjection(Frustum const& camera, glm::dvec3 const& cameraPosition, glm::dvec3 const& direction, glm::dmat4& view, glm::dmat4 projection)
+        {
+            glm::dvec3 const absoluteCameraCorners[8] = {
+                camera.GetCorners()[0] - cameraPosition, camera.GetCorners()[1] - cameraPosition,
+                camera.GetCorners()[2] - cameraPosition, camera.GetCorners()[3] - cameraPosition,
+                camera.GetCorners()[4] - cameraPosition, camera.GetCorners()[5] - cameraPosition,
+                camera.GetCorners()[6] - cameraPosition, camera.GetCorners()[7] - cameraPosition,
+            };
+
+            // On calcule les matrices light ViewProjection
+            auto position = glm::dvec3(camera.GetCenter()) - camera.GetRadius() * direction;
+            view = glm::lookAt(position, position + direction, glm::dvec3(0.0, 1.0, 0.0));
+            auto tmp = glm::dmat3(view);
+            glm::dvec3 lightCorners[8] = {
+                tmp * absoluteCameraCorners[0], tmp * absoluteCameraCorners[1],
+                tmp * absoluteCameraCorners[2], tmp * absoluteCameraCorners[3],
+                tmp * absoluteCameraCorners[4], tmp * absoluteCameraCorners[5],
+                tmp * absoluteCameraCorners[6], tmp * absoluteCameraCorners[7],
+            };
+            glm::dvec3 min = lightCorners[0];
+            glm::dvec3 max = lightCorners[0];
+            for (int j = 1; j < 8; ++j)
+            {
+                min.x = std::min(min.x, lightCorners[j].x);
+                min.y = std::min(min.y, lightCorners[j].y);
+                min.z = std::min(min.z, lightCorners[j].z);
+                max.x = std::max(max.x, lightCorners[j].x);
+                max.y = std::max(max.y, lightCorners[j].y);
+                max.z = std::max(max.z, lightCorners[j].z);
+            }
+            projection = glm::ortho(min.x, max.x, min.z, max.z, min.y, max.y);
+        }
+    }
+
     LightRenderer::LightRenderer(IRenderer& renderer, IShaderProgram& depthShader, IShaderProgram& directionnalShader, IShaderProgram& pointShader) :
         _renderer(renderer)
     {
@@ -21,7 +56,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_directionnal.diffuseColor = this->_directionnal.shader->GetParameter("lightDiffuseColor");
         this->_directionnal.specularColor = this->_directionnal.shader->GetParameter("lightSpecularColor");
         this->_directionnal.screenModelViewProjection = this->_directionnal.shader->GetParameter("screenWorldViewProjection");
-        this->_directionnal.shadowMap = this->_directionnal.shader->GetParameter("shadowMap");
+        this->_directionnal.shadowMap = this->_directionnal.shader->GetParameter("lightShadowMap");
         this->_directionnal.lightViewProjection = this->_directionnal.shader->GetParameter("lightViewProjection");
 
         this->_directionnal.depthShader = &depthShader;
@@ -65,12 +100,13 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void LightRenderer::Render(
         GBuffer& gbuffer,
-        Frustum const& camera,
+        Frustum const& absoluteCamera,
+        glm::dvec3 const& position,
         std::function<void(glm::dmat4)>& renderScene,
         std::list<DirectionnalLight> const& directionnalLights,
         std::list<PointLight> const& pointLights)
     {
-        this->_RenderDirectionnalLightsShadowMap(camera, renderScene, directionnalLights);
+        this->_RenderDirectionnalLightsShadowMap(absoluteCamera, position, renderScene, directionnalLights);
 
         gbuffer.BeginLighting();
         this->_renderer.SetClearColor(Color4f(.0f, .0f, .0f, 1.0f));
@@ -125,47 +161,40 @@ namespace Tools { namespace Renderers { namespace Utils {
         gbuffer.GetNormalsDepth().Unbind();
     }
 
-    void LightRenderer::_RenderDirectionnalLightsShadowMap(Frustum const& camera, std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights)
+    void LightRenderer::_RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& cameraPosition,  std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights)
     {
+        glm::dvec3 const absoluteCameraCorners[8] = {
+            absoluteCamera.GetCorners()[0], absoluteCamera.GetCorners()[1],
+            absoluteCamera.GetCorners()[2], absoluteCamera.GetCorners()[3],
+            absoluteCamera.GetCorners()[4], absoluteCamera.GetCorners()[5],
+            absoluteCamera.GetCorners()[6], absoluteCamera.GetCorners()[7],
+        };
+
         glm::dvec3 const cameraCorners[8] = {
-            camera.GetCorners()[0], camera.GetCorners()[1],
-            camera.GetCorners()[2], camera.GetCorners()[3],
-            camera.GetCorners()[4], camera.GetCorners()[5],
-            camera.GetCorners()[6], camera.GetCorners()[7],
+            absoluteCamera.GetCorners()[0] - cameraPosition, absoluteCamera.GetCorners()[1] - cameraPosition,
+            absoluteCamera.GetCorners()[2] - cameraPosition, absoluteCamera.GetCorners()[3] - cameraPosition,
+            absoluteCamera.GetCorners()[4] - cameraPosition, absoluteCamera.GetCorners()[5] - cameraPosition,
+            absoluteCamera.GetCorners()[6] - cameraPosition, absoluteCamera.GetCorners()[7] - cameraPosition,
         };
 
         int i = 0;
         for (auto it = lights.begin(), ite = lights.end(); it != ite && i < this->_directionnal.shadowMaps.size(); ++it, ++i)
         {
-            // On calcule la matrix light ViewProjection
-            auto lightPos = glm::dvec3(camera.GetCenter()) - camera.GetRadius() * glm::dvec3(it->direction);
-            auto lightView = glm::lookAt(lightPos, lightPos + glm::dvec3(it->direction), glm::dvec3(0.0, 1.0, 0.0));
-            auto tmp = glm::dmat3(lightView);
-            glm::dvec3 lightCorners[8] = {
-                tmp * cameraCorners[0], tmp * cameraCorners[1],
-                tmp * cameraCorners[2], tmp * cameraCorners[3],
-                tmp * cameraCorners[4], tmp * cameraCorners[5],
-                tmp * cameraCorners[6], tmp * cameraCorners[7],
-            };
-            glm::dvec3 min = lightCorners[0];
-            glm::dvec3 max = lightCorners[0];
-            for (int j = 1; j < 8; ++j)
-            {
-                min.x = std::min(min.x, lightCorners[j].x);
-                min.y = std::min(min.y, lightCorners[j].y);
-                min.z = std::min(min.z, lightCorners[j].z);
-                max.x = std::max(max.x, lightCorners[j].x);
-                max.y = std::max(max.y, lightCorners[j].y);
-                max.z = std::max(max.z, lightCorners[j].z);
-            }
-            auto lightViewProjection = glm::ortho(min.x, max.x, min.z, max.z, min.y, max.y) * lightView;
+            glm::dmat4 lightView;
+            glm::dmat4 lightProjection;
+            _CalculateLightViewAndProjection(absoluteCamera, glm::dvec3(0, 0, 0), glm::dvec3(it->direction), lightView, lightProjection);
+            auto lightAbsoluteViewProjection = lightProjection * lightView;
+            _CalculateLightViewAndProjection(absoluteCamera, cameraPosition, glm::dvec3(it->direction), lightView, lightProjection);
 
-            this->_directionnal.shadowMaps[i].first = glm::mat4(lightViewProjection);
+            this->_renderer.SetViewMatrix(glm::mat4(lightView));
+            this->_renderer.SetProjectionMatrix(glm::mat4(lightProjection));
+
+            this->_directionnal.shadowMaps[i].first = glm::mat4(lightAbsoluteViewProjection);
             this->_renderer.BeginDraw(this->_directionnal.shadowMaps[i].second.get());
             do
             {
                 this->_directionnal.depthShader->BeginPass();
-                renderScene(lightViewProjection);
+                renderScene(lightAbsoluteViewProjection);
             } while (this->_directionnal.depthShader->EndPass());
             this->_renderer.EndDraw();
         }

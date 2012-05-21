@@ -61,7 +61,8 @@ namespace Tools { namespace Renderers { namespace Utils {
         PointLight CreatePointLight();
         void Render(
             GBuffer& gbuffer,
-            Frustum const& camera,
+            Frustum const& absoluteCamera,
+            glm::dvec3 const& position,
             std::function<void(glm::dmat4)>& renderScene,
             std::list<DirectionnalLight> const& directionnalLights,
             std::list<PointLight> const& pointLights);
@@ -70,7 +71,7 @@ namespace Tools { namespace Renderers { namespace Utils {
     private:
         void _RenderDirectionnalLights(GBuffer& gbuffer, std::list<DirectionnalLight> const& lights);
         void _RenderPointLights(GBuffer& gbuffer, std::list<PointLight> const& lights);
-        void _RenderDirectionnalLightsShadowMap(Frustum const& camera, std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights);
+        void _RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& position, std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights);
     };
 
 }}}

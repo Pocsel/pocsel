@@ -22,7 +22,7 @@ sampler2D normalDepth = sampler_state
     magFilter = Point;
 };
 
-sampler2D shadowMap = sampler_state
+sampler2D lightShadowMap = sampler_state
 {
     minFilter = Point;
     magFilter = Point;
@@ -109,7 +109,7 @@ float calculateShadowMap(float3 viewPosition)
     float2 shadowTexCoord = 0.5f * lightingPosition.xy / lightingPosition.w + float2(0.5, 0.5);
     shadowTexCoord.y = 1.0f - shadowTexCoord.y;
 
-    float shadowDepth = tex2D(shadowMap, shadowTexCoord).r;
+    float shadowDepth = tex2D(lightShadowMap, shadowTexCoord).r;
     float ourDepth = lightingPosition.z / lightingPosition.w;
     if (shadowDepth + 0.000006 < ourDepth)
         return 0.3;
