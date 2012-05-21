@@ -486,6 +486,9 @@ namespace Server { namespace Game { namespace Engine {
                 throw std::runtime_error("EntityManager: Could not disable entity: call to Save() failed (entity deleted).");
         }
 
+        // donne au garbage collector les variables de cette entité
+        itPos->second->Disable(this->_engine.GetInterpreter());
+
         // ajoute l'entité dans la map des entités désactivées
         assert(!this->_disabledEntities.count(entityId) && "une entité positionnelle était déjà dans la map des entités désactivées");
         this->_disabledEntities[entityId] = itPos->second;
@@ -518,6 +521,9 @@ namespace Server { namespace Game { namespace Engine {
 
         // enlève l'entité de la map des entités désactivées
         this->_disabledEntities.erase(itDisabled);
+
+        // recrée la structure de base de l'entité
+        itPos->second->Enable(this->_engine.GetInterpreter());
 
         // XXX Load() activation hook
         CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Load", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
