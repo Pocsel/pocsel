@@ -78,7 +78,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             auto prototype = it->second->GetType().GetPrototype();
             if (!prototype.IsTable())
-                throw std::runtime_error("prototype is not a table");
+                throw std::runtime_error("prototype is not a table"); // le moddeur a fait de la merde avec son type...
             auto f = it->second->GetType().GetPrototype()[function];
             if (f.IsFunction())
             {
@@ -478,7 +478,7 @@ namespace Server { namespace Game { namespace Engine {
         if (!itPos->second)
             throw std::runtime_error("EntityManager: Could not disable entity: positional entity already disabled.");
 
-        // XXX Save() activation hook
+        // XXX Save() deactivation hook
         if (callSave)
         {
             CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
@@ -519,7 +519,7 @@ namespace Server { namespace Game { namespace Engine {
         // enlève l'entité de la map des entités désactivées
         this->_disabledEntities.erase(itDisabled);
 
-        // XXX Load() deactivation hook
+        // XXX Load() activation hook
         CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Load", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
         if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
             throw std::runtime_error("EntityManager: Could not enable entity: call to Load() failed (entity deleted).");
@@ -561,13 +561,13 @@ namespace Server { namespace Game { namespace Engine {
         Entity* entity;
         if (itType->second->IsPositional())
         {
-            PositionalEntity* positionalEntity = new PositionalEntity(this->_engine, entityId, itType->second, pos);
+            PositionalEntity* positionalEntity = new PositionalEntity(this->_engine.GetInterpreter(), entityId, itType->second, pos);
             assert(!this->_positionalEntities.count(entityId) && "impossible de créer une nouvelle entité car l'id est déjà utilisé dans la map des entités positionnelles");
             this->_positionalEntities[entityId] = positionalEntity;
             entity = positionalEntity;
         }
         else
-            entity = new Entity(this->_engine, entityId, itType->second);
+            entity = new Entity(this->_engine.GetInterpreter(), entityId, itType->second);
         assert(!this->_entities.count(entityId) && "impossible de créer une nouvelle entité car l'id est déjà utilisé dans la map des entités normales");
         this->_entities[entityId] = entity;
 
