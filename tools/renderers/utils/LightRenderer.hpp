@@ -61,6 +61,8 @@ namespace Tools { namespace Renderers { namespace Utils {
         PointLight CreatePointLight();
         void Render(
             GBuffer& gbuffer,
+            glm::mat4 const& view,
+            glm::mat4 const& projection,
             Frustum const& absoluteCamera,
             glm::dvec3 const& position,
             std::function<void(glm::dmat4)>& renderScene,

@@ -29,7 +29,7 @@ int main()
     int total = 0;
 
     Tools::Timer timer;
-    for (int i = 0; i < 100000; ++i)
+    for (double i = 0; i < 100000; ++i)
         map.insert(std::multimap<double, std::string>::value_type(std::sin(i), "coucou"));
     for (int i = 0; i < 50; ++i)
         for (auto it = map.begin(), ite = map.end(); it != ite; ++it)
@@ -37,7 +37,7 @@ int main()
     auto mapTime = timer.GetPreciseElapsedTime();
 
     timer.Reset();
-    for (int i = 0; i < 100000; ++i)
+    for (double i = 0; i < 100000; ++i)
         list.push_back(std::make_pair<double, std::string>(std::sin(i), "coucou"));
     //list.sort(&cmp);
     std::sort(list.begin(), list.end(), &cmp);

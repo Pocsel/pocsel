@@ -131,7 +131,7 @@ FSout fs(in VSout v)
     float specular = pow(max(0.0, dot(reflection, viewDirection)), materialShininess);
 
     float ao = 0;//screenSpaceAmbientOcclusion(v.texCoord, viewPosition, viewNormal);
-    float shadowMap = calculateShadowMap(viewPosition);
+    float shadowMap = 1.0; //calculateShadowMap(viewPosition);
 
     FSout f;
     f.diffuse.rgb = (NdL * lightDiffuseColor - ao) * shadowMap;

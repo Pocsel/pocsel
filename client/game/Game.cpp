@@ -134,6 +134,8 @@ namespace Client { namespace Game {
         std::function<void(glm::dmat4)> renderScene = std::bind(&Game::_RenderScene, this, std::placeholders::_1);
         this->_lightRenderer->Render(
             *this->_gBuffer,
+            camera.GetViewMatrix(),
+            camera.projection,
             Tools::Frustum(absoluteViewProjection),
             camera.position,
             renderScene,
@@ -147,7 +149,7 @@ namespace Client { namespace Game {
 
         // XXX
         this->_renderer.BeginDraw2D();
-        this->_renderer.SetModelMatrix(glm::scale(128.0f, 128.0f, 1.0f) * glm::translate(1.0f, 1.0f, 0.0f));
+        this->_renderer.SetModelMatrix(glm::scale(256.0f, 256.0f, 1.0f) * glm::translate(0.5f, 0.5f, 0.0f));
         do
         {
             this->_testShader->BeginPass();

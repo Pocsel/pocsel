@@ -100,6 +100,8 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void LightRenderer::Render(
         GBuffer& gbuffer,
+        glm::mat4 const& view,
+        glm::mat4 const& projection,
         Frustum const& absoluteCamera,
         glm::dvec3 const& position,
         std::function<void(glm::dmat4)>& renderScene,
@@ -109,6 +111,10 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_RenderDirectionnalLightsShadowMap(absoluteCamera, position, renderScene, directionnalLights);
 
         gbuffer.BeginLighting();
+
+        this->_renderer.SetViewMatrix(view);
+        this->_renderer.SetProjectionMatrix(projection);
+
         this->_renderer.SetClearColor(Color4f(.0f, .0f, .0f, 1.0f));
         this->_renderer.Clear(ClearFlags::Color);
         this->_renderer.SetDepthTest(false);
