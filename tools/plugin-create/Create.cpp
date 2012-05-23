@@ -124,8 +124,8 @@ namespace Tools { namespace PluginCreate {
                 std::string name = MakeRelative(clientRoot, *it).generic_string();
                 std::string type = itType->second;
                 std::string hash = HashFile(data);
-                if (itType->second == "lua")
-                    interpreter.DoString(std::string(data.begin(), data.end()));
+                //if (itType->second == "lua")
+                //    interpreter.DoString(std::string(data.begin(), data.end()));
                 conn.CreateQuery("INSERT INTO resource (name, type, data_hash, data) VALUES (?, ?, ?, ?);")->
                     Bind(name).Bind(type).Bind(hash).Bind(data.data(), data.size()).ExecuteNonSelect();
                 Tools::log << "Added client file \"" << name << "\" (size: " << data.size() << " bytes, hash: \"" << hash << "\", type: \"" << type << "\")." << std::endl;
