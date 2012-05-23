@@ -228,6 +228,7 @@ namespace Tools { namespace PluginCreate {
         {
             conn.CreateQuery("CREATE TABLE plugin (build_hash TEXT, fullname TEXT, identifier TEXT, format_version INTEGER);")->ExecuteNonSelect();
             conn.CreateQuery("CREATE TABLE resource (name TEXT, type TEXT, data_hash TEXT, data BLOB);")->ExecuteNonSelect();
+            conn.CreateQuery("CREATE TABLE script (name TEXT, type TEXT);")->ExecuteNonSelect();
             conn.CreateQuery("CREATE TABLE map (name TEXT, lua TEXT);")->ExecuteNonSelect();
             conn.CreateQuery("CREATE TABLE entity_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
             conn.CreateQuery("CREATE TABLE cube_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
@@ -237,6 +238,7 @@ namespace Tools { namespace PluginCreate {
 
             void RegisterScript(Tools::Lua::CallHelper& helper, std::string const& type, Tools::Database::IConnection& conn)
             {
+                conn.CreateQuery("INSERT INTO script (name, type) VALUES (?, ?);")->Bind("");
             }
 
             void DoNothing(Tools::Lua::CallHelper&)
