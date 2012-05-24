@@ -93,7 +93,7 @@ namespace Tools { namespace PluginCreate {
                 Bind(boost::uuids::to_string(buildHashGenerator())).Bind(fullname).Bind(identifier).Bind(Common::PluginFormatVersion).ExecuteNonSelect();
         }
 
-        void FillTableResource(boost::filesystem::path const& pluginRoot, Tools::Lua::Interpreter& interpreter, Tools::Database::IConnection& conn)
+        void FillTableResource(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn)
         {
             boost::filesystem::path clientRoot(pluginRoot / "client");
             if (!boost::filesystem::is_directory(clientRoot))
@@ -124,11 +124,11 @@ namespace Tools { namespace PluginCreate {
                 std::string name = MakeRelative(clientRoot, *it).generic_string();
                 std::string type = itType->second;
                 std::string hash = HashFile(data);
-                if (itType->second == "lua")
-                {
-                    Tools::log << "Processing client Lua file \"" << name << "\":" << std::endl;
-                    interpreter.DoString(std::string(data.begin(), data.end()));
-                }
+                //if (itType->second == "lua")
+                //{
+                //    Tools::log << "Processing client Lua file \"" << name << "\":" << std::endl;
+                //    interpreter.DoString(std::string(data.begin(), data.end()));
+                //}
                 conn.CreateQuery("INSERT INTO resource (name, type, data_hash, data) VALUES (?, ?, ?, ?);")->
                     Bind(name).Bind(type).Bind(hash).Bind(data.data(), data.size()).ExecuteNonSelect();
                 Tools::log << "Added client file \"" << name << "\" (size: " << data.size() << " bytes, hash: \"" << hash << "\", type: \"" << type << "\")." << std::endl;
@@ -234,28 +234,27 @@ namespace Tools { namespace PluginCreate {
             conn.CreateQuery("CREATE TABLE cube_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
         }
 
-        namespace Lua {
+        //namespace Lua {
 
-            void RegisterScript(Tools::Lua::CallHelper& helper, std::string const& type, Tools::Database::IConnection& conn)
-            {
-                conn.CreateQuery("INSERT INTO script (name, type) VALUES (?, ?);")->Bind("");
-            }
+        //    void RegisterScript(Tools::Lua::CallHelper& helper, std::string const& type, Tools::Database::IConnection& conn)
+        //    {
+        //    }
 
-            void DoNothing(Tools::Lua::CallHelper&)
-            {
-            }
+        //    void DoNothing(Tools::Lua::CallHelper&)
+        //    {
+        //    }
 
-        }
+        //}
 
-        void PrepareInterpreter(Tools::Lua::Interpreter& interpreter, Tools::Database::IConnection& conn)
-        {
-            interpreter.RegisterLib(Tools::Lua::Interpreter::Base);
-            interpreter.RegisterLib(Tools::Lua::Interpreter::Math);
-            interpreter.RegisterLib(Tools::Lua::Interpreter::Table);
-            interpreter.RegisterLib(Tools::Lua::Interpreter::String);
-            interpreter.Globals().GetTable("Client").GetTable("Doodad").Set("Register",
-                    interpreter.MakeFunction(std::bind(&Lua::RegisterScript, std::placeholders::_1, "doodad", std::ref(conn))));
-        }
+        //void PrepareInterpreter(Tools::Lua::Interpreter& interpreter, Tools::Database::IConnection& conn)
+        //{
+        //    interpreter.RegisterLib(Tools::Lua::Interpreter::Base);
+        //    interpreter.RegisterLib(Tools::Lua::Interpreter::Math);
+        //    interpreter.RegisterLib(Tools::Lua::Interpreter::Table);
+        //    interpreter.RegisterLib(Tools::Lua::Interpreter::String);
+        //    interpreter.Globals().GetTable("Client").GetTable("Doodad").Set("Register",
+        //            interpreter.MakeFunction(std::bind(&Lua::RegisterScript, std::placeholders::_1, "doodad", std::ref(conn))));
+        //}
 
         void ReadPluginConfiguration(boost::filesystem::path const& conf, std::string& identifier, std::string& fullname)
         {
@@ -323,14 +322,14 @@ namespace Tools { namespace PluginCreate {
         try
         {
             conn = new Tools::Database::Sqlite::Connection(destFile.string());
-            Tools::Lua::Interpreter interpreter;
-            PrepareInterpreter(interpreter, *conn);
+            //Tools::Lua::Interpreter interpreter;
+            //PrepareInterpreter(interpreter, *conn);
             CreatePluginTables(*conn);
             conn->BeginTransaction();
 
             // remplissage
             FillTablePlugin(identifier, fullname, *conn);
-            FillTableResource(pluginRoot, interpreter, *conn);
+            FillTableResource(pluginRoot, *conn);
             FillTableEntityFile(pluginRoot, *conn);
             FillTableCubeFile(pluginRoot, *conn);
             FillTableMap(pluginRoot, *conn);
