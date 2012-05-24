@@ -1,46 +1,78 @@
 #include "tools/precompiled.hpp"
 
 #include "tools/Vector3.hpp"
-#include "tools/renderers/utils/DirectionnalLight.hpp"
-#include "tools/renderers/utils/ILight.hpp"
 #include "tools/renderers/utils/GBuffer.hpp"
-#include "tools/renderers/utils/LightRenderer.hpp"
-#include "tools/renderers/utils/PointLight.hpp"
+#include "tools/renderers/utils/light/DirectionnalLight.hpp"
+#include "tools/renderers/utils/light/ILight.hpp"
+#include "tools/renderers/utils/light/LightRenderer.hpp"
+#include "tools/renderers/utils/light/PointLight.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Light {
 
     namespace {
         void _CalculateLightViewAndProjection(Frustum const& camera, glm::dvec3 const& cameraPosition, glm::dvec3 const& direction, glm::dmat4& view, glm::dmat4 projection)
         {
-            glm::dvec3 const absoluteCameraCorners[8] = {
+            //glm::dvec3 const absoluteCameraCorners[8] = {
+            //    camera.GetCorners()[0] - cameraPosition, camera.GetCorners()[1] - cameraPosition,
+            //    camera.GetCorners()[2] - cameraPosition, camera.GetCorners()[3] - cameraPosition,
+            //    camera.GetCorners()[4] - cameraPosition, camera.GetCorners()[5] - cameraPosition,
+            //    camera.GetCorners()[6] - cameraPosition, camera.GetCorners()[7] - cameraPosition,
+            //};
+
+            //// On calcule les matrices light ViewProjection
+            //auto position = glm::dvec3(camera.GetCenter()) - camera.GetRadius() * direction;
+            //view = glm::lookAt(position, position + direction, glm::dvec3(0.0, 1.0, 0.0));
+            //auto tmp = glm::dmat3(view);
+            //glm::dvec3 lightCorners[8] = {
+            //    tmp * absoluteCameraCorners[0], tmp * absoluteCameraCorners[1],
+            //    tmp * absoluteCameraCorners[2], tmp * absoluteCameraCorners[3],
+            //    tmp * absoluteCameraCorners[4], tmp * absoluteCameraCorners[5],
+            //    tmp * absoluteCameraCorners[6], tmp * absoluteCameraCorners[7],
+            //};
+            //glm::dvec3 min = lightCorners[0];
+            //glm::dvec3 max = lightCorners[0];
+            //for (int j = 1; j < 8; ++j)
+            //{
+            //    min.x = std::min(min.x, lightCorners[j].x);
+            //    min.y = std::min(min.y, lightCorners[j].y);
+            //    min.z = std::min(min.z, lightCorners[j].z);
+            //    max.x = std::max(max.x, lightCorners[j].x);
+            //    max.y = std::max(max.y, lightCorners[j].y);
+            //    max.z = std::max(max.z, lightCorners[j].z);
+            //}
+            //projection = glm::ortho(min.x, max.x, min.z, max.z, min.y, max.y);
+
+            auto lightRotation = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), -direction, glm::dvec3(0.0, 1.0, 0.0));
+            glm::dvec3 frustumCorners[8] = {
                 camera.GetCorners()[0] - cameraPosition, camera.GetCorners()[1] - cameraPosition,
                 camera.GetCorners()[2] - cameraPosition, camera.GetCorners()[3] - cameraPosition,
                 camera.GetCorners()[4] - cameraPosition, camera.GetCorners()[5] - cameraPosition,
                 camera.GetCorners()[6] - cameraPosition, camera.GetCorners()[7] - cameraPosition,
             };
 
-            // On calcule les matrices light ViewProjection
-            auto position = glm::dvec3(camera.GetCenter()) - camera.GetRadius() * direction;
-            view = glm::lookAt(position, position + direction, glm::dvec3(0.0, 1.0, 0.0));
-            auto tmp = glm::dmat3(view);
-            glm::dvec3 lightCorners[8] = {
-                tmp * absoluteCameraCorners[0], tmp * absoluteCameraCorners[1],
-                tmp * absoluteCameraCorners[2], tmp * absoluteCameraCorners[3],
-                tmp * absoluteCameraCorners[4], tmp * absoluteCameraCorners[5],
-                tmp * absoluteCameraCorners[6], tmp * absoluteCameraCorners[7],
-            };
-            glm::dvec3 min = lightCorners[0];
-            glm::dvec3 max = lightCorners[0];
+            for (int i = 0; i < 8; ++i)
+                frustumCorners[i] = glm::dvec3(lightRotation * glm::dvec4(frustumCorners[i], 1.0));
+            glm::dvec3 min = frustumCorners[0];
+            glm::dvec3 max = frustumCorners[0];
             for (int j = 1; j < 8; ++j)
             {
-                min.x = std::min(min.x, lightCorners[j].x);
-                min.y = std::min(min.y, lightCorners[j].y);
-                min.z = std::min(min.z, lightCorners[j].z);
-                max.x = std::max(max.x, lightCorners[j].x);
-                max.y = std::max(max.y, lightCorners[j].y);
-                max.z = std::max(max.z, lightCorners[j].z);
+                min.x = std::min(min.x, frustumCorners[j].x);
+                min.y = std::min(min.y, frustumCorners[j].y);
+                min.z = std::min(min.z, frustumCorners[j].z);
+                max.x = std::max(max.x, frustumCorners[j].x);
+                max.y = std::max(max.y, frustumCorners[j].y);
+                max.z = std::max(max.z, frustumCorners[j].z);
             }
-            projection = glm::ortho(min.x, max.x, min.z, max.z, min.y, max.y);
+            glm::dvec3 size = max - min;
+            glm::dvec3 halfSize = size * 0.5;
+            glm::dvec3 lightPosition = min + halfSize;
+            lightPosition.z = min.z;
+
+            lightPosition = glm::dvec3(glm::inverse(lightRotation) * glm::dvec4(lightPosition, 1.0));
+
+            view = glm::lookAt(lightPosition, lightPosition - direction, glm::dvec3(0.0, 1.0, 0.0));
+            projection = glm::ortho(size.x, size.y, -size.z, size.z);
+
         }
     }
 
@@ -169,20 +201,6 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void LightRenderer::_RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& cameraPosition,  std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights)
     {
-        glm::dvec3 const absoluteCameraCorners[8] = {
-            absoluteCamera.GetCorners()[0], absoluteCamera.GetCorners()[1],
-            absoluteCamera.GetCorners()[2], absoluteCamera.GetCorners()[3],
-            absoluteCamera.GetCorners()[4], absoluteCamera.GetCorners()[5],
-            absoluteCamera.GetCorners()[6], absoluteCamera.GetCorners()[7],
-        };
-
-        glm::dvec3 const cameraCorners[8] = {
-            absoluteCamera.GetCorners()[0] - cameraPosition, absoluteCamera.GetCorners()[1] - cameraPosition,
-            absoluteCamera.GetCorners()[2] - cameraPosition, absoluteCamera.GetCorners()[3] - cameraPosition,
-            absoluteCamera.GetCorners()[4] - cameraPosition, absoluteCamera.GetCorners()[5] - cameraPosition,
-            absoluteCamera.GetCorners()[6] - cameraPosition, absoluteCamera.GetCorners()[7] - cameraPosition,
-        };
-
         int i = 0;
         for (auto it = lights.begin(), ite = lights.end(); it != ite && i < this->_directionnal.shadowMaps.size(); ++it, ++i)
         {
@@ -206,4 +224,4 @@ namespace Tools { namespace Renderers { namespace Utils {
         }
     }
 
-}}}
+}}}}

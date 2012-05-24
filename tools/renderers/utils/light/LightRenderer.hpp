@@ -3,18 +3,20 @@
 
 #include "tools/IRenderer.hpp"
 #include "tools/Frustum.hpp"
-#include "tools/renderers/utils/DirectionnalLight.hpp"
 #include "tools/renderers/utils/Image.hpp"
-#include "tools/renderers/utils/PointLight.hpp"
 #include "tools/renderers/utils/Sphere.hpp"
+#include "tools/renderers/utils/light/DirectionnalLight.hpp"
+#include "tools/renderers/utils/light/PointLight.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils {
     class GBuffer;
-    class ILight;
-    class PointLight;
+    namespace Light {
+        class ILight;
+        class PointLight;
+    }
 }}}
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Light {
 
     class LightRenderer
     {
@@ -76,6 +78,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         void _RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& position, std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights);
     };
 
-}}}
+}}}}
 
 #endif

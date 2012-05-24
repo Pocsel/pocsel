@@ -27,11 +27,13 @@ namespace Tools {
         class IShaderProgram;
         class IShaderParameter;
         namespace Utils {
-            class DirectionnalLight;
             class GBuffer;
             class Image;
-            class LightRenderer;
-            class PointLight;
+            namespace Light {
+                class DirectionnalLight;
+                class LightRenderer;
+                class PointLight;
+            }
         }
     }
 }
@@ -58,9 +60,9 @@ namespace Client { namespace Game {
         Tools::Stat::Timer _statOutTime;
         // XXX
         std::unique_ptr<Tools::Renderers::Utils::GBuffer> _gBuffer;
-        std::unique_ptr<Tools::Renderers::Utils::LightRenderer> _lightRenderer;
-        std::list<Tools::Renderers::Utils::DirectionnalLight> _directionnalLights;
-        std::list<Tools::Renderers::Utils::PointLight> _pointLights;
+        std::unique_ptr<Tools::Renderers::Utils::Light::LightRenderer> _lightRenderer;
+        std::list<Tools::Renderers::Utils::Light::DirectionnalLight> _directionnalLights;
+        std::list<Tools::Renderers::Utils::Light::PointLight> _pointLights;
 
         std::unique_ptr<Tools::Renderers::Utils::Image> _testImage;
         Tools::Renderers::IShaderProgram* _testShader;

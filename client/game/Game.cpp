@@ -4,7 +4,7 @@
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/renderers/utils/GBuffer.hpp"
 #include "tools/renderers/utils/Image.hpp"
-#include "tools/renderers/utils/LightRenderer.hpp"
+#include "tools/renderers/utils/light/LightRenderer.hpp"
 #include "tools/stat/StatManager.hpp"
 #include "tools/window/Window.hpp"
 
@@ -47,7 +47,7 @@ namespace Client { namespace Game {
                 size,
                 this->_client.GetLocalResourceManager().GetShader("PostProcess.fx")));
         this->_lightRenderer.reset(
-            new Tools::Renderers::Utils::LightRenderer(
+            new Tools::Renderers::Utils::Light::LightRenderer(
                 this->_renderer,
                 this->_client.GetLocalResourceManager().GetShader("DirectionnalDepth.fx"),
                 this->_client.GetLocalResourceManager().GetShader("DirectionnalLight.fx"),
