@@ -72,7 +72,7 @@ namespace Tools { namespace PluginInstall {
             }
         }
 
-        void UpdateTableResource(Uint32 pluginId, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
+        void UpdateTableResource(Uint32 pluginId, Uint32 newWorldVersion, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
         {
             // liste des id de resource avant toute modif
             std::list<Uint32> previousIds;
@@ -91,22 +91,21 @@ namespace Tools { namespace PluginInstall {
                 std::string hashPlugin = pluginRow->GetString(2);
                 std::vector<char> data = pluginRow->GetArray(3);
 
-                auto worldQuery = wconn.CreateQuery("SELECT id, version, data_hash FROM resource WHERE plugin_id = ? AND name = ?;");
+                auto worldQuery = wconn.CreateQuery("SELECT id, data_hash FROM resource WHERE plugin_id = ? AND name = ?;");
                 worldQuery->Bind(pluginId).Bind(pluginRow->GetString(0));
                 if (auto worldRow = worldQuery->Fetch())
                 {
                     Uint32 id = worldRow->GetUint32(0);
-                    Uint32 version = worldRow->GetUint32(1);
-                    std::string hashWorld = worldRow->GetString(2);
+                    std::string hashWorld = worldRow->GetString(1);
 
                     if (hashPlugin != hashWorld)
                     {
                         wconn.CreateQuery("UPDATE resource SET version = ?, type = ?, data_hash = ?, data = ? WHERE plugin_id = ? AND name = ?;")->
-                            Bind(version + 1).Bind(type).Bind(hashPlugin).Bind(data).Bind(pluginId).Bind(name).ExecuteNonSelect();
-                        Tools::log << "Updated resource \"" << name << "\" (size: " << data.size() << " bytes, type: \"" << type << "\", hash: \"" << hashPlugin << "\") to version " << version + 1 << "." << std::endl;
+                            Bind(newWorldVersion).Bind(type).Bind(hashPlugin).Bind(data).Bind(pluginId).Bind(name).ExecuteNonSelect();
+                        Tools::log << "Updated resource \"" << name << "\" (size: " << data.size() << " bytes, type: \"" << type << "\", hash: \"" << hashPlugin << "\") to version " << newWorldVersion << "." << std::endl;
                     }
                     else
-                        Tools::log << "Resource \"" << name << "\" (size: " << data.size() << " bytes, type: \"" << type << "\", hash: \"" << hashPlugin << "\") not updated (version: " << version << ")." << std::endl;
+                        Tools::log << "Resource \"" << name << "\" (size: " << data.size() << " bytes, type: \"" << type << "\", hash: \"" << hashPlugin << "\") not updated." << std::endl;
                     newIds.push_back(id);
                 }
                 else
@@ -235,7 +234,7 @@ namespace Tools { namespace PluginInstall {
         // ouverture/creation world
         std::string worldIdentifier;
         std::string worldFullname;
-        Uint32 worldVersion;
+        Uint32 newWorldVersion;
         Tools::Database::IConnection* wconn = 0;
         try
         {
@@ -265,7 +264,7 @@ namespace Tools { namespace PluginInstall {
                 worldFullname = row->GetString(2);
                 if (!Common::FieldValidator::IsWorldFullname(worldFullname))
                     throw std::runtime_error("Invalid world fullname.");
-                worldVersion = row->GetUint32(3);
+                newWorldVersion = row->GetUint32(3) + 1;
             }
             else
                 throw std::runtime_error("No metadata.");
@@ -287,9 +286,9 @@ namespace Tools { namespace PluginInstall {
             Uint32 pluginId = UpdateTablePlugin(pluginBuildHash, pluginIdentifier, pluginFullname, *wconn);
             UpdateTableCubeFile(pluginId, *wconn, *pconn);
             UpdateTableEntityFile(pluginId, *wconn, *pconn);
-            UpdateTableResource(pluginId, *wconn, *pconn);
+            UpdateTableResource(pluginId, newWorldVersion, *wconn, *pconn);
             UpdateTableMap(pluginId, pluginIdentifier, *wconn, *pconn);
-            UpdateTableWorld(worldVersion + 1, *wconn, *pconn);
+            UpdateTableWorld(newWorldVersion, *wconn, *pconn);
 
             Tools::log << "Finishing writing to database..." << std::endl;
             wconn->EndTransaction();
