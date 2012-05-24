@@ -72,7 +72,6 @@ namespace Client { namespace Network {
                 Common::MovingOrientedPosition pos;
                 Uint32 id;
                 PacketExtractor::ItemMove(p, pos, id);
-
                 this->_client.GetGame().GetItemManager().MoveItem(id, pos);
             };
     }
@@ -103,7 +102,7 @@ namespace Client { namespace Network {
         Common::BaseChunk::CubeType nbCubeTypes;
         PacketExtractor::Login(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes, worldBuildHash);
 
-        Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << (int)major << "." << (int)minor << "\n";
+        Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << static_cast<int>(major) << "." << static_cast<int>(minor) << "\n";
         if (status)
         {
             Tools::debug << "World: " << worldName << " (identifier: \"" << worldId << "\", version: " << worldVersion << ", build hash: \"" << worldBuildHash << "\")\n";

@@ -10,10 +10,12 @@ namespace Server { namespace Game { namespace Map {
     struct CubeType : public Common::CubeType
     {
         Tools::Lua::Ref dataLua;
+        bool transparent;
 
-        CubeType(Common::BaseChunk::CubeType id, std::string const& name, Tools::Lua::Ref const& data)
-            : Common::CubeType(id, name),
-            dataLua(data)
+        CubeType(Common::BaseChunk::CubeType id, std::string const& name, Tools::Lua::Ref const& data, bool transparent) :
+            Common::CubeType(id, name),
+            dataLua(data),
+            transparent(transparent)
         {
         }
     };

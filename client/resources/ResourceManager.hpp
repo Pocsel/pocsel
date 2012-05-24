@@ -40,7 +40,7 @@ namespace Client { namespace Resources {
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
         std::map<Uint32 /* resourceId */, Uint32 /* pluginId */> _resourceToPluginId;
-        std::map<Uint32 /* pluginId */, std::map<std::string /* filename */, Uint32 /* resourceId */>> _resourceIds;
+        std::map<Uint32 /* pluginId */, std::map<std::string /* name */, Uint32 /* resourceId */>> _resourceIds;
         std::map<Uint32 /* pluginId */, Tools::Renderers::ITexture2D*> _textures;
         std::map<Uint32 /* pluginId */, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextures;
         std::map<Uint32 /* pluginId */, Tools::Renderers::IShaderProgram*> _shaders;
@@ -62,11 +62,11 @@ namespace Client { namespace Resources {
         std::string GetScript(Uint32 id);
         std::unique_ptr<Common::Resource> GetResource(Uint32 id);
 
-        Tools::Renderers::ITexture2D& GetTexture2D(Uint32 pluginId, std::string const& filename);
-        std::vector<Tools::Renderers::ITexture2D*> const& GetAnimatedTexture(Uint32 pluginId, std::string const& filename);
-        Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& filename);
-        std::string GetScript(Uint32 pluginId, std::string const& filename);
-        std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& filename);
+        Tools::Renderers::ITexture2D& GetTexture2D(Uint32 pluginId, std::string const& name);
+        std::vector<Tools::Renderers::ITexture2D*> const& GetAnimatedTexture(Uint32 pluginId, std::string const& name);
+        Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& name);
+        std::string GetScript(Uint32 pluginId, std::string const& name);
+        std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& name);
         Effect& GetEffect(Uint32 pluginId, std::string const& name);
 
         std::unique_ptr<ITexture> CreateTexture(Uint32 id);
@@ -80,12 +80,12 @@ namespace Client { namespace Resources {
             auto it = this->_resourceToPluginId.find(resourceId);
             return it != this->_resourceToPluginId.end() ? it->second : 0;
         }
-        Uint32 GetResourceId(Uint32 pluginId, std::string const& filename)
+        Uint32 GetResourceId(Uint32 pluginId, std::string const& name)
         {
             auto it = this->_resourceIds.find(pluginId);
             if (it == this->_resourceIds.end())
                 return 0;
-            auto it2 = it->second.find(filename);
+            auto it2 = it->second.find(name);
             return it2 != it->second.end() ? it2->second : 0;
         }
 

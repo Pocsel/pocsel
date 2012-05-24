@@ -21,7 +21,7 @@ namespace Client { namespace Game {
 
     void CubeTypeManager::AddCubeType(std::unique_ptr<Common::CubeType> type)
     {
-        Tools::debug << "CubeType: " << type->name << " (id: " << type->id << ", description: " << type->visualEffect << ")\n";
+        Tools::debug << "CubeType: " << type->name << " (id: " << type->id << ", material: " << type->material << ")\n";
         this->_cubeTypes.push_back(CubeType(*type));
         this->_AskOneType();
     }

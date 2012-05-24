@@ -684,7 +684,7 @@ namespace Server { namespace Game { namespace Engine {
                 throw std::runtime_error("Server.Entity.Register[Positional]: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
             if (!prototype["entityName"].IsString())
                 throw std::runtime_error("Server.Entity.Register[Positional]: Field \"entityName\" in prototype must exist and be of type string");
-            if (!Common::FieldValidator::IsEntityType(entityName = prototype["entityName"].ToString()))
+            if (!Common::FieldValidator::IsRegistrableType(entityName = prototype["entityName"].ToString()))
                 throw std::runtime_error("Server.Entity.Register[Positional]: Invalid entity name \"" + entityName + "\"");
             if (helper.GetNbArgs() && helper.PopArg().ToBoolean()) // bool flag en deuxieme parametre pour indiquer que c'est RegisterPositional()
                 positional = true;

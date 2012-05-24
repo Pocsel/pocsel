@@ -4,11 +4,12 @@
 #include "common/Position.hpp"
 
 #include "tools/Timer.hpp"
-#include "tools/lua/Interpreter.hpp"
+//#include "tools/lua/Interpreter.hpp"
 #include "tools/stat/Timer.hpp"
 
 #include "client/game/CubeTypeManager.hpp"
 #include "client/resources/ResourceManager.hpp"
+#include "client/game/engine/Engine.hpp"
 
 namespace Client {
     class Client;
@@ -49,10 +50,10 @@ namespace Client { namespace Game {
         Map::Map* _map;
         ItemManager* _itemManager;
         Player* _player;
+        Engine::Engine* _engine;
         int _callbackId;
         Tools::Timer _updateTimer;
         Tools::Timer _gameTimer;
-        Tools::Lua::Interpreter _interpreter;
         Tools::Stat::Timer _statUpdateTime;
         Tools::Stat::Timer _statRenderTime;
         Tools::Stat::Timer _statOutTime;
@@ -78,7 +79,8 @@ namespace Client { namespace Game {
         Resources::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
         ItemManager& GetItemManager() { return *this->_itemManager; }
         Map::Map& GetMap() { return *this->_map; }
-        Tools::Lua::Interpreter& GetInterpreter() { return this->_interpreter; }
+        Tools::Lua::Interpreter& GetInterpreter() { return this->_engine->GetInterpreter(); }
+        Engine::Engine& GetEngine() { return *this->_engine; }
         float GetLoadingProgression() const { return (this->_cubeTypeManager.GetLoadingProgression() + this->_resourceManager->GetLoadingProgression()) / 2.0f; }
     private:
         void _RenderScene(glm::dmat4 viewProjection);

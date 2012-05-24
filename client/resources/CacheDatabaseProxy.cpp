@@ -41,7 +41,7 @@ namespace Client { namespace Resources {
         {
             this->_connection->CreateQuery("CREATE TABLE cache (version INTEGER, format_version INTEGER, world_name TEXT, world_build_hash TEXT);")->ExecuteNonSelect();
             this->_connection->CreateQuery("INSERT INTO cache (version, format_version) VALUES (0, ?);")->Bind(CacheFormatVersion).ExecuteNonSelect();
-            this->_connection->CreateQuery("CREATE TABLE resource (id INTEGER, type TEXT, data BLOB, plugin_id INTEGER, filename TEXT);")->ExecuteNonSelect();
+            this->_connection->CreateQuery("CREATE TABLE resource (id INTEGER, type TEXT, data BLOB, plugin_id INTEGER, name TEXT);")->ExecuteNonSelect();
         }
     }
 
@@ -93,8 +93,8 @@ namespace Client { namespace Resources {
         }
         this->_connection->BeginTransaction();
         this->_connection->CreateQuery("DELETE FROM resource WHERE id = ?;")->Bind(res.id).ExecuteNonSelect();
-        this->_connection->CreateQuery("INSERT INTO resource (id, type, data, plugin_id, filename) VALUES (?, ?, ?, ?, ?);")->
-            Bind(res.id).Bind(res.type).Bind(res.data, res.size).Bind(res.pluginId).Bind(res.filename).ExecuteNonSelect();
+        this->_connection->CreateQuery("INSERT INTO resource (id, type, data, plugin_id, name) VALUES (?, ?, ?, ?, ?);")->
+            Bind(res.id).Bind(res.type).Bind(res.data, res.size).Bind(res.pluginId).Bind(res.name).ExecuteNonSelect();
         this->_connection->EndTransaction();
     }
 
@@ -102,7 +102,7 @@ namespace Client { namespace Resources {
     {
         try
         {
-            auto query = this->_connection->CreateQuery("SELECT id, plugin_id, type, filename, data FROM resource WHERE id = ?;");
+            auto query = this->_connection->CreateQuery("SELECT id, plugin_id, type, name, data FROM resource WHERE id = ?;");
             query->Bind(id);
             if (auto row = query->Fetch())
             {
@@ -130,7 +130,7 @@ namespace Client { namespace Resources {
         std::list<std::unique_ptr<Common::Resource>> resources;
         try
         {
-            auto query = this->_connection->CreateQuery("SELECT id, plugin_id, type, filename, data FROM resource WHERE type LIKE ?;");
+            auto query = this->_connection->CreateQuery("SELECT id, plugin_id, type, name, data FROM resource WHERE type LIKE ?;");
             query->Bind(type);
             while (auto row = query->Fetch())
             {
@@ -151,12 +151,12 @@ namespace Client { namespace Resources {
         return resources;
     }
 
-    Uint32 CacheDatabaseProxy::GetResourceId(Uint32 pluginId, std::string const& filename)
+    Uint32 CacheDatabaseProxy::GetResourceId(Uint32 pluginId, std::string const& name)
     {
         try
         {
-            auto query = this->_connection->CreateQuery("SELECT id FROM resource WHERE plugin_id = ? AND filename = ?;");
-            query->Bind(pluginId).Bind(filename);
+            auto query = this->_connection->CreateQuery("SELECT id FROM resource WHERE plugin_id = ? AND name = ?;");
+            query->Bind(pluginId).Bind(name);
             if (auto row = query->Fetch())
                 return row->GetUint32(0);
             else

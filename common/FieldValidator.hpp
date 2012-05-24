@@ -14,7 +14,7 @@ namespace Common {
         static bool IsWorldIdentifier(std::string const& str);
         static bool IsPluginFullname(std::string const& str);
         static bool IsWorldFullname(std::string const& str);
-        static bool IsEntityType(std::string const& str);
+        static bool IsRegistrableType(std::string const& str);
         static bool IsMapName(std::string const& str);
         static bool IsPluginBuildHash(std::string const& str);
         static bool IsWorldBuildHash(std::string const& str);

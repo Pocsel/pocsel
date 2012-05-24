@@ -190,29 +190,29 @@ namespace Client { namespace Resources {
         return this->_database.GetResource(id);
     }
 
-    Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 pluginId, std::string const& filename)
+    Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 pluginId, std::string const& name)
     {
-        return this->GetTexture2D(this->_database.GetResourceId(pluginId, filename));
+        return this->GetTexture2D(this->_database.GetResourceId(pluginId, name));
     }
 
-    std::vector<Tools::Renderers::ITexture2D*> const& ResourceManager::GetAnimatedTexture(Uint32 pluginId, std::string const& filename)
+    std::vector<Tools::Renderers::ITexture2D*> const& ResourceManager::GetAnimatedTexture(Uint32 pluginId, std::string const& name)
     {
-        return this->GetAnimatedTexture(this->_database.GetResourceId(pluginId, filename));
+        return this->GetAnimatedTexture(this->_database.GetResourceId(pluginId, name));
     }
 
-    Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 pluginId, std::string const& filename)
+    Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 pluginId, std::string const& name)
     {
-        return this->GetShader(this->_database.GetResourceId(pluginId, filename));
+        return this->GetShader(this->_database.GetResourceId(pluginId, name));
     }
 
-    std::string ResourceManager::GetScript(Uint32 pluginId, std::string const& filename)
+    std::string ResourceManager::GetScript(Uint32 pluginId, std::string const& name)
     {
-        return this->GetScript(this->_database.GetResourceId(pluginId, filename));
+        return this->GetScript(this->_database.GetResourceId(pluginId, name));
     }
 
-    std::unique_ptr<Common::Resource> ResourceManager::GetResource(Uint32 pluginId, std::string const& filename)
+    std::unique_ptr<Common::Resource> ResourceManager::GetResource(Uint32 pluginId, std::string const& name)
     {
-        return this->_database.GetResource(this->_database.GetResourceId(pluginId, filename));
+        return this->_database.GetResource(this->_database.GetResourceId(pluginId, name));
     }
 
     Effect& ResourceManager::GetEffect(Uint32 pluginId, std::string const& name)
@@ -267,7 +267,7 @@ namespace Client { namespace Resources {
         auto const& resources = this->_database.GetAllResources("%");
         for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
         {
-            this->_resourceIds[(*it)->pluginId][(*it)->filename] = (*it)->id;
+            this->_resourceIds[(*it)->pluginId][(*it)->name] = (*it)->id;
             this->_resourceToPluginId[(*it)->id] = (*it)->pluginId;
         }
         this->_game.GetCubeTypeManager().LoadResources();

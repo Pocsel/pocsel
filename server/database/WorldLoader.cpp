@@ -183,17 +183,16 @@ namespace Server { namespace Database {
     {
         Uint32 currentPluginId = 0;
         auto& lua = map.GetEngine().GetInterpreter();
-        auto cubeTypeNs = lua.Globals().GetTable("Server").GetTable("CubeType");
+        auto cubeTypeNs = lua.Globals().GetTable("Server").GetTable("Cube");
         cubeTypeNs.Set("Register", lua.MakeFunction([&](Tools::Lua::CallHelper& helper)
             {
                 Tools::Lua::Ref cubeType = helper.PopArg();
-                std::string name = cubeType["name"].Check<std::string>("Server.CubeType.Register: Field \"name\" must be a string");
+                std::string name = cubeType["name"].Check<std::string>("Server.Cube.Register: Field \"name\" must be a string");
                 auto id = this->_GetCubeTypeId(map.GetEngine().GetRunningPluginId(), name);
 
-                Game::Map::CubeType desc(id, name, cubeType);
+                Game::Map::CubeType desc(id, name, cubeType, cubeType["transparent"].To<bool>());
                 desc.solid = cubeType["solid"].To<bool>();
-                desc.transparent = cubeType["transparent"].To<bool>();
-                desc.visualEffect = cubeType["visualEffect"].Check<Uint32>("Server.CubeType.Register: Field \"visualEffect\" must be a number");
+                desc.material = cubeType["material"].Check<std::string>("Server.Cube.Register: Field \"material\" must be a string");
                 map.GetConfiguration().cubeTypes.push_back(desc);
 
                 Log::load << "[map: " << map.GetName() << "] " <<
@@ -304,7 +303,7 @@ namespace Server { namespace Database {
                         Tools::error << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
                         continue;
                     }
-                    cube.type = new Game::Map::CubeType(0, "void", mapIt->second.interpreter->MakeTable());
+                    cube.type = new Game::Map::CubeType(0, "void", mapIt->second.interpreter->MakeTable(), true);
                 }
 
                 // Parcours des ValidationBlocConf

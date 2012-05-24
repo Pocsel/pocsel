@@ -42,7 +42,7 @@ namespace Common {
         return str.size() <= 100;
     }
 
-    bool FieldValidator::IsEntityType(std::string const& str)
+    bool FieldValidator::IsRegistrableType(std::string const& str)
     {
         return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
