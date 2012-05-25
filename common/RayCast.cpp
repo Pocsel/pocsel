@@ -257,15 +257,15 @@ namespace Common {
         int cx, cy, cz;
         int x, y, z;
 
-        for (x = -distance; x < distance;)
+        for (x = (int)-distance; x < distance;)
         {
             cx = (int)((x + pos.x) / (int)Common::ChunkSize);
 
-            for (y = -distance; y < distance;)
+            for (y = (int)-distance; y < distance;)
             {
                 cy = (int)((y + pos.y) / (int)Common::ChunkSize);
 
-                for (z = -distance; z < distance;)
+                for (z = (int)-distance; z < distance;)
                 {
                     cz = (int)((z + pos.z) / (int)Common::ChunkSize);
 

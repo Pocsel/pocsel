@@ -3,7 +3,7 @@
 
 #include "common/BaseChunk.hpp"
 #include "tools/IRenderer.hpp"
-#include "client/resources/ITexture.hpp"
+#include "tools/renderers/utils/texture/ITexture.hpp"
 
 namespace Client {
     namespace Game {
@@ -28,11 +28,11 @@ namespace Client { namespace Map {
     private:
         Game::Game& _game;
         Tools::IRenderer& _renderer;
-        std::map<Uint32, std::unique_ptr<Resources::ITexture>> _textures;
+        std::map<Uint32, std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>> _textures;
         std::map<Resources::Effect*,
             std::pair<
                 std::unique_ptr<Tools::Renderers::IShaderParameter>,
-                std::map<Uint32, Resources::ITexture*>
+                std::map<Uint32, Tools::Renderers::Utils::Texture::ITexture*>
             >> _cubeTypes;
         std::map<Uint32, std::multimap<double, Chunk*>> _transparentChunks;
 
@@ -51,7 +51,7 @@ namespace Client { namespace Map {
                 throw std::runtime_error("bad id");
             return it->second->GetCurrentTexture();
         }
-        std::map<Uint32, std::unique_ptr<Resources::ITexture>> const& GetAllTextures() const { return this->_textures; }
+        std::map<Uint32, std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>> const& GetAllTextures() const { return this->_textures; }
     };
 
 }}

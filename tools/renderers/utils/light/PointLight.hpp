@@ -2,9 +2,9 @@
 #define __TOOLS_RENDERERS_UTILS_POINTLIGHT_HPP__
 
 #include "tools/IRenderer.hpp"
-#include "tools/renderers/utils/ILight.hpp"
+#include "tools/renderers/utils/light/ILight.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Light {
 
     class PointLight : public ILight
     {
@@ -29,6 +29,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         void SetParameters() const;
     };
 
-}}}
+}}}}
 
 #endif

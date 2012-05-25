@@ -45,7 +45,7 @@ namespace Tools { namespace PluginInstall {
             Tools::log << "No previous version installed, inserting into plugin table." << std::endl;
             wconn.CreateQuery("INSERT INTO plugin (build_hash, fullname, identifier) VALUES (?, ?, ?);")->
                 Bind(pluginBuildHash).Bind(pluginFullname).Bind(pluginIdentifier).ExecuteNonSelect();
-            return wconn.GetLastInsertedId();
+            return (Uint32)wconn.GetLastInsertedId();
         }
 
         void UpdateTableCubeFile(Uint32 pluginId, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)

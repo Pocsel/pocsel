@@ -1,8 +1,8 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/renderers/utils/PointLight.hpp"
+#include "tools/renderers/utils/light/PointLight.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Light {
 
     PointLight::PointLight(
         IShaderParameter& position,
@@ -24,4 +24,4 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_specularColor.Set(this->specularColor);
     }
 
-}}}
+}}}}

@@ -1,8 +1,8 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/renderers/utils/DirectionnalLight.hpp"
+#include "tools/renderers/utils/light/DirectionnalLight.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Light {
 
     DirectionnalLight::DirectionnalLight(
         IShaderParameter& direction,
@@ -24,4 +24,4 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_specularColor.Set(this->specularColor);
     }
 
-}}}
+}}}}
