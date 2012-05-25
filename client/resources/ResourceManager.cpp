@@ -4,7 +4,10 @@
 
 #include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
-#include "tools/renderers/utils/TextureAtlas.hpp"
+//#include "tools/renderers/utils/texture/TextureAtlas.hpp"
+#include "tools/renderers/utils/texture/ITexture.hpp"
+#include "tools/renderers/utils/texture/AnimatedTexture.hpp"
+#include "tools/renderers/utils/texture/Texture.hpp"
 #include "tools/window/Window.hpp"
 
 #include "common/Resource.hpp"
@@ -15,10 +18,7 @@
 #include "client/resources/CacheDatabaseProxy.hpp"
 #include "client/resources/ResourceDownloader.hpp"
 #include "client/resources/ResourceManager.hpp"
-#include "client/resources/ITexture.hpp"
-#include "client/resources/AnimatedTexture.hpp"
 #include "client/resources/Effect.hpp"
-#include "client/resources/Texture.hpp"
 #include "client/Settings.hpp"
 
 namespace {
@@ -33,14 +33,14 @@ namespace {
         {
             ilBindImage(0);
             ilDeleteImage(id);
-            throw std::runtime_error("AnimatedTexture: Can't load data");
+            throw std::runtime_error("Texture: Can't load data");
         }
         int bytesPerPixel = ilGetInteger(IL_IMAGE_BPP);
         if (bytesPerPixel != 3 && bytesPerPixel != 4)
         {
             ilBindImage(0);
             ilDeleteImage(id);
-            throw std::runtime_error("AnimatedTexture: A texture must be 24 or 32 bits per pixels.");
+            throw std::runtime_error("Texture: A texture must be 24 or 32 bits per pixels.");
         }
 
         auto size = glm::uvec2((ILuint)ilGetInteger(IL_IMAGE_WIDTH), (ILuint)ilGetInteger(IL_IMAGE_HEIGHT));
@@ -48,7 +48,7 @@ namespace {
         {
             ilBindImage(0);
             ilDeleteImage(id);
-            throw std::runtime_error("AnimatedTexture: height must be a multiple of width.");
+            throw std::runtime_error("Texture: height must be a multiple of width.");
         }
 
         auto frameSize = glm::uvec2(size.x);
@@ -80,12 +80,12 @@ namespace Client { namespace Resources {
     ResourceManager::~ResourceManager()
     {
         Tools::Renderers::ITexture2D* errTex = 0;
-        if (this->_textures.find(0) != this->_textures.end())
-            errTex = this->_textures[0];
-        for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
+        if (this->_rawTextures.find(0) != this->_rawTextures.end())
+            errTex = this->_rawTextures[0];
+        for (auto it = this->_rawTextures.begin(), ite = this->_rawTextures.end(); it != ite; ++it)
             if (it->second != errTex)
                 Tools::Delete(it->second);
-        for (auto it = this->_animatedTextures.begin(), ite = this->_animatedTextures.end(); it != ite; ++it)
+        for (auto it = this->_animatedTextureFrames.begin(), ite = this->_animatedTextureFrames.end(); it != ite; ++it)
             for (unsigned int i = 0; i < it->second.size(); ++i)
                 if (it->second[i] != errTex)
                     Tools::Delete(it->second[i]);
@@ -97,52 +97,61 @@ namespace Client { namespace Resources {
         delete errTex;
     }
 
-    Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 id)
+    std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> ResourceManager::GetTexture(Uint32 id)
     {
         auto it = this->_textures.find(id);
         if (it == this->_textures.end())
         {
             auto res = this->_database.GetResource(id);
-            if (res != 0)
-            {
-                this->_resourceToPluginId[id] = res->pluginId;
-                Tools::Renderers::ITexture2D* t = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Png, res->size, res->data).release();
-                this->_textures[id] = t;
-                return *t;
-            }
-            else
-            {
-                if (this->_textures.find(0) == this->_textures.end())
-                    this->_InitErrorTexture();
-                this->_textures[id] = this->_textures[0];
-                return *(this->_textures[id]);
-            }
-        }
-        else
-            return *it->second;
-    }
 
-    std::vector<Tools::Renderers::ITexture2D*> const& ResourceManager::GetAnimatedTexture(Uint32 id)
-    {
-        auto it = this->_animatedTextures.find(id);
-        if (it == this->_animatedTextures.end())
-        {
-            auto res = this->_database.GetResource(id);
+            std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> texture;
+
             if (res != 0)
             {
-                auto& frames = this->_animatedTextures[id];
-                InitializeFrames(this->_renderer, res->data, res->size, frames);
-                return frames;
+                if (res->type == "lua")
+                {
+                    try
+                    {
+                        auto description = this->GetScript(id);
+
+                        Tools::Lua::Interpreter i;
+                        i.DoString(description);
+                        auto const& globals = i.Globals();
+                        bool animated = globals["animated"].ToBoolean();
+                        auto animationTime = globals["animationTime"].ToNumber();
+                        auto framesTexture = globals["texture"].ToString();
+                        auto& frames = this->_animatedTextureFrames[this->GetResourceId(this->GetPluginId(id), framesTexture)];
+                        auto framesRes = this->GetResource(this->GetPluginId(id), framesTexture);
+                        InitializeFrames(this->_renderer, framesRes->data, framesRes->size, frames);
+                        auto timePerFrame = Uint64(animationTime * 1000000 / frames.size());
+
+                        texture.reset(new Tools::Renderers::Utils::Texture::AnimatedTexture(frames, timePerFrame, animated));
+                    }
+                    catch (std::exception& e)
+                    {
+                        Tools::error << "Texture: Can't load texture (error: " << e.what() << ").\n";
+                    }
+                }
+                else if (res->type == "image")
+                {
+                    auto& img = this->_rawTextures[id];
+                    img = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Png, res->size, res->data).release();
+                    texture.reset(new Tools::Renderers::Utils::Texture::Texture(*img));
+                }
+                else
+                    throw std::runtime_error("Bad resource type (remove your cache)");
+
+                this->_textures[id] = texture.release();
+                return std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(this->_textures[id]->Clone());
             }
-            else
-            {
-                if (this->_textures.find(0) == this->_textures.end())
-                    this->_InitErrorTexture();
-                this->_animatedTextures[id].push_back(this->_textures[0]);
-                return this->_animatedTextures[id];
-            }
+
+            if (this->_rawTextures.find(0) == this->_rawTextures.end())
+                this->_InitErrorTexture();
+            texture.reset(new Tools::Renderers::Utils::Texture::Texture(*(this->_rawTextures[0])));
+            this->_textures[id] = texture.release();
+            return std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(this->_textures[id]->Clone());
         }
-        return it->second;
+        return std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(it->second->Clone());
     }
 
     Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 id)
@@ -190,14 +199,9 @@ namespace Client { namespace Resources {
         return this->_database.GetResource(id);
     }
 
-    Tools::Renderers::ITexture2D& ResourceManager::GetTexture2D(Uint32 pluginId, std::string const& filename)
+    std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> ResourceManager::GetTexture(Uint32 pluginId, std::string const& filename)
     {
-        return this->GetTexture2D(this->_database.GetResourceId(pluginId, filename));
-    }
-
-    std::vector<Tools::Renderers::ITexture2D*> const& ResourceManager::GetAnimatedTexture(Uint32 pluginId, std::string const& filename)
-    {
-        return this->GetAnimatedTexture(this->_database.GetResourceId(pluginId, filename));
+        return this->GetTexture(this->_database.GetResourceId(pluginId, filename));
     }
 
     Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 pluginId, std::string const& filename)
@@ -226,29 +230,21 @@ namespace Client { namespace Resources {
         return *itEffect->second;
     }
 
-    std::unique_ptr<ITexture> ResourceManager::CreateTexture(Uint32 id)
-    {
-        auto res = this->_database.GetResource(id);
-        if (res == 0 || res->type == "image")
-            return std::unique_ptr<ITexture>(new Texture(this->GetTexture2D(id)));
-        return std::unique_ptr<ITexture>(new AnimatedTexture(this->_game, res->pluginId, this->GetScript(id)));
-    }
-
-    std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)
-    {
-        std::list<std::unique_ptr<Common::Resource>> resources;
-        std::map<Uint32, std::pair<std::size_t, void const*>> textures;
-        for (auto it = textureIds.begin(), ite = textureIds.end(); it != ite; ++it)
-        {
-            auto res = this->_database.GetResource(*it);
-            if (res == 0)
-                textures[*it] = std::pair<std::size_t, void const*>(0, (void const*)0);
-            else
-                textures[*it] = std::pair<std::size_t, void const*>(res->size, res->data);
-            resources.push_back(std::move(res));
-        }
-        return std::unique_ptr<Tools::Renderers::Utils::TextureAtlas>(new Tools::Renderers::Utils::TextureAtlas(this->_renderer, textures));
-    }
+    //std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)
+    //{
+    //    std::list<std::unique_ptr<Common::Resource>> resources;
+    //    std::map<Uint32, std::pair<std::size_t, void const*>> textures;
+    //    for (auto it = textureIds.begin(), ite = textureIds.end(); it != ite; ++it)
+    //    {
+    //        auto res = this->_database.GetResource(*it);
+    //        if (res == 0)
+    //            textures[*it] = std::pair<std::size_t, void const*>(0, (void const*)0);
+    //        else
+    //            textures[*it] = std::pair<std::size_t, void const*>(res->size, res->data);
+    //        resources.push_back(std::move(res));
+    //    }
+    //    return std::unique_ptr<Tools::Renderers::Utils::TextureAtlas>(new Tools::Renderers::Utils::TextureAtlas(this->_renderer, textures));
+    //}
 
     void ResourceManager::_InitErrorTexture()
     {
@@ -258,7 +254,7 @@ namespace Client { namespace Resources {
             255, 0, 255, 255,
             0, 0, 0, 255
         };
-        this->_textures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, glm::uvec2(2, 2)).release();
+        this->_rawTextures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, glm::uvec2(2, 2)).release();
     }
 
     void ResourceManager::LoadAllResources()

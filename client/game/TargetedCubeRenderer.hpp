@@ -1,7 +1,6 @@
 #ifndef __CLIENT_GAME_TARGETEDCUBERENDERER_HPP__
 #define __CLIENT_GAME_TARGETEDCUBERENDERER_HPP__
 
-#include "client/resources/ITexture.hpp"
 #include "common/CubePosition.hpp"
 
 namespace Tools {

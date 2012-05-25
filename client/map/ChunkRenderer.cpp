@@ -34,13 +34,13 @@ namespace Client { namespace Map {
             {
                 Uint32 textureId = cubeTypes[i].textures.ids[j];
                 if (this->_textures.find(textureId) == this->_textures.end())
-                    this->_textures[textureId] = this->_game.GetResourceManager().CreateTexture(textureId);
+                    this->_textures[textureId] = this->_game.GetResourceManager().GetTexture(textureId);
                 if (this->_cubeTypes.find(cubeTypes[i].effects.effects[j]) == this->_cubeTypes.end())
                 {
                     this->_cubeTypes[cubeTypes[i].effects.effects[j]] =
                         std::make_pair(
                             cubeTypes[i].effects.effects[j]->GetParameter("cubeTexture"),
-                            std::map<Uint32, Resources::ITexture*>());
+                            std::map<Uint32, Tools::Renderers::Utils::Texture::ITexture*>());
                 }
                 this->_cubeTypes[cubeTypes[i].effects.effects[j]].second[textureId] = this->_textures[textureId].get();
             }

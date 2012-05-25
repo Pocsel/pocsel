@@ -64,9 +64,9 @@ namespace Client { namespace Game {
         //this->_pointLights.back().diffuseColor =  glm::vec3(0.8f, 0.9f, 1.0f);
         //this->_pointLights.back().specularColor = glm::vec3(0.8f, 0.9f, 1.0f);
 
-        this->_testImage.reset(new Tools::Renderers::Utils::Image(this->_renderer));
-        this->_testShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
-        this->_testTexture = this->_testShader->GetParameter("baseTex");
+        //this->_testImage.reset(new Tools::Renderers::Utils::Image(this->_renderer));
+        //this->_testShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
+        //this->_testTexture = this->_testShader->GetParameter("baseTex");
         // XXX
     }
 
@@ -148,14 +148,14 @@ namespace Client { namespace Game {
         this->_renderer.EndDraw();
 
         // XXX
-        this->_renderer.BeginDraw2D();
-        this->_renderer.SetModelMatrix(glm::scale(256.0f, 256.0f, 1.0f) * glm::translate(0.5f, 0.5f, 0.0f));
-        do
-        {
-            this->_testShader->BeginPass();
-            this->_testImage->Render(*this->_testTexture, this->_lightRenderer->GetDirectionnalShadowMap(0));
-        } while (this->_testShader->EndPass());
-        this->_renderer.EndDraw2D();
+        //this->_renderer.BeginDraw2D();
+        //this->_renderer.SetModelMatrix(glm::scale(256.0f, 256.0f, 1.0f) * glm::translate(0.5f, 0.5f, 0.0f));
+        //do
+        //{
+        //    this->_testShader->BeginPass();
+        //    this->_testImage->Render(*this->_testTexture, this->_lightRenderer->GetDirectionnalShadowMap(0));
+        //} while (this->_testShader->EndPass());
+        //this->_renderer.EndDraw2D();
         // XXX
 
         this->_statRenderTime.End();

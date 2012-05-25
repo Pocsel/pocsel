@@ -169,7 +169,7 @@ namespace Client { namespace Map {
 
         // On récupère les textures pour y accéder plus rapidement
         auto const& textureMap = chunkRenderer.GetAllTextures();
-        std::vector<Resources::ITexture*> textures(textureMap.rbegin()->first + 1);
+        std::vector<Tools::Renderers::Utils::Texture::ITexture*> textures(textureMap.rbegin()->first + 1);
         for (auto it = textureMap.begin(), ite = textureMap.end(); it != ite; ++it)
             textures[it->first] = it->second.get();
 

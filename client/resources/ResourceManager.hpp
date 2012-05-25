@@ -12,9 +12,10 @@ namespace Tools {
     namespace Renderers {
         class IShaderProgram;
         class ITexture2D;
-        namespace Utils {
+        namespace Utils { namespace Texture {
+            class ITexture;
             class TextureAtlas;
-        }
+        }}
     }
 }
 
@@ -24,7 +25,6 @@ namespace Client {
         class Game;
     }
     namespace Resources {
-        class ITexture;
         class Effect;
     }
 }
@@ -39,13 +39,22 @@ namespace Client { namespace Resources {
         CacheDatabaseProxy _database;
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
-        std::map<Uint32 /* resourceId */, Uint32 /* pluginId */> _resourceToPluginId;
-        std::map<Uint32 /* pluginId */, std::map<std::string /* filename */, Uint32 /* resourceId */>> _resourceIds;
-        std::map<Uint32 /* pluginId */, Tools::Renderers::ITexture2D*> _textures;
-        std::map<Uint32 /* pluginId */, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextures;
-        std::map<Uint32 /* pluginId */, Tools::Renderers::IShaderProgram*> _shaders;
-        std::map<Uint32 /* pluginId */, std::map<std::string, Effect*>> _effects;
-        std::map<Uint32 /* pluginId */, std::string> _scripts;
+
+        // plugin Id => resource filename => resource Id
+        std::map<Uint32, std::map<std::string, Uint32>> _resourceIds;
+
+        // Resources (resource id => specific resource)
+        std::map<Uint32, Tools::Renderers::Utils::Texture::ITexture*> _textures;
+        std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
+        std::map<Uint32, std::map<std::string, Effect*>> _effects;
+        std::map<Uint32, std::string> _scripts;
+
+        // resource Id => plugin Id
+        std::map<Uint32, Uint32> _resourceToPluginId;
+
+        // Texture data (resource Id => renderer Texture)
+        std::map<Uint32, Tools::Renderers::ITexture2D*> _rawTextures;
+        std::map<Uint32, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextureFrames;
 
     public:
         ResourceManager(Game::Game& game,
@@ -56,21 +65,16 @@ namespace Client { namespace Resources {
                         std::string const& worldBuildHash);
         ~ResourceManager();
 
-        Tools::Renderers::ITexture2D& GetTexture2D(Uint32 id);
-        std::vector<Tools::Renderers::ITexture2D*> const& GetAnimatedTexture(Uint32 id);
+        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 id);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 id);
         std::string GetScript(Uint32 id);
         std::unique_ptr<Common::Resource> GetResource(Uint32 id);
 
-        Tools::Renderers::ITexture2D& GetTexture2D(Uint32 pluginId, std::string const& filename);
-        std::vector<Tools::Renderers::ITexture2D*> const& GetAnimatedTexture(Uint32 pluginId, std::string const& filename);
+        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 pluginId, std::string const& filename);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& filename);
         std::string GetScript(Uint32 pluginId, std::string const& filename);
         std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& filename);
         Effect& GetEffect(Uint32 pluginId, std::string const& name);
-
-        std::unique_ptr<ITexture> CreateTexture(Uint32 id);
-        std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> CreateTextureAtlas(std::list<Uint32> const& textureIds);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }
         ResourceDownloader& GetDownloader() { return this->_downloader; }
