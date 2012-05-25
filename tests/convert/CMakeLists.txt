@@ -6,6 +6,7 @@ set(src
     ${common_src}
     ${tools_base_src}
     ${tools_models_src}
+    ${tools_models_convert_src}
     ${tools_logger_src}
 )
 

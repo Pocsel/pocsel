@@ -121,6 +121,18 @@ namespace Client { namespace Game {
                 }
 
                 if (
+                        joints[i].name == "Bone"
+                   )
+                {
+                    float pi = std::atan2(0.0f, -1.0f);
+                    animatedJoint.orientation =
+                        glm::normalize(
+                                glm::angleAxis<float>(glm::degrees(phi - pi/2), 0, 1, 0)
+                                *
+                                animatedJoint.orientation
+                                );
+                }
+                if (
                         joints[i].name == "pelvis"
                         ||
                         joints[i].name == "neck"
