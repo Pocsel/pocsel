@@ -30,12 +30,10 @@ option(USE_CLANG "build application with clang" OFF)
 if (UNIX)
     if(USE_CLANG)
         set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
-        add_definitions(-std=c++11) #Enable C++0x mode
+        add_definitions(-std=c++11)
         set(CMAKE_CXX_FLAGS "-Wall -Wextra -Winvalid-pch")
         set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -UNDEBUG -msse2")
         set(CMAKE_CXX_FLAGS_RELEASE "-O4 -ffast-math -g -DNDEBUG -UDEBUG -msse2")
-        #set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O4 -DNDEBUG -UDEBUG -m32") # cross compilation x86 sur un linux x64
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
     else(USE_CLANG)
         add_definitions(-std=c++0x) #Enable C++0x mode
         set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -Winvalid-pch")
