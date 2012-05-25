@@ -6,10 +6,10 @@ namespace Common {
     class FieldValidator
     {
     public:
-        static bool IsAlNum(std::string const& str);
-        static bool IsAlNumDash(std::string const& str);
-        static bool IsAlNumUnderscore(std::string const& str);
-        static bool IsAlNumDashUnderscore(std::string const& str);
+        static bool IsAlphaNum(std::string const& str);
+        static bool IsAlphaNumDash(std::string const& str);
+        static bool IsAlphaNumUnderscore(std::string const& str);
+        static bool IsAlphaNumDashUnderscore(std::string const& str);
         static bool IsPluginIdentifier(std::string const& str);
         static bool IsWorldIdentifier(std::string const& str);
         static bool IsPluginFullname(std::string const& str);
@@ -19,7 +19,7 @@ namespace Common {
         static bool IsPluginBuildHash(std::string const& str);
         static bool IsWorldBuildHash(std::string const& str);
     private:
-        static bool _IsAlNum(std::string const& str, std::string const& allowed);
+        static bool _IsAlphaNum(std::string const& str, std::string const& allowed);
     };
 
 }

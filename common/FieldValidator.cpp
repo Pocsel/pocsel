@@ -2,34 +2,34 @@
 
 namespace Common {
 
-    bool FieldValidator::IsAlNum(std::string const& str)
+    bool FieldValidator::IsAlphaNum(std::string const& str)
     {
-        return FieldValidator::_IsAlNum(str, "");
+        return FieldValidator::_IsAlphaNum(str, "");
     }
 
-    bool FieldValidator::IsAlNumDash(std::string const& str)
+    bool FieldValidator::IsAlphaNumDash(std::string const& str)
     {
-        return FieldValidator::_IsAlNum(str, "-");
+        return FieldValidator::_IsAlphaNum(str, "-");
     }
 
-    bool FieldValidator::IsAlNumUnderscore(std::string const& str)
+    bool FieldValidator::IsAlphaNumUnderscore(std::string const& str)
     {
-        return FieldValidator::_IsAlNum(str, "_");
+        return FieldValidator::_IsAlphaNum(str, "_");
     }
 
-    bool FieldValidator::IsAlNumDashUnderscore(std::string const& str)
+    bool FieldValidator::IsAlphaNumDashUnderscore(std::string const& str)
     {
-        return FieldValidator::_IsAlNum(str, "-_");
+        return FieldValidator::_IsAlphaNum(str, "-_");
     }
 
     bool FieldValidator::IsPluginIdentifier(std::string const& str)
     {
-        return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
+        return FieldValidator::IsAlphaNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
     bool FieldValidator::IsWorldIdentifier(std::string const& str)
     {
-        return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
+        return FieldValidator::IsAlphaNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
     bool FieldValidator::IsPluginFullname(std::string const& str)
@@ -44,25 +44,25 @@ namespace Common {
 
     bool FieldValidator::IsRegistrableType(std::string const& str)
     {
-        return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
+        return FieldValidator::IsAlphaNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
     bool FieldValidator::IsMapName(std::string const& str)
     {
-        return FieldValidator::IsAlNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
+        return FieldValidator::IsAlphaNumDashUnderscore(str) && str.size() >= 1 && str.size() <= 20;
     }
 
     bool FieldValidator::IsPluginBuildHash(std::string const& str)
     {
-        return FieldValidator::IsAlNumDash(str) && str.size() >= 10 && str.size() <= 100; // regles arbitraires
+        return FieldValidator::IsAlphaNumDash(str) && str.size() >= 10 && str.size() <= 100; // regles arbitraires
     }
 
     bool FieldValidator::IsWorldBuildHash(std::string const& str)
     {
-        return FieldValidator::IsAlNumDash(str) && str.size() >= 10 && str.size() <= 100; // regles arbitraires
+        return FieldValidator::IsAlphaNumDash(str) && str.size() >= 10 && str.size() <= 100; // regles arbitraires
     }
 
-    bool FieldValidator::_IsAlNum(std::string const& str, std::string const& allowed)
+    bool FieldValidator::_IsAlphaNum(std::string const& str, std::string const& allowed)
     {
         auto it = str.begin();
         auto itEnd = str.end();

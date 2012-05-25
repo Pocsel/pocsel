@@ -2,16 +2,22 @@
 #define __TOOLS_RENDERERS_UTILS_DEFERREDSHADING_HPP__
 
 #include "tools/IRenderer.hpp"
+#include "tools/renderers/utils/texture/ITexture.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils {
 
     class Material
     {
-    public:
-        float shininess;
-        float custom1; // Paramètres custom pour les shaders
-        float custom2; // Paramètres custom pour les shaders
-        float custom3; // Paramètres custom pour les shaders
+    private:
+        float _shininess;
+        float _custom1; // Paramètres custom pour les shaders
+        float _custom2; // Paramètres custom pour les shaders
+        float _custom3; // Paramètres custom pour les shaders
+
+        std::unique_ptr<Texture::ITexture> _diffuse;
+        std::unique_ptr<Texture::ITexture> _specularMap;
+        std::unique_ptr<Texture::ITexture> _normalMap;
+
 
     };
 
@@ -23,8 +29,6 @@ namespace Tools { namespace Renderers { namespace Utils {
     public:
         DeferredShading(IRenderer& renderer);
         ~DeferredShading();
-
-        void Render(IShaderParameter& textureParameter, ITexture2D& texture);
 
     private:
         static void _InitBuffers(IRenderer& renderer);
