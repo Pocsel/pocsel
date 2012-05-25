@@ -25,13 +25,25 @@ find_package(Lua51 REQUIRED)
 find_package(Sqlite3 REQUIRED)
 find_package(ZLIB REQUIRED)
 
+option(USE_CLANG "build application with clang" OFF)
+
 if (UNIX)
-    add_definitions(-std=c++0x) #Enable C++0x mode
-    set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -Winvalid-pch")
-    set(CMAKE_CXX_CUSTOM_FLAGS_DEBUG "-g -DDEBUG -UNDEBUG -msse2")
-    set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -ffast-math -g -DNDEBUG -UDEBUG -march=native -mtune=native")
-    #set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -DNDEBUG -UDEBUG -m32") # cross compilation x86 sur un linux x64
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+    if(USE_CLANG)
+        set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+        add_definitions(-std=c++11) #Enable C++0x mode
+        set(CMAKE_CXX_FLAGS "-Wall -Wextra -Winvalid-pch")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -UNDEBUG -msse2")
+        set(CMAKE_CXX_FLAGS_RELEASE "-O4 -ffast-math -g -DNDEBUG -UDEBUG -msse2")
+        #set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O4 -DNDEBUG -UDEBUG -m32") # cross compilation x86 sur un linux x64
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
+    else(USE_CLANG)
+        add_definitions(-std=c++0x) #Enable C++0x mode
+        set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -Winvalid-pch")
+        set(CMAKE_CXX_CUSTOM_FLAGS_DEBUG "-g -DDEBUG -UNDEBUG -msse2")
+        set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -ffast-math -g -DNDEBUG -UDEBUG -msse2")
+        #set(CMAKE_CXX_CUSTOM_FLAGS_RELEASE "-O3 -DNDEBUG -UDEBUG -m32") # cross compilation x86 sur un linux x64
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+    endif(USE_CLANG)
 else (UNIX)
     set(CMAKE_CXX_CUSTOM_FLAGS "/MP")
     set(CMAKE_CXX_CUSTOM_FLAGS_DEBUG "-DDEBUG")
@@ -86,15 +98,20 @@ file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
+set(ADD_FLAGS_ONCE true)
+
 macro(enable_pch target target_src)
     list(REMOVE_ITEM ${target_src} precompiled.cpp)
     set(GCC_PCH_TARGET ${target}_gccPCH_fc)
     precompiled_header(${target_src} ALL_INCLUDES ${GCC_PCH_TARGET} precompiled ${target})
 
     if(CMAKE_COMPILER_IS_GNUCXX)
-        set(CMAKE_CXX_FLAGS "-I ${CMAKE_CURRENT_SOURCE_DIR} --include precompiled.hpp ${CMAKE_CXX_FLAGS}")
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/precompiled.hpp ${CMAKE_CURRENT_BINARY_DIR}/precompiled.hpp)
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+        if (ADD_FLAGS_ONCE)
+            set(ADD_FLAGS_ONCE false)
+            set(CMAKE_CXX_FLAGS "-I ${CMAKE_CURRENT_SOURCE_DIR} --include precompiled.hpp ${CMAKE_CXX_FLAGS}")
+            configure_file(${CMAKE_CURRENT_SOURCE_DIR}/precompiled.hpp ${CMAKE_CURRENT_BINARY_DIR}/precompiled.hpp)
+            include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+        endif()
     endif()
 endmacro()
 

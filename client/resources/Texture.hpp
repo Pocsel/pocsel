@@ -19,7 +19,7 @@ namespace Client { namespace Resources {
         Texture(Tools::Renderers::ITexture2D& texture) : _texture(&texture) {}
         virtual ~Texture() {}
 
-        virtual void Update(Uint64 totalTime) {} // totalTime in microsecond
+        virtual void Update(Uint64) {} // totalTime in microsecond
         virtual void Bind() { this->_texture->Bind(); }
         virtual void Unbind() { this->_texture->Unbind(); }
 

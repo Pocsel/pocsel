@@ -3,19 +3,9 @@
 
 #ifndef _WIN32
 
-# define GCC_VERSION (__GNUC__ * 10000 \
-                     + __GNUC_MINOR__ * 100 \
-                     + __GNUC_PATCHLEVEL__)
+# include <atomic>
 
-/* Test for GCC > 4.5.0 */
-# if GCC_VERSION >= 40500
-#  include <atomic>
-# else
-#  include <cstdatomic>
-# endif
 #else
-
-# undef GCC_VERSION
 
 #include <boost/memory_order.hpp>
 #include <boost/detail/interlocked.hpp>

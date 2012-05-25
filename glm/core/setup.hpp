@@ -8,10 +8,10 @@
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-/// 
+///
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-/// 
+///
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -96,7 +96,7 @@
 // Compiler
 
 // User defines: GLM_FORCE_COMPILER_UNKNOWN
-// TODO ? __llvm__ 
+// TODO ? __llvm__
 
 #define GLM_COMPILER_UNKNOWN		0x00000000
 
@@ -219,15 +219,15 @@
 #	if CUDA_VERSION < 3000
 #		error "GLM requires CUDA 3.0 or higher"
 #	elif CUDA_VERSION == 3000
-#		define GLM_COMPILER GLM_COMPILER_CUDA30	
+#		define GLM_COMPILER GLM_COMPILER_CUDA30
 #	elif CUDA_VERSION == 3010
-#		define GLM_COMPILER GLM_COMPILER_CUDA31	
+#		define GLM_COMPILER GLM_COMPILER_CUDA31
 #	elif CUDA_VERSION == 3020
-#		define GLM_COMPILER GLM_COMPILER_CUDA32	
+#		define GLM_COMPILER GLM_COMPILER_CUDA32
 #	elif CUDA_VERSION == 4000
-#		define GLM_COMPILER GLM_COMPILER_CUDA40	
+#		define GLM_COMPILER GLM_COMPILER_CUDA40
 #	elif CUDA_VERSION == 4010
-#		define GLM_COMPILER GLM_COMPILER_CUDA41	
+#		define GLM_COMPILER GLM_COMPILER_CUDA41
 #	elif CUDA_VERSION == 4020
 #		define GLM_COMPILER GLM_COMPILER_CUDA42
 #	else
@@ -283,7 +283,7 @@
 #		define GLM_COMPILER GLM_COMPILER_CLANG
 #   endif
 
-// G++ 
+// G++
 #elif(defined(__GNUC__) || defined(__MINGW32__))// || defined(__llvm__) || defined(__clang__)
 #   if defined (__llvm__)
 #       define GLM_COMPILER_GCC_EXTRA GLM_COMPILER_GCC_LLVM
@@ -426,7 +426,7 @@
 #	define GLM_LANG GLM_LANG_CXX98
 #else
 //  -std=c++0x or -std=gnu++0x
-#	if(((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) && defined(__GXX_EXPERIMENTAL_CXX0X__)) 
+#	if(((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) && defined(__GXX_EXPERIMENTAL_CXX0X__))
 #		define GLM_LANG GLM_LANG_CXX0X
 #	elif(((GLM_COMPILER & GLM_COMPILER_VC) == GLM_COMPILER_VC) && defined(_MSC_EXTENSIONS))
 #		define GLM_LANG GLM_LANG_CXXMS
@@ -438,7 +438,7 @@
 #		endif//(GLM_COMPILER == GLM_COMPILER_VC2010)
 #	elif((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) //&& defined(__STRICT_ANSI__))
 #		define GLM_LANG GLM_LANG_CXX98
-#	elif((GLM_COMPILER & GLM_COMPILER_CLANG) == GLM_COMPILER_CLANG) 
+#	elif((GLM_COMPILER & GLM_COMPILER_CLANG) == GLM_COMPILER_CLANG)
 #		define GLM_LANG GLM_LANG_CXX98
 #	else
 #		define GLM_LANG GLM_LANG_CXX
@@ -465,7 +465,7 @@
 #endif//GLM_MESSAGE
 
 /////////////////
-// Platform 
+// Platform
 
 // User defines: GLM_FORCE_PURE GLM_FORCE_SSE2 GLM_FORCE_AVX
 
@@ -491,14 +491,14 @@
 #		else
 #			define GLM_ARCH GLM_ARCH_SSE3
 #		endif
-#	elif(GLM_COMPILER >= GLM_COMPILER_VC2008) 
+#	elif(GLM_COMPILER >= GLM_COMPILER_VC2008)
 #		define GLM_ARCH GLM_ARCH_SSE3
 #	elif(GLM_COMPILER >= GLM_COMPILER_VC2005)
 #		define GLM_ARCH GLM_ARCH_SSE2
 #	else
 #		define GLM_ARCH GLM_ARCH_PURE
 #	endif
-#elif(GLM_COMPILER & GLM_COMPILER_LLVM_GCC)
+#elif(GLM_COMPILER & (GLM_COMPILER_LLVM_GCC | GLM_COMPILER_CLANG))
 #	if(defined(__AVX__))
 #		define GLM_ARCH GLM_ARCH_AVX
 #	elif(defined(__SSE3__))
@@ -566,7 +566,7 @@
 
 //#define GLM_FORCE_ONLY_XYZW
 #define GLM_COMPONENT_ONLY_XYZW				0 // To disable multiple vector component names access.
-#define GLM_COMPONENT_CXX98					1 //  
+#define GLM_COMPONENT_CXX98					1 //
 #define GLM_COMPONENT_CXX11					2 // To use anonymous union to provide multiple component names access for class valType. Visual C++ only.
 
 #if(GLM_SUPPORT_ANONYMOUS_UNION_OF_STRUCTURE() && !defined(GLM_FORCE_ONLY_XYZW))
@@ -605,13 +605,13 @@
 #endif//GLM_LANG
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// Qualifiers 
+// Qualifiers
 
 // User defines: GLM_FORCE_INLINE GLM_FORCE_CUDA
 
 #if(defined(GLM_FORCE_CUDA) || (GLM_COMPILER & GLM_COMPILER_CUDA))
-#   define GLM_CUDA_FUNC_DEF __device__ __host__ 
-#	define GLM_CUDA_FUNC_DECL __device__ __host__ 
+#   define GLM_CUDA_FUNC_DEF __device__ __host__
+#	define GLM_CUDA_FUNC_DECL __device__ __host__
 #else
 #   define GLM_CUDA_FUNC_DEF
 #	define GLM_CUDA_FUNC_DECL

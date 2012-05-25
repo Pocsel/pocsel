@@ -27,8 +27,7 @@ namespace Tools { namespace Window { namespace Sdl {
         Window(std::map<std::string, Tools::Window::BindAction::BindAction> const& actions,
             bool directX = false,
             glm::uvec2 const& size = glm::uvec2(800, 600),
-            bool fullscreen = false,
-            bool useShaders = true);
+            bool fullscreen = false);
         ~Window();
         virtual void Render();
         virtual Tools::IRenderer& GetRenderer() { return *this->_renderer; }

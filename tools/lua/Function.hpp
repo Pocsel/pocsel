@@ -108,11 +108,11 @@ namespace Tools { namespace Lua {
             template<class TFunc, class TArg1, class TArg2>
             static void Call(CallHelper&, TFunc func, TArg1 p1, TArg2 p2) { func(_DeRef2<TArg1, typename TFunc::first_argument_type>::Do(p1), _DeRef<TArg2>::Do(p2)); }
             template<class TFunc, class TArg1, class TArg2, class TArg3>
-            static void Call(CallHelper& helper, TFunc func, TArg1 p1, TArg2 p2, TArg3 p3) { func(_DeRef2<TArg1, typename TFunc::first_argument_type>::Do(p1), _DeRef<TArg2>::Do(p2), _DeRef<TArg3>::Do(p3)); }
+            static void Call(CallHelper&, TFunc func, TArg1 p1, TArg2 p2, TArg3 p3) { func(_DeRef2<TArg1, typename TFunc::first_argument_type>::Do(p1), _DeRef<TArg2>::Do(p2), _DeRef<TArg3>::Do(p3)); }
             template<class TFunc, class TArg1, class TArg2, class TArg3, class TArg4>
-            static void Call(CallHelper& helper, TFunc func, TArg1 p1, TArg2 p2, TArg3 p3, TArg4 p4) { func(_DeRef2<TArg1, typename TFunc::first_argument_type>::Do(p1), _DeRef<TArg2>::Do(p2), _DeRef<TArg3>::Do(p3), _DeRef<TArg4>::Do(p4)); }
+            static void Call(CallHelper&, TFunc func, TArg1 p1, TArg2 p2, TArg3 p3, TArg4 p4) { func(_DeRef2<TArg1, typename TFunc::first_argument_type>::Do(p1), _DeRef<TArg2>::Do(p2), _DeRef<TArg3>::Do(p3), _DeRef<TArg4>::Do(p4)); }
             template<class TFunc, class TArg1, class TArg2, class TArg3, class TArg4, class TArg5>
-            static void Call(CallHelper& helper, TFunc func, TArg1 p1, TArg2 p2, TArg3 p3, TArg4 p4, TArg5 p5) { func(_DeRef2<TArg1, typename TFunc::first_argument_type>::Do(p1), _DeRef<TArg2>::Do(p2), _DeRef<TArg3>::Do(p3), _DeRef<TArg4>::Do(p4), _DeRef<TArg5>::Do(p5)); }
+            static void Call(CallHelper&, TFunc func, TArg1 p1, TArg2 p2, TArg3 p3, TArg4 p4, TArg5 p5) { func(_DeRef2<TArg1, typename TFunc::first_argument_type>::Do(p1), _DeRef<TArg2>::Do(p2), _DeRef<TArg3>::Do(p3), _DeRef<TArg4>::Do(p4), _DeRef<TArg5>::Do(p5)); }
         };
 
         template<>
@@ -178,7 +178,7 @@ namespace Tools { namespace Lua {
     template<> double Ref::To<double>() const throw();
     template<> float Ref::To<float>() const throw();
     template<> std::string Ref::To<std::string>() const throw();
-    template<> inline Ref Ref::To<Ref>() const throw(std::runtime_error) { return *this; }
+    template<> inline Ref Ref::To<Ref>() const throw() { return *this; }
 
     template<class T>
         inline bool Ref::Is() const throw()

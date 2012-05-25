@@ -40,7 +40,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0));
     }
 
-    static int nbTexCoordActive = 0;
     void VertexBuffer::Bind()
     {
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, this->_id));

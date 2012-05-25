@@ -21,7 +21,7 @@ namespace Client { namespace Network {
         Uint16 GetCompleteSize() const;
         char const* GetCompleteData() const;
     protected:
-        virtual void _Resize(Uint16 target);
+        virtual void _Resize(Uint32 target);
         void _WriteId();
     };
 

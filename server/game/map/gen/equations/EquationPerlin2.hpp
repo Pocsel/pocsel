@@ -242,7 +242,7 @@ namespace Server { namespace Game { namespace Map { namespace Gen { namespace Eq
                     z0s = zctab[iz * 2];
                     z1s = zctab[iz * 2] + 1;
 
-                    if ((z1 == z0))
+                    if (z1 == z0)
                     {
                         if (x0 == x1)
                         {

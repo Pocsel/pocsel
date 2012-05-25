@@ -15,7 +15,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     public:
         ShaderParameterCg(ShaderProgramCg& program, std::string const& identifier);
-        ShaderParameterCg(ShaderProgramCg& program, CGparameter parameter);
+        ShaderParameterCg(CGparameter parameter);
         virtual ~ShaderParameterCg();
 
         virtual void Set(bool value);

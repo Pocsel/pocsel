@@ -5,14 +5,7 @@
 namespace Tools { namespace Zlib {
 
     namespace {
-
-        unsigned int _Max(unsigned int a, unsigned int b)
-        {
-            if (a >= b)
-                return a;
-            return b;
-        }
-        unsigned int _Min(unsigned int a, unsigned int b)
+        inline unsigned int _Min(unsigned int a, unsigned int b)
         {
             if (a < b)
                 return a;

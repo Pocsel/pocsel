@@ -20,6 +20,7 @@ namespace Tools {
         {
             this->_Update();
         }
+        virtual ~AlignedBox() {}
 
         glm::dvec3 const& GetMin() const { return this->_min; }
         glm::dvec3 const& GetMax() const { return this->_max; }
