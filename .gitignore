@@ -31,3 +31,4 @@ build_*
 *.manifest
 *.pch
 *.rule
+.clang_complete
