@@ -91,7 +91,6 @@ namespace Tools { namespace Renderers { namespace Utils {
                 throw std::runtime_error("FT_Get_Glyph failed (error: " + ToString(error) + ")");
             ::FT_Glyph_To_Bitmap(&glyph, ft_render_mode_normal, 0, 1);
             ::FT_BitmapGlyph bitmap_glyph = (::FT_BitmapGlyph) glyph;
-            ::FT_Bitmap& bitmap = bitmap_glyph->bitmap;
 
             totalWidth += bitmap_glyph->bitmap.width + 2;
             maxHeight = bitmap_glyph->bitmap.rows > maxHeight ? bitmap_glyph->bitmap.rows : maxHeight;
@@ -136,7 +135,9 @@ namespace Tools { namespace Renderers { namespace Utils {
 
             if (ry + bitmap_glyph->bitmap.rows + 1 > height)
             {
+#ifdef DEBUG
                 auto oldSize = textureData.size();
+#endif
                 while (ry + bitmap_glyph->bitmap.rows + 1 > height)
                     height *= 2;
                 textureData.resize(width * height * 4);

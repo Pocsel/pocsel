@@ -16,7 +16,7 @@ namespace cl {
         this->_data -= sizeof(Uint32) - 2;
     }
 
-    void UdpPacket::_Resize(Uint16 target)
+    void UdpPacket::_Resize(Uint32 target)
     {
         char* tmp = this->_data - sizeof(Uint32);
         this->_data = new char[target + sizeof(Uint32)];

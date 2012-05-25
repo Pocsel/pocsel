@@ -587,6 +587,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             size_t nbErased = this->_positionalEntities.erase(id);
             assert(nbErased == 1 && "j'ai voulu supprimer une entité positionnelle mais elle était pas dans sa map");
+            (void)nbErased; // pour le warning unused
         }
         this->_entities.erase(id);
         Tools::Delete(entity);

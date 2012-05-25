@@ -86,7 +86,7 @@ namespace Server { namespace Game {
         player->GetCurrentMap().MovePlayer(id, pos);
     }
 
-    void Game::PlayerAction(Uint32 id, Common::OrientedPosition const& pos, Common::CubePosition const& targetPos)
+    void Game::PlayerAction(Uint32 id, Common::OrientedPosition const&, Common::CubePosition const& targetPos)
     {
         auto it = this->_players.find(id);
         if (it == this->_players.end())

@@ -177,7 +177,7 @@ namespace Tools { namespace PluginInstall {
             }
         }
 
-        void UpdateTableWorld(Uint32 worldVersion, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
+        void UpdateTableWorld(Uint32 worldVersion, Tools::Database::IConnection& wconn, Tools::Database::IConnection&)
         {
             wconn.CreateQuery("UPDATE world SET version = ?;")->Bind(worldVersion).ExecuteNonSelect();
         }
@@ -310,6 +310,7 @@ namespace Tools { namespace PluginInstall {
 
     bool Uninstall(std::string const& pluginIdentifier, boost::filesystem::path const& worldFile)
     {
+        // TODO or not TODO ?
         return false;
     }
 

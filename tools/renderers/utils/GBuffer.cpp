@@ -58,8 +58,6 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void GBuffer::Render()
     {
-        auto size = glm::fvec2(this->_gbufferRenderTarget->GetSize());
-
         this->_quadModelViewProj->Set(this->_mvp, true);
         do
         {

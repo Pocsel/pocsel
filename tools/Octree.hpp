@@ -89,7 +89,7 @@ namespace Tools {
                 this->_count--;
                 return true;
             }
-            
+
             bool removed = false;
             for (int i = 0; i < 8; ++i)
                 if (this->_childs[i]->Contains(*element) == AbstractCollider::Inside && this->_childs[i]->RemoveElement(element))
@@ -127,7 +127,7 @@ namespace Tools {
                     function(*this->_elements[i]);
             else
                 for (int i = 0; i < 8; ++i)
-                    this->_childs[i]->Foreach<TFunc>(function);
+                    this->_childs[i]->template Foreach<TFunc>(function);
         }
 
         template<class TFunc>
@@ -147,10 +147,10 @@ namespace Tools {
                     switch (container.Contains(*(this->_childs[i])))
                     {
                     case AbstractCollider::Inside:
-                        this->_childs[i]->Foreach<TFunc>(function);
+                        this->_childs[i]->template Foreach<TFunc>(function);
                         break;
                     case AbstractCollider::Intersecting:
-                        this->_childs[i]->ForeachIn<TFunc>(container, function);
+                        this->_childs[i]->template ForeachIn<TFunc>(container, function);
                         break;
                     case AbstractCollider::Outside:
                         break;
@@ -178,10 +178,10 @@ namespace Tools {
                         case AbstractCollider::Inside:
                             break;
                         case AbstractCollider::Intersecting:
-                            this->_childs[i]->ForeachOut<TFunc>(container, function);
+                            this->_childs[i]->template ForeachOut<TFunc>(container, function);
                             break;
                         case AbstractCollider::Outside:
-                            this->_childs[i]->Foreach<TFunc>(function);
+                            this->_childs[i]->template Foreach<TFunc>(function);
                             break;
                         }
             }

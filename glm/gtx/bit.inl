@@ -27,8 +27,8 @@ namespace glm
 	template <typename genIType>
 	GLM_FUNC_QUALIFIER genIType extractField
 	(
-		half const & value, 
-		genIType const & first, 
+		half const & value,
+		genIType const & first,
 		genIType const & count
 	)
 	{
@@ -39,8 +39,8 @@ namespace glm
 	template <typename genIType>
 	GLM_FUNC_QUALIFIER genIType extractField
 	(
-		float const & value, 
-		genIType const & first, 
+		float const & value,
+		genIType const & first,
 		genIType const & count
 	)
 	{
@@ -51,8 +51,8 @@ namespace glm
 	template <typename genIType>
 	GLM_FUNC_QUALIFIER genIType extractField
 	(
-		double const & value, 
-		genIType const & first, 
+		double const & value,
+		genIType const & first,
 		genIType const & count
 	)
 	{
@@ -63,8 +63,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER genIUType extractField
 	(
-		genIUType const & Value, 
-		sizeType const & First, 
+		genIUType const & Value,
+		sizeType const & First,
 		sizeType const & Count
 	)
 	{
@@ -81,8 +81,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec2<genIUType> extractField
 	(
-		detail::tvec2<genIUType> const & value, 
-		sizeType const & first, 
+		detail::tvec2<genIUType> const & value,
+		sizeType const & first,
 		sizeType const & count
 	)
 	{
@@ -94,8 +94,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec3<genIUType> extractField
 	(
-		detail::tvec3<genIUType> const & value, 
-		sizeType const & first, 
+		detail::tvec3<genIUType> const & value,
+		sizeType const & first,
 		sizeType const & count
 	)
 	{
@@ -108,8 +108,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec4<genIUType> extractField
 	(
-		detail::tvec4<genIUType> const & value, 
-		sizeType const & first, 
+		detail::tvec4<genIUType> const & value,
+		sizeType const & first,
 		sizeType const & count
 	)
 	{
@@ -123,8 +123,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec2<genIUType> extractField
 	(
-		detail::tvec2<genIUType> const & value, 
-		detail::tvec2<sizeType> const & first, 
+		detail::tvec2<genIUType> const & value,
+		detail::tvec2<sizeType> const & first,
 		detail::tvec2<sizeType> const & count
 	)
 	{
@@ -136,8 +136,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec3<genIUType> extractField
 	(
-		detail::tvec3<genIUType> const & value, 
-		detail::tvec3<sizeType> const & first, 
+		detail::tvec3<genIUType> const & value,
+		detail::tvec3<sizeType> const & first,
 		detail::tvec3<sizeType> const & count
 	)
 	{
@@ -150,8 +150,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec4<genIUType> extractField
 	(
-		detail::tvec4<genIUType> const & value, 
-		detail::tvec4<sizeType> const & first, 
+		detail::tvec4<genIUType> const & value,
+		detail::tvec4<sizeType> const & first,
 		detail::tvec4<sizeType> const & count
 	)
 	{
@@ -165,8 +165,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec2<genIUType> extractField
 	(
-		genIUType const & value, 
-		detail::tvec2<sizeType> const & first, 
+		genIUType const & value,
+		detail::tvec2<sizeType> const & first,
 		detail::tvec2<sizeType> const & count
 	)
 	{
@@ -178,8 +178,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec3<genIUType> extractField
 	(
-		genIUType const & value, 
-		detail::tvec3<sizeType> const & first, 
+		genIUType const & value,
+		detail::tvec3<sizeType> const & first,
 		detail::tvec3<sizeType> const & count
 	)
 	{
@@ -192,8 +192,8 @@ namespace glm
 	template <typename genIUType, typename sizeType>
 	GLM_FUNC_QUALIFIER detail::tvec4<genIUType> extractField
 	(
-		genIUType const & value, 
-		detail::tvec4<sizeType> const & first, 
+		genIUType const & value,
+		detail::tvec4<sizeType> const & first,
 		detail::tvec4<sizeType> const & count
 	)
 	{
@@ -483,7 +483,7 @@ namespace glm
 	template <typename valType>
 	GLM_FUNC_QUALIFIER detail::tvec2<valType> bitRotateRight
 	(
-		detail::tvec2<valType> const & Value, 
+		detail::tvec2<valType> const & Value,
 		std::size_t Shift
 	)
 	{
@@ -495,7 +495,7 @@ namespace glm
 	template <typename valType>
 	GLM_FUNC_QUALIFIER detail::tvec3<valType> bitRotateRight
 	(
-		detail::tvec3<valType> const & Value, 
+		detail::tvec3<valType> const & Value,
 		std::size_t Shift
 	)
 	{
@@ -508,7 +508,7 @@ namespace glm
 	template <typename valType>
 	GLM_FUNC_QUALIFIER detail::tvec4<valType> bitRotateRight
 	(
-		detail::tvec4<valType> const & Value, 
+		detail::tvec4<valType> const & Value,
 		std::size_t Shift
 	)
 	{
@@ -531,7 +531,7 @@ namespace glm
 	template <typename valType>
 	GLM_FUNC_QUALIFIER detail::tvec2<valType> bitRotateLeft
 	(
-		detail::tvec2<valType> const & Value, 
+		detail::tvec2<valType> const & Value,
 		std::size_t Shift
 	)
 	{
@@ -543,7 +543,7 @@ namespace glm
 	template <typename valType>
 	GLM_FUNC_QUALIFIER detail::tvec3<valType> bitRotateLeft
 	(
-		detail::tvec3<valType> const & Value, 
+		detail::tvec3<valType> const & Value,
 		std::size_t Shift
 	)
 	{
@@ -556,7 +556,7 @@ namespace glm
 	template <typename valType>
 	GLM_FUNC_QUALIFIER detail::tvec4<valType> bitRotateLeft
 	(
-		detail::tvec4<valType> const & Value, 
+		detail::tvec4<valType> const & Value,
 		std::size_t Shift
 	)
 	{
@@ -571,15 +571,16 @@ namespace glm
 	GLM_FUNC_QUALIFIER genIUType fillBitfieldWithOne
 	(
 		genIUType const & Value,
-		int const & FromBit, 
+		int const & FromBit,
 		int const & ToBit
 	)
 	{
 		assert(FromBit <= ToBit);
+        (void)FromBit;
 		assert(ToBit <= sizeof(genIUType) * std::size_t(8));
 
 		genIUType Result = Value;
-		for(std::size_t i = 0; i <= ToBit; ++i)
+		for(int i = 0; i <= ToBit; ++i)
 			Result |= (1 << i);
 		return Result;
 	}
@@ -588,15 +589,16 @@ namespace glm
 	GLM_FUNC_QUALIFIER genIUType fillBitfieldWithZero
 	(
 		genIUType const & Value,
-		int const & FromBit, 
+		int const & FromBit,
 		int const & ToBit
 	)
 	{
 		assert(FromBit <= ToBit);
+        (void)FromBit;
 		assert(ToBit <= sizeof(genIUType) * std::size_t(8));
 
 		genIUType Result = Value;
-		for(std::size_t i = 0; i <= ToBit; ++i)
+		for(int i = 0; i <= ToBit; ++i)
 			Result &= ~(1 << i);
 		return Result;
 	}

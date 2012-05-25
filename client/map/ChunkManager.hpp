@@ -35,6 +35,7 @@ namespace Client { namespace Map {
                 chunk(std::move(chunk))
             {
             }
+            virtual ~ChunkNode() {}
         };
 
     private:

@@ -500,7 +500,7 @@ namespace Tools { namespace Models { namespace Convert {
     }
     template<class T> inline void endianswap(T *buf, int len) { for(T *end = &buf[len]; buf < end; buf++) *buf = endianswap(*buf); }
     template<class T> inline T endiansame(T n) { return n; }
-    template<class T> inline void endiansame(T *buf, int len) {}
+    template<class T> inline void endiansame(T *, int) {}
     template<class T> inline T lilswap(T n) { return *(const uchar *)&islittleendian ? n : endianswap(n); }
     template<class T> inline void lilswap(T *buf, int len) { if(!*(const uchar *)&islittleendian) endianswap(buf, len); }
     template<class T> inline T bigswap(T n) { return *(const uchar *)&islittleendian ? endianswap(n) : n; }
