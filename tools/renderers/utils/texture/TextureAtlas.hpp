@@ -4,7 +4,7 @@
 #include "tools/IRenderer.hpp"
 #include "tools/Vector3.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Texture {
 
     class TextureAtlas
     {
@@ -32,6 +32,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         }
     };
 
-}}}
+}}}}
 
 #endif

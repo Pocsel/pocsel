@@ -243,7 +243,7 @@ namespace sv {
         {
             packet->Read(id);
         }
-        catch (std::exception& e)
+        catch (std::exception&)
         {
             std::cout << "ERROR: could not read udp packet\n";
             return;

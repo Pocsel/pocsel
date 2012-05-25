@@ -359,7 +359,7 @@ namespace Server { namespace Game { namespace Engine {
                 Uint32 entityId = row->GetUint32(0);
                 Uint32 pluginId = row->GetUint32(1);
                 std::string entityName = row->GetString(2);
-                bool disabled = row->GetUint32(3);
+                bool disabled = row->GetUint32(3) == 1;
                 Common::Position pos(row->GetDouble(5), row->GetDouble(6), row->GetDouble(7));
                 try
                 {
@@ -404,7 +404,7 @@ namespace Server { namespace Game { namespace Engine {
                 std::string entityName = row->GetString(1);
                 Uint32 spawnerId = row->GetUint32(3);
                 Uint32 notificationCallbackId = row->GetUint32(4);
-                bool hasPosition = row->GetUint32(5);
+                bool hasPosition = row->GetUint32(5) == 1;
                 Common::Position pos(row->GetDouble(6), row->GetDouble(7), row->GetDouble(8));
                 try
                 {

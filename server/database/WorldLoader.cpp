@@ -240,7 +240,7 @@ namespace Server { namespace Database {
             auto id = this->_connection.GetLastInsertedId();
             if (id >= 256 * 256) // XXX
                 throw std::runtime_error("too many types of cubes to load, you should uninstall a plugin");
-            return id;
+            return (Uint16)id;
         }
     }
 

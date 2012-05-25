@@ -121,7 +121,7 @@ namespace cl {
                 this->_udpStatus.canSend = true;
             }
         }
-        catch (std::exception& e)
+        catch (std::exception&)
         {
             Tools::error << "Exception while binding to (UDP) : " <<
                 this->_socket.local_endpoint().address() <<

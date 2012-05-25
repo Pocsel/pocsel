@@ -2,9 +2,9 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 
-#include "tools/renderers/utils/TextureAtlas.hpp"
+#include "tools/renderers/utils/texture/TextureAtlas.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Texture {
 
     namespace {
         unsigned int NextPowerOfTwo(unsigned int n)
@@ -119,4 +119,4 @@ namespace Tools { namespace Renderers { namespace Utils {
         Tools::Delete(this->_texture);
     }
 
-}}}
+}}}}
