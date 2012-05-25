@@ -1,4 +1,5 @@
 #include "client/game/engine/Doodad.hpp"
+#include "tools/lua/Interpreter.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 

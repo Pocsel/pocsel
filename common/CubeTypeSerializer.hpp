@@ -16,6 +16,7 @@ namespace Common {
             p.Read(ptr->id);
             p.Read(ptr->name);
             p.Read(ptr->material);
+            p.Read(ptr->pluginId);
             p.Read(ptr->solid);
 
             return ptr;
@@ -26,6 +27,7 @@ namespace Common {
             p.Write(cube.id);
             p.Write(cube.name);
             p.Write(cube.material);
+            p.Write(cube.pluginId);
             p.Write(cube.solid);
         }
 

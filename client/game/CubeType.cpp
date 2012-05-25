@@ -1,10 +1,5 @@
 #include "client/precompiled.hpp"
 
-#include "tools/lua/CallHelper.hpp"
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/MetaTable.hpp"
-
-#include "client/Client.hpp"
 #include "client/game/CubeType.hpp"
 #include "client/resources/Effect.hpp"
 #include "client/resources/ResourceManager.hpp"
@@ -25,29 +20,26 @@ namespace Client { namespace Game {
     {
     }
 
-    void CubeType::Load(Resources::ResourceManager& resourceMgr, Tools::Lua::Interpreter& interpreter)
+    void CubeType::LoadMaterial(Resources::ResourceManager& resourceMgr, Tools::Lua::Ref const& prototype)
     {
-        Uint32 pluginId = resourceMgr.GetPluginId(this->visualEffect);
-        interpreter.DoString(resourceMgr.GetScript(this->visualEffect));
+        auto textures = prototype["textures"];
+        this->textures.top = resourceMgr.GetResourceId(this->pluginId, textures["top"].Check<std::string>());
+        this->textures.bottom = resourceMgr.GetResourceId(this->pluginId, textures["bottom"].Check<std::string>());
+        this->textures.right = resourceMgr.GetResourceId(this->pluginId, textures["right"].Check<std::string>());
+        this->textures.left = resourceMgr.GetResourceId(this->pluginId, textures["left"].Check<std::string>());
+        this->textures.front = resourceMgr.GetResourceId(this->pluginId, textures["front"].Check<std::string>());
+        this->textures.back = resourceMgr.GetResourceId(this->pluginId, textures["back"].Check<std::string>());
 
-        auto textures = interpreter.Globals()["textures"];
-        this->textures.top = resourceMgr.GetResourceId(pluginId, textures["top"].Check<std::string>());
-        this->textures.bottom = resourceMgr.GetResourceId(pluginId, textures["bottom"].Check<std::string>());
-        this->textures.right = resourceMgr.GetResourceId(pluginId, textures["right"].Check<std::string>());
-        this->textures.left = resourceMgr.GetResourceId(pluginId, textures["left"].Check<std::string>());
-        this->textures.front = resourceMgr.GetResourceId(pluginId, textures["front"].Check<std::string>());
-        this->textures.back = resourceMgr.GetResourceId(pluginId, textures["back"].Check<std::string>());
-
-        auto effects = interpreter.Globals()["effects"];
-        this->effects.top = &resourceMgr.GetEffect(pluginId, effects["top"].Check<std::string>());
-        this->effects.bottom = &resourceMgr.GetEffect(pluginId, effects["bottom"].Check<std::string>());
-        this->effects.right = &resourceMgr.GetEffect(pluginId, effects["right"].Check<std::string>());
-        this->effects.left = &resourceMgr.GetEffect(pluginId, effects["left"].Check<std::string>());
-        this->effects.front = &resourceMgr.GetEffect(pluginId, effects["front"].Check<std::string>());
-        this->effects.back = &resourceMgr.GetEffect(pluginId, effects["back"].Check<std::string>());
+        auto effects = prototype["effects"];
+        this->effects.top = &resourceMgr.GetEffect(this->pluginId, effects["top"].Check<std::string>());
+        this->effects.bottom = &resourceMgr.GetEffect(this->pluginId, effects["bottom"].Check<std::string>());
+        this->effects.right = &resourceMgr.GetEffect(this->pluginId, effects["right"].Check<std::string>());
+        this->effects.left = &resourceMgr.GetEffect(this->pluginId, effects["left"].Check<std::string>());
+        this->effects.front = &resourceMgr.GetEffect(this->pluginId, effects["front"].Check<std::string>());
+        this->effects.back = &resourceMgr.GetEffect(this->pluginId, effects["back"].Check<std::string>());
 
         // TODO !
-        //auto effectParameters = interpreter.Globals()["effectParameters"];
+        //auto effectParameters = prototype["effectParameters"];
         //this->effectParameters.top = _CreateEffectParameter(effectParameters["top"]);
         //this->effectParameters.bottom = _CreateEffectParameter(effectParameters["bottom"]);
         //this->effectParameters.right = _CreateEffectParameter(effectParameters["right"]);

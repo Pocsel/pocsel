@@ -112,10 +112,10 @@ namespace Server { namespace Network {
         {
             ptr->Write(resource.pluginId);
             ptr->Write(resource.type);
-            ptr->Write(resource.filename);
+            ptr->Write(resource.name);
             ptr->Write(resource.size);
             packetSize -= 2 * sizeof(Uint32) - 2 * sizeof(Uint16);
-            packetSize -= static_cast<Uint32>(resource.filename.size() - resource.type.size()); // boarg
+            packetSize -= static_cast<Uint32>(resource.name.size() - resource.type.size()); // boarg
             if (packetSize >= ((Uint16) -1))
                 throw std::runtime_error("overflow");
         }

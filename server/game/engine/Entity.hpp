@@ -19,7 +19,7 @@ namespace Server { namespace Game { namespace Engine {
         virtual ~Entity();
         EntityType const& GetType() const { return *this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
-        Tools::Lua::Ref const& GetStorage() const;
+        Tools::Lua::Ref GetStorage() const;
         void SetStorage(Tools::Lua::Ref const& storage);
         void Disable(Tools::Lua::Interpreter& interpreter);
         void Enable(Tools::Lua::Interpreter& interpreter);

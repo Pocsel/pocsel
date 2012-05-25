@@ -16,6 +16,9 @@ namespace Tools {
             class TextureAtlas;
         }
     }
+    namespace Lua {
+        class CallHelper;
+    }
 }
 
 namespace Client {
@@ -89,11 +92,12 @@ namespace Client { namespace Resources {
             return it2 != it->second.end() ? it2->second : 0;
         }
 
-        void LoadAllResources();
+        void BuildResourceIndex();
+        void RegisterLuaFunctions();
 
     private:
         void _InitErrorTexture();
-        void _LoadEffects();
+        void _ApiRegisterEffect(Tools::Lua::CallHelper& helper);
     };
 
 }}

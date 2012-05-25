@@ -26,6 +26,7 @@ namespace Client { namespace Game { namespace Engine {
     public:
         Engine(Game& game);
         ~Engine();
+        void LoadLuaScripts();
         Game& GetGame() { return this->_game; }
         DoodadManager& GetDoodadManager() { return *this->_doodadManager; }
         Uint32 GetRunningPluginId() { return this->_overriddenPluginId ? this->_overriddenPluginId : this->_doodadManager->GetRunningPluginId(); }

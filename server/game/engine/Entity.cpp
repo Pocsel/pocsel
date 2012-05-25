@@ -16,7 +16,7 @@ namespace Server { namespace Game { namespace Engine {
     {
     }
 
-    Tools::Lua::Ref const& Entity::GetStorage() const
+    Tools::Lua::Ref Entity::GetStorage() const
     {
         if (this->_self.IsTable()) // toujours vrai en théorie, sauf si le moddeur fait nimp avec self
             return this->_self["storage"];

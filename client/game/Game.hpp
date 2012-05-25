@@ -45,7 +45,7 @@ namespace Client { namespace Game {
     private:
         Client& _client;
         Tools::IRenderer& _renderer;
-        CubeTypeManager _cubeTypeManager;
+        CubeTypeManager* _cubeTypeManager;
         Resources::ResourceManager* _resourceManager;
         Map::Map* _map;
         ItemManager* _itemManager;
@@ -69,19 +69,20 @@ namespace Client { namespace Game {
         ~Game();
 
         void TeleportPlayer(std::string const& map, Common::Position const& position);
+        void LoadResources();
         void Update();
         void Render();
 
         Client& GetClient() { return this->_client; }
         Tools::IRenderer& GetRenderer() { return this->_renderer; }
         Player& GetPlayer() { return *this->_player; }
-        CubeTypeManager& GetCubeTypeManager() { return this->_cubeTypeManager; }
+        CubeTypeManager& GetCubeTypeManager() { return *this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
         ItemManager& GetItemManager() { return *this->_itemManager; }
         Map::Map& GetMap() { return *this->_map; }
         Tools::Lua::Interpreter& GetInterpreter() { return this->_engine->GetInterpreter(); }
         Engine::Engine& GetEngine() { return *this->_engine; }
-        float GetLoadingProgression() const { return (this->_cubeTypeManager.GetLoadingProgression() + this->_resourceManager->GetLoadingProgression()) / 2.0f; }
+        float GetLoadingProgression() const { return (this->_cubeTypeManager->GetLoadingProgression() + this->_resourceManager->GetLoadingProgression()) / 2.0f; }
     private:
         void _RenderScene(glm::dmat4 viewProjection);
     };

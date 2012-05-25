@@ -1,10 +1,9 @@
-Client.Effect.Create{
-    name = "water",
+Client.Effect.Register{
+    effectName = "water",
     resource = "cubes/water/effect.fx",
-    initObject = function(effect, object)
-        -- effect.id = current shader
+    initObject = function(self)
     end,
-    update = function(effect, object)
-        -- effect.id = current shader
+    update = function(self)
     end,
+    render = nil,
 }

@@ -1,15 +1,15 @@
-Client.CubeMaterial.Register{
+Client.CubeMaterial.Register {
 
-    cubeMaterialName = "Water"
+    cubeMaterialName = "Iron",
 
     textures = {
-        top = "cubes/water/texture.lua",
-        bottom = "cubes/water/texture.lua",
-        left = "cubes/water/texture.lua",
-        right = "cubes/water/texture.lua",
-        front = "cubes/water/texture.lua",
-        back = "cubes/water/texture.lua",
-    }
+        top = "cubes/iron/top.png",
+        bottom = "cubes/iron/bottom.png",
+        left = "cubes/iron/side.png",
+        right = "cubes/iron/side.png",
+        front = "cubes/iron/side.png",
+        back = "cubes/iron/side.png",
+    },
 
     effects = {
         top = "BaseChunk",
@@ -18,7 +18,7 @@ Client.CubeMaterial.Register{
         right = "BaseChunk",
         front = "BaseChunk",
         back = "BaseChunk",
-    }
+    },
 
     effectParameters = {
         top = { diffuseColor = Utils.Color.Create(0x777777) },

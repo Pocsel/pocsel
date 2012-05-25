@@ -16,6 +16,8 @@ namespace Client { namespace Game { namespace Engine {
     public:
         DoodadType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype);
         Tools::Lua::Ref const& GetPrototype() const { return this->_prototype; }
+        Uint32 GetPluginId() const { return this->_pluginId; }
+        std::string const& GetName() const { return this->_name; }
     };
 
 }}}

@@ -1,7 +1,7 @@
-Client.Effect.Create{
-    name = "BaseChunk",
+Client.Effect.Register{
+    effectName = "BaseChunk",
     resource = "effects/BaseChunk.fx",
     initObject = nil,
     update = nil,
-	render = nil
+	render = nil,
 }

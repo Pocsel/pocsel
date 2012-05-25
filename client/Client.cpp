@@ -107,7 +107,7 @@ namespace Client {
                 {
                     this->_state = WaitingPosition;
                     this->_network.SendPacket(Network::PacketCreator::Settings(this->_settings));
-                    this->_game->GetResourceManager().LoadAllResources();
+                    this->_game->LoadResources();
                 }
                 break;
             case WaitingPosition:
@@ -120,7 +120,7 @@ namespace Client {
                 this->_game->GetMap().GetChunkManager().UpdateLoading();
                 if (this->_game->GetMap().GetLoadingProgression() >= 1.0f)
                 {
-                    Tools::debug << "Run !\n";
+                    Tools::debug << "Run!\n";
                     this->_state = Running;
                     this->_network.SendPacket(Network::PacketCreator::TeleportOk());
                 }

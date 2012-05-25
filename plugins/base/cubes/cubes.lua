@@ -1,5 +1,5 @@
 Server.Cube.Register{
-	cubeName = "dirt",
+	cubeName = "Dirt",
 	transparent = false,
 	solid = true,
     material = "Dirt",
@@ -7,7 +7,7 @@ Server.Cube.Register{
 }
 
 Server.Cube.Register{
-	cubeName = "grass",
+	cubeName = "Grass",
 	transparent = false,
 	solid = true,
     material = "Grass",
@@ -15,7 +15,7 @@ Server.Cube.Register{
 }
 
 Server.Cube.Register{
-	cubeName = "iron",
+	cubeName = "Iron",
 	transparent = false,
 	solid = true,
 	material = "Iron",
@@ -23,7 +23,7 @@ Server.Cube.Register{
 }
 
 Server.Cube.Register{
-	cubeName = "water",
+	cubeName = "Water",
 	transparent = true,
 	solid = false,
 	material = "Water",
@@ -31,7 +31,7 @@ Server.Cube.Register{
 }
 
 Server.Cube.Register{
-	cubeName = "rock",
+	cubeName = "Rock",
 	transparent = false,
 	solid = true,
     material = "Rock",
