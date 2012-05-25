@@ -65,7 +65,7 @@ height_value = 0
 
 cubes = {
 
-    void = {
+    Void = {
         {
             priority = 0,
             validators = {
@@ -98,7 +98,7 @@ cubes = {
         }
     },
 
-    water = {
+    Water = {
         {
             priority = 1,
             validators = {
@@ -120,7 +120,7 @@ cubes = {
 
         }
     },
-    grass = {
+    Grass = {
         {
             priority = 6,
             validators = {
@@ -138,7 +138,7 @@ cubes = {
             }
         }
     },
-    dirt = {
+    Dirt = {
         {
             priority = 7,
             validators = {
@@ -151,7 +151,7 @@ cubes = {
             }
         }
     },
-    iron = {
+    Iron = {
         {
             priority = 8,
             validators = {
@@ -164,7 +164,7 @@ cubes = {
             }
         }
     },
-    rock = {
+    Rock = {
         {
             priority = 9,
             validators = {

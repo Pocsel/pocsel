@@ -9,6 +9,7 @@
 #include "tools/renderers/utils/texture/AnimatedTexture.hpp"
 #include "tools/renderers/utils/texture/Texture.hpp"
 #include "tools/window/Window.hpp"
+#include "tools/lua/Interpreter.hpp"
 
 #include "common/Resource.hpp"
 
@@ -22,6 +23,7 @@
 #include "client/Settings.hpp"
 
 namespace {
+
     inline void InitializeFrames(Tools::IRenderer& renderer, void const* data, std::size_t dataSize, std::vector<Tools::Renderers::ITexture2D*>& frames)
     {
         ilDisable(IL_BLIT_BLEND);
@@ -63,6 +65,7 @@ namespace {
         ilBindImage(0);
         ilDeleteImage(id);
     }
+
 }
 
 namespace Client { namespace Resources {
@@ -199,24 +202,24 @@ namespace Client { namespace Resources {
         return this->_database.GetResource(id);
     }
 
-    std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> ResourceManager::GetTexture(Uint32 pluginId, std::string const& filename)
+    std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> ResourceManager::GetTexture(Uint32 pluginId, std::string const& name)
     {
-        return this->GetTexture(this->_database.GetResourceId(pluginId, filename));
+        return this->GetTexture(this->_database.GetResourceId(pluginId, name));
     }
 
-    Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 pluginId, std::string const& filename)
+    Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 pluginId, std::string const& name)
     {
-        return this->GetShader(this->_database.GetResourceId(pluginId, filename));
+        return this->GetShader(this->_database.GetResourceId(pluginId, name));
     }
 
-    std::string ResourceManager::GetScript(Uint32 pluginId, std::string const& filename)
+    std::string ResourceManager::GetScript(Uint32 pluginId, std::string const& name)
     {
-        return this->GetScript(this->_database.GetResourceId(pluginId, filename));
+        return this->GetScript(this->_database.GetResourceId(pluginId, name));
     }
 
-    std::unique_ptr<Common::Resource> ResourceManager::GetResource(Uint32 pluginId, std::string const& filename)
+    std::unique_ptr<Common::Resource> ResourceManager::GetResource(Uint32 pluginId, std::string const& name)
     {
-        return this->_database.GetResource(this->_database.GetResourceId(pluginId, filename));
+        return this->_database.GetResource(this->_database.GetResourceId(pluginId, name));
     }
 
     Effect& ResourceManager::GetEffect(Uint32 pluginId, std::string const& name)
@@ -257,38 +260,31 @@ namespace Client { namespace Resources {
         this->_rawTextures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, glm::uvec2(2, 2)).release();
     }
 
-    void ResourceManager::LoadAllResources()
+    void ResourceManager::BuildResourceIndex()
     {
-        this->_LoadEffects();
         auto const& resources = this->_database.GetAllResources("%");
         for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
         {
-            this->_resourceIds[(*it)->pluginId][(*it)->filename] = (*it)->id;
+            this->_resourceIds[(*it)->pluginId][(*it)->name] = (*it)->id;
             this->_resourceToPluginId[(*it)->id] = (*it)->pluginId;
         }
-        this->_game.GetCubeTypeManager().LoadResources();
     }
 
-    void ResourceManager::_LoadEffects()
+    void ResourceManager::RegisterLuaFunctions()
     {
-        auto const& resources = this->_database.GetAllResources("lua");
+        auto effectNs = this->_game.GetInterpreter().Globals().GetTable("Client").GetTable("Effect");
+        effectNs.Set("Register", this->_game.GetInterpreter().MakeFunction(
+                    std::bind(&ResourceManager::_ApiRegisterEffect, this, std::placeholders::_1)));
+    }
 
-        auto& interpreter = this->_game.GetInterpreter();
-        auto effectNs = interpreter.Globals().GetTable("Client").GetTable("Effect");
-
-        for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
-        {
-            auto createEffect =
-                [this, &it](Tools::Lua::CallHelper& helper)
-                {
-                    auto pluginId = (*it)->pluginId;
-                    auto effect = new Effect(this->_game, helper.PopArg(), pluginId);
-                    this->_effects[pluginId][effect->GetName()] = effect;
-                    Tools::log << "Register effect \"" << effect->GetName() << "\" (plugin: " << pluginId << ")." << std::endl;
-                };
-            effectNs.Set("Create", interpreter.MakeFunction(createEffect));
-            interpreter.DoString(std::string((char const*)(*it)->data, (*it)->size));
-        }
+    void ResourceManager::_ApiRegisterEffect(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 pluginId = this->_game.GetEngine().GetRunningPluginId();
+        if (!pluginId)
+            throw std::runtime_error("CLient.Effect.Register: Could not determine currently running plugin, aborting registration");
+        auto effect = new Effect(this->_game, helper.PopArg(), pluginId);
+        this->_effects[pluginId][effect->GetName()] = effect;
+        Tools::log << "Effect \"" << effect->GetName() << "\" registered (plugin: " << pluginId << ")." << std::endl;
     }
 
 }}

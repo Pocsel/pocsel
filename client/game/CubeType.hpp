@@ -2,6 +2,7 @@
 #define __CLIENT_GAME_CUBETYPE_HPP__
 
 #include "common/CubeType.hpp"
+#include "tools/lua/Ref.hpp"
 
 namespace Tools { namespace Lua {
     class Interpreter;
@@ -70,7 +71,7 @@ namespace Client { namespace Game {
         //} effectParameters;
 
         explicit CubeType(Common::CubeType const& cubeType);
-        void Load(Resources::ResourceManager& resourceMgr, Tools::Lua::Interpreter& interpreter);
+        void LoadMaterial(Resources::ResourceManager& resourceMgr, Tools::Lua::Ref const& prototype);
     };
 
 }}

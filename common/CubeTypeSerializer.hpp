@@ -15,9 +15,9 @@ namespace Common {
 
             p.Read(ptr->id);
             p.Read(ptr->name);
-            p.Read(ptr->visualEffect);
+            p.Read(ptr->material);
+            p.Read(ptr->pluginId);
             p.Read(ptr->solid);
-            p.Read(ptr->transparent);
 
             return ptr;
         }
@@ -26,9 +26,9 @@ namespace Common {
         {
             p.Write(cube.id);
             p.Write(cube.name);
-            p.Write(cube.visualEffect);
+            p.Write(cube.material);
+            p.Write(cube.pluginId);
             p.Write(cube.solid);
-            p.Write(cube.transparent);
         }
 
     private:

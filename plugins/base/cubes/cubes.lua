@@ -1,39 +1,39 @@
-Server.CubeType.Register{
-	name = "dirt",
+Server.Cube.Register{
+	cubeName = "Dirt",
 	transparent = false,
 	solid = true,
-	visualEffect = Server.Resource.GetEffect("cubes/dirt/visual.lua"),
+    material = "Dirt",
 	rotation = 1 + 2 + 4,
 }
 
-Server.CubeType.Register{
-	name = "grass",
+Server.Cube.Register{
+	cubeName = "Grass",
 	transparent = false,
 	solid = true,
-	visualEffect = Server.Resource.GetEffect("cubes/grass/visual.lua"),
+    material = "Grass",
 	rotation = 0,
 }
 
-Server.CubeType.Register{
-	name = "iron",
+Server.Cube.Register{
+	cubeName = "Iron",
 	transparent = false,
 	solid = true,
-	visualEffect = Server.Resource.GetEffect("cubes/iron/visual.lua"),
+	material = "Iron",
 	rotation = 0,
 }
 
-Server.CubeType.Register{
-	name = "water",
+Server.Cube.Register{
+	cubeName = "Water",
 	transparent = true,
 	solid = false,
-	visualEffect = Server.Resource.GetEffect("cubes/water/visual.lua"),
+	material = "Water",
 	rotation = 0,
 }
 
-Server.CubeType.Register{
-	name = "rock",
+Server.Cube.Register{
+	cubeName = "Rock",
 	transparent = false,
 	solid = true,
-	visualEffect = Server.Resource.GetEffect("cubes/rock/visual.lua"),
+    material = "Rock",
 	rotation = 0,
 }

@@ -9,18 +9,21 @@ namespace Common {
     {
         BaseChunk::CubeType id;
         std::string name;
-        Uint32 visualEffect;
+        Uint32 pluginId;
+        std::string material;
 
         bool solid;
-        bool transparent;
 
         CubeType()
         {
         }
 
-        CubeType(BaseChunk::CubeType id, std::string const& name) :
+        CubeType(BaseChunk::CubeType id, std::string const& name, Uint32 pluginId, std::string const& material, bool solid) :
             id(id),
-            name(name)
+            name(name),
+            pluginId(pluginId),
+            material(material),
+            solid(solid)
         {
         }
     };

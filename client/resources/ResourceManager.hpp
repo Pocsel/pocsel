@@ -17,6 +17,9 @@ namespace Tools {
             class TextureAtlas;
         }}
     }
+    namespace Lua {
+        class CallHelper;
+    }
 }
 
 namespace Client {
@@ -40,7 +43,7 @@ namespace Client { namespace Resources {
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
 
-        // plugin Id => resource filename => resource Id
+        // plugin Id => resource name => resource Id
         std::map<Uint32, std::map<std::string, Uint32>> _resourceIds;
 
         // Resources (resource id => specific resource)
@@ -70,10 +73,10 @@ namespace Client { namespace Resources {
         std::string GetScript(Uint32 id);
         std::unique_ptr<Common::Resource> GetResource(Uint32 id);
 
-        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 pluginId, std::string const& filename);
-        Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& filename);
-        std::string GetScript(Uint32 pluginId, std::string const& filename);
-        std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& filename);
+        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 pluginId, std::string const& name);
+        Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& name);
+        std::string GetScript(Uint32 pluginId, std::string const& name);
+        std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& name);
         Effect& GetEffect(Uint32 pluginId, std::string const& name);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }
@@ -84,20 +87,21 @@ namespace Client { namespace Resources {
             auto it = this->_resourceToPluginId.find(resourceId);
             return it != this->_resourceToPluginId.end() ? it->second : 0;
         }
-        Uint32 GetResourceId(Uint32 pluginId, std::string const& filename)
+        Uint32 GetResourceId(Uint32 pluginId, std::string const& name)
         {
             auto it = this->_resourceIds.find(pluginId);
             if (it == this->_resourceIds.end())
                 return 0;
-            auto it2 = it->second.find(filename);
+            auto it2 = it->second.find(name);
             return it2 != it->second.end() ? it2->second : 0;
         }
 
-        void LoadAllResources();
+        void BuildResourceIndex();
+        void RegisterLuaFunctions();
 
     private:
         void _InitErrorTexture();
-        void _LoadEffects();
+        void _ApiRegisterEffect(Tools::Lua::CallHelper& helper);
     };
 
 }}

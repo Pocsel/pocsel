@@ -9,7 +9,7 @@ namespace Common {
         Uint32 const id;
         Uint32 const pluginId;
         std::string const type;
-        std::string const filename;
+        std::string const name;
         void const* const data;
         Uint32 const size;
 
@@ -18,13 +18,13 @@ namespace Common {
         Resource(Uint32 id,
                 Uint32 pluginId,
                 std::string const& type,
-                std::string const& filename,
+                std::string const& name,
                 void const* data,
                 Uint32 size) :
             id(id),
             pluginId(pluginId),
             type(type),
-            filename(filename),
+            name(name),
             data(_CopyData(data, size)),
             size(size)
         {}

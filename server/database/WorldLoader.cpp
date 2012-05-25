@@ -183,17 +183,21 @@ namespace Server { namespace Database {
     {
         Uint32 currentPluginId = 0;
         auto& lua = map.GetEngine().GetInterpreter();
-        auto cubeTypeNs = lua.Globals().GetTable("Server").GetTable("CubeType");
-        cubeTypeNs.Set("Register", lua.MakeFunction([&](Tools::Lua::CallHelper& helper)
+        auto cubeNs = lua.Globals().GetTable("Server").GetTable("Cube");
+        cubeNs.Set("Register", lua.MakeFunction([&](Tools::Lua::CallHelper& helper)
             {
-                Tools::Lua::Ref cubeType = helper.PopArg();
-                std::string name = cubeType["name"].Check<std::string>("Server.CubeType.Register: Field \"name\" must be a string");
+                Tools::Lua::Ref prototype = helper.PopArg();
+                std::string name = prototype["cubeName"].Check<std::string>("Server.Cube.Register: Field \"cubeName\" must exist and be a string");
                 auto id = this->_GetCubeTypeId(map.GetEngine().GetRunningPluginId(), name);
 
-                Game::Map::CubeType desc(id, name, cubeType);
-                desc.solid = cubeType["solid"].To<bool>();
-                desc.transparent = cubeType["transparent"].To<bool>();
-                desc.visualEffect = cubeType["visualEffect"].Check<Uint32>("Server.CubeType.Register: Field \"visualEffect\" must be a number");
+                Game::Map::CubeType desc(
+                    id,
+                    name,
+                    map.GetEngine().GetRunningPluginId(),
+                    prototype["material"].Check<std::string>("Server.Cube.Register: Field \"material\" must exist be a string"),
+                    prototype["solid"].To<bool>(),
+                    prototype,
+                    prototype["transparent"].To<bool>());
                 map.GetConfiguration().cubeTypes.push_back(desc);
 
                 Log::load << "[map: " << map.GetName() << "] " <<
@@ -223,7 +227,7 @@ namespace Server { namespace Database {
             }
         }
 
-        cubeTypeNs.Set("Register", lua.MakeNil());
+        cubeNs.Set("Register", lua.MakeNil());
         map.GetEngine().OverrideRunningPluginId(0);
     }
 
@@ -298,13 +302,14 @@ namespace Server { namespace Database {
                 cube.type = this->_GetCubeTypeByName(name);
                 if (cube.type == 0)
                 {
-                    if (name != "void")
+                    if (name != "Void")
                     {
                         Log::load << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
                         Tools::error << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"void\"\n";
+                        conf.cubes.erase(name);
                         continue;
                     }
-                    cube.type = new Game::Map::CubeType(0, "void", mapIt->second.interpreter->MakeTable());
+                    cube.type = new Game::Map::CubeType(0, "Void", 0, "Void", false, mapIt->second.interpreter->MakeTable(), true);
                 }
 
                 // Parcours des ValidationBlocConf

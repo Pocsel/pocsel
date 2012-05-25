@@ -2,6 +2,7 @@
 #define __CLIENT_RESOURCES_EFFECT_HPP__
 
 #include "tools/IRenderer.hpp"
+#include "client/game/Game.hpp"
 
 namespace Tools { namespace Lua {
     class CallHelper;
