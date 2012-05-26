@@ -4,6 +4,7 @@
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/Entity.hpp"
 #include "server/game/engine/PositionalEntity.hpp"
+#include "server/game/engine/DoodadManager.hpp"
 #include "server/game/engine/EntityType.hpp"
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
@@ -43,6 +44,11 @@ namespace Server { namespace Game { namespace Engine {
         auto itEntityEnd = this->_entities.end();
         for (; itEntity != itEntityEnd; ++itEntity)
             Tools::Delete(itEntity->second);
+        // disabled entities
+        auto itDisabledEntity = this->_disabledEntities.begin();
+        auto itDisabledEntityEnd = this->_disabledEntities.end();
+        for (; itDisabledEntity != itDisabledEntityEnd; ++itDisabledEntity)
+            Tools::Delete(itDisabledEntity->second);
         // entity types
         auto itPlugin = this->_entityTypes.begin();
         auto itPluginEnd = this->_entityTypes.end();
@@ -373,7 +379,8 @@ namespace Server { namespace Game { namespace Engine {
                     if (disabled)
                         try
                         {
-                            this->DisableEntity(entityId, false /* callSave */); // fait comme si on désactivait l'entité, mais sans Save()
+                            // fait comme si on désactivait l'entité, mais sans Save(), et sans désactivation de ses doodads
+                            this->DisableEntity(entityId, false /* normalDisable */);
                         }
                         catch (std::exception&)
                         {
@@ -469,7 +476,20 @@ namespace Server { namespace Game { namespace Engine {
         return *it->second;
     }
 
-    void EntityManager::DisableEntity(Uint32 entityId, bool callSave /* = true */) throw(std::runtime_error)
+    PositionalEntity const& EntityManager::GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error)
+    {
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+            throw std::runtime_error("EntityManager: Positional entity not found.");
+        return *it->second;
+    }
+
+    bool EntityManager::IsEntityPositional(Uint32 entityId) const
+    {
+        return this->_positionalEntities.count(entityId);
+    }
+
+    void EntityManager::DisableEntity(Uint32 entityId, bool normalDisable /* = true */) throw(std::runtime_error)
     {
         // trouve l'entité (positonnelle)
         auto itPos = this->_positionalEntities.find(entityId);
@@ -478,12 +498,14 @@ namespace Server { namespace Game { namespace Engine {
         if (!itPos->second)
             throw std::runtime_error("EntityManager: Could not disable entity: positional entity already disabled.");
 
-        // XXX Save() deactivation hook
-        if (callSave)
+        if (normalDisable)
         {
+            // XXX Save() deactivation hook
             CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
             if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                 throw std::runtime_error("EntityManager: Could not disable entity: call to Save() failed (entity deleted).");
+            // désactive les doodads gérés par cette entité
+            this->_engine.GetDoodadManager().DisableDoodadsOfEntity(entityId);
         }
 
         // donne au garbage collector les variables de cette entité
@@ -524,6 +546,9 @@ namespace Server { namespace Game { namespace Engine {
 
         // recrée la structure de base de l'entité
         itPos->second->Enable(this->_engine.GetInterpreter());
+
+        // active les doodads gérés par cette entité
+        this->_engine.GetDoodadManager().EnableDoodadsOfEntity(entityId);
 
         // XXX Load() activation hook
         CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Load", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
@@ -588,6 +613,7 @@ namespace Server { namespace Game { namespace Engine {
             size_t nbErased = this->_positionalEntities.erase(id);
             assert(nbErased == 1 && "j'ai voulu supprimer une entité positionnelle mais elle était pas dans sa map");
             (void)nbErased; // pour le warning unused
+            this->_engine.GetDoodadManager().DeleteDoodadsOfEntity(id);
         }
         this->_entities.erase(id);
         Tools::Delete(entity);
