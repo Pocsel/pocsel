@@ -95,4 +95,39 @@ namespace Client { namespace Network {
         p.Read(id);
     }
 
+    void PacketExtractor::DoodadSpawn(Tools::ByteArray const& p,
+            Uint32& doodadId,
+            Uint32& pluginId,
+            std::string& doodadName,
+            Common::Position& position,
+            std::string& serializedData)
+    {
+        p.Read(doodadId);
+        p.Read(pluginId);
+        p.Read(doodadName);
+        p.Read(position);
+        if (p.GetBytesLeft())
+            p.Read(serializedData);
+    }
+
+    void PacketExtractor::DoodadKill(Tools::ByteArray const& p,
+            Uint32& doodadId)
+    {
+        p.Read(doodadId);
+    }
+
+    void PacketExtractor::DoodadUpdate(Tools::ByteArray const& p,
+            Uint32& doodadId,
+            Common::Position*& position,
+            std::string& serializedData)
+    {
+        p.Read(doodadId);
+        if (p.ReadBool())
+        {
+            position = p.Read<Common::Position>().release();
+        }
+        if (p.GetBytesLeft())
+            p.Read(serializedData);
+    }
+
 }}

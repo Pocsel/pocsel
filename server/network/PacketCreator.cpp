@@ -156,4 +156,61 @@ namespace Server { namespace Network {
         ptr->Write(itemId);
         return std::unique_ptr<UdpPacket>(ptr);
     }
+
+    std::unique_ptr<UdpPacket> PacketCreator::DoodadSpawn(Uint32 doodadId,
+            Uint32 pluginId,
+            std::string const& doodadName,
+            Common::Position const& position,
+            std::string const& serializedData)
+    {
+        UdpPacket* ptr(new UdpPacket);
+        ptr->Write(Protocol::ServerToClient::DoodadSpawn);
+
+        ptr->Write(doodadId);
+        ptr->Write(pluginId);
+        ptr->Write(doodadName);
+        ptr->Write(position);
+
+        if (serializedData.size() > 0)
+            ptr->Write(serializedData);
+
+        return std::unique_ptr<UdpPacket>(ptr);
+    }
+
+    std::unique_ptr<UdpPacket> PacketCreator::DoodadKill(Uint32 doodadId)
+    {
+        UdpPacket* ptr(new UdpPacket);
+        ptr->Write(Protocol::ServerToClient::DoodadKill);
+
+        ptr->Write(doodadId);
+
+        return std::unique_ptr<UdpPacket>(ptr);
+    }
+
+    std::unique_ptr<UdpPacket> PacketCreator::DoodadUpdate(Uint32 doodadId,
+            Common::Position const* position,
+            std::string const& serializedData)
+    {
+        UdpPacket* ptr(new UdpPacket);
+        ptr->Write(Protocol::ServerToClient::DoodadUpdate);
+
+        ptr->Write(doodadId);
+
+        if (position != 0)
+        {
+            ptr->Write(true);
+            ptr->Write(*position);
+        }
+        else
+        {
+            ptr->Write(false);
+        }
+
+        if (serializedData.size() > 0)
+            ptr->Write(serializedData);
+
+        return std::unique_ptr<UdpPacket>(ptr);
+    }
+
+
 }}

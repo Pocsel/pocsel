@@ -45,6 +45,19 @@ namespace Client { namespace Network {
 
         static void TeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position);
         static void ItemMove(Tools::ByteArray const& p, Common::MovingOrientedPosition& pos, Uint32& id);
+
+        static void DoodadSpawn(Tools::ByteArray const& p,
+                Uint32& doodadId,
+                Uint32& pluginId,
+                std::string& doodadName,
+                Common::Position& position,
+                std::string& serializedData);
+        static void DoodadKill(Tools::ByteArray const& p,
+                Uint32& doodadId);
+        static void DoodadUpdate(Tools::ByteArray const& p,
+                Uint32& doodadId,
+                Common::Position*& position,
+                std::string& serializedData);
     };
 
 }}
