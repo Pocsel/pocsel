@@ -54,6 +54,8 @@ Server.Entity.RegisterPositional{
         self:Loop(initEntity)
 
 
+        self.doodad = Server.Doodad.Spawn("Coucou")
+        print("Mon doodad ", self.doodad)
         -- self.d = Srv.Doodad.Spawn("Pelleteuse", {"PelleteuseBase", "PelleteusePelle"})
         -- Srv.Doodad.RotateBody(self.d, "PelleteusePelle", Utils.Quat(5, 0, 0, 0))
 
