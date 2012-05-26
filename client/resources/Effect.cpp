@@ -2,6 +2,7 @@
 
 #include "tools/logger/Logger.hpp"
 #include "tools/lua/Ref.hpp"
+#include "tools/lua/Function.hpp"
 #include "common/FieldValidator.hpp"
 
 #include "client/game/Game.hpp"
