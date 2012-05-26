@@ -2,6 +2,7 @@
 #include "server/game/engine/MessageManager.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
+#include "server/game/engine/DoodadManager.hpp"
 #include "server/game/engine/Entity.hpp"
 #include "server/game/engine/EntityType.hpp"
 #include "server/game/World.hpp"
@@ -28,11 +29,13 @@ namespace Server { namespace Game { namespace Engine {
         this->_callbackManager = new CallbackManager(*this);
         this->_entityManager = new EntityManager(*this);
         this->_messageManager = new MessageManager(*this);
+        this->_doodadManager = new DoodadManager(*this);
     }
 
     Engine::~Engine()
     {
         Tools::debug << "Engine::~Engine()\n";
+        Tools::Delete(this->_doodadManager);
         Tools::Delete(this->_messageManager);
         Tools::Delete(this->_entityManager);
         Tools::Delete(this->_callbackManager);
@@ -53,6 +56,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_callbackManager->Load(conn);
         this->_messageManager->Load(conn);
         this->_entityManager->Load(conn);
+        this->_doodadManager->Load(conn); // PS: l'ordre a une importance de ouf
         // initializes any plugin that needs it
         auto const& plugins = this->_world.GetPluginManager().GetPlugins();
         auto it = plugins.begin();
@@ -67,6 +71,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_callbackManager->Save(conn);
         this->_messageManager->Save(conn);
         this->_entityManager->Save(conn);
+        this->_doodadManager->Save(conn); // PS: l'ordre a une importance de ouf
         // mark all plugins as initialized
         std::string table = this->_map.GetName() + "_initialized_plugin";
         conn.CreateQuery("DELETE FROM " + table + ";")->ExecuteNonSelect();

@@ -22,6 +22,7 @@ namespace Server { namespace Game { namespace Engine {
 
     class MessageManager;
     class CallbackManager;
+    class DoodadManager;
 
     class Engine :
         private boost::noncopyable
@@ -33,6 +34,7 @@ namespace Server { namespace Game { namespace Engine {
         MessageManager* _messageManager;
         EntityManager* _entityManager;
         CallbackManager* _callbackManager;
+        DoodadManager* _doodadManager;
         Uint64 _currentTime;
         Uint32 _overriddenPluginId;
         Uint32 _overriddenEntityId;
@@ -46,6 +48,7 @@ namespace Server { namespace Game { namespace Engine {
         MessageManager& GetMessageManager() { return *this->_messageManager; }
         EntityManager& GetEntityManager() { return *this->_entityManager; }
         CallbackManager& GetCallbackManager() { return *this->_callbackManager; }
+        DoodadManager& GetDoodadManager() { return *this->_doodadManager; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
