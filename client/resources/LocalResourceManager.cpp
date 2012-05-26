@@ -127,7 +127,7 @@ namespace Client { namespace Resources {
 
                 model = new Tools::Models::MqmModel(
                         data,
-                        std::bind(&LocalResourceManager::_GetTexture2D, this, texturesPath.string(), std::placeholders::_1),
+                        //std::bind(&LocalResourceManager::_GetTexture2D, this, texturesPath.string(), std::placeholders::_1),
                         this->_renderer
                         );
             }
@@ -150,14 +150,14 @@ namespace Client { namespace Resources {
     void LocalResourceManager::_InitErrorModel()
     {
         this->_models["__error__"] = Tools::Models::ErrorModel(
-                std::bind(&LocalResourceManager::GetTexture2D, this, std::placeholders::_1),
+                //std::bind(&LocalResourceManager::GetTexture2D, this, std::placeholders::_1),
                 this->_renderer
                 ).release();
     }
 
     void LocalResourceManager::_InitErrorTexture()
     {
-        unsigned char toto[] = {
+        static const unsigned char toto[] = {
             0, 0, 0, 255,
             255, 0, 255, 255,
             255, 0, 255, 255,

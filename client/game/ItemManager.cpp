@@ -1,6 +1,6 @@
 #include "client/game/ItemManager.hpp"
 #include "client/game/ItemRenderer.hpp"
-#include "client/game/Model.hpp"
+#include "client/game/engine/Model.hpp"
 #include "client/game/Item.hpp"
 #include "client/game/Game.hpp"
 
@@ -29,7 +29,7 @@ namespace Client { namespace Game {
     {
         if (this->_items.count(id) == 0)
         {
-            std::unique_ptr<Model> model(new Model(this->_game.GetClient().GetLocalResourceManager()));
+            std::unique_ptr<Engine::Model> model(new Engine::Model(this->_game.GetClient().GetGame().GetResourceManager()));
             this->_items[id] = new Item(model);
         }
         this->_items[id]->position = pos.position;

@@ -20,6 +20,9 @@ namespace Tools {
     namespace Lua {
         class CallHelper;
     }
+    namespace Models {
+        class MqmModel;
+    }
 }
 
 namespace Client {
@@ -48,9 +51,12 @@ namespace Client { namespace Resources {
 
         // Resources (resource id => specific resource)
         std::map<Uint32, Tools::Renderers::Utils::Texture::ITexture*> _textures;
+        std::map<Uint32, Tools::Models::MqmModel*> _models;
         std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
-        std::map<Uint32, std::map<std::string, Effect*>> _effects;
         std::map<Uint32, std::string> _scripts;
+
+        // effect c'est pas une resource mais un registrabrle
+        std::map<Uint32, std::map<std::string, Effect*>> _effects;
 
         // resource Id => plugin Id
         std::map<Uint32, Uint32> _resourceToPluginId;
@@ -69,24 +75,30 @@ namespace Client { namespace Resources {
         ~ResourceManager();
 
         std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 id);
+        Tools::Models::MqmModel const& GetMqmModel(Uint32 id);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 id);
         std::string GetScript(Uint32 id);
         std::unique_ptr<Common::Resource> GetResource(Uint32 id);
 
         std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 pluginId, std::string const& name);
+        Tools::Models::MqmModel const& GetMqmModel(Uint32 pluginId, std::string const& name);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& name);
         std::string GetScript(Uint32 pluginId, std::string const& name);
         std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& name);
+
+        // effect c'est pas une retouou mais un rtegjsiog
         Effect& GetEffect(Uint32 pluginId, std::string const& name);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }
         ResourceDownloader& GetDownloader() { return this->_downloader; }
         float GetLoadingProgression() const { return this->_downloader.GetLoadingProgression(); }
+
         Uint32 GetPluginId(Uint32 resourceId) const
         {
             auto it = this->_resourceToPluginId.find(resourceId);
             return it != this->_resourceToPluginId.end() ? it->second : 0;
         }
+
         Uint32 GetResourceId(Uint32 pluginId, std::string const& name)
         {
             auto it = this->_resourceIds.find(pluginId);
@@ -101,6 +113,7 @@ namespace Client { namespace Resources {
 
     private:
         void _InitErrorTexture();
+        void _InitErrorModel();
         void _ApiRegisterEffect(Tools::Lua::CallHelper& helper);
     };
 

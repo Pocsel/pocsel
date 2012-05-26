@@ -16,7 +16,7 @@ namespace Tools { namespace Models {
     }
 
     MqmModel::MqmModel(std::vector<char> const& data,
-            TextureCallback textureCallback,
+            //TextureCallback textureCallback,
             Tools::IRenderer& renderer)
     {
         Tools::debug << "MqmModel()\n";
@@ -39,14 +39,14 @@ namespace Tools { namespace Models {
         if (data.size() != header.filesize)
             throw std::runtime_error("MqmModel:: data size is not good");
 
-        this->_LoadMeshes(header, data, textureCallback, renderer);
+        this->_LoadMeshes(header, data, /*textureCallback,*/ renderer);
         if (header.num_anims > 0)
             this->_LoadAnimations(header, data);
     }
 
     void MqmModel::_LoadMeshes(Tools::Models::Iqm::Header const& header,
             std::vector<char> const& data,
-            TextureCallback textureCallback,
+            //TextureCallback textureCallback,
             Tools::IRenderer& renderer)
     {
         // lilswap((uint *)&buf[header.ofs_vertexarrays], header.num_vertexarrays*sizeof(iqmvertexarray)/sizeof(uint));
@@ -126,7 +126,7 @@ namespace Tools { namespace Models {
             Tools::Models::Iqm::Mesh &mesh = _meshes[i];
             //printf("%s: loaded mesh: %s\n", filename, &str[m.name]);
             std::string textureStr(&str[mesh.material]);
-            _textures.push_back(&textureCallback(textureStr));
+            _materials.push_back(textureStr);//&textureCallback(textureStr));
 
             this->_indexBuffers.push_back(renderer.CreateIndexBuffer().release());
             this->_indexBuffers.back()->SetData(

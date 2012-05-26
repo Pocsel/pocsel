@@ -106,25 +106,19 @@ namespace Server { namespace Network {
         Tools::debug << "PacketCreator::ResourceRange(): " << resource.id <<
                      ": offset = " << offset <<
                      " size = " << resource.size << ".\n";
-        // XXX si packet change on est dans la merde !
-        Uint32 packetSize = ((Uint16) -1) - sizeof(Protocol::ActionType) - 2 * sizeof(Uint32);
         if (offset == 0)
         {
             ptr->Write(resource.pluginId);
             ptr->Write(resource.type);
             ptr->Write(resource.name);
             ptr->Write(resource.size);
-            packetSize -= 2 * sizeof(Uint32) - 2 * sizeof(Uint16);
-            packetSize -= static_cast<Uint32>(resource.name.size() - resource.type.size()); // boarg
-            if (packetSize >= ((Uint16) -1))
+            if (ptr->GetSize() >= Common::Packet::MaxSize)
                 throw std::runtime_error("overflow");
         }
         if (offset && offset >= resource.size)
             throw std::runtime_error("Invalid range offset");
 
-        Uint32 toSendSize = std::min(resource.size, packetSize);
-        if (toSendSize > resource.size - offset) // WARNING: this form prevents overflow
-            throw std::runtime_error("Invalid range offset");
+        Uint32 toSendSize = std::min(resource.size - offset, (Uint32)(Common::Packet::MaxSize - ptr->GetSize()));
         ptr->WriteRawData(
                           ((char const*) resource.data) + offset,
                           toSendSize
@@ -148,7 +142,7 @@ namespace Server { namespace Network {
         ptr->Write(Protocol::ServerToClient::TeleportPlayer);
 
         ptr->Write(map);
-        ptr->Write(pos);
+        ptr->Write(pos); 
         return std::unique_ptr<Common::Packet>(ptr);
     }
 

@@ -4,7 +4,7 @@
 
 namespace Client { namespace Game {
 
-    Item::Item(std::unique_ptr<Model>& model) :
+    Item::Item(std::unique_ptr<Engine::Model>& model) :
         _model(model.release()),
         _moving(false)
     {

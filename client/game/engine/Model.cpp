@@ -1,11 +1,12 @@
-#include "client/game/Model.hpp"
+#include "client/game/engine/Model.hpp"
 
-#include "client/resources/LocalResourceManager.hpp"
+#include "client/resources/ResourceManager.hpp"
+#include "tools/renderers/utils/texture/ITexture.hpp"
 
-namespace Client { namespace Game {
+namespace Client { namespace Game { namespace Engine {
 
-    Model::Model(Resources::LocalResourceManager& resourceManager) :
-        _model(resourceManager.GetMqmModel("boblampclean")),
+    Model::Model(Resources::ResourceManager& resourceManager) :
+        _model(resourceManager.GetMqmModel(1, "boblampclean.mqm")),
         _animTime(0)
     {
         auto anims = this->_model.GetAnimInfos();
@@ -18,6 +19,20 @@ namespace Client { namespace Game {
         this->_animatedBones.assign(this->_model.GetJointInfos().size(), glm::mat4x4(1));
         if (this->_model.GetJointInfos().size() == 0)
             this->_animatedBones.assign(1, glm::mat4x4(1));
+
+        std::vector<std::string> const& materials = this->_model.GetMaterials();
+        for (auto it = materials.begin(), ite = materials.end(); it != ite; ++it)
+        {
+            this->_textures.push_back(resourceManager.GetTexture(1, *it).release());
+        }
+    }
+
+    Model::~Model()
+    {
+        for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
+        {
+            Tools::Delete(*it);
+        }
     }
 
     void Model::SetAnim(std::string const& anim)
@@ -166,4 +181,4 @@ namespace Client { namespace Game {
         }
     }
 
-}}
+}}}
