@@ -131,10 +131,30 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 newId = this->_nextDoodadId++;
 
         this->_CreateDoodad(newId, pluginId, doodadName, entityId, this->_engine.GetEntityManager().GetPositionalEntity(entityId));
+        helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
     }
 
     void DoodadManager::_ApiKill(Tools::Lua::CallHelper& helper)
     {
+        // trouve le doodad
+        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Kill: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Kill: Argument \"doodadId\" must be a number"));
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end())
+        {
+            Tools::error << "DoodadManager::_ApiKill: No doodad with id " << doodadId << ", cannot kill doodad." << std::endl;
+            return;
+        }
+
+        // enleve le doodad de la liste associée à l'entité
+        auto itList = this->_doodadsByEntities.find(it->second->GetEntityId());
+        assert(itList != this->_doodadsByEntities.end() && "un doodad de la map générale des doodads n'était pas dans une liste associée a une entité");
+        itList->second.remove(it->second);
+        if (itList->second.empty())
+            this->_doodadsByEntities.erase(itList); // supprime l'entrée associée à l'entité si celle-ci n'a plus de doodads
+
+        // enleve le doodad de la map générales + delete
+        Tools::Delete(it->second);
+        this->_doodads.erase(it);
     }
 
 }}}

@@ -17,7 +17,9 @@ namespace Server { namespace Game { namespace Engine {
 
     public:
         Doodad(Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
+        ~Doodad();
         Uint32 GetId() const { return this->_id; }
+        Uint32 GetEntityId() const { return this->_entityId; }
         void Disable();
         void Enable();
     };
