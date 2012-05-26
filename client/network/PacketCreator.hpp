@@ -38,6 +38,8 @@ namespace Client { namespace Network {
                                                  Common::OrientedPosition const& pos,
                                                  Common::CubePosition const& target,
                                                  Uint32 actionId);
+
+        static std::unique_ptr<UdpPacket> DoodadRemoved(Uint32 id, Uint32 doodadId);
     };
 
 }}
