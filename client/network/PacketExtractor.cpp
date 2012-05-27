@@ -100,14 +100,14 @@ namespace Client { namespace Network {
             Uint32& pluginId,
             std::string& doodadName,
             Common::Position& position,
-            std::string& serializedData)
+            std::list<std::pair<std::string /* key */, std::string /* value */>>& values)
     {
         p.Read(doodadId);
         p.Read(pluginId);
         p.Read(doodadName);
         p.Read(position);
-        if (p.GetBytesLeft())
-            p.Read(serializedData);
+        while (p.GetBytesLeft())
+            values.push_back(std::make_pair(p.ReadString(), p.ReadString()));
     }
 
     void PacketExtractor::DoodadKill(Tools::ByteArray const& p,
@@ -119,15 +119,13 @@ namespace Client { namespace Network {
     void PacketExtractor::DoodadUpdate(Tools::ByteArray const& p,
             Uint32& doodadId,
             Common::Position*& position,
-            std::string& serializedData)
+            std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands)
     {
         p.Read(doodadId);
         if (p.ReadBool())
-        {
             position = p.Read<Common::Position>().release();
-        }
-        if (p.GetBytesLeft())
-            p.Read(serializedData);
+        while (p.GetBytesLeft())
+            commands.push_back(std::make_tuple(p.ReadBool(), p.ReadString(), p.ReadString()));
     }
 
 }}

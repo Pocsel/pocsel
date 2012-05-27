@@ -13,6 +13,8 @@ namespace Server { namespace Game { namespace Engine {
         auto& i = this->_engine.GetInterpreter();
         auto namespaceTable = i.Globals()["Server"].Set("Doodad", i.MakeTable());
         namespaceTable.Set("Spawn", i.MakeFunction(std::bind(&DoodadManager::_ApiSpawn, this, std::placeholders::_1)));
+        namespaceTable.Set("Set", i.MakeFunction(std::bind(&DoodadManager::_ApiSet, this, std::placeholders::_1)));
+        namespaceTable.Set("Call", i.MakeFunction(std::bind(&DoodadManager::_ApiCall, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&DoodadManager::_ApiKill, this, std::placeholders::_1)));
     }
 
@@ -44,6 +46,22 @@ namespace Server { namespace Game { namespace Engine {
     void DoodadManager::Load(Tools::Database::IConnection& conn)
     {
         // TODO
+    }
+
+    void DoodadManager::ExecuteCommands()
+    {
+        auto it = this->_dirtyDoodads.begin();
+        auto itEnd = this->_dirtyDoodads.end();
+        for (; it != itEnd; ++it)
+            (*it)->ExecuteCommands();
+        this->_dirtyDoodads.clear();
+    }
+
+    void DoodadManager::DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId)
+    {
+        auto it = this->_doodads.find(doodadId);
+        if (it != this->_doodads.end())
+            it->second->RemovePlayer(playerId);
     }
 
     void DoodadManager::DeleteDoodadsOfEntity(Uint32 entityId)
@@ -104,7 +122,7 @@ namespace Server { namespace Game { namespace Engine {
         if (this->_doodads.count(doodadId))
             throw std::runtime_error("a doodad with id " + Tools::ToString(doodadId) + " already exists");
 
-        Doodad* d = new Doodad(doodadId, pluginId, name, entityId, entity);
+        Doodad* d = new Doodad(this->_engine, doodadId, pluginId, name, entityId, entity);
         this->_doodads[doodadId] = d;
         this->_doodadsByEntities[entityId].push_back(d);
     }
@@ -132,6 +150,36 @@ namespace Server { namespace Game { namespace Engine {
 
         this->_CreateDoodad(newId, pluginId, doodadName, entityId, this->_engine.GetEntityManager().GetPositionalEntity(entityId));
         helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
+    }
+
+    void DoodadManager::_ApiSet(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Set: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
+        Tools::Lua::Ref key = helper.PopArg("Server.Doodad.Set: Missing argument \"key\"");
+        Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Set: Missing argument \"value\"");
+
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end())
+        {
+            Tools::error << "DoodadManager::_ApiSet: No doodad with id " << doodadId << ", cannot set value." << std::endl;
+            return;
+        }
+        it->second->Set(key, value);
+    }
+
+    void DoodadManager::_ApiCall(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Call: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
+        std::string function = helper.PopArg("Server.Doodad.Call: Missing argument \"function\"").CheckString("Server.Doodad.Call: Argument \"function\" must be of type string");
+        Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Call: Missing argument \"value\"");
+
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end())
+        {
+            Tools::error << "DoodadManager::_ApiSet: No doodad with id " << doodadId << ", cannot set value." << std::endl;
+            return;
+        }
+        it->second->Call(function, value);
     }
 
     void DoodadManager::_ApiKill(Tools::Lua::CallHelper& helper)

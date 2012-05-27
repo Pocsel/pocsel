@@ -50,15 +50,17 @@ namespace Server { namespace Network {
         static std::unique_ptr<UdpPacket> ItemMove(Common::MovingOrientedPosition const& pos,
                                                    Uint32 itemId);
 
-        static std::unique_ptr<UdpPacket> DoodadSpawn(Uint32 doodadId,
+        static std::unique_ptr<Common::Packet> DoodadSpawn(Uint32 doodadId,
                 Uint32 pluginId,
                 std::string const& doodadName,
                 Common::Position const& position,
-                std::string const& serializedData);
-        static std::unique_ptr<UdpPacket> DoodadKill(Uint32 doodadId);
-        static std::unique_ptr<UdpPacket> DoodadUpdate(Uint32 doodadId,
+                std::list<std::pair<std::string /* key */, std::string /* value */>> const& values);
+
+        static std::unique_ptr<Common::Packet> DoodadKill(Uint32 doodadId);
+
+        static std::unique_ptr<Common::Packet> DoodadUpdate(Uint32 doodadId,
                 Common::Position const* position,
-                std::string const& serializedData);
+                std::list<std::tuple<bool /* functionCall */, std::string /* function */, std::string /* value */>> const& commands);
     };
 
 }}

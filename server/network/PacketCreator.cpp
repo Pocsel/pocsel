@@ -142,7 +142,7 @@ namespace Server { namespace Network {
         ptr->Write(Protocol::ServerToClient::TeleportPlayer);
 
         ptr->Write(map);
-        ptr->Write(pos); 
+        ptr->Write(pos);
         return std::unique_ptr<Common::Packet>(ptr);
     }
 
@@ -157,13 +157,13 @@ namespace Server { namespace Network {
         return std::unique_ptr<UdpPacket>(ptr);
     }
 
-    std::unique_ptr<UdpPacket> PacketCreator::DoodadSpawn(Uint32 doodadId,
+    std::unique_ptr<Common::Packet> PacketCreator::DoodadSpawn(Uint32 doodadId,
             Uint32 pluginId,
             std::string const& doodadName,
             Common::Position const& position,
-            std::string const& serializedData)
+            std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
     {
-        UdpPacket* ptr(new UdpPacket);
+        Common::Packet* ptr(new Common::Packet);
         ptr->Write(Protocol::ServerToClient::DoodadSpawn);
 
         ptr->Write(doodadId);
@@ -171,27 +171,32 @@ namespace Server { namespace Network {
         ptr->Write(doodadName);
         ptr->Write(position);
 
-        if (serializedData.size() > 0)
-            ptr->Write(serializedData);
+        auto it = values.begin();
+        auto itEnd = values.end();
+        for (; it != itEnd; ++it)
+        {
+            ptr->Write(it->first);
+            ptr->Write(it->second);
+        }
 
-        return std::unique_ptr<UdpPacket>(ptr);
+        return std::unique_ptr<Common::Packet>(ptr);
     }
 
-    std::unique_ptr<UdpPacket> PacketCreator::DoodadKill(Uint32 doodadId)
+    std::unique_ptr<Common::Packet> PacketCreator::DoodadKill(Uint32 doodadId)
     {
-        UdpPacket* ptr(new UdpPacket);
+        Common::Packet* ptr(new Common::Packet);
         ptr->Write(Protocol::ServerToClient::DoodadKill);
 
         ptr->Write(doodadId);
 
-        return std::unique_ptr<UdpPacket>(ptr);
+        return std::unique_ptr<Common::Packet>(ptr);
     }
 
-    std::unique_ptr<UdpPacket> PacketCreator::DoodadUpdate(Uint32 doodadId,
+    std::unique_ptr<Common::Packet> PacketCreator::DoodadUpdate(Uint32 doodadId,
             Common::Position const* position,
-            std::string const& serializedData)
+            std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
-        UdpPacket* ptr(new UdpPacket);
+        Common::Packet* ptr(new Common::Packet);
         ptr->Write(Protocol::ServerToClient::DoodadUpdate);
 
         ptr->Write(doodadId);
@@ -206,10 +211,16 @@ namespace Server { namespace Network {
             ptr->Write(false);
         }
 
-        if (serializedData.size() > 0)
-            ptr->Write(serializedData);
+        auto it = commands.begin();
+        auto itEnd = commands.end();
+        for (; it != itEnd; ++it)
+        {
+            ptr->Write(std::get<0>(*it));
+            ptr->Write(std::get<1>(*it));
+            ptr->Write(std::get<2>(*it));
+        }
 
-        return std::unique_ptr<UdpPacket>(ptr);
+        return std::unique_ptr<Common::Packet>(ptr);
     }
 
 

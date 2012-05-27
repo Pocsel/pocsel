@@ -25,7 +25,6 @@ namespace Server { namespace Game { namespace Engine {
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
         auto namespaceTable = this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
-        this->_interpreter->Globals().Set("Srv", namespaceTable);
         this->_callbackManager = new CallbackManager(*this);
         this->_entityManager = new EntityManager(*this);
         this->_messageManager = new MessageManager(*this);
@@ -48,6 +47,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_entityManager->DispatchKillEvents();
         this->_entityManager->DispatchSpawnEvents();
         this->_messageManager->DispatchMessages();
+        this->_doodadManager->ExecuteCommands(); // PS: l'ordre a une importance de ouf
     }
 
     void Engine::Load(Tools::Database::IConnection& conn)
@@ -89,6 +89,11 @@ namespace Server { namespace Game { namespace Engine {
             {
                 Tools::error << "Engine::Save: Could not mark plugin " << it->first << " as initialized: " << e.what() << std::endl;
             }
+    }
+
+    void Engine::SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet)
+    {
+        this->_map.SendPacket(playerId, packet);
     }
 
     void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)

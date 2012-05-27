@@ -25,6 +25,7 @@
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/MessageManager.hpp"
+#include "server/game/engine/DoodadManager.hpp"
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/database/ResourceManager.hpp"
 #include "server/network/PacketCreator.hpp"
@@ -172,11 +173,16 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushMessage(m);
     }
 
-    void Map::PlayerDoodadRemoved(Uint32 id, Uint32 doodadId)
+    void Map::DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&Map::_PlayerDoodadRemoved, this, id, doodadId));
+            m(std::bind(&Engine::DoodadManager::DoodadRemovedForPlayer, &this->_engine->GetDoodadManager(), playerId, doodadId));
         this->_messageQueue->PushMessage(m);
+    }
+
+    void Map::SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet)
+    {
+        this->_game.GetServer().GetClientManager().SendPacket(playerId, packet);
     }
 
     void Map::_GetChunk(Chunk::IdType id, ChunkCallback& response)
@@ -313,11 +319,6 @@ namespace Server { namespace Game { namespace Map {
             auto toto = Network::PacketCreator::ItemMove(pos, id);
             this->_game.GetServer().GetClientManager().SendUdpPacket(it->first, toto);
         }
-    }
-
-    void Map::_PlayerDoodadRemoved(Uint32 id, Uint32 doodadId)
-    {
-        // TODO
     }
 
     void Map::_DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos)

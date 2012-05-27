@@ -151,7 +151,7 @@ namespace Protocol {
          *      String type
          *      String filename
          *      Uint32 size
-         *  Char+ raw data de la taille restante
+         * Char+ raw data de la taille restante
          */
         ResourceRange,
 
@@ -177,7 +177,8 @@ namespace Protocol {
          * Uint32 pluginId
          * String doodadName
          * Position position
-         * ? String serializedData
+         *  String+ serializedKey
+         *  String+ serializedValue
          */
         DoodadSpawn,
 
@@ -188,9 +189,11 @@ namespace Protocol {
 
         /**
          * Uint32 doodadId
-         * bool position
-         * ? Position p
-         * ? String serializedData
+         * Bool position
+         * Position? p
+         *  Bool+ functionCall
+         *  String+ serializedKey || function
+         *  String+ serializedValue
          */
         DoodadUpdate,
 
