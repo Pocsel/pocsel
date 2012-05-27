@@ -55,6 +55,7 @@ namespace Server { namespace Network {
 
         static void Move(Tools::ByteArray const& p, Common::MovingOrientedPosition& pos);
         static void Action(Tools::ByteArray const& p, Common::OrientedPosition& cam, Common::CubePosition& cubePos, Uint32& actionId);
+        static void DoodadRemoved(Tools::ByteArray const& p, Uint32& doodadId);
     };
 
 }}

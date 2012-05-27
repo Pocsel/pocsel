@@ -5,6 +5,8 @@
 #include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
 //#include "tools/renderers/utils/texture/TextureAtlas.hpp"
+#include "tools/models/ErrorModel.hpp"
+#include "tools/models/MqmModel.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 #include "tools/renderers/utils/texture/AnimatedTexture.hpp"
 #include "tools/renderers/utils/texture/Texture.hpp"
@@ -94,12 +96,22 @@ namespace Client { namespace Resources {
             for (unsigned int i = 0; i < it->second.size(); ++i)
                 if (it->second[i] != errTex)
                     Tools::Delete(it->second[i]);
+        Tools::Delete(errTex);
+
+        Tools::Models::MqmModel* errModel = 0;
+        if (this->_models.count(0))
+            errModel = this->_models[0];
+        for (auto it = this->_models.begin(), ite = this->_models.end(); it != ite; ++it)
+            if (it->second != errModel)
+                Tools::Delete(it->second);
+        Tools::Delete(errModel);
+
         for (auto it = this->_shaders.begin(), ite = this->_shaders.end(); it != ite; ++it)
             Tools::Delete(it->second);
+
         for (auto it = this->_effects.begin(), ite = this->_effects.end(); it != ite; ++it)
             for (auto itEffect = it->second.begin(), iteEffect = it->second.end(); itEffect != iteEffect; ++itEffect)
                 Tools::Delete(itEffect->second);
-        delete errTex;
     }
 
     std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> ResourceManager::GetTexture(Uint32 id)
@@ -159,6 +171,43 @@ namespace Client { namespace Resources {
         return std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(it->second->Clone());
     }
 
+    Tools::Models::MqmModel const& ResourceManager::GetMqmModel(Uint32 id)
+    {
+        auto it = this->_models.find(id);
+        if (it == this->_models.end())
+        {
+            Tools::Models::MqmModel* model = 0;
+
+            auto res = this->_database.GetResource(id);
+
+            if (res != 0)
+            {
+                try
+                {
+                    std::vector<char> data(res->size);
+                    std::memcpy(data.data(), res->data, res->size);
+                    model = new Tools::Models::MqmModel(
+                            data,
+                            //std::bind(&ResourceManager::GetTexture, this, res->pluginId, std::placeholders::_1),
+                            this->_renderer);
+                }
+                catch (std::exception& ex)
+                {
+                    Tools::error << "Can't load MqmModel (" << ex.what() << ")\n";
+                }
+            }
+
+            if (model == 0)
+            {
+                if (this->_models.count(0) == 0)
+                    this->_InitErrorModel();
+                model = this->_models.find(0)->second;
+            }
+            return *model;
+        }
+        return *it->second;
+    }
+
     Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 id)
     {
         auto it = this->_shaders.find(id);
@@ -209,6 +258,11 @@ namespace Client { namespace Resources {
         return this->GetTexture(this->_database.GetResourceId(pluginId, name));
     }
 
+    Tools::Models::MqmModel const& ResourceManager::GetMqmModel(Uint32 pluginId, std::string const& name)
+    {
+        return this->GetMqmModel(this->_database.GetResourceId(pluginId, name));
+    }
+
     Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 pluginId, std::string const& name)
     {
         return this->GetShader(this->_database.GetResourceId(pluginId, name));
@@ -251,17 +305,6 @@ namespace Client { namespace Resources {
     //    return std::unique_ptr<Tools::Renderers::Utils::TextureAtlas>(new Tools::Renderers::Utils::TextureAtlas(this->_renderer, textures));
     //}
 
-    void ResourceManager::_InitErrorTexture()
-    {
-        unsigned char toto[] = {
-            0, 0, 0, 255,
-            255, 0, 255, 255,
-            255, 0, 255, 255,
-            0, 0, 0, 255
-        };
-        this->_rawTextures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, glm::uvec2(2, 2)).release();
-    }
-
     void ResourceManager::BuildResourceIndex()
     {
         auto const& resources = this->_database.GetAllResources("%");
@@ -289,4 +332,22 @@ namespace Client { namespace Resources {
         Tools::log << "Effect \"" << effect->GetName() << "\" registered (plugin: " << pluginId << ")." << std::endl;
     }
 
+    void ResourceManager::_InitErrorModel()
+    {
+        this->_models[0] = Tools::Models::ErrorModel(
+                //std::bind(&LocalResourceManager::GetTexture2D, this, std::placeholders::_1),
+                this->_renderer
+                ).release();
+    }
+
+    void ResourceManager::_InitErrorTexture()
+    {
+        static const unsigned char toto[] = {
+            0, 0, 0, 255,
+            255, 0, 255, 255,
+            255, 0, 255, 255,
+            0, 0, 0, 255
+        };
+        this->_rawTextures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, glm::uvec2(2, 2)).release();
+    }
 }}

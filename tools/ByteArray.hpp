@@ -17,11 +17,11 @@ namespace Tools {
         // Implemented Plain old data serializer
         template<typename T> struct PodSerializer;
 
-    private:
+    protected:
         enum
         {
-            INITIALSIZE = 1024,
-            SIZESTEP = 512
+            Initialize = 1024,
+            Sizestep = 512
         };
 
     protected:
@@ -103,8 +103,8 @@ namespace Tools {
         virtual void _Resize(Uint32 target);
         void _PrepareWrite(Uint32 bytesCount)
         {
-            if (this->_offset + bytesCount >= this->_allocSize)
-                this->_Resize(this->_allocSize + ((bytesCount / SIZESTEP + 1) * SIZESTEP));
+            if (this->_offset + bytesCount > this->_allocSize)
+                this->_Resize(this->_size + bytesCount);
             if (this->_offset + bytesCount > this->_size)
                 this->_size = this->_offset + bytesCount;
         }

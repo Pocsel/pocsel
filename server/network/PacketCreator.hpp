@@ -30,7 +30,6 @@ namespace Server { namespace Network {
                                         std::string const& worldBuildHash = "");
 
         static std::unique_ptr<UdpPacket> PassThrough();
-
         static std::unique_ptr<Common::Packet> PassThroughOk();
 
         static std::unique_ptr<Common::Packet> Ping(Uint64 timestamp);
@@ -50,6 +49,16 @@ namespace Server { namespace Network {
 
         static std::unique_ptr<UdpPacket> ItemMove(Common::MovingOrientedPosition const& pos,
                                                    Uint32 itemId);
+
+        static std::unique_ptr<UdpPacket> DoodadSpawn(Uint32 doodadId,
+                Uint32 pluginId,
+                std::string const& doodadName,
+                Common::Position const& position,
+                std::string const& serializedData);
+        static std::unique_ptr<UdpPacket> DoodadKill(Uint32 doodadId);
+        static std::unique_ptr<UdpPacket> DoodadUpdate(Uint32 doodadId,
+                Common::Position const* position,
+                std::string const& serializedData);
     };
 
 }}

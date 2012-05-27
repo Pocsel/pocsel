@@ -100,6 +100,7 @@ namespace Server { namespace Game { namespace Map {
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
+        void PlayerDoodadRemoved(Uint32 id, Uint32 doodadId);
 
         // rcon requests
         void RconExecute(Uint32 pluginId, std::string lua, std::function<void(std::string)> cb) const;
@@ -115,6 +116,7 @@ namespace Server { namespace Game { namespace Map {
         void _AddPlayer(std::shared_ptr<Player> p);
         void _RemovePlayer(Uint32 id);
         void _MovePlayer(Uint32 id, Common::MovingOrientedPosition pos);
+        void _PlayerDoodadRemoved(Uint32 id, Uint32 doodadId);
         void _DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos);
         void _DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos);
         void _DestroyCubes2(Chunk* chunk, std::shared_ptr<Common::CastChunk> cubePos);

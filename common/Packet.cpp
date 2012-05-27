@@ -40,7 +40,15 @@ namespace Common {
     void Packet::_Resize(Uint32 target)
     {
         if (target > MaxSize)
+        {
+            std::cout << target;
             throw std::runtime_error("Trying to create a too big packet");
+        }
+
+        Uint32 newTarget = (target / Sizestep + 1) * Sizestep;
+        if (newTarget > MaxSize)
+            newTarget = MaxSize;
+        target = newTarget;
 
         char* tmp = this->_data - SizeBytes;
         this->_data = new char[target + SizeBytes];

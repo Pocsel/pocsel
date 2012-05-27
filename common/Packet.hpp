@@ -17,7 +17,7 @@ namespace Common {
     public:
         enum {
             SizeBytes = 2,
-            MaxSize = (1 << 16) // -SizeBytes
+            MaxSize = 0xFF00
         };
     public:
         explicit Packet();

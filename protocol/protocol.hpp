@@ -89,6 +89,11 @@ namespace Protocol {
          */
         Action,
 
+        /**
+         * Uint32 doodadId
+         */
+        DoodadRemoved,
+
         NbPacketTypeClient, // pour les tableaux
     };
 
@@ -166,6 +171,28 @@ namespace Protocol {
          * Uint32 item id
          */
         ItemMove,
+
+        /**
+         * Uint32 doodadId
+         * Uint32 pluginId
+         * String doodadName
+         * Position position
+         * ? String serializedData
+         */
+        DoodadSpawn,
+
+        /**
+         * Uint32 doodadId
+         */
+        DoodadKill,
+
+        /**
+         * Uint32 doodadId
+         * bool position
+         * ? Position p
+         * ? String serializedData
+         */
+        DoodadUpdate,
 
         NbPacketTypeServer, // pour les tableaux
     };

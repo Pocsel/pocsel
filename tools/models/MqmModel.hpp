@@ -16,8 +16,8 @@ namespace Tools { namespace Models {
 
     class MqmModel
     {
-    public:
-        typedef std::function<Tools::Renderers::ITexture2D&(std::string const& name)> TextureCallback;
+    //public:
+    //    typedef std::function<Tools::Renderers::ITexture2D&(std::string const& name)> TextureCallback;
     public:
         struct JointInfo
         {
@@ -53,37 +53,33 @@ namespace Tools { namespace Models {
         unsigned int _numTris;
         unsigned int _numVerts;
         std::vector<glm::mat4x4> _baseFrame, _inverseBaseFrame;
-        std::vector<Tools::Renderers::ITexture2D*> _textures;
+        //std::vector<Tools::Renderers::ITexture2D*> _textures;
+        std::vector<std::string> _materials;
         Tools::Renderers::IVertexBuffer* _vertexBuffer;
         std::vector<Tools::Renderers::IIndexBuffer*> _indexBuffers;
-        std::vector<Tools::Models::Iqm::Mesh> _meshes;
-        std::vector<Tools::Models::Iqm::Joint> _joints;
+        std::vector<Mqm::Mesh> _meshes;
+        std::vector<Mqm::Joint> _joints;
         std::vector<JointInfo> _jointInfos;
 
     private:
         //anim
         std::vector<std::vector<FrameJoint>> _frames;
-        std::vector<Tools::Models::Iqm::Pose> _poses;
-        std::vector<Tools::Models::Iqm::Anim> _anims;
+        std::vector<Mqm::Pose> _poses;
+        std::vector<Mqm::Anim> _anims;
         std::vector<AnimInfo> _animInfos;
 
     public:
         explicit MqmModel(std::vector<char> const& data,
-                TextureCallback textureCallback,
+                //TextureCallback textureCallback,
                 Tools::IRenderer& renderer);
         ~MqmModel();
-
-        void _LoadMeshes(Tools::Models::Iqm::Header const& header,
-                std::vector<char> const& data,
-                TextureCallback textureCallback,
-                Tools::IRenderer& renderer);
-        void _LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data);
 
         std::vector<Tools::Models::Iqm::Mesh> const& GetMeshes() const { return this->_meshes; }
         std::vector<glm::mat4x4> const& GetInverseBindPose() const { return this->_inverseBaseFrame; }
         std::vector<glm::mat4x4> const& GetBindPose() const { return this->_baseFrame; }
 
-        std::vector<Tools::Renderers::ITexture2D*> const& GetTextures() const { return this->_textures; }
+        std::vector<std::string> const& GetMaterials() const { return this->_materials; }
+        //std::vector<Tools::Renderers::ITexture2D*> const& GetTextures() const { return this->_textures; }
         Tools::Renderers::IVertexBuffer* GetVertexBuffer() const { return this->_vertexBuffer; }
         std::vector<Tools::Renderers::IIndexBuffer*> const& GetIndexBuffers() const { return this->_indexBuffers; }
 
@@ -91,6 +87,12 @@ namespace Tools { namespace Models {
         std::vector<AnimInfo> const& GetAnimInfos() const { return this->_animInfos; }
         std::vector<JointInfo> const& GetJointInfos() const { return this->_jointInfos; }
     protected:
+        void _LoadMeshes(Tools::Models::Iqm::Header const& header,
+                std::vector<char> const& data,
+                //TextureCallback textureCallback,
+                Tools::IRenderer& renderer);
+        void _LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data);
+
         // Build the bind-pose and the inverse bind-pose matrix array for the model.
         void _BuildBindPose( const std::vector<Tools::Models::Iqm::Joint>& joints );
 

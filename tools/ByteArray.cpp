@@ -3,9 +3,9 @@
 namespace Tools {
 
     ByteArray::ByteArray() :
-        _size(0), _allocSize(INITIALSIZE), _offset(0)
+        _size(0), _allocSize(Initialize), _offset(0)
     {
-        this->_data = new char[INITIALSIZE];
+        this->_data = new char[Initialize];
     }
 
     ByteArray::ByteArray(ByteArray const& ByteArray) :
@@ -256,6 +256,7 @@ namespace Tools {
     void ByteArray::_Resize(Uint32 target)
     {
         assert(this->_allocSize < target);
+        target = (target / Sizestep + 1) * Sizestep;
         char* tmp = this->_data;
         this->_data = new char[target];
         std::memcpy(this->_data, tmp, this->_allocSize);

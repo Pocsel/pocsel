@@ -172,6 +172,13 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushMessage(m);
     }
 
+    void Map::PlayerDoodadRemoved(Uint32 id, Uint32 doodadId)
+    {
+        Tools::SimpleMessageQueue::Message
+            m(std::bind(&Map::_PlayerDoodadRemoved, this, id, doodadId));
+        this->_messageQueue->PushMessage(m);
+    }
+
     void Map::_GetChunk(Chunk::IdType id, ChunkCallback& response)
     {
         Chunk* chunk = this->_chunkManager->GetChunk(id);
@@ -306,6 +313,11 @@ namespace Server { namespace Game { namespace Map {
             auto toto = Network::PacketCreator::ItemMove(pos, id);
             this->_game.GetServer().GetClientManager().SendUdpPacket(it->first, toto);
         }
+    }
+
+    void Map::_PlayerDoodadRemoved(Uint32 id, Uint32 doodadId)
+    {
+        // TODO
     }
 
     void Map::_DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos)

@@ -135,4 +135,14 @@ namespace Client { namespace Network {
         return p;
     }
 
+    std::unique_ptr<UdpPacket> PacketCreator::DoodadRemoved(Uint32 id,
+                                                            Uint32 doodadId)
+    {
+        std::unique_ptr<UdpPacket> p(new UdpPacket(id));
+        p->Write(Protocol::ClientToServer::DoodadRemoved);
+
+        p->Write(doodadId);
+        return p;
+    }
+
 }}

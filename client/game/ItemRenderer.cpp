@@ -1,5 +1,6 @@
 #include "client/precompiled.hpp"
 
+#include "tools/renderers/utils/texture/ITexture.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/window/Window.hpp"
 #include "tools/models/MqmModel.hpp"
@@ -7,7 +8,7 @@
 #include "client/game/ItemRenderer.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
-#include "client/game/Model.hpp"
+#include "client/game/engine/Model.hpp"
 #include "client/game/Item.hpp"
 
 #include "common/CubePosition.hpp"
@@ -62,7 +63,7 @@ namespace Client { namespace Game {
             //    )
             );
 
-        Model const& model = item.GetModel();
+        Engine::Model const& model = item.GetModel();
 
         auto textures =  model.GetTextures();
         auto vertexBuffer =  model.GetVertexBuffer();
@@ -74,7 +75,7 @@ namespace Client { namespace Game {
         {
             auto& mesh = meshes[i];
             textures[i]->Bind();
-            this->_shaderTexture->Set(*textures[i]);
+            this->_shaderTexture->Set(textures[i]->GetCurrentTexture());
             indexBuffers[i]->Bind();
             this->_renderer.DrawElements(mesh.num_triangles * 3);
             indexBuffers[i]->Unbind();
