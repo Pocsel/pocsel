@@ -22,9 +22,13 @@ namespace Tools {
             p.Write(v.y);
         }
 
-    private:
-        static std::unique_ptr<glm::detail::tvec2<T>> Read(ByteArray const& p); // Used by Packet::Read<T>()
-        // TODO
+        static std::unique_ptr<glm::detail::tvec2<T>> Read(ByteArray const& p) // Used by Packet::Read<T>()
+        {
+            glm::detail::tvec2<T>* v = new glm::detail::tvec2<T>();
+            p.Read(v->x);
+            p.Read(v->y);
+            return std::unique_ptr<glm::detail::tvec2<T>>(v);
+        }
     };
 
     template<typename T> struct ByteArray::Serializer< glm::detail::tvec3<T> >
@@ -43,9 +47,14 @@ namespace Tools {
             p.Write(v.z);
         }
 
-    private:
-        static std::unique_ptr<glm::detail::tvec3<T>> Read(ByteArray const& p); // Used by Packet::Read<T>()
-        // TODO
+        static std::unique_ptr<glm::detail::tvec3<T>> Read(ByteArray const& p)
+        {
+            glm::detail::tvec3<T>* v = new glm::detail::tvec3<T>();
+            p.Read(v->x);
+            p.Read(v->y);
+            p.Read(v->z);
+            return std::unique_ptr<glm::detail::tvec3<T>>(v);
+        }
     };
 
 }
