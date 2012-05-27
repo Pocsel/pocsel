@@ -73,7 +73,11 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     std::unique_ptr<IShaderParameter> ShaderProgramCg::GetParameter(std::string const& identifier)
     {
-        return std::unique_ptr<IShaderParameter>(new ShaderParameterCg(*this, identifier));
+        auto param = new ShaderParameterCg(*this, identifier);
+        if (param->IsUseable())
+            return std::unique_ptr<IShaderParameter>(param);
+        Tools::Delete(param);
+        return std::unique_ptr<IShaderParameter>();
     }
 
     std::unique_ptr<IShaderParameter> ShaderProgramCg::GetParameterFromSemantic(std::string const& semantic)

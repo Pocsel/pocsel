@@ -18,6 +18,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         ShaderParameterCg(CGparameter parameter);
         virtual ~ShaderParameterCg();
 
+        bool IsUseable() const { return this->_param != 0; }
+
         virtual void Set(bool value);
         virtual void Set(int value);
         virtual void Set(float value);

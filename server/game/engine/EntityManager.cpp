@@ -486,7 +486,7 @@ namespace Server { namespace Game { namespace Engine {
 
     bool EntityManager::IsEntityPositional(Uint32 entityId) const
     {
-        return this->_positionalEntities.count(entityId);
+        return this->_positionalEntities.count(entityId) > 0;
     }
 
     void EntityManager::DisableEntity(Uint32 entityId, bool normalDisable /* = true */) throw(std::runtime_error)
