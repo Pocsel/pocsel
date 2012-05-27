@@ -57,7 +57,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     std::unique_ptr<IShaderParameter> ShaderProgram::GetParameter(std::string const& identifier)
     {
-        return std::unique_ptr<IShaderParameter>(new ShaderParameter(*this, identifier));
+        auto param = new ShaderParameter(*this, identifier);
+        if (param->IsUseable())
+            return std::unique_ptr<IShaderParameter>(param);
+        Tools::Delete(param);
+        return std::unique_ptr<IShaderParameter>();
     }
 
     std::unique_ptr<IShaderParameter> ShaderProgram::GetParameterFromSemantic(std::string const& semantic)

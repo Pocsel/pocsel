@@ -74,6 +74,42 @@ namespace Client { namespace Network {
                 PacketExtractor::ItemMove(p, pos, id);
                 this->_client.GetGame().GetItemManager().MoveItem(id, pos);
             };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadSpawn] =
+            [this](Tools::ByteArray& p)
+            {
+                if (this->_client.GetState() != Client::LoadingChunks &&
+                    this->_client.GetState() != Client::Running)
+                    throw std::runtime_error("Bad state for doodad spawn");
+                Uint32 doodadId;
+                Uint32 pluginId;
+                std::string doodadName;
+                Common::Position position;
+                std::list<std::pair<std::string /* key */, std::string /* value */>> values;
+                PacketExtractor::DoodadSpawn(p, doodadId, pluginId, doodadName, position, values);
+                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(doodadId, pluginId, doodadName, position, values);
+            };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadKill] =
+            [this](Tools::ByteArray& p)
+            {
+                if (this->_client.GetState() != Client::LoadingChunks &&
+                    this->_client.GetState() != Client::Running)
+                    throw std::runtime_error("Bad state for doodad kill");
+                Uint32 doodadId;
+                PacketExtractor::DoodadKill(p, doodadId);
+                this->_client.GetGame().GetEngine().GetDoodadManager().KillDoodad(doodadId);
+            };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadUpdate] =
+            [this](Tools::ByteArray& p)
+            {
+                if (this->_client.GetState() != Client::LoadingChunks &&
+                    this->_client.GetState() != Client::Running)
+                    throw std::runtime_error("Bad state for doodad update");
+                Uint32 doodadId;
+                Common::Position* position = 0;
+                std::list<std::tuple<bool, std::string /* key */, std::string /* value */>> commands;
+                PacketExtractor::DoodadUpdate(p, doodadId, position, commands);
+                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, position, commands);
+            };
     }
 
     void PacketDispatcher::ProcessAllPackets(std::list<Tools::ByteArray*>&& packets)

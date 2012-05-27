@@ -90,6 +90,8 @@ namespace Client { namespace Resources {
         for (auto it = this->_rawTextures.begin(), ite = this->_rawTextures.end(); it != ite; ++it)
             if (it->second != errTex)
                 Tools::Delete(it->second);
+        for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
+            Tools::Delete(it->second);
         for (auto it = this->_animatedTextureFrames.begin(), ite = this->_animatedTextureFrames.end(); it != ite; ++it)
             for (unsigned int i = 0; i < it->second.size(); ++i)
                 if (it->second[i] != errTex)

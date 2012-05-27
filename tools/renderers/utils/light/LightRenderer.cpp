@@ -165,8 +165,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         do
         {
             this->_directionnal.shader->BeginPass();
-            int i = 0;
-            for (auto it = lights.begin(), ite = lights.end(); it != ite; ++it)
+            unsigned int i = 0;
+            for (auto it = lights.begin(), ite = lights.end(); it != ite; ++it, ++i)
             {
                 it->SetParameters();
                 if (i < this->_directionnal.shadowMaps.size())
@@ -201,7 +201,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
 
     void LightRenderer::_RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& cameraPosition,  std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights)
     {
-        int i = 0;
+        unsigned int i = 0;
         for (auto it = lights.begin(), ite = lights.end(); it != ite && i < this->_directionnal.shadowMaps.size(); ++it, ++i)
         {
             glm::dmat4 lightView;

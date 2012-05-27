@@ -11,14 +11,19 @@ macro(precompiled_header sources includes target_name header_name project_name)
 
     # MSVC precompiled headers cmake code
     if (MSVC)
-        set_source_files_properties(${header_name}.cpp PROPERTIES COMPILE_FLAGS "/Yc${header_name}.hpp")
+    
+#        if (CMAKE_BUILD_TOOL STREQUAL "nmake")
+#
+#        else ()
+            set_source_files_properties(${header_name}.cpp PROPERTIES COMPILE_FLAGS "/Yc${header_name}.hpp")
 
-        set(CMAKE_CXX_FLAGS "/FI\"${header_name}.hpp\" ${CMAKE_CXX_FLAGS} /Yu${header_name}.hpp")
+            set(CMAKE_CXX_FLAGS "/FI\"${header_name}.hpp\" ${CMAKE_CXX_FLAGS} /Yu${header_name}.hpp")
 
-        # ${header_name}.cpp has to come before ${header_name}.hpp,
-        # otherwise we get a linker error...
-        list(INSERT ${sources} 0 ${header_name}.hpp)
-        list(INSERT ${sources} 0 ${header_name}.cpp)
+            # ${header_name}.cpp has to come before ${header_name}.hpp,
+            # otherwise we get a linker error...
+            list(INSERT ${sources} 0 ${header_name}.hpp)
+            list(INSERT ${sources} 0 ${header_name}.cpp)
+#        endif ()
 
     # GCC precompiled headers cmake code
     # We don't do this on Macs since GCC there goes haywire

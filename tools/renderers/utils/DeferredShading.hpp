@@ -5,16 +5,6 @@
 
 namespace Tools { namespace Renderers { namespace Utils {
 
-    class Material
-    {
-    public:
-        float shininess;
-        float custom1; // Paramètres custom pour les shaders
-        float custom2; // Paramètres custom pour les shaders
-        float custom3; // Paramètres custom pour les shaders
-
-    };
-
     class DeferredShading
     {
     private:
@@ -23,8 +13,6 @@ namespace Tools { namespace Renderers { namespace Utils {
     public:
         DeferredShading(IRenderer& renderer);
         ~DeferredShading();
-
-        void Render(IShaderParameter& textureParameter, ITexture2D& texture);
 
     private:
         static void _InitBuffers(IRenderer& renderer);

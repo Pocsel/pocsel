@@ -6,7 +6,7 @@
 namespace Client { namespace Game { namespace Engine {
 
     Model::Model(Resources::ResourceManager& resourceManager) :
-        _model(resourceManager.GetMqmModel(1, "boblampclean.mqm")),
+        _model(resourceManager.GetMqmModel(1, "stickman.mqm")),
         _animTime(0)
     {
         auto anims = this->_model.GetAnimInfos();
