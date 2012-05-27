@@ -105,6 +105,7 @@ namespace Client { namespace Game {
         Uint32 time = this->_updateTimer.GetElapsedTime();
         this->_player->UpdateMovements(time);
         this->_itemManager->Update(time);
+        this->_engine->Tick(time);
         this->_updateTimer.Reset();
 
         this->_statUpdateTime.End();

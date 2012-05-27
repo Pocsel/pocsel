@@ -30,6 +30,10 @@ namespace Client { namespace Game { namespace Engine {
         Tools::Delete(this->_interpreter);
     }
 
+    void Engine::Tick(Uint32 time)
+    {
+    }
+
     void Engine::LoadLuaScripts()
     {
         // enregistrement des fonctions spécifiques à chaque registrable client (Client.Effect.Register, Client.CubeMaterial.Register, ...)

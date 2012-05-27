@@ -62,7 +62,7 @@ namespace Client { namespace Game {
         if (!pluginId)
             throw std::runtime_error("Client.CubeMaterial.Register: Could not determine currently running plugin, aborting registration");
         std::string cubeMaterialName;
-        Tools::Lua::Ref prototype(helper.PopArg());
+        Tools::Lua::Ref prototype(helper.PopArg("Client.CubeMaterial.Register: Missing argument \"prototype\""));
         if (!prototype.IsTable())
             throw std::runtime_error("Client.CubeMaterial.Register: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
         if (!prototype["cubeMaterialName"].IsString())
