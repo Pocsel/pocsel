@@ -104,7 +104,7 @@ namespace Server { namespace Game { namespace Engine {
         if (this->_doodads.count(doodadId))
             throw std::runtime_error("a doodad with id " + Tools::ToString(doodadId) + " already exists");
 
-        Doodad* d = new Doodad(doodadId, pluginId, name, entityId, entity);
+        Doodad* d = new Doodad(doodadId, pluginId, name, entityId, entity, this->_engine.GetInterpreter());
         this->_doodads[doodadId] = d;
         this->_doodadsByEntities[entityId].push_back(d);
     }
