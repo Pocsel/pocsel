@@ -47,6 +47,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_entityManager->DispatchKillEvents();
         this->_entityManager->DispatchSpawnEvents();
         this->_messageManager->DispatchMessages();
+        this->_doodadManager->ExecuteCommands(); // PS: l'ordre a une importance de ouf
     }
 
     void Engine::Load(Tools::Database::IConnection& conn)

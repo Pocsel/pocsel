@@ -167,7 +167,7 @@ namespace Server { namespace ClientManagement {
             Uint32 doodadId;
             Network::PacketExtractor::DoodadRemoved(packet, doodadId);
 
-            manager.GetServer().GetGame().PlayerDoodadRemoved(client.id, doodadId);
+            manager.GetServer().GetGame().DoodadRemovedForPlayer(client.id, doodadId);
         }
     }}
 

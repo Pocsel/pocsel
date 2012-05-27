@@ -24,6 +24,7 @@ namespace Server { namespace Game { namespace Engine {
         std::map<Uint32 /* doodadId */, Doodad*> _doodads;
         std::map<Uint32 /* entityId */, std::list<Doodad*>> _doodadsByEntities;
         std::map<Uint32 /* entityId */, std::list<Doodad*>> _disabledDoodads;
+        std::unordered_set<Doodad*> _dirtyDoodads;
         Uint32 _nextDoodadId;
 
     public:
@@ -31,12 +32,18 @@ namespace Server { namespace Game { namespace Engine {
         ~DoodadManager();
         void Save(Tools::Database::IConnection& conn);
         void Load(Tools::Database::IConnection& conn);
+        void ExecuteCommands();
+        void DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId);
         void DeleteDoodadsOfEntity(Uint32 entityId);
         void DisableDoodadsOfEntity(Uint32 entityId);
         void EnableDoodadsOfEntity(Uint32 entityId);
+        void DoodadIsDirty(Doodad* doodad) { this->_dirtyDoodads.insert(doodad); }
+        void DoodadIsNotDirty(Doodad* doodad) { this->_dirtyDoodads.erase(doodad); }
     private:
         void _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
+        void _ApiSet(Tools::Lua::CallHelper& helper);
+        void _ApiCall(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
     };
 

@@ -51,13 +51,13 @@ namespace Client { namespace Network {
                 Uint32& pluginId,
                 std::string& doodadName,
                 Common::Position& position,
-                std::string& serializedData);
+                std::list<std::pair<std::string /* key */, std::string /* value */>>& values);
         static void DoodadKill(Tools::ByteArray const& p,
                 Uint32& doodadId);
         static void DoodadUpdate(Tools::ByteArray const& p,
                 Uint32& doodadId,
                 Common::Position*& position,
-                std::string& serializedData);
+                std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands);
     };
 
 }}

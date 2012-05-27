@@ -119,7 +119,7 @@ namespace Server { namespace Game {
             player->GetCurrentMap().DestroyCubes(Common::RayCast::SphereArea(p0, 100.0f / std::log10(dist * dist * 10.0f)));
     }
 
-    void Game::PlayerDoodadRemoved(Uint32 id, Uint32 doodadId)
+    void Game::DoodadRemovedForPlayer(Uint32 id, Uint32 doodadId)
     {
         auto it = this->_players.find(id);
         if (it == this->_players.end())
@@ -129,7 +129,7 @@ namespace Server { namespace Game {
         if (!player->IsInGame())
             return;
 
-        player->GetCurrentMap().PlayerDoodadRemoved(id, doodadId);
+        player->GetCurrentMap().DoodadRemovedForPlayer(id, doodadId);
     }
 
     void Game::SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance)

@@ -54,7 +54,7 @@ namespace Server { namespace Game {
         void PlayerMove(Uint32 id, Common::MovingOrientedPosition const& cam);
         void PlayerAction(Uint32 id, Common::OrientedPosition const& cam, Common::CubePosition const& targetPos);
         void PlayerAction2(Uint32 id, Common::OrientedPosition const& cam, Common::CubePosition const& targetPos);
-        void PlayerDoodadRemoved(Uint32 id, Uint32 doodadId);
+        void DoodadRemovedForPlayer(Uint32 id, Uint32 doodadId);
 
         // Thread safe
         void SpawnPlayer(std::string const& clientName, Uint32 clientId, std::string const& playerName, Uint32 viewDistance);

@@ -1,6 +1,8 @@
 #include "server/game/engine/Doodad.hpp"
+#include "server/game/engine/DoodadManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/PositionalEntity.hpp"
+#include "server/game/map/Map.hpp"
 #include "server/network/PacketCreator.hpp"
 #include "common/Packet.hpp"
 #include "tools/lua/Interpreter.hpp"
@@ -18,6 +20,21 @@ namespace Server { namespace Game { namespace Engine {
     Doodad::~Doodad()
     {
         Tools::debug << "Doodad::~Doodad: Doodad destroyed (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
+
+        // create kill packet
+        auto packet = Network::PacketCreator::DoodadKill(this->_id);
+
+        // send kill packet to players
+        auto it = this->_players.begin();
+        auto itEnd = this->_players.end();
+        for (; it != itEnd; ++it)
+        {
+            auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
+            this->_engine.SendPacket(*it, packetCopy);
+        }
+
+        // sécurité en plus, je pense que ça sert a rien
+        this->_engine.GetDoodadManager().DoodadIsNotDirty(this);
     }
 
     void Doodad::Disable()
@@ -33,6 +50,7 @@ namespace Server { namespace Game { namespace Engine {
     void Doodad::AddPlayer(Uint32 playerId)
     {
         this->_newPlayers.insert(playerId);
+        this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
     void Doodad::RemovePlayer(Uint32 playerId)
@@ -43,6 +61,9 @@ namespace Server { namespace Game { namespace Engine {
 
     void Doodad::_SpawnForNewPlayers()
     {
+        if (this->_newPlayers.empty())
+            return;
+
         // create packet
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         std::list<std::pair<std::string /* key */, std::string /* value */>> values;
@@ -56,17 +77,21 @@ namespace Server { namespace Game { namespace Engine {
         auto it = this->_newPlayers.begin();
         auto itEnd = this->_newPlayers.end();
         for (; it != itEnd; ++it)
-        {
-            auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
-            this->_engine.SendPacket(*it, packetCopy);
-            this->_players.insert(*it);
-        }
+            if (this->_engine.GetMap().HasPlayer(*it))
+            {
+                auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
+                this->_engine.SendPacket(*it, packetCopy);
+                this->_players.insert(*it);
+            }
         this->_newPlayers.clear();
     }
 
     void Doodad::ExecuteCommands()
     {
         this->_SpawnForNewPlayers();
+
+        if (this->_commands.empty())
+            return;
 
         // create packet
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
@@ -85,22 +110,27 @@ namespace Server { namespace Game { namespace Engine {
         auto it = this->_players.begin();
         auto itEnd = this->_players.end();
         for (; it != itEnd; ++it)
-        {
-            auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
-            this->_engine.SendPacket(*it, packetCopy);
-        }
+            if (this->_engine.GetMap().HasPlayer(*it))
+            {
+                auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
+                this->_engine.SendPacket(*it, packetCopy);
+            }
+            else
+                this->_players.erase(it);
     }
 
     void Doodad::Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value)
     {
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         this->_commands.push(Command(serializer.MakeSerializableCopy(key, true /* nilOnError */), serializer.MakeSerializableCopy(value, true /* nilOnError */)));
+        this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
     void Doodad::Call(std::string const& name, Tools::Lua::Ref const& value)
     {
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         this->_commands.push(Command(name, serializer.MakeSerializableCopy(value, true /* nilOnError */)));
+        this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
 }}}

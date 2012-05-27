@@ -85,6 +85,7 @@ namespace Server { namespace Game { namespace Map {
         Engine::Engine& GetEngine() { return *this->_engine; }
         Game& GetGame() { return this->_game; }
         World& GetWorld() { return this->_world; }
+        bool HasPlayer(Uint32 playerId) const { return this->_players.count(playerId); }
 
         // threadsafe
         std::vector<CubeType> const& GetCubeTypes() const { return this->_conf.cubeTypes; }
@@ -100,7 +101,7 @@ namespace Server { namespace Game { namespace Map {
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
-        void PlayerDoodadRemoved(Uint32 id, Uint32 doodadId);
+        void DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId);
         void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
 
         // rcon requests
@@ -117,7 +118,6 @@ namespace Server { namespace Game { namespace Map {
         void _AddPlayer(std::shared_ptr<Player> p);
         void _RemovePlayer(Uint32 id);
         void _MovePlayer(Uint32 id, Common::MovingOrientedPosition pos);
-        void _PlayerDoodadRemoved(Uint32 id, Uint32 doodadId);
         void _DestroyCube(Chunk* chunk, Chunk::CoordsType cubePos);
         void _DestroyCubes(Chunk* chunk, std::vector<Chunk::CoordsType> cubePos);
         void _DestroyCubes2(Chunk* chunk, std::shared_ptr<Common::CastChunk> cubePos);
