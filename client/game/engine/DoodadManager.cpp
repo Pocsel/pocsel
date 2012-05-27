@@ -23,4 +23,25 @@ namespace Client { namespace Game { namespace Engine {
         //return *it->second;
     }
 
+    void DoodadManager::SpawnDoodad(Uint32 doodadId,
+            Uint32 pluginId,
+            std::string const& doodadName,
+            Common::Position const& position,
+            std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
+    {
+
+    }
+
+    void DoodadManager::KillDoodad(Uint32 doodadId)
+    {
+
+    }
+
+    void DoodadManager::UpdateDoodad(Uint32 doodadId,
+            Common::Position const* position,
+            std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
+    {
+
+    }
+
 }}}
