@@ -1,6 +1,7 @@
 #include "server/game/engine/DoodadManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/Doodad.hpp"
+#include "server/game/map/Map.hpp"
 #include "tools/lua/Interpreter.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -117,7 +118,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_disabledDoodads.erase(listIt);
     }
 
-    void DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity)
+    Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity)
     {
         if (this->_doodads.count(doodadId))
             throw std::runtime_error("a doodad with id " + Tools::ToString(doodadId) + " already exists");
@@ -125,6 +126,7 @@ namespace Server { namespace Game { namespace Engine {
         Doodad* d = new Doodad(this->_engine, doodadId, pluginId, name, entityId, entity);
         this->_doodads[doodadId] = d;
         this->_doodadsByEntities[entityId].push_back(d);
+        return d;
     }
 
     void DoodadManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
@@ -148,8 +150,15 @@ namespace Server { namespace Game { namespace Engine {
             ++this->_nextDoodadId;
         Uint32 newId = this->_nextDoodadId++;
 
-        this->_CreateDoodad(newId, pluginId, doodadName, entityId, this->_engine.GetEntityManager().GetPositionalEntity(entityId));
+        Doodad* d = this->_CreateDoodad(newId, pluginId, doodadName, entityId, this->_engine.GetEntityManager().GetPositionalEntity(entityId));
         helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
+
+        // XXX test
+        auto const& players = this->_engine.GetMap().GetPlayers();
+        auto it = players.begin();
+        auto itEnd = players.end();
+        for (; it != itEnd; ++it)
+            d->AddPlayer(it->first);
     }
 
     void DoodadManager::_ApiSet(Tools::Lua::CallHelper& helper)

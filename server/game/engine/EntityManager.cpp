@@ -602,7 +602,7 @@ namespace Server { namespace Game { namespace Engine {
         assert(!this->_entities.count(entityId) && "impossible de créer une nouvelle entité car l'id est déjà utilisé dans la map des entités normales");
         this->_entities[entityId] = entity;
 
-        Tools::debug << "EntityManager::_CreateEntity: New " << (hasPosition ? "positional " : "") << "entity \"" << entityName << "\" (plugin " << pluginId << ") created (id: " << entityId << (hasPosition ? ", x: " + Tools::ToString(pos.x) + ", y: " + Tools::ToString(pos.y) + ", z: " + Tools::ToString(pos.z) : "") << ").\n";
+        Tools::debug << "EntityManager::_CreateEntity: New " << (itType->second->IsPositional() ? "positional " : "") << "entity \"" << entityName << "\" (plugin " << pluginId << ") created (id: " << entityId << (hasPosition ? ", x: " + Tools::ToString(pos.x) + ", y: " + Tools::ToString(pos.y) + ", z: " + Tools::ToString(pos.z) : "") << ").\n";
         return entity;
     }
 

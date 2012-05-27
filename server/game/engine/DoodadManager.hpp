@@ -40,7 +40,7 @@ namespace Server { namespace Game { namespace Engine {
         void DoodadIsDirty(Doodad* doodad) { this->_dirtyDoodads.insert(doodad); }
         void DoodadIsNotDirty(Doodad* doodad) { this->_dirtyDoodads.erase(doodad); }
     private:
-        void _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
+        Doodad* _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiSet(Tools::Lua::CallHelper& helper);
         void _ApiCall(Tools::Lua::CallHelper& helper);

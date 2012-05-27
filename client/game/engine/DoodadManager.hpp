@@ -28,6 +28,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 GetRunningDoodadId() const { return this->_runningDoodadId; }
         Uint32 GetRunningPluginId() const;
         Doodad const& GetDoodad(Uint32 doodadId) const throw(std::runtime_error); // ne pas garder la référence, le doodad peut etre delete à tout moment
+        void Tick();
         void SpawnDoodad(Uint32 doodadId,
                 Uint32 pluginId,
                 std::string const& doodadName,
@@ -38,6 +39,7 @@ namespace Client { namespace Game { namespace Engine {
                 Common::Position const* position,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands);
     private:
+        void _CallDoodadFunction(Uint32 doodadId, std::string const& function);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
     };
 

@@ -10,6 +10,9 @@ namespace Client { namespace Game { namespace Engine {
     DoodadManager::DoodadManager(Engine& engine) :
         _engine(engine), _runningDoodadId(0), _runningDoodad(0)
     {
+        auto& i = this->_engine.GetInterpreter();
+        auto namespaceTable = i.Globals().GetTable("Client").GetTable("Doodad");
+        namespaceTable.Set("Register", i.MakeFunction(std::bind(&DoodadManager::_ApiRegister, this, std::placeholders::_1)));
     }
 
     Uint32 DoodadManager::GetRunningPluginId() const
@@ -19,11 +22,18 @@ namespace Client { namespace Game { namespace Engine {
 
     Doodad const& DoodadManager::GetDoodad(Uint32 doodadId) const throw(std::runtime_error)
     {
-        throw std::runtime_error("bite");
-        //auto it = this->_doodads.find(doodadId);
-        //if (it == this->_doodads.end() || !it->second)
-        //    throw std::runtime_error("DoodadManager: Doodad not found.");
-        //return *it->second;
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end() || !it->second)
+            throw std::runtime_error("DoodadManager: Doodad not found.");
+        return *it->second;
+    }
+
+    void DoodadManager::Tick()
+    {
+        auto it = this->_doodads.begin();
+        auto itEnd = this->_doodads.end();
+        for (; it != itEnd; ++it)
+            this->_CallDoodadFunction(it->first, "Think");
     }
 
     void DoodadManager::SpawnDoodad(Uint32 doodadId,
@@ -32,16 +42,106 @@ namespace Client { namespace Game { namespace Engine {
             Common::Position const& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
     {
+        if (this->_doodads.count(doodadId))
+        {
+            Tools::error << "DoodadManager::SpawnDoodad: Doodad " << doodadId << " already exists." << std::endl;
+            return;
+        }
+        auto itPlugin = this->_doodadTypes.find(pluginId);
+        if (itPlugin == this->_doodadTypes.end())
+        {
+            Tools::error << "DoodadManager::SpawnDoodad: Plugin " << pluginId << " has no doodads." << std::endl;
+            return;
+        }
+        auto it = itPlugin->second.find(doodadName);
+        if (it == itPlugin->second.end())
+        {
+            Tools::error << "DoodadManager::SpawnDoodad: Doodad type \"" << doodadName << "\" not found in plugin " << pluginId << "." << std::endl;
+            return;
+        }
+        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(), doodadId, it->second);
+        auto itValues = values.begin();
+        auto itValuesEnd = values.end();
+        for (; itValues != itValuesEnd; ++itValues)
+        {
+            auto const& v = *itValues;
+            // TODO
+        }
+        this->_CallDoodadFunction(doodadId, "Spawn");
     }
 
     void DoodadManager::KillDoodad(Uint32 doodadId)
     {
+        auto it = this->_doodads.find(doodadId);
+        if (it != this->_doodads.end())
+        {
+            this->_CallDoodadFunction(doodadId, "Die");
+            Tools::Delete(it->second);
+            this->_doodads.erase(it);
+        }
+        else
+            Tools::error << "DoodadManager::KillDoodad: Doodad " << doodadId << " does not exist." << std::endl;
     }
 
     void DoodadManager::UpdateDoodad(Uint32 doodadId,
             Common::Position const* position,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end())
+        {
+            Tools::error << "DoodadManager::UpdateDoodad: Doodad " << doodadId << " not found." << std::endl;
+            return;
+        }
+        auto itCommands = commands.begin();
+        auto itCommandsEnd = commands.end();
+        for (; itCommands != itCommandsEnd; ++itCommands)
+        {
+            auto const& c = *itCommands;
+            if (std::get<0>(c)) // functionCall
+            {
+                this->_CallDoodadFunction(doodadId, std::get<1>(c) /* TODO value */);
+            }
+            else // pas functionCall
+            {
+                // TODO
+            }
+        }
+    }
+
+    void DoodadManager::_CallDoodadFunction(Uint32 doodadId, std::string const& function)
+    {
+        assert(!this->_runningDoodadId && !this->_engine.GetRunningDoodadId() && "chainage de calls Lua, THIS IS BAD");
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end())
+        {
+            Tools::error << "DoodadManager::_CallDoodadFunction: Call to \"" << function << "\" for doodad " << doodadId << " failed: doodad not found.\n";
+            return;
+        }
+        try
+        {
+            auto prototype = it->second->GetType().GetPrototype();
+            if (!prototype.IsTable())
+                throw std::runtime_error("prototype is not a table"); // le moddeur a fait de la merde avec son type...
+            auto f = it->second->GetType().GetPrototype()[function];
+            if (f.IsFunction())
+            {
+                this->_runningDoodadId = doodadId;
+                this->_runningDoodad = it->second;
+                f();
+                this->_runningDoodad = 0;
+                this->_runningDoodadId = 0;
+            }
+            else
+            {
+                Tools::error << "DoodadManager::_CallDoodadFunction: Call to \"" << function << "\" for doodad " << doodadId << " (\"" << it->second->GetType().GetName() << "\") failed: function not found (type: " << f.GetTypeName() << ").\n";
+            }
+        }
+        catch (std::exception& e)
+        {
+            Tools::error << "DoodadManager::_CallDoodadFunction: Fatal (doodad deleted): Call to \"" << function << "\" for doodad " << doodadId << " (\"" << it->second->GetType().GetName() << "\") failed: " << e.what() << std::endl;
+            return;
+        }
     }
 
     void DoodadManager::_ApiRegister(Tools::Lua::CallHelper& helper)

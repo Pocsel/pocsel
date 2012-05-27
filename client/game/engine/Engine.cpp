@@ -30,8 +30,9 @@ namespace Client { namespace Game { namespace Engine {
         Tools::Delete(this->_interpreter);
     }
 
-    void Engine::Tick(Uint32 time)
+    void Engine::Tick(Uint32)
     {
+        this->_doodadManager->Tick();
     }
 
     void Engine::LoadLuaScripts()
@@ -76,7 +77,7 @@ namespace Client { namespace Game { namespace Engine {
         {
             str += "?";
         }
-        str += "]";
+        str += "] ";
         auto it = helper.GetArgList().begin();
         auto itEnd = helper.GetArgList().end();
         for (; it != itEnd; ++it)

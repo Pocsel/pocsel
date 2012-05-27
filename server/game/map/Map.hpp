@@ -86,6 +86,7 @@ namespace Server { namespace Game { namespace Map {
         Game& GetGame() { return this->_game; }
         World& GetWorld() { return this->_world; }
         bool HasPlayer(Uint32 playerId) const { return this->_players.count(playerId); }
+        std::map<Uint32, std::shared_ptr<Player>> const& GetPlayers() const { return this->_players; }
 
         // threadsafe
         std::vector<CubeType> const& GetCubeTypes() const { return this->_conf.cubeTypes; }

@@ -4,11 +4,7 @@ Server.Entity.Register{
 
     Spawn = function(self) -- constructor
         print("Spawn()")
-        self.i = 0
-        self:Loop()
-        for i = 0, math.random() * 8 do
-            Server.Entity.Spawn({ x = math.random() * 10, y = math.random() * 10, z = math.random() * 10 }, "Blob", self.id)
-        end
+        Server.Message.Later(10, self.id, "SpawnBlob")
     end,
 
     Die = function(self) -- destructor
@@ -16,32 +12,15 @@ Server.Entity.Register{
     end,
 
     Save = function(self) -- save to database
-        self.storage.i = self.i
-        if not self.storage.nbSaves then
-            self.storage.nbSaves = 1
-        else
-            self.storage.nbSaves = self.storage.nbSaves + 1
-        end
-        print("number of saves: ", self.storage.nbSaves)
-        Server.Entity.Kill(self.storage.nbSaves + 1)
-        Server.Entity.Kill(self.storage.nbSaves + 2)
-        for i = 0, math.random() * 6 do
-            Server.Entity.Spawn({ x = math.random() * 10, y = math.random() * 10, z = math.random() * 10 }, "Blob", self.id)
-        end
+        print("Save()")
     end,
 
     Load = function(self) -- load from database
         print("Load()")
-        self.i = self.storage.i
     end,
 
-    Loop = function(self)
-        self.i = self.i + 1
-        Server.Message.Later(5, self.id, "Loop")
-    end,
-
-    GetCounter = function(self)
-        return self.i
+    SpawnBlob = function(self)
+        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 10, z = 67108864 }, "Blob")
     end,
 
 }
@@ -51,24 +30,31 @@ Server.Entity.RegisterPositional{
     entityName = "Blob",
 
     Spawn = function(self, initEntity)
-        self:Loop(initEntity)
-
-
-        self.doodad = Server.Doodad.Spawn("Coucou")
-        print("Mon doodad ", self.doodad)
-        -- self.d = Server.Doodad.Spawn("Pelleteuse", {"PelleteuseBase", "PelleteusePelle"})
-        -- Server.Doodad.RotateBody(self.d, "PelleteusePelle", Utils.Quat(5, 0, 0, 0))
-
-
+        print("Spawn()")
+        self.doodad = Server.Doodad.Spawn("Test")
+        Server.Message.Later(5, self.id, "CallTest")
+        Server.Message.Later(10, self.id, "KillTest")
     end,
 
-    Loop = function(self, initEntity)
-        Server.Message.Later(5 + math.random() * 20, initEntity, "GetCounter", nil, self.id, "GotCounter")
+    Die = function(self)
+        print("Die()");
     end,
 
-    GotCounter = function(self, arg, result)
-        print(result.ret)
-        self:Loop(result.entityId)
+    Save = function(self)
+        print("Save()")
+    end,
+
+    Load = function(self)
+        print("Load()")
+    end,
+
+    CallTest = function(self)
+        Server.Doodad.Call(self.doodad, "TestFunction", {})
+        Server.Doodad.Call(self.doodad, "TestFunction2", {})
+    end,
+
+    KillTest = function(self)
+        Server.Doodad.Kill(self.doodad)
     end,
 
 }
