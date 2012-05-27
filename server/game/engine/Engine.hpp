@@ -6,17 +6,18 @@
 namespace Tools { namespace Database {
     class IConnection;
 }}
-
 namespace Tools { namespace Lua {
     class Interpreter;
 }}
-
 namespace Server { namespace Game {
     namespace Map {
         class Map;
     }
     class World;
 }}
+namespace Common {
+    class Packet;
+}
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -53,6 +54,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
         World& GetWorld() { return this->_world; }
+        void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
         Uint32 GetRunningPluginId() { return this->_overriddenPluginId ? this->_overriddenPluginId : this->_entityManager->GetRunningPluginId(); }
         void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
         Uint32 GetRunningEntityId() { return this->_overriddenEntityId ? this->_overriddenEntityId : this->_entityManager->GetRunningEntityId(); }

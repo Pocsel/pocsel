@@ -101,6 +101,7 @@ namespace Server { namespace Game { namespace Map {
         void RemovePlayer(Uint32 id);
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
         void PlayerDoodadRemoved(Uint32 id, Uint32 doodadId);
+        void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
 
         // rcon requests
         void RconExecute(Uint32 pluginId, std::string lua, std::function<void(std::string)> cb) const;

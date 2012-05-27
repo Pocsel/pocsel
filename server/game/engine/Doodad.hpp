@@ -6,6 +6,7 @@
 namespace Server { namespace Game { namespace Engine {
 
     class PositionalEntity;
+    class Engine;
 
     class Doodad :
         private boost::noncopyable
@@ -28,6 +29,7 @@ namespace Server { namespace Game { namespace Engine {
         };
 
     private:
+        Engine& _engine;
         Uint32 _id;
         Uint32 _pluginId;
         std::string _name;
@@ -39,7 +41,7 @@ namespace Server { namespace Game { namespace Engine {
         std::queue<Command> _commands;
 
     public:
-        Doodad(Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, Tools::Lua::Interpreter& interpreter);
+        Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
         ~Doodad();
         Uint32 GetId() const { return this->_id; }
         Uint32 GetEntityId() const { return this->_entityId; }
