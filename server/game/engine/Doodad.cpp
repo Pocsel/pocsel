@@ -12,7 +12,14 @@
 namespace Server { namespace Game { namespace Engine {
 
     Doodad::Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity) :
-        _engine(engine), _id(id), _pluginId(pluginId), _name(name), _entityId(entityId), _entity(entity), _table(engine.GetInterpreter().MakeTable())
+        _engine(engine),
+        _id(id),
+        _pluginId(pluginId),
+        _name(name),
+        _entityId(entityId),
+        _entity(entity),
+        _table(engine.GetInterpreter().MakeTable()),
+        _positionDirty(false)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
     }
@@ -90,7 +97,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         this->_SpawnForNewPlayers();
 
-        if (this->_commands.empty())
+        if (this->_commands.empty() && !this->_positionDirty)
             return;
 
         // create packet
@@ -104,7 +111,8 @@ namespace Server { namespace Game { namespace Engine {
                 this->_table.Set(c.key, c.value); // update of server state
             this->_commands.pop();
         }
-        auto packet = Network::PacketCreator::DoodadUpdate(this->_id, &this->_entity.GetPosition(), commands);
+        auto packet = Network::PacketCreator::DoodadUpdate(this->_id, this->_positionDirty ? &this->_entity.GetPosition() : 0, commands);
+        this->_positionDirty = false;
 
         // send packet to players
         auto it = this->_players.begin();
@@ -130,6 +138,12 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         this->_commands.push(Command(name, serializer.MakeSerializableCopy(value, true /* nilOnError */)));
+        this->_engine.GetDoodadManager().DoodadIsDirty(this);
+    }
+
+    void Doodad::PositionIsDirty()
+    {
+        this->_positionDirty = true;
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 

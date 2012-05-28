@@ -1,6 +1,7 @@
 #include "client/game/engine/Engine.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/engine/Doodad.hpp"
+#include "client/game/engine/ModelManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "common/Resource.hpp"
@@ -22,17 +23,20 @@ namespace Client { namespace Game { namespace Engine {
 
         // création des managers
         this->_doodadManager = new DoodadManager(*this);
+        this->_modelManager = new ModelManager(*this);
     }
 
     Engine::~Engine()
     {
+        Tools::Delete(this->_modelManager);
         Tools::Delete(this->_doodadManager);
         Tools::Delete(this->_interpreter);
     }
 
-    void Engine::Tick(Uint32)
+    void Engine::Tick(Uint32 time)
     {
         this->_doodadManager->Tick();
+        this->_modelManager->Tick(time);
     }
 
     void Engine::LoadLuaScripts()

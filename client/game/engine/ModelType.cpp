@@ -2,8 +2,8 @@
 
 namespace Client { namespace Game { namespace Engine {
 
-    ModelType::ModelType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype) :
-        _name(name), _pluginId(pluginId), _prototype(prototype)
+    ModelType::ModelType(Uint32 pluginId, std::string const& name, Uint32 resourceId) :
+        _pluginId(pluginId), _name(name), _resourceId(resourceId)
     {
     }
 

@@ -31,6 +31,8 @@ namespace Server { namespace Game { namespace Engine {
         auto namespaceTable = i.Globals()["Server"].Set("Entity", i.MakeTable());
         namespaceTable.Set("Spawn", i.MakeFunction(std::bind(&EntityManager::_ApiSpawn, this, std::placeholders::_1)));
         namespaceTable.Set("SpawnFromPlugin", i.MakeFunction(std::bind(&EntityManager::_ApiSpawnFromPlugin, this, std::placeholders::_1)));
+        namespaceTable.Set("SetPos", i.MakeFunction(std::bind(&EntityManager::_ApiSetPos, this, std::placeholders::_1)));
+        namespaceTable.Set("GetPos", i.MakeFunction(std::bind(&EntityManager::_ApiGetPos, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&EntityManager::_ApiKill, this, std::placeholders::_1)));
         namespaceTable.Set("Register", i.MakeFunction(std::bind(&EntityManager::_ApiRegister, this, std::placeholders::_1)));
         namespaceTable.Set("RegisterPositional", i.MakeFunction(std::bind(&EntityManager::_ApiRegisterPositional, this, std::placeholders::_1)));
@@ -669,6 +671,34 @@ namespace Server { namespace Game { namespace Engine {
         if (cbTargetId)
             callbackId = this->_engine.GetCallbackManager().MakeCallback(cbTargetId, cbFunction, cbArg);
         this->AddSpawnEvent(pluginId, entityName, arg, this->_engine.GetRunningEntityId(), callbackId, hasPosition, pos);
+    }
+
+    void EntityManager::_ApiSetPos(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 targetId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
+        Common::Position pos = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg("Server.Entity.SetPos: Missing argument \"position\""));
+        auto it = this->_positionalEntities.find(targetId);
+        if (it == this->_positionalEntities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << targetId << " not found." << std::endl;
+            return;
+        }
+        it->second->SetPosition(pos);
+        this->_engine.GetDoodadManager().EntityHasMoved(targetId);
+    }
+
+    void EntityManager::_ApiGetPos(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 targetId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
+        auto it = this->_positionalEntities.find(targetId);
+        if (it == this->_positionalEntities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << targetId << " not found." << std::endl;
+            return; // retourne nil
+        }
+        Tools::Lua::Ref pos(this->_engine.GetInterpreter().GetState());
+        Tools::Lua::Utils::Vector::Vec3ToTable(it->second->GetPosition(), pos);
+        helper.PushRet(pos);
     }
 
     void EntityManager::_ApiKill(Tools::Lua::CallHelper& helper)

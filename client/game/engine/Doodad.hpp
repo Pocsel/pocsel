@@ -3,6 +3,7 @@
 
 #include "client/game/engine/DoodadType.hpp"
 #include "tools/lua/Ref.hpp"
+#include "common/Position.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -12,11 +13,15 @@ namespace Client { namespace Game { namespace Engine {
     private:
         DoodadType* _type;
         Tools::Lua::Ref _self;
+        Common::Position _pos;
 
     public:
-        Doodad(Tools::Lua::Interpreter& interpreter, Uint32 id, DoodadType* type);
+        Doodad(Tools::Lua::Interpreter& interpreter, Uint32 id, Common::Position const& pos, DoodadType* type);
+        ~Doodad();
         DoodadType const& GetType() const { return *this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
+        Common::Position const& GetPosition() const { return this->_pos; }
+        void SetPosition(Common::Position const& pos) { this->_pos = pos; }
     };
 
 }}}

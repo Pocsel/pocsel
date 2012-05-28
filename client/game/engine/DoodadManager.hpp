@@ -25,7 +25,9 @@ namespace Client { namespace Game { namespace Engine {
 
     public:
         DoodadManager(Engine& engine);
+        ~DoodadManager();
         Uint32 GetRunningDoodadId() const { return this->_runningDoodadId; }
+        Doodad* GetRunningDoodad() const { return this->_runningDoodad; }
         Uint32 GetRunningPluginId() const;
         Doodad const& GetDoodad(Uint32 doodadId) const throw(std::runtime_error); // ne pas garder la référence, le doodad peut etre delete à tout moment
         void Tick();

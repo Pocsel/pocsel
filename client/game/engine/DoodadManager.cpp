@@ -1,4 +1,5 @@
 #include "client/game/engine/DoodadManager.hpp"
+#include "client/game/engine/ModelManager.hpp"
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/DoodadType.hpp"
 #include "client/game/engine/Engine.hpp"
@@ -15,6 +16,25 @@ namespace Client { namespace Game { namespace Engine {
         namespaceTable.Set("Register", i.MakeFunction(std::bind(&DoodadManager::_ApiRegister, this, std::placeholders::_1)));
     }
 
+    DoodadManager::~DoodadManager()
+    {
+        // doodads
+        auto itDoodad = this->_doodads.begin();
+        auto itDoodadEnd = this->_doodads.end();
+        for (; itDoodad != itDoodadEnd; ++itDoodad)
+            Tools::Delete(itDoodad->second);
+        // doodad types
+        auto itPlugin = this->_doodadTypes.begin();
+        auto itPluginEnd = this->_doodadTypes.begin();
+        for (; itPlugin != itPluginEnd; ++itPlugin)
+        {
+            auto itType = itPlugin->second.begin();
+            auto itTypeEnd = itPlugin->second.end();
+            for (; itType != itTypeEnd; ++itType)
+                Tools::Delete(itType->second);
+        }
+    }
+
     Uint32 DoodadManager::GetRunningPluginId() const
     {
         return this->_runningDoodad ? this->_runningDoodad->GetType().GetPluginId() : 0;
@@ -24,7 +44,7 @@ namespace Client { namespace Game { namespace Engine {
     {
         auto it = this->_doodads.find(doodadId);
         if (it == this->_doodads.end() || !it->second)
-            throw std::runtime_error("DoodadManager: Doodad not found.");
+            throw std::runtime_error("DoodadManager::GetDoodad: Doodad not found.");
         return *it->second;
     }
 
@@ -59,7 +79,7 @@ namespace Client { namespace Game { namespace Engine {
             Tools::error << "DoodadManager::SpawnDoodad: Doodad type \"" << doodadName << "\" not found in plugin " << pluginId << "." << std::endl;
             return;
         }
-        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(), doodadId, it->second);
+        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(), doodadId, position, it->second);
         auto itValues = values.begin();
         auto itValuesEnd = values.end();
         for (; itValues != itValuesEnd; ++itValues)
@@ -76,6 +96,7 @@ namespace Client { namespace Game { namespace Engine {
         if (it != this->_doodads.end())
         {
             this->_CallDoodadFunction(doodadId, "Die");
+            this->_engine.GetModelManager().DeleteModelsOfDoodad(doodadId);
             Tools::Delete(it->second);
             this->_doodads.erase(it);
         }
@@ -93,6 +114,8 @@ namespace Client { namespace Game { namespace Engine {
             Tools::error << "DoodadManager::UpdateDoodad: Doodad " << doodadId << " not found." << std::endl;
             return;
         }
+        if (position)
+            it->second->SetPosition(*position);
         auto itCommands = commands.begin();
         auto itCommandsEnd = commands.end();
         for (; itCommands != itCommandsEnd; ++itCommands)

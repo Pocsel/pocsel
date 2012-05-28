@@ -3,7 +3,6 @@
 #include "tools/ByteArray.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/CubeTypeManager.hpp"
-#include "client/game/ItemManager.hpp"
 #include "client/map/Map.hpp"
 #include "client/map/ChunkManager.hpp"
 #include "client/resources/ResourceDownloader.hpp"
@@ -66,13 +65,13 @@ namespace Client { namespace Network {
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::ItemMove] =
             [this](Tools::ByteArray& p)
             {
-                if (this->_client.GetState() != Client::LoadingChunks &&
-                    this->_client.GetState() != Client::Running)
-                    throw std::runtime_error("Bad state for item move");
-                Common::MovingOrientedPosition pos;
-                Uint32 id;
-                PacketExtractor::ItemMove(p, pos, id);
-                this->_client.GetGame().GetItemManager().MoveItem(id, pos);
+                //if (this->_client.GetState() != Client::LoadingChunks &&
+                //    this->_client.GetState() != Client::Running)
+                //    throw std::runtime_error("Bad state for item move");
+                //Common::MovingOrientedPosition pos;
+                //Uint32 id;
+                //PacketExtractor::ItemMove(p, pos, id);
+                //this->_client.GetGame().GetItemManager().MoveItem(id, pos);
             };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadSpawn] =
             [this](Tools::ByteArray& p)

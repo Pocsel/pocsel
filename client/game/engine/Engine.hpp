@@ -13,6 +13,8 @@ namespace Client { namespace Game {
 
 namespace Client { namespace Game { namespace Engine {
 
+    class ModelManager;
+
     class Engine :
         private boost::noncopyable
     {
@@ -20,6 +22,7 @@ namespace Client { namespace Game { namespace Engine {
         Game& _game;
         Tools::Lua::Interpreter* _interpreter;
         DoodadManager* _doodadManager;
+        ModelManager* _modelManager;
         Uint32 _overriddenPluginId;
         Uint32 _overriddenDoodadId;
 
@@ -30,6 +33,7 @@ namespace Client { namespace Game { namespace Engine {
         void LoadLuaScripts();
         Game& GetGame() { return this->_game; }
         DoodadManager& GetDoodadManager() { return *this->_doodadManager; }
+        ModelManager& GetModelManager() { return *this->_modelManager; }
         Uint32 GetRunningPluginId() { return this->_overriddenPluginId ? this->_overriddenPluginId : this->_doodadManager->GetRunningPluginId(); }
         void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
         Uint32 GetRunningDoodadId() { return this->_overriddenDoodadId ? this->_overriddenDoodadId : this->_doodadManager->GetRunningDoodadId(); }

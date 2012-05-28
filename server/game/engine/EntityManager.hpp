@@ -95,6 +95,8 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper);
         void _SpawnFromPlugin(bool hasPosition, Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper);
+        void _ApiSetPos(Tools::Lua::CallHelper& helper);
+        void _ApiGetPos(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);

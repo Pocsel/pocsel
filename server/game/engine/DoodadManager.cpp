@@ -61,7 +61,7 @@ namespace Server { namespace Game { namespace Engine {
     void DoodadManager::DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId)
     {
         auto it = this->_doodads.find(doodadId);
-        if (it != this->_doodads.end())
+        if (it != this->_doodads.end() && it->second)
             it->second->RemovePlayer(playerId);
     }
 
@@ -118,6 +118,18 @@ namespace Server { namespace Game { namespace Engine {
         this->_disabledDoodads.erase(listIt);
     }
 
+    void DoodadManager::EntityHasMoved(Uint32 entityId)
+    {
+        auto itList = this->_doodadsByEntities.find(entityId);
+        if (itList == this->_doodadsByEntities.end())
+            return;
+        auto it = itList->second.begin();
+        auto itEnd = itList->second.end();
+        for (; it != itEnd; ++it)
+            if ((*it))
+                (*it)->PositionIsDirty();
+    }
+
     Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity)
     {
         if (this->_doodads.count(doodadId))
@@ -134,7 +146,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 pluginId = this->_engine.GetRunningPluginId();
         if (!pluginId)
             throw std::runtime_error("Server.Doodad.Spawn: Could not determine currently running plugin, cannot spawn doodad");
-        Uint32 entityId = this->_engine.GetEntityManager().GetRunningEntityId();
+        Uint32 entityId = this->_engine.GetRunningEntityId();
         if (helper.GetNbArgs() >= 2)
             entityId = static_cast<Uint32>(helper.PopArg().CheckNumber("Server.Doodad.Spawn: Argument \"entityId\" must be a number"));
         std::string doodadName = helper.PopArg("Server.Doodad.Spawn: Missing argument \"doodadName\"").CheckString("Server.Doodad.Spawn: Argument \"doodadName\" must be a string");
@@ -209,7 +221,7 @@ namespace Server { namespace Game { namespace Engine {
         if (itList->second.empty())
             this->_doodadsByEntities.erase(itList); // supprime l'entrée associée à l'entité si celle-ci n'a plus de doodads
 
-        // enleve le doodad de la map générales + delete
+        // enleve le doodad de la map générale + delete
         Tools::Delete(it->second);
         this->_doodads.erase(it);
     }

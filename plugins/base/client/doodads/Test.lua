@@ -4,6 +4,7 @@ Client.Doodad.Register{
 
     Spawn = function(self)
         print("Spawn()")
+        Client.Model.Spawn("Stickman")
     end,
 
     Think = function(self)

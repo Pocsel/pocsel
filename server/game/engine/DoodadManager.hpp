@@ -37,6 +37,7 @@ namespace Server { namespace Game { namespace Engine {
         void DeleteDoodadsOfEntity(Uint32 entityId);
         void DisableDoodadsOfEntity(Uint32 entityId);
         void EnableDoodadsOfEntity(Uint32 entityId);
+        void EntityHasMoved(Uint32 entityId);
         void DoodadIsDirty(Doodad* doodad) { this->_dirtyDoodads.insert(doodad); }
         void DoodadIsNotDirty(Doodad* doodad) { this->_dirtyDoodads.erase(doodad); }
     private:

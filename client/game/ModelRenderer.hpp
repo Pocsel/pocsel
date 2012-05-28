@@ -1,10 +1,11 @@
-#ifndef __CLIENT_GAME_ITEMRENDERER_HPP__
-#define __CLIENT_GAME_ITEMRENDERER_HPP__
+#ifndef __CLIENT_GAME_MODELRENDERER_HPP__
+#define __CLIENT_GAME_MODELRENDERER_HPP__
+
+#include "common/Position.hpp"
 
 namespace Common {
     struct OrientedPosition;
 }
-
 namespace Tools {
     class IRenderer;
     namespace Renderers {
@@ -13,11 +14,12 @@ namespace Tools {
         class IVertexBuffer;
     }
 }
-
 namespace Client {
     namespace Game {
+        namespace Engine {
+            class Model;
+        }
         class Game;
-        class Item;
     }
     namespace Resources {
         class ITexture;
@@ -26,7 +28,7 @@ namespace Client {
 
 namespace Client { namespace Game {
 
-    class ItemRenderer
+    class ModelRenderer
     {
     private:
         Game& _game;
@@ -37,9 +39,9 @@ namespace Client { namespace Game {
         Uint32 _elapsedTime;
 
     public:
-        ItemRenderer(Game& game);
-        ~ItemRenderer();
-        void Render(Item const& item);
+        ModelRenderer(Game& game);
+        ~ModelRenderer();
+        void Render(Engine::Model const& model, Common::Position const& pos);
         void Update(Uint32 time);
 
     private:

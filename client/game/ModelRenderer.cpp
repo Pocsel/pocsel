@@ -5,11 +5,10 @@
 #include "tools/window/Window.hpp"
 #include "tools/models/MqmModel.hpp"
 
-#include "client/game/ItemRenderer.hpp"
+#include "client/game/ModelRenderer.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
 #include "client/game/engine/Model.hpp"
-#include "client/game/Item.hpp"
 
 #include "common/CubePosition.hpp"
 
@@ -19,7 +18,7 @@
 
 namespace Client { namespace Game {
 
-    ItemRenderer::ItemRenderer(Game& game) :
+    ModelRenderer::ModelRenderer(Game& game) :
         _game(game),
         _renderer(game.GetClient().GetWindow().GetRenderer()),
         _elapsedTime(0)
@@ -29,13 +28,13 @@ namespace Client { namespace Game {
         this->_shaderBoneMatrix = this->_shader->GetParameter("boneMatrix").release();
     }
 
-    ItemRenderer::~ItemRenderer()
+    ModelRenderer::~ModelRenderer()
     {
         Tools::Delete(this->_shaderTexture);
         Tools::Delete(this->_shaderBoneMatrix);
     }
 
-    void ItemRenderer::Render(Item const& item)
+    void ModelRenderer::Render(Engine::Model const& model, Common::Position const& pos)
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
 
@@ -43,15 +42,15 @@ namespace Client { namespace Game {
 
         float pi = std::atan2(0.0f, -1.0f);
 
-        Common::OrientedPosition const& pos = item.position;
+        //Common::OrientedPosition const& pos = item.position;
 
         this->_renderer.SetModelMatrix(
             glm::translate<float>(
-                glm::fvec3(pos.position - camera.position)
+                glm::fvec3(pos - camera.position)
                 )
             *
             glm::yawPitchRoll<float>(
-                   /*pi / 2*/-pos.theta, -pi / 2, 0.0f
+                   /*pi / 2*/ /*-pos.theta*/0, -pi / 2, 0.0f
                 )
             //*
             //glm::translate<float>(
@@ -63,7 +62,7 @@ namespace Client { namespace Game {
             //    )
             );
 
-        Engine::Model const& model = item.GetModel();
+        //Engine::Model const& model = item.GetModel();
 
         auto textures =  model.GetTextures();
         auto vertexBuffer =  model.GetVertexBuffer();
@@ -86,7 +85,7 @@ namespace Client { namespace Game {
         this->_shader->EndPass();
     }
 
-    void ItemRenderer::Update(Uint32 time)
+    void ModelRenderer::Update(Uint32 time)
     {
         this->_elapsedTime += time;
     }

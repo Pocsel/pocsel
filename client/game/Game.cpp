@@ -13,7 +13,7 @@
 #include "client/game/Game.hpp"
 #include "client/map/Map.hpp"
 #include "client/game/Player.hpp"
-#include "client/game/ItemManager.hpp"
+#include "client/game/engine/ModelManager.hpp"
 #include "client/resources/LocalResourceManager.hpp"
 
 namespace Client { namespace Game {
@@ -29,7 +29,6 @@ namespace Client { namespace Game {
         this->_cubeTypeManager = new CubeTypeManager(client, nbCubeTypes);
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
         this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
-        this->_itemManager = new ItemManager(*this),
         this->_player = new Player(*this);
         this->_engine = new Engine::Engine(*this);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
@@ -75,7 +74,6 @@ namespace Client { namespace Game {
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
         Tools::Delete(this->_player);
-        Tools::Delete(this->_itemManager);
         Tools::Delete(this->_resourceManager);
         Tools::Delete(this->_cubeTypeManager);
         Tools::Delete(this->_engine);
@@ -104,7 +102,6 @@ namespace Client { namespace Game {
         this->_map->GetChunkManager().Update(this->_gameTimer.GetPreciseElapsedTime(), this->_player->GetPosition());
         Uint32 time = this->_updateTimer.GetElapsedTime();
         this->_player->UpdateMovements(time);
-        this->_itemManager->Update(time);
         this->_engine->Tick(time);
         this->_updateTimer.Reset();
 
@@ -168,8 +165,8 @@ namespace Client { namespace Game {
     {
         try
         {
-            this->_engine->LoadLuaScripts(); // registering de tous les registrables client (Effect, CubeMaterial, ...)
             this->_resourceManager->BuildResourceIndex(); // créé des maps pour acceder au resources par pluginId + nom
+            this->_engine->LoadLuaScripts(); // registering de tous les registrables client (Effect, CubeMaterial, ...)
             this->_cubeTypeManager->LoadMaterials(); // construit les cubes types à partir des CubeMaterial registerés
         }
         catch (std::exception& e)
@@ -181,7 +178,7 @@ namespace Client { namespace Game {
     void Game::_RenderScene(glm::dmat4 viewProjection)
     {
         this->_map->GetChunkManager().Render(this->GetPlayer().GetCamera().position, viewProjection);
-        this->_itemManager->Render();
+        this->_engine->GetModelManager().Render();
     }
 
 }}
