@@ -17,6 +17,7 @@ Server.Entity.RegisterPositional{
     end,
 }
 
+--[[
 Server.Entity.RegisterPositional{
     entityName = "Player",
     Spawn = function(self, playerId)
@@ -31,6 +32,7 @@ Server.Entity.RegisterPositional{
         Server.Entity.Kill(self.id)
     end,
 }
+--]]
 
 -- plus tard
 -- Server.Doodad.Register{
@@ -48,14 +50,14 @@ Server.Body.Register{
     physics = {
         -- friction, bounciness, etc
         -- peut etre que ca sera par noeud ou pshape
-    },                                        S
-    shapeTree = {                              
-        {                                      
+    },
+    shapeTree = {
+        {
             name = "Base", -- nom unique de no eud
             offset = { X, Y, Z }, -- par rappo rt au parent (entité positionnelle)
-            angle = { A, B, C }, -- idem       
-            boxes = {                          
-                {                              
+            angle = { A, B, C }, -- idem
+            boxes = {
+                {
                     -- par rapport au noeud   }
                     { X, Y, Z },
                     { W, H, L },
@@ -128,19 +130,11 @@ Client.Model.Register{
     }
 }
 
-Client.PlayerScript.Register{
-}
-
+--[[
 Client.Doodad.Register{
     doodadName = "Player",
     Spawn = function(self)
         self.model = Client.Model.Spawn(self.id, "Player")
     end,
 }
-
-Client.Model.Register{
-    modelName = "Player",
-    angles = {
-        ,
-    }
-}
+--]]
