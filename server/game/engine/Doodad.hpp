@@ -7,6 +7,7 @@ namespace Server { namespace Game { namespace Engine {
 
     class PositionalEntity;
     class Engine;
+    class Body;
 
     class Doodad :
         private boost::noncopyable
@@ -36,9 +37,11 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 _entityId;
         PositionalEntity const& _entity;
         Tools::Lua::Ref _table;
+        Body* _body;
         std::unordered_set<Uint32> _players;
         std::unordered_set<Uint32> _newPlayers;
         std::queue<Command> _commands;
+        std::queue<Command> _commandsUdp;
         bool _positionDirty;
 
     public:
@@ -53,6 +56,8 @@ namespace Server { namespace Game { namespace Engine {
         void ExecuteCommands();
         void Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value);
         void Call(std::string const& name, Tools::Lua::Ref const& value);
+        void SetUdp(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value);
+        void CallUdp(std::string const& name, Tools::Lua::Ref const& value);
         void PositionIsDirty();
     private:
         void _SpawnForNewPlayers();

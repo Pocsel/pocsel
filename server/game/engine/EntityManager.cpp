@@ -594,13 +594,13 @@ namespace Server { namespace Game { namespace Engine {
         Entity* entity;
         if (itType->second->IsPositional())
         {
-            PositionalEntity* positionalEntity = new PositionalEntity(this->_engine.GetInterpreter(), entityId, itType->second, pos);
+            PositionalEntity* positionalEntity = new PositionalEntity(this->_engine.GetInterpreter(), entityId, *itType->second, pos);
             assert(!this->_positionalEntities.count(entityId) && "impossible de créer une nouvelle entité car l'id est déjà utilisé dans la map des entités positionnelles");
             this->_positionalEntities[entityId] = positionalEntity;
             entity = positionalEntity;
         }
         else
-            entity = new Entity(this->_engine.GetInterpreter(), entityId, itType->second);
+            entity = new Entity(this->_engine.GetInterpreter(), entityId, *itType->second);
         assert(!this->_entities.count(entityId) && "impossible de créer une nouvelle entité car l'id est déjà utilisé dans la map des entités normales");
         this->_entities[entityId] = entity;
 

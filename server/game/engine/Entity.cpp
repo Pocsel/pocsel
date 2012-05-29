@@ -4,7 +4,7 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Entity::Entity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType* type) :
+    Entity::Entity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type) :
         _type(type), _self(interpreter.MakeTable())
     {
         this->_self.Set("id", id);
@@ -49,8 +49,8 @@ namespace Server { namespace Game { namespace Engine {
             this->_self = interpreter.MakeTable(); // il n'y aura plus "id" & "storage" mais de toute maniere le moddeur ne les avait pas avant...
         Tools::Lua::Ref metatable = interpreter.MakeTable();
         this->_self.SetMetaTable(metatable);
-        this->_self.Set("prototype", this->_type->GetPrototype());
-        metatable.Set("__index", this->_type->GetPrototype());
+        this->_self.Set("prototype", this->_type.GetPrototype());
+        metatable.Set("__index", this->_type.GetPrototype());
     }
 
 }}}

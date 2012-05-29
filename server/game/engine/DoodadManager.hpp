@@ -43,9 +43,12 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Doodad* _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
-        void _ApiSet(Tools::Lua::CallHelper& helper);
-        void _ApiCall(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
+        void _ApiSet(Tools::Lua::CallHelper& helper);
+        //void _ApiGet(Tools::Lua::CallHelper& helper); TODO ne pas oublier de prendre en compte les commands
+        void _ApiCall(Tools::Lua::CallHelper& helper);
+        void _ApiSetUdp(Tools::Lua::CallHelper& helper);
+        void _ApiCallUdp(Tools::Lua::CallHelper& helper);
     };
 
 }}}

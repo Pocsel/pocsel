@@ -58,7 +58,7 @@ namespace Server { namespace Network {
 
         static std::unique_ptr<Common::Packet> DoodadKill(Uint32 doodadId);
 
-        static std::unique_ptr<Common::Packet> DoodadUpdate(Uint32 doodadId,
+        static std::unique_ptr<UdpPacket> DoodadUpdate(Uint32 doodadId,
                 Common::Position const* position,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function */, std::string /* value */>> const& commands);
     };

@@ -1,7 +1,10 @@
 #ifndef __COMMON_ORIENTEDPOSITION_HPP__
 #define __COMMON_ORIENTEDPOSITION_HPP__
 
+#include "tools/Math.hpp"
+
 #include "common/Position.hpp"
+
 
 namespace Common {
 
@@ -16,7 +19,7 @@ namespace Common {
     public:
         OrientedPosition() :
             theta(0),
-            phi(std::atan2(0.0f, -1.0f) / 2) // pi / 2
+            phi(Tools::Math::Pi / 2)
         {
             this->SetAngles(theta, phi);
         }
@@ -24,7 +27,7 @@ namespace Common {
         OrientedPosition(Common::Position const& pos) :
             position(pos),
             theta(0),
-            phi(std::atan2(0.0f, -1.0f) / 2) // pi / 2
+            phi(Tools::Math::Pi / 2)
         {
             this->SetAngles(theta, phi);
         }
@@ -69,19 +72,17 @@ namespace Common {
 
         void Rotate(float dtheta, float dphi)
         {
-            float const pi = std::atan2(0.0f,-1.0f);
-
             float& t = const_cast<float&>(this->theta);
             t += dtheta;
-            if (t < 0 || t >= 2 * pi)
-                t = std::fmod(t, 2 * pi);
+            if (t < 0 || t >= 2 * Tools::Math::Pi)
+                t = std::fmod(t, 2 * Tools::Math::Pi);
 
             float& p = const_cast<float&>(this->phi);
             p += dphi;
             if (p < 0)
                 p = 0.001f;
-            else if (p > pi)
-                p = pi - 0.001f;
+            else if (p > Tools::Math::Pi)
+                p = Tools::Math::Pi - 0.001f;
 
             this->SetAngles(t, p);
         }

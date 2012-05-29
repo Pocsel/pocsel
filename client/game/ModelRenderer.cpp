@@ -1,5 +1,6 @@
 #include "client/precompiled.hpp"
 
+#include "tools/Math.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/window/Window.hpp"
@@ -40,8 +41,6 @@ namespace Client { namespace Game {
 
         this->_shader->BeginPass();
 
-        float pi = std::atan2(0.0f, -1.0f);
-
         //Common::OrientedPosition const& pos = item.position;
 
         this->_renderer.SetModelMatrix(
@@ -50,7 +49,7 @@ namespace Client { namespace Game {
                 )
             *
             glm::yawPitchRoll<float>(
-                   /*pi / 2*/ /*-pos.theta*/0, -pi / 2, 0.0f
+                   /*-pos.theta*/0, -Tools::Math::Pi / 2, 0.0f
                 )
             //*
             //glm::translate<float>(

@@ -5,6 +5,7 @@
 #include "client/game/engine/Engine.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/ModelRenderer.hpp"
+#include "tools/Math.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldValidator.hpp"
@@ -46,7 +47,7 @@ namespace Client { namespace Game { namespace Engine {
         auto itModel = this->_models.begin();
         auto itModelEnd = this->_models.end();
         for (; itModel != itModelEnd; ++itModel)
-            itModel->second->Update(time, 0);
+            itModel->second->Update(time, Tools::Math::Pi/2);
         this->_modelRenderer->Update(time);
     }
 
@@ -141,7 +142,6 @@ namespace Client { namespace Game { namespace Engine {
             throw std::runtime_error("Client.Model.Register: Could not determine currently running plugin, aborting registration");
         Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
         std::string modelName;
-        Uint32 resourceId;
         try
         {
             prototype = helper.PopArg("Client.Model.Register: Missing argument \"prototype\"");
@@ -153,16 +153,14 @@ namespace Client { namespace Game { namespace Engine {
                 throw std::runtime_error("Client.Model.Register: Invalid model name \"" + modelName + "\"");
             if (this->_modelTypes[pluginId].count(modelName))
                 throw std::runtime_error("Client.Model.Register: A model with the name \"" + modelName + "\" is already registered");
-            if (!prototype["file"].IsString())
-                throw std::runtime_error("Client.Model.Register: Field \"file\" must exist and be of type string");
-            resourceId = this->_engine.GetGame().GetResourceManager().GetResourceId(pluginId, prototype["file"].ToString());
+
+            this->_modelTypes[pluginId][modelName] = new ModelType(pluginId, modelName, prototype, this->_engine.GetGame().GetResourceManager());
         }
         catch (std::exception& e)
         {
             Tools::error << "ModelManager::_ApiRegister: Failed to register new model type from plugin " << pluginId << ": " << e.what() << std::endl;
             return;
         }
-        this->_modelTypes[pluginId][modelName] = new ModelType(pluginId, modelName, resourceId);
         Tools::debug << "Model \"" << modelName << "\" registered (plugin: " << pluginId << ")." << std::endl;
     }
 

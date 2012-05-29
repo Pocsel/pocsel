@@ -9,12 +9,17 @@ namespace Tools { namespace Database {
 namespace Tools { namespace Lua {
     class Interpreter;
 }}
-namespace Server { namespace Game {
-    namespace Map {
-        class Map;
+namespace Server {
+    namespace Game {
+        namespace Map {
+            class Map;
+        }
+        class World;
     }
-    class World;
-}}
+    namespace Network {
+        class UdpPacket;
+    }
+}
 namespace Common {
     class Packet;
 }
@@ -54,11 +59,13 @@ namespace Server { namespace Game { namespace Engine {
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
         World& GetWorld() { return this->_world; }
-        void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
         Uint32 GetRunningPluginId() { return this->_overriddenPluginId ? this->_overriddenPluginId : this->_entityManager->GetRunningPluginId(); }
         void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
         Uint32 GetRunningEntityId() { return this->_overriddenEntityId ? this->_overriddenEntityId : this->_entityManager->GetRunningEntityId(); }
         void OverrideRunningEntityId(Uint32 entityId) { this->_overriddenEntityId = entityId; }
+
+        void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
+        void SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet);
 
         // rcon requests
         std::string RconExecute(Uint32 pluginId, std::string const& lua);

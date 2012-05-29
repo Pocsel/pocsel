@@ -21,7 +21,8 @@ Server.Entity.Register{
 
     SpawnBlob = function(self)
         Server.Entity.Spawn({ x = 67108864, y = 16777216 + 10, z = 67108864 }, "Blob")
-        Server.Message.Later(3, self.id, "SpawnBlob")
+        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 12, z = 67108864 }, "Tank")
+        Server.Message.Later(10, self.id, "SpawnBlob")
     end,
 
 }
@@ -32,7 +33,9 @@ Server.Entity.RegisterPositional{
 
     Spawn = function(self, initEntity)
         print("Spawn()")
-        self.doodad = Server.Doodad.Spawn("Test")
+        self.doodad = Server.Doodad.Spawn("TestDoodad")
+        Server.Doodad.Rotate(self.doodad, angle)
+        Server.Entity.Rotate(self.id, angle)
         Server.Message.Later(5, self.id, "CallTest")
         Server.Message.Later(10, self.id, "KillTest")
         self:Move()
@@ -61,7 +64,7 @@ Server.Entity.RegisterPositional{
 
     Move = function(self)
         local pos = Server.Entity.GetPos(self.id)
-        Server.Entity.SetPos(self.id, { x = pos.x + 0.5, y = pos.y, z = pos.z })
+        Server.Entity.SetPos(self.id, { x = pos.x + 0.1, y = pos.y, z = pos.z })
         Server.Message.Later(0.5, self.id, "Move")
         print("Move() ", pos.x, " ", pos.y, " ", pos.z)
     end,

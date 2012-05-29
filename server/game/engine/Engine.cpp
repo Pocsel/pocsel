@@ -96,6 +96,11 @@ namespace Server { namespace Game { namespace Engine {
         this->_map.SendPacket(playerId, packet);
     }
 
+    void Engine::SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet)
+    {
+        this->_map.SendUdpPacket(playerId, packet);
+    }
+
     void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)
     {
         std::string str = "[" + this->_map.GetName() + "/";

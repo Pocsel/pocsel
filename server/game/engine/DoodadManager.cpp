@@ -14,9 +14,11 @@ namespace Server { namespace Game { namespace Engine {
         auto& i = this->_engine.GetInterpreter();
         auto namespaceTable = i.Globals()["Server"].Set("Doodad", i.MakeTable());
         namespaceTable.Set("Spawn", i.MakeFunction(std::bind(&DoodadManager::_ApiSpawn, this, std::placeholders::_1)));
+        namespaceTable.Set("Kill", i.MakeFunction(std::bind(&DoodadManager::_ApiKill, this, std::placeholders::_1)));
         namespaceTable.Set("Set", i.MakeFunction(std::bind(&DoodadManager::_ApiSet, this, std::placeholders::_1)));
         namespaceTable.Set("Call", i.MakeFunction(std::bind(&DoodadManager::_ApiCall, this, std::placeholders::_1)));
-        namespaceTable.Set("Kill", i.MakeFunction(std::bind(&DoodadManager::_ApiKill, this, std::placeholders::_1)));
+        namespaceTable.Set("SetUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiSetUdp, this, std::placeholders::_1)));
+        namespaceTable.Set("CallUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiCallUdp, this, std::placeholders::_1)));
     }
 
     DoodadManager::~DoodadManager()
@@ -173,6 +175,29 @@ namespace Server { namespace Game { namespace Engine {
             d->AddPlayer(it->first);
     }
 
+    void DoodadManager::_ApiKill(Tools::Lua::CallHelper& helper)
+    {
+        // trouve le doodad
+        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Kill: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Kill: Argument \"doodadId\" must be a number"));
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end())
+        {
+            Tools::error << "DoodadManager::_ApiKill: No doodad with id " << doodadId << ", cannot kill doodad." << std::endl;
+            return;
+        }
+
+        // enleve le doodad de la liste associée à l'entité
+        auto itList = this->_doodadsByEntities.find(it->second->GetEntityId());
+        assert(itList != this->_doodadsByEntities.end() && "un doodad de la map générale des doodads n'était pas dans une liste associée a une entité");
+        itList->second.remove(it->second);
+        if (itList->second.empty())
+            this->_doodadsByEntities.erase(itList); // supprime l'entrée associée à l'entité si celle-ci n'a plus de doodads
+
+        // enleve le doodad de la map générale + delete
+        Tools::Delete(it->second);
+        this->_doodads.erase(it);
+    }
+
     void DoodadManager::_ApiSet(Tools::Lua::CallHelper& helper)
     {
         Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Set: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
@@ -203,27 +228,34 @@ namespace Server { namespace Game { namespace Engine {
         it->second->Call(function, value);
     }
 
-    void DoodadManager::_ApiKill(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiSetUdp(Tools::Lua::CallHelper& helper)
     {
-        // trouve le doodad
-        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Kill: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Kill: Argument \"doodadId\" must be a number"));
+        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Set: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
+        Tools::Lua::Ref key = helper.PopArg("Server.Doodad.Set: Missing argument \"key\"");
+        Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Set: Missing argument \"value\"");
+
         auto it = this->_doodads.find(doodadId);
         if (it == this->_doodads.end())
         {
-            Tools::error << "DoodadManager::_ApiKill: No doodad with id " << doodadId << ", cannot kill doodad." << std::endl;
+            Tools::error << "DoodadManager::_ApiSet: No doodad with id " << doodadId << ", cannot set value." << std::endl;
             return;
         }
+        it->second->Set(key, value);
+    }
 
-        // enleve le doodad de la liste associée à l'entité
-        auto itList = this->_doodadsByEntities.find(it->second->GetEntityId());
-        assert(itList != this->_doodadsByEntities.end() && "un doodad de la map générale des doodads n'était pas dans une liste associée a une entité");
-        itList->second.remove(it->second);
-        if (itList->second.empty())
-            this->_doodadsByEntities.erase(itList); // supprime l'entrée associée à l'entité si celle-ci n'a plus de doodads
+    void DoodadManager::_ApiCallUdp(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Call: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
+        std::string function = helper.PopArg("Server.Doodad.Call: Missing argument \"function\"").CheckString("Server.Doodad.Call: Argument \"function\" must be of type string");
+        Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Call: Missing argument \"value\"");
 
-        // enleve le doodad de la map générale + delete
-        Tools::Delete(it->second);
-        this->_doodads.erase(it);
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end())
+        {
+            Tools::error << "DoodadManager::_ApiSet: No doodad with id " << doodadId << ", cannot set value." << std::endl;
+            return;
+        }
+        it->second->Call(function, value);
     }
 
 }}}

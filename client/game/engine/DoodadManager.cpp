@@ -79,7 +79,7 @@ namespace Client { namespace Game { namespace Engine {
             Tools::error << "DoodadManager::SpawnDoodad: Doodad type \"" << doodadName << "\" not found in plugin " << pluginId << "." << std::endl;
             return;
         }
-        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(), doodadId, position, it->second);
+        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(), doodadId, position, *it->second);
         auto itValues = values.begin();
         auto itValuesEnd = values.end();
         for (; itValues != itValuesEnd; ++itValues)

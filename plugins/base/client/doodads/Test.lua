@@ -1,10 +1,10 @@
 Client.Doodad.Register{
 
-    doodadName = "Test",
+    doodadName = "TestDoodad",
 
     Spawn = function(self)
         print("Spawn()")
-        Client.Model.Spawn("Stickman")
+        self.m = Client.Model.Spawn("Stickman")
     end,
 
     Think = function(self)
@@ -17,6 +17,10 @@ Client.Doodad.Register{
 
     TestFunction = function(self)
         print("Heyyyy!! :)")
+    end,
+
+    PhysicsUpdateCallback = function(self)
+        print("HEYOYOYOYOOYOY")
     end,
 
 }

@@ -24,17 +24,22 @@ namespace Tools {
     }
 }
 
-namespace Server { namespace Game {
-    class Game;
-    class World;
-    class Player;
-    namespace Map { namespace Gen {
-        class ChunkGenerator;
-    }}
-    namespace Engine {
-        class Engine;
+namespace Server {
+    namespace Game {
+        class Game;
+        class World;
+        class Player;
+        namespace Map { namespace Gen {
+            class ChunkGenerator;
+        }}
+        namespace Engine {
+            class Engine;
+        }
     }
-}}
+    namespace Network {
+        class UdpPacket;
+    }
+}
 
 namespace Server { namespace Game { namespace Map {
 
@@ -104,6 +109,7 @@ namespace Server { namespace Game { namespace Map {
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
         void DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId);
         void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
+        void SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet);
 
         // rcon requests
         void RconExecute(Uint32 pluginId, std::string lua, std::function<void(std::string)> cb) const;

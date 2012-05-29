@@ -163,7 +163,7 @@ namespace Server { namespace Network {
             Common::Position const& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
     {
-        Common::Packet* ptr(new Common::Packet);
+        Common::Packet* ptr(new Common::Packet());
         ptr->Write(Protocol::ServerToClient::DoodadSpawn);
 
         ptr->Write(doodadId);
@@ -184,7 +184,7 @@ namespace Server { namespace Network {
 
     std::unique_ptr<Common::Packet> PacketCreator::DoodadKill(Uint32 doodadId)
     {
-        Common::Packet* ptr(new Common::Packet);
+        Common::Packet* ptr(new Common::Packet());
         ptr->Write(Protocol::ServerToClient::DoodadKill);
 
         ptr->Write(doodadId);
@@ -192,11 +192,11 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(ptr);
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::DoodadUpdate(Uint32 doodadId,
+    std::unique_ptr<UdpPacket> PacketCreator::DoodadUpdate(Uint32 doodadId,
             Common::Position const* position,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
-        Common::Packet* ptr(new Common::Packet);
+        UdpPacket* ptr(new UdpPacket());
         ptr->Write(Protocol::ServerToClient::DoodadUpdate);
 
         ptr->Write(doodadId);
@@ -220,8 +220,7 @@ namespace Server { namespace Network {
             ptr->WriteString(std::get<2>(*it));
         }
 
-        return std::unique_ptr<Common::Packet>(ptr);
+        return std::unique_ptr<UdpPacket>(ptr);
     }
-
 
 }}

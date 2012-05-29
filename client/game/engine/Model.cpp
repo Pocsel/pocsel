@@ -1,6 +1,8 @@
 #include "client/game/engine/Model.hpp"
 #include "client/game/engine/ModelType.hpp"
 
+#include "tools/Math.hpp"
+
 #include "client/resources/ResourceManager.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 
@@ -103,9 +105,8 @@ namespace Client { namespace Game { namespace Engine {
                         joints[i].name == "spine"
                    )
                 {
-                    float pi = std::atan2(0.0f, -1.0f);
-                    animatedJoint0.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 0, 1, 0) * animatedJoint0.orientation);
-                    animatedJoint1.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 0, 1, 0) * animatedJoint1.orientation);
+                    animatedJoint0.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - Tools::Math::Pi/2)/4, 0, 1, 0) * animatedJoint0.orientation);
+                    animatedJoint1.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - Tools::Math::Pi/2)/4, 0, 1, 0) * animatedJoint1.orientation);
                 }
 
                 this->_animatedBones[i] =
@@ -148,10 +149,9 @@ namespace Client { namespace Game { namespace Engine {
                         joints[i].name == "Bone"
                    )
                 {
-                    float pi = std::atan2(0.0f, -1.0f);
                     animatedJoint.orientation =
                         glm::normalize(
-                                glm::angleAxis<float>(glm::degrees(phi - pi/2), 0, 1, 0)
+                                glm::angleAxis<float>(glm::degrees(phi - Tools::Math::Pi/2), 0, 1, 0)
                                 *
                                 animatedJoint.orientation
                                 );
@@ -166,10 +166,9 @@ namespace Client { namespace Game { namespace Engine {
                         joints[i].name == "spine"
                    )
                 {
-                    float pi = std::atan2(0.0f, -1.0f);
                     animatedJoint.orientation =
                         glm::normalize(
-                                glm::angleAxis<float>(glm::degrees(phi - pi/2)/4, 0, 1, 0)
+                                glm::angleAxis<float>(glm::degrees(phi - Tools::Math::Pi/2)/4, 0, 1, 0)
                                 *
                                 animatedJoint.orientation
                                 );

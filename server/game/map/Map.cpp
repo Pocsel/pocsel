@@ -185,6 +185,11 @@ namespace Server { namespace Game { namespace Map {
         this->_game.GetServer().GetClientManager().SendPacket(playerId, packet);
     }
 
+    void Map::SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet)
+    {
+        this->_game.GetServer().GetClientManager().SendUdpPacket(playerId, packet);
+    }
+
     void Map::_GetChunk(Chunk::IdType id, ChunkCallback& response)
     {
         Chunk* chunk = this->_chunkManager->GetChunk(id);
