@@ -32,5 +32,36 @@ namespace Tools { namespace Renderers { namespace Utils {
         Tools::Delete(material);
     }
 
+    void DeferredShading::_Render(_MeshList& meshes)
+    {
+        //TODO: meshes.sort();
+
+        auto beginShaderIt = meshes.begin();
+        IShaderProgram* current = &beginShaderIt->first->GetGeometryShader();
+        for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
+        {
+            auto shader = &it->first->GetGeometryShader();
+            if (shader == current)
+            {
+                DeferredShading::_RenderMeshes(beginShaderIt, it);
+                beginShaderIt = it;
+                current = shader;
+            }
+        }
+        DeferredShading::_RenderMeshes(beginShaderIt, meshes.end());
+
+        meshes.clear();
+    }
+
+    void DeferredShading::_RenderMeshes(_MeshList::iterator beginIt, _MeshList::iterator ite)
+    {
+        do
+        {
+            beginIt->first->GetGeometryShader().BeginPass();
+            for (auto it = beginIt; it != ite; ++it)
+                it->second();
+        } while (beginIt->first->GetGeometryShader().EndPass());
+    }
+
 }}}
 
