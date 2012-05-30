@@ -227,9 +227,11 @@ namespace Server { namespace Game { namespace Engine {
             auto query = conn.CreateQuery("INSERT INTO " + table + " (id, plugin_id, entity_name, disabled, storage, pos_x, pos_y, pos_z) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
             // non positional entities
             {
-                auto it = this->_entities.begin();
+                auto itTmp = this->_entities.begin();
                 auto itEnd = this->_entities.end();
-                for (; it != itEnd; ++it)
+                while (itTmp != itEnd)
+                {
+                    auto it = itTmp++;
                     if (it->second)
                     {
                         Entity* entity = it->second;
@@ -238,7 +240,6 @@ namespace Server { namespace Game { namespace Engine {
                             try
                             {
                                 // XXX Save() database hook
-                                // (peut delete l'entité, mais les iterateurs restent valident pour la map)
                                 CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
                                 if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                     throw std::runtime_error("call to Save() failed");
@@ -252,12 +253,15 @@ namespace Server { namespace Game { namespace Engine {
                                 Tools::log << "EntityManager::Save: Could not save non positional entity " << it->first << ": " << e.what() << std::endl;
                             }
                     }
+                }
             }
             // positional entities
             {
-                auto it = this->_positionalEntities.begin();
+                auto itTmp = this->_positionalEntities.begin();
                 auto itEnd = this->_positionalEntities.end();
-                for (; it != itEnd; ++it)
+                while (itTmp != itEnd)
+                {
+                    auto it = itTmp++;
                     if (it->second)
                     {
                         PositionalEntity* entity = it->second;
@@ -280,6 +284,7 @@ namespace Server { namespace Game { namespace Engine {
                             Tools::error << "EntityManager::Save: Could not save positional entity " << it->first << ": " << e.what() << std::endl;
                         }
                     }
+                }
             }
             // disabled entities
             {

@@ -4,7 +4,7 @@ Server.Entity.Register{
 
     Spawn = function(self) -- constructor
         print("Spawn()")
-        Server.Message.Later(10, self.id, "SpawnBlob")
+        Server.Message.Later(20, self.id, "SpawnBlob")
     end,
 
     Die = function(self) -- destructor
@@ -21,7 +21,6 @@ Server.Entity.Register{
 
     SpawnBlob = function(self)
         Server.Entity.Spawn({ x = 67108864, y = 16777216 + 10, z = 67108864 }, "Blob")
-        Server.Message.Later(3, self.id, "SpawnBlob")
     end,
 
 }
@@ -30,11 +29,14 @@ Server.Entity.RegisterPositional{
 
     entityName = "Blob",
 
-    Spawn = function(self, initEntity)
-        print("Spawn()")
+    Spawn = function(self)
+        self.move = { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }
+        self.moveSpeed = math.random()
         self.doodad = Server.Doodad.Spawn("Test")
-        Server.Message.Later(5, self.id, "CallTest")
-        Server.Message.Later(10, self.id, "KillTest")
+        --Server.Message.Later(7, self.id, "Suicide")
+        if self.id < 50 then
+            Server.Message.Later(3, self.id, "Test")
+        end
         self:Move()
     end,
 
@@ -50,39 +52,18 @@ Server.Entity.RegisterPositional{
         print("Load()")
     end,
 
-    CallTest = function(self)
-        Server.Doodad.Call(self.doodad, "TestFunction", {})
-        Server.Doodad.Call(self.doodad, "TestFunction2", {})
-    end,
-
-    KillTest = function(self)
-        --Server.Doodad.Kill(self.doodad)
+    Suicide = function(self)
+        Server.Entity.Kill(self.id)
     end,
 
     Move = function(self)
         local pos = Server.Entity.GetPos(self.id)
-        Server.Entity.SetPos(self.id, { x = pos.x + 0.5, y = pos.y, z = pos.z })
-        Server.Message.Later(0.5, self.id, "Move")
-        print("Move() ", pos.x, " ", pos.y, " ", pos.z)
+        Server.Entity.SetPos(self.id, { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
+        Server.Message.Later(self.moveSpeed, self.id, "Move")
     end,
 
-}
+    Test = function(self)
+        Server.Entity.Spawn(Server.Entity.GetPos(self.id), "Blob")
+    end
 
--- Server.Body.Register{
---
---     bodyName = "monBody",
---
---     -- definitions bounding boxes
---
--- }
---
--- Client.Doodad.Register{
---
---     doodadName = "Chicken",
---
---     Spawn = function(self)
---         self.m = Client.Model.Spawn("Chicken")
---         self.s = Client.Sound.Spawn("CACA")
---     end,
---
--- }
+}
