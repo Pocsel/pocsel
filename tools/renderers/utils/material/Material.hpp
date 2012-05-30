@@ -1,10 +1,11 @@
-#ifndef __TOOLS_RENDERERS_UTILS_MATERIAL_HPP__
-#define __TOOLS_RENDERERS_UTILS_MATERIAL_HPP__
+#ifndef __TOOLS_RENDERERS_UTILS_MATERIAL_MATERIAL_HPP__
+#define __TOOLS_RENDERERS_UTILS_MATERIAL_MATERIAL_HPP__
 
 #include "tools/IRenderer.hpp"
+#include "tools/renderers/utils/material/Variable.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     class Material
     {
@@ -27,6 +28,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         Effect _geometry;
         Effect _shadowMap;
         std::vector<std::unique_ptr<Texture::ITexture>> _textures;
+        std::vector<std::unique_ptr<IVariable>> _variables;
 
     public:
         Material(IRenderer& renderer, IShaderProgram& geometry, IShaderProgram& shadowMap);
@@ -36,6 +38,8 @@ namespace Tools { namespace Renderers { namespace Utils {
         void AddConstant(std::string const& name, glm::vec3 const& value);
         void AddConstant(std::string const& name, glm::vec4 const& value);
         void AddTexture(std::string const& name, std::unique_ptr<Texture::ITexture>&& texture);
+        template<class TValue>
+        Variable<TValue>& GetVariable(std::string const& name);
         void SetTimeParameter(std::string const& name);
 
         void Update(Uint64 totalTime); // totalTime in microsecond
@@ -43,6 +47,17 @@ namespace Tools { namespace Renderers { namespace Utils {
         void RenderShadowMap(std::function<void()>& render, Uint64 totalTime);
     };
 
-}}}
+    template<class TValue>
+    inline Variable<TValue>& Material::GetVariable(std::string const& name)
+    {
+        std::vector<std::unique_ptr<IShaderParameter>> parameters;
+        parameters.push_back(this->_geometry.shader.GetParameter(name));
+        parameters.push_back(this->_shadowMap.shader.GetParameter(name));
+        auto ptr = new Variable<TValue>(std::move(parameters));
+        this->_variables.push_back(std::unique_ptr<IVariable>(ptr));
+        return *ptr;
+    }
+
+}}}}
 
 #endif

@@ -1,8 +1,8 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/renderers/utils/Material.hpp"
+#include "tools/renderers/utils/material/Material.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     void Material::Effect::UpdateParameters(Uint64 totalTime)
     {
@@ -95,22 +95,26 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void Material::RenderGeometry(std::function<void()>& render, Uint64 totalTime)
     {
-        this->_geometry.UpdateParameters(totalTime);
         do
         {
             this->_geometry.shader.BeginPass();
+            this->_geometry.UpdateParameters(totalTime);
+            for (auto it = this->_variables.begin(), ite = this->_variables.end(); it != ite; ++it)
+                (*it)->UpdateParameter(0);
             render();
         } while (this->_geometry.shader.EndPass());
     }
 
     void Material::RenderShadowMap(std::function<void()>& render, Uint64 totalTime)
     {
-        this->_shadowMap.UpdateParameters(totalTime);
         do
         {
             this->_shadowMap.shader.BeginPass();
+            this->_shadowMap.UpdateParameters(totalTime);
+            for (auto it = this->_variables.begin(), ite = this->_variables.end(); it != ite; ++it)
+                (*it)->UpdateParameter(1);
             render();
         } while (this->_shadowMap.shader.EndPass());
     }
 
-}}}
+}}}}

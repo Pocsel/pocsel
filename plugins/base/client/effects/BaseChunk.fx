@@ -86,7 +86,7 @@ technique tech
 {
    pass p0
    {
-        AlphaBlendEnable = false;
+        AlphaBlendEnable = true;
         VertexShader = compile vs_2_0 vs();
         PixelShader = compile ps_2_0 fs();
    }
