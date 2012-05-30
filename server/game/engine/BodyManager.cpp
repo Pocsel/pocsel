@@ -71,8 +71,6 @@ namespace Server { namespace Game { namespace Engine {
                 throw std::runtime_error("Server.Body.Register[Positional]: Field \"BodyName\" in prototype must exist and be of type string");
             if (!Common::FieldValidator::IsRegistrableType(bodyName = prototype["BodyName"].ToString()))
                 throw std::runtime_error("Server.Body.Register[Positional]: Invalid Body name \"" + bodyName + "\"");
-//            if (helper.GetNbArgs() && helper.PopArg().ToBoolean()) // bool flag en deuxieme parametre pour indiquer que c'est RegisterPositional()
-//                positional = true;
         }
         catch (std::exception& e)
         {
