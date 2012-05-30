@@ -1,12 +1,17 @@
 #include "client/game/engine/Model.hpp"
+#include "client/game/engine/ModelType.hpp"
 
 #include "client/resources/ResourceManager.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
-    Model::Model(Resources::ResourceManager& resourceManager) :
-        _model(resourceManager.GetMqmModel(1, "stickman.mqm")),
+    Model::Model(Resources::ResourceManager& resourceManager, Uint32 id, Uint32 doodadId, Doodad* doodad, ModelType* type) :
+        _type(type),
+        _id(id),
+        _doodadId(doodadId),
+        _doodad(doodad),
+        _model(resourceManager.GetMqmModel(type->GetResourceId())),
         _animTime(0)
     {
         auto anims = this->_model.GetAnimInfos();
@@ -25,6 +30,8 @@ namespace Client { namespace Game { namespace Engine {
         {
             this->_textures.push_back(resourceManager.GetTexture(1, *it).release());
         }
+
+        Tools::debug << "Model::Model: New model \"" << this->_type->GetName() << "\", id: " << this->_id << std::endl;
     }
 
     Model::~Model()
@@ -33,6 +40,8 @@ namespace Client { namespace Game { namespace Engine {
         {
             Tools::Delete(*it);
         }
+
+        Tools::debug << "Model::Model: Destroying model \"" << this->_type->GetName() << "\", id: " << this->_id << std::endl;
     }
 
     void Model::SetAnim(std::string const& anim)

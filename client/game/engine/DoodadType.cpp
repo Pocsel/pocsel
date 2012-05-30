@@ -2,8 +2,8 @@
 
 namespace Client { namespace Game { namespace Engine {
 
-    DoodadType::DoodadType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype) :
-        _name(name), _pluginId(pluginId), _prototype(prototype)
+    DoodadType::DoodadType(Uint32 pluginId, std::string const& name, Tools::Lua::Ref const& prototype) :
+        _pluginId(pluginId), _name(name), _prototype(prototype)
     {
     }
 

@@ -125,7 +125,12 @@ namespace Client { namespace Network {
         if (p.ReadBool())
             position = p.Read<Common::Position>().release();
         while (p.GetBytesLeft())
-            commands.push_back(std::make_tuple(p.ReadBool(), p.ReadString(), p.ReadString()));
+        {
+            bool functionCall = p.ReadBool();
+            std::string functionOrKey = p.ReadString();
+            std::string value = p.ReadString();
+            commands.push_back(std::make_tuple(functionCall, functionOrKey, value));
+        }
     }
 
 }}

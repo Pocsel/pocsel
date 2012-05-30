@@ -39,6 +39,7 @@ namespace Server { namespace Game { namespace Engine {
         std::unordered_set<Uint32> _players;
         std::unordered_set<Uint32> _newPlayers;
         std::queue<Command> _commands;
+        bool _positionDirty;
 
     public:
         Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
@@ -52,6 +53,7 @@ namespace Server { namespace Game { namespace Engine {
         void ExecuteCommands();
         void Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value);
         void Call(std::string const& name, Tools::Lua::Ref const& value);
+        void PositionIsDirty();
     private:
         void _SpawnForNewPlayers();
     };

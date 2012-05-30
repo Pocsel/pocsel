@@ -50,7 +50,6 @@ namespace Client { namespace Game {
         CubeTypeManager* _cubeTypeManager;
         Resources::ResourceManager* _resourceManager;
         Map::Map* _map;
-        ItemManager* _itemManager;
         Player* _player;
         Engine::Engine* _engine;
         int _callbackId;
@@ -84,7 +83,6 @@ namespace Client { namespace Game {
         Player& GetPlayer() { return *this->_player; }
         CubeTypeManager& GetCubeTypeManager() { return *this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
-        ItemManager& GetItemManager() { return *this->_itemManager; }
         Map::Map& GetMap() { return *this->_map; }
         Tools::Lua::Interpreter& GetInterpreter() { return this->_engine->GetInterpreter(); }
         Engine::Engine& GetEngine() { return *this->_engine; }

@@ -215,9 +215,9 @@ namespace Server { namespace Network {
         auto itEnd = commands.end();
         for (; it != itEnd; ++it)
         {
-            ptr->Write(std::get<0>(*it));
-            ptr->Write(std::get<1>(*it));
-            ptr->Write(std::get<2>(*it));
+            ptr->WriteBool(std::get<0>(*it));
+            ptr->WriteString(std::get<1>(*it));
+            ptr->WriteString(std::get<2>(*it));
         }
 
         return std::unique_ptr<Common::Packet>(ptr);
