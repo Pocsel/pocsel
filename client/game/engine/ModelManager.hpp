@@ -24,11 +24,12 @@ namespace Client { namespace Game { namespace Engine {
         std::map<Uint32 /* doodadId */, std::list<Model*>> _modelsByDoodad;
         Uint32 _nextModelId;
         ModelRenderer* _modelRenderer;
+        Uint64 _lastTickTime;
 
     public:
         ModelManager(Engine& engine);
         ~ModelManager();
-        void Tick(Uint32 time);
+        void Tick(Uint64 totalTime);
         void Render();
         void DeleteModelsOfDoodad(Uint32 doodadId);
     private:

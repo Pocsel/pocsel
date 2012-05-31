@@ -12,7 +12,9 @@
 namespace Client { namespace Game { namespace Engine {
 
     ModelManager::ModelManager(Engine& engine) :
-        _engine(engine), _nextModelId(1) // le premier model sera le 1, 0 est la valeur spéciale "pas de model"
+        _engine(engine),
+        _nextModelId(1), // le premier model sera le 1, 0 est la valeur spéciale "pas de model"
+        _lastTickTime(0)
     {
         auto& i = this->_engine.GetInterpreter();
         auto namespaceTable = i.Globals().GetTable("Client").GetTable("Model");
@@ -41,13 +43,14 @@ namespace Client { namespace Game { namespace Engine {
         }
     }
 
-    void ModelManager::Tick(Uint32 time)
+    void ModelManager::Tick(Uint64 totalTime)
     {
         auto itModel = this->_models.begin();
         auto itModelEnd = this->_models.end();
+        float deltaTime = float(totalTime - this->_lastTickTime) * 0.000001f;
         for (; itModel != itModelEnd; ++itModel)
-            itModel->second->Update(time, 0);
-        this->_modelRenderer->Update(time);
+            itModel->second->Update(deltaTime, 0);
+        this->_lastTickTime = totalTime;
     }
 
     void ModelManager::Render()

@@ -33,10 +33,10 @@ namespace Client { namespace Game { namespace Engine {
         Tools::Delete(this->_interpreter);
     }
 
-    void Engine::Tick(Uint32 time)
+    void Engine::Tick(Uint64 totalTime)
     {
         this->_doodadManager->Tick();
-        this->_modelManager->Tick(time);
+        this->_modelManager->Tick(totalTime);
     }
 
     void Engine::LoadLuaScripts()

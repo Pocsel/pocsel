@@ -51,7 +51,7 @@ namespace Client { namespace Game {
         this->_vertexBuffer->Bind();
         this->_texture->Bind();
         this->_shaderTexture->Set(*this->_texture);
-        this->_shaderTime->Set((float)this->_elapsedTime * 0.001f);
+        this->_shaderTime->Set((float)this->_elapsedTime * 0.000001f);
         this->_renderer.DrawVertexBuffer(0, 6*6);
         this->_texture->Unbind();
         this->_vertexBuffer->Unbind();
@@ -59,9 +59,9 @@ namespace Client { namespace Game {
         this->_shader->EndPass();
     }
 
-    void TargetedCubeRenderer::Update(Uint32 time)
+    void TargetedCubeRenderer::Update(Uint64 deltaTime)
     {
-        this->_elapsedTime += time;
+        this->_elapsedTime += deltaTime;
     }
 
     void TargetedCubeRenderer::_InitVertexBuffer()

@@ -28,13 +28,13 @@ namespace Client { namespace Game {
         Tools::Renderers::IShaderParameter* _shaderTime;
         std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;
         Tools::Renderers::ITexture2D* _texture;
-        Uint32 _elapsedTime;
+        Uint64 _elapsedTime;
 
     public:
         TargetedCubeRenderer(Game& game);
         ~TargetedCubeRenderer();
         void Render(Common::CubePosition const& pos);
-        void Update(Uint32 time);
+        void Update(Uint64 deltaTime);
 
     private:
         void _InitVertexBuffer();

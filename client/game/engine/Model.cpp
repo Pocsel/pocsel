@@ -52,7 +52,7 @@ namespace Client { namespace Game { namespace Engine {
             this->_curAnimation = 0;
     }
 
-    void Model::Update(Uint32 time, float phi)
+    void Model::Update(float deltaTime, float phi)
     {
         auto joints = this->_model.GetJointInfos();
 
@@ -60,7 +60,7 @@ namespace Client { namespace Game { namespace Engine {
         {
             float frameDuration = 1.0f / this->_curAnimation->frameRate;
 
-            this->_animTime += (float)time / 1000.0f;
+            this->_animTime += deltaTime;
             this->_animTime = std::fmod(this->_animTime, this->_curAnimation->numFrames * frameDuration);
 
             float interpolate = std::fmod(_animTime, frameDuration) * this->_curAnimation->frameRate;

@@ -29,7 +29,7 @@ namespace Client { namespace Game { namespace Engine {
     public:
         Engine(Game& game);
         ~Engine();
-        void Tick(Uint32 time);
+        void Tick(Uint64 totalTime);
         void LoadLuaScripts();
         Game& GetGame() { return this->_game; }
         DoodadManager& GetDoodadManager() { return *this->_doodadManager; }

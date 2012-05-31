@@ -40,7 +40,7 @@ namespace Client { namespace Game { namespace Engine {
         Doodad const& GetDoodad() const { return *this->_doodad; }
 
         void SetAnim(std::string const& anim);
-        void Update(Uint32 time, float phi);
+        void Update(float deltaTime, float phi); // deltaTime in second
 
         std::vector<Tools::Models::Iqm::Mesh> const& GetMeshes() const { return this->_model.GetMeshes(); }
         std::vector<glm::mat4x4> const& GetAnimatedBones() const { return this->_animatedBones; }
