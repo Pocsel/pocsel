@@ -29,6 +29,7 @@ namespace Server { namespace Game { namespace Engine {
     class MessageManager;
     class CallbackManager;
     class DoodadManager;
+    class BodyManager;
 
     class Engine :
         private boost::noncopyable
@@ -41,6 +42,7 @@ namespace Server { namespace Game { namespace Engine {
         EntityManager* _entityManager;
         CallbackManager* _callbackManager;
         DoodadManager* _doodadManager;
+        BodyManager* _bodyManager;
         Uint64 _currentTime;
         Uint32 _overriddenPluginId;
         Uint32 _overriddenEntityId;

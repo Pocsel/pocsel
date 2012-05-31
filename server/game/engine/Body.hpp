@@ -13,12 +13,11 @@ namespace Server { namespace Game { namespace Engine {
     {
     private:
         BodyType const& _type;
-        Tools::Lua::Ref _table;
+        //Tools::Lua::Ref _table;
         bool _dirty;
 
     public:
         Body(Tools::Lua::Interpreter& interpreter, BodyType const& bodyType);
-        ~Body();
     };
 
 }}}

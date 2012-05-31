@@ -67,9 +67,9 @@ namespace Server { namespace Game { namespace Engine {
             prototype = helper.PopArg();
             if (!prototype.IsTable())
                 throw std::runtime_error("Server.Body.Register[Positional]: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
-            if (!prototype["BodyName"].IsString())
-                throw std::runtime_error("Server.Body.Register[Positional]: Field \"BodyName\" in prototype must exist and be of type string");
-            if (!Common::FieldValidator::IsRegistrableType(bodyName = prototype["BodyName"].ToString()))
+            if (!prototype["bodyName"].IsString())
+                throw std::runtime_error("Server.Body.Register[Positional]: Field \"bodyName\" in prototype must exist and be of type string");
+            if (!Common::FieldValidator::IsRegistrableType(bodyName = prototype["bodyName"].ToString()))
                 throw std::runtime_error("Server.Body.Register[Positional]: Invalid Body name \"" + bodyName + "\"");
         }
         catch (std::exception& e)
@@ -79,15 +79,11 @@ namespace Server { namespace Game { namespace Engine {
         }
         if (this->_bodyTypes[pluginId].count(bodyName)) // remplacement
         {
-            BodyType* type = this->_bodyTypes[pluginId][bodyName];
-            type->SetPrototype(prototype);
+            Tools::Delete(this->_bodyTypes[pluginId][bodyName]);
             Tools::log << "BodyManager::_ApiRegister: Replacing Body type \"" << bodyName << "\" with a newer type from \"" << pluginName << "\" (plugin " << pluginId << ").\n";
         }
-        else // nouveau type
-        {
-            this->_bodyTypes[pluginId][bodyName] = new BodyType(bodyName, pluginId, prototype);
-            Tools::debug << "BodyManager::_ApiRegister: New Body type \"" << bodyName << "\" registered from \"" << pluginName << "\" (plugin " << pluginId << ").\n";
-        }
+        this->_bodyTypes[pluginId][bodyName] = new BodyType(bodyName, pluginId, prototype);
+        Tools::debug << "BodyManager::_ApiRegister: New Body type \"" << bodyName << "\" registered from \"" << pluginName << "\" (plugin " << pluginId << ").\n";
     }
 
 }}}

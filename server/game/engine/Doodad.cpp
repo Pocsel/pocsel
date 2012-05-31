@@ -43,7 +43,7 @@ namespace Server { namespace Game { namespace Engine {
         }
 
         // sécurité en plus, je pense que ça sert a rien
-        this->_engine.GetDoodadManager().DoodadIsNotDirty(this);
+        this->_engine.GetDoodadManager().DoodadIsClean(this);
     }
 
     void Doodad::Disable()
@@ -129,7 +129,7 @@ namespace Server { namespace Game { namespace Engine {
         // send packet to players
         auto it = this->_players.begin();
         auto itEnd = this->_players.end();
-        for (; it != itEnd; ++it)
+        while (it != itEnd)
             if (this->_engine.GetMap().HasPlayer(*it))
             {
                 if (tcp)
@@ -142,9 +142,10 @@ namespace Server { namespace Game { namespace Engine {
                     auto packetCopy = std::unique_ptr<Network::UdpPacket>(new Network::UdpPacket(*packet));
                     this->_engine.SendUdpPacket(*it, packetCopy);
                 }
+                ++it;
             }
             else
-                this->_players.erase(it);
+                this->_players.erase(it++);
     }
 
     void Doodad::Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value)

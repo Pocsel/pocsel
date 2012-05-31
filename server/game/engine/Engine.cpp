@@ -3,6 +3,7 @@
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
 #include "server/game/engine/DoodadManager.hpp"
+#include "server/game/engine/BodyManager.hpp"
 #include "server/game/engine/Entity.hpp"
 #include "server/game/engine/EntityType.hpp"
 #include "server/game/World.hpp"
@@ -29,6 +30,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_entityManager = new EntityManager(*this);
         this->_messageManager = new MessageManager(*this);
         this->_doodadManager = new DoodadManager(*this);
+        this->_bodyManager = new BodyManager(*this);
     }
 
     Engine::~Engine()
