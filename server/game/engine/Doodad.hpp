@@ -45,7 +45,11 @@ namespace Server { namespace Game { namespace Engine {
         Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
         ~Doodad();
         Uint32 GetId() const { return this->_id; }
+        Uint32 GetPluginId() const { return this->_pluginId; }
+        std::string const& GetName() const { return this->_name; }
         Uint32 GetEntityId() const { return this->_entityId; }
+        Tools::Lua::Ref const& GetStorage() const { return this->_table; }
+        void SetStorage(Tools::Lua::Ref const& ref); // il faut pas que ça soit autre chose qu'une table sinon ça va throw grave
         void Disable();
         void Enable();
         void AddPlayer(Uint32 playerId);

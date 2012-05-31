@@ -52,8 +52,8 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Engine& _engine;
         std::map<Uint32 /* pluginId */, std::map<std::string /* entityName */, EntityType*>> _entityTypes;
-        std::map<Uint32 /* entityId */, Entity*> _entities;
-        std::map<Uint32 /* entityId */, PositionalEntity*> _positionalEntities;
+        std::map<Uint32 /* entityId */, Entity*> _entities; // pointeur nul quand une entité est désactivée
+        std::map<Uint32 /* entityId */, PositionalEntity*> _positionalEntities; // pointeur nul quand une entité est désactivée
         std::map<Uint32 /* entityId */, PositionalEntity*> _disabledEntities;
         Uint32 _nextEntityId;
         Uint32 _runningEntityId; // 0 quand aucune entité n'est en cours d'éxécution
@@ -81,10 +81,12 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 GetRunningPluginId() const;
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
+        PositionalEntity const& GetDisabledEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         bool IsEntityPositional(Uint32 entityId) const;
         void DisableEntity(Uint32 entityId, bool normalDisable = true) throw(std::runtime_error);
         void EnableEntity(Uint32 entityId) throw(std::runtime_error);
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
+        std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
 
         // rcon requests
         std::string RconGetEntities() const;

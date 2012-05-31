@@ -3,7 +3,6 @@
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/map/Map.hpp"
 #include "tools/database/IConnection.hpp"
-#include "tools/database/IConnection.hpp"
 #include "tools/lua/Interpreter.hpp"
 
 namespace Server { namespace Game { namespace Engine {
