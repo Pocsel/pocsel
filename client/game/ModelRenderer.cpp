@@ -20,8 +20,7 @@ namespace Client { namespace Game {
 
     ModelRenderer::ModelRenderer(Game& game) :
         _game(game),
-        _renderer(game.GetClient().GetWindow().GetRenderer()),
-        _elapsedTime(0)
+        _renderer(game.GetClient().GetWindow().GetRenderer())
     {
         this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("BaseModel.fx");
         this->_shaderTexture = this->_shader->GetParameter("diffuseTexture").release();
@@ -83,11 +82,6 @@ namespace Client { namespace Game {
         vertexBuffer->Unbind();
 
         this->_shader->EndPass();
-    }
-
-    void ModelRenderer::Update(Uint32 time)
-    {
-        this->_elapsedTime += time;
     }
 
 }}

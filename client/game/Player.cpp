@@ -56,9 +56,9 @@ namespace Client { namespace Game {
             this->_targetedCubeRenderer->Render(*this->_targetedCube);
     }
 
-    void Player::UpdateMovements(Uint32 time)
+    void Player::UpdateMovements(Uint64 deltaTime)
     {
-        this->_elapsedTime = time;
+        this->_elapsedTime = float(deltaTime) * 0.000001f;
 
         auto& w = this->_game.GetClient().GetWindow();
         this->_actionBinder.Dispatch(w.GetInputManager());
@@ -81,14 +81,14 @@ namespace Client { namespace Game {
         if (this->_movement != glm::fvec3())
             this->_Move();
 
-        this->_movedTime += time;
-        if (this->_moved && this->_movedTime > 40)
+        this->_movedTime += (Uint32)deltaTime;
+        if (this->_moved && this->_movedTime > 40000)
         {
             this->_game.GetClient().GetNetwork().SendUdpPacket(
                 Network::PacketCreator::Move(this->_game.GetClient().GetClientId(), Common::MovingOrientedPosition(this->_camera, this->_movement * this->_GetSpeed()))
                 );
             this->_moved = false;
-            this->_movedTime %= 40;
+            this->_movedTime %= 40000;
         }
 
         this->_movement = glm::fvec3();
@@ -112,7 +112,7 @@ namespace Client { namespace Game {
             }
         }
 
-        this->_targetedCubeRenderer->Update(time);
+        this->_targetedCubeRenderer->Update(deltaTime);
     }
 
     void Player::SetPosition(Common::Position const& pos)
@@ -208,7 +208,7 @@ namespace Client { namespace Game {
     void Player::_Move()
     {
         this->_movement = glm::normalize(this->_movement);
-        auto tmp = glm::dvec3(this->_movement) * (double)(this->_GetSpeed() * this->_elapsedTime * 0.001);
+        auto tmp = glm::dvec3(this->_movement) * (double)(this->_GetSpeed() * this->_elapsedTime);
         Common::Position p = this->_camera.position;
         p += tmp;
         this->SetPosition(p);

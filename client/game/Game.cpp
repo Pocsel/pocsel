@@ -99,10 +99,10 @@ namespace Client { namespace Game {
     {
         this->_statUpdateTime.Begin();
 
-        this->_map->GetChunkManager().Update(this->_gameTimer.GetPreciseElapsedTime(), this->_player->GetPosition());
-        Uint32 time = this->_updateTimer.GetElapsedTime();
-        this->_player->UpdateMovements(time);
-        this->_engine->Tick(time);
+        Uint64 totalTime = this->_gameTimer.GetPreciseElapsedTime();
+        this->_map->GetChunkManager().Update(totalTime, this->_player->GetPosition());
+        this->_player->UpdateMovements(this->_updateTimer.GetPreciseElapsedTime());
+        this->_engine->Tick(totalTime);
         this->_updateTimer.Reset();
 
         this->_statUpdateTime.End();
