@@ -13,8 +13,6 @@ namespace Tools { namespace Renderers { namespace Utils {
         typedef std::list<std::pair<Material::Material*, std::function<void()>>> _MeshList;
 
         IRenderer& _renderer;
-        std::map<IShaderProgram*, std::list<Material::Material*>> _geometryShadersToMaterials;
-        std::map<IShaderProgram*, std::list<Material::Material*>> _shadowMapShadersToMaterials;
         _MeshList _geometryMeshes;
         _MeshList _shadowMapMeshes;
 
@@ -29,15 +27,12 @@ namespace Tools { namespace Renderers { namespace Utils {
         {
             this->_shadowMapMeshes.push_back(std::make_pair(&material, render));
         }
-        void RenderGeometry() { this->_Render(this->_geometryMeshes); }
-        void RenderShadowMap() { this->_Render(this->_shadowMapMeshes); }
-
-        std::unique_ptr<Material::Material, std::function<void(Material::Material*)>> GetMaterial(Lua::Ref const& material, IShaderProgram& geometry, IShaderProgram& shadowMap);
+        void RenderGeometry() { this->_Render(this->_geometryMeshes, &Material::Material::GetGeometryShader); }
+        void RenderShadowMap() { this->_Render(this->_shadowMapMeshes, &Material::Material::GetShadowMapShader); }
 
     private:
-        void _FreeMaterial(Material::Material* material);
-        static void _Render(_MeshList& meshes);
-        static void _RenderMeshes(_MeshList::iterator it, _MeshList::iterator ite);
+        static void _Render(_MeshList& meshes, IShaderProgram& (Material::Material::* getShader)());
+        static void _RenderMeshes(_MeshList::iterator it, _MeshList::iterator ite, IShaderProgram& shader);
     };
 
 }}}

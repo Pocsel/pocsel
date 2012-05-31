@@ -46,6 +46,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         Variable<TValue>& GetVariable(std::string const& name);
         void SetTimeParameter(std::string const& name);
         void SetLuaUpdate(Lua::Ref const& update);
+        std::map<IVariable const*, std::unique_ptr<Texture::ITexture>> const& GetTextures() const { return this->_textures; }
         void SetTextures(IVariable const& variable, std::unique_ptr<Texture::ITexture>&& texture)
         {
             this->_textures[&variable] = std::move(texture);

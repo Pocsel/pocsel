@@ -9,58 +9,89 @@ namespace Tools { namespace Renderers { namespace Utils {
     {
     }
 
-    std::unique_ptr<Material::Material, std::function<void(Material::Material*)>> DeferredShading::GetMaterial(Lua::Ref const& material, IShaderProgram& geometry, IShaderProgram& shadowMap)
+    void DeferredShading::_Render(_MeshList& meshes, IShaderProgram& (Material::Material::* getShader)())
     {
-        std::unique_ptr<Material::Material, std::function<void(Material::Material*)>> ptr(
-            new Material::Material(this->_renderer, material, geometry, shadowMap),
-            std::bind(&DeferredShading::_FreeMaterial, this, std::placeholders::_1));
-
-        this->_geometryShadersToMaterials[&geometry].push_back(ptr.get());
-        this->_shadowMapShadersToMaterials[&shadowMap].push_back(ptr.get());
-
-        return ptr;
-    }
-
-    void DeferredShading::_FreeMaterial(Material::Material* material)
-    {
-        auto& geometry = material->GetGeometryShader();
-        auto& shadowMap = material->GetShadowMapShader();
-
-        this->_geometryShadersToMaterials[&geometry].remove(material);
-        this->_shadowMapShadersToMaterials[&shadowMap].remove(material);
-
-        Tools::Delete(material);
-    }
-
-    void DeferredShading::_Render(_MeshList& meshes)
-    {
-        //TODO: meshes.sort();
+        //TODO:
+        meshes.sort(
+            [&](_MeshList::value_type const& lhs, _MeshList::value_type const& rhs) -> bool
+            {
+                if (&(lhs.first->*getShader)() < &(rhs.first->*getShader)())
+                    return false;
+                auto lhsIt = lhs.first->GetTextures().begin();
+                auto lhsIte = lhs.first->GetTextures().end();
+                auto rhsIt = rhs.first->GetTextures().begin();
+                auto rhsIte = rhs.first->GetTextures().end();
+                for (auto it = lhsIt; it != lhsIte; ++it)
+                {
+                    bool run = false;
+                    for (auto i = rhsIt; i != rhsIte; ++i)
+                        if (&i->second->GetCurrentTexture() == &it->second->GetCurrentTexture())
+                        {
+                            run = true;
+                            break;
+                        }
+                    if (!run)
+                        return false;
+                }
+                return true;
+            });
 
         auto beginShaderIt = meshes.begin();
         IShaderProgram* current = &beginShaderIt->first->GetGeometryShader();
         for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
         {
-            auto shader = &it->first->GetGeometryShader();
+            auto shader = &(it->first->*getShader)();
             if (shader == current)
             {
-                DeferredShading::_RenderMeshes(beginShaderIt, it);
+                DeferredShading::_RenderMeshes(beginShaderIt, it, *current);
                 beginShaderIt = it;
                 current = shader;
             }
         }
-        DeferredShading::_RenderMeshes(beginShaderIt, meshes.end());
+        DeferredShading::_RenderMeshes(beginShaderIt, meshes.end(), *current);
 
         meshes.clear();
     }
 
-    void DeferredShading::_RenderMeshes(_MeshList::iterator beginIt, _MeshList::iterator ite)
+    void DeferredShading::_RenderMeshes(_MeshList::iterator beginIt, _MeshList::iterator ite, IShaderProgram& shader)
     {
+        std::list<ITexture2D*> bindedTextures;
         do
         {
-            beginIt->first->GetGeometryShader().BeginPass();
+            shader.BeginPass();
             for (auto it = beginIt; it != ite; ++it)
+            {
+                // Les textures
+                auto const& textures = it->first->GetTextures();
+                bindedTextures.remove_if([&](ITexture2D* tex) -> bool
+                    {
+                        bool remove = true;
+                        for (auto itTexture = textures.begin(), iteTexture = textures.end(); itTexture != iteTexture; ++itTexture)
+                            remove = remove && &itTexture->second->GetCurrentTexture() != tex;
+                        if (remove)
+                            tex->Unbind();
+                        return remove;
+                    });
+                for (auto itTexture = textures.begin(), iteTexture = textures.end(); itTexture != iteTexture; ++itTexture)
+                {
+                    bool binded = false;
+                    for (auto itBinded = bindedTextures.begin(), iteBinded = bindedTextures.end(); itBinded != iteBinded; ++itBinded)
+                        binded = binded || *itBinded == &itTexture->second->GetCurrentTexture();
+                    if (!binded)
+                    {
+                        itTexture->second->GetCurrentTexture().Bind();
+                        bindedTextures.push_back(&itTexture->second->GetCurrentTexture());
+                    }
+                }
+
+                // Render
                 it->second();
-        } while (beginIt->first->GetGeometryShader().EndPass());
+            }
+        } while (shader.EndPass());
+
+        // Unbind tout
+        for (auto itBinded = bindedTextures.begin(), iteBinded = bindedTextures.end(); itBinded != iteBinded; ++itBinded)
+            (*itBinded)->Unbind();
     }
 
 }}}

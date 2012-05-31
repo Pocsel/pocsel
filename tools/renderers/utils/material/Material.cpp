@@ -15,7 +15,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         _shadowMap(shadowMap),
         _luaMaterial(material)
     {
-        if (this->_luaMaterial["Update"].Exists())
+        if (!this->_luaMaterial.IsNoneOrNil() && this->_luaMaterial["Update"].Exists())
             this->_luaUpdate.reset(new Lua::Ref(this->_luaMaterial["Update"]));
     }
 

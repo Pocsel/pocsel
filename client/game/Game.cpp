@@ -24,7 +24,8 @@ namespace Client { namespace Game {
         _map(0),
         _statUpdateTime("Game update"),
         _statRenderTime("Game render"),
-        _statOutTime("Not game time")
+        _statOutTime("Not game time"),
+        _deferredShading(client.GetWindow().GetRenderer())
     {
         this->_cubeTypeManager = new CubeTypeManager(client, nbCubeTypes);
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
@@ -66,6 +67,14 @@ namespace Client { namespace Game {
         //this->_testImage.reset(new Tools::Renderers::Utils::Image(this->_renderer));
         //this->_testShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
         //this->_testTexture = this->_testShader->GetParameter("baseTex");
+
+        this->_material.reset(
+            new Tools::Renderers::Utils::Material::Material(
+                this->_renderer,
+                Tools::Lua::Ref(this->_engine->GetInterpreter().GetState()),
+                this->_client.GetLocalResourceManager().GetShader("TestShader.fx"),
+                this->_client.GetLocalResourceManager().GetShader("TestShader.fx")));
+        this->_sphere.reset(new Tools::Renderers::Utils::Sphere(this->_renderer));
         // XXX
     }
 
@@ -127,6 +136,14 @@ namespace Client { namespace Game {
         this->_RenderScene(absoluteViewProjection);
         this->_map->GetChunkManager().RenderAlpha(this->GetPlayer().GetCamera().position);
         this->_player->Render();
+
+        this->_renderer.SetModelMatrix(glm::translate(2.0f, -2.0f, 2.0f));
+        this->_deferredShading.RenderGeometry(*this->_material,
+            [&]()
+            {
+                this->_sphere->Render();
+            });
+        this->_deferredShading.RenderGeometry();
 
         this->_gBuffer->Unbind();
 
