@@ -270,7 +270,6 @@ namespace Server { namespace Game { namespace Engine {
                         try
                         {
                             // XXX Save() database hook
-                            // (peut delete l'entité, mais les iterateurs restent valident pour la map)
                             CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
                             if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                 throw std::runtime_error("call to Save() failed");

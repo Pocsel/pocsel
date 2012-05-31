@@ -36,13 +36,11 @@ namespace Client { namespace Game {
         Tools::Renderers::IShaderProgram* _shader;
         Tools::Renderers::IShaderParameter* _shaderTexture;
         Tools::Renderers::IShaderParameter* _shaderBoneMatrix;
-        Uint32 _elapsedTime;
 
     public:
         ModelRenderer(Game& game);
         ~ModelRenderer();
         void Render(Engine::Model const& model, Common::Position const& pos);
-        void Update(Uint32 time);
 
     private:
     };
