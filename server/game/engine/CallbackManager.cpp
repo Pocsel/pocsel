@@ -21,12 +21,12 @@ namespace Server { namespace Game { namespace Engine {
             Tools::Delete(it->second);
     }
 
-    Uint32 CallbackManager::MakeCallback(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, bool serialize /* = true */)
+    Uint32 CallbackManager::MakeCallback(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, bool serialize /* = true */)
     {
         while (!this->_nextCallbackId // 0 est la valeur spéciale "pas de callback", on la saute
                 || this->_callbacks.count(this->_nextCallbackId))
             ++this->_nextCallbackId;
-        this->_callbacks[this->_nextCallbackId] = new Callback(targetId, function,
+        this->_callbacks[this->_nextCallbackId] = new Callback(entityId, function,
                 serialize ? this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(arg, true) : arg);
         return this->_nextCallbackId++;
     }
@@ -43,7 +43,7 @@ namespace Server { namespace Game { namespace Engine {
         auto it = this->_callbacks.find(callbackId);
         if (it != this->_callbacks.end())
         {
-            Result res = this->_engine.GetEntityManager().CallEntityFunction(it->second->targetId, it->second->function, it->second->arg, bonusArg, ret);
+            Result res = this->_engine.GetEntityManager().CallEntityFunction(it->second->entityId, it->second->function, it->second->arg, bonusArg, ret);
             if (!keepCallback)
             {
                 delete it->second;
@@ -82,15 +82,15 @@ namespace Server { namespace Game { namespace Engine {
     {
         std::string table = this->_engine.GetMap().GetName() + "_callback";
         conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
-        auto query = conn.CreateQuery("INSERT INTO " + table + " (id, target_id, function, arg) VALUES (?, ?, ?, ?);");
+        auto query = conn.CreateQuery("INSERT INTO " + table + " (id, entity_id, function, arg) VALUES (?, ?, ?, ?);");
         auto it = this->_callbacks.begin();
         auto itEnd = this->_callbacks.end();
         for (; it != itEnd; ++it)
             try
             {
                 std::string arg = this->_engine.GetInterpreter().GetSerializer().Serialize(it->second->arg, true /* nilOnError */);
-                Tools::debug << ">> Save >> " << table << " >> Callback (id: " << it->first << ", targetId: " << it->second->targetId << ", function: \"" << it->second->function << "\", arg: " << arg.size() << " bytes)" << std::endl;
-                query->Bind(it->first).Bind(it->second->targetId).Bind(it->second->function).Bind(arg).ExecuteNonSelect().Reset();
+                Tools::debug << ">> Save >> " << table << " >> Callback (id: " << it->first << ", entityId: " << it->second->entityId << ", function: \"" << it->second->function << "\", arg: " << arg.size() << " bytes)" << std::endl;
+                query->Bind(it->first).Bind(it->second->entityId).Bind(it->second->function).Bind(arg).ExecuteNonSelect().Reset();
             }
             catch (std::exception& e)
             {
@@ -101,17 +101,17 @@ namespace Server { namespace Game { namespace Engine {
     void CallbackManager::Load(Tools::Database::IConnection& conn)
     {
         std::string table = this->_engine.GetMap().GetName() + "_callback";
-        auto query = conn.CreateQuery("SELECT id, target_id, function, arg FROM " + table);
+        auto query = conn.CreateQuery("SELECT id, entity_id, function, arg FROM " + table);
         while (auto row = query->Fetch())
         {
             Uint32 id = row->GetUint32(0);
-            Uint32 targetId = row->GetUint32(1);
+            Uint32 entityId = row->GetUint32(1);
             std::string function = row->GetString(2);
             try
             {
                 Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(3));
-                Tools::debug << "<< Load << " << table << " << Callback (id: " << id << ", targetId: " << targetId << ", function: \"" << function << "\", arg: <lua>)" << std::endl;
-                this->_callbacks[id] = new Callback(targetId, function, arg);
+                Tools::debug << "<< Load << " << table << " << Callback (id: " << id << ", entityId: " << entityId << ", function: \"" << function << "\", arg: <lua>)" << std::endl;
+                this->_callbacks[id] = new Callback(entityId, function, arg);
             }
             catch (std::exception& e) // erreur de deserialization
             {

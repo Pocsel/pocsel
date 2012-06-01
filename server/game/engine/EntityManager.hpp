@@ -39,11 +39,11 @@ namespace Server { namespace Game { namespace Engine {
         };
         struct KillEvent
         {
-            KillEvent(Uint32 targetId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId) :
-                targetId(targetId), arg(arg), killerId(killerId), notificationCallbackId(notificationCallbackId)
+            KillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId) :
+                entityId(entityId), arg(arg), killerId(killerId), notificationCallbackId(notificationCallbackId)
             {
             }
-            Uint32 targetId;
+            Uint32 entityId;
             Tools::Lua::Ref arg;
             Uint32 killerId;
             Uint32 notificationCallbackId;
@@ -68,10 +68,10 @@ namespace Server { namespace Game { namespace Engine {
         // peut retourner toutes les valeurs de CallbackManager::Result sauf CallbackNotFound (evidemment)
         // seul entry point Lua avec Engine::RconExecute()
         // si Error est retourné, l'entité a été supprimée
-        CallbackManager::Result CallEntityFunction(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0);
+        CallbackManager::Result CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0);
 
         void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position());
-        void AddKillEvent(Uint32 targetId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId);
+        void AddKillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId);
         void DispatchSpawnEvents();
         void DispatchKillEvents();
         void Save(Tools::Database::IConnection& conn);

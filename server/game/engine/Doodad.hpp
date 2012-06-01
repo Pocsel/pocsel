@@ -35,7 +35,7 @@ namespace Server { namespace Game { namespace Engine {
         std::string _name;
         Uint32 _entityId;
         PositionalEntity const& _entity;
-        Tools::Lua::Ref _table;
+        Tools::Lua::Ref _storage;
         std::unordered_set<Uint32> _players;
         std::unordered_set<Uint32> _newPlayers;
         std::queue<Command> _commands;
@@ -48,7 +48,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 GetPluginId() const { return this->_pluginId; }
         std::string const& GetName() const { return this->_name; }
         Uint32 GetEntityId() const { return this->_entityId; }
-        Tools::Lua::Ref const& GetStorage() const { return this->_table; }
+        Tools::Lua::Ref const& GetStorage() const { return this->_storage; }
         void SetStorage(Tools::Lua::Ref const& ref); // il faut pas que ça soit autre chose qu'une table sinon ça va throw grave
         void Disable();
         void Enable();
