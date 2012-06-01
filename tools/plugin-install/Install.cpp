@@ -147,6 +147,7 @@ namespace Tools { namespace PluginInstall {
             wconn.CreateQuery("CREATE TABLE " + name + "_spawn_event (id INTEGER, plugin_id INTEGER, entity_name TEXT, arg TEXT, spawner_id INTEGER, notification_callback_id INTEGER, has_position INTEGER, pos_x REAL, pos_y REAL, pos_z REAL);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE " + name + "_kill_event (id INTEGER, target_id INTEGER, arg TEXT, killer_id INTEGER, notification_callback_id INTEGER);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE " + name + "_entity (id INTEGER, plugin_id INTEGER, entity_name TEXT, disabled INTEGER, storage TEXT, pos_x REAL, pos_y REAL, pos_z REAL);")->ExecuteNonSelect();
+            wconn.CreateQuery("CREATE TABLE " + name + "_doodad (id INTEGER, plugin_id INTEGER, doodad_name TEXT, entity_id INTEGER, storage TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE " + name + "_initialized_plugin (id INTEGER);")->ExecuteNonSelect();
 
             wconn.CreateQuery("INSERT INTO map (name, plugin_id, lua, time) VALUES (?, ?, ?, ?);")->

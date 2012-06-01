@@ -56,6 +56,11 @@ namespace Server { namespace Game { namespace Engine {
         // TODO
     }
 
+    void Doodad::SetStorage(Tools::Lua::Ref const& ref)
+    {
+        this->_table = ref;
+    }
+
     void Doodad::AddPlayer(Uint32 playerId)
     {
         this->_newPlayers.insert(playerId);

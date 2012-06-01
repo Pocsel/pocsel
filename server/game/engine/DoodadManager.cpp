@@ -3,6 +3,7 @@
 #include "server/game/engine/Doodad.hpp"
 #include "server/game/map/Map.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/database/IConnection.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -43,12 +44,108 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::Save(Tools::Database::IConnection& conn)
     {
-        // TODO
+        std::string table = this->_engine.GetMap().GetName() + "_doodad";
+        conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
+        auto query = conn.CreateQuery("INSERT INTO " + table + " (id, plugin_id, doodad_name, entity_id, storage) VALUES (?, ?, ?, ?, ?);");
+
+        // enabled doodads
+        {
+            auto it = this->_doodads.begin();
+            auto itEnd = this->_doodads.end();
+            for (; it != itEnd; ++it)
+            {
+                Doodad* d = it->second;
+                if (!d)
+                    continue;
+                assert(d->GetId() == it->first && "lol");
+                try
+                {
+                    std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(d->GetStorage(), true /* nilOnError */);
+                    Tools::debug << ">> Save >> " << table << " >> Enabled Doodad (id: " << d->GetId() << ", pluginId: " << d->GetPluginId() << ", doodadName: \"" << d->GetName() << "\", entityId: " << d->GetEntityId() << ", storage: " << storage.size() << " bytes)" << std::endl;
+                    query->Bind(d->GetId()).Bind(d->GetPluginId()).Bind(d->GetName()).Bind(d->GetEntityId()).Bind(storage).ExecuteNonSelect().Reset();
+                }
+                catch (std::exception& e)
+                {
+                    Tools::error << "DoodadManager::Save: Could not save enabled doodad " << d->GetId() << ": " << e.what() << std::endl;
+                }
+            }
+        }
+
+        // disabled doodads
+        {
+            auto it = this->_disabledDoodads.begin();
+            auto itEnd = this->_disabledDoodads.end();
+            for (; it != itEnd; ++it)
+            {
+                auto itList = it->second.begin();
+                auto itListEnd = it->second.end();
+                for (; itList != itListEnd; ++itList)
+                {
+                    Doodad* d = *itList;
+                    try
+                    {
+                        std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(d->GetStorage(), true /* nilOnError */);
+                        Tools::debug << ">> Save >> " << table << " >> Disabled Doodad (id: " << d->GetId() << ", pluginId: " << d->GetPluginId() << ", doodadName: \"" << d->GetName() << "\", entityId: " << d->GetEntityId() << ", storage: " << storage.size() << " bytes)" << std::endl;
+                        query->Bind(d->GetId()).Bind(d->GetPluginId()).Bind(d->GetName()).Bind(d->GetEntityId()).Bind(storage).ExecuteNonSelect().Reset();
+                    }
+                    catch (std::exception& e)
+                    {
+                        Tools::error << "DoodadManager::Save: Could not save disabled doodad " << d->GetId() << ": " << e.what() << std::endl;
+                    }
+                }
+            }
+        }
     }
 
     void DoodadManager::Load(Tools::Database::IConnection& conn)
     {
-        // TODO
+        Uint32 maxId = 0;
+        std::string table = this->_engine.GetMap().GetName() + "_doodad";
+        auto query = conn.CreateQuery("SELECT id, plugin_id, doodad_name, entity_id, storage FROM " + table);
+        while (auto row = query->Fetch())
+        {
+            Uint32 doodadId = row->GetUint32(0);
+            if (doodadId > maxId)
+                maxId = doodadId;
+            Uint32 pluginId = row->GetUint32(1);
+            std::string name = row->GetString(2);
+            Uint32 entityId = row->GetUint32(3);
+            try
+            {
+                Tools::Lua::Ref storage = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(4));
+                Tools::debug << "<< Load << " << table << " << Doodad (id: " << doodadId << ", pluginId: " << pluginId << ", doodadName: \"" << name << "\", entityId: " << entityId << ", storage: <lua>)" << std::endl;
+                if (!storage.IsTable())
+                    throw std::runtime_error("Storage must be of type table and not " + storage.GetTypeName());
+                PositionalEntity const* entity;
+                try
+                {
+                    entity = &this->_engine.GetEntityManager().GetPositionalEntity(entityId);
+                }
+                catch (std::exception&)
+                {
+                    try
+                    {
+                        entity = &this->_engine.GetEntityManager().GetDisabledEntity(entityId);
+                    }
+                    catch (std::exception&)
+                    {
+                        throw std::runtime_error("No positional entity or disabled entity with id " + Tools::ToString(entityId));
+                    }
+                }
+                this->_CreateDoodad(doodadId, pluginId, name, entityId, *entity)->SetStorage(storage);
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "DoodadManager::Load: Could not load doodad " << doodadId << ": " << e.what() << std::endl;
+            }
+        }
+        this->_nextDoodadId = maxId + 1; // utile si jamais un script Lua fait des if sur des id de doodads
+
+        // désactive les doodads des entités désactivées
+        auto it = this->_engine.GetEntityManager().GetDisabledEntities().begin();
+        auto itEnd = this->_engine.GetEntityManager().GetDisabledEntities().end();
+        for (; it != itEnd; ++it)
+            this->DisableDoodadsOfEntity(it->first);
     }
 
     void DoodadManager::ExecuteCommands()

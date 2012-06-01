@@ -364,14 +364,17 @@ namespace Server { namespace Game { namespace Engine {
     {
         // entities
         {
+            Uint32 maxId = 0;
             std::string table = this->_engine.GetMap().GetName() + "_entity";
             auto query = conn.CreateQuery("SELECT id, plugin_id, entity_name, disabled, storage, pos_x, pos_y, pos_z FROM " + table);
             while (auto row = query->Fetch())
             {
                 Uint32 entityId = row->GetUint32(0);
+                if (entityId > maxId)
+                    maxId = entityId;
                 Uint32 pluginId = row->GetUint32(1);
                 std::string entityName = row->GetString(2);
-                bool disabled = row->GetUint32(3) == 1;
+                bool disabled = row->GetUint32(3) != 0;
                 Common::Position pos(row->GetDouble(5), row->GetDouble(6), row->GetDouble(7));
                 try
                 {
@@ -405,6 +408,7 @@ namespace Server { namespace Game { namespace Engine {
                     Tools::error << "EntityManager::Load: Could not load entity \"" << entityName << "\" (plugin " << pluginId << "): " << e.what() << std::endl;
                 }
             }
+            this->_nextEntityId = maxId + 1; // utile si jamais un script Lua fait des if sur des id d'entités
         }
 
         // spawn events
@@ -487,6 +491,14 @@ namespace Server { namespace Game { namespace Engine {
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
             throw std::runtime_error("EntityManager: Positional entity not found.");
+        return *it->second;
+    }
+
+    PositionalEntity const& EntityManager::GetDisabledEntity(Uint32 entityId) const throw(std::runtime_error)
+    {
+        auto it = this->_disabledEntities.find(entityId);
+        if (it == this->_disabledEntities.end())
+            throw std::runtime_error("EntityManager: Disabled entity not found.");
         return *it->second;
     }
 
