@@ -83,7 +83,7 @@ namespace Server { namespace Game { namespace Engine {
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         PositionalEntity const& GetDisabledEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         bool IsEntityPositional(Uint32 entityId) const;
-        void DisableEntity(Uint32 entityId, bool normalDisable = true) throw(std::runtime_error);
+        void DisableEntity(Uint32 entityId, bool chunkUnloaded = true) throw(std::runtime_error);
         void EnableEntity(Uint32 entityId) throw(std::runtime_error);
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
         std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }

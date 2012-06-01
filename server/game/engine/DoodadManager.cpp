@@ -164,8 +164,8 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::DeleteDoodadsOfEntity(Uint32 entityId)
     {
-        auto listIt = this->_doodadsByEntities.find(entityId);
-        if (listIt == this->_doodadsByEntities.end())
+        auto listIt = this->_doodadsByEntity.find(entityId);
+        if (listIt == this->_doodadsByEntity.end())
             return; // l'entité n'a aucun doodad
         auto it = listIt->second.begin();
         auto itEnd = listIt->second.end();
@@ -174,13 +174,13 @@ namespace Server { namespace Game { namespace Engine {
             this->_doodads.erase((*it)->GetId());
             Tools::Delete(*it);
         }
-        this->_doodadsByEntities.erase(listIt);
+        this->_doodadsByEntity.erase(listIt);
     }
 
     void DoodadManager::DisableDoodadsOfEntity(Uint32 entityId)
     {
-        auto listIt = this->_doodadsByEntities.find(entityId);
-        if (listIt == this->_doodadsByEntities.end())
+        auto listIt = this->_doodadsByEntity.find(entityId);
+        if (listIt == this->_doodadsByEntity.end())
             return; // l'entité n'a aucun doodad
         auto it = listIt->second.begin();
         auto itEnd = listIt->second.end();
@@ -193,7 +193,7 @@ namespace Server { namespace Game { namespace Engine {
         }
         assert(!this->_disabledDoodads.count(entityId) && "une liste de doodads n'a pas été enlevée de la map de liste rangés par entités");
         this->_disabledDoodads[entityId] = listIt->second;
-        this->_doodadsByEntities.erase(listIt);
+        this->_doodadsByEntity.erase(listIt);
     }
 
     void DoodadManager::EnableDoodadsOfEntity(Uint32 entityId)
@@ -210,15 +210,15 @@ namespace Server { namespace Game { namespace Engine {
             doodad->second = *it;
             (*it)->Enable();
         }
-        assert(!this->_doodadsByEntities.count(entityId) && "une liste de doodads désactivés n'a pas été enlevée de la map de liste de doodads rangés par entités");
-        this->_doodadsByEntities[entityId] = listIt->second;
+        assert(!this->_doodadsByEntity.count(entityId) && "une liste de doodads désactivés n'a pas été enlevée de la map de liste de doodads rangés par entités");
+        this->_doodadsByEntity[entityId] = listIt->second;
         this->_disabledDoodads.erase(listIt);
     }
 
     void DoodadManager::EntityHasMoved(Uint32 entityId)
     {
-        auto itList = this->_doodadsByEntities.find(entityId);
-        if (itList == this->_doodadsByEntities.end())
+        auto itList = this->_doodadsByEntity.find(entityId);
+        if (itList == this->_doodadsByEntity.end())
             return;
         auto it = itList->second.begin();
         auto itEnd = itList->second.end();
@@ -234,7 +234,7 @@ namespace Server { namespace Game { namespace Engine {
 
         Doodad* d = new Doodad(this->_engine, doodadId, pluginId, name, entityId, entity);
         this->_doodads[doodadId] = d;
-        this->_doodadsByEntities[entityId].push_back(d);
+        this->_doodadsByEntity[entityId].push_back(d);
         return d;
     }
 
@@ -312,11 +312,11 @@ namespace Server { namespace Game { namespace Engine {
         }
 
         // enleve le doodad de la liste associée à l'entité
-        auto itList = this->_doodadsByEntities.find(it->second->GetEntityId());
-        assert(itList != this->_doodadsByEntities.end() && "un doodad de la map générale des doodads n'était pas dans une liste associée a une entité");
+        auto itList = this->_doodadsByEntity.find(it->second->GetEntityId());
+        assert(itList != this->_doodadsByEntity.end() && "un doodad de la map générale des doodads n'était pas dans une liste associée a une entité");
         itList->second.remove(it->second);
         if (itList->second.empty())
-            this->_doodadsByEntities.erase(itList); // supprime l'entrée associée à l'entité si celle-ci n'a plus de doodads
+            this->_doodadsByEntity.erase(itList); // supprime l'entrée associée à l'entité si celle-ci n'a plus de doodads
 
         // enleve le doodad de la map générale + delete
         Tools::Delete(it->second);

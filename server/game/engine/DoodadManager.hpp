@@ -22,7 +22,7 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Engine& _engine;
         std::map<Uint32 /* doodadId */, Doodad*> _doodads; // pointeur nul quand un doodad est désactivé
-        std::map<Uint32 /* entityId */, std::list<Doodad*>> _doodadsByEntities;
+        std::map<Uint32 /* entityId */, std::list<Doodad*>> _doodadsByEntity;
         std::map<Uint32 /* entityId */, std::list<Doodad*>> _disabledDoodads;
         std::unordered_set<Doodad*> _dirtyDoodads;
         Uint32 _nextDoodadId;

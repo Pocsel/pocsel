@@ -11,9 +11,10 @@ Server.Entity.Register{
         print("Die()")
     end,
 
-    Save = function(self) -- save to database
-        print("Save()")
+    Save = function(self, chunkUnloaded) -- save to database
+        print("Save() ", tostring(chunkUnloaded))
         Server.Entity.Save(self.id)
+        return true
     end,
 
     Load = function(self) -- load from database
@@ -46,9 +47,10 @@ Server.Entity.RegisterPositional{
         print("Die()");
     end,
 
-    Save = function(self)
-        print("Save()")
+    Save = function(self, chunkUnloaded)
+        print("Save() ", tostring(chunkUnloaded))
         Server.Entity.Save()
+        return true
     end,
 
     Load = function(self)
