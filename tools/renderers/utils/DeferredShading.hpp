@@ -27,12 +27,12 @@ namespace Tools { namespace Renderers { namespace Utils {
         {
             this->_shadowMapMeshes.push_back(std::make_pair(&material, render));
         }
-        void RenderGeometry() { this->_Render(this->_geometryMeshes, &Material::Material::GetGeometryShader); }
-        void RenderShadowMap() { this->_Render(this->_shadowMapMeshes, &Material::Material::GetShadowMapShader); }
+        void RenderGeometry(Uint64 totalTime) { this->_Render(totalTime, this->_geometryMeshes, &Material::Material::GetGeometryShader); }
+        void RenderShadowMap(Uint64 totalTime) { this->_Render(totalTime, this->_shadowMapMeshes, &Material::Material::GetShadowMapShader); }
 
     private:
-        static void _Render(_MeshList& meshes, IShaderProgram& (Material::Material::* getShader)());
-        static void _RenderMeshes(_MeshList::iterator it, _MeshList::iterator ite, IShaderProgram& shader);
+        static void _Render(Uint64 totalTime, _MeshList& meshes, IShaderProgram& (Material::Material::* getShader)());
+        static void _RenderMeshes(Uint64 totalTime, _MeshList::iterator it, _MeshList::iterator ite, IShaderProgram& shader);
     };
 
 }}}

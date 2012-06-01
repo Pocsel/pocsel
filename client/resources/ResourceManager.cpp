@@ -289,6 +289,11 @@ namespace Client { namespace Resources {
         return *itEffect->second;
     }
 
+    std::unique_ptr<Tools::Renderers::Utils::Material::Material> ResourceManager::GetMaterial(Uint32 pluginId, std::string const& name)
+    {
+        throw std::runtime_error("Not implemented yet"); // TODO
+    }
+
     //std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)
     //{
     //    std::list<std::unique_ptr<Common::Resource>> resources;

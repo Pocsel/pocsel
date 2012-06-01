@@ -74,12 +74,17 @@ namespace Client { namespace Game {
                 Tools::Lua::Ref(this->_engine->GetInterpreter().GetState()),
                 this->_client.GetLocalResourceManager().GetShader("TestShader.fx"),
                 this->_client.GetLocalResourceManager().GetShader("TestShader.fx")));
+        auto& var = this->_material->GetVariable<Tools::Renderers::Utils::Texture::ITexture>("diffuse");
+        var.Set(this->_resourceManager->GetTexture(1, "cubes/iron/top.png"));
         this->_sphere.reset(new Tools::Renderers::Utils::Sphere(this->_renderer));
         // XXX
     }
 
     Game::~Game()
     {
+        // XXX
+        this->_material.reset();
+        // XXX
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
         Tools::Delete(this->_player);
@@ -121,6 +126,7 @@ namespace Client { namespace Game {
     {
         this->_statRenderTime.Begin();
 
+        Uint64 totalTime = this->_gameTimer.GetPreciseElapsedTime();
         auto& camera = this->GetPlayer().GetCamera();
         this->_renderer.SetProjectionMatrix(camera.projection);
         this->_renderer.SetViewMatrix(camera.GetViewMatrix());
@@ -143,7 +149,7 @@ namespace Client { namespace Game {
             {
                 this->_sphere->Render();
             });
-        this->_deferredShading.RenderGeometry();
+        this->_deferredShading.RenderGeometry(totalTime);
 
         this->_gBuffer->Unbind();
 

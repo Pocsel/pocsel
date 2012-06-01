@@ -9,7 +9,7 @@ namespace Tools { namespace Renderers { namespace Utils {
     {
     }
 
-    void DeferredShading::_Render(_MeshList& meshes, IShaderProgram& (Material::Material::* getShader)())
+    void DeferredShading::_Render(Uint64 totalTime, _MeshList& meshes, IShaderProgram& (Material::Material::* getShader)())
     {
         //TODO:
         meshes.sort(
@@ -40,20 +40,21 @@ namespace Tools { namespace Renderers { namespace Utils {
         IShaderProgram* current = &beginShaderIt->first->GetGeometryShader();
         for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
         {
+            it->first->Update(totalTime);
             auto shader = &(it->first->*getShader)();
             if (shader == current)
             {
-                DeferredShading::_RenderMeshes(beginShaderIt, it, *current);
+                DeferredShading::_RenderMeshes(totalTime, beginShaderIt, it, *current);
                 beginShaderIt = it;
                 current = shader;
             }
         }
-        DeferredShading::_RenderMeshes(beginShaderIt, meshes.end(), *current);
+        DeferredShading::_RenderMeshes(totalTime, beginShaderIt, meshes.end(), *current);
 
         meshes.clear();
     }
 
-    void DeferredShading::_RenderMeshes(_MeshList::iterator beginIt, _MeshList::iterator ite, IShaderProgram& shader)
+    void DeferredShading::_RenderMeshes(Uint64 totalTime, _MeshList::iterator beginIt, _MeshList::iterator ite, IShaderProgram& shader)
     {
         std::list<ITexture2D*> bindedTextures;
         do
@@ -85,6 +86,7 @@ namespace Tools { namespace Renderers { namespace Utils {
                 }
 
                 // Render
+                it->first->UpdateParameters(shader, totalTime);
                 it->second();
             }
         } while (shader.EndPass());

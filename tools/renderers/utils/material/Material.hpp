@@ -59,6 +59,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         IShaderProgram& GetGeometryShader() { return this->_geometry.shader; }
         IShaderProgram& GetShadowMapShader() { return this->_shadowMap.shader; }
         void UpdateParameters(int index, Uint64 totalTime);
+        void UpdateParameters(IShaderProgram& shader, Uint64 totalTime);
     };
 
 }}}}
