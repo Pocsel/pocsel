@@ -34,7 +34,7 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    Body* BodyManager::_CreateBody(Uint32 pluginId, std::string bodyName) throw(std::runtime_error)
+    Body* BodyManager::CreateBody(Uint32 pluginId, std::string bodyName) throw(std::runtime_error)
     {
         // trouve le plugin
         auto itPlugin = this->_bodyTypes.find(pluginId);
@@ -48,7 +48,7 @@ namespace Server { namespace Game { namespace Engine {
 
         // allocation
         Body* body;
-        body = new Body(this->_engine.GetInterpreter(), *itType->second);
+        body = new Body(*itType->second);
 
         Tools::debug << "BodyManager::_CreateBody: New Body \"" << bodyName << "\" (plugin " << pluginId << ") created.\n";
         return body;

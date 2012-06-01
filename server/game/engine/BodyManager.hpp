@@ -22,12 +22,12 @@ namespace Server { namespace Game { namespace Engine {
         BodyManager(Engine& engine);
         ~BodyManager();
 
+        Body* CreateBody(Uint32 pluginId, std::string BodyName) throw(std::runtime_error);
         // rcon requests
         //std::string RconGetBodies() const;
         //void RconAddBodyTypes(Rcon::BodyManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon
 
     private:
-        Body* _CreateBody(Uint32 pluginId, std::string BodyName) throw(std::runtime_error);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
     };
 

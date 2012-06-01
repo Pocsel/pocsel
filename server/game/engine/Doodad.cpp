@@ -13,7 +13,7 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Doodad::Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity) :
+    Doodad::Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, Body* body) :
         _engine(engine),
         _id(id),
         _pluginId(pluginId),
@@ -21,6 +21,7 @@ namespace Server { namespace Game { namespace Engine {
         _entityId(entityId),
         _entity(entity),
         _table(engine.GetInterpreter().MakeTable()),
+        _body(body),
         _positionDirty(false)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;

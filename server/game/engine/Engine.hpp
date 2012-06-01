@@ -57,6 +57,7 @@ namespace Server { namespace Game { namespace Engine {
         EntityManager& GetEntityManager() { return *this->_entityManager; }
         CallbackManager& GetCallbackManager() { return *this->_callbackManager; }
         DoodadManager& GetDoodadManager() { return *this->_doodadManager; }
+        BodyManager& GetBodyManager() { return *this->_bodyManager; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }

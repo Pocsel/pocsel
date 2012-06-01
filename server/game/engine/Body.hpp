@@ -11,13 +11,21 @@ namespace Server { namespace Game { namespace Engine {
     class Body :
         private boost::noncopyable
     {
+    public:
+        struct BodyNode
+        {
+            BodyNode() : _dirty(false) {}
+            glm::vec3 position;
+            glm::vec3 orientation;
+            glm::vec3 size;
+            bool _dirty;
+        };
     private:
         BodyType const& _type;
-        //Tools::Lua::Ref _table;
-        bool _dirty;
+        std::map<std::string, BodyNode> _nodes;
 
     public:
-        Body(Tools::Lua::Interpreter& interpreter, BodyType const& bodyType);
+        Body(BodyType const& bodyType);
     };
 
 }}}

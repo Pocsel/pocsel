@@ -5,6 +5,7 @@ Server.Entity.Register{
     Spawn = function(self) -- constructor
         print("Spawn()")
         Server.Message.Later(20, self.id, "SpawnBlob")
+        Server.Message.Later(20, self.id, "SpawnTank")
     end,
 
     Die = function(self) -- destructor

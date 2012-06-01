@@ -9,29 +9,31 @@ namespace Server { namespace Game { namespace Engine {
         private boost::noncopyable
     {
     public:
-        struct ShapeTreeNode
+        struct ShapeNode
         {
+            ShapeNode(int parent) : parent(parent) {}
             std::string name;
-            std::vector<ShapeTreeNode> children;
+            std::vector<unsigned int> children;
+            int parent;
         };
+        static const unsigned int ShapesMax = 50;
     private:
         std::string _name;
         Uint32 _pluginId;
-        //Tools::Lua::Ref _prototype;
-        std::vector<ShapeTreeNode> _shapeTree;
-        std::map<std::string /*name*/, ShapeTreeNode*> _shapeTreeMap;
+        std::vector<ShapeNode> _shapes;
+        std::vector<unsigned int> _roots;
+        std::map<std::string /*name*/, ShapeNode*> _shapesMap;
 
     public:
         BodyType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype);
         std::string const& GetName() const { return this->_name; }
         Uint32 GetPluginId() const { return this->_pluginId; }
-//        Tools::Lua::Ref const& GetPrototype() const { return this->_prototype; }
-//        void SetPrototype(Tools::Lua::Ref const& prototype) { this->_prototype = prototype; }
+        std::map<std::string, ShapeNode*> const& GetShapesMap() const { return this->_shapesMap; }
 
     private:
-        void _FillShapeTree(Tools::Lua::Ref const& shapeTree, std::vector<ShapeTreeNode>& result);
-        void _BuildShapeNode(Tools::Lua::Ref& shapeTree, ShapeTreeNode& node);
-        void _DumpTree(std::vector<ShapeTreeNode> const& shapeNodes, std::string off);
+        void _FillShapeTree(Tools::Lua::Ref const& shapeTree, std::vector<unsigned int>& result, int parent);
+        unsigned int _BuildShapeNode(Tools::Lua::Ref& shapeTree, int parent);
+        void _DumpTree(std::vector<unsigned int> const& shapeNodes, std::string off);
     };
 
 }}}

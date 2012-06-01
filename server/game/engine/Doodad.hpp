@@ -45,7 +45,7 @@ namespace Server { namespace Game { namespace Engine {
         bool _positionDirty;
 
     public:
-        Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
+        Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, Body* body);
         ~Doodad();
         Uint32 GetId() const { return this->_id; }
         Uint32 GetPluginId() const { return this->_pluginId; }

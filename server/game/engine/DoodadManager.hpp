@@ -41,7 +41,7 @@ namespace Server { namespace Game { namespace Engine {
         void DoodadIsDirty(Doodad* doodad) { this->_dirtyDoodads.insert(doodad); }
         void DoodadIsClean(Doodad* doodad) { this->_dirtyDoodads.erase(doodad); }
     private:
-        Doodad* _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
+        Doodad* _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, std::string const& bodyName);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiSet(Tools::Lua::CallHelper& helper);

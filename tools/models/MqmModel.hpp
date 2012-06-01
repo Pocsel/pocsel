@@ -16,8 +16,6 @@ namespace Tools { namespace Models {
 
     class MqmModel
     {
-    //public:
-    //    typedef std::function<Tools::Renderers::ITexture2D&(std::string const& name)> TextureCallback;
     public:
         struct JointInfo
         {
@@ -53,7 +51,6 @@ namespace Tools { namespace Models {
         unsigned int _numTris;
         unsigned int _numVerts;
         std::vector<glm::mat4x4> _baseFrame, _inverseBaseFrame;
-        //std::vector<Tools::Renderers::ITexture2D*> _textures;
         std::vector<std::string> _materials;
         Tools::Renderers::IVertexBuffer* _vertexBuffer;
         std::vector<Tools::Renderers::IIndexBuffer*> _indexBuffers;
@@ -70,7 +67,6 @@ namespace Tools { namespace Models {
 
     public:
         explicit MqmModel(std::vector<char> const& data,
-                //TextureCallback textureCallback,
                 Tools::IRenderer& renderer);
         ~MqmModel();
 
@@ -79,7 +75,6 @@ namespace Tools { namespace Models {
         std::vector<glm::mat4x4> const& GetBindPose() const { return this->_baseFrame; }
 
         std::vector<std::string> const& GetMaterials() const { return this->_materials; }
-        //std::vector<Tools::Renderers::ITexture2D*> const& GetTextures() const { return this->_textures; }
         Tools::Renderers::IVertexBuffer* GetVertexBuffer() const { return this->_vertexBuffer; }
         std::vector<Tools::Renderers::IIndexBuffer*> const& GetIndexBuffers() const { return this->_indexBuffers; }
 
@@ -89,7 +84,6 @@ namespace Tools { namespace Models {
     protected:
         void _LoadMeshes(Tools::Models::Iqm::Header const& header,
                 std::vector<char> const& data,
-                //TextureCallback textureCallback,
                 Tools::IRenderer& renderer);
         void _LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data);
 

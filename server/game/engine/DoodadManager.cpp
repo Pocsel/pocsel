@@ -1,4 +1,5 @@
 #include "server/game/engine/DoodadManager.hpp"
+#include "server/game/engine/BodyManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/Doodad.hpp"
 #include "server/game/map/Map.hpp"
@@ -132,7 +133,7 @@ namespace Server { namespace Game { namespace Engine {
                         throw std::runtime_error("No positional entity or disabled entity with id " + Tools::ToString(entityId));
                     }
                 }
-                this->_CreateDoodad(doodadId, pluginId, name, entityId, *entity)->SetStorage(storage);
+                this->_CreateDoodad(doodadId, pluginId, name, entityId, *entity, "")->SetStorage(storage); // TODO
             }
             catch (std::exception& e)
             {
@@ -229,12 +230,12 @@ namespace Server { namespace Game { namespace Engine {
                 (*it)->PositionIsDirty();
     }
 
-    Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity)
+    Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, std::string const& bodyName)
     {
         if (this->_doodads.count(doodadId))
             throw std::runtime_error("a doodad with id " + Tools::ToString(doodadId) + " already exists");
 
-        Doodad* d = new Doodad(this->_engine, doodadId, pluginId, name, entityId, entity);
+        Doodad* d = new Doodad(this->_engine, doodadId, pluginId, name, entityId, entity, bodyName == "" ? 0 : this->_engine.GetBodyManager().CreateBody(pluginId, bodyName));
         this->_doodads[doodadId] = d;
         this->_doodadsByEntities[entityId].push_back(d);
         return d;
@@ -246,9 +247,19 @@ namespace Server { namespace Game { namespace Engine {
         if (!pluginId)
             throw std::runtime_error("Server.Doodad.Spawn: Could not determine currently running plugin, cannot spawn doodad");
         Uint32 entityId = this->_engine.GetRunningEntityId();
-        if (helper.GetNbArgs() >= 2)
-            entityId = static_cast<Uint32>(helper.PopArg().CheckNumber("Server.Doodad.Spawn: Argument \"entityId\" must be a number"));
-        std::string doodadName = helper.PopArg("Server.Doodad.Spawn: Missing argument \"doodadName\"").CheckString("Server.Doodad.Spawn: Argument \"doodadName\" must be a string");
+        std::list<Tools::Lua::Ref>& args = helper.GetArgList();
+        if (!args.size())
+            throw std::runtime_error("Server.Doodad.Spawn: Need arguments ([id ,] doodadName [, bodyName])");
+        if (args.begin()->IsNumber())
+        {
+            entityId = static_cast<Uint32>(args.begin()->ToNumber());
+            args.pop_front();
+        }
+        if (!args.size())
+            throw std::runtime_error("Server.Doodad.Spawn: Need a doodad name ([id ,] doodadName [, bodyName])");
+        std::string doodadName = args.begin()->CheckString("Server.Doodad.Spawn: Argument \"doodadName\" must be a string");
+        args.pop_front();
+        std::string bodyName = !args.size() ? "" : args.begin()->CheckString("Server.Doodad.Spawn: Argument \"bodyName\" must be a string");
         if (!entityId || !this->_engine.GetEntityManager().IsEntityPositional(entityId))
         {
             Tools::error << "DoodadManager::_ApiSpawn: No positional entity with id " << entityId << ", cannot spawn doodad." << std::endl;
@@ -261,7 +272,7 @@ namespace Server { namespace Game { namespace Engine {
             ++this->_nextDoodadId;
         Uint32 newId = this->_nextDoodadId++;
 
-        Doodad* d = this->_CreateDoodad(newId, pluginId, doodadName, entityId, this->_engine.GetEntityManager().GetPositionalEntity(entityId));
+        Doodad* d = this->_CreateDoodad(newId, pluginId, doodadName, entityId, this->_engine.GetEntityManager().GetPositionalEntity(entityId), bodyName);
         helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
 
         // XXX test
