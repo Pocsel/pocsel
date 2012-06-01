@@ -1,65 +1,68 @@
-float4x4 mvp : WorldViewProjection;
-float4x4 mv : WorldView;
-float3 lightDirection = {-0.704, -0.704, 0};
-
-float3 fogColor = float3(0.8, 0.8, 0.9);
-float fogEnd = 750.0f;
-
-// Water
-float time = 0;
-float displacement = 4.0;
+float4x4 worldViewProjection : WorldViewProjection;
+float4x4 worldViewInverseTranspose;
 
 #ifdef DIRECTX
-sampler2D cubeTexture = sampler_state
+texture cubeTexture;
+
+sampler sCubeTexture = sampler_state
 {
+    Texture = <cubeTexture>;
     MinFilter = Linear;
     MagFilter = Point;
     MipFilter = Linear;
 };
+
+#define cubeTexture sCubeTexture
+
 #else
 sampler2D cubeTexture = sampler_state
 {
-    minFilter = LinearMipMapLinear;
-    magFilter = Nearest;
+    MinFilter = LinearMipMapLinear;
+    MagFilter = Nearest;
 };
 #endif
 
 struct VSout
 {
-    float4 position : POSITION;
-    float2 texCoord : TEXCOORD0;
-    float lightIntensity : TEXCOORD1;
-    float fogFactor : TEXCOORD2;
-    // Water:
-    //float4 texProj;
+    float4 position     : POSITION;
+    float2 texCoord     : TEXCOORD0;
+    float3 normal       : TEXCOORD1;
+    float4 pos          : TEXCOORD2;
+};
+
+struct FSout
+{
+    float4 diffuse      : COLOR0;
+    float4 normalDepth  : COLOR1;
 };
 
 VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
 {
-    VSout vout;
+    VSout v;
 
-    vout.texCoord = texCoord;//frac(float2(1.0, 2.0) * texCoord);
-/*
-    float3 normal = float3(1.0, 4.0, 16.0);
-    normal = frac(normal * inNormal);
-    //Unpack to the -1..1 range
-    normal = (normal * 2.0) - 1.0;
-*/
-    vout.position = mul(mvp, position);
-    float fog = clamp(abs(vout.position.z), 0, fogEnd);
-    fog = (fogEnd - fog) / fogEnd;
-    vout.fogFactor = clamp(fog, 0, 1);
-    vout.lightIntensity = dot(-lightDirection, normal) * 0.35 + 0.65;
-    return vout;
+    v.texCoord = texCoord;
+    v.position = mul(worldViewProjection, position);
+    v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
+    v.pos = v.position;
+
+    return v;
 }
 
-float4 fs(in VSout v) : COLOR
+float2 encodeNormals(float3 n)
 {
-    float4 c = tex2D(cubeTexture, v.texCoord);
+    float2 enc = normalize(n.xy) * (sqrt(n.z*-0.5+0.5));
+    enc = enc*0.5+0.5;
+    return float4(enc, 0, 1.0);
+}
 
-    c.rgb = v.lightIntensity * lerp(fogColor, c.rgb, v.fogFactor);
+FSout fs(in VSout v)
+{
+    FSout f;
 
-    return c;
+    f.diffuse = tex2D(cubeTexture, v.texCoord);
+    f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, 1.0);
+
+    return f;
 }
 
 #ifndef DIRECTX
@@ -68,6 +71,7 @@ technique tech_glsl
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -76,6 +80,7 @@ technique tech
 {
     pass p0
     {
+        AlphaBlendEnable = false;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }
@@ -87,8 +92,9 @@ technique tech
 {
    pass p0
    {
-       VertexShader = compile vs_2_0 vs();
-       PixelShader = compile ps_2_0 fs();
+        AlphaBlendEnable = true;
+        VertexShader = compile vs_2_0 vs();
+        PixelShader = compile ps_2_0 fs();
    }
 }
 

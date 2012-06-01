@@ -8,26 +8,56 @@ float3 lightPos = float3(0, 0, 0);
 float3 lightDiffuse = float3(1.0, 1.0, 1.0);
 float3 lightSpecular = float3(0.9, 1.0, 0.8);
 
+#ifdef DIRECTX
+texture lighting;
+texture specular;
+texture diffuse;
+
+sampler sLighting = sampler_state
+{
+    Texture = <lighting>;
+    minFilter = Point;
+    magFilter = Point;
+};
+sampler sSpecular = sampler_state
+{
+    Texture = <specular>;
+    minFilter = Point;
+    magFilter = Point;
+};
+sampler sDiffuse = sampler_state
+{
+    Texture = <diffuse>;
+    minFilter = Point;
+    magFilter = Point;
+};
+
+#define lighting sLighting
+#define specular sSpecular
+#define diffuse sDiffuse
+
+#else
 sampler2D lighting = sampler_state
 {
-   minFilter = Point;
-   magFilter = Point;
+    minFilter = Point;
+    magFilter = Point;
 };
 sampler2D specular = sampler_state
 {
-   minFilter = Point;
-   magFilter = Point;
+    minFilter = Point;
+    magFilter = Point;
 };
 sampler2D diffuse = sampler_state
 {
-   minFilter = Point;
-   magFilter = Point;
+    minFilter = Point;
+    magFilter = Point;
 };
+#endif
 
 struct VSout
 {
-   float4 position : POSITION;
-   float2 texCoord : TEXCOORD0;
+    float4 position : POSITION;
+    float2 texCoord : TEXCOORD0;
 };
 
 VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
