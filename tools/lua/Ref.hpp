@@ -19,8 +19,10 @@ namespace Tools { namespace Lua {
         Ref(Ref const& ref) throw();
         ~Ref() throw(); // Possible d'appeler Unref() pour détruire la ref après l'interpreter sans segfault !
         Ref& operator =(Ref const& ref) throw();
-        bool operator ==(Ref const& ref) const throw();
-        bool operator !=(Ref const& ref) const throw();
+        bool operator ==(Ref const& ref) const throw(); // ceci n'est pas une comparaison de reference mais de valeurs, utilise lua_rawequal
+        bool operator !=(Ref const& ref) const throw(); // idem
+        template <typename T>
+            bool Equals(T value) const throw(); // idem
         void Unref() throw();
         size_t GetLength() const throw(); // retourne la longueur pour une chaine, la taille pour un tableau (#), le nombre d'octets pour un user data et 0 pour le reste
         // function call

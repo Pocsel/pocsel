@@ -252,7 +252,7 @@ namespace Server { namespace Game { namespace Engine {
             throw std::runtime_error("Server.Doodad.Spawn: Need arguments ([id ,] doodadName [, bodyName])");
         if (args.begin()->IsNumber())
         {
-            entityId = static_cast<Uint32>(args.begin()->ToNumber());
+            entityId = args.begin()->To<Uint32>();
             args.pop_front();
         }
         if (!args.size())
@@ -308,7 +308,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiSet(Tools::Lua::CallHelper& helper)
     {
-        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Set: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
+        Uint32 doodadId = helper.PopArg("Server.Doodad.Set: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.Set: Argument \"doodadId\" must be a number");
         Tools::Lua::Ref key = helper.PopArg("Server.Doodad.Set: Missing argument \"key\"");
         Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Set: Missing argument \"value\"");
 
@@ -323,7 +323,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiCall(Tools::Lua::CallHelper& helper)
     {
-        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Call: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
+        Uint32 doodadId = helper.PopArg("Server.Doodad.Call: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.Set: Argument \"doodadId\" must be a number");
         std::string function = helper.PopArg("Server.Doodad.Call: Missing argument \"function\"").CheckString("Server.Doodad.Call: Argument \"function\" must be of type string");
         Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Call: Missing argument \"value\"");
 
@@ -338,7 +338,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiSetUdp(Tools::Lua::CallHelper& helper)
     {
-        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Set: Missing argument \"doodadId\"").CheckNumber("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
+        Uint32 doodadId = static_cast<Uint32>(helper.PopArg("Server.Doodad.Set: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.Set: Argument \"doodadId\" must be a number"));
         Tools::Lua::Ref key = helper.PopArg("Server.Doodad.Set: Missing argument \"key\"");
         Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Set: Missing argument \"value\"");
 

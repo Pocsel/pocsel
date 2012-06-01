@@ -14,10 +14,12 @@ Server.Entity.Register{
 
     Save = function(self) -- save to database
         print("Save()")
+        Server.Entity.Save(self.id)
     end,
 
     Load = function(self) -- load from database
         print("Load()")
+        Server.Entity.Load(self.id)
     end,
 
     SpawnBlob = function(self)
@@ -51,10 +53,12 @@ Server.Entity.RegisterPositional{
 
     Save = function(self)
         print("Save()")
+        Server.Entity.Save()
     end,
 
     Load = function(self)
         print("Load()")
+        Server.Entity.Load()
     end,
 
     Suicide = function(self)

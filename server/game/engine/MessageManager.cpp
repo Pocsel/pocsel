@@ -51,22 +51,22 @@ namespace Server { namespace Game { namespace Engine {
             auto itMessageEnd = it->second.end();
             for (; itMessage != itMessageEnd; ++itMessage)
             {
-                Uint32 targetId = 0;
+                Uint32 entityId = 0;
                 try
                 {
-                    targetId = this->_engine.GetCallbackManager().GetCallback((*itMessage)->callbackId).targetId;
+                    entityId = this->_engine.GetCallbackManager().GetCallback((*itMessage)->callbackId).entityId;
                 }
                 catch (std::exception&)
                 {
                 }
-                if (targetId)
+                if (entityId)
                 {
                     Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
                     CallbackManager::Result res = this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->callbackId, &ret);
                     if ((*itMessage)->notificationCallbackId)
                     {
                         auto resultTable = this->_engine.GetInterpreter().MakeTable();
-                        resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(targetId));
+                        resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(entityId));
                         if (res == CallbackManager::Ok)
                         {
                             resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true));
@@ -90,7 +90,7 @@ namespace Server { namespace Game { namespace Engine {
         double seconds = helper.PopArg().CheckNumber("Server.Message.Later: Argument \"seconds\" must be a number");
         if (seconds < 0)
             seconds = 0;
-        Uint32 targetId = static_cast<Uint32>(helper.PopArg("Server.Message.[Later/Now]: Missing argument \"target\"").CheckNumber("Server.Message.[Later/Now]: Argument \"target\" must be a number"));
+        Uint32 entityId = helper.PopArg("Server.Message.[Later/Now]: Missing argument \"target\"").Check<Uint32>("Server.Message.[Later/Now]: Argument \"target\" must be a number");
         std::string function = helper.PopArg("Server.Message.[Later/Now]: Missing argument \"function\"").CheckString("Server.Message.[Later/Now]: Argument \"function\" must be a string");
         Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
@@ -101,13 +101,13 @@ namespace Server { namespace Game { namespace Engine {
             arg = helper.PopArg();
             if (helper.GetNbArgs())
             {
-                cbTargetId = static_cast<Uint32>(helper.PopArg("Server.Message.[Later/Now]: Missing argument \"cbTarget\"").CheckNumber("Server.Message.[Later/Now]: Argument \"cbTarget\" must be a number"));
+                cbTargetId = helper.PopArg("Server.Message.[Later/Now]: Missing argument \"cbTarget\"").Check<Uint32>("Server.Message.[Later/Now]: Argument \"cbTarget\" must be a number");
                 cbFunction = helper.PopArg("Server.Message.[Later/Now]: Missing argument \"cbFunction\"").CheckString("Server.Message.[Later/Now]: Argument \"cbFunction\" must be a string");
                 if (helper.GetNbArgs())
                     cbArg = helper.PopArg();
             }
         }
-        Uint32 callbackId = this->_engine.GetCallbackManager().MakeCallback(targetId, function, arg);
+        Uint32 callbackId = this->_engine.GetCallbackManager().MakeCallback(entityId, function, arg);
         Uint32 notificationCallbackId = 0;
         if (cbTargetId)
             notificationCallbackId = this->_engine.GetCallbackManager().MakeCallback(cbTargetId, cbFunction, cbArg);
@@ -222,7 +222,7 @@ namespace Server { namespace Game { namespace Engine {
                 {
                     CallbackManager::Callback const& c = this->_engine.GetCallbackManager().GetCallback((*it)->callbackId);
                     json +=
-                        "\t\t\"target\": \"" + _GetPrettyEntityName(this->_engine, c.targetId) + "\",\n" +
+                        "\t\t\"target\": \"" + _GetPrettyEntityName(this->_engine, c.entityId) + "\",\n" +
                         "\t\t\"function\": \"" + Rcon::ToJsonStr(c.function) + "\",\n" +
                         "\t\t\"argument\": \"" + _GetSerializedStringPlusError(this->_engine, c.arg) + "\",\n";
                 }
@@ -237,7 +237,7 @@ namespace Server { namespace Game { namespace Engine {
                 {
                     CallbackManager::Callback const& c = this->_engine.GetCallbackManager().GetCallback((*it)->notificationCallbackId);
                     json +=
-                        "\t\t\"notification_target\": \"" + _GetPrettyEntityName(this->_engine, c.targetId) + "\",\n" +
+                        "\t\t\"notification_target\": \"" + _GetPrettyEntityName(this->_engine, c.entityId) + "\",\n" +
                         "\t\t\"notification_function\": \"" + Rcon::ToJsonStr(c.function) + "\",\n" +
                         "\t\t\"notification_argument\": \"" + _GetSerializedStringPlusError(this->_engine, c.arg) + "\"\n";
                 }
