@@ -11,7 +11,11 @@ namespace Common{
     struct MovingOrientedPosition;
 }
 
-namespace Server { namespace Network {
+namespace Server {
+    namespace Game { namespace Engine {
+        class BodyType;
+    }}
+    namespace Network {
     class UdpPacket;
 }}
 
@@ -43,6 +47,8 @@ namespace Server { namespace Network {
                                              Uint32 offset);
 
         static std::unique_ptr<Common::Packet> CubeType(Common::CubeType const& cubeType);
+
+        static std::unique_ptr<Common::Packet> BodyType(Game::Engine::BodyType const& bodyType);
 
         static std::unique_ptr<Common::Packet> TeleportPlayer(std::string const& map,
                                                               Common::Position const& pos);

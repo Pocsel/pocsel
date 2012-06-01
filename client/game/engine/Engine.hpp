@@ -14,6 +14,7 @@ namespace Client { namespace Game {
 namespace Client { namespace Game { namespace Engine {
 
     class ModelManager;
+    class BodyType;
 
     class Engine :
         private boost::noncopyable
@@ -39,6 +40,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 GetRunningDoodadId() { return this->_overriddenDoodadId ? this->_overriddenDoodadId : this->_doodadManager->GetRunningDoodadId(); }
         void OverrideRunningDoodadId(Uint32 doodadId) { this->_overriddenDoodadId = doodadId; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
+        void AddBodyType(std::unique_ptr<BodyType> bodyType);
     private:
         void _ApiPrint(Tools::Lua::CallHelper& helper);
     };

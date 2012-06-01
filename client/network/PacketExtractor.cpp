@@ -1,6 +1,7 @@
 #include "client/precompiled.hpp"
 
 #include "client/network/ChunkSerializer.hpp"
+#include "client/network/BodyTypeSerializer.hpp"
 #include "client/network/PacketExtractor.hpp"
 #include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
@@ -81,6 +82,11 @@ namespace Client { namespace Network {
     std::unique_ptr<Common::CubeType> PacketExtractor::CubeType(Tools::ByteArray const& p)
     {
         return p.Read<Common::CubeType>();
+    }
+
+    std::unique_ptr<Common::CubeType> PacketExtractor::CubeType(Tools::ByteArray const& p)
+    {
+        return p.Read<Client::Game::Engine::BodyType>();
     }
 
     void PacketExtractor::TeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position)

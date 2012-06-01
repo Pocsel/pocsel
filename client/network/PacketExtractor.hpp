@@ -14,6 +14,10 @@ namespace Common {
     struct MovingOrientedPosition;
 }
 
+namespace Client { namespace Game { namespace Engine {
+    class BodyType;
+}}}
+
 namespace Client { namespace Network {
 
     class PacketExtractor
@@ -42,6 +46,7 @@ namespace Client { namespace Network {
                 Uint32& dataSize);
         static std::unique_ptr<Map::Chunk> Chunk(Tools::ByteArray const& p);
         static std::unique_ptr<Common::CubeType> CubeType(Tools::ByteArray const& p);
+        static std::unique_ptr<Client::Game::Engine::BodyType> BodyType(Tools::ByteArray const& p);
 
         static void TeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position);
         static void ItemMove(Tools::ByteArray const& p, Common::MovingOrientedPosition& pos, Uint32& id);

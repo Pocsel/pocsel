@@ -41,6 +41,13 @@ namespace Client { namespace Network {
                     throw std::runtime_error("Bad state for loading a cube type");
                 this->_client.GetGame().GetCubeTypeManager().AddCubeType(PacketExtractor::CubeType(p));
             };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::BodyType] =
+            [this](Tools::ByteArray& p)
+            {
+                if (this->_client.GetState() != Client::LoadingResources)
+                    throw std::runtime_error("Bad state for loading a body type");
+                this->_client.GetGame().GetEngine().AddBodyType(PacketExtractor::BodyType(p));
+            };
 
         // Game
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::Chunk] =

@@ -135,6 +135,15 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(response);
     }
 
+    std::unique_ptr<Common::Packet> PacketCreator::BodyType(Game::Engine::BodyType const& bodyType)
+    {
+        Common::Packet* p(new Common::Packet);
+        response->Write(Protocol::ServerToClient::BodyType);
+
+        response->Write(bodyType);
+        return std::unique_ptr<Common::Packet>(response);
+    }
+
     std::unique_ptr<Common::Packet> PacketCreator::TeleportPlayer(std::string const& map,
                                                                   Common::Position const& pos)
     {

@@ -17,6 +17,7 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Engine& _engine;
         std::map<Uint32 /* pluginId */, std::map<std::string /* BodyName */, BodyType*>> _bodyTypes;
+        std::vector<BodyType*> _bodyTypesVec;
 
     public:
         BodyManager(Engine& engine);

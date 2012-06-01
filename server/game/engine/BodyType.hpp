@@ -13,8 +13,8 @@ namespace Server { namespace Game { namespace Engine {
         {
             ShapeNode(int parent) : parent(parent) {}
             std::string name;
-            std::vector<unsigned int> children;
-            int parent;
+            std::vector<Uint32> children;
+            Int32 parent;
         };
         static const unsigned int ShapesMax = 50;
     private:
