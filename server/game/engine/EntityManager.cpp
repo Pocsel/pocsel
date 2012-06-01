@@ -33,6 +33,8 @@ namespace Server { namespace Game { namespace Engine {
         namespaceTable.Set("SpawnFromPlugin", i.MakeFunction(std::bind(&EntityManager::_ApiSpawnFromPlugin, this, std::placeholders::_1)));
         namespaceTable.Set("SetPos", i.MakeFunction(std::bind(&EntityManager::_ApiSetPos, this, std::placeholders::_1)));
         namespaceTable.Set("GetPos", i.MakeFunction(std::bind(&EntityManager::_ApiGetPos, this, std::placeholders::_1)));
+        namespaceTable.Set("Save", i.MakeFunction(std::bind(&EntityManager::_ApiSave, this, std::placeholders::_1)));
+        namespaceTable.Set("Load", i.MakeFunction(std::bind(&EntityManager::_ApiLoad, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&EntityManager::_ApiKill, this, std::placeholders::_1)));
         namespaceTable.Set("Register", i.MakeFunction(std::bind(&EntityManager::_ApiRegister, this, std::placeholders::_1)));
         namespaceTable.Set("RegisterPositional", i.MakeFunction(std::bind(&EntityManager::_ApiRegisterPositional, this, std::placeholders::_1)));
@@ -715,6 +717,30 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Ref pos(this->_engine.GetInterpreter().GetState());
         Tools::Lua::Utils::Vector::Vec3ToTable(it->second->GetPosition(), pos);
         helper.PushRet(pos);
+    }
+
+    void EntityManager::_ApiSave(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 entityId = helper.GetNbArgs() ? helper.PopArg().To<Uint32>() : this->_runningEntityId;
+        auto it = this->_entities.find(entityId);
+        if (it == this->_entities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiSave: Entity " << entityId << " not found, cannot save." << std::endl;
+            return;
+        }
+        it->second->SaveToStorage();
+    }
+
+    void EntityManager::_ApiLoad(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 entityId = helper.GetNbArgs() ? helper.PopArg().To<Uint32>() : this->_runningEntityId;
+        auto it = this->_entities.find(entityId);
+        if (it == this->_entities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiLoad: Entity " << entityId << " not found, cannot load." << std::endl;
+            return;
+        }
+        it->second->LoadFromStorage();
     }
 
     void EntityManager::_ApiKill(Tools::Lua::CallHelper& helper)

@@ -23,6 +23,8 @@ namespace Server { namespace Game { namespace Engine {
         void SetStorage(Tools::Lua::Ref const& storage);
         void Disable(Tools::Lua::Interpreter& interpreter);
         void Enable(Tools::Lua::Interpreter& interpreter);
+        void SaveToStorage();
+        void LoadFromStorage();
     };
 
 }}}
