@@ -8,7 +8,7 @@
 
 namespace Tools {
 
-    template<typename T> struct ByteArray::Serializer< Server::Game::Engine::BodyType >
+    template<> struct ByteArray::Serializer< Server::Game::Engine::BodyType >
     {
 
         static void Write(Server::Game::Engine::BodyType const& bt, ByteArray& p) // Used by Packet::Write<T>(T const&)
@@ -21,7 +21,7 @@ namespace Tools {
         static std::unique_ptr<Server::Game::Engine::BodyType> Read(ByteArray const& p); // Used by Packet::Read<T>()
     };
 
-    template<typename T> struct ByteArray::Serializer< Server::Game::Engine::BodyType::ShapeNode >
+    template<> struct ByteArray::Serializer< Server::Game::Engine::BodyType::ShapeNode >
     {
 
         static void Write(Server::Game::Engine::BodyType::ShapeNode const& sn, ByteArray& p) // Used by Packet::Write<T>(T const&)

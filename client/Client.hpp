@@ -62,7 +62,13 @@ namespace Client {
         Client(Settings& settings);
         ~Client();
         int Run();
-        void Login(Uint32 clientId, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash);
+        void Login(Uint32 clientId,
+                std::string const& worldIdentifier,
+                std::string const& worldName,
+                Uint32 worldVersion,
+                Common::BaseChunk::CubeType nbCubeTypes,
+                Uint32 nbBodyTypes,
+                std::string const& worldBuildHash);
         void LoadChunks();
         void Connect();
         void Disconnect(std::string const& reason = "");

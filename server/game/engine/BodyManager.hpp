@@ -28,6 +28,10 @@ namespace Server { namespace Game { namespace Engine {
         //std::string RconGetBodies() const;
         //void RconAddBodyTypes(Rcon::BodyManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon
 
+        bool HasBodyType(Uint32 id) const { return id && id <= this->_bodyTypesVec.size(); }
+        BodyType const& GetBodyType(Uint32 id) const { assert(this->HasBodyType(id)); return *this->_bodyTypesVec[id - 1]; }
+        Uint32 GetNbBodyTypes() const { return this->_bodyTypesVec.size(); }
+
     private:
         void _ApiRegister(Tools::Lua::CallHelper& helper);
     };

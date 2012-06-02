@@ -16,6 +16,8 @@
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/map/Map.hpp"
+#include "server/game/engine/Engine.hpp"
+#include "server/game/engine/BodyManager.hpp"
 
 #include "server/database/ResourceManager.hpp"
 
@@ -93,6 +95,19 @@ namespace Server { namespace ClientManagement {
                 throw std::runtime_error("Invalid resource id: " + Tools::ToString(id));
             Common::Resource const& resource = resourceManager.GetResource(id);
             client.SendPacket(std::move(Network::PacketCreator::ResourceRange(resource, offset)));
+        }
+
+        void _HandleGetBodyType(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
+        {
+            Tools::debug << "_HandleGetCubeType (client " << client.id << ")\n";
+            Uint32 id;
+            Network::PacketExtractor::GetBodyType(packet, id);
+
+            Game::Map::Map const& map = manager.GetServer().GetGame().GetWorld().GetDefaultMap();
+
+            if (!map.GetEngine().GetBodyManager().HasBodyType(id))
+                throw std::runtime_error("Invalid body type id: " + Tools::ToString(id));
+            client.SendPacket(std::move(Network::PacketCreator::BodyType(map.GetEngine().GetBodyManager().GetBodyType(id))));
         }
 
         void _HandleGetCubeType(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
@@ -184,6 +199,7 @@ namespace Server { namespace ClientManagement {
             &ClientActionsNS::_HandleGetNeededResourceIds,
             &ClientActionsNS::_HandleGetResourceRange,
             &ClientActionsNS::_HandleGetCubeType,
+            &ClientActionsNS::_HandleGetBodyType,
             &ClientActionsNS::_HandleSettings,
             &ClientActionsNS::_HandleTeleportOk,
             &ClientActionsNS::_HandleMove,
@@ -197,11 +213,12 @@ namespace Server { namespace ClientManagement {
         static_assert((int) Protocol::ClientToServer::GetNeededResourceIds == 6, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetResourceRange == 7, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::GetCubeType == 8, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::Settings == 9, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::TeleportOk == 10, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::Move == 11, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::Action == 12, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::DoodadRemoved == 13, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::GetBodyType == 9, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Settings == 10, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::TeleportOk == 11, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Move == 12, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::Action == 13, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::DoodadRemoved == 14, "wrong callback index");
 
 
         static_assert((size_t)Protocol::ClientToServer::NbPacketTypeClient == sizeof(actions) / sizeof(*actions),

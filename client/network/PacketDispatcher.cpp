@@ -3,6 +3,7 @@
 #include "tools/ByteArray.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/CubeTypeManager.hpp"
+#include "client/game/engine/BodyType.hpp"
 #include "client/map/Map.hpp"
 #include "client/map/ChunkManager.hpp"
 #include "client/resources/ResourceDownloader.hpp"
@@ -142,13 +143,14 @@ namespace Client { namespace Network {
         Uint32 clientId;
         Uint32 worldVersion;
         Common::BaseChunk::CubeType nbCubeTypes;
-        PacketExtractor::Login(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes, worldBuildHash);
+        Uint32 nbBodyTypes;
+        PacketExtractor::Login(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes, nbBodyTypes, worldBuildHash);
 
         Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << static_cast<int>(major) << "." << static_cast<int>(minor) << "\n";
         if (status)
         {
             Tools::debug << "World: " << worldName << " (identifier: \"" << worldId << "\", version: " << worldVersion << ", build hash: \"" << worldBuildHash << "\")\n";
-            this->_client.Login(clientId, worldId, worldName, worldVersion, nbCubeTypes, worldBuildHash);
+            this->_client.Login(clientId, worldId, worldName, worldVersion, nbCubeTypes, nbBodyTypes, worldBuildHash);
         }
         else
             this->_client.Disconnect(reason);

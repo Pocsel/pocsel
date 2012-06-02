@@ -3,6 +3,7 @@
 #include "client/network/ChunkSerializer.hpp"
 #include "client/network/BodyTypeSerializer.hpp"
 #include "client/network/PacketExtractor.hpp"
+#include "client/game/engine/BodyType.hpp"
 #include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
@@ -19,6 +20,7 @@ namespace Client { namespace Network {
             std::string& worldName,
             Uint32& worldVersion,
             Common::BaseChunk::CubeType& nbCubeTypes,
+            Uint32& nbBodyTypes,
             std::string& worldBuildHash)
     {
         p.Read(status);
@@ -33,6 +35,7 @@ namespace Client { namespace Network {
             p.Read(worldName);
             p.Read(worldVersion);
             p.Read(nbCubeTypes);
+            p.Read(nbBodyTypes);
             p.Read(worldBuildHash);
             if (nbCubeTypes == 0)
                 throw std::runtime_error("nbCubeTypes == 0");
@@ -84,7 +87,7 @@ namespace Client { namespace Network {
         return p.Read<Common::CubeType>();
     }
 
-    std::unique_ptr<Common::CubeType> PacketExtractor::CubeType(Tools::ByteArray const& p)
+    std::unique_ptr<Client::Game::Engine::BodyType> PacketExtractor::BodyType(Tools::ByteArray const& p)
     {
         return p.Read<Client::Game::Engine::BodyType>();
     }

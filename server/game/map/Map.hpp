@@ -88,6 +88,7 @@ namespace Server { namespace Game { namespace Map {
         Conf& GetConfiguration() { return this->_conf; }
         std::string const& GetFullName() const { return this->_conf.fullname; }
         Engine::Engine& GetEngine() { return *this->_engine; }
+        Engine::Engine const& GetEngine() const { return *this->_engine; }
         Game& GetGame() { return this->_game; }
         World& GetWorld() { return this->_world; }
         bool HasPlayer(Uint32 playerId) const { return this->_players.count(playerId) != 0; }

@@ -31,6 +31,7 @@ namespace Server { namespace Network {
                                         std::string const& worldName = "",
                                         Uint32 worldVersion = 0,
                                         Game::Map::Chunk::CubeType nbCubeTypes = 0,
+                                        Uint32 nbBodyTypes = 0,
                                         std::string const& worldBuildHash = "");
 
         static std::unique_ptr<UdpPacket> PassThrough();

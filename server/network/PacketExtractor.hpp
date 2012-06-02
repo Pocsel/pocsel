@@ -47,6 +47,9 @@ namespace Server { namespace Network {
         static void GetCubeType(Tools::ByteArray const& p,
                                 Game::Map::Chunk::CubeType& id);
 
+        static void GetBodyType(Tools::ByteArray const& p,
+                                Uint32& id);
+
         static void Settings(Tools::ByteArray const& p,
                              Uint32& viewDistance,
                              std::string& playerName);

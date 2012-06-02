@@ -1,5 +1,6 @@
 #include "server/network/PacketCreator.hpp"
 #include "server/network/ChunkSerializer.hpp"
+#include "server/network/BodyTypeSerializer.hpp"
 #include "server/network/UdpPacket.hpp"
 
 #include "tools/VectorSerializer.hpp"
@@ -21,6 +22,7 @@ namespace Server { namespace Network {
                                             std::string const& worldName /* = "" */,
                                             Uint32 worldVersion /* = 0 */,
                                             Game::Map::Chunk::CubeType nbCubeTypes /* = 0 */,
+                                            Uint32 nbBodyTypes /* = 0 */,
                                             std::string const& worldBuildHash /* = 0 */)
     {
         Common::Packet* p(new Common::Packet);
@@ -36,6 +38,7 @@ namespace Server { namespace Network {
             p->Write(worldName);
             p->Write(worldVersion);
             p->Write(nbCubeTypes);
+            p->Write(nbBodyTypes);
             p->Write(worldBuildHash);
         }
         else
@@ -138,10 +141,10 @@ namespace Server { namespace Network {
     std::unique_ptr<Common::Packet> PacketCreator::BodyType(Game::Engine::BodyType const& bodyType)
     {
         Common::Packet* p(new Common::Packet);
-        response->Write(Protocol::ServerToClient::BodyType);
+        p->Write(Protocol::ServerToClient::BodyType);
 
-        response->Write(bodyType);
-        return std::unique_ptr<Common::Packet>(response);
+        p->Write(bodyType);
+        return std::unique_ptr<Common::Packet>(p);
     }
 
     std::unique_ptr<Common::Packet> PacketCreator::TeleportPlayer(std::string const& map,

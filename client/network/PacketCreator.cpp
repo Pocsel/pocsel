@@ -94,6 +94,15 @@ namespace Client { namespace Network {
         return p;
     }
 
+    std::unique_ptr<Common::Packet> PacketCreator::GetBodyType(Uint32 id)
+    {
+        std::unique_ptr<Common::Packet> p(new Common::Packet());
+        p->Write(Protocol::ClientToServer::GetBodyType);
+
+        p->Write(id);
+        return p;
+    }
+
     std::unique_ptr<Common::Packet> PacketCreator::Settings(Client::Settings const& settings)
     {
         std::unique_ptr<Common::Packet> p(new Common::Packet());
