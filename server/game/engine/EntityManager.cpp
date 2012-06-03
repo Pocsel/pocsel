@@ -241,14 +241,24 @@ namespace Server { namespace Game { namespace Engine {
                         if (!type.IsPositional()) // saute les entités positionnelles, elles sont gérées differement après
                             try
                             {
+                                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+
                                 // XXX Save() database hook
-                                CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+                                CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil());
                                 if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                     throw std::runtime_error("call to Save() failed");
                                 std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);
 
-                                Tools::debug << ">> Save >> " << table << " >> Enabled Non-Positional Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes)" << std::endl;
-                                query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(0).Bind(0).Bind(0).ExecuteNonSelect().Reset();
+                                if (ret.ToBoolean())
+                                {
+                                    Tools::debug << ">> Save >> " << table << " >> Enabled Non-Positional Entity " << it->first << " not saved." << std::endl;
+                                    this->_DeleteEntity(it->first, it->second);
+                                }
+                                else
+                                {
+                                    Tools::debug << ">> Save >> " << table << " >> Enabled Non-Positional Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes)" << std::endl;
+                                    query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(0).Bind(0).Bind(0).ExecuteNonSelect().Reset();
+                                }
                             }
                             catch (std::exception& e)
                             {
@@ -271,14 +281,24 @@ namespace Server { namespace Game { namespace Engine {
                         auto const& type = entity->GetType();
                         try
                         {
+                            Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+
                             // XXX Save() database hook
-                            CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+                            CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
                             if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                 throw std::runtime_error("call to Save() failed");
                             std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);
 
-                            Tools::debug << ">> Save >> " << table << " >> Enabled Positional Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes, x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
-                            query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
+                            if (ret.ToBoolean())
+                            {
+                                Tools::debug << ">> Save >> " << table << " >> Enabled Positional Entity " << it->first << " not saved." << std::endl;
+                                this->_DeleteEntity(it->first, it->second);
+                            }
+                            else
+                            {
+                                Tools::debug << ">> Save >> " << table << " >> Enabled Positional Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes, x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
+                                query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
+                            }
                         }
                         catch (std::exception& e)
                         {
@@ -391,7 +411,7 @@ namespace Server { namespace Game { namespace Engine {
                         try
                         {
                             // fait comme si on désactivait l'entité, mais sans Save(), et sans désactivation de ses doodads
-                            this->DisableEntity(entityId, false /* normalDisable */);
+                            this->DisableEntity(entityId, false /* chunkUnloaded */);
                         }
                         catch (std::exception&)
                         {
@@ -509,21 +529,30 @@ namespace Server { namespace Game { namespace Engine {
         return this->_positionalEntities.count(entityId) > 0;
     }
 
-    void EntityManager::DisableEntity(Uint32 entityId, bool normalDisable /* = true */) throw(std::runtime_error)
+    void EntityManager::DisableEntity(Uint32 entityId, bool chunkUnloaded /* = true */) throw(std::runtime_error)
     {
         // trouve l'entité (positonnelle)
         auto itPos = this->_positionalEntities.find(entityId);
         if (itPos == this->_positionalEntities.end())
-            throw std::runtime_error("EntityManager: Could not disable entity: positional entity not found.");
+            throw std::runtime_error("EntityManager::DisableEntity: Could not disable entity: positional entity not found.");
         if (!itPos->second)
-            throw std::runtime_error("EntityManager: Could not disable entity: positional entity already disabled.");
+            throw std::runtime_error("EntityManager::DisableEntity: Could not disable entity: positional entity already disabled.");
 
-        if (normalDisable)
+        if (chunkUnloaded)
         {
+            Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+
             // XXX Save() deactivation hook
-            CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Save", this->_engine.GetInterpreter().MakeNil(), this->_engine.GetInterpreter().MakeNil());
+            CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Save", this->_engine.GetInterpreter().MakeBoolean(true) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
             if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
-                throw std::runtime_error("EntityManager: Could not disable entity: call to Save() failed (entity deleted).");
+                throw std::runtime_error("EntityManager::DisableEntity: Could not disable entity: call to Save() failed (entity deleted).");
+
+            if (ret.ToBoolean())
+            {
+                this->_DeleteEntity(entityId, itPos->second);
+                throw std::runtime_error("EntityManager::DisableEntity: Entity " + Tools::ToString(entityId) + " does not want to be saved.");
+            }
+
             // désactive les doodads gérés par cette entité
             this->_engine.GetDoodadManager().DisableDoodadsOfEntity(entityId);
         }
