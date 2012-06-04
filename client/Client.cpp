@@ -177,7 +177,7 @@ namespace Client {
         this->_state = LoadingResources;
         if (this->_game)
             Tools::Delete(this->_game);
-        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes, worldBuildHash);
+        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes, nbBodyTypes, worldBuildHash);
     }
 
     void Client::LoadChunks()

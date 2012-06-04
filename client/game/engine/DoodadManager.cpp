@@ -163,6 +163,9 @@ namespace Client { namespace Game { namespace Engine {
         catch (std::exception& e)
         {
             Tools::error << "DoodadManager::_CallDoodadFunction: Fatal (doodad deleted): Call to \"" << function << "\" for doodad " << doodadId << " (\"" << it->second->GetType().GetName() << "\") failed: " << e.what() << std::endl;
+            // TODO delete doodad
+            this->_runningDoodad = 0;
+            this->_runningDoodadId = 0;
             return;
         }
     }

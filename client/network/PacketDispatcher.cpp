@@ -4,6 +4,7 @@
 #include "client/game/Game.hpp"
 #include "client/game/CubeTypeManager.hpp"
 #include "client/game/engine/BodyType.hpp"
+#include "client/game/engine/BodyManager.hpp"
 #include "client/map/Map.hpp"
 #include "client/map/ChunkManager.hpp"
 #include "client/resources/ResourceDownloader.hpp"
@@ -47,7 +48,7 @@ namespace Client { namespace Network {
             {
                 if (this->_client.GetState() != Client::LoadingResources)
                     throw std::runtime_error("Bad state for loading a body type");
-                this->_client.GetGame().GetEngine().AddBodyType(PacketExtractor::BodyType(p));
+                this->_client.GetGame().GetEngine().GetBodyManager().AddBodyType(PacketExtractor::BodyType(p));
             };
 
         // Game

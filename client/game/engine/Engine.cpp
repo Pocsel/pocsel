@@ -2,13 +2,14 @@
 #include "client/game/Game.hpp"
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/ModelManager.hpp"
+#include "client/game/engine/BodyManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "common/Resource.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
-    Engine::Engine(Game& game) :
+    Engine::Engine(Game& game, Uint32 nbBodyTypes) :
         _game(game), _overriddenPluginId(0), _overriddenDoodadId(0)
     {
         this->_interpreter = new Tools::Lua::Interpreter();
@@ -24,6 +25,7 @@ namespace Client { namespace Game { namespace Engine {
         // création des managers
         this->_doodadManager = new DoodadManager(*this);
         this->_modelManager = new ModelManager(*this);
+        this->_bodyManager = new BodyManager(*this, nbBodyTypes);
     }
 
     Engine::~Engine()
@@ -31,6 +33,7 @@ namespace Client { namespace Game { namespace Engine {
         Tools::Delete(this->_modelManager);
         Tools::Delete(this->_doodadManager);
         Tools::Delete(this->_interpreter);
+        Tools::Delete(this->_bodyManager);
     }
 
     void Engine::Tick(Uint64 totalTime)

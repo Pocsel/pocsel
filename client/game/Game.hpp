@@ -70,7 +70,13 @@ namespace Client { namespace Game {
         // XXX
 
     public:
-        Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash);
+        Game(Client& client,
+                std::string const& worldIdentifier,
+                std::string const& worldName,
+                Uint32 worldVersion,
+                Common::BaseChunk::CubeType nbCubeTypes,
+                Uint32 nbBodyTypes,
+                std::string const& worldBuildHash);
         ~Game();
 
         void TeleportPlayer(std::string const& map, Common::Position const& position);

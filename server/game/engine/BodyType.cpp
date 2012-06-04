@@ -17,7 +17,9 @@ namespace Server { namespace Game { namespace Engine {
             this->_FillShapeTree(shapeTree, this->_roots, -1);
         }
 
+#ifdef DEBUG
         this->_DumpTree(_roots, "");
+#endif
     }
 
     void BodyType::_FillShapeTree(Tools::Lua::Ref const& shapeTree, std::vector<unsigned int>& result, int parent)
@@ -64,10 +66,11 @@ namespace Server { namespace Game { namespace Engine {
         }
         if (!Common::FieldValidator::IsRegistrableType(node.name))
             throw std::runtime_error("Client.Body.Register: A shapeTree node needs a name");
-        this->_shapesMap[node.name] = &node;
+        this->_shapesMap[node.name] = idx;
         return idx;
     }
 
+#ifdef DEBUG
     void BodyType::_DumpTree(std::vector<unsigned int> const& shapeNodes, std::string off)
     {
         auto it = shapeNodes.begin(), ite = shapeNodes.end();
@@ -77,5 +80,6 @@ namespace Server { namespace Game { namespace Engine {
             _DumpTree(_shapes[*it].children, off + "    ");
         }
     }
+#endif
 
 }}}
