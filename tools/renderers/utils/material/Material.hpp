@@ -42,6 +42,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     public:
         Material(IRenderer& renderer, Lua::Ref const& material, IShaderProgram& geometry, IShaderProgram& shadowMap);
 
+        explicit Material(Material const& material);
+
         template<class TValue>
         Variable<TValue>& GetVariable(std::string const& name);
         void SetTimeParameter(std::string const& name);
@@ -58,8 +60,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
         IShaderProgram& GetGeometryShader() { return this->_geometry.shader; }
         IShaderProgram& GetShadowMapShader() { return this->_shadowMap.shader; }
+        std::vector<std::unique_ptr<IVariable>> const& GetVariables() const { return this->_variables; }
         void UpdateParameters(int index, Uint64 totalTime);
         void UpdateParameters(IShaderProgram& shader, Uint64 totalTime);
+    private:
+        Material& operator =(Material const& material);
     };
 
 }}}}

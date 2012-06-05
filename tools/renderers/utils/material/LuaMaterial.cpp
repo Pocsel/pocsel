@@ -1,81 +1,62 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/renderers/utils/material/Material.hpp"
+#include "tools/lua/MetaTable.hpp"
+#include "tools/renderers/utils/material/LuaMaterial.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
-    void Material::Effect::UpdateParameters(Uint64 totalTime)
-    {
-        if (this->totalTime != 0)
-            this->totalTime->Set((float)totalTime * 0.000001f);
-    }
-
-    Material::Material(IRenderer& renderer, Lua::Ref const& material, IShaderProgram& geometry, IShaderProgram& shadowMap) :
-        _renderer(renderer),
-        _geometry(geometry),
-        _shadowMap(shadowMap),
-        _luaMaterial(material)
-    {
-        if (!this->_luaMaterial.IsNoneOrNil() && this->_luaMaterial["Update"].Exists())
-            this->_luaUpdate.reset(new Lua::Ref(this->_luaMaterial["Update"]));
-    }
-
-    void Material::SetTimeParameter(std::string const& name)
-    {
-        this->_geometry.totalTime = this->_geometry.shader.GetParameter(name);
-        this->_shadowMap.totalTime = this->_shadowMap.shader.GetParameter(name);
-    }
-
-    void Material::SetLuaUpdate(Lua::Ref const& update)
-    {
-        this->_luaUpdate.release();
-        if (update.Exists())
-            this->_luaUpdate.reset(new Lua::Ref(update));
-    }
-
-    void Material::Update(Uint64 totalTime)
-    {
-        if (this->_luaUpdate != 0 && this->_luaUpdate->Exists())
-            (*this->_luaUpdate)(totalTime);
-        for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
-            it->second->Update(totalTime);
-    }
-
-    void Material::RenderGeometry(std::function<void()>& render, Uint64 totalTime)
-    {
-        do
+    namespace {
+        template<class T>
+        void SetValue(LuaMaterial& material, std::string const& key, Lua::Ref& value)
         {
-            this->_geometry.shader.BeginPass();
-            this->UpdateParameters(0, totalTime);
-            for (auto it = this->_variables.begin(), ite = this->_variables.end(); it != ite; ++it)
-                (*it)->UpdateParameter(0);
-            render();
-        } while (this->_geometry.shader.EndPass());
+            auto it = material._variables.find(key);
+
+            Variable<T>* shaderVariable;
+            if (it == material._variables.end())
+                shaderVariable = &material._material->GetVariable<T>(key);
+            else
+                shaderVariable = reinterpret_cast<Variable<T>*>(it->second);
+            shaderVariable->Set(value.Check<T>());
+        }
     }
 
-    void Material::RenderShadowMap(std::function<void()>& render, Uint64 totalTime)
+    LuaMaterial::LuaMaterial(IRenderer& renderer, Lua::Ref const& registeredMaterial, std::function<IShaderProgram&(std::string const&)> const& loadShader) :
+        _type(registeredMaterial),
+        _self(registeredMaterial.GetState().MakeTable())
     {
-        do
-        {
-            this->_shadowMap.shader.BeginPass();
-            this->UpdateParameters(1, totalTime);
-            render();
-        } while (this->_shadowMap.shader.EndPass());
+        this->_self.SetMetaTable(this->_type);
+        auto& geometryShader = loadShader(this->_type["geometryShader"].Check<std::string>());
+        auto& shadowMapShader = loadShader(this->_type["shadowMapShader"].Check<std::string>());
+        this->_material.reset(new Material(renderer, this->_self, geometryShader, shadowMapShader));
     }
 
-    void Material::UpdateParameters(int index, Uint64 totalTime)
+    LuaMaterial::LuaMaterial(LuaMaterial const& material) :
+        _material(new Material(*material._material)),
+        _type(material._type),
+        _self(_type.GetState().MakeTable())
     {
-        if (index == 0)
-            this->_geometry.UpdateParameters(totalTime);
-        else
-            this->_shadowMap.UpdateParameters(totalTime);
-        for (auto it = this->_variables.begin(), ite = this->_variables.end(); it != ite; ++it)
-            (*it)->UpdateParameter(index);
+        this->_self.SetMetaTable(this->_type);
     }
 
-    void Material::UpdateParameters(IShaderProgram& shader, Uint64 totalTime)
+    LuaMaterial& LuaMaterial::operator =(LuaMaterial const& material)
     {
-        this->UpdateParameters(&shader == &this->GetGeometryShader() ? 0 : 1, totalTime);
+    }
+
+    void LuaMaterial::LoadLuaTypes(Lua::Interpreter& interpreter)
+    {
+        auto table = Lua::MetaTable::Create<LuaMaterial>(interpreter);
+        table.SetMetaMethod(Lua::MetaTable::NewIndex,
+            [](Lua::CallHelper& helper)
+            {
+                auto& material = *helper.PopArg().Check<LuaMaterial*>();
+                auto key = helper.PopArg().Check<std::string>();
+                auto value = helper.PopArg();
+
+                if (value.IsNumber())
+                    material._SetValue(key, (float)value.CheckNumber());
+                else if (value.Is<Texture::ITexture>())
+                    material._SetValue(key, value.Check<Texture::ITexture*>());
+            });
     }
 
 }}}}

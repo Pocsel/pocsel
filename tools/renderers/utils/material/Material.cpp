@@ -20,6 +20,16 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             this->_luaUpdate.reset(new Lua::Ref(this->_luaMaterial["Update"]));
     }
 
+    Material::Material(Material const& material) :
+        _renderer(material._renderer),
+        _geometry(material._geometry.shader),
+        _shadowMap(material._shadowMap.shader),
+        _luaMaterial(material._luaMaterial)
+    {
+        if (!this->_luaMaterial.IsNoneOrNil() && this->_luaMaterial["Update"].Exists())
+            this->_luaUpdate.reset(new Lua::Ref(this->_luaMaterial["Update"]));
+    }
+
     void Material::SetTimeParameter(std::string const& name)
     {
         this->_geometry.totalTime = this->_geometry.shader.GetParameter(name);
