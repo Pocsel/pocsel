@@ -20,6 +20,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             this->_parameters.swap(parameters);
         }
 
+        T Get() const
+        {
+            return this->_value;
+        }
+
         void Set(T value)
         {
             this->_value = value;
@@ -47,6 +52,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             _texture(0)
         {
             this->_parameters.swap(parameters);
+        }
+
+        Texture::ITexture& Get()
+        {
+            return *this->_texture;
         }
 
         void Set(std::unique_ptr<Texture::ITexture>&& texture)

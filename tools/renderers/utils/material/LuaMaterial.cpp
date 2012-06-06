@@ -1,28 +1,15 @@
 #include "tools/precompiled.hpp"
 
+#include "tools/lua/Iterator.hpp"
 #include "tools/lua/MetaTable.hpp"
 #include "tools/renderers/utils/material/LuaMaterial.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
-    namespace {
-        template<class T>
-        void SetValue(LuaMaterial& material, std::string const& key, Lua::Ref& value)
-        {
-            auto it = material._variables.find(key);
-
-            Variable<T>* shaderVariable;
-            if (it == material._variables.end())
-                shaderVariable = &material._material->GetVariable<T>(key);
-            else
-                shaderVariable = reinterpret_cast<Variable<T>*>(it->second);
-            shaderVariable->Set(value.Check<T>());
-        }
-    }
-
-    LuaMaterial::LuaMaterial(IRenderer& renderer, Lua::Ref const& registeredMaterial, std::function<IShaderProgram&(std::string const&)> const& loadShader) :
+    LuaMaterial::LuaMaterial(IRenderer& renderer, Lua::Ref const& registeredMaterial, std::function<IShaderProgram&(std::string const&)> const& loadShader, std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> loadTexture) :
         _type(registeredMaterial),
-        _self(registeredMaterial.GetState().MakeTable())
+        _self(registeredMaterial.GetState().MakeTable()),
+        _loadTexture(loadTexture)
     {
         this->_self.SetMetaTable(this->_type);
         auto& geometryShader = loadShader(this->_type["geometryShader"].Check<std::string>());
@@ -40,6 +27,14 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     LuaMaterial& LuaMaterial::operator =(LuaMaterial const& material)
     {
+        if (&material != this)
+        {
+            this->_material.reset(new Material(*material._material));
+            this->_type = material._type;
+            this->_self = this->_type.GetState().MakeTable();
+            this->_self.SetMetaTable(this->_type);
+        }
+        return *this;
     }
 
     void LuaMaterial::LoadLuaTypes(Lua::Interpreter& interpreter)
@@ -52,11 +47,47 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
                 auto key = helper.PopArg().Check<std::string>();
                 auto value = helper.PopArg();
 
+                // TODO: Les autres types
                 if (value.IsNumber())
                     material._SetValue(key, (float)value.CheckNumber());
-                else if (value.Is<Texture::ITexture>())
-                    material._SetValue(key, value.Check<Texture::ITexture*>());
+                else if (value.IsString())
+                    material._SetValue(key, material._loadTexture(value.CheckString()));
             });
+        table.SetMetaMethod(Lua::MetaTable::Index,
+            [](Lua::CallHelper& helper)
+            {
+                auto& material = *helper.PopArg().Check<LuaMaterial*>();
+                auto key = helper.PopArg().Check<std::string>();
+
+                auto it = material._variables.find(key);
+                if (it == material._variables.end())
+                    return;
+
+                // TODO: Les autres types
+                if (auto value = dynamic_cast<Variable<float>*>(it->second)) // dynamic_cast c'est lent mais ça marche
+                    helper.PushRet(helper.GetInterpreter().MakeNumber(value->Get()));
+                else if (auto value = dynamic_cast<Variable<Texture::ITexture>*>(it->second))
+                    helper.PushRet(helper.GetInterpreter().Make(&value->Get()));
+                else
+                    helper.PushRet(helper.GetInterpreter().MakeNil());
+            });
+    }
+
+    void LuaMaterial::_LoadVariables()
+    {
+        auto it = this->_type["shader"].Begin();
+        auto ite = this->_type["shader"].End();
+        for (; it != ite; ++it)
+        {
+            auto key = it.GetKey().CheckString();
+            auto value = it.GetValue();
+
+            // TODO: Les autres types
+            if (value.IsNumber())
+                this->_SetValue(key, (float)value.CheckNumber());
+            else if (value.Is<std::string>())
+                this->_SetValue(key, this->_loadTexture(value.CheckString()));
+        }
     }
 
 }}}}
