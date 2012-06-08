@@ -62,7 +62,7 @@ namespace Client { namespace Network {
                 Uint32& doodadId);
         static void DoodadUpdate(Tools::ByteArray const& p,
                 Uint32& doodadId,
-                Common::Position*& position,
+                std::unique_ptr<Common::Position>& position,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands);
     };
 

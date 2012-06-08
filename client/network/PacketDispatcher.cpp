@@ -113,10 +113,10 @@ namespace Client { namespace Network {
                     this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for doodad update");
                 Uint32 doodadId;
-                Common::Position* position = 0;
+                std::unique_ptr<Common::Position> position;
                 std::list<std::tuple<bool, std::string /* key */, std::string /* value */>> commands;
                 PacketExtractor::DoodadUpdate(p, doodadId, position, commands);
-                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, position, commands);
+                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, position.get(), commands);
             };
     }
 

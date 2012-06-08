@@ -137,7 +137,7 @@ namespace Tools {
         while (_isRunning)
         {
             QueueWorker* worker(0);
-            Message message(0);
+            Message message(nullptr);
 
             { // pick next task
                 boost::lock_guard<boost::mutex> lock(_mutex);

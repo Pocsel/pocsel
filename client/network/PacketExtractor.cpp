@@ -127,12 +127,12 @@ namespace Client { namespace Network {
 
     void PacketExtractor::DoodadUpdate(Tools::ByteArray const& p,
             Uint32& doodadId,
-            Common::Position*& position,
+            std::unique_ptr<Common::Position>& position,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands)
     {
         p.Read(doodadId);
         if (p.ReadBool())
-            position = p.Read<Common::Position>().release();
+            position = p.Read<Common::Position>();
         while (p.GetBytesLeft())
         {
             bool functionCall = p.ReadBool();

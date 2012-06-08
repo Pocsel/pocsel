@@ -7,6 +7,7 @@
 //#include "tools/renderers/utils/texture/TextureAtlas.hpp"
 #include "tools/models/ErrorModel.hpp"
 #include "tools/models/MqmModel.hpp"
+#include "tools/renderers/utils/material/LuaMaterial.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 #include "tools/renderers/utils/texture/AnimatedTexture.hpp"
 #include "tools/renderers/utils/texture/Texture.hpp"
@@ -176,7 +177,7 @@ namespace Client { namespace Resources {
         auto it = this->_models.find(id);
         if (it == this->_models.end())
         {
-            Tools::Models::MqmModel* model = 0;
+            auto& model = this->_models[id];
 
             auto res = this->_database.GetResource(id);
 
@@ -289,6 +290,11 @@ namespace Client { namespace Resources {
         return *itEffect->second;
     }
 
+    std::unique_ptr<Tools::Renderers::Utils::Material::Material> ResourceManager::GetMaterial(Uint32 pluginId, std::string const& name)
+    {
+        throw std::runtime_error("Not implemented yet"); // TODO
+    }
+
     //std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)
     //{
     //    std::list<std::unique_ptr<Common::Resource>> resources;
@@ -315,23 +321,6 @@ namespace Client { namespace Resources {
         }
     }
 
-    void ResourceManager::RegisterLuaFunctions()
-    {
-        auto effectNs = this->_game.GetInterpreter().Globals().GetTable("Client").GetTable("Effect");
-        effectNs.Set("Register", this->_game.GetInterpreter().MakeFunction(
-                    std::bind(&ResourceManager::_ApiRegisterEffect, this, std::placeholders::_1)));
-    }
-
-    void ResourceManager::_ApiRegisterEffect(Tools::Lua::CallHelper& helper)
-    {
-        Uint32 pluginId = this->_game.GetEngine().GetRunningPluginId();
-        if (!pluginId)
-            throw std::runtime_error("CLient.Effect.Register: Could not determine currently running plugin, aborting registration");
-        auto effect = new Effect(this->_game, helper.PopArg(), pluginId);
-        this->_effects[pluginId][effect->GetName()] = effect;
-        Tools::log << "Effect \"" << effect->GetName() << "\" registered (plugin: " << pluginId << ")." << std::endl;
-    }
-
     void ResourceManager::_InitErrorModel()
     {
         this->_models[0] = Tools::Models::ErrorModel(
@@ -349,5 +338,43 @@ namespace Client { namespace Resources {
             0, 0, 0, 255
         };
         this->_rawTextures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, sizeof(toto), toto, glm::uvec2(2, 2)).release();
+    }
+
+    void ResourceManager::RegisterLuaFunctions()
+    {
+        auto clientNs = this->_game.GetInterpreter().Globals().GetTable("Client");
+        auto effectNs = clientNs.GetTable("Effect");
+        effectNs.Set("Register", this->_game.GetInterpreter().MakeFunction(
+                    std::bind(&ResourceManager::_ApiRegisterEffect, this, std::placeholders::_1)));
+        auto materialNs = clientNs.GetTable("Material");
+        materialNs.Set("Register", this->_game.GetInterpreter().MakeFunction(std::bind(&ResourceManager::_ApiRegisterMaterial, this, std::placeholders::_1)));
+        //Tools::Renderers::Utils::Material::LuaMaterial::LoadLuaTypes(this->_game.GetInterpreter(),
+        //    [](std::string const& res)
+        //    {
+        //    });
+    }
+
+    void ResourceManager::_ApiRegisterEffect(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 pluginId = this->_game.GetEngine().GetRunningPluginId();
+        if (!pluginId)
+            throw std::runtime_error("CLient.Effect.Register: Could not determine currently running plugin, aborting registration");
+        auto effect = new Effect(this->_game, helper.PopArg(), pluginId);
+        this->_effects[pluginId][effect->GetName()] = effect;
+        Tools::log << "Effect \"" << effect->GetName() << "\" registered (plugin: " << pluginId << ")." << std::endl;
+    }
+
+    void ResourceManager::_ApiRegisterMaterial(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 pluginId = this->_game.GetEngine().GetRunningPluginId();
+        if (pluginId == 0)
+            throw std::runtime_error("CLient.Material.Register: Could not determine currently running plugin, aborting registration");
+        auto material = new Tools::Renderers::Utils::Material::LuaMaterial(
+            this->_renderer,
+            helper.PopArg(),
+            std::bind(static_cast<Tools::Renderers::IShaderProgram&(ResourceManager::*)(Uint32, std::string const&)>(&ResourceManager::GetShader), this, pluginId, std::placeholders::_1),
+            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(ResourceManager::*)(Uint32, std::string const&)>(&ResourceManager::GetTexture), this, pluginId, std::placeholders::_1));
+        
+        Tools::log << "Material \"" << material->GetName() << "\" registered (plugin: " << pluginId << ")." << std::endl;
     }
 }}

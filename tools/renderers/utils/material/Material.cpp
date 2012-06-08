@@ -6,7 +6,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     void Material::Effect::UpdateParameters(Uint64 totalTime)
     {
-        this->totalTime->Set((float)totalTime * 0.000001f);
+        if (this->totalTime != 0)
+            this->totalTime->Set((float)totalTime * 0.000001f);
     }
 
     Material::Material(IRenderer& renderer, Lua::Ref const& material, IShaderProgram& geometry, IShaderProgram& shadowMap) :
@@ -15,7 +16,17 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         _shadowMap(shadowMap),
         _luaMaterial(material)
     {
-        if (this->_luaMaterial["Update"].Exists())
+        if (!this->_luaMaterial.IsNoneOrNil() && this->_luaMaterial["Update"].Exists())
+            this->_luaUpdate.reset(new Lua::Ref(this->_luaMaterial["Update"]));
+    }
+
+    Material::Material(Material const& material) :
+        _renderer(material._renderer),
+        _geometry(material._geometry.shader),
+        _shadowMap(material._shadowMap.shader),
+        _luaMaterial(material._luaMaterial)
+    {
+        if (!this->_luaMaterial.IsNoneOrNil() && this->_luaMaterial["Update"].Exists())
             this->_luaUpdate.reset(new Lua::Ref(this->_luaMaterial["Update"]));
     }
 
@@ -34,7 +45,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     void Material::Update(Uint64 totalTime)
     {
-        if (this->_luaUpdate->Exists())
+        if (this->_luaUpdate != 0 && this->_luaUpdate->Exists())
             (*this->_luaUpdate)(totalTime);
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
             it->second->Update(totalTime);
@@ -70,6 +81,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             this->_shadowMap.UpdateParameters(totalTime);
         for (auto it = this->_variables.begin(), ite = this->_variables.end(); it != ite; ++it)
             (*it)->UpdateParameter(index);
+    }
+
+    void Material::UpdateParameters(IShaderProgram& shader, Uint64 totalTime)
+    {
+        this->UpdateParameters(&shader == &this->GetGeometryShader() ? 0 : 1, totalTime);
     }
 
 }}}}

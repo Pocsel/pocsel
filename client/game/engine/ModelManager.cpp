@@ -34,7 +34,7 @@ namespace Client { namespace Game { namespace Engine {
             Tools::Delete(itModel->second);
         // model types
         auto itPlugin = this->_modelTypes.begin();
-        auto itPluginEnd = this->_modelTypes.begin();
+        auto itPluginEnd = this->_modelTypes.end();
         for (; itPlugin != itPluginEnd; ++itPlugin)
         {
             auto itType = itPlugin->second.begin();
@@ -42,6 +42,7 @@ namespace Client { namespace Game { namespace Engine {
             for (; itType != itTypeEnd; ++itType)
                 Tools::Delete(itType->second);
         }
+        Tools::Delete(this->_modelRenderer);
     }
 
     void ModelManager::Tick(Uint64 totalTime)
