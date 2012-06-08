@@ -203,7 +203,7 @@ int main(int, char**)
         //// glm::dvec2 - MetaTable
         MetaTable mVec2(i, glm::dvec2());
         mVec2.SetMethod("Normalize", i.Bind(static_cast<glm::dvec2(*)(glm::dvec2 const&)>(&glm::normalize), std::placeholders::_1));
-        mVec2.SetMethod("Dot", i.Bind(&glm::dot, std::placeholders::_1, std::placeholders::_2));
+        mVec2.SetMethod("Dot", i.Bind(static_cast<double(*)(glm::dvec2 const&, glm::dvec2 const&)>(&glm::dot), std::placeholders::_1, std::placeholders::_2));
         mVec2.SetMetaMethod(MetaTable::Serialize,
             [&i](CallHelper& helper)
             {
