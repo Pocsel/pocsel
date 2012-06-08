@@ -2,6 +2,6 @@ Client.Model.Register{
 
     modelName = "Stickman",
 
-    file = "stickman.mqm"
+    file = "base:stickman.mqm"
 
 }

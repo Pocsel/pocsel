@@ -14,6 +14,7 @@
 #include "server/Server.hpp"
 
 #include "server/game/Game.hpp"
+#include "server/game/PluginManager.hpp"
 #include "server/game/World.hpp"
 #include "server/game/map/Map.hpp"
 
@@ -92,7 +93,8 @@ namespace Server { namespace ClientManagement {
             if (!resourceManager.HasResource(id))
                 throw std::runtime_error("Invalid resource id: " + Tools::ToString(id));
             Common::Resource const& resource = resourceManager.GetResource(id);
-            client.SendPacket(std::move(Network::PacketCreator::ResourceRange(resource, offset)));
+
+            client.SendPacket(Network::PacketCreator::ResourceRange(manager.GetServer().GetGame().GetWorld().GetPluginManager(), resource, offset));
         }
 
         void _HandleGetCubeType(ClientManager& manager, Client& client, Tools::ByteArray const& packet)

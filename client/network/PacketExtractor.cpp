@@ -64,7 +64,7 @@ namespace Client { namespace Network {
         p.Read(offset);
         if (!offset)
         {
-            p.Read(pluginId);
+            //p.Read(pluginId);
             p.Read(type);
             p.Read(filename);
             p.Read(totalSize);

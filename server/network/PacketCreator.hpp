@@ -11,9 +11,14 @@ namespace Common{
     struct MovingOrientedPosition;
 }
 
-namespace Server { namespace Network {
-    class UdpPacket;
-}}
+namespace Server {
+    namespace Game {
+        class PluginManager;
+    }
+    namespace Network {
+        class UdpPacket;
+    }
+}
 
 namespace Server { namespace Network {
 
@@ -39,8 +44,9 @@ namespace Server { namespace Network {
         static std::unique_ptr<Common::Packet> NeededResourceIds(std::vector<Uint32>& ids,
                                                  Uint32& offset);
 
-        static std::unique_ptr<Common::Packet> ResourceRange(Common::Resource const& resource,
-                                             Uint32 offset);
+        static std::unique_ptr<Common::Packet> ResourceRange(Game::PluginManager const& pluginManager,
+            Common::Resource const& resource,
+            Uint32 offset);
 
         static std::unique_ptr<Common::Packet> CubeType(Common::CubeType const& cubeType);
 

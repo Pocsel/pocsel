@@ -187,10 +187,7 @@ namespace Client { namespace Resources {
                 {
                     std::vector<char> data(res->size);
                     std::memcpy(data.data(), res->data, res->size);
-                    model = new Tools::Models::MqmModel(
-                            data,
-                            //std::bind(&ResourceManager::GetTexture, this, res->pluginId, std::placeholders::_1),
-                            this->_renderer);
+                    model = new Tools::Models::MqmModel(data, this->_renderer);
                 }
                 catch (std::exception& ex)
                 {
@@ -348,10 +345,7 @@ namespace Client { namespace Resources {
                     std::bind(&ResourceManager::_ApiRegisterEffect, this, std::placeholders::_1)));
         auto materialNs = clientNs.GetTable("Material");
         materialNs.Set("Register", this->_game.GetInterpreter().MakeFunction(std::bind(&ResourceManager::_ApiRegisterMaterial, this, std::placeholders::_1)));
-        //Tools::Renderers::Utils::Material::LuaMaterial::LoadLuaTypes(this->_game.GetInterpreter(),
-        //    [](std::string const& res)
-        //    {
-        //    });
+        //Tools::Renderers::Utils::Material::LuaMaterial::LoadLuaTypes(this->_game.GetInterpreter(), );
     }
 
     void ResourceManager::_ApiRegisterEffect(Tools::Lua::CallHelper& helper)

@@ -1,3 +1,6 @@
+#include "server/precompiled.hpp"
+
+#include "server/game/PluginManager.hpp"
 #include "server/network/PacketCreator.hpp"
 #include "server/network/ChunkSerializer.hpp"
 #include "server/network/UdpPacket.hpp"
@@ -95,8 +98,9 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(response);
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::ResourceRange(Common::Resource const& resource,
-                                                 Uint32 offset)
+    std::unique_ptr<Common::Packet> PacketCreator::ResourceRange(Game::PluginManager const& pluginManager,
+        Common::Resource const& resource,
+        Uint32 offset)
     {
         std::unique_ptr<Common::Packet> ptr(new Common::Packet());
         ptr->Write(Protocol::ServerToClient::ResourceRange);
@@ -108,9 +112,9 @@ namespace Server { namespace Network {
                      " size = " << resource.size << ".\n";
         if (offset == 0)
         {
-            ptr->Write(resource.pluginId);
             ptr->Write(resource.type);
-            ptr->Write(resource.name);
+            auto pluginName = pluginManager.GetPluginIdentifier(resource.pluginId);
+            ptr->Write(pluginName + ":" + resource.name);
             ptr->Write(resource.size);
             if (ptr->GetSize() >= Common::Packet::MaxSize)
                 throw std::runtime_error("overflow");
