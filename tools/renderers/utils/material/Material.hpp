@@ -34,7 +34,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         IRenderer& _renderer;
         Effect _geometry;
         Effect _shadowMap;
-        std::map<IVariable const*, std::unique_ptr<Texture::ITexture>> _textures;
+        std::map<IVariable const*, std::shared_ptr<Texture::ITexture>> _textures;
         std::vector<std::unique_ptr<IVariable>> _variables;
         Lua::Ref _luaMaterial;
         std::unique_ptr<Lua::Ref> _luaUpdate;
@@ -48,10 +48,10 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         Variable<TValue>& GetVariable(std::string const& name);
         void SetTimeParameter(std::string const& name);
         void SetLuaUpdate(Lua::Ref const& update);
-        std::map<IVariable const*, std::unique_ptr<Texture::ITexture>> const& GetTextures() const { return this->_textures; }
-        void SetTextures(IVariable const& variable, std::unique_ptr<Texture::ITexture>&& texture)
+        std::map<IVariable const*, std::shared_ptr<Texture::ITexture>> const& GetTextures() const { return this->_textures; }
+        void SetTextures(IVariable const& variable, std::shared_ptr<Texture::ITexture> texture)
         {
-            this->_textures[&variable] = std::move(texture);
+            this->_textures[&variable] = texture;
         }
 
         void Update(Uint64 totalTime); // totalTime in microsecond

@@ -106,7 +106,7 @@ namespace Client { namespace Resources {
             return it != this->_resourceToPluginId.end() ? it->second : 0;
         }
 
-        Uint32 GetResourceId(Uint32 pluginId, std::string const& name)
+        Uint32 GetResourceId(Uint32 pluginId, std::string const& name) const
         {
             auto it = this->_resourceIds.find(pluginId);
             if (it == this->_resourceIds.end())
@@ -122,6 +122,7 @@ namespace Client { namespace Resources {
         void _InitErrorTexture();
         void _InitErrorModel();
         void _ApiRegisterEffect(Tools::Lua::CallHelper& helper);
+        void _ApiRegisterMaterial(Tools::Lua::CallHelper& helper);
     };
 
 }}

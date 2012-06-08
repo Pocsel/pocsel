@@ -54,6 +54,8 @@ namespace Tools { namespace Lua {
         Ref MakeUserData(void** data, size_t size) throw(std::runtime_error) { return this->_state->MakeUserData(data, size); }
         template <typename T>
         Ref Make(T val) throw(std::runtime_error);
+        template <typename T>
+        Ref MakeMove(T&& val) throw(std::runtime_error);
         // other stuff
         State& GetState() throw() { return *this->_state; }
         void DumpStack() const throw();
@@ -89,6 +91,16 @@ namespace Tools { namespace Lua {
     template<> inline Ref Interpreter::Make<char const*>(char const* val) throw(std::runtime_error) { return this->_state->Make(val); }
     template<> inline Ref Interpreter::Make<std::function<void(CallHelper&)>>(std::function<void(CallHelper&)> val) throw(std::runtime_error) { return this->_state->Make(val); }
     template<> inline Ref Interpreter::Make<Ref>(Ref val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template <typename T>
+    inline Ref Interpreter::MakeMove(T&& val) throw(std::runtime_error)
+    {
+        auto m = this->_state->GetMetaTable(typeid(T).hash_code());
+        T* luaValue;
+        auto r = this->_state->MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
+        *luaValue = std::move(val);
+        r.SetMetaTable(m);
+        return r;
+    }
 
 }}
 

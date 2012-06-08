@@ -59,10 +59,10 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             return *this->_texture;
         }
 
-        void Set(std::unique_ptr<Texture::ITexture>&& texture)
+        void Set(std::shared_ptr<Texture::ITexture> texture)
         {
             this->_texture = texture.get();
-            this->_material.SetTextures(*this, std::move(texture));
+            this->_material.SetTextures(*this, texture);
         }
 
         virtual void UpdateParameter(int index)

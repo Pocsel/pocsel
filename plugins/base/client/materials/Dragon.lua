@@ -1,4 +1,5 @@
-Color = Utils.Color
+local Color = Utils.Color
+
 Client.Material.Register{
     materialName = "Dragon",
     geometryShader = "materials/DragonGeometry.fx",

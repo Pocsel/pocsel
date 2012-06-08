@@ -11,9 +11,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     {
     private:
         std::unique_ptr<Material> _material;
+        std::string _name;
         Lua::Ref _type;
         Lua::Ref _self;
         std::map<std::string, IVariable*> _variables;
+        std::map<std::string, Lua::Ref> _luaVariables;
         std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> _loadTexture;
 
     public:
@@ -22,7 +24,9 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         LuaMaterial(LuaMaterial const& material);
         LuaMaterial& operator =(LuaMaterial const& material);
 
-        static void LoadLuaTypes(Lua::Interpreter& interpreter);
+        std::string const& GetName() const { return this->_name; }
+
+        static void LoadLuaTypes(Lua::Interpreter& interpreter, std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> loadTexture);
     private:
         void _LoadVariables();
         template<class T>
@@ -32,22 +36,34 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
             Variable<T>* shaderVariable;
             if (it == this->_variables.end())
+            {
                 shaderVariable = &this->_material->GetVariable<T>(key);
+                this->_variables[key] = shaderVariable;
+            }
             else
+            {
                 shaderVariable = reinterpret_cast<Variable<T>*>(it->second);
+                this->_luaVariables.erase(key);
+            }
             shaderVariable->Set(value);
         }
         template<class T>
-        void _SetValue(std::string const& key, std::unique_ptr<T>&& value)
+        void _SetValue(std::string const& key, std::shared_ptr<T> value)
         {
             auto it = this->_variables.find(key);
 
             Variable<T>* shaderVariable;
             if (it == this->_variables.end())
+            {
                 shaderVariable = &this->_material->GetVariable<T>(key);
+                this->_variables[key] = shaderVariable;
+            }
             else
+            {
                 shaderVariable = reinterpret_cast<Variable<T>*>(it->second);
-            shaderVariable->Set(std::move(value));
+                this->_luaVariables.erase(key);
+            }
+            shaderVariable->Set(value);
         }
     };
 

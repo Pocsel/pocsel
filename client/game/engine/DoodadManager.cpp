@@ -25,7 +25,7 @@ namespace Client { namespace Game { namespace Engine {
             Tools::Delete(itDoodad->second);
         // doodad types
         auto itPlugin = this->_doodadTypes.begin();
-        auto itPluginEnd = this->_doodadTypes.begin();
+        auto itPluginEnd = this->_doodadTypes.end();
         for (; itPlugin != itPluginEnd; ++itPlugin)
         {
             auto itType = itPlugin->second.begin();
