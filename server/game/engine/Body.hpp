@@ -2,6 +2,7 @@
 #define __SERVER_GAME_ENGINE_BODY_HPP__
 
 #include "tools/lua/Ref.hpp"
+#include "tools/physics/Node.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -14,18 +15,18 @@ namespace Server { namespace Game { namespace Engine {
     public:
         struct BodyNode
         {
-            BodyNode() : _dirty(false) {}
-            glm::vec3 position;
-            glm::vec3 orientation;
-            glm::vec3 size;
-            bool _dirty;
+            BodyNode() : dirty(false) {}
+            Tools::Physics::Node node;
+            bool dirty;
         };
     private:
         BodyType const& _type;
-        std::map<std::string, BodyNode> _nodes;
+        std::vector<BodyNode> _nodes;
 
     public:
         Body(BodyType const& bodyType);
+        BodyType const& GetType() const { return this->_type; }
+        std::vector<BodyNode> const& GetNodes() const { return this->_nodes; }
     };
 
 }}}

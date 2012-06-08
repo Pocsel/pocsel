@@ -1,3 +1,4 @@
+/*
 #include "client/game/engine/BodyType.hpp"
 
 namespace Client { namespace Game { namespace Engine {
@@ -30,3 +31,4 @@ namespace Client { namespace Game { namespace Engine {
 #endif
 
 }}}
+*/

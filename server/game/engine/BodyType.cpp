@@ -6,7 +6,9 @@
 namespace Server { namespace Game { namespace Engine {
 
     BodyType::BodyType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype) :
-        _name(name), _pluginId(pluginId)//, _prototype(prototype)
+        Tools::Physics::BodyType(),
+        _name(name),
+        _pluginId(pluginId)//, _prototype(prototype)
     {
         _shapes.reserve(ShapesMax);
         if (prototype["shapeTree"].Exists())
@@ -69,17 +71,5 @@ namespace Server { namespace Game { namespace Engine {
         this->_shapesMap[node.name] = idx;
         return idx;
     }
-
-#ifdef DEBUG
-    void BodyType::_DumpTree(std::vector<unsigned int> const& shapeNodes, std::string off)
-    {
-        auto it = shapeNodes.begin(), ite = shapeNodes.end();
-        for (; it != ite; ++it)
-        {
-            std::cout << off << "> " << _shapes[*it].name << "\n";
-            _DumpTree(_shapes[*it].children, off + "    ");
-        }
-    }
-#endif
 
 }}}
