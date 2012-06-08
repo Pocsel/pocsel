@@ -300,6 +300,12 @@ namespace Tools { namespace Lua {
             return this->Set(this->_state.Make(key), this->_state.Make(value));
         }
 
+    template <typename T>
+        inline bool Ref::Equals(T value) const throw()
+        {
+            return *this == this->_state.Make(value);
+        }
+
 }}
 
 #endif

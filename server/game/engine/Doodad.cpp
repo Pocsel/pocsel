@@ -18,7 +18,7 @@ namespace Server { namespace Game { namespace Engine {
         _name(name),
         _entityId(entityId),
         _entity(entity),
-        _table(engine.GetInterpreter().MakeTable()),
+        _storage(engine.GetInterpreter().MakeTable()),
         _positionDirty(false)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
@@ -54,6 +54,11 @@ namespace Server { namespace Game { namespace Engine {
         // TODO
     }
 
+    void Doodad::SetStorage(Tools::Lua::Ref const& ref)
+    {
+        this->_storage = ref;
+    }
+
     void Doodad::AddPlayer(Uint32 playerId)
     {
         this->_newPlayers.insert(playerId);
@@ -74,8 +79,8 @@ namespace Server { namespace Game { namespace Engine {
         // create packet
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         std::list<std::pair<std::string /* key */, std::string /* value */>> values;
-        auto itTable = this->_table.Begin();
-        auto itTableEnd = this->_table.End();
+        auto itTable = this->_storage.Begin();
+        auto itTableEnd = this->_storage.End();
         for (; itTable != itTableEnd; ++itTable)
             values.push_back(std::make_pair(serializer.Serialize(itTable.GetKey(), true /* nilOnError */), serializer.Serialize(itTable.GetValue(), true /* nilOnError */)));
         auto packet = Network::PacketCreator::DoodadSpawn(this->_id, this->_pluginId, this->_name, this->_entity.GetPosition(), values);
@@ -108,7 +113,7 @@ namespace Server { namespace Game { namespace Engine {
             Command const& c = this->_commands.front();
             commands.push_back(std::make_tuple(c.functionCall, c.functionCall ? c.function : serializer.Serialize(c.key, true /* nilOnError */), serializer.Serialize(c.value, true /* nilOnError */)));
             if (!c.functionCall)
-                this->_table.Set(c.key, c.value); // update of server state
+                this->_storage.Set(c.key, c.value); // update of server state
             this->_commands.pop();
         }
         auto packet = Network::PacketCreator::DoodadUpdate(this->_id, this->_positionDirty ? &this->_entity.GetPosition() : 0, commands);

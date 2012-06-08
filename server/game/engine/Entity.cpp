@@ -1,6 +1,7 @@
 #include "server/game/engine/Entity.hpp"
 #include "server/game/engine/EntityType.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/lua/Iterator.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -51,6 +52,31 @@ namespace Server { namespace Game { namespace Engine {
         this->_self.SetMetaTable(metatable);
         this->_self.Set("prototype", this->_type->GetPrototype());
         metatable.Set("__index", this->_type->GetPrototype());
+    }
+
+    void Entity::SaveToStorage()
+    {
+        if (!this->_self.IsTable())
+            return;
+        if (!this->_self["storage"].IsTable())
+            this->_self.Set("storage", this->_self.GetState().MakeTable());
+        Tools::Lua::Ref storage = this->_self["storage"];
+        auto it = this->_self.Begin();
+        auto itEnd = this->_self.End();
+        for (; it != itEnd; ++it)
+            if (!it.GetKey().Equals("id") && !it.GetKey().Equals("prototype") && !it.GetKey().Equals("storage"))
+                storage.Set(it.GetKey(), it.GetValue());
+    }
+
+    void Entity::LoadFromStorage()
+    {
+        if (!this->_self.IsTable() || !this->_self["storage"].IsTable())
+            return;
+        auto it = this->_self["storage"].Begin();
+        auto itEnd = this->_self["storage"].End();
+        for (; it != itEnd; ++it)
+            if (!it.GetKey().Equals("id") && !it.GetKey().Equals("prototype") && !it.GetKey().Equals("storage"))
+                this->_self.Set(it.GetKey(), it.GetValue());
     }
 
 }}}
