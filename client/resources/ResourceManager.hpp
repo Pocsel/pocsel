@@ -64,9 +64,6 @@ namespace Client { namespace Resources {
         std::map<std::string, Effect*> _effects;
         std::map<std::string, Tools::Renderers::Utils::Material::Material*> _materials;
 
-        // resource Id => plugin Id
-        std::map<Uint32, Uint32> _resourceToPluginId;
-
         // Texture data (resource Id => renderer Texture)
         std::map<Uint32, Tools::Renderers::ITexture2D*> _rawTextures;
         std::map<Uint32, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextureFrames;
@@ -100,19 +97,10 @@ namespace Client { namespace Resources {
         ResourceDownloader& GetDownloader() { return this->_downloader; }
         float GetLoadingProgression() const { return this->_downloader.GetLoadingProgression(); }
 
-        Uint32 GetPluginId(Uint32 resourceId) const
-        {
-            auto it = this->_resourceToPluginId.find(resourceId);
-            return it != this->_resourceToPluginId.end() ? it->second : 0;
-        }
-
         Uint32 GetResourceId(std::string const& name) const
         {
-            auto it = this->_resourceIds.find(pluginId);
-            if (it == this->_resourceIds.end())
-                return 0;
-            auto it2 = it->second.find(name);
-            return it2 != it->second.end() ? it2->second : 0;
+            auto it = this->_resourceIds.find(name);
+            return it != this->_resourceIds.end() ? it->second : 0;
         }
 
         void BuildResourceIndex();

@@ -127,7 +127,7 @@ namespace Client { namespace Game { namespace Engine {
 
     void ModelManager::_ApiRegister(Tools::Lua::CallHelper& helper)
     {
-        auto const& pluginName = this->_engine.GetCurrentPluginName();
+        auto const& pluginName = this->_engine.GetRunningPluginName();
         if (pluginName == "")
             throw std::runtime_error("Client.Model.Register: Could not determine currently running plugin, aborting registration");
         Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());

@@ -35,8 +35,8 @@ namespace Client { namespace Game { namespace Engine {
         Game& GetGame() { return this->_game; }
         DoodadManager& GetDoodadManager() { return *this->_doodadManager; }
         ModelManager& GetModelManager() { return *this->_modelManager; }
-        std::string const& GetCurrentPluginName() const { return this->_pluginName; }
-        std::string const& GetCurrentResourceName() const { return this->_resourceName; }
+        std::string const& GetRunningPluginName() const { return this->_pluginName; }
+        std::string const& GetRunningResourceName() const { return this->_resourceName; }
         Uint32 GetRunningDoodadId() { return this->_overriddenDoodadId ? this->_overriddenDoodadId : this->_doodadManager->GetRunningDoodadId(); }
         void OverrideRunningDoodadId(Uint32 doodadId) { this->_overriddenDoodadId = doodadId; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }

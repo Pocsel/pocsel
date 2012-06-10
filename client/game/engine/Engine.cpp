@@ -71,8 +71,8 @@ namespace Client { namespace Game { namespace Engine {
     void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)
     {
         std::string str = "[";
-        if (this->GetCurrentPluginName() != "")
-            str += this->GetCurrentPluginName();
+        if (this->GetRunningPluginName() != "")
+            str += this->GetRunningPluginName();
         else
             str += "?";
         str += "/";

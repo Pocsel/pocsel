@@ -52,7 +52,6 @@ namespace Client { namespace Game { namespace Engine {
     }
 
     void DoodadManager::SpawnDoodad(Uint32 doodadId,
-            Uint32 pluginId,
             std::string const& doodadName,
             Common::Position const& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
@@ -158,7 +157,7 @@ namespace Client { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiRegister(Tools::Lua::CallHelper& helper)
     {
-        std::string const& pluginName = this->_engine.GetCurrentPluginName();
+        std::string const& pluginName = this->_engine.GetRunningPluginName();
         if (pluginName == "")
             throw std::runtime_error("Client.Doodad.Register: Could not determine currently running plugin, aborting registration");
         Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
@@ -178,7 +177,7 @@ namespace Client { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
-            Tools::error << "DoodadManager::_ApiRegister: Failed to register new doodad type from plugin " << pluginName << " (file: " << this->_engine.GetCurrentResourceName() << "): " << e.what() << std::endl;
+            Tools::error << "DoodadManager::_ApiRegister: Failed to register new doodad type from plugin " << pluginName << " (file: " << this->_engine.GetRunningResourceName() << "): " << e.what() << std::endl;
             return;
         }
         this->_doodadTypes[doodadName] = new DoodadType(doodadName, prototype);

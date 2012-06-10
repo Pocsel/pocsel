@@ -2,7 +2,7 @@ Server.Cube.Register{
 	cubeName = "Dirt",
 	transparent = false,
 	solid = true,
-    material = "Dirt",
+    material = "base:Dirt",
 	rotation = 1 + 2 + 4,
 }
 
@@ -10,7 +10,7 @@ Server.Cube.Register{
 	cubeName = "Grass",
 	transparent = false,
 	solid = true,
-    material = "Grass",
+    material = "base:Grass",
 	rotation = 0,
 }
 
@@ -18,7 +18,7 @@ Server.Cube.Register{
 	cubeName = "Iron",
 	transparent = false,
 	solid = true,
-	material = "Iron",
+	material = "base:Iron",
 	rotation = 0,
 }
 
@@ -26,7 +26,7 @@ Server.Cube.Register{
 	cubeName = "Water",
 	transparent = true,
 	solid = false,
-	material = "Water",
+	material = "base:Water",
 	rotation = 0,
 }
 
@@ -34,6 +34,6 @@ Server.Cube.Register{
 	cubeName = "Rock",
 	transparent = false,
 	solid = true,
-    material = "Rock",
+    material = "base:Rock",
 	rotation = 0,
 }

@@ -28,9 +28,9 @@ namespace Client { namespace Resources {
 
     void ResourceDownloader::HandleResourceRange(Tools::ByteArray& p)
     {
-        Uint32 id, offset, pluginId, totalSize, dataSize;
+        Uint32 id, offset, totalSize, dataSize;
         std::string type, filename;
-        char const* data = Network::PacketExtractor::ResourceRange(p, id, offset, pluginId, type, filename, totalSize, dataSize);
+        char const* data = Network::PacketExtractor::ResourceRange(p, id, offset, type, filename, totalSize, dataSize);
 
         if (id == 0)
             throw std::runtime_error("Wrong resource id");
@@ -50,7 +50,7 @@ namespace Client { namespace Resources {
                 this->_CheckDownloadEnd();
                 return;
             }
-            res = new Common::Resource(id, pluginId, type, filename, 0, totalSize);
+            res = new Common::Resource(id, type, filename, 0, totalSize);
             this->_inTransfer[id] = res;
         }
         else // paquet data range seulement

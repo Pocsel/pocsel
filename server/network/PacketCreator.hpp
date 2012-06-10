@@ -57,7 +57,6 @@ namespace Server { namespace Network {
                                                    Uint32 itemId);
 
         static std::unique_ptr<Common::Packet> DoodadSpawn(Uint32 doodadId,
-                Uint32 pluginId,
                 std::string const& doodadName,
                 Common::Position const& position,
                 std::list<std::pair<std::string /* key */, std::string /* value */>> const& values);

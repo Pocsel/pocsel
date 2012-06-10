@@ -58,7 +58,7 @@ namespace Client { namespace Game {
 
     void CubeTypeManager::_ApiRegister(Tools::Lua::CallHelper& helper)
     {
-        auto const& pluginName = this->_client.GetGame().GetEngine().GetCurrentPluginName();
+        auto const& pluginName = this->_client.GetGame().GetEngine().GetRunningPluginName();
         if (pluginName == "")
             throw std::runtime_error("Client.CubeMaterial.Register: Could not determine currently running plugin, aborting registration");
         std::string cubeMaterialName;
