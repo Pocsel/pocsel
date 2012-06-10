@@ -1,9 +1,9 @@
-#ifndef __SERVER_GAME_ENGINE_BODY_HPP__
-#define __SERVER_GAME_ENGINE_BODY_HPP__
+#ifndef __CLIENT_GAME_ENGINE_BODY_HPP__
+#define __CLIENT_GAME_ENGINE_BODY_HPP__
 
 #include "tools/physics/Body.hpp"
 
-namespace Server { namespace Game { namespace Engine {
+namespace Client { namespace Game { namespace Engine {
 
     class Engine;
     class BodyType;
@@ -18,3 +18,4 @@ namespace Server { namespace Game { namespace Engine {
 }}}
 
 #endif
+

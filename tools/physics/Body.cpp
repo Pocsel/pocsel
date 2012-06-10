@@ -2,11 +2,12 @@
 #include "server/game/engine/BodyType.hpp"
 
 
-namespace Server { namespace Game { namespace Engine {
+namespace Tools { namespace Physics {
 
     Body::Body(BodyType const& bodyType) :
-        Tools::Physics::Body(bodyType)
+        _type(bodyType),
+        _nodes(bodyType.GetShapes().size())
     {
     }
 
-}}}
+}}

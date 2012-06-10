@@ -7,27 +7,27 @@
 #include "tools/physics/BodyType.hpp"
 
 namespace Tools {
-    
+
     namespace Physics {
 
-        template<typename BodyTypeType>
+        template<typename TBodyType>
             struct BodyTypeSerializer
             {
 
-                static void Write(BodyTypeType const& bt, ByteArray& p) // Used by Packet::Write<T>(T const&)
+                static void Write(TBodyType const& bt, ByteArray& p) // Used by Packet::Write<T>(T const&)
                 {
                     p.Write(bt.GetShapes());
                 }
 
-                static std::unique_ptr<BodyTypeType> Read(ByteArray const& p) // Used by Packet::Read<T>()
+                static std::unique_ptr<TBodyType> Read(ByteArray const& p) // Used by Packet::Read<T>()
                 {
-                    std::vector<Tools::Physics::BodyType::ShapeNode> vec;
+                    std::vector<BodyType::ShapeNode> vec;
                     p.Read(vec);
-                    return std::unique_ptr<BodyTypeType>(new BodyTypeType(vec));
+                    return std::unique_ptr<TBodyType>(new TBodyType(vec));
                 }
 
                 private:
-                static void Read(ByteArray const& p, BodyTypeType& bt);  // Used by Packet::Read<T>(T&)
+                static void Read(ByteArray const& p, TBodyType& bt);  // Used by Packet::Read<T>(T&)
             };
     }
 
