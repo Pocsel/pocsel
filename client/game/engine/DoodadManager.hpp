@@ -18,7 +18,7 @@ namespace Client { namespace Game { namespace Engine {
     {
     private:
         Engine& _engine;
-        std::map<Uint32 /* pluginId */, std::map<std::string /* doodadName */, DoodadType*>> _doodadTypes;
+        std::map<std::string /* doodadName */, DoodadType*> _doodadTypes;
         std::map<Uint32 /* doodadId */, Doodad*> _doodads;
         Uint32 _runningDoodadId; // 0 quand aucun doodad n'est en cours d'éxécution
         Doodad* _runningDoodad; // nul quand aucun doodad n'est en cours d'éxécution

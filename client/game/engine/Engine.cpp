@@ -1,15 +1,19 @@
+#include "client/precompiled.hpp"
+
 #include "client/game/engine/Engine.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/ModelManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
+#include "common/FieldUtils.hpp"
 #include "common/Resource.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
     Engine::Engine(Game& game) :
-        _game(game), _overriddenPluginId(0), _overriddenDoodadId(0)
+        _game(game),
+        _overriddenDoodadId(0)
     {
         this->_interpreter = new Tools::Lua::Interpreter();
 
@@ -51,24 +55,24 @@ namespace Client { namespace Game { namespace Engine {
         auto itEnd = files.end();
         for (; it != itEnd; ++it)
         {
-            this->OverrideRunningPluginId((*it)->pluginId);
+            this->_SetRunningResource((*it)->name);
             try
             {
                 this->_interpreter->DoString(std::string(static_cast<char const*>((*it)->data), (*it)->size));
             }
             catch (std::exception& e)
             {
-                Tools::error << "Error while processing script resource \"" << (*it)->name << "\" from plugin " << (*it)->pluginId << ": " << e.what() << std::endl;
+                Tools::error << "Error while processing script resource \"" << (*it)->name << "\" : " << e.what() << std::endl;
             }
-            this->OverrideRunningPluginId(0);
+            this->_SetRunningResource("");
         }
     }
 
     void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)
     {
         std::string str = "[";
-        if (this->GetRunningPluginId())
-            str += Tools::ToString(this->GetRunningPluginId());
+        if (this->GetCurrentPluginName() != "")
+            str += this->GetCurrentPluginName();
         else
             str += "?";
         str += "/";
@@ -87,6 +91,20 @@ namespace Client { namespace Game { namespace Engine {
         for (; it != itEnd; ++it)
             str += it->ToString();
         Tools::log << str << std::endl;
+    }
+
+    void Engine::_SetRunningResource(std::string const& name)
+    {
+        if (name == "")
+        {
+            this->_pluginName = "";
+            this->_resourceName = "";
+        }
+        else
+        {
+            this->_pluginName = Common::FieldUtils::GetPluginNameFromResource(name);
+            this->_resourceName = Common::FieldUtils::GetResourceNameFromResource(name);
+        }
     }
 
 }}}

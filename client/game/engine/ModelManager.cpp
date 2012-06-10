@@ -7,7 +7,7 @@
 #include "client/game/ModelRenderer.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Interpreter.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -32,15 +32,10 @@ namespace Client { namespace Game { namespace Engine {
         for (; itModel != itModelEnd; ++itModel)
             Tools::Delete(itModel->second);
         // model types
-        auto itPlugin = this->_modelTypes.begin();
-        auto itPluginEnd = this->_modelTypes.end();
-        for (; itPlugin != itPluginEnd; ++itPlugin)
-        {
-            auto itType = itPlugin->second.begin();
-            auto itTypeEnd = itPlugin->second.end();
-            for (; itType != itTypeEnd; ++itType)
-                Tools::Delete(itType->second);
-        }
+        auto itType = this->_modelTypes.begin();
+        auto itTypeEnd = this->_modelTypes.end();
+        for (; itType != itTypeEnd; ++itType)
+            Tools::Delete(itType->second);
         Tools::Delete(this->_modelRenderer);
     }
 
@@ -79,9 +74,6 @@ namespace Client { namespace Game { namespace Engine {
 
     void ModelManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
     {
-        Uint32 pluginId = this->_engine.GetRunningPluginId();
-        if (!pluginId)
-            throw std::runtime_error("Client.Model.Spawn: Could not determine currently running plugin, cannot spawn model");
         Uint32 doodadId = this->_engine.GetRunningDoodadId();
         if (helper.GetNbArgs() >= 2)
             doodadId = helper.PopArg().Check<Uint32>("Client.Model.Spawn: Argument \"doodadId\" must be a number");
@@ -91,15 +83,10 @@ namespace Client { namespace Game { namespace Engine {
             Tools::error << "ModelManager::_ApiSpawn: No doodad with id " << doodadId << ", cannot spawn model." << std::endl;
             return; // retourne nil
         }
-        if (!this->_modelTypes.count(pluginId))
+        auto itType = this->_modelTypes.find(modelName);
+        if (itType == this->_modelTypes.end())
         {
-            Tools::error << "ModelManager::_ApiSpawn: Plugin " << pluginId << " has no models." << std::endl;
-            return; // retourne nil
-        }
-        auto itType = this->_modelTypes[pluginId].find(modelName);
-        if (itType == this->_modelTypes[pluginId].end())
-        {
-            Tools::error << "ModelManager::_ApiSpawn: No model named \"" << modelName << "\" in plugin " << pluginId << "." << std::endl;
+            Tools::error << "ModelManager::_ApiSpawn: No model named \"" << modelName << "\"." << std::endl;
             return; // retourne nil
         }
 
@@ -140,8 +127,8 @@ namespace Client { namespace Game { namespace Engine {
 
     void ModelManager::_ApiRegister(Tools::Lua::CallHelper& helper)
     {
-        Uint32 pluginId = this->_engine.GetRunningPluginId();
-        if (!pluginId)
+        auto const& pluginName = this->_engine.GetCurrentPluginName();
+        if (pluginName == "")
             throw std::runtime_error("Client.Model.Register: Could not determine currently running plugin, aborting registration");
         Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
         std::string modelName;
@@ -153,21 +140,22 @@ namespace Client { namespace Game { namespace Engine {
                 throw std::runtime_error("Client.Model.Register: Argument \"prototype\" must be of type table");
             if (!prototype["modelName"].IsString())
                 throw std::runtime_error("Client.Model.Register: Field \"modelName\" must exist and be of type string");
-            if (!Common::FieldValidator::IsRegistrableType(modelName = prototype["modelName"].ToString()))
+            if (!Common::FieldUtils::IsRegistrableType(modelName = prototype["modelName"].ToString()))
                 throw std::runtime_error("Client.Model.Register: Invalid model name \"" + modelName + "\"");
-            if (this->_modelTypes[pluginId].count(modelName))
+            modelName = Common::FieldUtils::GetResourceName(pluginName, modelName);
+            if (this->_modelTypes.count(modelName))
                 throw std::runtime_error("Client.Model.Register: A model with the name \"" + modelName + "\" is already registered");
             if (!prototype["file"].IsString())
                 throw std::runtime_error("Client.Model.Register: Field \"file\" must exist and be of type string");
-            resourceId = this->_engine.GetGame().GetResourceManager().GetResourceId(pluginId, prototype["file"].ToString());
+            resourceId = this->_engine.GetGame().GetResourceManager().GetResourceId(prototype["file"].ToString());
         }
         catch (std::exception& e)
         {
-            Tools::error << "ModelManager::_ApiRegister: Failed to register new model type from plugin " << pluginId << ": " << e.what() << std::endl;
+            Tools::error << "ModelManager::_ApiRegister: Failed to register new model type: " << e.what() << std::endl;
             return;
         }
-        this->_modelTypes[pluginId][modelName] = new ModelType(pluginId, modelName, resourceId);
-        Tools::debug << "Model \"" << modelName << "\" registered (plugin: " << pluginId << ")." << std::endl;
+        this->_modelTypes[modelName] = new ModelType(modelName, resourceId);
+        Tools::debug << "Model \"" << modelName << "\" registered." << std::endl;
     }
 
 }}}

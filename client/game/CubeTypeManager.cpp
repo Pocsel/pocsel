@@ -6,7 +6,7 @@
 #include "client/network/PacketCreator.hpp"
 
 #include "common/Packet.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 #include "tools/lua/Interpreter.hpp"
 
 namespace Client { namespace Game {
@@ -34,11 +34,11 @@ namespace Client { namespace Game {
         auto itEnd = this->_cubeTypes.end();
         for (; it != itEnd; ++it)
         {
-            auto material = this->_materials[it->pluginId].find(it->material);
-            if (material != this->_materials[it->pluginId].end())
+            auto material = this->_materials.find(it->material);
+            if (material != this->_materials.end())
                 it->LoadMaterial(this->_client.GetGame().GetResourceManager(), material->second);
             else
-                throw std::runtime_error("Cube material \"" + it->material + "\" not found for cube type \"" + it->name + "\" (plugin: " + Tools::ToString(it->pluginId) + ").");
+                throw std::runtime_error("Cube material \"" + it->material + "\" not found for cube type \"" + it->name + "\".");
         }
     }
 
@@ -58,8 +58,8 @@ namespace Client { namespace Game {
 
     void CubeTypeManager::_ApiRegister(Tools::Lua::CallHelper& helper)
     {
-        Uint32 pluginId = this->_client.GetGame().GetEngine().GetRunningPluginId();
-        if (!pluginId)
+        auto const& pluginName = this->_client.GetGame().GetEngine().GetCurrentPluginName();
+        if (pluginName == "")
             throw std::runtime_error("Client.CubeMaterial.Register: Could not determine currently running plugin, aborting registration");
         std::string cubeMaterialName;
         Tools::Lua::Ref prototype(helper.PopArg("Client.CubeMaterial.Register: Missing argument \"prototype\""));
@@ -67,12 +67,13 @@ namespace Client { namespace Game {
             throw std::runtime_error("Client.CubeMaterial.Register: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
         if (!prototype["cubeMaterialName"].IsString())
             throw std::runtime_error("Client.CubeMaterial.Register: Field \"cubeMaterialName\" must exist and be of type string");
-        if (!Common::FieldValidator::IsRegistrableType(cubeMaterialName = prototype["cubeMaterialName"].ToString()))
+        if (!Common::FieldUtils::IsRegistrableType(cubeMaterialName = prototype["cubeMaterialName"].ToString()))
             throw std::runtime_error("Client.CubeMaterial.Register: Invalid cube material name \"" + cubeMaterialName + "\"");
-        if (this->_materials[pluginId].count(cubeMaterialName))
-            throw std::runtime_error("Client.CubeMaterial.Register: A cube material with the name \"" + cubeMaterialName + "\" already exists in this plugin (" + Tools::ToString(pluginId) + ")");
-        this->_materials[pluginId].insert(std::make_pair(cubeMaterialName, prototype));
-        Tools::debug << "Cube material \"" << cubeMaterialName << "\" registered (plugin: " << pluginId << ")." << std::endl;
+        cubeMaterialName = Common::FieldUtils::GetResourceName(pluginName, cubeMaterialName);
+        if (this->_materials.count(cubeMaterialName))
+            throw std::runtime_error("Client.CubeMaterial.Register: A cube material with the name \"" + cubeMaterialName + "\" already exists");
+        this->_materials.insert(std::make_pair(cubeMaterialName, prototype));
+        Tools::debug << "Cube material \"" << cubeMaterialName << "\" registered." << std::endl;
     }
 
 }}

@@ -6,7 +6,7 @@
 #include "tools/plugin-create/Create.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/database/sqlite/Connection.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 #include "common/constants.hpp"
 
 namespace boost { namespace filesystem3 {
@@ -212,7 +212,7 @@ namespace Tools { namespace PluginCreate {
                     continue;
                 }
                 std::string name = it->stem().string();
-                if (!Common::FieldValidator::IsMapName(name))
+                if (!Common::FieldUtils::IsMapName(name))
                 {
                     Tools::log << "Invalid map name \"" << name << "\", map ignored (must be alphamumeric, 20 characters max.)." << std::endl;
                     continue;
@@ -305,12 +305,12 @@ namespace Tools { namespace PluginCreate {
             Tools::log << "Error: Failed to read plugin configuration file: " << e.what() << std::endl;
             return false;
         }
-        if (!Common::FieldValidator::IsPluginIdentifier(identifier))
+        if (!Common::FieldUtils::IsPluginIdentifier(identifier))
         {
             Tools::log << "Error: Invalid plugin identifier \"" << identifier << "\" (must be alphanumeric, 20 characters max.)." << std::endl;
             return false;
         }
-        if (!Common::FieldValidator::IsPluginFullname(fullname))
+        if (!Common::FieldUtils::IsPluginFullname(fullname))
         {
             Tools::log << "Error: Invalid plugin fullname \"" << fullname << "\" (100 characters max.)." << std::endl;
             return false;

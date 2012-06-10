@@ -3,7 +3,7 @@
 #include "tools/logger/Logger.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Function.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 
 #include "client/game/Game.hpp"
 #include "client/resources/Effect.hpp"
@@ -18,7 +18,7 @@ namespace Client { namespace Resources {
         try
         {
             this->_name = settings["effectName"].CheckString("Client.Effect.Register: Field \"effectName\" must exist and be a string");
-            if (!Common::FieldValidator::IsRegistrableType(this->_name))
+            if (!Common::FieldUtils::IsRegistrableType(this->_name))
                 throw std::runtime_error("Client.Effect.Register: Invalid effect name \"" + this->_name + "\"");
             this->_shader = &game.GetResourceManager().GetShader(pluginId, settings["resource"].CheckString("Client.Effect.Register: Field \"resource\" must exist and be a string"));
             if (settings["initObject"].IsFunction())
