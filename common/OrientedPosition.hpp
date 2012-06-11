@@ -19,7 +19,7 @@ namespace Common {
     public:
         OrientedPosition() :
             theta(0),
-            phi(Tools::Math::Pi / 2)
+            phi(Tools::Math::PiFloat / 2.0f)
         {
             this->SetAngles(theta, phi);
         }
@@ -27,7 +27,7 @@ namespace Common {
         OrientedPosition(Common::Position const& pos) :
             position(pos),
             theta(0),
-            phi(Tools::Math::Pi / 2)
+            phi(Tools::Math::PiFloat / 2.0f)
         {
             this->SetAngles(theta, phi);
         }
@@ -74,15 +74,15 @@ namespace Common {
         {
             float& t = const_cast<float&>(this->theta);
             t += dtheta;
-            if (t < 0 || t >= 2 * Tools::Math::Pi)
-                t = std::fmod(t, 2 * Tools::Math::Pi);
+            if (t < 0.0f || t >= 2.0f * Tools::Math::PiFloat)
+                t = std::fmod(t, 2.0f * Tools::Math::PiFloat);
 
             float& p = const_cast<float&>(this->phi);
             p += dphi;
             if (p < 0)
                 p = 0.001f;
-            else if (p > Tools::Math::Pi)
-                p = Tools::Math::Pi - 0.001f;
+            else if (p > Tools::Math::PiFloat)
+                p = Tools::Math::PiFloat - 0.001f;
 
             this->SetAngles(t, p);
         }

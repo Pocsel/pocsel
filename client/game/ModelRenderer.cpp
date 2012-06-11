@@ -48,7 +48,7 @@ namespace Client { namespace Game {
                 )
             *
             glm::yawPitchRoll<float>(
-                   /*-pos.theta*/0, -Tools::Math::Pi / 2, 0.0f
+                   /*-pos.theta*/0, -Tools::Math::PiFloat / 2, 0.0f
                 )
             //*
             //glm::translate<float>(

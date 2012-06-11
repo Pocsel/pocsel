@@ -27,7 +27,7 @@ namespace Client { namespace Game { namespace Engine {
     {
         if (this->_nbBodyTypes == this->_bodyTypes.size())
             return;
-        this->_engine.GetGame().GetClient().GetNetwork().SendPacket(Network::PacketCreator::GetBodyType(this->_bodyTypes.size() + 1));
+        this->_engine.GetGame().GetClient().GetNetwork().SendPacket(Network::PacketCreator::GetBodyType((Uint32)this->_bodyTypes.size() + 1));
     }
 
 }}}

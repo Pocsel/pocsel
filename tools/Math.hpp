@@ -12,6 +12,7 @@ namespace Tools { namespace Math {
         }
 
         static const double Pi = 3.1415926535897932384626433832795;
+        static const float PiFloat = 3.1415926535897932384626433832795f;
 
 }}
 

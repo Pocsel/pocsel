@@ -1,3 +1,5 @@
+#include "server/precompiled.hpp"
+
 #include "server/game/engine/BodyType.hpp"
 
 #include "tools/lua/Iterator.hpp"
@@ -38,7 +40,7 @@ namespace Server { namespace Game { namespace Engine {
 
     unsigned int BodyType::_BuildShapeNode(Tools::Lua::Ref& shapeTree, int parent)
     {
-        unsigned int idx = this->_shapes.size();
+        auto idx = (unsigned int)this->_shapes.size();
         if (idx == ShapesMax)
             throw std::runtime_error("Client.Body.Register: Too many shapes (" + Tools::ToString(ShapesMax)+ " max)");
         this->_shapes.push_back(ShapeNode(parent));

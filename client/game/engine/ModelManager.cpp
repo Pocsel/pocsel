@@ -46,7 +46,7 @@ namespace Client { namespace Game { namespace Engine {
         auto itModelEnd = this->_models.end();
         float deltaTime = float(totalTime - this->_lastTickTime) * 0.000001f;
         for (; itModel != itModelEnd; ++itModel)
-            itModel->second->Update(deltaTime, Tools::Math::Pi/2);
+            itModel->second->Update(deltaTime, Tools::Math::PiFloat/2.0f);
         this->_lastTickTime = totalTime;
     }
 

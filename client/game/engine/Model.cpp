@@ -1,3 +1,5 @@
+#include "client/precompiled.hpp"
+
 #include "client/game/engine/Model.hpp"
 #include "client/game/engine/ModelType.hpp"
 
@@ -103,8 +105,8 @@ namespace Client { namespace Game { namespace Engine {
                         joints[i].name == "spine"
                    )
                 {
-                    animatedJoint0.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - Tools::Math::Pi/2)/4, 0, 1, 0) * animatedJoint0.orientation);
-                    animatedJoint1.orientation = glm::normalize(glm::angleAxis<float>(glm::degrees(phi - Tools::Math::Pi/2)/4, 0, 1, 0) * animatedJoint1.orientation);
+                    animatedJoint0.orientation = glm::normalize(glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f) * animatedJoint0.orientation);
+                    animatedJoint1.orientation = glm::normalize(glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f) * animatedJoint1.orientation);
                 }
 
                 this->_animatedBones[i] =
@@ -149,7 +151,7 @@ namespace Client { namespace Game { namespace Engine {
                 {
                     animatedJoint.orientation =
                         glm::normalize(
-                                glm::angleAxis<float>(glm::degrees(phi - Tools::Math::Pi/2), 0, 1, 0)
+                                glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f), 0.0f, 1.0f, 0.0f)
                                 *
                                 animatedJoint.orientation
                                 );
@@ -166,7 +168,7 @@ namespace Client { namespace Game { namespace Engine {
                 {
                     animatedJoint.orientation =
                         glm::normalize(
-                                glm::angleAxis<float>(glm::degrees(phi - Tools::Math::Pi/2)/4, 0, 1, 0)
+                                glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f)
                                 *
                                 animatedJoint.orientation
                                 );
