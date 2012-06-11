@@ -30,7 +30,7 @@ joint "forearm.l" 10
 	pq -0.00000000 0.45813379 -0.00000006 0.00000000 -0.00000003 -0.00000000 -1.00000000
 
 mesh "head"
-	material "stickman.png"
+	material "base:stickman.png"
 
 vp 0.21708000 -0.15771601 2.56583548
 	vt 0.00084477 0.99987775
@@ -135,7 +135,7 @@ fm 18 16 19
 fm 16 13 19
 
 mesh "body"
-	material "stickman.png"
+	material "base:stickman.png"
 
 vp -0.09942411 -0.26000276 0.62868077
 	vt 0.00486892 0.00366604

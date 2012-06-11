@@ -3,21 +3,21 @@ Client.CubeMaterial.Register{
     cubeMaterialName = "Grass",
 
     textures = {
-        top = "cubes/grass/top.png",
-        bottom = "cubes/dirt/texture.png",
-        left = "cubes/grass/side.png",
-        right = "cubes/grass/side.png",
-        front = "cubes/grass/side.png",
-        back = "cubes/grass/side.png",
+        top = "base:cubes/grass/top.png",
+        bottom = "base:cubes/dirt/texture.png",
+        left = "base:cubes/grass/side.png",
+        right = "base:cubes/grass/side.png",
+        front = "base:cubes/grass/side.png",
+        back = "base:cubes/grass/side.png",
     },
 
     effects = {
-        top = "BaseChunk",
-        bottom = "BaseChunk",
-        left = "BaseChunk",
-        right = "BaseChunk",
-        front = "BaseChunk",
-        back = "BaseChunk",
+        top = "base:BaseChunk",
+        bottom = "base:BaseChunk",
+        left = "base:BaseChunk",
+        right = "base:BaseChunk",
+        front = "base:BaseChunk",
+        back = "base:BaseChunk",
     },
 
     effectParameters = {

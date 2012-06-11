@@ -89,12 +89,11 @@ namespace Client { namespace Network {
                     this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for doodad spawn");
                 Uint32 doodadId;
-                Uint32 pluginId;
                 std::string doodadName;
                 Common::Position position;
                 std::list<std::pair<std::string /* key */, std::string /* value */>> values;
-                PacketExtractor::DoodadSpawn(p, doodadId, pluginId, doodadName, position, values);
-                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(doodadId, pluginId, doodadName, position, values);
+                PacketExtractor::DoodadSpawn(p, doodadId, doodadName, position, values);
+                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(doodadId, doodadName, position, values);
             };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadKill] =
             [this](Tools::ByteArray& p)

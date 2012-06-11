@@ -26,7 +26,8 @@ namespace Client { namespace Game { namespace Engine {
         DoodadManager* _doodadManager;
         ModelManager* _modelManager;
         BodyManager* _bodyManager;
-        Uint32 _overriddenPluginId;
+        std::string _pluginName;
+        std::string _resourceName;
         Uint32 _overriddenDoodadId;
 
     public:
@@ -41,13 +42,14 @@ namespace Client { namespace Game { namespace Engine {
         ModelManager const& GetModelManager() const { return *this->_modelManager; }
         BodyManager& GetBodyManager() { return *this->_bodyManager; }
         BodyManager const& GetBodyManager() const { return *this->_bodyManager; }
-        Uint32 GetRunningPluginId() { return this->_overriddenPluginId ? this->_overriddenPluginId : this->_doodadManager->GetRunningPluginId(); }
-        void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
+        std::string const& GetRunningPluginName() const { return this->_pluginName; }
+        std::string const& GetRunningResourceName() const { return this->_resourceName; }
         Uint32 GetRunningDoodadId() { return this->_overriddenDoodadId ? this->_overriddenDoodadId : this->_doodadManager->GetRunningDoodadId(); }
         void OverrideRunningDoodadId(Uint32 doodadId) { this->_overriddenDoodadId = doodadId; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
     private:
         void _ApiPrint(Tools::Lua::CallHelper& helper);
+        void _SetRunningResource(std::string const& name);
     };
 
 }}}

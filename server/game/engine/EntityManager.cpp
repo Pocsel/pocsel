@@ -13,7 +13,7 @@
 #include "tools/lua/MetaTable.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 #include "server/game/map/Map.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "server/rcon/EntityManager.hpp"
 #include "tools/lua/utils/Vector.hpp"
@@ -812,7 +812,7 @@ namespace Server { namespace Game { namespace Engine {
                 throw std::runtime_error("Server.Entity.Register[Positional]: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
             if (!prototype["entityName"].IsString())
                 throw std::runtime_error("Server.Entity.Register[Positional]: Field \"entityName\" in prototype must exist and be of type string");
-            if (!Common::FieldValidator::IsRegistrableType(entityName = prototype["entityName"].ToString()))
+            if (!Common::FieldUtils::IsRegistrableType(entityName = prototype["entityName"].ToString()))
                 throw std::runtime_error("Server.Entity.Register[Positional]: Invalid entity name \"" + entityName + "\"");
             if (helper.GetNbArgs() && helper.PopArg().ToBoolean()) // bool flag en deuxieme parametre pour indiquer que c'est RegisterPositional()
                 positional = true;

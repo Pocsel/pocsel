@@ -52,7 +52,7 @@ namespace Client { namespace Resources {
         Tools::IRenderer& _renderer;
 
         // plugin Id => resource name => resource Id
-        std::map<Uint32, std::map<std::string, Uint32>> _resourceIds;
+        std::map<std::string, Uint32> _resourceIds;
 
         // Resources (resource id => specific resource)
         std::map<Uint32, Tools::Renderers::Utils::Texture::ITexture*> _textures;
@@ -61,11 +61,8 @@ namespace Client { namespace Resources {
         std::map<Uint32, std::string> _scripts;
 
         // effect c'est pas une resource mais un registrabrle
-        std::map<Uint32, std::map<std::string, Effect*>> _effects;
-        std::map<Uint32, std::map<std::string, Tools::Renderers::Utils::Material::Material*>> _materials;
-
-        // resource Id => plugin Id
-        std::map<Uint32, Uint32> _resourceToPluginId;
+        std::map<std::string, Effect*> _effects;
+        std::map<std::string, Tools::Renderers::Utils::Material::Material*> _materials;
 
         // Texture data (resource Id => renderer Texture)
         std::map<Uint32, Tools::Renderers::ITexture2D*> _rawTextures;
@@ -86,33 +83,24 @@ namespace Client { namespace Resources {
         std::string GetScript(Uint32 id);
         std::unique_ptr<Common::Resource> GetResource(Uint32 id);
 
-        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 pluginId, std::string const& name);
-        Tools::Models::MqmModel const& GetMqmModel(Uint32 pluginId, std::string const& name);
-        Tools::Renderers::IShaderProgram& GetShader(Uint32 pluginId, std::string const& name);
-        std::string GetScript(Uint32 pluginId, std::string const& name);
-        std::unique_ptr<Common::Resource> GetResource(Uint32 pluginId, std::string const& name);
+        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(std::string const& name);
+        Tools::Models::MqmModel const& GetMqmModel(std::string const& name);
+        Tools::Renderers::IShaderProgram& GetShader(std::string const& name);
+        std::string GetScript(std::string const& name);
+        std::unique_ptr<Common::Resource> GetResource(std::string const& name);
 
         // effect c'est pas une retouou mais un rtegjsiog
-        Effect& GetEffect(Uint32 pluginId, std::string const& name);
-        std::unique_ptr<Tools::Renderers::Utils::Material::Material> GetMaterial(Uint32 pluginId, std::string const& name);
+        Effect& GetEffect(std::string const& name);
+        std::unique_ptr<Tools::Renderers::Utils::Material::Material> GetMaterial(std::string const& name);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }
         ResourceDownloader& GetDownloader() { return this->_downloader; }
         float GetLoadingProgression() const { return this->_downloader.GetLoadingProgression(); }
 
-        Uint32 GetPluginId(Uint32 resourceId) const
+        Uint32 GetResourceId(std::string const& name) const
         {
-            auto it = this->_resourceToPluginId.find(resourceId);
-            return it != this->_resourceToPluginId.end() ? it->second : 0;
-        }
-
-        Uint32 GetResourceId(Uint32 pluginId, std::string const& name) const
-        {
-            auto it = this->_resourceIds.find(pluginId);
-            if (it == this->_resourceIds.end())
-                return 0;
-            auto it2 = it->second.find(name);
-            return it2 != it->second.end() ? it2->second : 0;
+            auto it = this->_resourceIds.find(name);
+            return it != this->_resourceIds.end() ? it->second : 0;
         }
 
         void BuildResourceIndex();

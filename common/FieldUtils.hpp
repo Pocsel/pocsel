@@ -1,9 +1,9 @@
-#ifndef __COMMON_FIELDVALIDATOR_HPP__
-#define __COMMON_FIELDVALIDATOR_HPP__
+#ifndef __COMMON_FIELDUTILS_HPP__
+#define __COMMON_FIELDUTILS_HPP__
 
 namespace Common {
 
-    class FieldValidator
+    class FieldUtils
     {
     public:
         static bool IsAlphaNum(std::string const& str);
@@ -18,6 +18,9 @@ namespace Common {
         static bool IsMapName(std::string const& str);
         static bool IsPluginBuildHash(std::string const& str);
         static bool IsWorldBuildHash(std::string const& str);
+        static std::string GetPluginNameFromResource(std::string const& name);
+        static std::string GetResourceNameFromResource(std::string const& name);
+        static std::string GetResourceName(std::string const& pluginName, std::string const& resourceName);
     private:
         static bool _IsAlphaNum(std::string const& str, std::string const& allowed);
     };

@@ -3,24 +3,24 @@
 #include "tools/logger/Logger.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Function.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 
 #include "client/game/Game.hpp"
 #include "client/resources/Effect.hpp"
 
 namespace Client { namespace Resources {
 
-    Effect::Effect(Game::Game& game, Tools::Lua::Ref settings, Uint32 pluginId)
-        : _pluginId(pluginId),
+    Effect::Effect(Game::Game& game, Tools::Lua::Ref settings) :
         _shader(0),
         _settings(new Tools::Lua::Ref(settings))
     {
         try
         {
             this->_name = settings["effectName"].CheckString("Client.Effect.Register: Field \"effectName\" must exist and be a string");
-            if (!Common::FieldValidator::IsRegistrableType(this->_name))
+            if (!Common::FieldUtils::IsRegistrableType(this->_name))
                 throw std::runtime_error("Client.Effect.Register: Invalid effect name \"" + this->_name + "\"");
-            this->_shader = &game.GetResourceManager().GetShader(pluginId, settings["resource"].CheckString("Client.Effect.Register: Field \"resource\" must exist and be a string"));
+            this->_name = Common::FieldUtils::GetResourceName(game.GetEngine().GetRunningPluginName(), this->_name);
+            this->_shader = &game.GetResourceManager().GetShader(settings["resource"].CheckString("Client.Effect.Register: Field \"resource\" must exist and be a string"));
             if (settings["initObject"].IsFunction())
                 this->_initObject.reset(new Tools::Lua::Ref(settings["initObject"]));
             if (settings["update"].IsFunction())

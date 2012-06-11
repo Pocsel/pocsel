@@ -81,7 +81,7 @@ namespace Client { namespace Game {
                 this->_client.GetLocalResourceManager().GetShader("TestShader.fx"),
                 this->_client.GetLocalResourceManager().GetShader("TestShader.fx")));
         auto& var = this->_material->GetVariable<Tools::Renderers::Utils::Texture::ITexture>("diffuse");
-        var.Set(this->_resourceManager->GetTexture(1, "cubes/iron/top.png"));
+        var.Set(this->_resourceManager->GetTexture("base:cubes/iron/top.png"));
         this->_sphere.reset(new Tools::Renderers::Utils::Sphere(this->_renderer));
         // XXX
     }

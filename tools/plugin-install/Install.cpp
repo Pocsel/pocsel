@@ -4,7 +4,7 @@
 #include "tools/plugin-install/Install.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 #include "common/constants.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 
 namespace Tools { namespace PluginInstall {
 
@@ -162,7 +162,7 @@ namespace Tools { namespace PluginInstall {
             while (auto pluginRow = pluginQuery->Fetch())
             {
                 std::string name = pluginIdentifier + "_" + pluginRow->GetString(0);
-                if (!Common::FieldValidator::IsMapName(name))
+                if (!Common::FieldUtils::IsMapName(name))
                     throw std::runtime_error("Invalid map name \"" + name + "\".");
                 std::string lua = pluginRow->GetString(1);
 
@@ -213,13 +213,13 @@ namespace Tools { namespace PluginInstall {
                 if (row->GetUint32(3) != Common::PluginFormatVersion)
                     throw std::runtime_error("Bad format version (got " + Tools::ToString(row->GetUint32(3)) + ", expected " + Tools::ToString(Common::PluginFormatVersion) + ").");
                 pluginBuildHash = row->GetString(0);
-                if (!Common::FieldValidator::IsPluginBuildHash(pluginBuildHash))
+                if (!Common::FieldUtils::IsPluginBuildHash(pluginBuildHash))
                     throw std::runtime_error("Invalid build hash \"" + pluginBuildHash + "\".");
                 pluginFullname = row->GetString(1);
-                if (!Common::FieldValidator::IsPluginFullname(pluginFullname))
+                if (!Common::FieldUtils::IsPluginFullname(pluginFullname))
                     throw std::runtime_error("Invalid plugin fullname.");
                 pluginIdentifier = row->GetString(2);
-                if (!Common::FieldValidator::IsPluginIdentifier(pluginIdentifier))
+                if (!Common::FieldUtils::IsPluginIdentifier(pluginIdentifier))
                     throw std::runtime_error("Invalid plugin identifier.");
             }
             else
@@ -244,9 +244,9 @@ namespace Tools { namespace PluginInstall {
             {
                 if (!identifier.empty() && !fullname.empty())
                 {
-                    if (!Common::FieldValidator::IsWorldIdentifier(identifier))
+                    if (!Common::FieldUtils::IsWorldIdentifier(identifier))
                         throw std::runtime_error("Invalid world identifier \"" + identifier + "\" (must be alphanumeric, 20 characters max.).");
-                    if (!Common::FieldValidator::IsWorldFullname(fullname))
+                    if (!Common::FieldUtils::IsWorldFullname(fullname))
                         throw std::runtime_error("Invalid world fullname \"" + fullname + "\" (100 characters max.).");
                     CreateWorldTables(*wconn);
                     FillTableWorld(identifier, fullname, *wconn);
@@ -260,10 +260,10 @@ namespace Tools { namespace PluginInstall {
                 if (row->GetUint32(0) != Common::WorldFormatVersion)
                     throw std::runtime_error("Bad format version (got " + Tools::ToString(row->GetUint32(0)) + ", expected " + Tools::ToString(Common::WorldFormatVersion) + ").");
                 worldIdentifier = row->GetString(1);
-                if (!Common::FieldValidator::IsWorldIdentifier(worldIdentifier))
+                if (!Common::FieldUtils::IsWorldIdentifier(worldIdentifier))
                     throw std::runtime_error("Invalid world identifier.");
                 worldFullname = row->GetString(2);
-                if (!Common::FieldValidator::IsWorldFullname(worldFullname))
+                if (!Common::FieldUtils::IsWorldFullname(worldFullname))
                     throw std::runtime_error("Invalid world fullname.");
                 newWorldVersion = row->GetUint32(3) + 1;
             }

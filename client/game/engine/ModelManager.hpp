@@ -19,7 +19,7 @@ namespace Client { namespace Game { namespace Engine {
     {
     private:
         Engine& _engine;
-        std::map<Uint32 /* pluginId */, std::map<std::string /* modelName */, ModelType*>> _modelTypes;
+        std::map<std::string /* modelName */, ModelType*> _modelTypes;
         std::map<Uint32 /* modelId */, Model*> _models;
         std::map<Uint32 /* doodadId */, std::list<Model*>> _modelsByDoodad;
         Uint32 _nextModelId;

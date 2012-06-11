@@ -18,7 +18,7 @@ namespace Client { namespace Game { namespace Engine {
     {
     private:
         Engine& _engine;
-        std::map<Uint32 /* pluginId */, std::map<std::string /* doodadName */, DoodadType*>> _doodadTypes;
+        std::map<std::string /* doodadName */, DoodadType*> _doodadTypes;
         std::map<Uint32 /* doodadId */, Doodad*> _doodads;
         Uint32 _runningDoodadId; // 0 quand aucun doodad n'est en cours d'éxécution
         Doodad* _runningDoodad; // nul quand aucun doodad n'est en cours d'éxécution
@@ -28,11 +28,9 @@ namespace Client { namespace Game { namespace Engine {
         ~DoodadManager();
         Uint32 GetRunningDoodadId() const { return this->_runningDoodadId; }
         Doodad* GetRunningDoodad() const { return this->_runningDoodad; }
-        Uint32 GetRunningPluginId() const;
         Doodad const& GetDoodad(Uint32 doodadId) const throw(std::runtime_error); // ne pas garder la référence, le doodad peut etre delete à tout moment
         void Tick();
         void SpawnDoodad(Uint32 doodadId,
-                Uint32 pluginId,
                 std::string const& doodadName,
                 Common::Position const& position,
                 std::list<std::pair<std::string /* key */, std::string /* value */>> const& values);

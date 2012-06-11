@@ -15,13 +15,11 @@ namespace Client { namespace Game { namespace Engine {
         private boost::noncopyable
     {
     private:
-        Uint32 _pluginId;
         std::string _name;
         Uint32 _resourceId;
 
     public:
-        ModelType(Uint32 pluginId, std::string const& name, Tools::Lua::Ref& prototype, Resources::ResourceManager& resourceManager);
-        Uint32 GetPluginId() const { return this->_pluginId; }
+        ModelType(std::string const& name, Uint32 resourceId);
         std::string const& GetName() const { return this->_name; }
         Uint32 GetResourceId() const { return this->_resourceId; }
     };

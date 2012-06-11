@@ -1,3 +1,7 @@
+#include "server/precompiled.hpp"
+
+#include "server/game/PluginManager.hpp"
+#include "server/game/World.hpp"
 #include "server/game/engine/Doodad.hpp"
 #include "server/game/engine/DoodadManager.hpp"
 #include "server/game/engine/Engine.hpp"
@@ -6,6 +10,7 @@
 #include "server/game/map/Map.hpp"
 #include "server/network/PacketCreator.hpp"
 #include "server/network/UdpPacket.hpp"
+#include "common/FieldUtils.hpp"
 #include "common/Packet.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Iterator.hpp"
@@ -86,7 +91,8 @@ namespace Server { namespace Game { namespace Engine {
         auto itTableEnd = this->_storage.End();
         for (; itTable != itTableEnd; ++itTable)
             values.push_back(std::make_pair(serializer.Serialize(itTable.GetKey(), true /* nilOnError */), serializer.Serialize(itTable.GetValue(), true /* nilOnError */)));
-        auto packet = Network::PacketCreator::DoodadSpawn(this->_id, this->_pluginId, this->_name, this->_entity.GetPosition(), values);
+        auto const& pluginName = this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(this->_pluginId);
+        auto packet = Network::PacketCreator::DoodadSpawn(this->_id, Common::FieldUtils::GetResourceName(pluginName, this->_name), this->_entity.GetPosition(), values);
 
         // send packet to new players
         auto it = this->_newPlayers.begin();

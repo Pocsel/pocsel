@@ -1,3 +1,6 @@
+#include "server/precompiled.hpp"
+
+#include "server/game/PluginManager.hpp"
 #include "server/network/PacketCreator.hpp"
 #include "server/network/ChunkSerializer.hpp"
 #include "server/network/BodyTypeSerializer.hpp"
@@ -11,6 +14,7 @@
 #include "common/Resource.hpp"
 #include "common/ChunkSerializer.hpp"
 #include "common/CubeTypeSerializer.hpp"
+#include "common/FieldUtils.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
 
 namespace Server { namespace Network {
@@ -98,8 +102,9 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(response);
     }
 
-    std::unique_ptr<Common::Packet> PacketCreator::ResourceRange(Common::Resource const& resource,
-                                                 Uint32 offset)
+    std::unique_ptr<Common::Packet> PacketCreator::ResourceRange(Game::PluginManager const& pluginManager,
+        Common::Resource const& resource,
+        Uint32 offset)
     {
         std::unique_ptr<Common::Packet> ptr(new Common::Packet());
         ptr->Write(Protocol::ServerToClient::ResourceRange);
@@ -111,9 +116,10 @@ namespace Server { namespace Network {
                      " size = " << resource.size << ".\n";
         if (offset == 0)
         {
-            ptr->Write(resource.pluginId);
             ptr->Write(resource.type);
-            ptr->Write(resource.name);
+            // TODO: packager qui met bien les noms de resources "pluginName:resourceName", virer le pluginManager de cette fonction !
+            auto pluginName = pluginManager.GetPluginIdentifier(resource.pluginId);
+            ptr->Write(Common::FieldUtils::GetResourceName(pluginName, resource.name));
             ptr->Write(resource.size);
             if (ptr->GetSize() >= Common::Packet::MaxSize)
                 throw std::runtime_error("overflow");
@@ -170,7 +176,6 @@ namespace Server { namespace Network {
     }
 
     std::unique_ptr<Common::Packet> PacketCreator::DoodadSpawn(Uint32 doodadId,
-            Uint32 pluginId,
             std::string const& doodadName,
             Common::Position const& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
@@ -179,7 +184,6 @@ namespace Server { namespace Network {
         ptr->Write(Protocol::ServerToClient::DoodadSpawn);
 
         ptr->Write(doodadId);
-        ptr->Write(pluginId);
         ptr->Write(doodadName);
         ptr->Write(position);
 

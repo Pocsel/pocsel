@@ -3,21 +3,21 @@ Client.CubeMaterial.Register {
     cubeMaterialName = "Iron",
 
     textures = {
-        top = "cubes/iron/top.png",
-        bottom = "cubes/iron/bottom.png",
-        left = "cubes/iron/side.png",
-        right = "cubes/iron/side.png",
-        front = "cubes/iron/side.png",
-        back = "cubes/iron/side.png",
+        top = "base:cubes/iron/top.png",
+        bottom = "base:cubes/iron/bottom.png",
+        left = "base:cubes/iron/side.png",
+        right = "base:cubes/iron/side.png",
+        front = "base:cubes/iron/side.png",
+        back = "base:cubes/iron/side.png",
     },
 
     effects = {
-        top = "BaseChunk",
-        bottom = "BaseChunk",
-        left = "BaseChunk",
-        right = "BaseChunk",
-        front = "BaseChunk",
-        back = "BaseChunk",
+        top = "base:BaseChunk",
+        bottom = "base:BaseChunk",
+        left = "base:BaseChunk",
+        right = "base:BaseChunk",
+        front = "base:BaseChunk",
+        back = "base:BaseChunk",
     },
 
     effectParameters = {

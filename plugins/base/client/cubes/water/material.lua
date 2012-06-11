@@ -3,21 +3,21 @@ Client.CubeMaterial.Register{
     cubeMaterialName = "Water",
 
     textures = {
-        top = "cubes/water/texture.lua",
-        bottom = "cubes/water/texture.lua",
-        left = "cubes/water/texture.lua",
-        right = "cubes/water/texture.lua",
-        front = "cubes/water/texture.lua",
-        back = "cubes/water/texture.lua",
+        top = "base:cubes/water/texture.lua",
+        bottom = "base:cubes/water/texture.lua",
+        left = "base:cubes/water/texture.lua",
+        right = "base:cubes/water/texture.lua",
+        front = "base:cubes/water/texture.lua",
+        back = "base:cubes/water/texture.lua",
     },
 
     effects = {
-        top = "BaseChunk",
-        bottom = "BaseChunk",
-        left = "BaseChunk",
-        right = "BaseChunk",
-        front = "BaseChunk",
-        back = "BaseChunk",
+        top = "base:BaseChunk",
+        bottom = "base:BaseChunk",
+        left = "base:BaseChunk",
+        right = "base:BaseChunk",
+        front = "base:BaseChunk",
+        back = "base:BaseChunk",
     },
 
     effectParameters = {

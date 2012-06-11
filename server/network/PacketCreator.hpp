@@ -15,9 +15,13 @@ namespace Server {
     namespace Game { namespace Engine {
         class BodyType;
     }}
+    namespace Game {
+        class PluginManager;
+    }
     namespace Network {
-    class UdpPacket;
-}}
+        class UdpPacket;
+    }
+}
 
 namespace Server { namespace Network {
 
@@ -44,8 +48,9 @@ namespace Server { namespace Network {
         static std::unique_ptr<Common::Packet> NeededResourceIds(std::vector<Uint32>& ids,
                                                  Uint32& offset);
 
-        static std::unique_ptr<Common::Packet> ResourceRange(Common::Resource const& resource,
-                                             Uint32 offset);
+        static std::unique_ptr<Common::Packet> ResourceRange(Game::PluginManager const& pluginManager,
+            Common::Resource const& resource,
+            Uint32 offset);
 
         static std::unique_ptr<Common::Packet> CubeType(Common::CubeType const& cubeType);
 
@@ -58,7 +63,6 @@ namespace Server { namespace Network {
                                                    Uint32 itemId);
 
         static std::unique_ptr<Common::Packet> DoodadSpawn(Uint32 doodadId,
-                Uint32 pluginId,
                 std::string const& doodadName,
                 Common::Position const& position,
                 std::list<std::pair<std::string /* key */, std::string /* value */>> const& values);

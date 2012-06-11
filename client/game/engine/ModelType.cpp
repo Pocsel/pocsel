@@ -7,8 +7,9 @@
 
 namespace Client { namespace Game { namespace Engine {
 
-    ModelType::ModelType(Uint32 pluginId, std::string const& name, Tools::Lua::Ref& prototype, Resources::ResourceManager& resourceManager) :
-        _pluginId(pluginId), _name(name)
+    ModelType::ModelType(std::string const& name, Uint32 resourceId) :
+        _name(name),
+        _resourceId(resourceId)
     {
         if (!prototype["file"].IsString())
             throw std::runtime_error("Client.Model.Register: Field \"file\" must exist and be of type string");

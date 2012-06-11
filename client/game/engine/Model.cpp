@@ -29,9 +29,7 @@ namespace Client { namespace Game { namespace Engine {
 
         std::vector<std::string> const& materials = this->_model.GetMaterials();
         for (auto it = materials.begin(), ite = materials.end(); it != ite; ++it)
-        {
-            this->_textures.push_back(resourceManager.GetTexture(1, *it).release());
-        }
+            this->_textures.push_back(resourceManager.GetTexture(*it).release());
 
         Tools::debug << "Model::Model: New model \"" << this->_type->GetName() << "\", id: " << this->_id << std::endl;
     }

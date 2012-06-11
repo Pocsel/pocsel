@@ -58,7 +58,6 @@ namespace Client { namespace Network {
     char const* PacketExtractor::ResourceRange(Tools::ByteArray const& p,
                                                       Uint32& id,
                                                       Uint32& offset,
-                                                      Uint32& pluginId,
                                                       std::string& type,
                                                       std::string& filename,
                                                       Uint32& totalSize,
@@ -68,7 +67,6 @@ namespace Client { namespace Network {
         p.Read(offset);
         if (!offset)
         {
-            p.Read(pluginId);
             p.Read(type);
             p.Read(filename);
             p.Read(totalSize);
@@ -106,13 +104,11 @@ namespace Client { namespace Network {
 
     void PacketExtractor::DoodadSpawn(Tools::ByteArray const& p,
             Uint32& doodadId,
-            Uint32& pluginId,
             std::string& doodadName,
             Common::Position& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>>& values)
     {
         p.Read(doodadId);
-        p.Read(pluginId);
         p.Read(doodadName);
         p.Read(position);
         while (p.GetBytesLeft())
