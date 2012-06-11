@@ -24,7 +24,7 @@ namespace Client { namespace Game {
             std::string _nickname;
             Common::Camera _camera;
             Tools::Window::ActionBinder _actionBinder;
-            Uint32 _elapsedTime;
+            float _elapsedTime;
             bool _moved;
             Uint32 _movedTime;
             bool _sprint;
@@ -45,7 +45,7 @@ namespace Client { namespace Game {
             Common::CubePosition const& GetTargetedCube() const { assert(this->_targetedCube != 0); return *this->_targetedCube; }
             void Render();
 
-            void UpdateMovements(Uint32 time);
+            void UpdateMovements(Uint64 deltaTime);
             void MoveForward();
             void MoveBackward();
             void StrafeLeft();

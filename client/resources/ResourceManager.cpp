@@ -7,6 +7,7 @@
 //#include "tools/renderers/utils/texture/TextureAtlas.hpp"
 #include "tools/models/ErrorModel.hpp"
 #include "tools/models/MqmModel.hpp"
+#include "tools/renderers/utils/material/LuaMaterial.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 #include "tools/renderers/utils/texture/AnimatedTexture.hpp"
 #include "tools/renderers/utils/texture/Texture.hpp"
@@ -110,8 +111,7 @@ namespace Client { namespace Resources {
             Tools::Delete(it->second);
 
         for (auto it = this->_effects.begin(), ite = this->_effects.end(); it != ite; ++it)
-            for (auto itEffect = it->second.begin(), iteEffect = it->second.end(); itEffect != iteEffect; ++itEffect)
-                Tools::Delete(itEffect->second);
+            Tools::Delete(it->second);
     }
 
     std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> ResourceManager::GetTexture(Uint32 id)
@@ -137,8 +137,8 @@ namespace Client { namespace Resources {
                         bool animated = globals["animated"].ToBoolean();
                         auto animationTime = globals["animationTime"].ToNumber();
                         auto framesTexture = globals["texture"].ToString();
-                        auto& frames = this->_animatedTextureFrames[this->GetResourceId(this->GetPluginId(id), framesTexture)];
-                        auto framesRes = this->GetResource(this->GetPluginId(id), framesTexture);
+                        auto& frames = this->_animatedTextureFrames[this->GetResourceId(framesTexture)];
+                        auto framesRes = this->GetResource(framesTexture);
                         InitializeFrames(this->_renderer, framesRes->data, framesRes->size, frames);
                         auto timePerFrame = Uint64(animationTime * 1000000 / frames.size());
 
@@ -176,7 +176,7 @@ namespace Client { namespace Resources {
         auto it = this->_models.find(id);
         if (it == this->_models.end())
         {
-            Tools::Models::MqmModel* model = 0;
+            auto& model = this->_models[id];
 
             auto res = this->_database.GetResource(id);
 
@@ -186,10 +186,7 @@ namespace Client { namespace Resources {
                 {
                     std::vector<char> data(res->size);
                     std::memcpy(data.data(), res->data, res->size);
-                    model = new Tools::Models::MqmModel(
-                            data,
-                            //std::bind(&ResourceManager::GetTexture, this, res->pluginId, std::placeholders::_1),
-                            this->_renderer);
+                    model = new Tools::Models::MqmModel(data, this->_renderer);
                 }
                 catch (std::exception& ex)
                 {
@@ -216,7 +213,6 @@ namespace Client { namespace Resources {
             auto res = this->_database.GetResource(id);
             if (res != 0)
             {
-                this->_resourceToPluginId[id] = res->pluginId;
                 Tools::Renderers::IShaderProgram* s = this->_renderer.CreateProgram(std::string((char const*)res->data, res->size)).release();
                 this->_shaders[id] = s;
                 return *s;
@@ -236,7 +232,6 @@ namespace Client { namespace Resources {
             auto res = this->_database.GetResource(id);
             if (res != 0)
             {
-                this->_resourceToPluginId[id] = res->pluginId;
                 std::string str((char const*)res->data, res->size);
                 this->_scripts[id] = str;
                 return str;
@@ -253,40 +248,42 @@ namespace Client { namespace Resources {
         return this->_database.GetResource(id);
     }
 
-    std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> ResourceManager::GetTexture(Uint32 pluginId, std::string const& name)
+    std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> ResourceManager::GetTexture(std::string const& name)
     {
-        return this->GetTexture(this->_database.GetResourceId(pluginId, name));
+        return this->GetTexture(this->_database.GetResourceId(name));
     }
 
-    Tools::Models::MqmModel const& ResourceManager::GetMqmModel(Uint32 pluginId, std::string const& name)
+    Tools::Models::MqmModel const& ResourceManager::GetMqmModel(std::string const& name)
     {
-        return this->GetMqmModel(this->_database.GetResourceId(pluginId, name));
+        return this->GetMqmModel(this->_database.GetResourceId(name));
     }
 
-    Tools::Renderers::IShaderProgram& ResourceManager::GetShader(Uint32 pluginId, std::string const& name)
+    Tools::Renderers::IShaderProgram& ResourceManager::GetShader(std::string const& name)
     {
-        return this->GetShader(this->_database.GetResourceId(pluginId, name));
+        return this->GetShader(this->_database.GetResourceId(name));
     }
 
-    std::string ResourceManager::GetScript(Uint32 pluginId, std::string const& name)
+    std::string ResourceManager::GetScript(std::string const& name)
     {
-        return this->GetScript(this->_database.GetResourceId(pluginId, name));
+        return this->GetScript(this->_database.GetResourceId(name));
     }
 
-    std::unique_ptr<Common::Resource> ResourceManager::GetResource(Uint32 pluginId, std::string const& name)
+    std::unique_ptr<Common::Resource> ResourceManager::GetResource(std::string const& name)
     {
-        return this->_database.GetResource(this->_database.GetResourceId(pluginId, name));
+        return this->_database.GetResource(this->_database.GetResourceId(name));
     }
 
-    Effect& ResourceManager::GetEffect(Uint32 pluginId, std::string const& name)
+    Effect& ResourceManager::GetEffect(std::string const& name)
     {
-        auto it = this->_effects.find(pluginId);
+        auto it = this->_effects.find(name);
         if (it == this->_effects.end())
-            throw std::runtime_error("Bad pluginId (remove your cache)");
-        auto itEffect = it->second.find(name);
-        if (itEffect == it->second.end())
-            throw std::runtime_error("Bad pluginId (remove your cache)");
-        return *itEffect->second;
+            throw std::runtime_error("Effect \"" + name + "\" not found");
+        return *it->second;
+    }
+
+    std::unique_ptr<Tools::Renderers::Utils::Material::Material> ResourceManager::GetMaterial(std::string const& name)
+    {
+        throw std::runtime_error("Not implemented yet"); // TODO
     }
 
     //std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)
@@ -309,27 +306,7 @@ namespace Client { namespace Resources {
     {
         auto const& resources = this->_database.GetAllResources("%");
         for (auto it = resources.begin(), ite = resources.end(); it != ite; ++it)
-        {
-            this->_resourceIds[(*it)->pluginId][(*it)->name] = (*it)->id;
-            this->_resourceToPluginId[(*it)->id] = (*it)->pluginId;
-        }
-    }
-
-    void ResourceManager::RegisterLuaFunctions()
-    {
-        auto effectNs = this->_game.GetInterpreter().Globals().GetTable("Client").GetTable("Effect");
-        effectNs.Set("Register", this->_game.GetInterpreter().MakeFunction(
-                    std::bind(&ResourceManager::_ApiRegisterEffect, this, std::placeholders::_1)));
-    }
-
-    void ResourceManager::_ApiRegisterEffect(Tools::Lua::CallHelper& helper)
-    {
-        Uint32 pluginId = this->_game.GetEngine().GetRunningPluginId();
-        if (!pluginId)
-            throw std::runtime_error("CLient.Effect.Register: Could not determine currently running plugin, aborting registration");
-        auto effect = new Effect(this->_game, helper.PopArg(), pluginId);
-        this->_effects[pluginId][effect->GetName()] = effect;
-        Tools::log << "Effect \"" << effect->GetName() << "\" registered (plugin: " << pluginId << ")." << std::endl;
+            this->_resourceIds[(*it)->name] = (*it)->id;
     }
 
     void ResourceManager::_InitErrorModel()
@@ -348,6 +325,41 @@ namespace Client { namespace Resources {
             255, 0, 255, 255,
             0, 0, 0, 255
         };
-        this->_rawTextures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 100312, toto, glm::uvec2(2, 2)).release();
+        this->_rawTextures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, sizeof(toto), toto, glm::uvec2(2, 2)).release();
+    }
+
+    void ResourceManager::RegisterLuaFunctions()
+    {
+        auto clientNs = this->_game.GetInterpreter().Globals().GetTable("Client");
+        auto effectNs = clientNs.GetTable("Effect");
+        effectNs.Set("Register", this->_game.GetInterpreter().MakeFunction(
+                    std::bind(&ResourceManager::_ApiRegisterEffect, this, std::placeholders::_1)));
+        auto materialNs = clientNs.GetTable("Material");
+        materialNs.Set("Register", this->_game.GetInterpreter().MakeFunction(std::bind(&ResourceManager::_ApiRegisterMaterial, this, std::placeholders::_1)));
+        //Tools::Renderers::Utils::Material::LuaMaterial::LoadLuaTypes(this->_game.GetInterpreter(), );
+    }
+
+    void ResourceManager::_ApiRegisterEffect(Tools::Lua::CallHelper& helper)
+    {
+        auto const& pluginName = this->_game.GetEngine().GetRunningPluginName();
+        if (pluginName == "")
+            throw std::runtime_error("CLient.Effect.Register: Could not determine currently running plugin, aborting registration");
+        auto effect = new Effect(this->_game, helper.PopArg());
+        this->_effects[effect->GetName()] = effect;
+        Tools::log << "Effect \"" << effect->GetName() << "\" registered (plugin: " << pluginName << ")." << std::endl;
+    }
+
+    void ResourceManager::_ApiRegisterMaterial(Tools::Lua::CallHelper& helper)
+    {
+        auto const& pluginName = this->_game.GetEngine().GetRunningPluginName();
+        if (pluginName == "")
+            throw std::runtime_error("CLient.Material.Register: Could not determine currently running plugin, aborting registration");
+        auto material = new Tools::Renderers::Utils::Material::LuaMaterial(
+            this->_renderer,
+            helper.PopArg(),
+            std::bind(static_cast<Tools::Renderers::IShaderProgram&(ResourceManager::*)(std::string const&)>(&ResourceManager::GetShader), this, std::placeholders::_1),
+            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(ResourceManager::*)(std::string const&)>(&ResourceManager::GetTexture), this, std::placeholders::_1));
+        
+        Tools::log << "Material \"" << material->GetName() << "\" registered (plugin: " << pluginName << ")." << std::endl;
     }
 }}

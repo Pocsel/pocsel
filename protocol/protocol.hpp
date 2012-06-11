@@ -67,6 +67,11 @@ namespace Protocol {
         GetCubeType,
 
         /**
+         * Uint32 idx
+         */
+        GetBodyType,
+
+        /**
          * Uint32 view distance
          * String player name
          */
@@ -111,6 +116,7 @@ namespace Protocol {
          *   String world name
          *   Uint32 world version
          *   Uint16 (CubeType) nombre de types de cube
+         *   Uint32 nombre de types de body
          *   String world build hash - ajouté le 28/2/12
          */
         LoggedIn = 0,
@@ -159,6 +165,11 @@ namespace Protocol {
          * CubeType description
          */
         CubeType,
+
+        /**
+         * BodyType description
+         */
+        BodyType,
 
         /**
          * String Map

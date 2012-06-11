@@ -29,6 +29,7 @@ namespace Server { namespace Game { namespace Engine {
     class MessageManager;
     class CallbackManager;
     class DoodadManager;
+    class BodyManager;
 
     class Engine :
         private boost::noncopyable
@@ -41,6 +42,7 @@ namespace Server { namespace Game { namespace Engine {
         EntityManager* _entityManager;
         CallbackManager* _callbackManager;
         DoodadManager* _doodadManager;
+        BodyManager* _bodyManager;
         Uint64 _currentTime;
         Uint32 _overriddenPluginId;
         Uint32 _overriddenEntityId;
@@ -52,10 +54,17 @@ namespace Server { namespace Game { namespace Engine {
         void Load(Tools::Database::IConnection& conn);
         void Save(Tools::Database::IConnection& conn);
         MessageManager& GetMessageManager() { return *this->_messageManager; }
+        MessageManager const& GetMessageManager() const { return *this->_messageManager; }
         EntityManager& GetEntityManager() { return *this->_entityManager; }
+        EntityManager const& GetEntityManager() const { return *this->_entityManager; }
         CallbackManager& GetCallbackManager() { return *this->_callbackManager; }
+        CallbackManager const& GetCallbackManager() const { return *this->_callbackManager; }
         DoodadManager& GetDoodadManager() { return *this->_doodadManager; }
+        DoodadManager const& GetDoodadManager() const { return *this->_doodadManager; }
+        BodyManager& GetBodyManager() { return *this->_bodyManager; }
+        BodyManager const& GetBodyManager() const { return *this->_bodyManager; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
+        Tools::Lua::Interpreter const& GetInterpreter() const { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
         World& GetWorld() { return this->_world; }

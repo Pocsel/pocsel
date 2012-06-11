@@ -2,12 +2,18 @@ float4x4 worldViewProjection : WorldViewProjection;
 float4x4 worldViewInverseTranspose;
 
 #ifdef DIRECTX
-sampler2D cubeTexture = sampler_state
+texture cubeTexture;
+
+sampler sCubeTexture = sampler_state
 {
+    Texture = <cubeTexture>;
     MinFilter = Linear;
     MagFilter = Point;
     MipFilter = Linear;
 };
+
+#define cubeTexture sCubeTexture
+
 #else
 sampler2D cubeTexture = sampler_state
 {
@@ -86,7 +92,7 @@ technique tech
 {
    pass p0
    {
-        AlphaBlendEnable = false;
+        AlphaBlendEnable = true;
         VertexShader = compile vs_2_0 vs();
         PixelShader = compile ps_2_0 fs();
    }

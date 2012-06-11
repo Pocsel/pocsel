@@ -2,8 +2,11 @@
 
 int main(int argc, char **argv)
 {
-    if(argc < 1)
+    if(argc < 2)
+    {
+        std::cout << "Usage: " << argv[0] << " <ouput.mqm> <input.{mi}qe> [... inputs files]" << std::endl;
         return EXIT_FAILURE;
+    }
 
     std::vector<Tools::Models::Convert::filespec> infiles;
     Tools::Models::Convert::filespec inspec;

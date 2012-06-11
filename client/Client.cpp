@@ -162,7 +162,13 @@ namespace Client {
         return boost::exit_success;
     }
 
-    void Client::Login(Uint32 clientId, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash)
+    void Client::Login(Uint32 clientId,
+            std::string const& worldIdentifier,
+            std::string const& worldName,
+            Uint32 worldVersion,
+            Common::BaseChunk::CubeType nbCubeTypes,
+            Uint32 nbBodyTypes,
+            std::string const& worldBuildHash)
     {
         if (this->_state != LoggingIn)
             throw std::runtime_error("Bad client state");
@@ -171,7 +177,7 @@ namespace Client {
         this->_state = LoadingResources;
         if (this->_game)
             Tools::Delete(this->_game);
-        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes, worldBuildHash);
+        this->_game = new Game::Game(*this, worldIdentifier, worldName, worldVersion, nbCubeTypes, nbBodyTypes, worldBuildHash);
     }
 
     void Client::LoadChunks()

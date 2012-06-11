@@ -14,7 +14,6 @@ namespace Client { namespace Resources {
     class Effect
     {
     private:
-        Uint32 _pluginId;
         std::string _name;
         Tools::Renderers::IShaderProgram* _shader;
         std::map<std::string, std::unique_ptr<Tools::Renderers::IShaderParameter>> _parameters;
@@ -23,7 +22,7 @@ namespace Client { namespace Resources {
         std::unique_ptr<Tools::Lua::Ref> _update;
 
     public:
-        Effect(Game::Game& game, Tools::Lua::Ref settings, Uint32 pluginId);
+        Effect(Game::Game& game, Tools::Lua::Ref settings);
 
         void Init(Tools::Lua::Ref const& object);
         void Update(Tools::Lua::Ref const& object);

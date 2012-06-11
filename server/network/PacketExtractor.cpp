@@ -72,6 +72,11 @@ namespace Server { namespace Network {
         p.Read(id);
     }
 
+    void PacketExtractor::GetBodyType(Tools::ByteArray const& p, Uint32& id)
+    {
+        p.Read(id);
+    }
+
     void PacketExtractor::Settings(Tools::ByteArray const& p,
                                    Uint32& viewDistance,
                                    std::string& playerName)

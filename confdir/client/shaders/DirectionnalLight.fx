@@ -16,6 +16,27 @@ float4x4 lightViewProjection;
 // TODO:
 float   materialShininess = 5.0;
 
+#ifdef DIRECTX
+texture lightShadowMap;
+texture normalDepth;
+
+sampler sLightShadowMap = sampler_state
+{
+    Texture = <lightShadowMap>;
+    minFilter = Point;
+    magFilter = Point;
+};
+
+sampler sNormalDepth = sampler_state
+{
+    Texture = <normalDepth>;
+    minFilter = Point;
+    magFilter = Point;
+};
+
+#define normalDepth sNormalDepth
+#define lightShadowMap sLightShadowMap
+#else
 sampler2D normalDepth = sampler_state
 {
     minFilter = Point;
@@ -27,6 +48,7 @@ sampler2D lightShadowMap = sampler_state
     minFilter = Point;
     magFilter = Point;
 };
+#endif
 
 struct VSout
 {

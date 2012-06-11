@@ -5,11 +5,25 @@
 float4x4 worldViewProjection : WorldViewProjection;
 float4x4 worldViewInverseTranspose;
 
+#ifdef DIRECTX
+texture diffuseTexture;
+
+sampler sDiffuseTexture = sampler_state
+{
+    Texture = <diffuseTexture>;
+    minFilter = Linear;
+    magFilter = Linear;
+};
+
+#define diffuseTexture sDiffuseTexture
+
+#else
 sampler2D diffuseTexture = sampler_state
 {
     minFilter = Linear;
     magFilter = Linear;
 };
+#endif
 
 float4x4 boneMatrix[MAX_BONES];
 
@@ -93,7 +107,7 @@ technique tech
 {
     pass p0
     {
-        AlphaBlendEnable = false;
+        AlphaBlendEnable = true;
         VertexShader = compile vs_3_0 vs();
         PixelShader = compile ps_3_0 fs();
     }

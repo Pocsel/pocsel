@@ -21,8 +21,8 @@ namespace Server { namespace Game { namespace Engine {
     {
     private:
         Engine& _engine;
-        std::map<Uint32 /* doodadId */, Doodad*> _doodads;
-        std::map<Uint32 /* entityId */, std::list<Doodad*>> _doodadsByEntities;
+        std::map<Uint32 /* doodadId */, Doodad*> _doodads; // pointeur nul quand un doodad est désactivé
+        std::map<Uint32 /* entityId */, std::list<Doodad*>> _doodadsByEntity;
         std::map<Uint32 /* entityId */, std::list<Doodad*>> _disabledDoodads;
         std::unordered_set<Doodad*> _dirtyDoodads;
         Uint32 _nextDoodadId;
@@ -39,9 +39,9 @@ namespace Server { namespace Game { namespace Engine {
         void EnableDoodadsOfEntity(Uint32 entityId);
         void EntityHasMoved(Uint32 entityId);
         void DoodadIsDirty(Doodad* doodad) { this->_dirtyDoodads.insert(doodad); }
-        void DoodadIsNotDirty(Doodad* doodad) { this->_dirtyDoodads.erase(doodad); }
+        void DoodadIsClean(Doodad* doodad) { this->_dirtyDoodads.erase(doodad); }
     private:
-        Doodad* _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity);
+        Doodad* _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, std::string const& bodyName);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiSet(Tools::Lua::CallHelper& helper);

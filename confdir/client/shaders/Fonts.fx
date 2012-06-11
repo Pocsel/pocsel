@@ -1,11 +1,26 @@
 float4x4 modelViewProjectionMatrix : WorldViewProjection;
 float4 color = {0, 0, 1, 1};
 float multZ = 0;
+
+#ifdef DIRECTX
+texture fontTex;
+
+sampler sFontTex = sampler_state
+{
+    Texture = <fontTex>;
+    minFilter = Linear;
+    magFilter = Linear;
+};
+
+#define fontTex sFontTex
+
+#else
 sampler2D fontTex = sampler_state
 {
     minFilter = Linear;
     magFilter = Linear;
 };
+#endif
 
 float4 vs(in float4 pos : POSITION,
           in float2 iTexCoord : TEXCOORD0,

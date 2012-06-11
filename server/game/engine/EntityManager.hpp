@@ -39,11 +39,11 @@ namespace Server { namespace Game { namespace Engine {
         };
         struct KillEvent
         {
-            KillEvent(Uint32 targetId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId) :
-                targetId(targetId), arg(arg), killerId(killerId), notificationCallbackId(notificationCallbackId)
+            KillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId) :
+                entityId(entityId), arg(arg), killerId(killerId), notificationCallbackId(notificationCallbackId)
             {
             }
-            Uint32 targetId;
+            Uint32 entityId;
             Tools::Lua::Ref arg;
             Uint32 killerId;
             Uint32 notificationCallbackId;
@@ -52,8 +52,8 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Engine& _engine;
         std::map<Uint32 /* pluginId */, std::map<std::string /* entityName */, EntityType*>> _entityTypes;
-        std::map<Uint32 /* entityId */, Entity*> _entities;
-        std::map<Uint32 /* entityId */, PositionalEntity*> _positionalEntities;
+        std::map<Uint32 /* entityId */, Entity*> _entities; // pointeur nul quand une entité est désactivée
+        std::map<Uint32 /* entityId */, PositionalEntity*> _positionalEntities; // pointeur nul quand une entité est désactivée
         std::map<Uint32 /* entityId */, PositionalEntity*> _disabledEntities;
         Uint32 _nextEntityId;
         Uint32 _runningEntityId; // 0 quand aucune entité n'est en cours d'éxécution
@@ -67,10 +67,11 @@ namespace Server { namespace Game { namespace Engine {
 
         // peut retourner toutes les valeurs de CallbackManager::Result sauf CallbackNotFound (evidemment)
         // seul entry point Lua avec Engine::RconExecute()
-        CallbackManager::Result CallEntityFunction(Uint32 targetId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0);
+        // si Error est retourné, l'entité a été supprimée
+        CallbackManager::Result CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0);
 
         void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position());
-        void AddKillEvent(Uint32 targetId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId);
+        void AddKillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId);
         void DispatchSpawnEvents();
         void DispatchKillEvents();
         void Save(Tools::Database::IConnection& conn);
@@ -80,10 +81,12 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 GetRunningPluginId() const;
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
+        PositionalEntity const& GetDisabledEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         bool IsEntityPositional(Uint32 entityId) const;
-        void DisableEntity(Uint32 entityId, bool normalDisable = true) throw(std::runtime_error);
+        void DisableEntity(Uint32 entityId, bool chunkUnloaded = true) throw(std::runtime_error);
         void EnableEntity(Uint32 entityId) throw(std::runtime_error);
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
+        std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
 
         // rcon requests
         std::string RconGetEntities() const;
@@ -97,6 +100,8 @@ namespace Server { namespace Game { namespace Engine {
         void _SpawnFromPlugin(bool hasPosition, Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper);
         void _ApiSetPos(Tools::Lua::CallHelper& helper);
         void _ApiGetPos(Tools::Lua::CallHelper& helper);
+        void _ApiSave(Tools::Lua::CallHelper& helper);
+        void _ApiLoad(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);

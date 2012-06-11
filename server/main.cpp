@@ -23,6 +23,14 @@ BOOL WINAPI ConsoleControlHandler(DWORD control)
     }
     return false;
 }
+
+# if defined _MSC_VER && defined DEBUG
+static void DumpMemory()
+{
+    _CrtDumpMemoryLeaks();
+}
+# endif
+
 #endif
 
 int main(int ac, char **av)
@@ -31,6 +39,9 @@ int main(int ac, char **av)
     (void) ::signal(SIGINT, sigint);
 #else
     SetConsoleCtrlHandler(ConsoleControlHandler, true);
+# if defined _MSC_VER && defined DEBUG
+    atexit(&DumpMemory);
+# endif
 #endif
 
     Server::Settings settings(ac, av);

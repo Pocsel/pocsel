@@ -1,11 +1,25 @@
 float4x4 mvp : WorldViewProjection;
 float time;
 
+#ifdef DIRECTX
+texture baseTex;
+
+sampler sBaseTex = sampler_state
+{
+    Texture = <baseTex>;
+    minFilter = Linear;
+    magFilter = Linear;
+};
+
+#define baseTex sBaseTex
+
+#else
 sampler2D baseTex = sampler_state
 {
     minFilter = Linear;
     magFilter = Linear;
 };
+#endif
 
 struct VSout
 {

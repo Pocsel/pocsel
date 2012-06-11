@@ -1,7 +1,9 @@
 #include "client/precompiled.hpp"
 
 #include "client/network/ChunkSerializer.hpp"
+#include "client/network/BodyTypeSerializer.hpp"
 #include "client/network/PacketExtractor.hpp"
+#include "client/game/engine/BodyType.hpp"
 #include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
@@ -18,6 +20,7 @@ namespace Client { namespace Network {
             std::string& worldName,
             Uint32& worldVersion,
             Common::BaseChunk::CubeType& nbCubeTypes,
+            Uint32& nbBodyTypes,
             std::string& worldBuildHash)
     {
         p.Read(status);
@@ -32,6 +35,7 @@ namespace Client { namespace Network {
             p.Read(worldName);
             p.Read(worldVersion);
             p.Read(nbCubeTypes);
+            p.Read(nbBodyTypes);
             p.Read(worldBuildHash);
             if (nbCubeTypes == 0)
                 throw std::runtime_error("nbCubeTypes == 0");
@@ -54,7 +58,6 @@ namespace Client { namespace Network {
     char const* PacketExtractor::ResourceRange(Tools::ByteArray const& p,
                                                       Uint32& id,
                                                       Uint32& offset,
-                                                      Uint32& pluginId,
                                                       std::string& type,
                                                       std::string& filename,
                                                       Uint32& totalSize,
@@ -64,7 +67,6 @@ namespace Client { namespace Network {
         p.Read(offset);
         if (!offset)
         {
-            p.Read(pluginId);
             p.Read(type);
             p.Read(filename);
             p.Read(totalSize);
@@ -83,6 +85,11 @@ namespace Client { namespace Network {
         return p.Read<Common::CubeType>();
     }
 
+    std::unique_ptr<Client::Game::Engine::BodyType> PacketExtractor::BodyType(Tools::ByteArray const& p)
+    {
+        return p.Read<Client::Game::Engine::BodyType>();
+    }
+
     void PacketExtractor::TeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position)
     {
         p.Read(map);
@@ -97,13 +104,11 @@ namespace Client { namespace Network {
 
     void PacketExtractor::DoodadSpawn(Tools::ByteArray const& p,
             Uint32& doodadId,
-            Uint32& pluginId,
             std::string& doodadName,
             Common::Position& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>>& values)
     {
         p.Read(doodadId);
-        p.Read(pluginId);
         p.Read(doodadName);
         p.Read(position);
         while (p.GetBytesLeft())
@@ -118,12 +123,12 @@ namespace Client { namespace Network {
 
     void PacketExtractor::DoodadUpdate(Tools::ByteArray const& p,
             Uint32& doodadId,
-            Common::Position*& position,
+            std::unique_ptr<Common::Position>& position,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands)
     {
         p.Read(doodadId);
         if (p.ReadBool())
-            position = p.Read<Common::Position>().release();
+            position = p.Read<Common::Position>();
         while (p.GetBytesLeft())
         {
             bool functionCall = p.ReadBool();

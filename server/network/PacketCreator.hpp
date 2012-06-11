@@ -11,9 +11,17 @@ namespace Common{
     struct MovingOrientedPosition;
 }
 
-namespace Server { namespace Network {
-    class UdpPacket;
-}}
+namespace Server {
+    namespace Game { namespace Engine {
+        class BodyType;
+    }}
+    namespace Game {
+        class PluginManager;
+    }
+    namespace Network {
+        class UdpPacket;
+    }
+}
 
 namespace Server { namespace Network {
 
@@ -27,6 +35,7 @@ namespace Server { namespace Network {
                                         std::string const& worldName = "",
                                         Uint32 worldVersion = 0,
                                         Game::Map::Chunk::CubeType nbCubeTypes = 0,
+                                        Uint32 nbBodyTypes = 0,
                                         std::string const& worldBuildHash = "");
 
         static std::unique_ptr<UdpPacket> PassThrough();
@@ -39,10 +48,13 @@ namespace Server { namespace Network {
         static std::unique_ptr<Common::Packet> NeededResourceIds(std::vector<Uint32>& ids,
                                                  Uint32& offset);
 
-        static std::unique_ptr<Common::Packet> ResourceRange(Common::Resource const& resource,
-                                             Uint32 offset);
+        static std::unique_ptr<Common::Packet> ResourceRange(Game::PluginManager const& pluginManager,
+            Common::Resource const& resource,
+            Uint32 offset);
 
         static std::unique_ptr<Common::Packet> CubeType(Common::CubeType const& cubeType);
+
+        static std::unique_ptr<Common::Packet> BodyType(Game::Engine::BodyType const& bodyType);
 
         static std::unique_ptr<Common::Packet> TeleportPlayer(std::string const& map,
                                                               Common::Position const& pos);
@@ -51,7 +63,6 @@ namespace Server { namespace Network {
                                                    Uint32 itemId);
 
         static std::unique_ptr<Common::Packet> DoodadSpawn(Uint32 doodadId,
-                Uint32 pluginId,
                 std::string const& doodadName,
                 Common::Position const& position,
                 std::list<std::pair<std::string /* key */, std::string /* value */>> const& values);

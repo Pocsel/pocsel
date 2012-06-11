@@ -17,7 +17,7 @@ namespace Client { namespace Game {
         Common::BaseChunk::CubeType _nbCubeTypes;
         Common::BaseChunk::CubeType _curAskedType;
         std::vector<CubeType> _cubeTypes;
-        std::map<Uint32 /* pluginId */, std::map<std::string /* name */, Tools::Lua::Ref /* registered table */>> _materials;
+        std::map<std::string /* name */, Tools::Lua::Ref /* registered table */> _materials;
         Client& _client;
 
     public:

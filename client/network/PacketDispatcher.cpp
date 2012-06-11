@@ -3,6 +3,8 @@
 #include "tools/ByteArray.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/CubeTypeManager.hpp"
+#include "client/game/engine/BodyType.hpp"
+#include "client/game/engine/BodyManager.hpp"
 #include "client/map/Map.hpp"
 #include "client/map/ChunkManager.hpp"
 #include "client/resources/ResourceDownloader.hpp"
@@ -40,6 +42,13 @@ namespace Client { namespace Network {
                 if (this->_client.GetState() != Client::LoadingResources)
                     throw std::runtime_error("Bad state for loading a cube type");
                 this->_client.GetGame().GetCubeTypeManager().AddCubeType(PacketExtractor::CubeType(p));
+            };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::BodyType] =
+            [this](Tools::ByteArray& p)
+            {
+                if (this->_client.GetState() != Client::LoadingResources)
+                    throw std::runtime_error("Bad state for loading a body type");
+                this->_client.GetGame().GetEngine().GetBodyManager().AddBodyType(PacketExtractor::BodyType(p));
             };
 
         // Game
@@ -80,12 +89,11 @@ namespace Client { namespace Network {
                     this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for doodad spawn");
                 Uint32 doodadId;
-                Uint32 pluginId;
                 std::string doodadName;
                 Common::Position position;
                 std::list<std::pair<std::string /* key */, std::string /* value */>> values;
-                PacketExtractor::DoodadSpawn(p, doodadId, pluginId, doodadName, position, values);
-                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(doodadId, pluginId, doodadName, position, values);
+                PacketExtractor::DoodadSpawn(p, doodadId, doodadName, position, values);
+                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(doodadId, doodadName, position, values);
             };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadKill] =
             [this](Tools::ByteArray& p)
@@ -104,10 +112,10 @@ namespace Client { namespace Network {
                     this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for doodad update");
                 Uint32 doodadId;
-                Common::Position* position = 0;
+                std::unique_ptr<Common::Position> position;
                 std::list<std::tuple<bool, std::string /* key */, std::string /* value */>> commands;
                 PacketExtractor::DoodadUpdate(p, doodadId, position, commands);
-                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, position, commands);
+                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, position.get(), commands);
             };
     }
 
@@ -135,13 +143,14 @@ namespace Client { namespace Network {
         Uint32 clientId;
         Uint32 worldVersion;
         Common::BaseChunk::CubeType nbCubeTypes;
-        PacketExtractor::Login(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes, worldBuildHash);
+        Uint32 nbBodyTypes;
+        PacketExtractor::Login(p, status, major, minor, reason, clientId, worldId, worldName, worldVersion, nbCubeTypes, nbBodyTypes, worldBuildHash);
 
         Tools::debug << "LoggedIn: " << (status ? "ok" : "ko") << " Protocol: " << static_cast<int>(major) << "." << static_cast<int>(minor) << "\n";
         if (status)
         {
             Tools::debug << "World: " << worldName << " (identifier: \"" << worldId << "\", version: " << worldVersion << ", build hash: \"" << worldBuildHash << "\")\n";
-            this->_client.Login(clientId, worldId, worldName, worldVersion, nbCubeTypes, worldBuildHash);
+            this->_client.Login(clientId, worldId, worldName, worldVersion, nbCubeTypes, nbBodyTypes, worldBuildHash);
         }
         else
             this->_client.Disconnect(reason);

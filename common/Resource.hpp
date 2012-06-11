@@ -15,6 +15,7 @@ namespace Common {
 
 
     public:
+        // TODO: constructeur à virer (avec pluginId) lorsque le packager mettera les bons noms de resources ("pluginName:resourceName")
         Resource(Uint32 id,
                 Uint32 pluginId,
                 std::string const& type,
@@ -23,6 +24,19 @@ namespace Common {
                 Uint32 size) :
             id(id),
             pluginId(pluginId),
+            type(type),
+            name(name),
+            data(_CopyData(data, size)),
+            size(size)
+        {}
+
+        Resource(Uint32 id,
+                std::string const& type,
+                std::string const& name,
+                void const* data,
+                Uint32 size) :
+            id(id),
+            pluginId(0),
             type(type),
             name(name),
             data(_CopyData(data, size)),

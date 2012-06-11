@@ -6,6 +6,7 @@
 #include "tools/Timer.hpp"
 //#include "tools/lua/Interpreter.hpp"
 #include "tools/stat/Timer.hpp"
+#include "tools/renderers/utils/DeferredShading.hpp"
 
 #include "client/game/CubeTypeManager.hpp"
 #include "client/resources/ResourceManager.hpp"
@@ -30,6 +31,7 @@ namespace Tools {
         namespace Utils {
             class GBuffer;
             class Image;
+            class Sphere;
             namespace Light {
                 class DirectionnalLight;
                 class LightRenderer;
@@ -64,13 +66,23 @@ namespace Client { namespace Game {
         std::list<Tools::Renderers::Utils::Light::DirectionnalLight> _directionnalLights;
         std::list<Tools::Renderers::Utils::Light::PointLight> _pointLights;
 
+        Tools::Renderers::Utils::DeferredShading _deferredShading;
+        std::unique_ptr<Tools::Renderers::Utils::Material::Material> _material;
+        std::unique_ptr<Tools::Renderers::Utils::Sphere> _sphere;
+
         //std::unique_ptr<Tools::Renderers::Utils::Image> _testImage;
         //Tools::Renderers::IShaderProgram* _testShader;
         //std::unique_ptr<Tools::Renderers::IShaderParameter> _testTexture;
         // XXX
 
     public:
-        Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash);
+        Game(Client& client,
+                std::string const& worldIdentifier,
+                std::string const& worldName,
+                Uint32 worldVersion,
+                Common::BaseChunk::CubeType nbCubeTypes,
+                Uint32 nbBodyTypes,
+                std::string const& worldBuildHash);
         ~Game();
 
         void TeleportPlayer(std::string const& map, Common::Position const& position);

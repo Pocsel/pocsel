@@ -29,6 +29,7 @@ namespace Client { namespace Network {
         static std::unique_ptr<Common::Packet> GetNeededResourceIds(Uint32 cacheVersion);
         static std::unique_ptr<Common::Packet> GetResourceRange(Uint32 resourceId, Uint32 offset);
         static std::unique_ptr<Common::Packet> GetCubeType(Common::BaseChunk::CubeType id);
+        static std::unique_ptr<Common::Packet> GetBodyType(Uint32 id);
         static std::unique_ptr<Common::Packet> Settings(Settings const& settings);
         static std::unique_ptr<Common::Packet> TeleportOk();
 

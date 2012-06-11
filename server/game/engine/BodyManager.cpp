@@ -6,7 +6,7 @@
 #include "server/game/PluginManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/MetaTable.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -34,7 +34,7 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    Body* BodyManager::_CreateBody(Uint32 pluginId, std::string bodyName) throw(std::runtime_error)
+    Body* BodyManager::CreateBody(Uint32 pluginId, std::string bodyName) throw(std::runtime_error)
     {
         // trouve le plugin
         auto itPlugin = this->_bodyTypes.find(pluginId);
@@ -48,7 +48,7 @@ namespace Server { namespace Game { namespace Engine {
 
         // allocation
         Body* body;
-        body = new Body(this->_engine.GetInterpreter(), *itType->second);
+        body = new Body(*itType->second);
 
         Tools::debug << "BodyManager::_CreateBody: New Body \"" << bodyName << "\" (plugin " << pluginId << ") created.\n";
         return body;
@@ -67,12 +67,10 @@ namespace Server { namespace Game { namespace Engine {
             prototype = helper.PopArg();
             if (!prototype.IsTable())
                 throw std::runtime_error("Server.Body.Register[Positional]: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
-            if (!prototype["BodyName"].IsString())
-                throw std::runtime_error("Server.Body.Register[Positional]: Field \"BodyName\" in prototype must exist and be of type string");
-            if (!Common::FieldValidator::IsRegistrableType(bodyName = prototype["BodyName"].ToString()))
+            if (!prototype["bodyName"].IsString())
+                throw std::runtime_error("Server.Body.Register[Positional]: Field \"bodyName\" in prototype must exist and be of type string");
+            if (!Common::FieldUtils::IsRegistrableType(bodyName = prototype["bodyName"].ToString()))
                 throw std::runtime_error("Server.Body.Register[Positional]: Invalid Body name \"" + bodyName + "\"");
-//            if (helper.GetNbArgs() && helper.PopArg().ToBoolean()) // bool flag en deuxieme parametre pour indiquer que c'est RegisterPositional()
-//                positional = true;
         }
         catch (std::exception& e)
         {
@@ -81,15 +79,12 @@ namespace Server { namespace Game { namespace Engine {
         }
         if (this->_bodyTypes[pluginId].count(bodyName)) // remplacement
         {
-            BodyType* type = this->_bodyTypes[pluginId][bodyName];
-            type->SetPrototype(prototype);
+            Tools::Delete(this->_bodyTypes[pluginId][bodyName]);
             Tools::log << "BodyManager::_ApiRegister: Replacing Body type \"" << bodyName << "\" with a newer type from \"" << pluginName << "\" (plugin " << pluginId << ").\n";
         }
-        else // nouveau type
-        {
-            this->_bodyTypes[pluginId][bodyName] = new BodyType(bodyName, pluginId, prototype);
-            Tools::debug << "BodyManager::_ApiRegister: New Body type \"" << bodyName << "\" registered from \"" << pluginName << "\" (plugin " << pluginId << ").\n";
-        }
+        this->_bodyTypesVec.push_back(new BodyType(bodyName, pluginId, prototype));
+        this->_bodyTypes[pluginId][bodyName] = this->_bodyTypesVec.back();
+        Tools::debug << "BodyManager::_ApiRegister: New Body type \"" << bodyName << "\" registered from \"" << pluginName << "\" (plugin " << pluginId << ").\n";
     }
 
 }}}

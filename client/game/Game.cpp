@@ -18,19 +18,26 @@
 
 namespace Client { namespace Game {
 
-    Game::Game(Client& client, std::string const& worldIdentifier, std::string const& worldName, Uint32 worldVersion, Common::BaseChunk::CubeType nbCubeTypes, std::string const& worldBuildHash) :
+    Game::Game(Client& client,
+            std::string const& worldIdentifier,
+            std::string const& worldName,
+            Uint32 worldVersion,
+            Common::BaseChunk::CubeType nbCubeTypes,
+            Uint32 nbBodyTypes,
+            std::string const& worldBuildHash) :
         _client(client),
         _renderer(client.GetWindow().GetRenderer()),
         _map(0),
         _statUpdateTime("Game update"),
         _statRenderTime("Game render"),
-        _statOutTime("Not game time")
+        _statOutTime("Not game time"),
+        _deferredShading(client.GetWindow().GetRenderer())
     {
         this->_cubeTypeManager = new CubeTypeManager(client, nbCubeTypes);
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
         this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
         this->_player = new Player(*this);
-        this->_engine = new Engine::Engine(*this);
+        this->_engine = new Engine::Engine(*this, nbBodyTypes);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(
             [this](glm::uvec2 const& size)
             {
@@ -66,11 +73,24 @@ namespace Client { namespace Game {
         //this->_testImage.reset(new Tools::Renderers::Utils::Image(this->_renderer));
         //this->_testShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
         //this->_testTexture = this->_testShader->GetParameter("baseTex");
+
+        this->_material.reset(
+            new Tools::Renderers::Utils::Material::Material(
+                this->_renderer,
+                Tools::Lua::Ref(this->_engine->GetInterpreter().GetState()),
+                this->_client.GetLocalResourceManager().GetShader("TestShader.fx"),
+                this->_client.GetLocalResourceManager().GetShader("TestShader.fx")));
+        auto& var = this->_material->GetVariable<Tools::Renderers::Utils::Texture::ITexture>("diffuse");
+        var.Set(this->_resourceManager->GetTexture("base:cubes/iron/top.png"));
+        this->_sphere.reset(new Tools::Renderers::Utils::Sphere(this->_renderer));
         // XXX
     }
 
     Game::~Game()
     {
+        // XXX
+        this->_material.reset();
+        // XXX
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
         Tools::Delete(this->_player);
@@ -99,10 +119,10 @@ namespace Client { namespace Game {
     {
         this->_statUpdateTime.Begin();
 
-        this->_map->GetChunkManager().Update(this->_gameTimer.GetPreciseElapsedTime(), this->_player->GetPosition());
-        Uint32 time = this->_updateTimer.GetElapsedTime();
-        this->_player->UpdateMovements(time);
-        this->_engine->Tick(time);
+        Uint64 totalTime = this->_gameTimer.GetPreciseElapsedTime();
+        this->_map->GetChunkManager().Update(totalTime, this->_player->GetPosition());
+        this->_player->UpdateMovements(this->_updateTimer.GetPreciseElapsedTime());
+        this->_engine->Tick(totalTime);
         this->_updateTimer.Reset();
 
         this->_statUpdateTime.End();
@@ -112,6 +132,7 @@ namespace Client { namespace Game {
     {
         this->_statRenderTime.Begin();
 
+        Uint64 totalTime = this->_gameTimer.GetPreciseElapsedTime();
         auto& camera = this->GetPlayer().GetCamera();
         this->_renderer.SetProjectionMatrix(camera.projection);
         this->_renderer.SetViewMatrix(camera.GetViewMatrix());
@@ -127,6 +148,14 @@ namespace Client { namespace Game {
         this->_RenderScene(absoluteViewProjection);
         this->_map->GetChunkManager().RenderAlpha(this->GetPlayer().GetCamera().position);
         this->_player->Render();
+
+        this->_renderer.SetModelMatrix(glm::translate(2.0f, -2.0f, 2.0f));
+        this->_deferredShading.RenderGeometry(*this->_material,
+            [&]()
+            {
+                this->_sphere->Render();
+            });
+        this->_deferredShading.RenderGeometry(totalTime);
 
         this->_gBuffer->Unbind();
 

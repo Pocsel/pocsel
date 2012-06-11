@@ -1,3 +1,7 @@
+#include "server/precompiled.hpp"
+
+#include "server/game/PluginManager.hpp"
+#include "server/game/World.hpp"
 #include "server/game/engine/Doodad.hpp"
 #include "server/game/engine/DoodadManager.hpp"
 #include "server/game/engine/Engine.hpp"
@@ -6,6 +10,7 @@
 #include "server/game/map/Map.hpp"
 #include "server/network/PacketCreator.hpp"
 #include "server/network/UdpPacket.hpp"
+#include "common/FieldUtils.hpp"
 #include "common/Packet.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Iterator.hpp"
@@ -13,14 +18,15 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Doodad::Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity) :
+    Doodad::Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, Body* body) :
         _engine(engine),
         _id(id),
         _pluginId(pluginId),
         _name(name),
         _entityId(entityId),
         _entity(entity),
-        _table(engine.GetInterpreter().MakeTable()),
+        _storage(engine.GetInterpreter().MakeTable()),
+        _body(body),
         _positionDirty(false)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
@@ -43,7 +49,7 @@ namespace Server { namespace Game { namespace Engine {
         }
 
         // sécurité en plus, je pense que ça sert a rien
-        this->_engine.GetDoodadManager().DoodadIsNotDirty(this);
+        this->_engine.GetDoodadManager().DoodadIsClean(this);
     }
 
     void Doodad::Disable()
@@ -54,6 +60,11 @@ namespace Server { namespace Game { namespace Engine {
     void Doodad::Enable()
     {
         // TODO
+    }
+
+    void Doodad::SetStorage(Tools::Lua::Ref const& ref)
+    {
+        this->_storage = ref;
     }
 
     void Doodad::AddPlayer(Uint32 playerId)
@@ -76,11 +87,12 @@ namespace Server { namespace Game { namespace Engine {
         // create packet
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         std::list<std::pair<std::string /* key */, std::string /* value */>> values;
-        auto itTable = this->_table.Begin();
-        auto itTableEnd = this->_table.End();
+        auto itTable = this->_storage.Begin();
+        auto itTableEnd = this->_storage.End();
         for (; itTable != itTableEnd; ++itTable)
             values.push_back(std::make_pair(serializer.Serialize(itTable.GetKey(), true /* nilOnError */), serializer.Serialize(itTable.GetValue(), true /* nilOnError */)));
-        auto packet = Network::PacketCreator::DoodadSpawn(this->_id, this->_pluginId, this->_name, this->_entity.GetPosition(), values);
+        auto const& pluginName = this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(this->_pluginId);
+        auto packet = Network::PacketCreator::DoodadSpawn(this->_id, Common::FieldUtils::GetResourceName(pluginName, this->_name), this->_entity.GetPosition(), values);
 
         // send packet to new players
         auto it = this->_newPlayers.begin();
@@ -111,7 +123,7 @@ namespace Server { namespace Game { namespace Engine {
             Command const& c = this->_commands.front();
             commands.push_back(std::make_tuple(c.functionCall, c.functionCall ? c.function : serializer.Serialize(c.key, true /* nilOnError */), serializer.Serialize(c.value, true /* nilOnError */)));
             if (!c.functionCall)
-                this->_table.Set(c.key, c.value); // update of server state
+                this->_storage.Set(c.key, c.value); // update of server state
             this->_commands.pop();
             tcp = true;
         }
@@ -120,7 +132,7 @@ namespace Server { namespace Game { namespace Engine {
             Command const& c = this->_commands.front();
             commands.push_back(std::make_tuple(c.functionCall, c.functionCall ? c.function : serializer.Serialize(c.key, true /* nilOnError */), serializer.Serialize(c.value, true /* nilOnError */)));
             if (!c.functionCall)
-                this->_table.Set(c.key, c.value); // update of server state
+                this->_storage.Set(c.key, c.value); // update of server state
             this->_commands.pop();
         }
         auto packet = Network::PacketCreator::DoodadUpdate(this->_id, this->_positionDirty ? &this->_entity.GetPosition() : 0, commands);
@@ -129,7 +141,7 @@ namespace Server { namespace Game { namespace Engine {
         // send packet to players
         auto it = this->_players.begin();
         auto itEnd = this->_players.end();
-        for (; it != itEnd; ++it)
+        while (it != itEnd)
             if (this->_engine.GetMap().HasPlayer(*it))
             {
                 if (tcp)
@@ -142,9 +154,10 @@ namespace Server { namespace Game { namespace Engine {
                     auto packetCopy = std::unique_ptr<Network::UdpPacket>(new Network::UdpPacket(*packet));
                     this->_engine.SendUdpPacket(*it, packetCopy);
                 }
+                ++it;
             }
             else
-                this->_players.erase(it);
+                this->_players.erase(it++);
     }
 
     void Doodad::Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value)
