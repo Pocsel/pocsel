@@ -12,7 +12,7 @@
 
 namespace Client { namespace Game { namespace Engine {
 
-    Engine::Engine(Game& game) :
+    Engine::Engine(Game& game, Uint32 nbBodyTypes) :
         _game(game),
         _overriddenDoodadId(0)
     {

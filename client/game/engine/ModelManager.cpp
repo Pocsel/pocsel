@@ -133,6 +133,7 @@ namespace Client { namespace Game { namespace Engine {
             throw std::runtime_error("Client.Model.Register: Could not determine currently running plugin, aborting registration");
         Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
         std::string modelName;
+        Uint32 resourceId;
         try
         {
             prototype = helper.PopArg("Client.Model.Register: Missing argument \"prototype\"");

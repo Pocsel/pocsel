@@ -6,7 +6,7 @@
 #include "server/game/PluginManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/MetaTable.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -69,7 +69,7 @@ namespace Server { namespace Game { namespace Engine {
                 throw std::runtime_error("Server.Body.Register[Positional]: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
             if (!prototype["bodyName"].IsString())
                 throw std::runtime_error("Server.Body.Register[Positional]: Field \"bodyName\" in prototype must exist and be of type string");
-            if (!Common::FieldValidator::IsRegistrableType(bodyName = prototype["bodyName"].ToString()))
+            if (!Common::FieldUtils::IsRegistrableType(bodyName = prototype["bodyName"].ToString()))
                 throw std::runtime_error("Server.Body.Register[Positional]: Invalid Body name \"" + bodyName + "\"");
         }
         catch (std::exception& e)

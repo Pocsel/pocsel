@@ -11,9 +11,6 @@ namespace Client { namespace Game { namespace Engine {
         _name(name),
         _resourceId(resourceId)
     {
-        if (!prototype["file"].IsString())
-            throw std::runtime_error("Client.Model.Register: Field \"file\" must exist and be of type string");
-        _resourceId = resourceManager.GetResourceId(pluginId, prototype["file"].ToString());
     }
 
 }}}

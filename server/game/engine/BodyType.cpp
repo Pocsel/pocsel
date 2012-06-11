@@ -1,7 +1,7 @@
 #include "server/game/engine/BodyType.hpp"
 
 #include "tools/lua/Iterator.hpp"
-#include "common/FieldValidator.hpp"
+#include "common/FieldUtils.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -66,7 +66,7 @@ namespace Server { namespace Game { namespace Engine {
                 this->_FillShapeTree(it.GetValue(), node.children, idx);
             }
         }
-        if (!Common::FieldValidator::IsRegistrableType(node.name))
+        if (!Common::FieldUtils::IsRegistrableType(node.name))
             throw std::runtime_error("Client.Body.Register: A shapeTree node needs a name");
         this->_shapesMap[node.name] = idx;
         return idx;
