@@ -1,7 +1,7 @@
-#ifndef __TOOLS_PHYSICS_BODYTYPE_HPP__
-#define __TOOLS_PHYSICS_BODYTYPE_HPP__
+#ifndef __COMMON_PHYSICS_BODYTYPE_HPP__
+#define __COMMON_PHYSICS_BODYTYPE_HPP__
 
-namespace Tools { namespace Physics {
+namespace Common { namespace Physics {
 
     class BodyType
     {

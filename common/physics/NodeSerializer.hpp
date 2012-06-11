@@ -1,15 +1,16 @@
-#ifndef __TOOLS_PHYSICS_NODESERIALIZER_HPP__
-#define __TOOLS_PHYSICS_NODESERIALIZER_HPP__
+#ifndef __COMMON_PHYSICS_NODESERIALIZER_HPP__
+#define __COMMON_PHYSICS_NODESERIALIZER_HPP__
 
 #include "tools/ByteArray.hpp"
-#include "tools/physics/Node.hpp"
+
+#include "common/physics/Node.hpp"
 
 namespace Tools {
 
     // Packet
-    template<typename T> struct ByteArray::Serializer<Physics::Node>
+    template struct ByteArray::Serializer<Common::Physics::Node>
     {
-        static void Read(ByteArray const& p, Physics::Node& v)  // Used by Packet::Read<T>(T&)
+        static void Read(ByteArray const& p, Common::Physics::Node& v)  // Used by Packet::Read<T>(T&)
         {
             p.Read(v.position.r);
             p.Read(v.position.v);
@@ -41,7 +42,7 @@ namespace Tools {
 
         static std::unique_ptr<PhysicsObject> Read(ByteArray const& p) // Used by Packet::Read<T>()
         {
-            std::unique_ptr<Physics::Node> v(new Physics::Node());
+            std::unique_ptr<Common::Physics::Node> v(new Common::Physics::Node());
 
             p.Read(v.position.r);
             p.Read(v.position.v);
