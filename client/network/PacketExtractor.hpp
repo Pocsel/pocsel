@@ -12,6 +12,9 @@
 namespace Common {
     class Packet;
     struct MovingOrientedPosition;
+    namespace Physics {
+        struct Node;
+    }
 }
 
 namespace Client { namespace Game { namespace Engine {
@@ -54,13 +57,13 @@ namespace Client { namespace Network {
         static void DoodadSpawn(Tools::ByteArray const& p,
                 Uint32& doodadId,
                 std::string& doodadName,
-                Common::Position& position,
+                Common::Physics::Node& position,
                 std::list<std::pair<std::string /* key */, std::string /* value */>>& values);
         static void DoodadKill(Tools::ByteArray const& p,
                 Uint32& doodadId);
         static void DoodadUpdate(Tools::ByteArray const& p,
                 Uint32& doodadId,
-                std::unique_ptr<Common::Position>& position,
+                std::unique_ptr<Common::Physics::Node>& position,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands);
     };
 

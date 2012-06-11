@@ -8,7 +8,7 @@
 namespace Tools {
 
     // Packet
-    template struct ByteArray::Serializer<Common::Physics::Node>
+    template<> struct ByteArray::Serializer<Common::Physics::Node>
     {
         static void Read(ByteArray const& p, Common::Physics::Node& v)  // Used by Packet::Read<T>(T&)
         {
@@ -25,7 +25,7 @@ namespace Tools {
             p.Read(v.scale.a);
         }
 
-        static void Write(PhysicsObject const& v, ByteArray& p) // Used by Packet::Write<T>(T const&)
+        static void Write(Common::Physics::Node const& v, ByteArray& p) // Used by Packet::Write<T>(T const&)
         {
             p.Write(v.position.r);
             p.Write(v.position.v);
@@ -40,21 +40,21 @@ namespace Tools {
             p.Write(v.scale.a);
         }
 
-        static std::unique_ptr<PhysicsObject> Read(ByteArray const& p) // Used by Packet::Read<T>()
+        static std::unique_ptr<Common::Physics::Node> Read(ByteArray const& p) // Used by Packet::Read<T>()
         {
             std::unique_ptr<Common::Physics::Node> v(new Common::Physics::Node());
 
-            p.Read(v.position.r);
-            p.Read(v.position.v);
-            p.Read(v.position.a);
+            p.Read(v->position.r);
+            p.Read(v->position.v);
+            p.Read(v->position.a);
 
-            p.Read(v.yawPitchRoll.r);
-            p.Read(v.yawPitchRoll.v);
-            p.Read(v.yawPitchRoll.a);
+            p.Read(v->yawPitchRoll.r);
+            p.Read(v->yawPitchRoll.v);
+            p.Read(v->yawPitchRoll.a);
 
-            p.Read(v.scale.r);
-            p.Read(v.scale.v);
-            p.Read(v.scale.a);
+            p.Read(v->scale.r);
+            p.Read(v->scale.v);
+            p.Read(v->scale.a);
 
             return v;
         }
