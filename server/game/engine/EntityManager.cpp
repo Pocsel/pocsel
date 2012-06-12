@@ -869,7 +869,7 @@ namespace Server { namespace Game { namespace Engine {
     void EntityManager::_ApiSetPos(Tools::Lua::CallHelper& helper)
     {
         Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-        Common::Position pos = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg("Server.Entity.SetPos: Missing argument \"position\""));
+        Common::Position pos = Tools::Lua::Utils::Vector::TableToVec3<Common::PositionCoordType>(helper.PopArg("Server.Entity.SetPos: Missing argument \"position\""));
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
         {
@@ -892,6 +892,62 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Ref pos(this->_engine.GetInterpreter().GetState());
         Tools::Lua::Utils::Vector::Vec3ToTable(it->second->GetPosition(), pos);
         helper.PushRet(pos);
+    }
+
+    void EntityManager::_ApiSetSpeed(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
+        glm::dvec3 speed = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg("Server.Entity.SetPos: Missing argument \"position\""));
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
+            return;
+        }
+        it->second->SetSpeed(speed);
+        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
+    }
+
+    void EntityManager::_ApiGetSpeed(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
+            return; // retourne nil
+        }
+        Tools::Lua::Ref speed(this->_engine.GetInterpreter().GetState());
+        Tools::Lua::Utils::Vector::Vec3ToTable(it->second->GetSpeed(), speed);
+        helper.PushRet(speed);
+    }
+
+    void EntityManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
+        glm::dvec3 accel = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg("Server.Entity.SetPos: Missing argument \"position\""));
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
+            return;
+        }
+        it->second->SetAccel(accel);
+        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
+    }
+
+    void EntityManager::_ApiGetAccel(Tools::Lua::CallHelper& helper)
+    {
+        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
+            return; // retourne nil
+        }
+        Tools::Lua::Ref accel(this->_engine.GetInterpreter().GetState());
+        Tools::Lua::Utils::Vector::Vec3ToTable(it->second->GetAccel(), accel);
+        helper.PushRet(accel);
     }
 
 }}}

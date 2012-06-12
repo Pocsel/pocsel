@@ -8,9 +8,9 @@ namespace Common { namespace Physics {
 
     struct Node
     {
-        Vector<PositionCoordType, float, float> position;
-        Vector<> yawPitchRoll;
-        Vector<> scale;
+        Vector<double> position;
+        Vector<float> yawPitchRoll;
+        Vector<float> scale;
     };
 
 }}
