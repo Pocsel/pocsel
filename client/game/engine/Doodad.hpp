@@ -3,7 +3,8 @@
 
 #include "client/game/engine/DoodadType.hpp"
 #include "tools/lua/Ref.hpp"
-#include "common/Position.hpp"
+
+#include "common/physics/Node.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -13,15 +14,25 @@ namespace Client { namespace Game { namespace Engine {
     private:
         DoodadType const& _type;
         Tools::Lua::Ref _self;
-        Common::Position _pos;
+        Common::Physics::Node _physics;
 
     public:
-        Doodad(Tools::Lua::Interpreter& interpreter, Uint32 id, Common::Position const& pos, DoodadType const& type);
+        Doodad(Tools::Lua::Interpreter& interpreter, Uint32 id, Common::Physics::Node const& physics, DoodadType const& type);
         ~Doodad();
         DoodadType const& GetType() const { return this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
-        Common::Position const& GetPosition() const { return this->_pos; }
-        void SetPosition(Common::Position const& pos) { this->_pos = pos; }
+
+        Common::Position const& GetPosition() const { return this->_physics.position.r; }
+        void SetPosition(Common::Position const& pos) { this->_physics.position.r = pos; }
+        glm::dvec3 const& GetSpeed() const { return this->_physics.position.v; }
+        void SetSpeed(glm::dvec3 const& speed) { this->_physics.position.v = speed; }
+        glm::dvec3 const& GetAccel() const { return this->_physics.position.a; }
+        void SetAccel(glm::dvec3 const& accel) { this->_physics.position.a = accel; }
+
+        Common::Physics::Node const& GetPhysics() const { return this->_physics; }
+        void SetPhysics(Common::Physics::Node const& p) { this->_physics = p; }
+
+        Common::Physics::Node& GetPhysics() { return this->_physics; }
     };
 
 }}}
