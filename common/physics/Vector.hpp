@@ -3,12 +3,12 @@
 
 namespace Common { namespace Physics {
 
-    template<typename RT = float, typename VT = float, typename AT = float>
+    template<typename T = float>
     struct Vector
     {
-        glm::detail::tvec3<RT> r;
-        glm::detail::tvec3<VT> v;
-        glm::detail::tvec3<AT> a;
+        glm::detail::tvec3<T> r;
+        glm::detail::tvec3<T> v;
+        glm::detail::tvec3<T> a;
     };
 
 }}

@@ -42,6 +42,7 @@ Server.Entity.RegisterPositional{
         self.moveSpeed = math.random()
         self.doodad = Server.Doodad.Spawn("base:Test")
         --Server.Message.Later(7, self.id, "Suicide")
+        Server.Entity.SetSpeed(self.id, self.move)
         if self.id < 50 then
             Server.Message.Later(3, self.id, "Test")
         end
@@ -68,8 +69,8 @@ Server.Entity.RegisterPositional{
     end,
 
     Move = function(self)
-        local pos = Server.Entity.GetPos(self.id)
-        Server.Entity.SetPos(self.id, { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
+        -- local pos = Server.Entity.GetPos(self.id)
+        Server.Entity.SetAccel(self.id, {x = 0, y = 0, z = 0}) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
         Server.Message.Later(self.moveSpeed, self.id, "Move")
     end,
 

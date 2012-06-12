@@ -87,6 +87,7 @@ namespace Server { namespace Game { namespace Engine {
         void EnableEntity(Uint32 entityId) throw(std::runtime_error);
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
         std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
+        std::map<Uint32, PositionalEntity*> const& GetPositionalEntities() const { return this->_positionalEntities; }
 
         // rcon requests
         std::string RconGetEntities() const;
@@ -105,6 +106,10 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
         void _ApiSetPos(Tools::Lua::CallHelper& helper);
         void _ApiGetPos(Tools::Lua::CallHelper& helper);
+        void _ApiSetSpeed(Tools::Lua::CallHelper& helper);
+        void _ApiGetSpeed(Tools::Lua::CallHelper& helper);
+        void _ApiSetAccel(Tools::Lua::CallHelper& helper);
+        void _ApiGetAccel(Tools::Lua::CallHelper& helper);
     };
 
 }}}
