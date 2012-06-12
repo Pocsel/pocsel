@@ -91,14 +91,12 @@ namespace Server { namespace Game { namespace Engine {
 
         // rcon requests
         std::string RconGetEntities() const;
-        void RconAddEntityTypes(Rcon::EntityManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon
+        void RconAddEntityTypes(Rcon::EntityManager& manager) const;
 
     private:
         Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool hasPosition = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
-        void _ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper);
-        void _SpawnFromPlugin(bool hasPosition, Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper);
         void _ApiSave(Tools::Lua::CallHelper& helper);
         void _ApiLoad(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);

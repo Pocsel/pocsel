@@ -86,12 +86,14 @@ namespace Common {
 
     std::string FieldUtils::GetPluginNameFromResource(std::string const& name)
     {
-        return name.substr(0, name.find_first_of(':'));
+        size_t colonPos = name.find_first_of(':');
+        return colonPos == std::string::npos ? "" : name.substr(0, colonPos);
     }
 
     std::string FieldUtils::GetResourceNameFromResource(std::string const& name)
     {
-        return name.substr(name.find_first_of(':'));
+        size_t colonPos = name.find_first_of(':');
+        return colonPos == std::string::npos ? name : name.substr(colonPos + 1);
     }
 
     std::string FieldUtils::GetResourceName(std::string const& pluginName, std::string const& resourceName)
