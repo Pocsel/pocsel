@@ -4,11 +4,14 @@
 #include "server/game/map/Chunk.hpp"
 #include "common/Position.hpp"
 
-namespace Common{
+namespace Common {
     class Packet;
     class Resource;
     struct CubeType;
     struct MovingOrientedPosition;
+    namespace Physics {
+        struct Node;
+    }
 }
 
 namespace Server {
@@ -64,13 +67,13 @@ namespace Server { namespace Network {
 
         static std::unique_ptr<Common::Packet> DoodadSpawn(Uint32 doodadId,
                 std::string const& doodadName,
-                Common::Position const& position,
+                Common::Physics::Node const& position,
                 std::list<std::pair<std::string /* key */, std::string /* value */>> const& values);
 
         static std::unique_ptr<Common::Packet> DoodadKill(Uint32 doodadId);
 
         static std::unique_ptr<UdpPacket> DoodadUpdate(Uint32 doodadId,
-                Common::Position const* position,
+                Common::Physics::Node const* position,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function */, std::string /* value */>> const& commands);
     };
 

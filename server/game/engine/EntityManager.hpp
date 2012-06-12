@@ -96,13 +96,15 @@ namespace Server { namespace Game { namespace Engine {
         Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool hasPosition = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
-        void _ApiSetPos(Tools::Lua::CallHelper& helper);
-        void _ApiGetPos(Tools::Lua::CallHelper& helper);
         void _ApiSave(Tools::Lua::CallHelper& helper);
         void _ApiLoad(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
+
+        // positionnal
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
+        void _ApiSetPos(Tools::Lua::CallHelper& helper);
+        void _ApiGetPos(Tools::Lua::CallHelper& helper);
     };
 
 }}}

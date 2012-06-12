@@ -2,12 +2,12 @@
 #define __SERVER_GAME_ENGINE_BODYTYPE_HPP__
 
 #include "tools/lua/Ref.hpp"
-#include "tools/physics/BodyType.hpp"
+#include "common/physics/BodyType.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
     class BodyType :
-        public Tools::Physics::BodyType
+        public Common::Physics::BodyType
     {
     private:
         std::string _name;

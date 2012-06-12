@@ -7,6 +7,7 @@
 #include "common/Packet.hpp"
 #include "common/CubeTypeSerializer.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
+#include "common/physics/NodeSerializer.hpp"
 
 namespace Client { namespace Network {
 
@@ -105,7 +106,7 @@ namespace Client { namespace Network {
     void PacketExtractor::DoodadSpawn(Tools::ByteArray const& p,
             Uint32& doodadId,
             std::string& doodadName,
-            Common::Position& position,
+            Common::Physics::Node& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>>& values)
     {
         p.Read(doodadId);
@@ -123,12 +124,12 @@ namespace Client { namespace Network {
 
     void PacketExtractor::DoodadUpdate(Tools::ByteArray const& p,
             Uint32& doodadId,
-            std::unique_ptr<Common::Position>& position,
+            std::unique_ptr<Common::Physics::Node>& position,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands)
     {
         p.Read(doodadId);
         if (p.ReadBool())
-            position = p.Read<Common::Position>();
+            position = p.Read<Common::Physics::Node>();
         while (p.GetBytesLeft())
         {
             bool functionCall = p.ReadBool();

@@ -187,7 +187,7 @@ namespace Protocol {
          * Uint32 doodadId
          * Uint32 pluginId
          * String doodadName
-         * Position position
+         * PhysicsNode position
          *  String+ serializedKey
          *  String+ serializedValue
          */
@@ -201,7 +201,7 @@ namespace Protocol {
         /**
          * Uint32 doodadId
          * Bool position
-         * Position? p
+         * PhysicsNode? position
          *  Bool+ functionCall
          *  String+ serializedKey || function
          *  String+ serializedValue
