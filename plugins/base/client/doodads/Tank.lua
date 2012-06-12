@@ -3,6 +3,8 @@ Client.Doodad.Register{
     Spawn = function(self)
         self.model = Client.Model.Spawn(self.id, "Tank")
     end,
+    Think = function(self)
+    end,
 }
 
 Client.Model.Register{
