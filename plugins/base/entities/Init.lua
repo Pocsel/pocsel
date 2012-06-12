@@ -38,11 +38,10 @@ Server.Entity.RegisterPositional{
     entityName = "Blob",
 
     Spawn = function(self)
-        self.move = { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }
-        self.moveSpeed = math.random()
+        self.moveSpeed = 3 + math.random() * 3
+
         self.doodad = Server.Doodad.Spawn("base:Test")
-        --Server.Message.Later(7, self.id, "Suicide")
-        Server.Entity.SetSpeed(self.id, self.move)
+--        Server.Message.Later(30, self.id, "Suicide")
         if self.id < 50 then
             Server.Message.Later(3, self.id, "Test")
         end
@@ -70,7 +69,8 @@ Server.Entity.RegisterPositional{
 
     Move = function(self)
         -- local pos = Server.Entity.GetPos(self.id)
-        Server.Entity.SetAccel(self.id, {x = 0, y = 0, z = 0}) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
+        Server.Entity.SetSpeed(self.id, { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
+        Server.Entity.SetAccel(self.id, { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
         Server.Message.Later(self.moveSpeed, self.id, "Move")
     end,
 

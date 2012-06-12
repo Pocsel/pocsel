@@ -94,7 +94,7 @@ namespace Client { namespace Network {
                 Common::Physics::Node position;
                 std::list<std::pair<std::string /* key */, std::string /* value */>> values;
                 PacketExtractor::DoodadSpawn(p, doodadId, doodadName, position, values);
-                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(doodadId, doodadName, position.position.r, values); // TODO position -> physics node
+                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(doodadId, doodadName, position, values); // TODO position -> physics node
             };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadKill] =
             [this](Tools::ByteArray& p)
@@ -116,7 +116,7 @@ namespace Client { namespace Network {
                 std::unique_ptr<Common::Physics::Node> position;
                 std::list<std::tuple<bool, std::string /* key */, std::string /* value */>> commands;
                 PacketExtractor::DoodadUpdate(p, doodadId, position, commands);
-                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, (position.get() ? &position->position.r : 0), commands); // TODO position -> physics node
+                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, position.get(), commands); // TODO position -> physics node
             };
     }
 
