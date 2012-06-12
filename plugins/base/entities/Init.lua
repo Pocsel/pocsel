@@ -24,12 +24,12 @@ Server.Entity.Register{
     end,
 
     SpawnBlob = function(self)
-        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 10, z = 67108864 }, "Blob")
+        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 10, z = 67108864 }, "base:Blob")
         Server.Message.Later(10, self.id, "SpawnBlob")
     end,
 
     SpawnTank = function(self)
-        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 12, z = 67108864 }, "Tank")
+        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 12, z = 67108864 }, "base:Tank")
     end,
 }
 
@@ -74,7 +74,7 @@ Server.Entity.RegisterPositional{
     end,
 
     Test = function(self)
-        Server.Entity.Spawn(Server.Entity.GetPos(self.id), "Blob")
+        Server.Entity.Spawn(Server.Entity.GetPos(self.id), "base:Blob")
     end
 
 }
