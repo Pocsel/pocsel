@@ -41,6 +41,12 @@ namespace Server { namespace Game { namespace Engine {
         namespaceTable.Set("RegisterPositional", i.MakeFunction(std::bind(&EntityManager::_ApiRegisterPositional, this, std::placeholders::_1)));
         namespaceTable.Set("SetPos", i.MakeFunction(std::bind(&EntityManager::_ApiSetPos, this, std::placeholders::_1)));
         namespaceTable.Set("GetPos", i.MakeFunction(std::bind(&EntityManager::_ApiGetPos, this, std::placeholders::_1)));
+        namespaceTable.Set("SetSpeed", i.MakeFunction(std::bind(&EntityManager::_ApiSetSpeed, this, std::placeholders::_1)));
+        namespaceTable.Set("GetSpeed", i.MakeFunction(std::bind(&EntityManager::_ApiGetSpeed, this, std::placeholders::_1)));
+        namespaceTable.Set("SetVel", i.MakeFunction(std::bind(&EntityManager::_ApiSetSpeed, this, std::placeholders::_1)));
+        namespaceTable.Set("GetVel", i.MakeFunction(std::bind(&EntityManager::_ApiGetSpeed, this, std::placeholders::_1)));
+        namespaceTable.Set("SetAccel", i.MakeFunction(std::bind(&EntityManager::_ApiSetAccel, this, std::placeholders::_1)));
+        namespaceTable.Set("GetAccel", i.MakeFunction(std::bind(&EntityManager::_ApiGetAccel, this, std::placeholders::_1)));
     }
 
     EntityManager::~EntityManager()
