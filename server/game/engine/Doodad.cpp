@@ -91,8 +91,7 @@ namespace Server { namespace Game { namespace Engine {
         auto itTableEnd = this->_storage.End();
         for (; itTable != itTableEnd; ++itTable)
             values.push_back(std::make_pair(serializer.Serialize(itTable.GetKey(), true /* nilOnError */), serializer.Serialize(itTable.GetValue(), true /* nilOnError */)));
-        auto const& pluginName = this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(this->_pluginId);
-        auto packet = Network::PacketCreator::DoodadSpawn(this->_id, Common::FieldUtils::GetResourceName(pluginName, this->_name), this->_entity.GetPhysics(), values);
+        auto packet = Network::PacketCreator::DoodadSpawn(this->_id, this->_name, this->_entity.GetPhysics(), values);
 
         // send packet to new players
         auto it = this->_newPlayers.begin();

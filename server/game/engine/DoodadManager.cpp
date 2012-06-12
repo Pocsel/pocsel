@@ -2,7 +2,10 @@
 #include "server/game/engine/BodyManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/Doodad.hpp"
+#include "server/game/World.hpp"
+#include "server/game/PluginManager.hpp"
 #include "server/game/map/Map.hpp"
+#include "common/FieldUtils.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/database/IConnection.hpp"
 
@@ -243,9 +246,6 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
     {
-        Uint32 pluginId = this->_engine.GetRunningPluginId();
-        if (!pluginId)
-            throw std::runtime_error("Server.Doodad.Spawn: Could not determine currently running plugin, cannot spawn doodad");
         Uint32 entityId = this->_engine.GetRunningEntityId();
         std::list<Tools::Lua::Ref>& args = helper.GetArgList();
         if (!args.size())
@@ -265,6 +265,9 @@ namespace Server { namespace Game { namespace Engine {
             Tools::error << "DoodadManager::_ApiSpawn: No positional entity with id " << entityId << ", cannot spawn doodad." << std::endl;
             return; // retourne nil
         }
+        Uint32 pluginId = this->_engine.GetWorld().GetPluginManager().GetPluginId(Common::FieldUtils::GetPluginNameFromResource(doodadName));
+        if (!pluginId)
+            throw std::runtime_error("Server.Doodad.Spawn: Could not find the plugin associated with this doodad");
 
         // trouve le prochain doodadId
         while (!this->_nextDoodadId // 0 est la valeur spéciale "pas de doodad", on la saute
