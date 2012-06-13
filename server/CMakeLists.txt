@@ -27,3 +27,4 @@ target_link_libraries(server
 )
 
 SetProgramInfo(server)
+add_dependencies(server dev_world)

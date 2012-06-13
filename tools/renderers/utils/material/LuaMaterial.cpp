@@ -39,7 +39,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     void LuaMaterial::LoadLuaTypes(Lua::Interpreter& interpreter, std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> loadTexture)
     {
-        // Register ITexture
+        // Register type ITexture
         {
             // La métatable sert juste comme conteneur (du moins pour le moment)
             Lua::MetaTable::Create<std::shared_ptr<Texture::ITexture>>(interpreter);
@@ -55,7 +55,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             textureNs.SetMetaTable(metaTable);
         }
 
-        // Register LuaMaterial
+        // Register type LuaMaterial
         {
             auto table = Lua::MetaTable::Create<LuaMaterial>(interpreter);
             table.SetMetaMethod(Lua::MetaTable::NewIndex,

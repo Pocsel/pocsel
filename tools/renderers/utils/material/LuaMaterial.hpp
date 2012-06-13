@@ -11,7 +11,6 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     {
     private:
         std::unique_ptr<Material> _material;
-        std::string _name;
         Lua::Ref _type;
         Lua::Ref _self;
         std::map<std::string, IVariable*> _variables;
@@ -23,8 +22,6 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
         LuaMaterial(LuaMaterial const& material);
         LuaMaterial& operator =(LuaMaterial const& material);
-
-        std::string const& GetName() const { return this->_name; }
 
         static void LoadLuaTypes(Lua::Interpreter& interpreter, std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> loadTexture);
     private:
