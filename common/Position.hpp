@@ -7,7 +7,9 @@
 
 namespace Common {
 
-    typedef glm::dvec3 Position;
+    typedef double PositionCoordType;
+
+    typedef glm::detail::tvec3<PositionCoordType> Position;
 
     /* coordonnées entières du chunk contenant cette position */
     inline BaseChunk::CoordsType GetChunkCoords(Position const& pos);

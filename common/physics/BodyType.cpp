@@ -1,6 +1,6 @@
-#include "tools/physics/BodyType.hpp"
+#include "common/physics/BodyType.hpp"
 
-namespace Tools { namespace Physics {
+namespace Common { namespace Physics {
 
     BodyType::BodyType(std::vector<ShapeNode> const& shapes) :
         _shapes(shapes)

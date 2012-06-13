@@ -1,9 +1,9 @@
-#ifndef __TOOLS_PHYSICS_BODY_HPP__
-#define __TOOLS_PHYSICS_BODY_HPP__
+#ifndef __COMMON_PHYSICS_BODY_HPP__
+#define __COMMON_PHYSICS_BODY_HPP__
 
-#include "tools/physics/Node.hpp"
+#include "common/physics/Node.hpp"
 
-namespace Tools { namespace Physics {
+namespace Common { namespace Physics {
 
     class BodyType;
 
@@ -13,7 +13,7 @@ namespace Tools { namespace Physics {
         struct BodyNode
         {
             BodyNode() : dirty(false) {}
-            Tools::Physics::Node node;
+            Common::Physics::Node node;
             bool dirty;
         };
     protected:

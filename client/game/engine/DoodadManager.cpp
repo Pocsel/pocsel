@@ -5,11 +5,15 @@
 #include "client/game/engine/Engine.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
+#include "common/physics/Move.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
     DoodadManager::DoodadManager(Engine& engine) :
-        _engine(engine), _runningDoodadId(0), _runningDoodad(0)
+        _engine(engine),
+        _runningDoodadId(0),
+        _runningDoodad(0),
+        _lastTime(0)
     {
         auto& i = this->_engine.GetInterpreter();
         auto namespaceTable = i.Globals().GetTable("Client").GetTable("Doodad");
@@ -43,17 +47,22 @@ namespace Client { namespace Game { namespace Engine {
         return *it->second;
     }
 
-    void DoodadManager::Tick()
+    void DoodadManager::Tick(Uint64 totalTime)
     {
+        double deltaTime = (totalTime - this->_lastTime) / (double)1000000;
         auto it = this->_doodads.begin();
         auto itEnd = this->_doodads.end();
         for (; it != itEnd; ++it)
+        {
+            Common::Physics::MoveNode(it->second->GetPhysics(), deltaTime);
             this->_CallDoodadFunction(it->first, "Think");
+        }
+        this->_lastTime = totalTime;
     }
 
     void DoodadManager::SpawnDoodad(Uint32 doodadId,
             std::string const& doodadName,
-            Common::Position const& position,
+            Common::Physics::Node const& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
     {
         if (this->_doodads.count(doodadId))
@@ -93,7 +102,7 @@ namespace Client { namespace Game { namespace Engine {
     }
 
     void DoodadManager::UpdateDoodad(Uint32 doodadId,
-            Common::Position const* position,
+            Common::Physics::Node const* position,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
         auto it = this->_doodads.find(doodadId);
@@ -103,7 +112,7 @@ namespace Client { namespace Game { namespace Engine {
             return;
         }
         if (position)
-            it->second->SetPosition(*position);
+            it->second->SetPhysics(*position);
         auto itCommands = commands.begin();
         auto itCommandsEnd = commands.end();
         for (; itCommands != itCommandsEnd; ++itCommands)

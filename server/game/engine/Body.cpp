@@ -5,7 +5,7 @@
 namespace Server { namespace Game { namespace Engine {
 
     Body::Body(BodyType const& bodyType) :
-        Tools::Physics::Body(bodyType)
+        Common::Physics::Body(bodyType)
     {
     }
 

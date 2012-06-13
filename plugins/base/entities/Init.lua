@@ -24,12 +24,12 @@ Server.Entity.Register{
     end,
 
     SpawnBlob = function(self)
-        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 10, z = 67108864 }, "Blob")
+        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 10, z = 67108864 }, "base:Blob")
         Server.Message.Later(10, self.id, "SpawnBlob")
     end,
 
     SpawnTank = function(self)
-        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 12, z = 67108864 }, "Tank")
+        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 12, z = 67108864 }, "base:Tank")
     end,
 }
 
@@ -38,10 +38,10 @@ Server.Entity.RegisterPositional{
     entityName = "Blob",
 
     Spawn = function(self)
-        self.move = { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }
-        self.moveSpeed = math.random()
-        self.doodad = Server.Doodad.Spawn("Test")
-        --Server.Message.Later(7, self.id, "Suicide")
+        self.moveSpeed = 3 + math.random() * 3
+
+        self.doodad = Server.Doodad.Spawn("base:Test")
+--        Server.Message.Later(30, self.id, "Suicide")
         if self.id < 50 then
             Server.Message.Later(3, self.id, "Test")
         end
@@ -68,13 +68,14 @@ Server.Entity.RegisterPositional{
     end,
 
     Move = function(self)
-        local pos = Server.Entity.GetPos(self.id)
-        Server.Entity.SetPos(self.id, { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
+        -- local pos = Server.Entity.GetPos(self.id)
+        Server.Entity.SetSpeed(self.id, { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
+        Server.Entity.SetAccel(self.id, { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
         Server.Message.Later(self.moveSpeed, self.id, "Move")
     end,
 
     Test = function(self)
-        Server.Entity.Spawn(Server.Entity.GetPos(self.id), "Blob")
+        Server.Entity.Spawn(Server.Entity.GetPos(self.id), "base:Blob")
     end
 
 }

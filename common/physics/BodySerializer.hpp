@@ -1,11 +1,11 @@
-#ifndef __TOOLS_PHYSICS_BODYSERIALIZER_HPP__
-#define __TOOLS_PHYSICS_BODYSERIALIZER_HPP__
+#ifndef __COMMON_PHYSICS_BODYSERIALIZER_HPP__
+#define __COMMON_PHYSICS_BODYSERIALIZER_HPP__
 
 #include "tools/ByteArray.hpp"
 
-#include "tools/physics/Body.hpp"
+#include "common/physics/Body.hpp"
 
-namespace Tools { namespace Physics {
+namespace Common { namespace Physics {
 
     template<typename TBody>
         struct BodySerializer

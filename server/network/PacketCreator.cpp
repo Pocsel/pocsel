@@ -16,6 +16,7 @@
 #include "common/CubeTypeSerializer.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
+#include "common/physics/NodeSerializer.hpp"
 
 namespace Server { namespace Network {
 
@@ -177,7 +178,7 @@ namespace Server { namespace Network {
 
     std::unique_ptr<Common::Packet> PacketCreator::DoodadSpawn(Uint32 doodadId,
             std::string const& doodadName,
-            Common::Position const& position,
+            Common::Physics::Node const& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
     {
         Common::Packet* ptr(new Common::Packet());
@@ -209,7 +210,7 @@ namespace Server { namespace Network {
     }
 
     std::unique_ptr<UdpPacket> PacketCreator::DoodadUpdate(Uint32 doodadId,
-            Common::Position const* position,
+            Common::Physics::Node const* position,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
         UdpPacket* ptr(new UdpPacket());

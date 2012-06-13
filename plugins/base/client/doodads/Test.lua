@@ -1,6 +1,6 @@
 Client.Doodad.Register{
 
-    doodadName = "TestDoodad",
+    doodadName = "Test",
 
     Spawn = function(self)
         print("Spawn()")

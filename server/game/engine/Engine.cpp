@@ -3,6 +3,7 @@
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
 #include "server/game/engine/DoodadManager.hpp"
+#include "server/game/engine/PhysicsManager.hpp"
 #include "server/game/engine/BodyManager.hpp"
 #include "server/game/engine/Entity.hpp"
 #include "server/game/engine/EntityType.hpp"
@@ -30,12 +31,15 @@ namespace Server { namespace Game { namespace Engine {
         this->_entityManager = new EntityManager(*this);
         this->_messageManager = new MessageManager(*this);
         this->_doodadManager = new DoodadManager(*this);
+        this->_physicsManager = new PhysicsManager(*this, this->_entityManager->GetPositionalEntities());
         this->_bodyManager = new BodyManager(*this);
     }
 
     Engine::~Engine()
     {
         Tools::debug << "Engine::~Engine()\n";
+        Tools::Delete(this->_physicsManager);
+        Tools::Delete(this->_bodyManager);
         Tools::Delete(this->_doodadManager);
         Tools::Delete(this->_messageManager);
         Tools::Delete(this->_entityManager);
@@ -45,9 +49,11 @@ namespace Server { namespace Game { namespace Engine {
 
     void Engine::Tick(Uint64 currentTime)
     {
+        Uint64 deltaTime = currentTime - this->_currentTime;
         this->_currentTime = currentTime;
         this->_entityManager->DispatchKillEvents();
         this->_entityManager->DispatchSpawnEvents();
+        this->_physicsManager->Tick(deltaTime);
         this->_messageManager->DispatchMessages();
         this->_doodadManager->ExecuteCommands(); // PS: l'ordre a une importance de ouf
     }

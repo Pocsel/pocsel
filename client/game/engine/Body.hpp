@@ -1,7 +1,7 @@
 #ifndef __CLIENT_GAME_ENGINE_BODY_HPP__
 #define __CLIENT_GAME_ENGINE_BODY_HPP__
 
-#include "tools/physics/Body.hpp"
+#include "common/physics/Body.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -9,7 +9,7 @@ namespace Client { namespace Game { namespace Engine {
     class BodyType;
 
     class Body :
-        public Tools::Physics::Body
+        public Common::Physics::Body
     {
     public:
         Body(BodyType const& bodyType);

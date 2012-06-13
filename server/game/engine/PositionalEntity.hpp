@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_ENGINE_POSITIONALENTITY_HPP__
 #define __SERVER_GAME_ENGINE_POSITIONALENTITY_HPP__
 
-#include "common/Position.hpp"
+#include "common/physics/Node.hpp"
 #include "server/game/engine/Entity.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -10,12 +10,22 @@ namespace Server { namespace Game { namespace Engine {
         public Entity
     {
     private:
-        Common::Position _pos;
+        Common::Physics::Node _physics;
 
     public:
         PositionalEntity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
-        Common::Position const& GetPosition() const { return this->_pos; }
-        void SetPosition(Common::Position const& pos) { this->_pos = pos; }
+
+        Common::Position const& GetPosition() const { return this->_physics.position.r; }
+        void SetPosition(Common::Position const& pos) { this->_physics.position.r = pos; }
+        glm::dvec3 const& GetSpeed() const { return this->_physics.position.v; }
+        void SetSpeed(glm::dvec3 const& speed) { this->_physics.position.v = speed; }
+        glm::dvec3 const& GetAccel() const { return this->_physics.position.a; }
+        void SetAccel(glm::dvec3 const& accel) { this->_physics.position.a = accel; }
+
+        Common::Physics::Node const& GetPhysics() const { return this->_physics; }
+        void SetPhysics(Common::Physics::Node const& p) { this->_physics = p; }
+
+        Common::Physics::Node& GetPhysics() { return this->_physics; }
     };
 
 }}}

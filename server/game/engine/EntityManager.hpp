@@ -87,24 +87,29 @@ namespace Server { namespace Game { namespace Engine {
         void EnableEntity(Uint32 entityId) throw(std::runtime_error);
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
         std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
+        std::map<Uint32, PositionalEntity*> const& GetPositionalEntities() const { return this->_positionalEntities; }
 
         // rcon requests
         std::string RconGetEntities() const;
-        void RconAddEntityTypes(Rcon::EntityManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon
+        void RconAddEntityTypes(Rcon::EntityManager& manager) const;
 
     private:
         Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool hasPosition = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
-        void _ApiSpawnFromPlugin(Tools::Lua::CallHelper& helper);
-        void _SpawnFromPlugin(bool hasPosition, Common::Position const& pos, Uint32 pluginId, Tools::Lua::CallHelper& helper);
-        void _ApiSetPos(Tools::Lua::CallHelper& helper);
-        void _ApiGetPos(Tools::Lua::CallHelper& helper);
         void _ApiSave(Tools::Lua::CallHelper& helper);
         void _ApiLoad(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
+
+        // positionnal
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
+        void _ApiSetPos(Tools::Lua::CallHelper& helper);
+        void _ApiGetPos(Tools::Lua::CallHelper& helper);
+        void _ApiSetSpeed(Tools::Lua::CallHelper& helper);
+        void _ApiGetSpeed(Tools::Lua::CallHelper& helper);
+        void _ApiSetAccel(Tools::Lua::CallHelper& helper);
+        void _ApiGetAccel(Tools::Lua::CallHelper& helper);
     };
 
 }}}
