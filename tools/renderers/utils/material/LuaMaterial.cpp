@@ -11,11 +11,12 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         _self(registeredMaterial.GetState().MakeTable()),
         _loadTexture(loadTexture)
     {
-        this->_self.SetMetaTable(this->_type);
-        this->_self.Set("shader", this->_self.GetState().GetInterpreter().Make<LuaMaterial*>(this));
         auto& geometryShader = loadShader(this->_type["geometryShader"].Check<std::string>());
         auto& shadowMapShader = loadShader(this->_type["shadowMapShader"].Check<std::string>());
         this->_material.reset(new Material(renderer, this->_self, geometryShader, shadowMapShader));
+
+        this->_self.SetMetaTable(this->_type);
+        this->_self.Set("shader", this->_self.GetState().GetInterpreter().Make<LuaMaterial*>(this));
         this->_LoadVariables();
     }
 
@@ -27,6 +28,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     {
         this->_self.SetMetaTable(this->_type);
         this->_self.Set("shader", this->_self.GetState().GetInterpreter().Make<LuaMaterial*>(this));
+        this->_material->SetLuaMaterial(this->_self);
         this->_LoadVariables();
     }
 
@@ -37,7 +39,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             this->_material.reset(new Material(*material._material));
             this->_type = material._type;
             this->_self = this->_type.GetState().MakeTable();
+            this->_loadTexture = material._loadTexture;
             this->_self.SetMetaTable(this->_type);
+            this->_self.Set("shader", this->_self.GetState().GetInterpreter().Make<LuaMaterial*>(this));
+            this->_material->SetLuaMaterial(this->_self);
+            this->_LoadVariables();
         }
         return *this;
     }
@@ -66,20 +72,20 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             table.SetMetaMethod(Lua::MetaTable::NewIndex,
                 [](Lua::CallHelper& helper)
                 {
-                    auto& material = **helper.PopArg().Check<LuaMaterial**>();
+                    auto material = *helper.PopArg().Check<LuaMaterial**>();
                     auto key = helper.PopArg().Check<std::string>();
                     auto value = helper.PopArg();
 
-                    material._SetLuaValue(key, value);
+                    material->_SetLuaValue(key, value);
                 });
             table.SetMetaMethod(Lua::MetaTable::Index,
                 [](Lua::CallHelper& helper)
                 {
-                    auto& material = **helper.PopArg().Check<LuaMaterial**>();
+                    auto material = *helper.PopArg().Check<LuaMaterial**>();
                     auto key = helper.PopArg().Check<std::string>();
 
-                    auto it = material._variables.find(key);
-                    if (it == material._variables.end())
+                    auto it = material->_variables.find(key);
+                    if (it == material->_variables.end())
                         return;
 
                     // TODO: Les autres types
@@ -102,6 +108,9 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             auto key = it.GetKey().CheckString();
             this->_SetLuaValue(key, it.GetValue());
         }
+        auto update = this->_type["Update"];
+        if (update.IsFunction())
+            this->_material->SetLuaUpdate(update);
     }
 
     void LuaMaterial::_SetLuaValue(std::string const& key, Lua::Ref value)

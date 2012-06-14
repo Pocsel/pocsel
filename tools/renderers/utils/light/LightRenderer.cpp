@@ -82,14 +82,14 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         int nbDirectionnalShadowMap = 4;
 
         this->_directionnal.shader = &directionnalShader;
-        this->_directionnal.normalDepth = this->_directionnal.shader->GetParameter("normalDepth");
-        this->_directionnal.direction = this->_directionnal.shader->GetParameter("lightDirection");
-        this->_directionnal.ambientColor = this->_directionnal.shader->GetParameter("lightAmbientColor");
-        this->_directionnal.diffuseColor = this->_directionnal.shader->GetParameter("lightDiffuseColor");
-        this->_directionnal.specularColor = this->_directionnal.shader->GetParameter("lightSpecularColor");
-        this->_directionnal.screenModelViewProjection = this->_directionnal.shader->GetParameter("screenWorldViewProjection");
-        this->_directionnal.shadowMap = this->_directionnal.shader->GetParameter("lightShadowMap");
-        this->_directionnal.lightViewProjection = this->_directionnal.shader->GetParameter("lightViewProjection");
+        this->_directionnal.normalDepth = &this->_directionnal.shader->GetParameter("normalDepth");
+        this->_directionnal.direction = &this->_directionnal.shader->GetParameter("lightDirection");
+        this->_directionnal.ambientColor = &this->_directionnal.shader->GetParameter("lightAmbientColor");
+        this->_directionnal.diffuseColor = &this->_directionnal.shader->GetParameter("lightDiffuseColor");
+        this->_directionnal.specularColor = &this->_directionnal.shader->GetParameter("lightSpecularColor");
+        this->_directionnal.screenModelViewProjection = &this->_directionnal.shader->GetParameter("screenWorldViewProjection");
+        this->_directionnal.shadowMap = &this->_directionnal.shader->GetParameter("lightShadowMap");
+        this->_directionnal.lightViewProjection = &this->_directionnal.shader->GetParameter("lightViewProjection");
 
         this->_directionnal.depthShader = &depthShader;
         this->_directionnal.screen.reset(new Image(renderer));
@@ -103,11 +103,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         }
 
         this->_point.shader = &pointShader;
-        this->_point.normalDepth = this->_point.shader->GetParameter("normalDepth");
-        this->_point.position = this->_point.shader->GetParameter("lightPosition");
-        this->_point.range = this->_point.shader->GetParameter("lightRange");
-        this->_point.diffuseColor = this->_point.shader->GetParameter("lightDiffuseColor");
-        this->_point.specularColor = this->_point.shader->GetParameter("lightSpecularColor");
+        this->_point.normalDepth = &this->_point.shader->GetParameter("normalDepth");
+        this->_point.position = &this->_point.shader->GetParameter("lightPosition");
+        this->_point.range = &this->_point.shader->GetParameter("lightRange");
+        this->_point.diffuseColor = &this->_point.shader->GetParameter("lightDiffuseColor");
+        this->_point.specularColor = &this->_point.shader->GetParameter("lightSpecularColor");
 
         this->_point.sphere.reset(new Sphere(renderer));
     }

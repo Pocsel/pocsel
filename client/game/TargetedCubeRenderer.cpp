@@ -22,8 +22,8 @@ namespace Client { namespace Game {
         _elapsedTime(0)
     {
         this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fx");
-        this->_shaderTexture = this->_shader->GetParameter("baseTex").release();
-        this->_shaderTime = this->_shader->GetParameter("time").release();
+        this->_shaderTexture = &this->_shader->GetParameter("baseTex");
+        this->_shaderTime = &this->_shader->GetParameter("time");
 
         this->_texture = &this->_game.GetClient().GetLocalResourceManager().GetTexture2D("CubeTarget.png");
 
@@ -32,8 +32,6 @@ namespace Client { namespace Game {
 
     TargetedCubeRenderer::~TargetedCubeRenderer()
     {
-        Tools::Delete(this->_shaderTexture);
-        Tools::Delete(this->_shaderTime);
     }
 
     void TargetedCubeRenderer::Render(Common::CubePosition const& pos)

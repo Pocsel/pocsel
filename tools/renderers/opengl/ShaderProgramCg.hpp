@@ -31,6 +31,7 @@ namespace Tools { namespace Renderers {
             CGparameter _viewProjectionInverse;
             CGparameter _mvpInverse;
             CGparameter _worldViewInverseTranspose;
+            std::map<std::string, std::unique_ptr<IShaderParameter>> _parameters;
 
             CGpass _pass;
 
@@ -38,8 +39,8 @@ namespace Tools { namespace Renderers {
             ShaderProgramCg(GLRenderer& renderer, std::string const& effect);
             virtual ~ShaderProgramCg();
 
-            virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier);
-            virtual std::unique_ptr<IShaderParameter> GetParameterFromSemantic(std::string const& semantic);
+            virtual IShaderParameter& GetParameter(std::string const& identifier);
+            virtual IShaderParameter& GetParameterFromSemantic(std::string const& semantic);
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage);
             virtual void UpdateParameter(ShaderParameterUsage::Type usage);
             virtual void UpdateCurrentPass();

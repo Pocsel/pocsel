@@ -15,12 +15,12 @@ namespace Tools { namespace Renderers { namespace Utils {
 
         // Shaders
         IShaderProgram& _combineShader;
-        std::unique_ptr<IShaderParameter> _quadModelViewProj;
-        std::unique_ptr<IShaderParameter> _diffuseTexture;
-        //std::unique_ptr<IShaderParameter> _normalsDepthTexture;
-        std::unique_ptr<IShaderParameter> _lightTexture;
-        std::unique_ptr<IShaderParameter> _specularTexture;
-        //std::unique_ptr<IShaderParameter> _materialTexture; // TODO
+        IShaderParameter* _quadModelViewProj;
+        IShaderParameter* _diffuseTexture;
+        //IShaderParameter* _normalsDepthTexture;
+        IShaderParameter* _lightTexture;
+        IShaderParameter* _specularTexture;
+        //IShaderParameter* _materialTexture; // TODO
 
         Image _quad;
         glm::mat4x4 _mvp;

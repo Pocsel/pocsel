@@ -15,8 +15,8 @@ namespace Client { namespace Menu {
     {
         this->_font = &client.GetLocalResourceManager().GetFont("Acme_7_Wide.ttf", 20);
         this->_fontShader = &client.GetLocalResourceManager().GetShader("Fonts.fx");
-        this->_fontColor = this->_fontShader->GetParameter("color").release();
-        this->_fontTexture = this->_fontShader->GetParameter("fontTex").release();
+        this->_fontColor = &this->_fontShader->GetParameter("color");
+        this->_fontTexture = &this->_fontShader->GetParameter("fontTex");
         this->_rectShader = &client.GetLocalResourceManager().GetShader("BaseShaderColor.fx");
         this->_loadingScreen = new LoadingScreen(client, *this);
         this->_disconnectedScreen = new DisconnectedScreen(client, *this);
@@ -28,8 +28,6 @@ namespace Client { namespace Menu {
         Tools::Delete(this->_mainMenu);
         Tools::Delete(this->_disconnectedScreen);
         Tools::Delete(this->_loadingScreen);
-        Tools::Delete(this->_fontTexture);
-        Tools::Delete(this->_fontColor);
     }
 
     void Menu::BeginMenuDrawing()

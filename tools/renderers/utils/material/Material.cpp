@@ -32,8 +32,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     void Material::SetTimeParameter(std::string const& name)
     {
-        this->_geometry.totalTime = this->_geometry.shader.GetParameter(name);
-        this->_shadowMap.totalTime = this->_shadowMap.shader.GetParameter(name);
+        this->_geometry.totalTime = &this->_geometry.shader.GetParameter(name);
+        this->_shadowMap.totalTime = &this->_shadowMap.shader.GetParameter(name);
     }
 
     void Material::SetLuaUpdate(Lua::Ref const& update)
@@ -45,8 +45,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     void Material::Update(Uint64 totalTime)
     {
-        if (this->_luaUpdate != 0 && this->_luaUpdate->Exists())
-            (*this->_luaUpdate)(totalTime);
+        if (this->_luaUpdate != 0)
+            (*this->_luaUpdate)(this->_luaMaterial, this->_luaMaterial.GetState().MakeNumber((double)totalTime / 1000000.0));
         for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
             it->second->Update(totalTime);
     }

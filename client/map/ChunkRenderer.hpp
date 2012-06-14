@@ -31,7 +31,7 @@ namespace Client { namespace Map {
         std::map<Uint32, std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>> _textures;
         std::map<Resources::Effect*,
             std::pair<
-                std::unique_ptr<Tools::Renderers::IShaderParameter>,
+                Tools::Renderers::IShaderParameter*,
                 std::map<Uint32, Tools::Renderers::Utils::Texture::ITexture*>
             >> _cubeTypes;
         std::map<Uint32, std::multimap<double, Chunk*>> _transparentChunks;

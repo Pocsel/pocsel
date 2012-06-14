@@ -31,6 +31,8 @@ namespace Tools { namespace Renderers {
             D3DXHANDLE _viewProjectionInverse;
             D3DXHANDLE _worldViewInverseTranspose;
 
+            std::map<std::string, std::unique_ptr<IShaderParameter>> _parameters;
+
             UINT _pass;
             UINT _passCount;
 
@@ -38,8 +40,8 @@ namespace Tools { namespace Renderers {
             ShaderProgram(DX9Renderer& renderer, std::string const& effect);
             virtual ~ShaderProgram();
 
-            virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier);
-            virtual std::unique_ptr<IShaderParameter> GetParameterFromSemantic(std::string const& semantic);
+            virtual IShaderParameter& GetParameter(std::string const& identifier);
+            virtual IShaderParameter& GetParameterFromSemantic(std::string const& semantic);
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage);
             virtual void UpdateParameter(ShaderParameterUsage::Type usage);
             virtual void UpdateCurrentPass();

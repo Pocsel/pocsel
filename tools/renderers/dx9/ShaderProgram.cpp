@@ -55,18 +55,28 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_effect->Release();
     }
 
-    std::unique_ptr<IShaderParameter> ShaderProgram::GetParameter(std::string const& identifier)
+    IShaderParameter& ShaderProgram::GetParameter(std::string const& identifier)
     {
-        auto param = new ShaderParameter(*this, identifier);
-        if (param->IsUseable())
-            return std::unique_ptr<IShaderParameter>(param);
-        Tools::Delete(param);
-        return std::unique_ptr<IShaderParameter>();
+        auto it = this->_parameters.find(identifier);
+        if (it == this->_parameters.end())
+        {
+            auto ptr = new ShaderParameter(*this, identifier);
+            auto& pair = this->_parameters.insert(std::make_pair(identifier, std::unique_ptr<IShaderParameter>(ptr)));
+            return *pair.first->second;
+        }
+        return *it->second;
     }
 
-    std::unique_ptr<IShaderParameter> ShaderProgram::GetParameterFromSemantic(std::string const& semantic)
+    IShaderParameter& ShaderProgram::GetParameterFromSemantic(std::string const& semantic)
     {
-        return std::unique_ptr<IShaderParameter>(new ShaderParameter(*this, this->_effect->GetParameterBySemantic(0, semantic.c_str())));
+        auto it = this->_parameters.find(semantic + "__semantic__");
+        if (it == this->_parameters.end())
+        {
+            auto ptr = new ShaderParameter(*this, this->_effect->GetParameterBySemantic(0, semantic.c_str()));
+            auto& pair = this->_parameters.insert(std::make_pair(semantic + "__semantic__", std::unique_ptr<IShaderParameter>(ptr)));
+            return *pair.first->second;
+        }
+        return *it->second;
     }
 
     void ShaderProgram::SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage)

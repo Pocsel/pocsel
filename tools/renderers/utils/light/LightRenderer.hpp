@@ -25,30 +25,30 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         struct
         {
             IShaderProgram* shader;
-            std::unique_ptr<IShaderParameter> normalDepth;
-            std::unique_ptr<IShaderParameter> ambientColor;
-            std::unique_ptr<IShaderParameter> direction;
-            std::unique_ptr<IShaderParameter> diffuseColor;
-            std::unique_ptr<IShaderParameter> specularColor;
-            std::unique_ptr<IShaderParameter> shadowMap;
-            std::unique_ptr<IShaderParameter> lightViewProjection;
+            IShaderParameter* normalDepth;
+            IShaderParameter* ambientColor;
+            IShaderParameter* direction;
+            IShaderParameter* diffuseColor;
+            IShaderParameter* specularColor;
+            IShaderParameter* shadowMap;
+            IShaderParameter* lightViewProjection;
 
             IShaderProgram* depthShader;
             std::vector<std::pair<glm::mat4, std::unique_ptr<IRenderTarget>>> shadowMaps;
 
             glm::mat4 modelViewProjection;
-            std::unique_ptr<IShaderParameter> screenModelViewProjection;
+            IShaderParameter* screenModelViewProjection;
             std::unique_ptr<Image> screen;
         } _directionnal;
         struct
         {
             IShaderProgram* shader;
-            std::unique_ptr<IShaderParameter> normalDepth;
-            std::unique_ptr<IShaderParameter> position;
-            std::unique_ptr<IShaderParameter> range;
-            std::unique_ptr<IShaderParameter> diffuseColor;
-            std::unique_ptr<IShaderParameter> specularColor;
-            std::unique_ptr<IShaderParameter> shadowMap;
+            IShaderParameter* normalDepth;
+            IShaderParameter* position;
+            IShaderParameter* range;
+            IShaderParameter* diffuseColor;
+            IShaderParameter* specularColor;
+            IShaderParameter* shadowMap;
 
             IShaderProgram* depthShader;
             std::vector<std::unique_ptr<IRenderTarget>> shadowMaps;

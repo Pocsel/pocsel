@@ -12,10 +12,10 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     {
     private:
         T _value;
-        std::vector<std::unique_ptr<IShaderParameter>> _parameters;
+        std::vector<IShaderParameter*> _parameters;
 
     public:
-        Variable(Material&, std::vector<std::unique_ptr<IShaderParameter>>&& parameters)
+        Variable(Material&, std::vector<IShaderParameter*>&& parameters)
         {
             this->_parameters.swap(parameters);
         }
@@ -44,10 +44,10 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     private:
         Material& _material;
         Texture::ITexture* _texture;
-        std::vector<std::unique_ptr<IShaderParameter>> _parameters;
+        std::vector<IShaderParameter*> _parameters;
 
     public:
-        Variable(Material& material, std::vector<std::unique_ptr<IShaderParameter>>&& parameters) :
+        Variable(Material& material, std::vector<IShaderParameter*>&& parameters) :
             _material(material),
             _texture(0)
         {
@@ -67,8 +67,12 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
         virtual void UpdateParameter(int index)
         {
-            if (this->_texture != 0 && this->_parameters[index] != 0)
-                this->_parameters[index]->Set(this->_texture->GetCurrentTexture());
+            if (this->_texture != 0)
+            {
+                auto ptr = this->_parameters[index];
+                if (ptr != 0)
+                    ptr->Set(this->_texture->GetCurrentTexture());
+            }
         }
     };
 
@@ -78,9 +82,9 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         auto it = this->_variables.find(name);
         if (it == this->_variables.end())
         {
-            std::vector<std::unique_ptr<IShaderParameter>> parameters;
-            parameters.push_back(this->_geometry.shader.GetParameter(name));
-            parameters.push_back(this->_shadowMap.shader.GetParameter(name));
+            std::vector<IShaderParameter*> parameters;
+            parameters.push_back(&this->_geometry.shader.GetParameter(name));
+            parameters.push_back(&this->_shadowMap.shader.GetParameter(name));
             auto ptr = new Variable<TValue>(*this, std::move(parameters));
             this->_variables.insert(std::make_pair(name, std::unique_ptr<IVariable>(ptr)));
             return *ptr;

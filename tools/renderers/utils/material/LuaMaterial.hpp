@@ -14,13 +14,12 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         Lua::Ref _type;
         Lua::Ref _self;
         std::map<std::string, IVariable*> _variables;
-        std::map<std::string, Lua::Ref> _luaVariables;
         std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> _loadTexture;
 
     public:
         LuaMaterial(IRenderer& renderer, Lua::Ref const& registedMaterial, std::function<IShaderProgram&(std::string const&)> const& loadShader, std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> loadTexture);
 
-        LuaMaterial(LuaMaterial const& material);
+        explicit LuaMaterial(LuaMaterial const& material);
         LuaMaterial& operator =(LuaMaterial const& material);
 
         Material& GetMaterial() { return *this->_material; }
@@ -41,10 +40,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
                 this->_variables[key] = shaderVariable;
             }
             else
-            {
                 shaderVariable = reinterpret_cast<Variable<T>*>(it->second);
-                this->_luaVariables.erase(key);
-            }
             shaderVariable->Set(value);
         }
         template<class T>
@@ -59,10 +55,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
                 this->_variables[key] = shaderVariable;
             }
             else
-            {
                 shaderVariable = reinterpret_cast<Variable<T>*>(it->second);
-                this->_luaVariables.erase(key);
-            }
             shaderVariable->Set(value);
         }
     };

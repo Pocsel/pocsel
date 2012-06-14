@@ -233,6 +233,8 @@ namespace Tools {
             virtual void Set(std::vector<glm::mat4x4> const& matrices) = 0;
             virtual void Set(ITexture2D& texture) = 0;
 
+            virtual bool IsUseable() const = 0;
+
         protected:
             IShaderParameter() {}
         private:
@@ -245,8 +247,8 @@ namespace Tools {
         public:
             virtual ~IShaderProgram() {}
 
-            virtual std::unique_ptr<IShaderParameter> GetParameter(std::string const& identifier) = 0;
-            virtual std::unique_ptr<IShaderParameter> GetParameterFromSemantic(std::string const& semantic) = 0;
+            virtual IShaderParameter& GetParameter(std::string const& identifier) = 0;
+            virtual IShaderParameter& GetParameterFromSemantic(std::string const& semantic) = 0;
             virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage) = 0;
             virtual void UpdateParameter(ShaderParameterUsage::Type usage) = 0;
             virtual void UpdateCurrentPass() = 0;

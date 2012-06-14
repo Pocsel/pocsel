@@ -44,6 +44,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     ShaderProgramCg::~ShaderProgramCg()
     {
+        this->_parameters.clear();
         if (this->_mvp)
             cgDestroyParameter(this->_mvp);
         if (this->_vp)
@@ -71,18 +72,28 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         cgDestroyEffect(this->_effect);
     }
 
-    std::unique_ptr<IShaderParameter> ShaderProgramCg::GetParameter(std::string const& identifier)
+    IShaderParameter& ShaderProgramCg::GetParameter(std::string const& identifier)
     {
-        auto param = new ShaderParameterCg(*this, identifier);
-        if (param->IsUseable())
-            return std::unique_ptr<IShaderParameter>(param);
-        Tools::Delete(param);
-        return std::unique_ptr<IShaderParameter>();
+        auto it = this->_parameters.find(identifier);
+        if (it == this->_parameters.end())
+        {
+            auto ptr = new ShaderParameterCg(*this, identifier);
+            auto& pair = this->_parameters.insert(std::make_pair(identifier, std::unique_ptr<IShaderParameter>(ptr)));
+            return *pair.first->second;
+        }
+        return *it->second;
     }
 
-    std::unique_ptr<IShaderParameter> ShaderProgramCg::GetParameterFromSemantic(std::string const& semantic)
+    IShaderParameter& ShaderProgramCg::GetParameterFromSemantic(std::string const& semantic)
     {
-        return std::unique_ptr<IShaderParameter>(new ShaderParameterCg(cgGetEffectParameterBySemantic(this->_effect, semantic.c_str())));
+        auto it = this->_parameters.find(semantic + "__semantic__");
+        if (it == this->_parameters.end())
+        {
+            auto ptr = new ShaderParameterCg(cgGetEffectParameterBySemantic(this->_effect, semantic.c_str()));
+            auto& pair = this->_parameters.insert(std::make_pair(semantic + "__semantic__", std::unique_ptr<IShaderParameter>(ptr)));
+            return *pair.first->second;
+        }
+        return *it->second;
     }
 
     void ShaderProgramCg::SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage)

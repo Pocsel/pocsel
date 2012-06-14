@@ -16,10 +16,10 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_lightRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Light data
         this->_lightRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Specular data
 
-        this->_quadModelViewProj = this->_combineShader.GetParameter("quadWorldViewProjection");
-        this->_diffuseTexture = this->_combineShader.GetParameter("diffuse");
-        this->_lightTexture = this->_combineShader.GetParameter("lighting");
-        this->_specularTexture = this->_combineShader.GetParameter("specular");
+        this->_quadModelViewProj = &this->_combineShader.GetParameter("quadWorldViewProjection");
+        this->_diffuseTexture = &this->_combineShader.GetParameter("diffuse");
+        this->_lightTexture = &this->_combineShader.GetParameter("lighting");
+        this->_specularTexture = &this->_combineShader.GetParameter("specular");
 
         glm::fvec2 sizef(size);
         this->_mvp = glm::ortho(0.0f, sizef.x, sizef.y, 0.0f)
