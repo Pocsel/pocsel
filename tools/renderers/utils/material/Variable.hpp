@@ -86,7 +86,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             parameters.push_back(&this->_geometry.shader.GetParameter(name));
             parameters.push_back(&this->_shadowMap.shader.GetParameter(name));
             auto ptr = new Variable<TValue>(*this, std::move(parameters));
-            this->_variables.insert(std::make_pair(name, std::unique_ptr<IVariable>(ptr)));
+            this->_variables.insert(std::move(std::make_pair(name, std::unique_ptr<IVariable>(ptr))));
             return *ptr;
         }
         return reinterpret_cast<Variable<TValue>&>(*it->second);
