@@ -81,7 +81,11 @@ include_directories(
     ${ALL_INCLUDES}
 )
 
-file(GLOB_RECURSE   common_src                  "common/*.[ch]pp")
+set(BULLET_DIR "bullet")
+
+file(GLOB           common_src                  "common/*.[ch]pp")
+file(GLOB           common_physics_src          "common/physics/*.[ch]pp")
+
 file(GLOB           tools_base_src              "tools/*.[ch]pp" "tools/meta/*.[ch]pp")
 file(GLOB_RECURSE   tools_database_src          "tools/database/*.[ch]pp")
 file(GLOB_RECURSE   tools_gui_src               "tools/gui/*.[ch]pp")
@@ -91,14 +95,12 @@ file(GLOB_RECURSE   tools_lua_utils_src         "tools/lua/utils/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_install_src    "tools/plugin-install/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_create_src     "tools/plugin-create/*.[ch]pp")
 file(GLOB_RECURSE   tools_renderers_src         "tools/renderers/*.[ch]pp")
-file(GLOB           tools_physics_src           "tools/physics/*.[ch]pp")
 file(GLOB           tools_models_src            "tools/models/*.[ch]pp")
 file(GLOB           tools_models_convert_src    "tools/models/convert/*.[ch]pp")
 file(GLOB_RECURSE   tools_stat_src              "tools/stat/*.[ch]pp")
 file(GLOB_RECURSE   tools_thread_src            "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
-file(GLOB_RECURSE   bullet_src                  "bullet/*.hpp" "bullet/*.h")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 

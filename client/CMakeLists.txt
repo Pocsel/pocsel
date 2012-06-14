@@ -1,8 +1,11 @@
 file(GLOB_RECURSE client_src "*.[ch]pp")
 
+include_directories(${BULLET_DIR})
+
 set(src
     ${client_src}
     ${common_src}
+    ${common_physics_src}
     ${tools_base_src}
     ${tools_database_src}
     ${tools_logger_src}
@@ -10,7 +13,6 @@ set(src
     ${tools_lua_utils_src}
     ${tools_renderers_src}
     ${tools_models_src}
-    ${tools_physics_src}
     ${tools_stat_src}
     ${tools_thread_src}
     ${tools_window_src}
