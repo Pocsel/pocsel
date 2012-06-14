@@ -14,6 +14,7 @@
 #include "tools/window/Window.hpp"
 #include "tools/lua/Interpreter.hpp"
 
+#include "common/FieldUtils.hpp"
 #include "common/Resource.hpp"
 
 #include "client/Client.hpp"
@@ -281,9 +282,12 @@ namespace Client { namespace Resources {
         return *it->second;
     }
 
-    std::unique_ptr<Tools::Renderers::Utils::Material::Material> ResourceManager::GetMaterial(std::string const& name)
+    std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> ResourceManager::GetMaterial(std::string const& name)
     {
-        throw std::runtime_error("Not implemented yet"); // TODO
+        auto it = this->_materials.find(name);
+        if (it == this->_materials.end())
+            throw std::runtime_error("Material \"" + name + "\" not found");
+        return std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>(new Tools::Renderers::Utils::Material::LuaMaterial(*it->second));
     }
 
     //std::unique_ptr<Tools::Renderers::Utils::TextureAtlas> ResourceManager::CreateTextureAtlas(std::list<Uint32> const& textureIds)
@@ -354,12 +358,15 @@ namespace Client { namespace Resources {
         auto const& pluginName = this->_game.GetEngine().GetRunningPluginName();
         if (pluginName == "")
             throw std::runtime_error("CLient.Material.Register: Could not determine currently running plugin, aborting registration");
-        auto material = new Tools::Renderers::Utils::Material::LuaMaterial(
+        auto prototype = helper.PopArg();
+        auto const& materialName = prototype["materialName"].CheckString("missing materialName");
+        auto material = std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>(new Tools::Renderers::Utils::Material::LuaMaterial(
             this->_renderer,
-            helper.PopArg(),
+            prototype,
             std::bind(static_cast<Tools::Renderers::IShaderProgram&(ResourceManager::*)(std::string const&)>(&ResourceManager::GetShader), this, std::placeholders::_1),
-            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(ResourceManager::*)(std::string const&)>(&ResourceManager::GetTexture), this, std::placeholders::_1));
-        
-        Tools::log << "Material \"" << material->GetName() << "\" registered (plugin: " << pluginName << ")." << std::endl;
+            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(ResourceManager::*)(std::string const&)>(&ResourceManager::GetTexture), this, std::placeholders::_1)));
+        this->_materials.insert(std::make_pair(Common::FieldUtils::GetResourceName(pluginName, materialName), std::move(material)));
+
+        Tools::log << "Material \"" << materialName << "\" registered (plugin: " << pluginName << ")." << std::endl;
     }
 }}

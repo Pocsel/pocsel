@@ -31,18 +31,13 @@ namespace Client { namespace Game { namespace Engine {
 
         std::vector<std::string> const& materials = this->_model.GetMaterials();
         for (auto it = materials.begin(), ite = materials.end(); it != ite; ++it)
-            this->_textures.push_back(resourceManager.GetTexture(*it).release());
+            this->_materials.push_back(resourceManager.GetMaterial(*it));
 
         Tools::debug << "Model::Model: New model \"" << this->_type->GetName() << "\", id: " << this->_id << std::endl;
     }
 
     Model::~Model()
     {
-        for (auto it = this->_textures.begin(), ite = this->_textures.end(); it != ite; ++it)
-        {
-            Tools::Delete(*it);
-        }
-
         Tools::debug << "Model::Model: Destroying model \"" << this->_type->GetName() << "\", id: " << this->_id << std::endl;
     }
 

@@ -14,6 +14,7 @@ namespace Tools {
         class ITexture2D;
         namespace Utils {
             namespace Material {
+                class LuaMaterial;
                 class Material;
             }
             namespace Texture {
@@ -62,7 +63,7 @@ namespace Client { namespace Resources {
 
         // effect c'est pas une resource mais un registrabrle
         std::map<std::string, Effect*> _effects;
-        std::map<std::string, Tools::Renderers::Utils::Material::Material*> _materials;
+        std::map<std::string, std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> _materials;
 
         // Texture data (resource Id => renderer Texture)
         std::map<Uint32, Tools::Renderers::ITexture2D*> _rawTextures;
@@ -91,7 +92,7 @@ namespace Client { namespace Resources {
 
         // effect c'est pas une retouou mais un rtegjsiog
         Effect& GetEffect(std::string const& name);
-        std::unique_ptr<Tools::Renderers::Utils::Material::Material> GetMaterial(std::string const& name);
+        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> GetMaterial(std::string const& name);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }
         ResourceDownloader& GetDownloader() { return this->_downloader; }

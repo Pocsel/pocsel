@@ -15,7 +15,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         meshes.sort(
             [&](_MeshList::value_type const& lhs, _MeshList::value_type const& rhs) -> bool
             {
-                if (&(lhs.first->*getShader)() < &(rhs.first->*getShader)())
+                if (&(lhs.first->*getShader)() >= &(rhs.first->*getShader)())
                     return false;
                 auto lhsIt = lhs.first->GetTextures().begin();
                 auto lhsIte = lhs.first->GetTextures().end();
@@ -42,7 +42,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         {
             it->first->Update(totalTime);
             auto shader = &(it->first->*getShader)();
-            if (shader == current)
+            if (shader != current)
             {
                 DeferredShading::_RenderMeshes(totalTime, beginShaderIt, it, *current);
                 beginShaderIt = it;

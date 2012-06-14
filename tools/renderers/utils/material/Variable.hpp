@@ -75,12 +75,17 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     template<class TValue>
     inline Variable<TValue>& Material::GetVariable(std::string const& name)
     {
-        std::vector<std::unique_ptr<IShaderParameter>> parameters;
-        parameters.push_back(this->_geometry.shader.GetParameter(name));
-        parameters.push_back(this->_shadowMap.shader.GetParameter(name));
-        auto ptr = new Variable<TValue>(*this, std::move(parameters));
-        this->_variables.push_back(std::unique_ptr<IVariable>(ptr));
-        return *ptr;
+        auto it = this->_variables.find(name);
+        if (it == this->_variables.end())
+        {
+            std::vector<std::unique_ptr<IShaderParameter>> parameters;
+            parameters.push_back(this->_geometry.shader.GetParameter(name));
+            parameters.push_back(this->_shadowMap.shader.GetParameter(name));
+            auto ptr = new Variable<TValue>(*this, std::move(parameters));
+            this->_variables.insert(std::make_pair(name, std::unique_ptr<IVariable>(ptr)));
+            return *ptr;
+        }
+        return reinterpret_cast<Variable<TValue>&>(*it->second);
     }
 
 }}}}

@@ -2,14 +2,11 @@
 #define __CLIENT_GAME_MODEL_ENGINE_HPP__
 
 #include "tools/models/MqmModel.hpp"
+#include "tools/renderers/utils/material/LuaMaterial.hpp"
 
 namespace Client { namespace Resources {
     class ResourceManager;
 }}
-
-namespace Tools { namespace Renderers { namespace Utils { namespace Texture {
-    class ITexture;
-}}}}
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -29,7 +26,7 @@ namespace Client { namespace Game { namespace Engine {
         std::map<std::string, Tools::Models::MqmModel::AnimInfo> _animations;
         std::vector<glm::mat4x4> _animatedBones;
         float _animTime;
-        std::vector<Tools::Renderers::Utils::Texture::ITexture*> _textures;
+        std::vector<std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> _materials;
 
     public:
         Model(Resources::ResourceManager& resourceManager, Uint32 id, Uint32 doodadId, Doodad* doodad, ModelType* type);
@@ -46,7 +43,7 @@ namespace Client { namespace Game { namespace Engine {
         std::vector<glm::mat4x4> const& GetAnimatedBones() const { return this->_animatedBones; }
 
         // TODO recuperer les vraies textures
-        std::vector<Tools::Renderers::Utils::Texture::ITexture*> const& GetTextures() const { return this->_textures; }
+        std::vector<std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> const& GetMaterials() const { return this->_materials; }
         Tools::Renderers::IVertexBuffer* GetVertexBuffer() const { return this->_model.GetVertexBuffer(); }
         std::vector<Tools::Renderers::IIndexBuffer*> const& GetIndexBuffers() const { return this->_model.GetIndexBuffers(); }
     };

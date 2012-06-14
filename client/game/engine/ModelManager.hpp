@@ -1,9 +1,14 @@
 #ifndef __CLIENT_GAME_ENGINE_MODELMANAGER_HPP__
 #define __CLIENT_GAME_ENGINE_MODELMANAGER_HPP__
 
-namespace Tools { namespace Lua {
-    class CallHelper;
-}}
+namespace Tools {
+    namespace Lua {
+        class CallHelper;
+    }
+    namespace Renderers { namespace Utils {
+        class DeferredShading;
+    }}
+}
 namespace Client { namespace Game {
     class ModelRenderer;
 }}
@@ -30,7 +35,7 @@ namespace Client { namespace Game { namespace Engine {
         ModelManager(Engine& engine);
         ~ModelManager();
         void Tick(Uint64 totalTime);
-        void Render();
+        void Render(Tools::Renderers::Utils::DeferredShading& deferredShading);
         void DeleteModelsOfDoodad(Uint32 doodadId);
     private:
         void _ApiSpawn(Tools::Lua::CallHelper& helper);

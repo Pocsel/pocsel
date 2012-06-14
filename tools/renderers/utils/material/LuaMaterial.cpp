@@ -12,17 +12,22 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         _loadTexture(loadTexture)
     {
         this->_self.SetMetaTable(this->_type);
+        this->_self.Set("shader", this->_self.GetState().GetInterpreter().Make<LuaMaterial*>(this));
         auto& geometryShader = loadShader(this->_type["geometryShader"].Check<std::string>());
         auto& shadowMapShader = loadShader(this->_type["shadowMapShader"].Check<std::string>());
         this->_material.reset(new Material(renderer, this->_self, geometryShader, shadowMapShader));
+        this->_LoadVariables();
     }
 
     LuaMaterial::LuaMaterial(LuaMaterial const& material) :
         _material(new Material(*material._material)),
         _type(material._type),
-        _self(_type.GetState().MakeTable())
+        _self(_type.GetState().MakeTable()),
+        _loadTexture(material._loadTexture)
     {
         this->_self.SetMetaTable(this->_type);
+        this->_self.Set("shader", this->_self.GetState().GetInterpreter().Make<LuaMaterial*>(this));
+        this->_LoadVariables();
     }
 
     LuaMaterial& LuaMaterial::operator =(LuaMaterial const& material)
@@ -57,26 +62,20 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
         // Register type LuaMaterial
         {
-            auto table = Lua::MetaTable::Create<LuaMaterial>(interpreter);
+            auto table = Lua::MetaTable::Create<LuaMaterial*>(interpreter);
             table.SetMetaMethod(Lua::MetaTable::NewIndex,
                 [](Lua::CallHelper& helper)
                 {
-                    auto& material = *helper.PopArg().Check<LuaMaterial*>();
+                    auto& material = **helper.PopArg().Check<LuaMaterial**>();
                     auto key = helper.PopArg().Check<std::string>();
                     auto value = helper.PopArg();
 
-                    // TODO: Les autres types
-                    if (value.IsNumber())
-                        material._SetValue(key, (float)value.CheckNumber());
-                    else if (value.IsString())
-                        material._SetValue(key, std::shared_ptr<Texture::ITexture>(material._loadTexture(value.CheckString()).release()));
-                    else if (value.Is<std::shared_ptr<Texture::ITexture>>())
-                        material._SetValue(key, *value.Check<std::shared_ptr<Texture::ITexture>*>());
+                    material._SetLuaValue(key, value);
                 });
             table.SetMetaMethod(Lua::MetaTable::Index,
                 [](Lua::CallHelper& helper)
                 {
-                    auto& material = *helper.PopArg().Check<LuaMaterial*>();
+                    auto& material = **helper.PopArg().Check<LuaMaterial**>();
                     auto key = helper.PopArg().Check<std::string>();
 
                     auto it = material._variables.find(key);
@@ -101,14 +100,19 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         for (; it != ite; ++it)
         {
             auto key = it.GetKey().CheckString();
-            auto value = it.GetValue();
-
-            // TODO: Les autres types
-            if (value.IsNumber())
-                this->_SetValue(key, (float)value.CheckNumber());
-            else if (value.Is<std::string>())
-                this->_SetValue(key, std::shared_ptr<Texture::ITexture>(this->_loadTexture(value.CheckString()).release()));
+            this->_SetLuaValue(key, it.GetValue());
         }
+    }
+
+    void LuaMaterial::_SetLuaValue(std::string const& key, Lua::Ref value)
+    {
+        // TODO: Les autres types
+        if (value.IsNumber())
+            this->_SetValue(key, (float)value.CheckNumber());
+        else if (value.IsString())
+            this->_SetValue(key, std::shared_ptr<Texture::ITexture>(this->_loadTexture(value.CheckString()).release()));
+        else if (value.Is<std::shared_ptr<Texture::ITexture>>())
+            this->_SetValue(key, *value.Check<std::shared_ptr<Texture::ITexture>*>());
     }
 
 }}}}

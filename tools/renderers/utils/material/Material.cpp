@@ -58,7 +58,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             this->_geometry.shader.BeginPass();
             this->UpdateParameters(0, totalTime);
             for (auto it = this->_variables.begin(), ite = this->_variables.end(); it != ite; ++it)
-                (*it)->UpdateParameter(0);
+                it->second->UpdateParameter(0);
             render();
         } while (this->_geometry.shader.EndPass());
     }
@@ -80,7 +80,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         else
             this->_shadowMap.UpdateParameters(totalTime);
         for (auto it = this->_variables.begin(), ite = this->_variables.end(); it != ite; ++it)
-            (*it)->UpdateParameter(index);
+            it->second->UpdateParameter(index);
     }
 
     void Material::UpdateParameters(IShaderProgram& shader, Uint64 totalTime)

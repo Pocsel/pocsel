@@ -1,5 +1,6 @@
 #include "client/precompiled.hpp"
 
+#include "client/resources/ResourceManager.hpp"
 #include "client/game/engine/Engine.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/engine/Doodad.hpp"
@@ -7,6 +8,7 @@
 #include "client/game/engine/BodyManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
+#include "tools/renderers/utils/material/LuaMaterial.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/Resource.hpp"
 
@@ -24,6 +26,8 @@ namespace Client { namespace Game { namespace Engine {
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
+        Tools::Renderers::Utils::Material::LuaMaterial::LoadLuaTypes(*this->_interpreter,
+            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetTexture), &game.GetResourceManager(), std::placeholders::_1));
         Tools::Lua::Utils::RegisterColor(*this->_interpreter);
 
         // création des managers

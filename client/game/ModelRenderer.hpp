@@ -12,6 +12,9 @@ namespace Tools {
         class IShaderParameter;
         class IShaderProgram;
         class IVertexBuffer;
+        namespace Utils {
+            class DeferredShading;
+        }
     }
 }
 namespace Client {
@@ -33,14 +36,10 @@ namespace Client { namespace Game {
     private:
         Game& _game;
         Tools::IRenderer& _renderer;
-        Tools::Renderers::IShaderProgram* _shader;
-        Tools::Renderers::IShaderParameter* _shaderTexture;
-        Tools::Renderers::IShaderParameter* _shaderBoneMatrix;
 
     public:
         ModelRenderer(Game& game);
-        ~ModelRenderer();
-        void Render(Engine::Model const& model, Common::Position const& pos);
+        void Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Engine::Model const& model, Common::Position const& pos);
 
     private:
     };

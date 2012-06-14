@@ -23,9 +23,12 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         LuaMaterial(LuaMaterial const& material);
         LuaMaterial& operator =(LuaMaterial const& material);
 
+        Material& GetMaterial() { return *this->_material; }
+
         static void LoadLuaTypes(Lua::Interpreter& interpreter, std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> loadTexture);
     private:
         void _LoadVariables();
+        void _SetLuaValue(std::string const& key, Lua::Ref value);
         template<class T>
         void _SetValue(std::string const& key, T value)
         {

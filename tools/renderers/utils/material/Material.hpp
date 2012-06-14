@@ -35,7 +35,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         Effect _geometry;
         Effect _shadowMap;
         std::map<IVariable const*, std::shared_ptr<Texture::ITexture>> _textures;
-        std::vector<std::unique_ptr<IVariable>> _variables;
+        std::map<std::string, std::unique_ptr<IVariable>> _variables;
         Lua::Ref _luaMaterial;
         std::unique_ptr<Lua::Ref> _luaUpdate;
 
@@ -60,7 +60,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
         IShaderProgram& GetGeometryShader() { return this->_geometry.shader; }
         IShaderProgram& GetShadowMapShader() { return this->_shadowMap.shader; }
-        std::vector<std::unique_ptr<IVariable>> const& GetVariables() const { return this->_variables; }
+        std::map<std::string, std::unique_ptr<IVariable>> const& GetVariables() const { return this->_variables; }
         void UpdateParameters(int index, Uint64 totalTime);
         void UpdateParameters(IShaderProgram& shader, Uint64 totalTime);
     private:
