@@ -11,6 +11,7 @@ set(src
     ${tools_zlib_src}
     ${tools_plugin_src}
     ${tools_physics_src}
+    ${bullet_src}
 )
 
 CreateGroups("${src}")
@@ -19,6 +20,7 @@ add_executable(server ${src})
 enable_pch(server src)
 
 target_link_libraries(server
+    libbullet
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}

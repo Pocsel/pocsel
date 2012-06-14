@@ -98,6 +98,7 @@ file(GLOB_RECURSE   tools_stat_src              "tools/stat/*.[ch]pp")
 file(GLOB_RECURSE   tools_thread_src            "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
+file(GLOB_RECURSE   bullet_src                  "bullet/*.hpp" "bullet/*.h")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
@@ -143,6 +144,7 @@ configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/De
 
 add_subdirectory(sdk)
 add_subdirectory(plugins)
+add_subdirectory(bullet)
 add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(tests)
