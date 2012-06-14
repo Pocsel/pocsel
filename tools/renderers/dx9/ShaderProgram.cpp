@@ -61,7 +61,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         if (it == this->_parameters.end())
         {
             auto ptr = new ShaderParameter(*this, identifier);
-            auto& pair = this->_parameters.insert(std::make_pair(identifier, std::unique_ptr<IShaderParameter>(ptr)));
+            auto const& pair = this->_parameters.insert(std::make_pair(identifier, std::unique_ptr<IShaderParameter>(ptr)));
             return *pair.first->second;
         }
         return *it->second;
@@ -73,7 +73,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         if (it == this->_parameters.end())
         {
             auto ptr = new ShaderParameter(*this, this->_effect->GetParameterBySemantic(0, semantic.c_str()));
-            auto& pair = this->_parameters.insert(std::make_pair(semantic + "__semantic__", std::unique_ptr<IShaderParameter>(ptr)));
+            auto const& pair = this->_parameters.insert(std::make_pair(semantic + "__semantic__", std::unique_ptr<IShaderParameter>(ptr)));
             return *pair.first->second;
         }
         return *it->second;
