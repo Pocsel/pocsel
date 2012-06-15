@@ -227,7 +227,8 @@ function editLuaFile(plugin, file) {
         },
         dataType: 'json',
         success: function(json) {
-            $('#lua-modal_text').val(json.lua);
+            $('#lua-modal_text').empty();
+            $('#lua-modal_text').append(json.lua);
             $('#lua-modal_preloader').hide('fast');
             $('#lua-modal_text').show('fast');
             $('#lua-modal_swap').show('fast');
