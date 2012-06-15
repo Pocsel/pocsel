@@ -66,13 +66,6 @@
                 If the callback's target is unloaded or destroyed when the
                 callback is triggered, the callback fails silently.
 
-        - SpawnFromPlugin([position], plugin, entityName,
-                          [arg, [cbTarget, cbFunction, [cbArg]]])
-            Adds an event for spawning a new entity from a different plugin
-            (see Spawn()).
-            - plugin [string]
-                Plugin in which to search for the entity type.
-
         - Kill(target, [arg, [cbTarget, cbFunction, [cbArg]]])
             Adds an event for killing an entity on the next tick.
             - target [number]
@@ -102,18 +95,47 @@
                 If the callback's target is unloaded or destroyed when the
                 callback is triggered, the callback fails silently.
 
-        - CallLater(seconds, function, [arg])
-            Adds an event for calling a function of the calling entity. This
-            call is guaranteed to succeed if the function exists.
-            - seconds [number]
-                Number of seconds to wait before calling the function.
-            - function [string]
-                Name of the function to call.
-            - arg [serializable]
-                Argument to pass to the function.
+        - Save([target])
+            Writes all local variables to storage.
+            - target [number]
+                Id of the entity to save.
 
-        - Call(function, [arg])
-            Calls CallLater() with the first parameter (seconds) set to 0.
+        - Load([target])
+            Reads all variables from storage to create local variables.
+            - target [number]
+                Id of the entity to load.
+
+        - SetPos(target, pos)
+        - GetPos(target)
+        - SetSpeed(target, speed)
+        - GetSpeed(target)
+        - SetAccel(target, accel)
+        - GetAccel(target)
+            // TODO
+
+//        - CallLater(seconds, function, [arg])
+//            Adds an event for calling a function of the calling entity. This
+//            call is guaranteed to succeed if the function exists.
+//            - seconds [number]
+//                Number of seconds to wait before calling the function.
+//            - function [string]
+//                Name of the function to call.
+//            - arg [serializable]
+//                Argument to pass to the function.
+//
+//        - Call(function, [arg])
+//            Calls CallLater() with the first parameter (seconds) set to 0.
+
+    - Doodad
+        Doodad manager.
+
+        - Spawn([entityId], doodadName, [bodyName])
+        - Kill(target)
+        - Set(target, key, value)
+        - Call(target, function, value)
+        - SetUdp(target, key, value)
+        - CallUdp(target, function, value)
+            // TODO
 
     - Message
         Messaging system between entities.
