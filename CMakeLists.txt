@@ -81,7 +81,7 @@ include_directories(
     ${ALL_INCLUDES}
 )
 
-set(BULLET_DIR "bullet")
+set(BULLET_DIR "${CMAKE_SOURCE_DIR}/bullet")
 
 file(GLOB           common_src                  "common/*.[ch]pp")
 file(GLOB           common_physics_src          "common/physics/*.[ch]pp")

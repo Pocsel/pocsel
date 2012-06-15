@@ -26,6 +26,7 @@ add_executable(client ${src})
 enable_pch(client src)
 
 target_link_libraries(client
+    libbullet
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${SQLITE3_LIBRARIES}
