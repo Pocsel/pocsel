@@ -30,6 +30,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             this->_value = value;
         }
 
+        virtual Lua::Ref GetLuaValue(Lua::Interpreter& interpreter) const
+        {
+            return interpreter.Make(this->_value);
+        }
+
         virtual void UpdateParameter(int index)
         {
             if (this->_parameters[index] != 0)
@@ -65,6 +70,11 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             this->_material.SetTextures(*this, texture);
         }
 
+        virtual Lua::Ref GetLuaValue(Lua::Interpreter& interpreter) const
+        {
+            return interpreter.Make(this->_texture);
+        }
+
         virtual void UpdateParameter(int index)
         {
             if (this->_texture != 0)
@@ -83,13 +93,45 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         if (it == this->_variables.end())
         {
             std::vector<IShaderParameter*> parameters;
-            parameters.push_back(&this->_geometry.shader.GetParameter(name));
-            parameters.push_back(&this->_shadowMap.shader.GetParameter(name));
+            parameters.push_back(&this->_geometry->shader.GetParameter(name));
+            parameters.push_back(&this->_shadowMap->shader.GetParameter(name));
             auto ptr = new Variable<TValue>(*this, std::move(parameters));
             this->_variables.insert(std::move(std::make_pair(name, std::unique_ptr<IVariable>(ptr))));
             return *ptr;
         }
         return reinterpret_cast<Variable<TValue>&>(*it->second);
+    }
+
+    template<class T>
+    inline void Material::_SetValue(std::string const& key, T value)
+    {
+        auto it = this->_variables.find(key);
+
+        Variable<T>* shaderVariable;
+        if (it == this->_variables.end())
+        {
+            shaderVariable = &this->GetVariable<T>(key);
+            this->_variables[key].reset(shaderVariable);
+        }
+        else
+            shaderVariable = reinterpret_cast<Variable<T>*>(it->second.get());
+        shaderVariable->Set(value);
+    }
+
+    template<class T>
+    inline void Material::_SetValue(std::string const& key, std::shared_ptr<T> value)
+    {
+        auto it = this->_variables.find(key);
+
+        Variable<T>* shaderVariable;
+        if (it == this->_variables.end())
+        {
+            shaderVariable = &this->GetVariable<T>(key);
+            this->_variables[key].reset(shaderVariable);
+        }
+        else
+            shaderVariable = reinterpret_cast<Variable<T>*>(it->second.get());
+        shaderVariable->Set(value);
     }
 
 }}}}

@@ -68,19 +68,38 @@ namespace {
 namespace Tools { namespace Lua {
 
     State::State(Interpreter& interpreter) throw(std::runtime_error) :
-        _interpreter(interpreter)
+        _interpreter(interpreter),
+        _weakId(1),
+        _garbageCollectionEnabled(true)
     {
         this->_state = luaL_newstate();
         if (!this->_state)
             throw std::runtime_error("Lua::State: Not enough memory to instantiate new interpreter");
+        this->_weakTable = new Ref(this->MakeTable());
+        auto metaWeakTable = this->MakeTable();
+        metaWeakTable.Set("__mode", "v");
+        this->_weakTable->SetMetaTable(metaWeakTable);
     }
 
     State::~State() throw()
     {
+        Tools::Delete(this->_weakTable);
         for (auto it = this->_metaTables.begin(), ite = this->_metaTables.end(); it != ite; ++it)
             Tools::Delete(it->second);
         this->_metaTables.clear(); // leak possible
         lua_close(this->_state);
+    }
+
+    void State::StopGarbageCollector()
+    {
+        lua_gc(this->_state, LUA_GCSTOP, 0);
+        this->_garbageCollectionEnabled = false;
+    }
+
+    void State::RestartGarbageCollector()
+    {
+        lua_gc(this->_state, LUA_GCRESTART, 0);
+        this->_garbageCollectionEnabled = true;
     }
 
     void State::RegisterMetaTable(Ref const& metaTable, std::size_t hash) throw()
@@ -183,11 +202,10 @@ namespace Tools { namespace Lua {
     MAKE_MAKEMETHOD(char const*, MakeString);
     MAKE_MAKEMETHOD(std::function<void(CallHelper&)>, MakeFunction);
 
-    template <>
-        Ref State::Make<Ref>(Ref const& val) throw()
-        {
-            return val;
-        }
+    template<> Ref State::Make<Ref>(Ref const& val) throw()
+    {
+        return val;
+    }
 
     Ref State::GetMetaTable(std::size_t hash) throw(std::runtime_error)
     {
@@ -195,5 +213,16 @@ namespace Tools { namespace Lua {
         if (it == this->_metaTables.end())
             throw std::runtime_error("Lua::State: MetaTable not found");
         return *it->second;
+    }
+
+    Ref State::GetWeakReference(Uint32 id) const
+    {
+        return (*this->_weakTable)[id];
+    }
+
+    Uint32 State::GetWeakReference(Ref const& ref)
+    {
+        this->_weakTable->Set(this->_weakId, ref);
+        return this->_weakId++;
     }
 }}

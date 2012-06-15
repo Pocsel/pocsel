@@ -37,6 +37,8 @@ namespace Tools { namespace Renderers { namespace Utils {
             });
 
         auto beginShaderIt = meshes.begin();
+        if (beginShaderIt == meshes.end())
+            return;
         IShaderProgram* current = &beginShaderIt->first->GetGeometryShader();
         for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
         {
