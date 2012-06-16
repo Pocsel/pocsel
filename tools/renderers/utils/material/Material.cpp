@@ -193,6 +193,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             metaTable.Set("__call", interpreter.MakeFunction(
                 [loadMaterial, &interpreter](Lua::CallHelper& helper)
                 {
+                    helper.PopArg(); // Il y a un argument en plus, je ne sais pas trop quoi, ça print "[base/?]" en lua
                     auto material = loadMaterial(helper.PopArg().CheckString());
                     auto vars = helper.PopArg();
                     if (vars.IsTable())

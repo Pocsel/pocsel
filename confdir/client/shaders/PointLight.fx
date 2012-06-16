@@ -50,7 +50,11 @@ float3 decodePosition(float4 enc, float2 coords)
 {
     float z = 1-enc.z;
     float x = coords.x * 2 - 1;
+#ifdef DIRECTX
     float y = (1 - coords.y) * 2 - 1;
+#else
+    float y = coords.y * 2 - 1;
+#endif
     float4 projPos = float4(x, y, z, 1.0);
     float4 pos = mul(projectionInverse, projPos);
     return pos.xyz / pos.w;
@@ -80,6 +84,10 @@ FSout fs(in VSout v)
     f.specular.rgb = specular * lightSpecularColor * attenuation;
     f.diffuse.a = NdL;
     f.specular.a = specular;
+
+    f.diffuse.r = 1.0;
+    f.diffuse.a = 1.0;
+
     return f;
 }
 

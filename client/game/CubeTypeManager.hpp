@@ -11,7 +11,7 @@ namespace Client {
 
 namespace Client { namespace Game {
 
-    class CubeTypeManager
+    class CubeTypeManager : private boost::noncopyable
     {
     private:
         Common::BaseChunk::CubeType _nbCubeTypes;
@@ -23,7 +23,7 @@ namespace Client { namespace Game {
     public:
         CubeTypeManager(Client& client, Common::BaseChunk::CubeType nbCubeTypes);
 
-        void AddCubeType(std::unique_ptr<Common::CubeType> cubeType);
+        void AddCubeType(std::unique_ptr<Common::CubeType>&& cubeType);
         void LoadMaterials();
 
         std::vector<CubeType> const& GetCubeTypes() const { return this->_cubeTypes; }
