@@ -23,7 +23,6 @@
 #include "client/resources/CacheDatabaseProxy.hpp"
 #include "client/resources/ResourceDownloader.hpp"
 #include "client/resources/ResourceManager.hpp"
-#include "client/resources/Effect.hpp"
 #include "client/Settings.hpp"
 
 namespace {
@@ -109,9 +108,6 @@ namespace Client { namespace Resources {
         Tools::Delete(errModel);
 
         for (auto it = this->_shaders.begin(), ite = this->_shaders.end(); it != ite; ++it)
-            Tools::Delete(it->second);
-
-        for (auto it = this->_effects.begin(), ite = this->_effects.end(); it != ite; ++it)
             Tools::Delete(it->second);
     }
 
@@ -274,13 +270,13 @@ namespace Client { namespace Resources {
         return this->_database.GetResource(this->_database.GetResourceId(name));
     }
 
-    Effect& ResourceManager::GetEffect(std::string const& name)
-    {
-        auto it = this->_effects.find(name);
-        if (it == this->_effects.end())
-            throw std::runtime_error("Effect \"" + name + "\" not found");
-        return *it->second;
-    }
+    //Effect& ResourceManager::GetEffect(std::string const& name)
+    //{
+    //    auto it = this->_effects.find(name);
+    //    if (it == this->_effects.end())
+    //        throw std::runtime_error("Effect \"" + name + "\" not found");
+    //    return *it->second;
+    //}
 
     std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> ResourceManager::GetMaterial(std::string const& name)
     {
@@ -335,29 +331,16 @@ namespace Client { namespace Resources {
     void ResourceManager::RegisterLuaFunctions()
     {
         auto clientNs = this->_game.GetInterpreter().Globals().GetTable("Client");
-        auto effectNs = clientNs.GetTable("Effect");
-        effectNs.Set("Register", this->_game.GetInterpreter().MakeFunction(
-                    std::bind(&ResourceManager::_ApiRegisterEffect, this, std::placeholders::_1)));
         auto materialNs = clientNs.GetTable("Material");
         materialNs.Set("Register", this->_game.GetInterpreter().MakeFunction(std::bind(&ResourceManager::_ApiRegisterMaterial, this, std::placeholders::_1)));
         //Tools::Renderers::Utils::Material::LuaMaterial::LoadLuaTypes(this->_game.GetInterpreter(), );
-    }
-
-    void ResourceManager::_ApiRegisterEffect(Tools::Lua::CallHelper& helper)
-    {
-        auto const& pluginName = this->_game.GetEngine().GetRunningPluginName();
-        if (pluginName == "")
-            throw std::runtime_error("CLient.Effect.Register: Could not determine currently running plugin, aborting registration");
-        auto effect = new Effect(this->_game, helper.PopArg());
-        this->_effects[effect->GetName()] = effect;
-        Tools::log << "Effect \"" << effect->GetName() << "\" registered (plugin: " << pluginName << ")." << std::endl;
     }
 
     void ResourceManager::_ApiRegisterMaterial(Tools::Lua::CallHelper& helper)
     {
         auto const& pluginName = this->_game.GetEngine().GetRunningPluginName();
         if (pluginName == "")
-            throw std::runtime_error("CLient.Material.Register: Could not determine currently running plugin, aborting registration");
+            throw std::runtime_error("Client.Material.Register: Could not determine currently running plugin, aborting registration");
         auto prototype = helper.PopArg();
         auto const& materialName = prototype["materialName"].CheckString("missing materialName");
         auto material = std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>(new Tools::Renderers::Utils::Material::LuaMaterial(

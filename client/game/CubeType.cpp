@@ -3,7 +3,6 @@
 #include "tools/lua/Function.hpp"
 
 #include "client/game/CubeType.hpp"
-#include "client/resources/Effect.hpp"
 #include "client/resources/ResourceManager.hpp"
 
 using Tools::Renderers::Utils::Material::LuaMaterial;

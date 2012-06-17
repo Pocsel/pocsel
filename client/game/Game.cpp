@@ -132,12 +132,13 @@ namespace Client { namespace Game {
         this->_gBuffer->Bind();
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
 
-        this->_RenderScene(absoluteViewProjection);
+        //this->_RenderScene(absoluteViewProjection);
+        this->_map->GetChunkManager().Render(this->_deferredShading, this->GetPlayer().GetCamera().position, absoluteViewProjection);
         this->_engine->GetModelManager().Render(this->_deferredShading);
-        this->_map->GetChunkManager().RenderAlpha(this->GetPlayer().GetCamera().position);
-        this->_player->Render();
 
         this->_deferredShading.RenderGeometry(totalTime);
+
+        this->_player->Render();
 
         this->_gBuffer->Unbind();
 
@@ -187,7 +188,6 @@ namespace Client { namespace Game {
 
     void Game::_RenderScene(glm::dmat4 viewProjection)
     {
-        this->_map->GetChunkManager().Render(this->GetPlayer().GetCamera().position, viewProjection);
     }
 
 }}

@@ -3,6 +3,7 @@
 
 #include "common/BaseChunk.hpp"
 #include "tools/IRenderer.hpp"
+#include "tools/renderers/utils/DeferredShading.hpp"
 #include "tools/renderers/utils/material/LuaMaterial.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 
@@ -36,8 +37,7 @@ namespace Client { namespace Map {
         ~ChunkRenderer();
 
         bool RefreshGraphics(Chunk& chunk);
-        void Render(Common::Position const& position, glm::dmat4 viewProj);
-        void RenderAlpha(Common::Position const& position);
+        void Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Common::Position const& position, glm::dmat4 const& viewProj);
     };
 
 }}

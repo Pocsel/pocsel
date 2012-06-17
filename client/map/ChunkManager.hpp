@@ -56,8 +56,10 @@ namespace Client { namespace Map {
         void AddChunk(std::unique_ptr<Chunk>&& chunk);
         void UpdateLoading();
         void Update(Uint64 totalTime, Common::Position const& playerPosition);
-        void Render(Common::Position const& position, glm::dmat4 viewProjection) { this->_chunkRenderer.Render(position, viewProjection); }
-        void RenderAlpha(Common::Position const& position) { this->_chunkRenderer.RenderAlpha(position); }
+        void Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Common::Position const& position, glm::dmat4 const& viewProjection)
+        {
+            this->_chunkRenderer.Render(deferredShading, position, viewProjection);
+        }
 
         template<class TFunc>
         void ForeachIn(Tools::AbstractCollider const& container, TFunc function);

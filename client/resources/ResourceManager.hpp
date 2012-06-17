@@ -36,9 +36,6 @@ namespace Client {
     namespace Game {
         class Game;
     }
-    namespace Resources {
-        class Effect;
-    }
 }
 
 namespace Client { namespace Resources {
@@ -62,7 +59,6 @@ namespace Client { namespace Resources {
         std::map<Uint32, std::string> _scripts;
 
         // effect c'est pas une resource mais un registrabrle
-        std::map<std::string, Effect*> _effects;
         std::map<std::string, std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> _materials;
 
         // Texture data (resource Id => renderer Texture)
@@ -84,14 +80,13 @@ namespace Client { namespace Resources {
         std::string GetScript(Uint32 id);
         std::unique_ptr<Common::Resource> GetResource(Uint32 id);
 
-        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(std::string const& name);
         Tools::Models::MqmModel const& GetMqmModel(std::string const& name);
         Tools::Renderers::IShaderProgram& GetShader(std::string const& name);
         std::string GetScript(std::string const& name);
         std::unique_ptr<Common::Resource> GetResource(std::string const& name);
 
-        // effect c'est pas une retouou mais un rtegjsiog
-        Effect& GetEffect(std::string const& name);
+        // Les registrables
+        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(std::string const& name);
         std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> GetMaterial(std::string const& name);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }
@@ -110,7 +105,6 @@ namespace Client { namespace Resources {
     private:
         void _InitErrorTexture();
         void _InitErrorModel();
-        void _ApiRegisterEffect(Tools::Lua::CallHelper& helper);
         void _ApiRegisterMaterial(Tools::Lua::CallHelper& helper);
     };
 

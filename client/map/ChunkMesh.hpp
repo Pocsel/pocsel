@@ -5,9 +5,12 @@
 
 #include "common/BaseChunk.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils { namespace Material {
-    class Material;
-}}}}
+namespace Tools { namespace Renderers { namespace Utils {
+    class DeferredShading;
+    namespace Material {
+        class Material;
+    }
+}}}
 
 namespace Client {
     namespace Game {
@@ -58,17 +61,8 @@ namespace Client { namespace Map {
                      std::vector<std::shared_ptr<Common::BaseChunk::CubeType>> neighbors);
 
         bool RefreshGraphics(Tools::IRenderer& renderer);
-        void Render(Tools::Renderers::Utils::Material::Material& material, Tools::IRenderer& renderer);
+        void Render(Tools::IRenderer& renderer, Tools::Renderers::Utils::DeferredShading& deferredShading, glm::mat4 const& world, Uint32 squaredDistance);
         Uint32 GetTriangleCount() const { return this->_triangleCount; }
-        Uint32 GetTriangleCount(Tools::Renderers::Utils::Material::Material& material) const
-        {
-            if (this->_triangleCount == 0)
-                return 0;
-            auto it = this->_meshes.find(&material);
-            if (it == this->_meshes.end())
-                return 0;
-            return it->second.nbIndices * 4 / 3;
-        }
         bool HasTransparentCube() const { return this->_hasTransparentCube; }
     };
 

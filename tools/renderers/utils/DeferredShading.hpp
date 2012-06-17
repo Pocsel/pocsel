@@ -10,7 +10,7 @@ namespace Tools { namespace Renderers { namespace Utils {
     class DeferredShading
     {
     private:
-        typedef std::list<std::pair<Material::Material*, std::function<void()>>> _MeshList;
+        typedef std::vector<std::tuple<Material::Material*, std::function<void()>, Uint32>> _MeshList;
 
         IRenderer& _renderer;
         _MeshList _geometryMeshes;
@@ -19,13 +19,13 @@ namespace Tools { namespace Renderers { namespace Utils {
     public:
         DeferredShading(IRenderer& renderer);
 
-        void RenderGeometry(Material::Material& material, std::function<void()> const& render)
+        void RenderGeometry(Material::Material& material, std::function<void()> const& render, Uint32 squaredDistance = std::numeric_limits<Uint32>::max())
         {
-            this->_geometryMeshes.push_back(std::make_pair(&material, render));
+            this->_geometryMeshes.push_back(std::make_tuple(&material, render, squaredDistance));
         }
-        void RenderShadowMap(Material::Material& material, std::function<void()> const& render)
+        void RenderShadowMap(Material::Material& material, std::function<void()> const& render, Uint32 squaredDistance = std::numeric_limits<Uint32>::max())
         {
-            this->_shadowMapMeshes.push_back(std::make_pair(&material, render));
+            this->_shadowMapMeshes.push_back(std::make_tuple(&material, render, squaredDistance));
         }
         void RenderGeometry(Uint64 totalTime) { this->_Render(totalTime, this->_geometryMeshes, &Material::Material::GetGeometryShader); }
         void RenderShadowMap(Uint64 totalTime) { this->_Render(totalTime, this->_shadowMapMeshes, &Material::Material::GetShadowMapShader); }

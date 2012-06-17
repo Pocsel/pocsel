@@ -318,18 +318,27 @@ namespace Client { namespace Map {
         return true;
     }
 
-    void ChunkMesh::Render(Material& material, Tools::IRenderer& renderer)
+    void ChunkMesh::Render(Tools::IRenderer& renderer, Tools::Renderers::Utils::DeferredShading& deferredShading, glm::mat4 const& world, Uint32 squaredDistance)
     {
         if (this->_triangleCount == 0)
             return;
-        Mesh& m = this->_meshes[&material];
-        if (m.nbIndices == 0)
-            return;
-        this->_vertices->Bind();
-        m.indices->Bind();
-        renderer.DrawElements(m.nbIndices);
-        m.indices->Unbind();
-        this->_vertices->Unbind();
+        for (auto it = this->_meshes.begin(), ite = this->_meshes.end(); it != ite; ++it)
+        {
+            auto& m = it->second;
+            if (m.nbIndices == 0)
+                continue;
+            deferredShading.RenderGeometry(*it->first,
+                [this, &m, &renderer, world]()
+                {
+                    renderer.SetModelMatrix(world);
+                    this->_vertices->Bind();
+                    m.indices->Bind();
+                    renderer.DrawElements(m.nbIndices);
+                    m.indices->Unbind();
+                    this->_vertices->Unbind();
+                },
+                squaredDistance);
+        }
     }
 
 }}
