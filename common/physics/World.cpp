@@ -26,7 +26,7 @@ namespace Common { namespace Physics {
 
         _dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
 
-        _dynamicsWorld->setGravity(btVector3(0,-10,0));
+        _dynamicsWorld->setGravity(btVector3(0,-0.1,0));
     }
 
     World::~World()

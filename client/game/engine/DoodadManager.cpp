@@ -6,6 +6,8 @@
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/physics/Move.hpp"
+#include "common/physics/World.hpp"
+#include "bullet/bullet-all.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -13,8 +15,10 @@ namespace Client { namespace Game { namespace Engine {
         _engine(engine),
         _runningDoodadId(0),
         _runningDoodad(0),
-        _lastTime(0)
+        _lastTime(0),
+        _world(0)
     {
+        this->_world = new Common::Physics::World();
         auto& i = this->_engine.GetInterpreter();
         auto namespaceTable = i.Globals().GetTable("Client").GetTable("Doodad");
         namespaceTable.Set("Register", i.MakeFunction(std::bind(&DoodadManager::_ApiRegister, this, std::placeholders::_1)));
@@ -32,6 +36,8 @@ namespace Client { namespace Game { namespace Engine {
         auto itPluginEnd = this->_doodadTypes.end();
         for (; itPlugin != itPluginEnd; ++itPlugin)
             Tools::Delete(itPlugin->second);
+
+        Tools::Delete(this->_world);
     }
 
     //Uint32 DoodadManager::GetRunningPluginId() const
@@ -50,11 +56,22 @@ namespace Client { namespace Game { namespace Engine {
     void DoodadManager::Tick(Uint64 totalTime)
     {
         double deltaTime = (totalTime - this->_lastTime) / (double)1000000;
+
+        this->_world->GetBtWorld().stepSimulation(deltaTime);
+
         auto it = this->_doodads.begin();
         auto itEnd = this->_doodads.end();
         for (; it != itEnd; ++it)
         {
-            Common::Physics::MoveNode(it->second->GetPhysics(), deltaTime);
+            Doodad& entity = *it->second;
+            btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
+            Common::Physics::Node& physics = entity.GetPhysics();
+
+            physics.position.r.x = btPos.x();
+            physics.position.r.y = btPos.y();
+            physics.position.r.z = btPos.z();
+
+            //Common::Physics::MoveNode(it->second->GetPhysics(), deltaTime);
             this->_CallDoodadFunction(it->first, "Think");
         }
         this->_lastTime = totalTime;
@@ -84,6 +101,7 @@ namespace Client { namespace Game { namespace Engine {
             auto const& v = *itValues;
             // TODO
         }
+        this->_world->GetBtWorld().addRigidBody(&this->_doodads[doodadId]->GetBtBody());
         this->_CallDoodadFunction(doodadId, "Spawn");
     }
 

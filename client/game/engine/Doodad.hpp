@@ -6,6 +6,8 @@
 
 #include "common/physics/Node.hpp"
 
+class btRigidBody;
+
 namespace Client { namespace Game { namespace Engine {
 
     class Doodad :
@@ -15,6 +17,7 @@ namespace Client { namespace Game { namespace Engine {
         DoodadType const& _type;
         Tools::Lua::Ref _self;
         Common::Physics::Node _physics;
+        btRigidBody* _btBody;
 
     public:
         Doodad(Tools::Lua::Interpreter& interpreter, Uint32 id, Common::Physics::Node const& physics, DoodadType const& type);
@@ -33,6 +36,7 @@ namespace Client { namespace Game { namespace Engine {
         void SetPhysics(Common::Physics::Node const& p) { this->_physics = p; }
 
         Common::Physics::Node& GetPhysics() { return this->_physics; }
+        btRigidBody& GetBtBody() { return *this->_btBody; }
     };
 
 }}}

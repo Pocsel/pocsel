@@ -7,6 +7,7 @@ namespace Tools { namespace Lua {
 
 namespace Common { namespace Physics {
     struct Node;
+    class World;
 }}
 
 namespace Client { namespace Game { namespace Engine {
@@ -25,6 +26,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 _runningDoodadId; // 0 quand aucun doodad n'est en cours d'éxécution
         Doodad* _runningDoodad; // nul quand aucun doodad n'est en cours d'éxécution
         Uint64 _lastTime;
+        Common::Physics::World* _world;
 
     public:
         DoodadManager(Engine& engine);

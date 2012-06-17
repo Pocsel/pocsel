@@ -4,6 +4,8 @@
 #include "common/physics/Node.hpp"
 #include "server/game/engine/Entity.hpp"
 
+class btRigidBody;
+
 namespace Server { namespace Game { namespace Engine {
 
     class PositionalEntity :
@@ -11,9 +13,11 @@ namespace Server { namespace Game { namespace Engine {
     {
     private:
         Common::Physics::Node _physics;
+        btRigidBody* _btBody;
 
     public:
         PositionalEntity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
+        ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position.r; }
         void SetPosition(Common::Position const& pos) { this->_physics.position.r = pos; }
@@ -26,6 +30,7 @@ namespace Server { namespace Game { namespace Engine {
         void SetPhysics(Common::Physics::Node const& p) { this->_physics = p; }
 
         Common::Physics::Node& GetPhysics() { return this->_physics; }
+        btRigidBody& GetBtBody() { return *this->_btBody; }
     };
 
 }}}

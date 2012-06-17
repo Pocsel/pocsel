@@ -2,8 +2,7 @@
 #define __SERVER_GAME_ENGINE_PHYSICSMANAGER_HPP__
 
 namespace Common { namespace Physics {
-    struct Node;
-    template<typename T> struct Vector;
+    class World;
 }}
 
 namespace Server { namespace Game { namespace Engine {
@@ -18,9 +17,12 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Engine& _engine;
         std::map<Uint32, PositionalEntity*> const& _entities;
+        std::set<Uint32> _bodiesInWorld;
+        Common::Physics::World* _world;
 
     public:
         PhysicsManager(Engine& engine, std::map<Uint32, PositionalEntity*> const& entities);
+        ~PhysicsManager();
         void Tick(Uint64 deltaTime);
     };
 

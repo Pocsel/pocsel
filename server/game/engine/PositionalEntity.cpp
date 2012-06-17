@@ -1,11 +1,41 @@
 #include "server/game/engine/PositionalEntity.hpp"
 
+#include "bullet/bullet-all.hpp"
+
 namespace Server { namespace Game { namespace Engine {
 
     PositionalEntity::PositionalEntity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos) :
-        Entity(interpreter, id, type)
+        Entity(interpreter, id, type),
+        _btBody(0)
     {
         _physics.position.r = pos;
+
+        static btCollisionShape* colShape = new btBoxShape(btVector3(1, 2, 1));
+
+        /// Create Dynamic Objects
+        btTransform startTransform;
+        startTransform.setIdentity();
+
+        btScalar mass(12);
+        btVector3 localInertia(0, 0, 0);
+
+        colShape->calculateLocalInertia(mass, localInertia);
+
+        startTransform.setOrigin(btVector3(
+                    btScalar(pos.x),
+                    btScalar(pos.y),
+                    btScalar(pos.z)));
+
+        //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+        btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+        _btBody = new btRigidBody(rbInfo);
     }
+
+    PositionalEntity::~PositionalEntity()
+    {
+        Tools::Delete(_btBody);
+    }
+
 
 }}}
