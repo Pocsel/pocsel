@@ -18,7 +18,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         _renderer(renderer),
         _loadTexture(loadTexture),
         _type(type),
-        _self(materialSelf.GetState())
+        _self(materialSelf.GetState()),
+        _hasAlpha(0)
     {
         materialSelf = materialSelf.GetState().MakeTable();
         this->_self = materialSelf;
@@ -40,7 +41,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         _geometry(new Effect(material._geometry->shader)),
         _shadowMap(new Effect(material._shadowMap->shader)),
         _type(material._type),
-        _self(material._type.GetState())
+        _self(material._type.GetState()),
+        _hasAlpha(0)
     {
         materialSelf = materialSelf.GetState().MakeTable();
         this->_self = materialSelf;
@@ -124,8 +126,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         auto update = this->_type["Update"];
         if (update.IsFunction())
             this->SetLuaUpdate(update);
-        if (this->_type["alpha"].IsBoolean())
-            this->_hasAlpha = this->_type["alpha"].CheckBoolean();
+        if (this->_type["hasAlpha"].IsBoolean())
+            this->_hasAlpha = this->_type["hasAlpha"].CheckBoolean();
     }
 
     void Material::SetLuaValue(std::string const& key, Lua::Ref value)
