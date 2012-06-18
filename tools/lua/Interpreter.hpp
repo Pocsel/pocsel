@@ -70,13 +70,17 @@ namespace Tools { namespace Lua {
         Ref Bind(T function, TA1 arg1, TA2 arg2, TA3 arg3);
     };
 
+#ifdef new
+# undef new
+#endif
+
     template <typename T>
     inline Ref Interpreter::Make(T val) throw(std::runtime_error)
     {
         auto m = this->_state->GetMetaTable(typeid(T).hash_code());
         T* luaValue;
         auto r = this->_state->MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
-        *luaValue = val;
+        new (luaValue) T(val);
         r.SetMetaTable(m);
         return r;
     }
@@ -97,10 +101,14 @@ namespace Tools { namespace Lua {
         auto m = this->_state->GetMetaTable(typeid(T).hash_code());
         T* luaValue;
         auto r = this->_state->MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
-        *luaValue = std::move(val);
+        new (luaValue) T(std::move(val));
         r.SetMetaTable(m);
         return r;
     }
+
+#ifdef DEBUG_NEW
+# define new DEBUG_NEW
+#endif
 
 }}
 

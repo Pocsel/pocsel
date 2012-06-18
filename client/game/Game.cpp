@@ -73,24 +73,11 @@ namespace Client { namespace Game {
         //this->_testImage.reset(new Tools::Renderers::Utils::Image(this->_renderer));
         //this->_testShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
         //this->_testTexture = this->_testShader->GetParameter("baseTex");
-
-        this->_material.reset(
-            new Tools::Renderers::Utils::Material::Material(
-                this->_renderer,
-                Tools::Lua::Ref(this->_engine->GetInterpreter().GetState()),
-                this->_client.GetLocalResourceManager().GetShader("TestShader.fx"),
-                this->_client.GetLocalResourceManager().GetShader("TestShader.fx")));
-        auto& var = this->_material->GetVariable<Tools::Renderers::Utils::Texture::ITexture>("diffuse");
-        var.Set(this->_resourceManager->GetTexture("base:cubes/iron/top.png"));
-        this->_sphere.reset(new Tools::Renderers::Utils::Sphere(this->_renderer));
         // XXX
     }
 
     Game::~Game()
     {
-        // XXX
-        this->_material.reset();
-        // XXX
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
         Tools::Delete(this->_player);
@@ -145,18 +132,13 @@ namespace Client { namespace Game {
         this->_gBuffer->Bind();
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
 
-        this->_RenderScene(absoluteViewProjection);
+        //this->_RenderScene(absoluteViewProjection);
+        this->_map->GetChunkManager().Render(this->_deferredShading, this->GetPlayer().GetCamera().position, absoluteViewProjection);
         this->_engine->GetModelManager().Render(this->_deferredShading);
-        this->_map->GetChunkManager().RenderAlpha(this->GetPlayer().GetCamera().position);
-        this->_player->Render();
 
-        this->_renderer.SetModelMatrix(glm::translate(2.0f, -2.0f, 2.0f));
-        this->_deferredShading.RenderGeometry(*this->_material,
-            [&]()
-            {
-                this->_sphere->Render();
-            });
         this->_deferredShading.RenderGeometry(totalTime);
+
+        this->_player->Render();
 
         this->_gBuffer->Unbind();
 
@@ -206,7 +188,6 @@ namespace Client { namespace Game {
 
     void Game::_RenderScene(glm::dmat4 viewProjection)
     {
-        this->_map->GetChunkManager().Render(this->GetPlayer().GetCamera().position, viewProjection);
     }
 
 }}

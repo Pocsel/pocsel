@@ -146,7 +146,6 @@ namespace Client { namespace Map {
         std::for_each(toDelete.begin(), toDelete.end(), [this](ChunkNode* node) { this->_refreshTasks.erase(node); });
         this->_DownloadNewChunks(playerPosition);
         this->_RemoveOldChunks(playerPosition);
-        this->_chunkRenderer.Update(totalTime);
         this->_oldPosition = playerPosition;
     }
 
@@ -394,14 +393,14 @@ namespace Client { namespace Map {
                 this,
                 node.chunk,
                 node.chunk->GetSharedCubes(),
-                std::move(cubeTypes),
+                std::cref(cubeTypes),
                 std::move(neighbors))));
 
         this->_threadPool.PushTask<bool>(t);
         this->_refreshTasks[&node] = t;
     }
 
-    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Game::CubeType> cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
+    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Game::CubeType> const& cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
     {
         return chunk->GetMesh()->Refresh(this->_chunkRenderer, cubeTypes, cubes, neighbors);
     }

@@ -25,10 +25,16 @@ namespace Tools { namespace Lua {
         Interpreter& _interpreter;
         lua_State* _state;
         std::unordered_map<std::size_t, Ref*> _metaTables;
+        Ref* _weakTable;
+        Uint32 _weakId;
+        bool _garbageCollectionEnabled;
 
     public:
         State(Interpreter& interpreter) throw(std::runtime_error);
         ~State() throw();
+        bool GetGarbageCollectionEnabled() const { return this->_garbageCollectionEnabled; }
+        void StopGarbageCollector();
+        void RestartGarbageCollector();
         void RegisterMetaTable(Ref const& metaTable, std::size_t hash) throw();
         Ref MakeBoolean(bool val) throw();
         Ref MakeFunction(std::function<void(CallHelper&)> val) throw();
@@ -43,6 +49,8 @@ namespace Tools { namespace Lua {
         operator lua_State*() const throw() { return this->_state; }
         Interpreter& GetInterpreter() throw() { return this->_interpreter; }
         Ref GetMetaTable(std::size_t hash) throw(std::runtime_error);
+        Ref GetWeakReference(Uint32 id) const;
+        Uint32 GetWeakReference(Ref const& ref);
     };
 
     template<> Ref State::Make<bool>(bool const& val) throw();

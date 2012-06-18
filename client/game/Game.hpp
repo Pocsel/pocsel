@@ -67,8 +67,6 @@ namespace Client { namespace Game {
         std::list<Tools::Renderers::Utils::Light::PointLight> _pointLights;
 
         Tools::Renderers::Utils::DeferredShading _deferredShading;
-        std::unique_ptr<Tools::Renderers::Utils::Material::Material> _material;
-        std::unique_ptr<Tools::Renderers::Utils::Sphere> _sphere;
 
         //std::unique_ptr<Tools::Renderers::Utils::Image> _testImage;
         //Tools::Renderers::IShaderProgram* _testShader;

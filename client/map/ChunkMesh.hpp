@@ -5,6 +5,13 @@
 
 #include "common/BaseChunk.hpp"
 
+namespace Tools { namespace Renderers { namespace Utils {
+    class DeferredShading;
+    namespace Material {
+        class Material;
+    }
+}}}
+
 namespace Client {
     namespace Game {
         class CubeType;
@@ -35,44 +42,28 @@ namespace Client { namespace Map {
         };
         Chunk& _chunk;
         Tools::Renderers::IVertexBuffer* _vertices;
-        std::map<Uint32, Mesh> _meshes;
+        std::map<Tools::Renderers::Utils::Material::Material*, Mesh> _meshes;
         Uint32 _triangleCount;
         bool _hasTransparentCube;
         bool _isComputed;
         boost::mutex _refreshMutex;
         unsigned int _tmpNbVertices;
         float* _tmpVertices;
-        std::map<Uint32, std::vector<unsigned int>> _tmpIndices;
+        std::map<Tools::Renderers::Utils::Material::Material*, std::vector<unsigned int>> _tmpIndices;
 
     public:
         ChunkMesh(Chunk& chunk);
         ~ChunkMesh();
 
         bool Refresh(ChunkRenderer& chunkRenderer,
-                     std::vector<Game::CubeType> cubeTypes,
+                     std::vector<Game::CubeType> const& cubeTypes,
                      std::shared_ptr<Common::BaseChunk::CubeType> cubes,
                      std::vector<std::shared_ptr<Common::BaseChunk::CubeType>> neighbors);
 
         bool RefreshGraphics(Tools::IRenderer& renderer);
-        void Render(Uint32 textureId, Tools::IRenderer& renderer);
+        void Render(Tools::IRenderer& renderer, Tools::Renderers::Utils::DeferredShading& deferredShading, glm::mat4 const& world, Uint32 squaredDistance);
         Uint32 GetTriangleCount() const { return this->_triangleCount; }
-        Uint32 GetTriangleCount(Uint32 textureId) const
-        {
-            if (this->_triangleCount == 0)
-                return 0;
-            auto it = this->_meshes.find(textureId);
-            if (it == this->_meshes.end())
-                return 0;
-            return it->second.nbIndices * 4 / 3;
-        }
         bool HasTransparentCube() const { return this->_hasTransparentCube; }
-        bool HasCubeType(int cubeType) const
-        {
-            if (this->_triangleCount == 0)
-                return false;
-            auto it = this->_meshes.find(cubeType);
-            return (it->second.nbIndices > 0);
-        }
     };
 
 }}

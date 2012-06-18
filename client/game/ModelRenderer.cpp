@@ -52,7 +52,8 @@ namespace Client { namespace Game {
                     this->_renderer.DrawElements(meshes[i].num_triangles * 3);
                     indexBuffers[i]->Unbind();
                     vertexBuffer->Unbind();
-                });
+                },
+                Uint32(glm::lengthSquared(pos - camera.position)));
         }
     }
 

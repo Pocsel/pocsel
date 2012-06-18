@@ -9,6 +9,7 @@
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/renderers/utils/material/LuaMaterial.hpp"
+#include "tools/renderers/utils/material/Material.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/Resource.hpp"
 
@@ -26,8 +27,9 @@ namespace Client { namespace Game { namespace Engine {
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
-        Tools::Renderers::Utils::Material::LuaMaterial::LoadLuaTypes(*this->_interpreter,
-            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetTexture), &game.GetResourceManager(), std::placeholders::_1));
+        Tools::Renderers::Utils::Material::Material::LoadLuaTypes(*this->_interpreter,
+            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetTexture), &game.GetResourceManager(), std::placeholders::_1),
+            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetMaterial), &game.GetResourceManager(), std::placeholders::_1));
         Tools::Lua::Utils::RegisterColor(*this->_interpreter);
 
         // création des managers

@@ -253,7 +253,7 @@ namespace Server { namespace Game { namespace Engine {
                                 Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
 
                                 // XXX Save() database hook
-                                CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil());
+                                CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
                                 if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                     throw std::runtime_error("call to Save() failed");
                                 std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);

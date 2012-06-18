@@ -11,16 +11,16 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void DeferredShading::_Render(Uint64 totalTime, _MeshList& meshes, IShaderProgram& (Material::Material::* getShader)())
     {
-        //TODO:
-        meshes.sort(
-            [&](_MeshList::value_type const& lhs, _MeshList::value_type const& rhs) -> bool
+        //TODO: Alpha !
+        std::sort(meshes.begin(), meshes.end(),
+            [&getShader](_MeshList::value_type const& lhs, _MeshList::value_type const& rhs) -> bool
             {
-                if (&(lhs.first->*getShader)() >= &(rhs.first->*getShader)())
+                if (&(std::get<0>(lhs)->*getShader)() >= &(std::get<0>(rhs)->*getShader)())
                     return false;
-                auto lhsIt = lhs.first->GetTextures().begin();
-                auto lhsIte = lhs.first->GetTextures().end();
-                auto rhsIt = rhs.first->GetTextures().begin();
-                auto rhsIte = rhs.first->GetTextures().end();
+                auto lhsIt = std::get<0>(lhs)->GetTextures().begin();
+                auto lhsIte = std::get<0>(lhs)->GetTextures().end();
+                auto rhsIt = std::get<0>(rhs)->GetTextures().begin();
+                auto rhsIte = std::get<0>(rhs)->GetTextures().end();
                 for (auto it = lhsIt; it != lhsIte; ++it)
                 {
                     bool run = false;
@@ -33,15 +33,18 @@ namespace Tools { namespace Renderers { namespace Utils {
                     if (!run)
                         return false;
                 }
-                return true;
+                // On affiche du plus près au plus éloigné -- TODO: seulement sans alpha
+                return std::get<2>(lhs) < std::get<2>(rhs);
             });
 
         auto beginShaderIt = meshes.begin();
-        IShaderProgram* current = &beginShaderIt->first->GetGeometryShader();
+        if (beginShaderIt == meshes.end())
+            return;
+        IShaderProgram* current = &std::get<0>(*beginShaderIt)->GetGeometryShader();
         for (auto it = meshes.begin(), ite = meshes.end(); it != ite; ++it)
         {
-            it->first->Update(totalTime);
-            auto shader = &(it->first->*getShader)();
+            std::get<0>(*it)->Update(totalTime);
+            auto shader = &(std::get<0>(*it)->*getShader)();
             if (shader != current)
             {
                 DeferredShading::_RenderMeshes(totalTime, beginShaderIt, it, *current);
@@ -63,7 +66,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             for (auto it = beginIt; it != ite; ++it)
             {
                 // Les textures
-                auto const& textures = it->first->GetTextures();
+                auto const& textures = std::get<0>(*it)->GetTextures();
                 bindedTextures.remove_if([&](ITexture2D* tex) -> bool
                     {
                         bool remove = true;
@@ -86,8 +89,8 @@ namespace Tools { namespace Renderers { namespace Utils {
                 }
 
                 // Render
-                it->first->UpdateParameters(shader, totalTime);
-                it->second();
+                std::get<0>(*it)->UpdateParameters(shader, totalTime);
+                std::get<1>(*it)();
             }
         } while (shader.EndPass());
 
