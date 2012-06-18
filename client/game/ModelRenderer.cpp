@@ -28,7 +28,11 @@ namespace Client { namespace Game {
     {
     }
 
-    void ModelRenderer::Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Engine::Model const& model, Common::Position const& pos)
+    void ModelRenderer::Render(
+            Tools::Renderers::Utils::DeferredShading& deferredShading,
+            Engine::Model const& model,
+            Common::Position const& pos,
+            float updateFlag)
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
 
@@ -40,6 +44,9 @@ namespace Client { namespace Game {
         {
             auto& var = materials[i]->GetMaterial().GetVariable<std::vector<glm::mat4x4>>("boneMatrices");
             var.Set(model.GetAnimatedBones());
+
+            auto& varFlag = materials[i]->GetMaterial().GetVariable<float>("updateFlag");
+            varFlag.Set(updateFlag);
 
             deferredShading.RenderGeometry(
                 materials[i]->GetMaterial(),

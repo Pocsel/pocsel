@@ -57,7 +57,7 @@ namespace Client { namespace Game { namespace Engine {
     {
         double deltaTime = (totalTime - this->_lastTime) / (double)1000000;
 
-        this->_world->GetBtWorld().stepSimulation(deltaTime);
+        this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
 
         auto it = this->_doodads.begin();
         auto itEnd = this->_doodads.end();
@@ -67,9 +67,19 @@ namespace Client { namespace Game { namespace Engine {
             btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
             Common::Physics::Node& physics = entity.GetPhysics();
 
-            physics.position.r.x = btPos.x();
-            physics.position.r.y = btPos.y();
-            physics.position.r.z = btPos.z();
+            btTransform wt;
+            entity.GetBtBody().getMotionState()->getWorldTransform(wt);
+            btVector3 wpos = wt.getOrigin();
+
+            physics.position.r.x = wpos.x();
+            physics.position.r.y = wpos.y();
+            physics.position.r.z = wpos.z();
+
+            float uf = it->second->GetUpdateFlag();
+            uf -= 0.3;
+            if (uf < 0)
+                uf = 0;
+            it->second->SetUpdateFlag(uf);
 
             //Common::Physics::MoveNode(it->second->GetPhysics(), deltaTime);
             this->_CallDoodadFunction(it->first, "Think");
@@ -130,7 +140,29 @@ namespace Client { namespace Game { namespace Engine {
             return;
         }
         if (position)
-            it->second->SetPhysics(*position);
+            //it->second->SetPhysics(*position);
+        {
+            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setX(position->position.r.x);
+            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setY(position->position.r.y);
+            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setZ(position->position.r.z);
+            btTransform wt;
+            wt.setOrigin(btVector3(position->position.r.x,
+                                     position->position.r.y,
+                                     position->position.r.z));
+
+            it->second->GetBtBody().getMotionState()->setWorldTransform(wt);
+
+            btRigidBody& toto = it->second->GetBtBody();
+
+            toto.setCenterOfMassTransform(wt);
+
+            it->second->GetBtBody().setLinearVelocity(btVector3(position->position.v.x,
+                                                                position->position.v.y,
+                                                                position->position.v.z));
+
+            it->second->SetUpdateFlag(1.1f);
+        }
+
         auto itCommands = commands.begin();
         auto itCommandsEnd = commands.end();
         for (; itCommands != itCommandsEnd; ++itCommands)

@@ -39,7 +39,11 @@ namespace Client { namespace Game {
 
     public:
         ModelRenderer(Game& game);
-        void Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Engine::Model const& model, Common::Position const& pos);
+        void Render(
+                Tools::Renderers::Utils::DeferredShading& deferredShading,
+                Engine::Model const& model,
+                Common::Position const& pos,
+                float updateFlag);
 
     private:
     };

@@ -55,7 +55,7 @@ namespace Client { namespace Game { namespace Engine {
         auto itModel = this->_models.begin();
         auto itModelEnd = this->_models.end();
         for (; itModel != itModelEnd; ++itModel)
-            this->_modelRenderer->Render(deferredShading, *itModel->second, itModel->second->GetDoodad().GetPosition());
+            this->_modelRenderer->Render(deferredShading, *itModel->second, itModel->second->GetDoodad().GetPosition(), itModel->second->GetDoodad().GetUpdateFlag());
     }
 
     void ModelManager::DeleteModelsOfDoodad(Uint32 doodadId)

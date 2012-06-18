@@ -10,7 +10,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         _physics.position.r = pos;
 
-        static btCollisionShape* colShape = new btBoxShape(btVector3(1, 2, 1));
+        static btCollisionShape* colShape = new btSphereShape(1); // btBoxShape(btVector3(1, 2, 1));
 
         /// Create Dynamic Objects
         btTransform startTransform;

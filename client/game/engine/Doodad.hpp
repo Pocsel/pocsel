@@ -19,6 +19,8 @@ namespace Client { namespace Game { namespace Engine {
         Common::Physics::Node _physics;
         btRigidBody* _btBody;
 
+        float _updateFlag;
+
     public:
         Doodad(Tools::Lua::Interpreter& interpreter, Uint32 id, Common::Physics::Node const& physics, DoodadType const& type);
         ~Doodad();
@@ -37,6 +39,9 @@ namespace Client { namespace Game { namespace Engine {
 
         Common::Physics::Node& GetPhysics() { return this->_physics; }
         btRigidBody& GetBtBody() { return *this->_btBody; }
+
+        void SetUpdateFlag(float value) { this->_updateFlag = value; }
+        float GetUpdateFlag() const { return this->_updateFlag; }
     };
 
 }}}

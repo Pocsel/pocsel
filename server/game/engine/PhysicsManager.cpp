@@ -37,7 +37,7 @@ namespace Server { namespace Game { namespace Engine {
 
         double dt = deltaTime / (double)1000000.0;
 
-        this->_world->GetBtWorld().stepSimulation(dt);
+        this->_world->Tick(deltaTime);
 
         for (auto it = this->_entities.begin(), ite = this->_entities.end(); it != ite; ++it)
         {
@@ -46,15 +46,25 @@ namespace Server { namespace Game { namespace Engine {
 
             PositionalEntity& entity = *it->second;
             btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
+            btVector3 const& btVel = entity.GetBtBody().getLinearVelocity();
             Common::Physics::Node& physics = entity.GetPhysics();
 
-            physics.position.r.x = btPos.x();
-            physics.position.r.y = btPos.y();
-            physics.position.r.z = btPos.z();
+            btTransform wt;
+            entity.GetBtBody().getMotionState()->getWorldTransform(wt);
+            btVector3 wpos = wt.getOrigin();
 
-            // std::cout << physics.position.r.x << ", ";
-            // std::cout << physics.position.r.y << ", ";
-            // std::cout << physics.position.r.z << "\n";
+            physics.position.r.x = wpos.x();//BtPos.x();
+            physics.position.r.y = wpos.y();//BtPos.y();
+            physics.position.r.z = wpos.z();//BtPos.z();
+
+            physics.position.v.x = btVel.x();
+            physics.position.v.y = btVel.y();
+            physics.position.v.z = btVel.z();
+
+
+            // std::cout << physics.position.v.x << ", ";
+            // std::cout << physics.position.v.y << ", ";
+            // std::cout << physics.position.v.z << "\n";
 
             // TODO j'en suis là
 

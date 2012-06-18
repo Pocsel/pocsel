@@ -26,7 +26,7 @@ namespace Common { namespace Physics {
 
         _dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
 
-        _dynamicsWorld->setGravity(btVector3(0,-0.1,0));
+        _dynamicsWorld->setGravity(btVector3(-0.01,-0.01,0));
     }
 
     World::~World()
@@ -41,7 +41,7 @@ namespace Common { namespace Physics {
     void World::Tick(Uint64 totalTime)
     {
         double deltaTime = (totalTime - this->_lastTime) * 0.000001;
-        this->_dynamicsWorld->stepSimulation(deltaTime);
+        this->_dynamicsWorld->stepSimulation(deltaTime, 123, 1.0 / 60.0);
     }
 
 }}

@@ -7,12 +7,13 @@ namespace Client { namespace Game { namespace Engine {
     Doodad::Doodad(Tools::Lua::Interpreter& interpreter, Uint32 id, Common::Physics::Node const& physics, DoodadType const& type) :
         _type(type),
         _self(interpreter.MakeTable()),
-        _physics(physics)
+        _physics(physics),
+        _updateFlag(0.0f)
     {
         this->_self.Set("id", id);
         Tools::debug << "Doodad::Doodad: New doodad \"" << this->_type.GetName() << "\" spawned (id: " << id << ", pos: " << this->_physics.position.r.x << " " << this->_physics.position.r.y << " " << this->_physics.position.r.z << ")" << std::endl;
 
-        static btCollisionShape* colShape = new btBoxShape(btVector3(1, 2, 1));
+        static btCollisionShape* colShape = new btSphereShape(1); // btBoxShape(btVector3(1, 2, 1));
 
         /// Create Dynamic Objects
         btTransform startTransform;
