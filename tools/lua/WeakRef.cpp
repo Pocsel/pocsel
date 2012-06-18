@@ -16,7 +16,7 @@ namespace Tools { namespace Lua {
 
     WeakRef& WeakRef::operator =(Ref const& ref)
     {
-        assert(&this->_state == &ref.GetState() && "Impossible de copier une référence d'un autre interpreteur");
+        assert(&this->_state == &ref.GetState() && "Impossible de copier une reference d'un autre interpreteur");
         this->_id = _state.GetWeakReference(ref);
         return *this;
     }
@@ -25,7 +25,7 @@ namespace Tools { namespace Lua {
     {
         if (this != &ref)
         {
-            assert(&this->_state == &ref._state && "Impossible de copier une référence d'un autre interpreteur");
+            assert(&this->_state == &ref._state && "Impossible de copier une reference d'un autre interpreteur");
             this->_id = ref._id;
         }
         return *this;
