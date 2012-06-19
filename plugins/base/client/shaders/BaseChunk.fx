@@ -36,8 +36,13 @@ struct FSout
     float4 normalDepth  : COLOR1;
 };
 
-VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
+VSout vs(in float4 position : POSITION, in float normalTexCoord : TEXCOORD0)
 {
+    float3 normal = fmod(floor(float3(normalTexCoord / 16, normalTexCoord / 4, normalTexCoord)), 4);
+    normal = normal - 1.0;
+
+    float2 texCoord = fmod(floor(float2(normalTexCoord / 128, normalTexCoord / 64)), 2);
+
     VSout v;
 
     v.texCoord = texCoord;
@@ -52,7 +57,7 @@ float2 encodeNormals(float3 n)
 {
     float2 enc = normalize(n.xy) * (sqrt(n.z*-0.5+0.5));
     enc = enc*0.5+0.5;
-    return float4(enc, 0, 1.0);
+    return enc;
 }
 
 FSout fs(in VSout v)
@@ -71,15 +76,15 @@ FSout fs(in VSout v)
 
 #ifndef DIRECTX
 
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
+//technique tech_glsl
+//{
+//    pass p0
+//    {
+//        AlphaBlendEnable = false;
+//        VertexProgram = compile glslv vs();
+//        FragmentProgram = compile glslf fs();
+//    }
+//}
 technique tech
 {
     pass p0

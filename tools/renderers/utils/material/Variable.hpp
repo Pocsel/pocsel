@@ -107,33 +107,13 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     template<class T>
     inline void Material::_SetValue(std::string const& key, T value)
     {
-        //auto it = this->_variables.find(key);
-
-        Variable<T>* shaderVariable;
-        //if (it == this->_variables.end())
-        //{
-            shaderVariable = &this->GetVariable<T>(key);
-            //this->_variables[key].reset(shaderVariable);
-        //}
-        //else
-        //    shaderVariable = reinterpret_cast<Variable<T>*>(it->second.get());
-        shaderVariable->Set(value);
+        this->GetVariable<T>(key).Set(value);
     }
 
     template<class T>
     inline void Material::_SetValue(std::string const& key, std::shared_ptr<T> value)
     {
-        //auto it = this->_variables.find(key);
-
-        Variable<T>* shaderVariable;
-        //if (it == this->_variables.end())
-        //{
-            shaderVariable = &this->GetVariable<T>(key);
-            //this->_variables[key].reset(shaderVariable);
-        //}
-        //else
-        //    shaderVariable = reinterpret_cast<Variable<T>*>(it->second.get());
-        shaderVariable->Set(value);
+        this->GetVariable<T>(key).Set(value);
     }
 
 }}}}

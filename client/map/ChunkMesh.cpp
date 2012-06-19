@@ -58,18 +58,13 @@ namespace Client { namespace Map {
         struct Vertex
         {
             glm::fvec3 position;
-            glm::fvec3 normal;
-            glm::fvec2 texture;
+            float packed;
             Vertex() {}
             Vertex(glm::fvec3 const& position, glm::fvec3 const& normal, glm::fvec2 const& texture)
-                : position(position),
-                normal(normal),
-                texture(texture)
+                : position(position)
             {
-                //Uint32 packed = ((normal.x + 1) << 4) | ((normal.y + 1) << 2) | (normal.z + 1);
-                //this->normal = ((float)packed) / ((float) (1 << 6));
-                //packed = (texture.x << 1) | texture.y;
-                //this->texture = ((float)packed) / ((float) (1 << 2));
+                this->packed = (normal.x + 1) * 16 + (normal.y + 1) * 4 + (normal.z + 1);
+                this->packed += (texture.x * 2 + texture.y) * float(1 << 6);
             }
         };
 
@@ -297,8 +292,7 @@ namespace Client { namespace Map {
 
         this->_vertices = renderer.CreateVertexBuffer().release();
         this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Normal, 3); // Normales + Textures
-        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 2); // Textures
+        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord, 1); // Normales + Textures
         this->_vertices->SetData(this->_tmpNbVertices * (3+3+2) * sizeof(*this->_tmpVertices), this->_tmpVertices, Tools::Renderers::VertexBufferUsage::Static);
         for (auto it = this->_tmpIndices.begin(), ite = this->_tmpIndices.end(); it !=ite; ++it)
         {
