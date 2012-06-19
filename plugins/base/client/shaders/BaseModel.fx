@@ -73,11 +73,15 @@ float2 encodeNormals(float3 n)
 
 FSout fs(in VSout v)
 {
+    float4 diffuse = tex2D(diffuseTexture, v.texCoord);
+    float specularPower = diffuse.r * 0.299 + diffuse.g * 0.587 + diffuse.b * 0.114;
+    specularPower = specularPower*specularPower;
+
     FSout f;
 
-    f.diffuse = tex2D(diffuseTexture, v.texCoord);
+    f.diffuse = diffuse;
+    f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, specularPower);
     f.diffuse.rgb = f.diffuse.rgb + float3(updateFlag, updateFlag, updateFlag);
-    f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, 1.0);
 
     return f;
 }

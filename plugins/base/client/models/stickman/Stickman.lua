@@ -3,7 +3,7 @@ Client.Material.Register{
     geometryShader = "base:shaders/BaseModel.fx",
     shadowMapShader = "base:shaders/BaseModel.fx",
     shader = {
-        diffuseTexture = "base:models/stickman/stickman.png"
+        diffuseTexture = "base:models/stickman/stickman.png",
     },
     hasAlpha = false,
     Update = nil

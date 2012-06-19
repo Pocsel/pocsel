@@ -145,12 +145,14 @@ FSout fs(in VSout v)
     float4 encNormalDepth = tex2D(normalDepth, v.texCoord);
     float3 viewNormal = decodeNormals(encNormalDepth);// * 2 - 1;
     float3 viewPosition = decodePosition(encNormalDepth, v.texCoord);
+    float specularPower = encNormalDepth.w;
 
     float NdL = max(0, dot(viewNormal, viewLightDirection));
 
     float3 viewDirection = normalize(viewPosition);
     float3 reflection = reflect(viewLightDirection, viewNormal);
-    float specular = pow(max(0.0, dot(reflection, viewDirection)), materialShininess);
+    //float specular = pow(max(0.0, dot(reflection, viewDirection)), materialShininess);
+    float specular = pow(max(0.0, dot(reflection, viewDirection)), (1.0 - specularPower) * 25);
 
     float ao = 0;//screenSpaceAmbientOcclusion(v.texCoord, viewPosition, viewNormal);
     float shadowMap = 1.0; //calculateShadowMap(viewPosition);
@@ -158,7 +160,7 @@ FSout fs(in VSout v)
     FSout f;
     f.diffuse.rgb = (NdL * lightDiffuseColor - ao) * shadowMap;
     f.diffuse.rgb += lightAmbientColor;
-    f.specular.rgb = (0*specular * lightSpecularColor * ao) * shadowMap;
+    f.specular.rgb = (specular * lightSpecularColor) * shadowMap * specularPower;
     f.diffuse.a = 1.0;
     f.specular.a = 1.0;
     return f;

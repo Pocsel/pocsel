@@ -36,8 +36,13 @@ struct FSout
     float4 normalDepth  : COLOR1;
 };
 
-VSout vs(in float4 position : POSITION, in float3 normal : NORMAL, in float2 texCoord : TEXCOORD0)
+VSout vs(in float4 position : POSITION, in float normalTexCoord : TEXCOORD0)
 {
+    float3 normal = fmod(floor(float3(normalTexCoord / 16, normalTexCoord / 4, normalTexCoord)), 4);
+    normal = normal - 1.0;
+
+    float2 texCoord = fmod(floor(float2(normalTexCoord / 128, normalTexCoord / 64)), 2);
+
     VSout v;
 
     v.texCoord = texCoord;
@@ -52,30 +57,34 @@ float2 encodeNormals(float3 n)
 {
     float2 enc = normalize(n.xy) * (sqrt(n.z*-0.5+0.5));
     enc = enc*0.5+0.5;
-    return float4(enc, 0, 1.0);
+    return enc;
 }
 
 FSout fs(in VSout v)
 {
+    float4 diffuse = tex2D(cubeTexture, v.texCoord);
+    float specularPower = diffuse.r * 0.299 + diffuse.g * 0.587 + diffuse.b * 0.114;
+    specularPower = specularPower*specularPower;
+
     FSout f;
 
-    f.diffuse = tex2D(cubeTexture, v.texCoord);
-    f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, 1.0);
+    f.diffuse = diffuse;
+    f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, specularPower);
 
     return f;
 }
 
 #ifndef DIRECTX
 
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
+//technique tech_glsl
+//{
+//    pass p0
+//    {
+//        AlphaBlendEnable = false;
+//        VertexProgram = compile glslv vs();
+//        FragmentProgram = compile glslf fs();
+//    }
+//}
 technique tech
 {
     pass p0
@@ -92,7 +101,7 @@ technique tech
 {
    pass p0
    {
-        AlphaBlendEnable = true;
+        AlphaBlendEnable = false;
         VertexShader = compile vs_2_0 vs();
         PixelShader = compile ps_2_0 fs();
    }
