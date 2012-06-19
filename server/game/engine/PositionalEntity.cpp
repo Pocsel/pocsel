@@ -30,6 +30,8 @@ namespace Server { namespace Game { namespace Engine {
         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
         _btBody = new btRigidBody(rbInfo);
+
+        _btBody->setUserPointer(this);
     }
 
     PositionalEntity::~PositionalEntity()

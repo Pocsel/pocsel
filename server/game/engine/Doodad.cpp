@@ -189,6 +189,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void Doodad::PositionIsDirty()
     {
+        std::cout << "DIRTY" << _entityId << "\n";
         this->_positionDirty = true;
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }

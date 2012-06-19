@@ -38,7 +38,7 @@ Server.Entity.RegisterPositional{
     entityName = "Blob",
 
     Spawn = function(self)
-        self.moveSpeed = 0.5 -- 3 + math.random() * 3
+        self.moveSpeed = 10 -- 3 + math.random() * 3
 
         self.doodad = Server.Doodad.Spawn("base:Test")
 --        Server.Message.Later(30, self.id, "Suicide")

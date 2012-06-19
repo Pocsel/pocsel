@@ -24,6 +24,8 @@ namespace Server { namespace Game { namespace Engine {
         PhysicsManager(Engine& engine, std::map<Uint32, PositionalEntity*> const& entities);
         ~PhysicsManager();
         void Tick(Uint64 deltaTime);
+
+        friend struct _cb;
     };
 
 }}}
