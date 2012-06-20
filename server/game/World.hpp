@@ -12,6 +12,7 @@ namespace Server {
     }}
     namespace Database {
         class WorldLoader;
+        class WorldLoader2;
     }
 }
 namespace Tools { namespace Database {
@@ -65,6 +66,7 @@ namespace Server { namespace Game {
 
     private:
         friend class Database::WorldLoader;
+        friend class Database::WorldLoader2;
     };
 
 }}

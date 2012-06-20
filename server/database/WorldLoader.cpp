@@ -99,7 +99,6 @@ namespace Server { namespace Database {
                     throw std::runtime_error("A map named \"" + conf.name + "\" already exists");
                 world._maps[conf.name] = map;
 
-                WorldLoader::_RegisterResourcesFunctions(*map, map->GetEngine().GetInterpreter());
                 if (conf.is_default)
                     world._defaultMap = world._maps[conf.name];
 
@@ -160,23 +159,6 @@ namespace Server { namespace Database {
         }
         if (!world._maps.empty())
             world._maps.begin()->second->GetEngine().GetEntityManager().RconAddEntityTypes(world.GetGame().GetServer().GetRcon().GetEntityManager());
-    }
-
-    void WorldLoader::_RegisterResourcesFunctions(Game::Map::Map& map, Tools::Lua::Interpreter& lua)
-    {
-        auto resourceNs = lua.Globals().GetTable("Server").GetTable("Resource");
-        resourceNs.Set("GetEffect", lua.MakeFunction(
-            [&](Tools::Lua::CallHelper& helper)
-            {
-                auto pluginId = map.GetEngine().GetRunningPluginId();
-                helper.PushRet(lua.Make(map.GetGame().GetServer().GetResourceManager().GetId(pluginId, helper.PopArg().Check<std::string>())));
-            }));
-        resourceNs.Set("GetEffectFromPlugin", lua.MakeFunction(
-            [&](Tools::Lua::CallHelper& helper)
-            {
-                auto pluginId = map.GetGame().GetWorld().GetPluginManager().GetPluginId(helper.PopArg().Check<std::string>());
-                helper.PushRet(lua.Make(map.GetGame().GetServer().GetResourceManager().GetId(pluginId, helper.PopArg().Check<std::string>())));
-            }));
     }
 
     void WorldLoader::_LoadCubeTypes(Game::Map::Map& map)
@@ -244,7 +226,7 @@ namespace Server { namespace Database {
             auto id = this->_connection.GetLastInsertedId();
             if (id >= 256 * 256) // XXX
                 throw std::runtime_error("too many types of cubes to load, you should uninstall a plugin");
-            return (Uint16)id;
+            return static_cast<Uint16>(id);
         }
     }
 
