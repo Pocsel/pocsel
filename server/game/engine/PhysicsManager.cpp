@@ -29,20 +29,26 @@ namespace Server { namespace Game { namespace Engine {
 
                 if (numContacts > 0)
                 {
-                    btRigidBody const* body0 = (btRigidBody const*)contactManifold->getBody0();
-                    PositionalEntity const* entity0 = (PositionalEntity const*)body0->getUserPointer();
-                    Uint32 id0 = entity0->GetSelf()["id"].To<Uint32>();
+                    for (int j=0;j<numContacts;j++)
+                    {
+                        btManifoldPoint& pt = contactManifold->getContactPoint(j);
+                        if (pt.getDistance()<0.f)
+                        {
+                            btRigidBody const* body0 = (btRigidBody const*)contactManifold->getBody0();
+                            PositionalEntity const* entity0 = (PositionalEntity const*)body0->getUserPointer();
+                            Uint32 id0 = entity0->GetSelf()["id"].To<Uint32>();
 
-                    pm->_engine.GetDoodadManager().EntityHasMoved(id0);
+                            pm->_engine.GetDoodadManager().EntityHasMoved(id0);
 
-                    btRigidBody const* body1 = (btRigidBody const*)contactManifold->getBody1();
-                    PositionalEntity const* entity1 = (PositionalEntity const*)body1->getUserPointer();
-                    Uint32 id1 = entity1->GetSelf()["id"].To<Uint32>();
+                            btRigidBody const* body1 = (btRigidBody const*)contactManifold->getBody1();
+                            PositionalEntity const* entity1 = (PositionalEntity const*)body1->getUserPointer();
+                            Uint32 id1 = entity1->GetSelf()["id"].To<Uint32>();
 
-                    pm->_engine.GetDoodadManager().EntityHasMoved(id1);
+                            pm->_engine.GetDoodadManager().EntityHasMoved(id1);
 
-                    std::cout << "id0= " << id0 << ", id1=" << id1 << "\n";
-//                    Uint32 id = ((PositionalEntity*)contactManifold->)
+                            break;
+                        }
+                    }
                 }
 
                 //for (int j=0;j<numContacts;j++)
