@@ -94,6 +94,11 @@ namespace detail {
 }
 
 #define decltype(...) detail::type_helper<decltype(__VA_ARGS__)>::type
+
+// CPP11_DELETE utile pour supprimer les constructeurs et opérateurs par copie
+#define CPP11_DELETE
+#else
+#define CPP11_DELETE = delete
 #endif
 
 #endif

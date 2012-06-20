@@ -36,8 +36,8 @@ namespace Client { namespace Game {
         void LoadMaterial(Resources::ResourceManager& resourceMgr, Tools::Lua::Ref const& prototype);
 
     private:
-        CubeType(CubeType const&);
-        CubeType& operator =(CubeType const&);
+        CubeType(CubeType const&) CPP11_DELETE;
+        CubeType& operator =(CubeType const&) CPP11_DELETE;
     };
 
 }}
