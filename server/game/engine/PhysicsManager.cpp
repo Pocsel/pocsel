@@ -97,26 +97,46 @@ namespace Server { namespace Game { namespace Engine {
                 continue;
 
             PositionalEntity& entity = *it->second;
-            btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
-            btVector3 const& btVel = entity.GetBtBody().getLinearVelocity();
+            btRigidBody const& btBody = entity.GetBtBody();
+            btVector3 const& btPos = btBody.getCenterOfMassPosition();
+            btQuaternion const& btAngl = btBody.getCenterOfMassTransform().getRotation();
+            btVector3 const& btVel = btBody.getLinearVelocity();
             Common::Physics::Node& physics = entity.GetPhysics();
 
             btTransform wt;
-            entity.GetBtBody().getMotionState()->getWorldTransform(wt);
+            btBody.getMotionState()->getWorldTransform(wt);
             btVector3 wpos = wt.getOrigin();
 
-            physics.position.r.x = wpos.x();//BtPos.x();
-            physics.position.r.y = wpos.y();//BtPos.y();
-            physics.position.r.z = wpos.z();//BtPos.z();
+            physics.position.x = wpos.x();//BtPos.x();
+            physics.position.y = wpos.y();//BtPos.y();
+            physics.position.z = wpos.z();//BtPos.z();
 
-            physics.position.v.x = btVel.x();
-            physics.position.v.y = btVel.y();
-            physics.position.v.z = btVel.z();
+            //physics.acceleration.x = btPos.x();
+            //physics.acceleration.y = btPos.y();
+            //physics.acceleration.z = btPos.z();
+            //physics.scale.x = btAngl.x();
+            //physics.scale.y = btAngl.y();
+            //physics.scale.z = btAngl.z();
+            //physics.scaleVelocity.x = btAngl.w();
+
+            physics.velocity.x = btVel.x();
+            physics.velocity.y = btVel.y();
+            physics.velocity.z = btVel.z();
+
+            btQuaternion wrot = wt.getRotation();
+            glm::quat glmRot(wrot.w(), wrot.x(), wrot.y(), wrot.z());
+            physics.orientation = //glm::eulerAngles(glmRot);
+            glmRot;
+            btVector3 av = btBody.getAngularVelocity();
+            physics.angularVelocity = glm::vec3(av.x(), av.y(), av.z());
+
+            //btVector3 ae = btBody.getTurnVelocity();
+            //physics.angularAcceleration = glm::vec3(ae.x(), ae.y(), ae.z());
 
 
-            // std::cout << physics.position.v.x << ", ";
-            // std::cout << physics.position.v.y << ", ";
-            // std::cout << physics.position.v.z << "\n";
+            // std::cout << physics.velocity.x << ", ";
+            // std::cout << physics.velocity.y << ", ";
+            // std::cout << physics.velocity.z << "\n";
 
             // TODO j'en suis là
 

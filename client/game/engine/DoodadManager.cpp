@@ -71,9 +71,14 @@ namespace Client { namespace Game { namespace Engine {
             entity.GetBtBody().getMotionState()->getWorldTransform(wt);
             btVector3 wpos = wt.getOrigin();
 
-            physics.position.r.x = wpos.x();
-            physics.position.r.y = wpos.y();
-            physics.position.r.z = wpos.z();
+            physics.position.x = wpos.x();
+            physics.position.y = wpos.y();
+            physics.position.z = wpos.z();
+
+            btQuaternion wrot = wt.getRotation();
+            glm::quat glmRot(wrot.w(), wrot.x(), wrot.y(), wrot.z());
+            physics.orientation = //glm::eulerAngles(glmRot);
+            glmRot;
 
             float uf = it->second->GetUpdateFlag();
             uf -= 0.3;
@@ -142,23 +147,55 @@ namespace Client { namespace Game { namespace Engine {
         if (position)
             //it->second->SetPhysics(*position);
         {
-            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setX(position->position.r.x);
-            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setY(position->position.r.y);
-            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setZ(position->position.r.z);
+            btTransform frameWt;
+
+            frameWt.setOrigin(btVector3(
+                    position->acceleration.x,
+                    position->acceleration.y,
+                    position->acceleration.z));
+
+            frameWt.setRotation(btQuaternion(
+                        position->scale.x,
+                        position->scale.y,
+                        position->scale.z,
+                        position->scaleVelocity.x));
+
+            //it->second->GetBtBody().setCenterOfMassTransform(frameWt);
+
+            //toto.setCenterOfMassTransform(wt);
+            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setX(position->acceleration.x);
+            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setY(position->acceleration.y);
+            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setZ(position->acceleration.z);
+
             btTransform wt;
-            wt.setOrigin(btVector3(position->position.r.x,
-                                     position->position.r.y,
-                                     position->position.r.z));
+            wt.setOrigin(btVector3(position->position.x,
+                                     position->position.y,
+                                     position->position.z));
+            wt.setRotation(btQuaternion(
+                        position->orientation.x,
+                        position->orientation.y,
+                        position->orientation.z,
+                        position->orientation.w));
 
             it->second->GetBtBody().getMotionState()->setWorldTransform(wt);
 
             btRigidBody& toto = it->second->GetBtBody();
 
-            toto.setCenterOfMassTransform(wt);
 
-            it->second->GetBtBody().setLinearVelocity(btVector3(position->position.v.x,
-                                                                position->position.v.y,
-                                                                position->position.v.z));
+            it->second->GetBtBody().setLinearVelocity(
+                    btVector3(position->velocity.x,
+                        position->velocity.y,
+                        position->velocity.z));
+
+            it->second->GetBtBody().setAngularVelocity(
+                    btVector3(position->angularVelocity.x,
+                        position->angularVelocity.y,
+                        position->angularVelocity.z));
+
+            //const_cast<btVector3&>(it->second->GetBtBody().getTurnVelocity()).setX(position->angularAcceleration.x);
+            //const_cast<btVector3&>(it->second->GetBtBody().getTurnVelocity()).setY(position->angularAcceleration.y);
+            //const_cast<btVector3&>(it->second->GetBtBody().getTurnVelocity()).setZ(position->angularAcceleration.z);
+
 
             it->second->SetUpdateFlag(1.1f);
         }

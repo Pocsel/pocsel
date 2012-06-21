@@ -15,6 +15,7 @@
 #include "client/game/engine/Model.hpp"
 
 #include "common/CubePosition.hpp"
+#include "common/physics/Node.hpp"
 
 #include "client/Client.hpp"
 
@@ -31,7 +32,7 @@ namespace Client { namespace Game {
     void ModelRenderer::Render(
             Tools::Renderers::Utils::DeferredShading& deferredShading,
             Engine::Model const& model,
-            Common::Position const& pos,
+            Common::Physics::Node const& pos,
             float updateFlag)
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
@@ -52,15 +53,53 @@ namespace Client { namespace Game {
                 materials[i]->GetMaterial(),
                 [&, i, vertexBuffer]()
                 {
-                    this->_renderer.SetModelMatrix(glm::translate(glm::fvec3(pos - camera.position)) *
-                        glm::yawPitchRoll(0.0f, -Tools::Math::PiFloat / 2.0f, 0.0f));
+                    //float toto = -Tools::Math::PiFloat / 2.0f - glm::radians(pos.yawPitchRoll.r.y);
+                    /*if (toto < -Tools::Math::PiFloat)
+                        toto += Tools::Math::PiFloat * 2;
+                    else if (toto > Tools::Math::PiFloat)
+                        toto -= Tools::Math::PiFloat * 2;*/
+
+
+                    //glm::fvec3 euler = glm::eulerAngles(pos.orientation);
+                    //std::cout << euler.x << ", " << euler.y << ", " << euler.z << "\n";
+                    //euler.x = glm::radians(euler.x) - Tools::Math::PiFloat / 2.0f;
+                    //euler.y = glm::radians(euler.y);
+                    //euler.z = glm::radians(euler.z);
+                    glm::quat orientation = //glm::quat(euler);
+                        pos.orientation
+                        *
+                        glm::quat(glm::vec3(-Tools::Math::PiFloat / 2.0f, 0.0f, 0.0f))
+                        ;
+
+                    this->_renderer.SetModelMatrix(
+                        glm::translate(glm::fvec3(pos.position - camera.position))
+                        *
+                        glm::toMat4(orientation)
+                        *
+                        glm::translate(glm::fvec3(0, 0, -1))
+                        /*
+                        glm::toMat4(pos.orientation)
+                        *
+                        glm::yawPitchRoll(0.0f, -Tools::Math::PiFloat / 2.0f, 0.0f)
+                        */
+                    );
+                        //glm::yawPitchRoll(
+                        //    0.0f + glm::radians(pos.yawPitchRoll.r.x),
+                        //    toto,///*-Tools::Math::PiFloat / 2.0f + */ glm::radians(pos.yawPitchRoll.r.y),
+                        //    0.0f + glm::radians(pos.yawPitchRoll.r.z)))
+                    /**
+                        glm::yawPitchRoll(
+                            0.0f,
+                            Tools::Math::PiFloat / 2.0f,
+                            0.0f)
+                        )*/ //;
                     vertexBuffer->Bind();
                     indexBuffers[i]->Bind();
                     this->_renderer.DrawElements(meshes[i].num_triangles * 3);
                     indexBuffers[i]->Unbind();
                     vertexBuffer->Unbind();
                 },
-                Uint32(glm::lengthSquared(pos - camera.position)));
+                Uint32(glm::lengthSquared(pos.position - camera.position)));
         }
     }
 

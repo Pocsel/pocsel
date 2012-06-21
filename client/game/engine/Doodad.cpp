@@ -11,9 +11,11 @@ namespace Client { namespace Game { namespace Engine {
         _updateFlag(0.0f)
     {
         this->_self.Set("id", id);
-        Tools::debug << "Doodad::Doodad: New doodad \"" << this->_type.GetName() << "\" spawned (id: " << id << ", pos: " << this->_physics.position.r.x << " " << this->_physics.position.r.y << " " << this->_physics.position.r.z << ")" << std::endl;
+        Tools::debug << "Doodad::Doodad: New doodad \"" << this->_type.GetName() << "\" spawned (id: " << id << ", pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;
 
-        static btCollisionShape* colShape = new btSphereShape(1); // btBoxShape(btVector3(1, 2, 1));
+        static btCollisionShape* colShape = new
+        //     btSphereShape(1);
+            btBoxShape(btVector3(1, 2, 1));
 
         /// Create Dynamic Objects
         btTransform startTransform;
@@ -24,20 +26,23 @@ namespace Client { namespace Game { namespace Engine {
 
         colShape->calculateLocalInertia(mass, localInertia);
 
+        startTransform.setIdentity();
+        startTransform.setRotation(btQuaternion(0,0,0));
         startTransform.setOrigin(btVector3(
-                    btScalar(physics.position.r.x),
-                    btScalar(physics.position.r.y),
-                    btScalar(physics.position.r.z)));
+                    btScalar(physics.position.x),
+                    btScalar(physics.position.y),
+                    btScalar(physics.position.z)));
 
         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+        myMotionState->setWorldTransform(startTransform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
         _btBody = new btRigidBody(rbInfo);
     }
 
     Doodad::~Doodad()
     {
-        Tools::debug << "Doodad::~Doodad: Destroying doodad \"" << this->_type.GetName() << "\" (pos: " << this->_physics.position.r.x << " " << this->_physics.position.r.y << " " << this->_physics.position.r.z << ")" << std::endl;
+        Tools::debug << "Doodad::~Doodad: Destroying doodad \"" << this->_type.GetName() << "\" (pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;
     }
 
 }}}

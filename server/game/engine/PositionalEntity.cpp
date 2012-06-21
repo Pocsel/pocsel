@@ -8,9 +8,11 @@ namespace Server { namespace Game { namespace Engine {
         Entity(interpreter, id, type),
         _btBody(0)
     {
-        _physics.position.r = pos;
+        _physics.position = pos;
 
-        static btCollisionShape* colShape = new btSphereShape(1); // btBoxShape(btVector3(1, 2, 1));
+        static btCollisionShape* colShape = new
+        //     btSphereShape(1);
+            btBoxShape(btVector3(1, 2, 1));
 
         /// Create Dynamic Objects
         btTransform startTransform;
@@ -21,6 +23,8 @@ namespace Server { namespace Game { namespace Engine {
 
         colShape->calculateLocalInertia(mass, localInertia);
 
+        startTransform.setIdentity();
+        startTransform.setRotation(btQuaternion(0,0,0));
         startTransform.setOrigin(btVector3(
                     btScalar(pos.x),
                     btScalar(pos.y),
@@ -28,6 +32,7 @@ namespace Server { namespace Game { namespace Engine {
 
         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+        myMotionState->setWorldTransform(startTransform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
         _btBody = new btRigidBody(rbInfo);
 

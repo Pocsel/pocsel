@@ -5,6 +5,9 @@
 
 namespace Common {
     struct OrientedPosition;
+    namespace Physics {
+        struct Node;
+    }
 }
 namespace Tools {
     class IRenderer;
@@ -42,7 +45,7 @@ namespace Client { namespace Game {
         void Render(
                 Tools::Renderers::Utils::DeferredShading& deferredShading,
                 Engine::Model const& model,
-                Common::Position const& pos,
+                Common::Physics::Node const& pos,
                 float updateFlag);
 
     private:
