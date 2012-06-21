@@ -98,7 +98,7 @@ cubes = {
         }
     },
 
-    Water = {
+    ["base:Water"] = {
         {
             priority = 1,
             validators = {
@@ -120,7 +120,7 @@ cubes = {
 
         }
     },
-    Grass = {
+    ["base:Grass"] = {
         {
             priority = 6,
             validators = {
@@ -138,7 +138,7 @@ cubes = {
             }
         }
     },
-    Dirt = {
+    ["base:Dirt"] = {
         {
             priority = 7,
             validators = {
@@ -151,7 +151,7 @@ cubes = {
             }
         }
     },
-    Iron = {
+    ["base:Iron"] = {
         {
             priority = 8,
             validators = {
@@ -164,7 +164,7 @@ cubes = {
             }
         }
     },
-    Rock = {
+    ["base:Rock"] = {
         {
             priority = 9,
             validators = {

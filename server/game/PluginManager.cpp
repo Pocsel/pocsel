@@ -1,13 +1,16 @@
 #include "server/game/PluginManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
+#include "common/FieldUtils.hpp"
 
 namespace Server { namespace Game {
 
     void PluginManager::AddPlugin(Uint32 id, std::string const& fullname, std::string const& identifier) throw(std::runtime_error)
     {
         Plugin p;
-        p.fullname = fullname;
-        p.identifier = identifier;
+        if (!Common::FieldUtils::IsPluginFullname(p.fullname = fullname))
+            throw std::runtime_error("PluginManager::AddPlugin: Invalid plugin fullname \"" + fullname + "\".");
+        if (!Common::FieldUtils::IsPluginIdentifier(p.identifier = identifier))
+            throw std::runtime_error("PluginManager::AddPlugin: Invalid plugin identifier \"" + identifier + "\".");
         if (this->_plugins.count(id) > 0)
             throw std::runtime_error("PluginManager::AddPlugin: Plugin id already used");
         this->_plugins[id] = p;

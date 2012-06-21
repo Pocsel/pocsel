@@ -8,6 +8,7 @@
 #include "server/rcon/ToJsonStr.hpp"
 
 #include "server/database/WorldLoader.hpp"
+#include "server/database/WorldLoader2.hpp"
 
 #include "server/game/map/Map.hpp"
 
@@ -21,7 +22,7 @@ namespace Server { namespace Game{
         this->_pluginManager = new PluginManager();
         try
         {
-            Database::WorldLoader(*this, game.GetServer().GetResourceManager());
+            Database::WorldLoader2(*this, game.GetServer().GetResourceManager());
         }
         catch (std::exception& e)
         {
