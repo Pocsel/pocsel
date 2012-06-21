@@ -18,6 +18,7 @@ namespace Tools {
     class SimpleMessageQueue;
     namespace Database {
         class IConnection;
+        class NiqueTaMereLaPute;
     }
     namespace Lua {
         class Interpreter;
