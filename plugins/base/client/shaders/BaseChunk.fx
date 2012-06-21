@@ -38,10 +38,10 @@ struct FSout
 
 VSout vs(in float4 position : POSITION, in float normalTexCoord : TEXCOORD0)
 {
-    float3 normal = fmod(floor(float3(normalTexCoord / 16, normalTexCoord / 4, normalTexCoord)), 4);
+    float3 normal = floor(frac(float3(normalTexCoord * 4, normalTexCoord * 16, normalTexCoord * 64)) * 4);
     normal = normal - 1.0;
 
-    float2 texCoord = fmod(floor(float2(normalTexCoord / 128, normalTexCoord / 64)), 2);
+    float2 texCoord = floor(frac(float2(normalTexCoord, normalTexCoord * 2)) * 2);
 
     VSout v;
 
@@ -76,15 +76,15 @@ FSout fs(in VSout v)
 
 #ifndef DIRECTX
 
-//technique tech_glsl
-//{
-//    pass p0
-//    {
-//        AlphaBlendEnable = false;
-//        VertexProgram = compile glslv vs();
-//        FragmentProgram = compile glslf fs();
-//    }
-//}
+technique tech_glsl
+{
+    pass p0
+    {
+        AlphaBlendEnable = false;
+        VertexProgram = compile glslv vs();
+        FragmentProgram = compile glslf fs();
+    }
+}
 technique tech
 {
     pass p0

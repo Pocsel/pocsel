@@ -4,8 +4,9 @@ project(Pocsel)
 
 # Modules supplémentaires
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-include(CustomPrecompiledHeader)
 include(CreateGroups)
+include(AddResources)
+include(CustomPrecompiledHeader)
 include(GetGitRevision)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
@@ -98,6 +99,9 @@ file(GLOB_RECURSE   tools_stat_src              "tools/stat/*.[ch]pp")
 file(GLOB_RECURSE   tools_thread_src            "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
+# lua resources
+file(GLOB_RECURSE   tools_lua_utils_res         "tools/lua/utils/*.lua")
+AddResources(tools_lua_utils_src ${tools_lua_utils_res})
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
@@ -141,8 +145,12 @@ endmacro()
 set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
 configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
+add_subdirectory(buildutils)
 add_subdirectory(sdk)
 add_subdirectory(plugins)
 add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(tests)
+
+add_dependencies(client resources)
+add_dependencies(server resources)

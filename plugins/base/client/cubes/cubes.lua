@@ -6,7 +6,7 @@ Client.Material.Register{
     hasAlpha = false,
     
     shader = {
-        cubeTexture = "base:cubes/iron/texture.png",
+        cubeTexture = Client.Texture("base:cubes/iron/texture.png"),
     },
     Update = nil
 }
