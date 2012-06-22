@@ -8,16 +8,22 @@ namespace Tools {
         class IShaderParameter;
         class IVertexBuffer;
         class ITexture2D;
+        namespace Utils {
+            class Cube;
+            class Sphere;
+        }
     }
 }
 
 namespace Common { namespace Physics {
-    class Node;
+    struct Node;
 }}
 
 namespace Client { namespace Game {
     class Game;
 }}
+
+class btRigidBody;
 
 namespace Client { namespace Game {
 
@@ -29,16 +35,17 @@ namespace Client { namespace Game {
         Tools::Renderers::IShaderProgram* _shader;
         //Tools::Renderers::IShaderParameter* _shaderTexture;
         //Tools::Renderers::IShaderParameter* _shaderTime;
-        std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;
-        Uint64 _elapsedTime;
+        //std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;
+
+        Tools::Renderers::Utils::Sphere* _sphere;
+        Tools::Renderers::Utils::Cube* _cube;
 
     public:
         ShapeRenderer(Game& game);
         ~ShapeRenderer();
-        void Render(Common::Physics::Node const& node);
-
-    private:
-        void _InitVertexBuffer();
+        void Render(
+                btRigidBody const& body); 
+        //Common::Physics::Node const& node);
     };
 
 }}

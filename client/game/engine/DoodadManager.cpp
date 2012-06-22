@@ -65,7 +65,7 @@ namespace Client { namespace Game { namespace Engine {
         for (; it != itEnd; ++it)
         {
             Doodad& entity = *it->second;
-            btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
+            //btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
             Common::Physics::Node& physics = entity.GetPhysics();
 
             btTransform wt;
@@ -199,7 +199,7 @@ namespace Client { namespace Game { namespace Engine {
     {
         for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
         {
-            this->_shapeRenderer->Render(it->second->GetPhysics());
+            this->_shapeRenderer->Render(it->second->GetBtBody());
         }
     }
 

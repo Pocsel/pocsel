@@ -10,6 +10,8 @@ namespace Server { namespace Game { namespace Engine {
     class Engine;
 }}}
 
+class btRigidBody;
+
 namespace Server { namespace Game { namespace Engine {
 
     class PhysicsManager
@@ -18,6 +20,7 @@ namespace Server { namespace Game { namespace Engine {
         Engine& _engine;
         std::map<Uint32, PositionalEntity*> const& _entities;
         std::set<Uint32> _bodiesInWorld;
+        std::set<btRigidBody const*> _entityBodies;
         Common::Physics::World* _world;
 
     public:
