@@ -1,9 +1,16 @@
+local SampleModule = require "base:entities/SampleModule.lua"
+
 Server.Entity.Register{
 
     entityName = "Init", -- mandatory
 
     Spawn = function(self) -- constructor
         print("Spawn()")
+        if SampleModule ~= nil then
+            print("Test Module: ", SampleModule.testVal)
+        else
+            print("Test Module nil")
+        end
         Server.Message.Later(20, self.id, "SpawnBlob")
         Server.Message.Later(20, self.id, "SpawnTank")
     end,

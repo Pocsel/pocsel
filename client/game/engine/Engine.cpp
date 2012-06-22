@@ -59,22 +59,60 @@ namespace Client { namespace Game { namespace Engine {
         this->_game.GetCubeTypeManager().RegisterLuaFunctions();
 
         // éxécution de tous les scripts
+        this->_interpreter->Globals().Set("require", this->_interpreter->MakeFunction(std::bind(&Engine::_ApiRequire, this, std::placeholders::_1)));
         auto const& files = this->_game.GetResourceManager().GetDatabase().GetAllResources("lua");
         auto it = files.begin();
         auto itEnd = files.end();
         for (; it != itEnd; ++it)
-        {
-            this->_SetRunningResource((*it)->name);
             try
             {
-                this->_interpreter->DoString(std::string(static_cast<char const*>((*it)->data), (*it)->size));
+                this->_LoadLuaScript((*it)->name);
             }
             catch (std::exception& e)
             {
-                Tools::error << "Error while processing script resource \"" << (*it)->name << "\" : " << e.what() << std::endl;
+                Tools::error << "Engine::LoadLuaScripts: " << e.what() << std::endl;
             }
-            this->_SetRunningResource("");
+        this->_interpreter->Globals().Set("require", this->_interpreter->MakeNil());
+        this->_modules.clear(); // ne garde pas de references inutiles vers les modules
+    }
+
+    Tools::Lua::Ref Engine::_LoadLuaScript(std::string const& name)
+    {
+        // check si le fichier a déjà été chargé
+        auto itModule = this->_modules.find(name);
+        if (itModule != this->_modules.end())
+        {
+            if (itModule->second.first) // loading in progress
+                Tools::error << "Engine::_LoadLuaScript: Warning: Recursive require() of \"" << name << "\" (returning nil)." << std::endl;
+            return itModule->second.second;
         }
+
+        // le fichier n'est pas déjà chargé :
+        std::string previousRunningResourceName = this->_runningResourceName;
+        std::string previousRunningPluginName = this->_runningPluginName;
+        this->_SetRunningResource(name);
+        auto it = this->_modules.insert(std::make_pair(name, std::make_pair(true /* loading in progress */, this->_interpreter->MakeNil())));
+        try
+        {
+            auto f = this->_interpreter->LoadString(this->_game.GetResourceManager().GetScript(name));
+            auto module = f();
+            if (module == f) // le module se retourne lui-même = pas de return dans le module = on retourne nil
+                module = this->_interpreter->MakeNil();
+            it.first->second.second = module;
+            it.first->second.first = false; // loading not in progress anymore
+            this->_SetRunningResource(Common::FieldUtils::GetResourceName(previousRunningResourceName, previousRunningPluginName));
+            return module;
+        }
+        catch (std::exception& e)
+        {
+            throw std::runtime_error("Error while processing script resource \"" + name + "\" : " + e.what());
+        }
+    }
+
+    void Engine::_ApiRequire(Tools::Lua::CallHelper& helper)
+    {
+        std::string name = helper.PopArg("require: Missing argument \"name\"").CheckString("require: Argument \"name\" must be a string");
+        helper.PushRet(this->_LoadLuaScript(name));
     }
 
     void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)
@@ -104,16 +142,8 @@ namespace Client { namespace Game { namespace Engine {
 
     void Engine::_SetRunningResource(std::string const& name)
     {
-        if (name == "")
-        {
-            this->_pluginName = "";
-            this->_resourceName = "";
-        }
-        else
-        {
-            this->_pluginName = Common::FieldUtils::GetPluginNameFromResource(name);
-            this->_resourceName = Common::FieldUtils::GetResourceNameFromResource(name);
-        }
+        this->_runningPluginName = Common::FieldUtils::GetPluginNameFromResource(name);
+        this->_runningResourceName = Common::FieldUtils::GetResourceNameFromResource(name);
     }
 
 }}}

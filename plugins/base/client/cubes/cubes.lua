@@ -1,15 +1,9 @@
+require "base:materials/BaseChunk.lua"
+local nombreBonus = require "base:materials/BaseChunk.lua"
 
-Client.Material.Register{
-    materialName = "BaseChunk",
-    geometryShader = "base:shaders/BaseChunk.fx",
-    shadowMapShader = "base:shaders/BaseChunk.fx",
-    hasAlpha = false,
-    
-    shader = {
-        cubeTexture = "base:cubes/iron/texture.png",
-    },
-    Update = nil
-}
+if nombreBonus == nil then
+    print("*************************** NIL")
+end
 
 local function RegisterSimpleCubeType(name, textureName)
     local material = Client.Material("base:BaseChunk", { cubeTexture = textureName })

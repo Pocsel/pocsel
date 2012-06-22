@@ -10,6 +10,7 @@ namespace Tools {
     namespace Lua {
         class Interpreter;
         class CallHelper;
+        class Ref;
     }
 }
 
@@ -34,6 +35,7 @@ namespace Server { namespace Database {
         Game::World& _world;
         std::list<std::pair<std::string /* map name */, Tools::Lua::Interpreter*>> _tmpMaps; // maps en cours de chargement
         Game::Map::Map* _currentMap; // map en cours de processing de server_file
+        std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> _modules; // modules de la map en cours de processing de server_file
 
     public:
         WorldLoader2(Game::World& world, ResourceManager& resourceManager);
@@ -46,6 +48,8 @@ namespace Server { namespace Database {
         void _LoadMaps();
         void _ParseMapConf(std::string const& name, std::string const& lua, Game::Map::Conf& conf); // ajoute un interpreter dans _tmpMaps pour gerer les cubes apres
         void _LoadServerFiles();
+        Tools::Lua::Ref _LoadServerFile(Uint32 pluginId, std::string const& name);
+        void _ApiRequire(Tools::Lua::CallHelper& helper);
         void _ApiRegisterCube(Tools::Lua::CallHelper& helper);
         void _LoadCubeTypes();
 
