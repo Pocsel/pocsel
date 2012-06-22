@@ -5,7 +5,6 @@
 
 #include "common/physics/Node.hpp"
 #include "common/physics/Vector.hpp"
-#include "common/physics/Move.hpp"
 #include "common/physics/World.hpp"
 
 #include "bullet/bullet-all.hpp"
@@ -87,8 +86,6 @@ namespace Server { namespace Game { namespace Engine {
             }
         }
 
-        double dt = deltaTime / (double)1000000.0;
-
         this->_world->Tick(deltaTime);
 
         for (auto it = this->_entities.begin(), ite = this->_entities.end(); it != ite; ++it)
@@ -98,59 +95,23 @@ namespace Server { namespace Game { namespace Engine {
 
             PositionalEntity& entity = *it->second;
             btRigidBody const& btBody = entity.GetBtBody();
-            btVector3 const& btPos = btBody.getCenterOfMassPosition();
-            btQuaternion const& btAngl = btBody.getCenterOfMassTransform().getRotation();
-            btVector3 const& btVel = btBody.getLinearVelocity();
             Common::Physics::Node& physics = entity.GetPhysics();
 
             btTransform wt;
             btBody.getMotionState()->getWorldTransform(wt);
+
             btVector3 wpos = wt.getOrigin();
+            physics.position = Common::Position(wpos.x(), wpos.y(), wpos.z());
 
-            physics.position.x = wpos.x();//BtPos.x();
-            physics.position.y = wpos.y();//BtPos.y();
-            physics.position.z = wpos.z();//BtPos.z();
+            btQuaternion const& wrot = wt.getRotation();
+            physics.orientation = glm::quat(wrot.w(), wrot.x(), wrot.y(), wrot.z());
 
-            //physics.acceleration.x = btPos.x();
-            //physics.acceleration.y = btPos.y();
-            //physics.acceleration.z = btPos.z();
-            //physics.scale.x = btAngl.x();
-            //physics.scale.y = btAngl.y();
-            //physics.scale.z = btAngl.z();
-            //physics.scaleVelocity.x = btAngl.w();
+            btVector3 const& btVel = btBody.getLinearVelocity();
+            physics.velocity = glm::vec3(btVel.x(), btVel.y(), btVel.z());
 
-            physics.velocity.x = btVel.x();
-            physics.velocity.y = btVel.y();
-            physics.velocity.z = btVel.z();
-
-            btQuaternion wrot = wt.getRotation();
-            glm::quat glmRot(wrot.w(), wrot.x(), wrot.y(), wrot.z());
-            physics.orientation = //glm::eulerAngles(glmRot);
-            glmRot;
-            btVector3 av = btBody.getAngularVelocity();
+            btVector3 const& av = btBody.getAngularVelocity();
             physics.angularVelocity = glm::vec3(av.x(), av.y(), av.z());
-
-            //btVector3 ae = btBody.getTurnVelocity();
-            //physics.angularAcceleration = glm::vec3(ae.x(), ae.y(), ae.z());
-
-
-            // std::cout << physics.velocity.x << ", ";
-            // std::cout << physics.velocity.y << ", ";
-            // std::cout << physics.velocity.z << "\n";
-
-            // TODO j'en suis là
-
-            // Common::Physics::MoveNode(entity.GetPhysics(), dt);
         }
-
-        //for (auto it = this->_entities.begin(), ite = this->_entities.end(); it != ite; ++it)
-        //{
-        //    if (!it->second)
-        //        continue;
-        //    PositionalEntity& entity = *it->second;
-
-        //    Common::Physics::MoveNode(entity.GetPhysics(), dt);
-        //}
     }
 
 }}}

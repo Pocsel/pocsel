@@ -14,11 +14,11 @@ namespace Common { namespace Physics {
 
         glm::quat orientation;
         glm::vec3 angularVelocity;
-        glm::vec3 angularAcceleration;
+        //glm::vec3 angularAcceleration;
 
-        glm::vec3 scale;
-        glm::vec3 scaleVelocity;
-        glm::vec3 scaleAcceleration;
+        //glm::vec3 scale;
+        //glm::vec3 scaleVelocity;
+        //glm::vec3 scaleAcceleration;
 
        // Vector<double> position;
        // Vector<float> yawPitchRoll;

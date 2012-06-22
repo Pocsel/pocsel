@@ -19,11 +19,11 @@ namespace Tools {
 
             p.Read(v.orientation);
             p.Read(v.angularVelocity);
-            p.Read(v.angularAcceleration);
+            //p.Read(v.angularAcceleration);
 
-            p.Read(v.scale);
-            p.Read(v.scaleVelocity);
-            p.Read(v.scaleAcceleration);
+            //p.Read(v.scale);
+            //p.Read(v.scaleVelocity);
+            //p.Read(v.scaleAcceleration);
         }
 
         static void Write(Common::Physics::Node const& v, ByteArray& p) // Used by Packet::Write<T>(T const&)
@@ -34,11 +34,11 @@ namespace Tools {
 
             p.Write(v.orientation);
             p.Write(v.angularVelocity);
-            p.Write(v.angularAcceleration);
+            //p.Write(v.angularAcceleration);
 
-            p.Write(v.scale);
-            p.Write(v.scaleVelocity);
-            p.Write(v.scaleAcceleration);
+            //p.Write(v.scale);
+            //p.Write(v.scaleVelocity);
+            //p.Write(v.scaleAcceleration);
         }
 
         static std::unique_ptr<Common::Physics::Node> Read(ByteArray const& p) // Used by Packet::Read<T>()
@@ -51,11 +51,11 @@ namespace Tools {
 
             p.Read(v->orientation);
             p.Read(v->angularVelocity);
-            p.Read(v->angularAcceleration);
+            //p.Read(v->angularAcceleration);
 
-            p.Read(v->scale);
-            p.Read(v->scaleVelocity);
-            p.Read(v->scaleAcceleration);
+            //p.Read(v->scale);
+            //p.Read(v->scaleVelocity);
+            //p.Read(v->scaleAcceleration);
 
             return v;
         }

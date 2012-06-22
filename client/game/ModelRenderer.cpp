@@ -53,19 +53,7 @@ namespace Client { namespace Game {
                 materials[i]->GetMaterial(),
                 [&, i, vertexBuffer]()
                 {
-                    //float toto = -Tools::Math::PiFloat / 2.0f - glm::radians(pos.yawPitchRoll.r.y);
-                    /*if (toto < -Tools::Math::PiFloat)
-                        toto += Tools::Math::PiFloat * 2;
-                    else if (toto > Tools::Math::PiFloat)
-                        toto -= Tools::Math::PiFloat * 2;*/
-
-
-                    //glm::fvec3 euler = glm::eulerAngles(pos.orientation);
-                    //std::cout << euler.x << ", " << euler.y << ", " << euler.z << "\n";
-                    //euler.x = glm::radians(euler.x) - Tools::Math::PiFloat / 2.0f;
-                    //euler.y = glm::radians(euler.y);
-                    //euler.z = glm::radians(euler.z);
-                    glm::quat orientation = //glm::quat(euler);
+                    glm::quat orientation =
                         pos.orientation
                         *
                         glm::quat(glm::vec3(-Tools::Math::PiFloat / 2.0f, 0.0f, 0.0f))
@@ -77,22 +65,7 @@ namespace Client { namespace Game {
                         glm::toMat4(orientation)
                         *
                         glm::translate(glm::fvec3(0, 0, -1))
-                        /*
-                        glm::toMat4(pos.orientation)
-                        *
-                        glm::yawPitchRoll(0.0f, -Tools::Math::PiFloat / 2.0f, 0.0f)
-                        */
                     );
-                        //glm::yawPitchRoll(
-                        //    0.0f + glm::radians(pos.yawPitchRoll.r.x),
-                        //    toto,///*-Tools::Math::PiFloat / 2.0f + */ glm::radians(pos.yawPitchRoll.r.y),
-                        //    0.0f + glm::radians(pos.yawPitchRoll.r.z)))
-                    /**
-                        glm::yawPitchRoll(
-                            0.0f,
-                            Tools::Math::PiFloat / 2.0f,
-                            0.0f)
-                        )*/ //;
                     vertexBuffer->Bind();
                     indexBuffers[i]->Bind();
                     this->_renderer.DrawElements(meshes[i].num_triangles * 3);

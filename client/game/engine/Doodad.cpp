@@ -15,19 +15,17 @@ namespace Client { namespace Game { namespace Engine {
 
         static btCollisionShape* colShape = new
         //     btSphereShape(1);
-            btBoxShape(btVector3(1, 2, 1));
+            btBoxShape(btVector3(0.5, 1.0, 0.5)); // on donne la moitié de la taille
 
         /// Create Dynamic Objects
-        btTransform startTransform;
-        startTransform.setIdentity();
 
         btScalar mass(12);
         btVector3 localInertia(0, 0, 0);
 
         colShape->calculateLocalInertia(mass, localInertia);
 
+        btTransform startTransform;
         startTransform.setIdentity();
-        startTransform.setRotation(btQuaternion(0,0,0));
         startTransform.setOrigin(btVector3(
                     btScalar(physics.position.x),
                     btScalar(physics.position.y),

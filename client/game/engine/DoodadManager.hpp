@@ -10,6 +10,10 @@ namespace Common { namespace Physics {
     class World;
 }}
 
+namespace Client { namespace Game {
+    class ShapeRenderer;
+}}
+
 namespace Client { namespace Game { namespace Engine {
 
     class Engine;
@@ -27,6 +31,7 @@ namespace Client { namespace Game { namespace Engine {
         Doodad* _runningDoodad; // nul quand aucun doodad n'est en cours d'éxécution
         Uint64 _lastTime;
         Common::Physics::World* _world;
+        ShapeRenderer* _shapeRenderer;
 
     public:
         DoodadManager(Engine& engine);
@@ -43,6 +48,7 @@ namespace Client { namespace Game { namespace Engine {
         void UpdateDoodad(Uint32 doodadId,
                 Common::Physics::Node const* position,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands);
+        void Render();
     private:
         void _CallDoodadFunction(Uint32 doodadId, std::string const& function);
         void _ApiRegister(Tools::Lua::CallHelper& helper);

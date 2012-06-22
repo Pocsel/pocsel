@@ -3,9 +3,9 @@
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/DoodadType.hpp"
 #include "client/game/engine/Engine.hpp"
+#include "client/game/ShapeRenderer.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
-#include "common/physics/Move.hpp"
 #include "common/physics/World.hpp"
 #include "bullet/bullet-all.hpp"
 
@@ -16,9 +16,11 @@ namespace Client { namespace Game { namespace Engine {
         _runningDoodadId(0),
         _runningDoodad(0),
         _lastTime(0),
-        _world(0)
+        _world(0),
+        _shapeRenderer(0)
     {
         this->_world = new Common::Physics::World();
+        this->_shapeRenderer = new ShapeRenderer(this->_engine.GetGame());
         auto& i = this->_engine.GetInterpreter();
         auto namespaceTable = i.Globals().GetTable("Client").GetTable("Doodad");
         namespaceTable.Set("Register", i.MakeFunction(std::bind(&DoodadManager::_ApiRegister, this, std::placeholders::_1)));
@@ -38,6 +40,7 @@ namespace Client { namespace Game { namespace Engine {
             Tools::Delete(itPlugin->second);
 
         Tools::Delete(this->_world);
+        Tools::Delete(this->_shapeRenderer);
     }
 
     //Uint32 DoodadManager::GetRunningPluginId() const
@@ -55,8 +58,6 @@ namespace Client { namespace Game { namespace Engine {
 
     void DoodadManager::Tick(Uint64 totalTime)
     {
-        double deltaTime = (totalTime - this->_lastTime) / (double)1000000;
-
         this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
 
         auto it = this->_doodads.begin();
@@ -145,27 +146,11 @@ namespace Client { namespace Game { namespace Engine {
             return;
         }
         if (position)
-            //it->second->SetPhysics(*position);
         {
-            btTransform frameWt;
+            it->second->SetPhysics(*position);
 
-            frameWt.setOrigin(btVector3(
-                    position->acceleration.x,
-                    position->acceleration.y,
-                    position->acceleration.z));
+            btRigidBody& btBody = it->second->GetBtBody();
 
-            frameWt.setRotation(btQuaternion(
-                        position->scale.x,
-                        position->scale.y,
-                        position->scale.z,
-                        position->scaleVelocity.x));
-
-            //it->second->GetBtBody().setCenterOfMassTransform(frameWt);
-
-            //toto.setCenterOfMassTransform(wt);
-            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setX(position->acceleration.x);
-            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setY(position->acceleration.y);
-            //const_cast<btVector3&>(it->second->GetBtBody().getCenterOfMassPosition()).setZ(position->acceleration.z);
 
             btTransform wt;
             wt.setOrigin(btVector3(position->position.x,
@@ -177,24 +162,18 @@ namespace Client { namespace Game { namespace Engine {
                         position->orientation.z,
                         position->orientation.w));
 
-            it->second->GetBtBody().getMotionState()->setWorldTransform(wt);
-
-            btRigidBody& toto = it->second->GetBtBody();
+            btBody.getMotionState()->setWorldTransform(wt);
 
 
-            it->second->GetBtBody().setLinearVelocity(
+            btBody.setLinearVelocity(
                     btVector3(position->velocity.x,
                         position->velocity.y,
                         position->velocity.z));
 
-            it->second->GetBtBody().setAngularVelocity(
+            btBody.setAngularVelocity(
                     btVector3(position->angularVelocity.x,
                         position->angularVelocity.y,
                         position->angularVelocity.z));
-
-            //const_cast<btVector3&>(it->second->GetBtBody().getTurnVelocity()).setX(position->angularAcceleration.x);
-            //const_cast<btVector3&>(it->second->GetBtBody().getTurnVelocity()).setY(position->angularAcceleration.y);
-            //const_cast<btVector3&>(it->second->GetBtBody().getTurnVelocity()).setZ(position->angularAcceleration.z);
 
 
             it->second->SetUpdateFlag(1.1f);
@@ -213,6 +192,14 @@ namespace Client { namespace Game { namespace Engine {
             {
                 // TODO
             }
+        }
+    }
+
+    void DoodadManager::Render()
+    {
+        for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
+        {
+            this->_shapeRenderer->Render(it->second->GetPhysics());
         }
     }
 

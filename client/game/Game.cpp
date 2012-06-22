@@ -139,6 +139,7 @@ namespace Client { namespace Game {
         this->_deferredShading.RenderGeometry(totalTime);
 
         this->_player->Render();
+        this->_engine->GetDoodadManager().Render();
 
         this->_gBuffer->Unbind();
 
