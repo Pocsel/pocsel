@@ -318,7 +318,7 @@ function module.Vector2(x, y)
     local v = {}
     if type(x) == "table" then
         v = { x = x.x, y = x.y }
-    else if type(x) == "number" and type(y) == "number" then
+    elseif type(x) == "number" and type(y) == "number" then
         v = { x = x, y = y }
     else
         assert(false, "Vector2 must take 2 scalars or a table with x and y")
@@ -331,7 +331,7 @@ function module.Vector3(x, y, z)
     local v = {}
     if type(x) == "table" then
         v = { x = x.x, y = x.y, z = x.z }
-    else if type(x) == "number" and type(y) == "number" and type(z) == "number" then
+    elseif type(x) == "number" and type(y) == "number" and type(z) == "number" then
         v = { x = x, y = y, z = z }
     else
         assert(false, "Vector3 must take 3 scalars or a table with x, y and z")
@@ -344,7 +344,7 @@ function module.Vector4(x, y, z, w)
     local v = {}
     if type(x) == "table" then
         v = { x = x.x, y = x.y, z = x.z, w = x.w }
-    else if type(x) == "number" and type(y) == "number" and type(z) == "number" and type(w) == "number" then
+    elseif type(x) == "number" and type(y) == "number" and type(z) == "number" and type(w) == "number" then
         v = { x = x, y = y, z = z, w = w }
     else
         assert(false, "Vector4 must take 4 scalars or a table with x, y, z and w")

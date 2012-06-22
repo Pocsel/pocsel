@@ -7,7 +7,7 @@ int main(int ac, char** av)
 {
     if (ac != 3)
     {
-        std::cout << "Usage: " << (ac > 0 ? av[0] : "buildutils") << " <resource file> <output C file>" << std::endl;
+        std::cout << "Usage: " << (ac > 0 ? av[0] : "respacker") << " <resource file> <output C file>" << std::endl;
         return EXIT_FAILURE;
     }
     std::ifstream resource(av[1]);
@@ -27,10 +27,13 @@ int main(int ac, char** av)
     std::cout << "Resource: \"" << av[1] << "\" to header \"" << av[2]  << "\"."<< std::endl;
 
     output << "static unsigned char const data[] = {" << std::endl;
-    while (!resource.eof())
+    while (true)
     {
         unsigned int nb = (unsigned char)resource.get();
-        output << "0x" << std::hex << nb << ",";
+        if (!resource.eof())
+            output << "0x" << std::hex << nb << ",";
+        else
+            break;
     }
     output << std::endl << "};" << std::endl;
 

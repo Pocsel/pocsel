@@ -1,7 +1,5 @@
 macro(AddResources src resources)
 
-    set(buildutils "${EXECUTABLE_OUTPUT_PATH}/buildutils")
-
     set(headers "")
     foreach (res ${resources})
         
@@ -12,7 +10,7 @@ macro(AddResources src resources)
         file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp" "\n")
         ADD_CUSTOM_COMMAND(
             OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp"
-            COMMAND buildutils 
+            COMMAND respacker 
             ARGS "${CMAKE_SOURCE_DIR}/${res}" "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp"
             MAIN_DEPENDENCY ${res})
 
