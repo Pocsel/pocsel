@@ -2,29 +2,25 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
-int main(int ac, char** av)
+static int PackResource(std::string in, std::string out)
 {
-    if (ac != 3)
-    {
-        std::cout << "Usage: " << (ac > 0 ? av[0] : "respacker") << " <resource file> <output C file>" << std::endl;
-        return EXIT_FAILURE;
-    }
-    std::ifstream resource(av[1]);
-    std::ofstream output(av[2]);
+    std::ifstream resource(in);
+    std::ofstream output(out);
 
     if (!resource.is_open())
     {
-        std::cout << "Can't open " << av[1] << std::endl;
+        std::cout << "Can't open " << in << std::endl;
         return EXIT_FAILURE;
     }
     if (!output.is_open())
     {
-        std::cout << "Can't open " << av[2] << std::endl;
+        std::cout << "Can't open " << out << std::endl;
         return EXIT_FAILURE;
     }
 
-    std::cout << "Resource: \"" << av[1] << "\" to header \"" << av[2]  << "\"."<< std::endl;
+    std::cout << "Resource: \"" << in << "\" -> \"" << out  << "\"."<< std::endl;
 
     output << "static unsigned char const data[] = {" << std::endl;
     while (true)
@@ -38,4 +34,15 @@ int main(int ac, char** av)
     output << std::endl << "};" << std::endl;
 
     return EXIT_SUCCESS;
+}
+
+int main(int ac, char** av)
+{
+    if (ac < 3)
+    {
+        std::cout << "Usage: " << (ac > 0 ? av[0] : "respacker") << " <resource file> <output C file>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    return PackResource(av[1], av[2]);
 }

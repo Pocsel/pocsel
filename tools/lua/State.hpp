@@ -10,6 +10,7 @@ namespace Tools { namespace Lua {
     class Interpreter;
     class Ref;
     class CallHelper;
+    class MetaTable;
 
     class State :
         private boost::noncopyable
@@ -24,7 +25,7 @@ namespace Tools { namespace Lua {
     private:
         Interpreter& _interpreter;
         lua_State* _state;
-        std::unordered_map<std::size_t, Ref*> _metaTables;
+        std::unordered_map<std::size_t, MetaTable*> _metaTables;
         Ref* _weakTable;
         Uint32 _weakId;
         bool _garbageCollectionEnabled;
@@ -35,7 +36,7 @@ namespace Tools { namespace Lua {
         bool GetGarbageCollectionEnabled() const { return this->_garbageCollectionEnabled; }
         void StopGarbageCollector();
         void RestartGarbageCollector();
-        void RegisterMetaTable(Ref const& metaTable, std::size_t hash) throw();
+        MetaTable& RegisterMetaTable(MetaTable&& metaTable, std::size_t hash) throw();
         Ref MakeBoolean(bool val) throw();
         Ref MakeFunction(std::function<void(CallHelper&)> val) throw();
         Ref MakeNil() throw();
@@ -48,7 +49,7 @@ namespace Tools { namespace Lua {
             Ref Make(T const& val) throw();
         operator lua_State*() const throw() { return this->_state; }
         Interpreter& GetInterpreter() throw() { return this->_interpreter; }
-        Ref GetMetaTable(std::size_t hash) throw(std::runtime_error);
+        MetaTable const& GetMetaTable(std::size_t hash) throw(std::runtime_error);
         Ref GetWeakReference(Uint32 id) const;
         Uint32 GetWeakReference(Ref const& ref);
     };

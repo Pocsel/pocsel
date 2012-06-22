@@ -4,6 +4,7 @@
 #include "tools/lua/State.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Serializer.hpp"
+#include "tools/lua/MetaTable.hpp"
 
 extern "C" {
     struct luaL_Reg;
@@ -77,12 +78,8 @@ namespace Tools { namespace Lua {
     template <typename T>
     inline Ref Interpreter::Make(T val) throw(std::runtime_error)
     {
-        auto m = this->_state->GetMetaTable(typeid(T).hash_code());
-        T* luaValue;
-        auto r = this->_state->MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
-        new (luaValue) T(val);
-        r.SetMetaTable(m);
-        return r;
+        auto const& m = this->_state->GetMetaTable(typeid(T).hash_code());
+        return m.MakeReference(std::move(val));
     }
     template<> inline Ref Interpreter::Make<bool>(bool val) throw(std::runtime_error) { return this->_state->Make(val); }
     template<> inline Ref Interpreter::Make<int>(int val) throw(std::runtime_error) { return this->_state->Make(val); }
@@ -98,12 +95,8 @@ namespace Tools { namespace Lua {
     template <typename T>
     inline Ref Interpreter::MakeMove(T&& val) throw(std::runtime_error)
     {
-        auto m = this->_state->GetMetaTable(typeid(T).hash_code());
-        T* luaValue;
-        auto r = this->_state->MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
-        new (luaValue) T(std::move(val));
-        r.SetMetaTable(m);
-        return r;
+        auto const& m = this->_state->GetMetaTable(typeid(T).hash_code());
+        return m.MakeReference(std::move(val));
     }
 
 #ifdef DEBUG_NEW

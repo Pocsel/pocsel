@@ -204,10 +204,14 @@ namespace Tools { namespace Lua {
         {
             try
             {
-                if (!this->IsUserData() || this->GetMetaTable().IsNoneOrNil() ||
-                        this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
+                auto mt = this->GetMetaTable();
+                if (mt.IsNoneOrNil())
                     throw 1;
-                return reinterpret_cast<T>(this->CheckUserData(err));
+                auto& cppMt = this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code());
+                if (mt != cppMt.GetMetaTable())
+                    throw 1;
+
+                return cppMt.MakeNative<T>(*this);
             }
             catch (int)
             {

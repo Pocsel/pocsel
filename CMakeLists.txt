@@ -145,7 +145,7 @@ configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/De
 
 # resources
 AddResources(tools_lua_src
-    ${tools_lua_res})
+    "${tools_lua_res}")
 
 add_subdirectory(buildutils)
 add_subdirectory(sdk)

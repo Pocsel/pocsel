@@ -8,6 +8,8 @@ namespace Tools { namespace Lua {
 namespace Tools { namespace Lua { namespace Utils {
 
     void RegisterColor(Lua::Interpreter& interpreter);
+    void RegisterVector(Lua::Interpreter& interpreter);
+    void RegisterMatrix(Lua::Interpreter& interpreter);
 
 }}}
 

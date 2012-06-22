@@ -4,6 +4,29 @@ module.vector3MetaTable = {}
 module.vector4MetaTable = {}
 
 ---- Vector 2 ----
+function module.vector2MetaTable.__tostring(self)
+    return "(" .. self.x .. "; " .. self.y .. ")"
+end
+
+function module.vector2MetaTable.__index(self, index)
+    if index == 0 then
+        return self.x
+    elseif index == 1 then
+        return self.y
+    end
+    return nil
+end
+
+function module.vector2MetaTable.__newindex(self, index, value)
+    assert(type(value) == "number", "value must be a number")
+    if index == 0 then
+        self.x = value
+    elseif index == 1 then
+        self.y = value
+    end
+    assert(false, "index must be 0 or 1")
+end
+
 function module.vector2MetaTable.__add(self, rhs)
     local r
     if type(b) == "number" then
@@ -102,6 +125,33 @@ function module.vector2MetaTable.Dot(self, rhs)
 end
 
 ---- Vector 3 ----
+function module.vector3MetaTable.__tostring(self)
+    return "(" .. self.x .. "; " .. self.y .. "; " .. self.z .. ")"
+end
+
+function module.vector3MetaTable.__index(self, index)
+    if index == 0 then
+        return self.x
+    elseif index == 1 then
+        return self.y
+    elseif index == 2 then
+        return self.z
+    end
+    return nil
+end
+
+function module.vector3MetaTable.__newindex(self, index, value)
+    assert(type(value) == "number", "value must be a number")
+    if index == 0 then
+        self.x = value
+    elseif index == 1 then
+        self.y = value
+    elseif index == 2 then
+        self.z = value
+    end
+    assert(false, "index must be in range 0..2")
+end
+
 function module.vector3MetaTable.__add(self, rhs)
     local r
     if type(b) == "number" then
@@ -212,6 +262,37 @@ function module.vector3MetaTable.Cross(self, rhs)
 end
 
 ---- Vector 4 ----
+function module.vector4MetaTable.__tostring(self)
+    return "(" .. self.x .. "; " .. self.y .. "; " .. self.z .. "; " .. self.w .. ")"
+end
+
+function module.vector4MetaTable.__ind(self, index)
+    if index == 0 then
+        return self.x
+    elseif index == 1 then
+        return self.y
+    elseif index == 2 then
+        return self.z
+    elseif index == 3 then
+        return self.w
+    end
+    return nil
+end
+
+function module.vector4MetaTable.__newindex(self, index, value)
+    assert(type(value) == "number", "value must be a number")
+    if index == 0 then
+        self.x = value
+    elseif index == 1 then
+        self.y = value
+    elseif index == 2 then
+        self.z = value
+    elseif index == 3 then
+        self.w = value
+    end
+    assert(false, "index must be in range 0..3")
+end
+
 function module.vector4MetaTable.__add(self, rhs)
     local r
     if type(b) == "number" then
@@ -314,7 +395,7 @@ function module.vector4MetaTable.Dot(self, rhs)
 end
 
 ---- Constructors ----
-function module.Vector2(x, y)
+function Utils.Vector2(x, y)
     local v = {}
     if type(x) == "table" then
         v = { x = x.x, y = x.y }
@@ -327,7 +408,7 @@ function module.Vector2(x, y)
     return v
 end
 
-function module.Vector3(x, y, z)
+function Utils.Vector3(x, y, z)
     local v = {}
     if type(x) == "table" then
         v = { x = x.x, y = x.y, z = x.z }
@@ -340,7 +421,7 @@ function module.Vector3(x, y, z)
     return v
 end
 
-function module.Vector4(x, y, z, w)
+function Utils.Vector4(x, y, z, w)
     local v = {}
     if type(x) == "table" then
         v = { x = x.x, y = x.y, z = x.z, w = x.w }
@@ -354,15 +435,15 @@ function module.Vector4(x, y, z, w)
 end
 
 ---- Helpers IsVectorX() ----
-function module.IsVector2(v)
+function Utils.IsVector2(v)
     return type(v) == "table" and getmetatable(v) == module.vector2MetaTable
 end
 
-function module.IsVector3(v)
+function Utils.IsVector3(v)
     return type(v) == "table" and getmetatable(v) == module.vector3MetaTable
 end
 
-function module.IsVector4(v)
+function Utils.IsVector4(v)
     return type(v) == "table" and getmetatable(v) == module.vector4MetaTable
 end
 
