@@ -25,6 +25,7 @@ add_definitions(${QT_DEFINITIONS})
 
 CreateGroups("${src}")
 add_executable(packager-qt ${src} ${qtres})
+add_dependencies(packager-qt resources)
 
 enable_pch(packager-qt src)
 

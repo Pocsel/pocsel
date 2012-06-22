@@ -88,7 +88,6 @@ file(GLOB_RECURSE   tools_database_src          "tools/database/*.[ch]pp")
 file(GLOB_RECURSE   tools_gui_src               "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE   tools_logger_src            "tools/logger/*.[ch]pp")
 file(GLOB_RECURSE   tools_lua_src               "tools/lua/*.[ch]pp")
-file(GLOB_RECURSE   tools_lua_utils_src         "tools/lua/utils/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_install_src    "tools/plugin-install/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_create_src     "tools/plugin-create/*.[ch]pp")
 file(GLOB_RECURSE   tools_renderers_src         "tools/renderers/*.[ch]pp")
@@ -100,7 +99,7 @@ file(GLOB_RECURSE   tools_thread_src            "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
 # lua resources
-file(GLOB_RECURSE   tools_lua_utils_res         "tools/lua/utils/*.lua")
+file(GLOB_RECURSE   tools_lua_res         "tools/lua/utils/*.lua")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
@@ -145,7 +144,8 @@ set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
 configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
 # resources
-AddResources(tools_lua_utils_src ${tools_lua_utils_res})
+AddResources(tools_lua_src
+    ${tools_lua_res})
 
 add_subdirectory(buildutils)
 add_subdirectory(sdk)
@@ -153,8 +153,3 @@ add_subdirectory(plugins)
 add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(tests)
-
-add_dependencies(packager-cli resources)
-add_dependencies(packager-qt resources)
-add_dependencies(client resources)
-add_dependencies(server resources)

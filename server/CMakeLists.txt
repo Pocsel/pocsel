@@ -15,6 +15,7 @@ set(src
 
 CreateGroups("${src}")
 add_executable(server ${src})
+add_dependencies(server resources)
 
 enable_pch(server src)
 
