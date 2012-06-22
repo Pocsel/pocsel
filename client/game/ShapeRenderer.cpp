@@ -44,45 +44,70 @@ namespace Client { namespace Game {
 
         glm::quat orientation(bodyRot.w(), bodyRot.x(), bodyRot.y(), bodyRot.z());
         glm::dvec3 position(bodyPos.x(), bodyPos.y(), bodyPos.z());
+        glm::vec3 relPos = glm::fvec3(position - camera.position);
 
         this->_shader->BeginPass();
 
-        this->_renderer.SetModelMatrix(
-                glm::translate<float>(
-                    glm::fvec3(position - camera.position)
-                    )
-                *
-                glm::toMat4(orientation)
-                *
-                glm::scale(
-                    glm::fvec3(0.5, 0.5, 0.5)
-                    )
-                );
-
         this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Line);
         {
-
             const btCollisionShape* colShape = body.getCollisionShape();
             const btSphereShape* sphereShape;
             const btBoxShape* boxShape;
 
             if ((sphereShape = dynamic_cast<const btSphereShape*>(colShape)) != 0)
-            {
-                if (!this->_sphere)
-                    this->_sphere = new Tools::Renderers::Utils::Sphere(this->_renderer);
-                this->_sphere->Render();
-            }
+                this->_RenderSphere(sphereShape, orientation, relPos);
             else if ((boxShape = dynamic_cast<const btBoxShape*>(colShape)) != 0)
-            {
-                if (!this->_cube)
-                    this->_cube = new Tools::Renderers::Utils::Cube(this->_renderer);
-                this->_cube->Render();
-            }
-
+                this->_RenderBox(boxShape, orientation, relPos);
         }
         this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
+
 
         this->_shader->EndPass();
     }
 
+    void ShapeRenderer::_RenderBox(
+            btBoxShape const* box,
+            glm::quat const& orientation,
+            glm::vec3 const& pos)
+    {
+        btVector3 const& halfExtents = box->getHalfExtentsWithoutMargin();
+        this->_renderer.SetModelMatrix(
+                glm::translate<float>(
+                    glm::fvec3(pos)
+                    )
+                *
+                glm::toMat4(orientation)
+                *
+                glm::scale(
+                    glm::fvec3(halfExtents.x(), halfExtents.y(), halfExtents.z())
+                    )
+                );
+
+        if (!this->_cube)
+            this->_cube = new Tools::Renderers::Utils::Cube(this->_renderer);
+        this->_cube->Render();
+    }
+
+    void ShapeRenderer::_RenderSphere(
+            btSphereShape const* sphere,
+            glm::quat const& orientation,
+            glm::vec3 const& pos)
+    {
+        btScalar radius = sphere->getRadius();
+        this->_renderer.SetModelMatrix(
+                glm::translate<float>(
+                    glm::fvec3(pos)
+                    )
+                *
+                glm::toMat4(orientation)
+                *
+                glm::scale(
+                    glm::fvec3(radius, radius, radius)
+                    )
+                );
+
+        if (!this->_sphere)
+            this->_sphere = new Tools::Renderers::Utils::Sphere(this->_renderer);
+        this->_sphere->Render();
+    }
 }}

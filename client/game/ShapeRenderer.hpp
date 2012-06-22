@@ -24,6 +24,8 @@ namespace Client { namespace Game {
 }}
 
 class btRigidBody;
+class btBoxShape;
+class btSphereShape;
 
 namespace Client { namespace Game {
 
@@ -33,9 +35,6 @@ namespace Client { namespace Game {
         Game& _game;
         Tools::IRenderer& _renderer;
         Tools::Renderers::IShaderProgram* _shader;
-        //Tools::Renderers::IShaderParameter* _shaderTexture;
-        //Tools::Renderers::IShaderParameter* _shaderTime;
-        //std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;
 
         Tools::Renderers::Utils::Sphere* _sphere;
         Tools::Renderers::Utils::Cube* _cube;
@@ -44,8 +43,18 @@ namespace Client { namespace Game {
         ShapeRenderer(Game& game);
         ~ShapeRenderer();
         void Render(
-                btRigidBody const& body); 
+                btRigidBody const& body);
         //Common::Physics::Node const& node);
+
+    private:
+        void _RenderBox(
+                btBoxShape const* box,
+                glm::quat const& orientation,
+                glm::vec3 const& pos);
+        void _RenderSphere(
+                btSphereShape const* sphere,
+                glm::quat const& orientation,
+                glm::vec3 const& pos);
     };
 
 }}

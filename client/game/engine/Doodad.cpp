@@ -14,12 +14,13 @@ namespace Client { namespace Game { namespace Engine {
         Tools::debug << "Doodad::Doodad: New doodad \"" << this->_type.GetName() << "\" spawned (id: " << id << ", pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;
 
         static btCollisionShape* colShape = new
-            // btSphereShape(0.5); // on donne le rayon
-            btBoxShape(btVector3(0.5, 0.5, 0.5)); // on donne la moitié de la taille
+            //btSphereShape(2) // on donne le rayon
+            btBoxShape(btVector3(0.1, 4, 2)) // on donne la moitié de la taille
+            ;
 
         /// Create Dynamic Objects
 
-        btScalar mass(12);
+        btScalar mass(1200);
         btVector3 localInertia(0, 0, 0);
 
         colShape->calculateLocalInertia(mass, localInertia);

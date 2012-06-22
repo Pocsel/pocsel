@@ -11,12 +11,13 @@ namespace Server { namespace Game { namespace Engine {
         _physics.position = pos;
 
         static btCollisionShape* colShape = new
-             btSphereShape(0.5); // rayon
-        //    btBoxShape(btVector3(0.5, 1.0, 0.5)); // on donne la moitié de la taille
+            // btSphereShape(2) // rayon
+            btBoxShape(btVector3(0.1, 4, 2)) // on donne la moitié de la taille
+            ;
 
         /// Create Dynamic Objects
 
-        btScalar mass(12);
+        btScalar mass(1200);
         btVector3 localInertia(0, 0, 0);
 
         colShape->calculateLocalInertia(mass, localInertia);
