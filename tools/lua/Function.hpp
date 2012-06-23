@@ -4,6 +4,7 @@
 #include "tools/precompiled.hpp"
 
 #include "tools/lua/Interpreter.hpp"
+#include "tools/lua/MetaTable.hpp"
 #include "tools/lua/Ref.hpp"
 
 #include "tools/meta/Signature.hpp"
@@ -142,6 +143,30 @@ namespace Tools { namespace Lua {
     }
 
     /********* Interpreter *********/
+    template <typename T>
+    inline Ref Interpreter::Make(T val) throw(std::runtime_error)
+    {
+        auto const& m = this->_state->GetMetaTable(typeid(T).hash_code());
+        return m.MakeReference(std::move(val));
+    }
+    template<> inline Ref Interpreter::Make<bool>(bool val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<int>(int val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<unsigned int>(unsigned int val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<char>(char val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<unsigned char>(unsigned char val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<double>(double val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<float>(float val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<std::string>(std::string val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<char const*>(char const* val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<std::function<void(CallHelper&)>>(std::function<void(CallHelper&)> val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template<> inline Ref Interpreter::Make<Ref>(Ref val) throw(std::runtime_error) { return this->_state->Make(val); }
+    template <typename T>
+    inline Ref Interpreter::MakeMove(T&& val) throw(std::runtime_error)
+    {
+        auto const& m = this->_state->GetMetaTable(typeid(T).hash_code());
+        return m.MakeReference(std::move(val));
+    }
+
     template<class T>
     Ref Interpreter::Bind(T function)
     {
