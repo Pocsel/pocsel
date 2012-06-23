@@ -3,12 +3,24 @@
 
 #include "common/BaseChunk.hpp"
 
+class btBvhTriangleMeshShape;
+class btRigidBody;
+
 namespace Server { namespace Game { namespace Map {
 
     struct Chunk : public Common::BaseChunk
     {
-        explicit Chunk(IdType id) : BaseChunk(id) {}
-        explicit Chunk(CoordsType const& coords) : BaseChunk(coords) {}
+    private:
+        btBvhTriangleMeshShape* _shape;
+        btRigidBody* _body;
+
+    public:
+        explicit Chunk(IdType id);// : BaseChunk(id) {}
+        explicit Chunk(CoordsType const& coords);// : BaseChunk(coords) {}
+        ~Chunk();
+
+        void InitBody();
+        btRigidBody* GetBody() { return this->_body; }
     };
 
 }}}

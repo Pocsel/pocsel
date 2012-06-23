@@ -19,10 +19,8 @@ namespace Server { namespace Game { namespace Map {
     {
         Tools::debug << existingBigChunks.size() << " existing chunks in " << map.GetName() << "\n";
 
-        std::for_each(existingBigChunks.begin(), existingBigChunks.end(), [this](Chunk::IdType const& id)
-                {
-                    this->_dbBigChunks.insert(id);
-                });
+        for (auto it = existingBigChunks.begin(), ite = existingBigChunks.end(); it != ite; ++it)
+            this->_dbBigChunks.insert(*it);
     }
 
     ChunkManager::~ChunkManager()
@@ -157,22 +155,22 @@ namespace Server { namespace Game { namespace Map {
 
     void ChunkManager::_DeflateIfPossible(Chunk::IdType noDeflateId, bool noDeflate)
     {
-        while (this->_inflatedValues.size() > _maxInflated)
-        {
-            if (noDeflate && this->_inflatedValues.back() == noDeflateId)
-                break;
+        //while (this->_inflatedValues.size() > _maxInflated)
+        //{
+        //    if (noDeflate && this->_inflatedValues.back() == noDeflateId)
+        //        break;
 
-            this->_MoveInflatedToDeflated(this->_inflatedValues.back());
-        }
-        while (this->_deflatedValues.size() > _maxDeflatedVal)
-        {
-            BigChunk::IdType bigId = this->_deflatedValues.back();
+        //    this->_MoveInflatedToDeflated(this->_inflatedValues.back());
+        //}
+        //while (this->_deflatedValues.size() > _maxDeflatedVal)
+        //{
+        //    BigChunk::IdType bigId = this->_deflatedValues.back();
 
-            if (this->_inflatedChunksContainers.count(bigId) == 1)
-                break;
+        //    if (this->_inflatedChunksContainers.count(bigId) == 1)
+        //        break;
 
-            this->_MoveDeflatedToDeflatedBig(bigId);
-        }
+        //    this->_MoveDeflatedToDeflatedBig(bigId);
+        //}
     }
 
     void ChunkManager::_MoveInflatedToDeflated(Chunk::IdType id)

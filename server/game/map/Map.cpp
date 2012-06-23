@@ -26,6 +26,7 @@
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/MessageManager.hpp"
 #include "server/game/engine/DoodadManager.hpp"
+#include "server/game/engine/PhysicsManager.hpp"
 #include "server/game/map/gen/ChunkGenerator.hpp"
 #include "server/database/ResourceManager.hpp"
 #include "server/network/PacketCreator.hpp"
@@ -226,6 +227,11 @@ namespace Server { namespace Game { namespace Map {
         this->_chunkRequests.erase(chunk->id);
 
         this->_chunkManager->AddChunk(std::unique_ptr<Chunk>(chunk));
+
+        // XXX THIS IS SHIT
+        chunk->InitBody();
+        if (chunk->GetBody())
+            this->_engine->GetPhysicsManager().AddBody(chunk->GetBody());
     }
 
     void Map::_GetSpawnPosition(SpawnCallback& response)
