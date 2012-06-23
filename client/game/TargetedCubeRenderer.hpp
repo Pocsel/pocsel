@@ -9,6 +9,7 @@ namespace Tools {
         class IShaderParameter;
         class IShaderProgram;
         class IVertexBuffer;
+        class ITexture2D;
     }
 }
 

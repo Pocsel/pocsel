@@ -12,9 +12,8 @@ namespace Tools { namespace PluginInstall {
 
         void CreateWorldTables(Tools::Database::IConnection& wconn)
         {
-            wconn.CreateQuery("CREATE TABLE cube_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
+            wconn.CreateQuery("CREATE TABLE server_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE cube_id (id INTEGER PRIMARY KEY, plugin_id INTEGER, name TEXT);")->ExecuteNonSelect();
-            wconn.CreateQuery("CREATE TABLE entity_file (plugin_id INTEGER, name TEXT, lua TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE map (name TEXT, plugin_id INTEGER, lua TEXT, time INTEGER);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE plugin (id INTEGER PRIMARY KEY, build_hash TEXT, fullname TEXT, identifier TEXT);")->ExecuteNonSelect();
             wconn.CreateQuery("CREATE TABLE resource (id INTEGER PRIMARY KEY, plugin_id INTEGER, version INTEGER, name TEXT, type TEXT, data_hash TEXT, data BLOB);")->ExecuteNonSelect();
@@ -48,27 +47,15 @@ namespace Tools { namespace PluginInstall {
             return (Uint32)wconn.GetLastInsertedId();
         }
 
-        void UpdateTableCubeFile(Uint32 pluginId, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
+        void UpdateTableServerFile(Uint32 pluginId, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
         {
-            wconn.CreateQuery("DELETE FROM cube_file WHERE plugin_id = ?;")->Bind(pluginId).ExecuteNonSelect();
-            auto query = pconn.CreateQuery("SELECT name, lua FROM cube_file;");
+            wconn.CreateQuery("DELETE FROM server_file WHERE plugin_id = ?;")->Bind(pluginId).ExecuteNonSelect();
+            auto query = pconn.CreateQuery("SELECT name, lua FROM server_file;");
             while (auto row = query->Fetch())
             {
-                wconn.CreateQuery("INSERT INTO cube_file (plugin_id, name, lua) VALUES (?, ?, ?);")->
+                wconn.CreateQuery("INSERT INTO server_file (plugin_id, name, lua) VALUES (?, ?, ?);")->
                     Bind(pluginId).Bind(row->GetString(0)).Bind(row->GetString(1)).ExecuteNonSelect();
-                Tools::log << "Added cube file \"" << row->GetString(0) << "\" (size: " << row->GetString(1).size() << " bytes)." << std::endl;
-            }
-        }
-
-        void UpdateTableEntityFile(Uint32 pluginId, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
-        {
-            wconn.CreateQuery("DELETE FROM entity_file WHERE plugin_id = ?;")->Bind(pluginId).ExecuteNonSelect();
-            auto query = pconn.CreateQuery("SELECT name, lua FROM entity_file;");
-            while (auto row = query->Fetch())
-            {
-                wconn.CreateQuery("INSERT INTO entity_file (plugin_id, name, lua) VALUES (?, ?, ?);")->
-                    Bind(pluginId).Bind(row->GetString(0)).Bind(row->GetString(1)).ExecuteNonSelect();
-                Tools::log << "Added entity file \"" << row->GetString(0) << "\" (size: " << row->GetString(1).size() << " bytes)." << std::endl;
+                Tools::log << "Added server file \"" << row->GetString(0) << "\" (size: " << row->GetString(1).size() << " bytes)." << std::endl;
             }
         }
 
@@ -285,8 +272,7 @@ namespace Tools { namespace PluginInstall {
             wconn->BeginTransaction();
 
             Uint32 pluginId = UpdateTablePlugin(pluginBuildHash, pluginIdentifier, pluginFullname, *wconn);
-            UpdateTableCubeFile(pluginId, *wconn, *pconn);
-            UpdateTableEntityFile(pluginId, *wconn, *pconn);
+            UpdateTableServerFile(pluginId, *wconn, *pconn);
             UpdateTableResource(pluginId, newWorldVersion, *wconn, *pconn);
             UpdateTableMap(pluginId, pluginIdentifier, *wconn, *pconn);
             UpdateTableWorld(newWorldVersion, *wconn, *pconn);

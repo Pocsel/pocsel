@@ -26,6 +26,7 @@ sampler2D diffuseTexture = sampler_state
 #endif
 
 float4x4 boneMatrices[MAX_BONES];
+float updateFlag = 0.0;
 
 struct VSout
 {
@@ -80,6 +81,7 @@ FSout fs(in VSout v)
 
     f.diffuse = diffuse;
     f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, specularPower);
+    f.diffuse.rgb = f.diffuse.rgb + float3(updateFlag, updateFlag, updateFlag);
 
     return f;
 }

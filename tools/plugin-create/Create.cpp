@@ -135,59 +135,31 @@ namespace Tools { namespace PluginCreate {
             }
         }
 
-        void FillTableEntityFile(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn)
+        void FillTableServerFile(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn)
         {
-            boost::filesystem::path entitiesRoot(pluginRoot / "entities");
-            if (!boost::filesystem::is_directory(entitiesRoot))
+            boost::filesystem::path serverRoot(pluginRoot / "server");
+            if (!boost::filesystem::is_directory(serverRoot))
             {
-                Tools::log << entitiesRoot << " not found, no entity files will be packaged." << std::endl;
+                Tools::log << serverRoot << " not found, no server files will be packaged." << std::endl;
                 return;
             }
 
             std::list<boost::filesystem::path> files;
-            RecursiveFileList(entitiesRoot, files);
+            RecursiveFileList(serverRoot, files);
             auto it = files.begin();
             auto itEnd = files.end();
             for (; it != itEnd; ++it)
             {
                 if (it->extension().string() != ".lua")
                 {
-                    Tools::log << "Entity file " << *it << " ignored (unknow extension " << it->extension() << ")." << std::endl;
+                    Tools::log << "Server file " << *it << " ignored (unknow extension " << it->extension() << ")." << std::endl;
                     continue;
                 }
                 auto data = ReadFile(*it);
-                std::string name = MakeRelative(entitiesRoot, *it).generic_string();
-                conn.CreateQuery("INSERT INTO entity_file (name, lua) VALUES (?, ?);")->
+                std::string name = MakeRelative(serverRoot, *it).generic_string();
+                conn.CreateQuery("INSERT INTO server_file (name, lua) VALUES (?, ?);")->
                     Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect();
-                Tools::log << "Added entity file \"" << name << "\" (size: " << data.size() << " bytes)." << std::endl;
-            }
-        }
-
-        void FillTableCubeFile(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn)
-        {
-            boost::filesystem::path cubesRoot(pluginRoot / "cubes");
-            if (!boost::filesystem::is_directory(cubesRoot))
-            {
-                Tools::log << cubesRoot << " not found, no cube files will be packaged." << std::endl;
-                return;
-            }
-
-            std::list<boost::filesystem::path> files;
-            RecursiveFileList(cubesRoot, files);
-            auto it = files.begin();
-            auto itEnd = files.end();
-            for (; it != itEnd; ++it)
-            {
-                if (it->extension().string() != ".lua")
-                {
-                    Tools::log << "Cube file " << *it << " ignored (unknow extension " << it->extension() << ")." << std::endl;
-                    continue;
-                }
-                auto data = ReadFile(*it);
-                std::string name = MakeRelative(cubesRoot, *it).generic_string();
-                conn.CreateQuery("INSERT INTO cube_file (name, lua) VALUES (?, ?);")->
-                    Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect();
-                Tools::log << "Added cube file \"" << name << "\" (size: " << data.size() << " bytes)." << std::endl;
+                Tools::log << "Added server file \"" << name << "\" (size: " << data.size() << " bytes)." << std::endl;
             }
         }
 
@@ -230,8 +202,7 @@ namespace Tools { namespace PluginCreate {
             conn.CreateQuery("CREATE TABLE resource (name TEXT, type TEXT, data_hash TEXT, data BLOB);")->ExecuteNonSelect();
             conn.CreateQuery("CREATE TABLE script (name TEXT, type TEXT);")->ExecuteNonSelect();
             conn.CreateQuery("CREATE TABLE map (name TEXT, lua TEXT);")->ExecuteNonSelect();
-            conn.CreateQuery("CREATE TABLE entity_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
-            conn.CreateQuery("CREATE TABLE cube_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
+            conn.CreateQuery("CREATE TABLE server_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
         }
 
         //namespace Lua {
@@ -330,8 +301,7 @@ namespace Tools { namespace PluginCreate {
             // remplissage
             FillTablePlugin(identifier, fullname, *conn);
             FillTableResource(pluginRoot, *conn);
-            FillTableEntityFile(pluginRoot, *conn);
-            FillTableCubeFile(pluginRoot, *conn);
+            FillTableServerFile(pluginRoot, *conn);
             FillTableMap(pluginRoot, *conn);
 
             Tools::log << "Finishing writing to database..." << std::endl;

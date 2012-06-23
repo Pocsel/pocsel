@@ -87,8 +87,14 @@ float4 fs(in VSout v) : COLOR
 #endif
     float4 spec = tex2D(specular, v.texCoord);
 
-    float3 color = tex2D(lighting, v.texCoord).rgb * diff.rgb;
+    float3 light = tex2D(lighting, v.texCoord).rgb;
+
+    float3 color = light * diff.rgb;
     color += spec.rgb;
+
+    if (light.r < 0.1 && diff.r == 0)
+        color = float3(0.9, 0.9, 0.3);
+
     return float4(color, diff.a);
 }
 

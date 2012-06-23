@@ -46,6 +46,7 @@ namespace Server { namespace Database {
             ~LoadingMapConf();
         };
 
+    private:
         Game::World& _world;
         ResourceManager& _resourceMgr;
         Tools::Database::IConnection& _connection;
@@ -55,7 +56,6 @@ namespace Server { namespace Database {
         WorldLoader(Game::World& world, ResourceManager& manager);
 
     private:
-        void _RegisterResourcesFunctions(Game::Map::Map& map, Tools::Lua::Interpreter& interpreter);
         void _LoadCubeTypes(Game::Map::Map& map);
         LoadingMapConf _LoadMapConf(Game::Map::Conf& conf, std::string const& name, std::string const& code);
         void _LoadMapCubeTypes();
