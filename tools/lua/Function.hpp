@@ -141,6 +141,7 @@ namespace Tools { namespace Lua {
         };
     }
 
+    /********* Interpreter *********/
     template<class T>
     Ref Interpreter::Bind(T function)
     {
@@ -165,6 +166,7 @@ namespace Tools { namespace Lua {
         return this->MakeFunction(_Functor<Tools::Meta::Signature<T>>(std::bind(function, arg1, arg2, arg3)));
     }
 
+    /********* Ref *********/
     template<class T>
     inline T Ref::To() const throw()
     {
@@ -183,8 +185,8 @@ namespace Tools { namespace Lua {
     template<class T>
         inline bool Ref::Is() const throw()
         {
-            if (!this->IsUserData() || this->GetMetaTable().IsNoneOrNil() ||
-                    this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()))
+            if (this->GetMetaTable().IsNoneOrNil() ||
+                this->GetMetaTable() != this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code()).GetMetaTable())
                 return false;
             return true;
         }
@@ -310,6 +312,30 @@ namespace Tools { namespace Lua {
             return *this == this->_state.Make(value);
         }
 
+    /********* CallHelper *********/
+    // arguments helpers
+    template<class T>
+    inline void CallHelper::PushArg(T const& arg) throw()
+    {
+        this->PushArg(this->_i.Make(arg));
+    }
+    template<class T>
+    inline void CallHelper::PushArgMove(T&& arg) throw()
+    {
+        this->PushArg(this->_i.Make(std::move(arg)));
+    }
+
+    // return helpers
+    template<class T>
+    inline void CallHelper::PushRet(T const& ret) throw()
+    {
+        this->PushRet(this->_i.Make(ret));
+    }
+    template<class T>
+    inline void CallHelper::PushRetMove(T&& ret) throw()
+    {
+        this->PushRet(this->_i.Make(std::move(ret)));
+    }
 }}
 
 #endif

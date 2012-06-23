@@ -71,10 +71,6 @@ namespace Tools { namespace Lua {
         Ref Bind(T function, TA1 arg1, TA2 arg2, TA3 arg3);
     };
 
-#ifdef new
-# undef new
-#endif
-
     template <typename T>
     inline Ref Interpreter::Make(T val) throw(std::runtime_error)
     {
@@ -98,10 +94,6 @@ namespace Tools { namespace Lua {
         auto const& m = this->_state->GetMetaTable(typeid(T).hash_code());
         return m.MakeReference(std::move(val));
     }
-
-#ifdef DEBUG_NEW
-# define new DEBUG_NEW
-#endif
 
 }}
 

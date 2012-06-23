@@ -157,7 +157,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
                 {
                     helper.PopArg();
                     auto texture = loadTexture(helper.PopArg().CheckString());
-                    helper.PushRet(interpreter.Make(std::shared_ptr<Texture::ITexture>(texture.release())));
+                    helper.PushRet(std::shared_ptr<Texture::ITexture>(texture.release()));
                 }));
             textureNs.SetMetaTable(metaTable);
         }
@@ -165,7 +165,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         // Register type LuaMaterial
         {
             // MetaTable pour le shader
-            auto table = Lua::MetaTable::Create<std::unique_ptr<Material>>(interpreter);
+            auto& table = Lua::MetaTable::Create<std::unique_ptr<Material>>(interpreter);
             table.SetMetaMethod(Lua::MetaTable::NewIndex,
                 [](Lua::CallHelper& helper)
                 {

@@ -92,6 +92,10 @@ namespace Tools { namespace Lua {
         {
         }
 
+#ifdef new
+# undef new
+#endif
+
         template<class T>
         Ref MakeReference(T&& data) const
         {
@@ -103,6 +107,10 @@ namespace Tools { namespace Lua {
             r.SetMetaTable(this->_metaTable);
             return r;
         }
+
+#ifdef DEBUG_NEW
+# define new DEBUG_NEW
+#endif
 
         template<class T>
         typename std::enable_if<!std::is_pointer<T>::value, T>::type MakeNative(Ref const& ref) const

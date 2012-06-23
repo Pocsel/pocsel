@@ -12,7 +12,7 @@ Client.Material.Register{
 }
 
 local function RegisterSimpleCubeType(name, textureName)
-    local material = Client.Material("base:BaseChunk", { cubeTexture = textureName })
+    local material = Client.Material("base:BaseChunk", { cubeTexture = Client.Texture(textureName) })
     Client.CubeMaterial.Register{
         cubeMaterialName = name,
         materials = {
@@ -27,12 +27,12 @@ local function RegisterSimpleCubeType(name, textureName)
 end
 
 local function RegisterCubeType(name, topTexture, sideTexture, bottomTexture)
-    local sideMaterial = Client.Material("base:BaseChunk", { cubeTexture = sideTexture })
+    local sideMaterial = Client.Material("base:BaseChunk", { cubeTexture = Client.Texture(sideTexture) })
     Client.CubeMaterial.Register{
         cubeMaterialName = name,
         materials = {
-            top = Client.Material("base:BaseChunk", { cubeTexture = topTexture }),
-            bottom = Client.Material("base:BaseChunk", { cubeTexture = bottomTexture }),
+            top = Client.Material("base:BaseChunk", { cubeTexture = Client.Texture(topTexture) }),
+            bottom = Client.Material("base:BaseChunk", { cubeTexture = Client.Texture(bottomTexture) }),
             left = sideMaterial,
             right = sideMaterial,
             front = sideMaterial,
