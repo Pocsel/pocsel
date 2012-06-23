@@ -3,7 +3,6 @@
 
 #include <boost/lambda/construct.hpp>
 
-#include "tools/lua/Ref.hpp"
 #include "tools/lua/Interpreter.hpp"
 
 namespace Tools { namespace Lua {
@@ -50,85 +49,30 @@ namespace Tools { namespace Lua {
 
     public:
         template<class T>
-        static MetaTable& Create(Interpreter& interpreter,
+        static MetaTable& Create(
+            Interpreter& interpreter,
             std::function<Ref(void const*)> makeRef = std::function<Ref(void const*)>(),
-            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>())
-        {
-            auto& tmp = interpreter.GetState().RegisterMetaTable(MetaTable(interpreter), typeid(T).hash_code());;
-            tmp._makeRef = makeRef;
-            tmp._makeNative = makeNative;
-            tmp._metaTable.Set("__index", tmp._prototype);
-            tmp.SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
-            return tmp;
-        }
+            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>());
         template<class T>
-        static MetaTable& Create(Interpreter& interpreter, T&&,
+        static MetaTable& Create(
+            Interpreter& interpreter, T&&,
             std::function<Ref(void const*)> makeRef = std::function<Ref(void const*)>(),
-            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>())
-        {
-            auto& tmp = interpreter.GetState().RegisterMetaTable(MetaTable(interpreter), typeid(T).hash_code());;
-            tmp._makeRef = makeRef;
-            tmp._makeNative = makeNative;
-            tmp.SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
-            return tmp;
-        }
+            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>());
         template<class T>
-        static MetaTable& Create(Ref const& table, T&&,
+        static MetaTable& Create(
+            Ref const& table, T&&,
             std::function<Ref(void const*)> makeRef = std::function<Ref(void const*)>(),
-            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>())
-        {
-            auto& tmp = table.GetState().RegisterMetaTable(MetaTable(table), typeid(T).hash_code());;
-            tmp._makeRef = makeRef;
-            tmp._makeNative = makeNative;
-            tmp.SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
-            return tmp;
-        }
+            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>());
 
-        MetaTable(MetaTable&& mt) :
-            _interpreter(mt._interpreter),
-            _prototype(std::move(mt._prototype)),
-            _metaTable(std::move(mt._metaTable)),
-            _makeRef(std::move(mt._makeRef))
-        {
-        }
-
-#ifdef new
-# undef new
-#endif
+        MetaTable(MetaTable&& mt);
 
         template<class T>
-        Ref MakeReference(T&& data) const
-        {
-            if (this->_makeRef)
-                return this->_makeRef(&data);
-            T* luaValue = 0;
-            auto r = this->_interpreter.MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
-            new (luaValue) T(std::move(data));
-            r.SetMetaTable(this->_metaTable);
-            return r;
-        }
-
-#ifdef DEBUG_NEW
-# define new DEBUG_NEW
-#endif
+        Ref MakeReference(T&& data) const;
 
         template<class T>
-        typename std::enable_if<!std::is_pointer<T>::value, T>::type MakeNative(Ref const& ref) const
-        {
-            if (this->_makeNative)
-            {
-                T value;
-                this->_makeNative(ref, &value);
-                return value;
-            }
-            assert("Pas possible, ne pas faire Check<Type> mais Check<Type*> ou specifier un \"makeNative\".");
-            throw std::runtime_error("Call Martin !");
-        }
+        typename std::enable_if<!std::is_pointer<T>::value, T>::type MakeNative(Ref const& ref) const;
         template<class T>
-        typename std::enable_if<std::is_pointer<T>::value, T>::type MakeNative(Ref const& ref) const
-        {
-            return reinterpret_cast<T>(ref.CheckUserData());
-        }
+        typename std::enable_if<std::is_pointer<T>::value, T>::type MakeNative(Ref const& ref) const;
 
         MetaTable& SetMethod(std::string const& name, std::function<void(CallHelper&)> const& method);
         MetaTable& SetMetaMethod(MetaMethod type, std::function<void(CallHelper&)> const& method);

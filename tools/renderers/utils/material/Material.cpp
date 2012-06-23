@@ -1,7 +1,6 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/lua/Iterator.hpp"
-#include "tools/lua/MetaTable.hpp"
+#include "tools/lua/Interpreter.hpp"
 #include "tools/renderers/utils/material/LuaMaterial.hpp"
 #include "tools/renderers/utils/material/Material.hpp"
 #include "tools/renderers/utils/material/Variable.hpp"

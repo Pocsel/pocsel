@@ -3,9 +3,10 @@
 
 #include "tools/precompiled.hpp"
 
+#include "tools/lua/Iterator.hpp"
 #include "tools/lua/Interpreter.hpp"
-#include "tools/lua/MetaTable.hpp"
 #include "tools/lua/Ref.hpp"
+#include "tools/lua/MetaTable.hpp"
 
 #include "tools/meta/Signature.hpp"
 
@@ -361,6 +362,92 @@ namespace Tools { namespace Lua {
     {
         this->PushRet(this->_i.Make(std::move(ret)));
     }
+
+    /********* MetaTable *********/
+    template<class T>
+    inline MetaTable& MetaTable::Create(
+        Interpreter& interpreter,
+        std::function<Ref(void const*)> makeRef,
+        std::function<void(Ref const&, void*)> makeNative)
+    {
+        auto& tmp = interpreter.GetState().RegisterMetaTable(MetaTable(interpreter), typeid(T).hash_code());;
+        tmp._makeRef = makeRef;
+        tmp._makeNative = makeNative;
+        tmp._metaTable.Set("__index", tmp._prototype);
+        tmp.SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
+        return tmp;
+    }
+    template<class T>
+    inline MetaTable& MetaTable::Create(
+        Interpreter& interpreter, T&&,
+        std::function<Ref(void const*)> makeRef,
+        std::function<void(Ref const&, void*)> makeNative)
+    {
+        auto& tmp = interpreter.GetState().RegisterMetaTable(MetaTable(interpreter), typeid(T).hash_code());;
+        tmp._makeRef = makeRef;
+        tmp._makeNative = makeNative;
+        tmp.SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
+        return tmp;
+    }
+    template<class T>
+    inline MetaTable& MetaTable::Create(
+        Ref const& table, T&&,
+        std::function<Ref(void const*)> makeRef,
+        std::function<void(Ref const&, void*)> makeNative)
+    {
+        auto& tmp = table.GetState().RegisterMetaTable(MetaTable(table), typeid(T).hash_code());;
+        tmp._makeRef = makeRef;
+        tmp._makeNative = makeNative;
+        tmp.SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
+        return tmp;
+    }
+
+    inline MetaTable::MetaTable(MetaTable&& mt) :
+        _interpreter(mt._interpreter),
+        _prototype(std::move(mt._prototype)),
+        _metaTable(std::move(mt._metaTable)),
+        _makeRef(std::move(mt._makeRef))
+    {
+    }
+
+#ifdef new
+# undef new
+#endif
+
+    template<class T>
+    inline Ref MetaTable::MakeReference(T&& data) const
+    {
+        if (this->_makeRef)
+            return this->_makeRef(&data);
+        T* luaValue = 0;
+        auto r = this->_interpreter.MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
+        new (luaValue) T(std::move(data));
+        r.SetMetaTable(this->_metaTable);
+        return r;
+    }
+
+#ifdef DEBUG_NEW
+# define new DEBUG_NEW
+#endif
+
+    template<class T>
+    inline typename std::enable_if<!std::is_pointer<T>::value, T>::type MetaTable::MakeNative(Ref const& ref) const
+    {
+        if (this->_makeNative)
+        {
+            T value;
+            this->_makeNative(ref, &value);
+            return value;
+        }
+        assert("Pas possible, ne pas faire Check<Type> mais Check<Type*> ou specifier un \"makeNative\".");
+        throw std::runtime_error("Call Martin !");
+    }
+    template<class T>
+    inline typename std::enable_if<std::is_pointer<T>::value, T>::type MetaTable::MakeNative(Ref const& ref) const
+    {
+        return reinterpret_cast<T>(ref.CheckUserData());
+    }
+
 }}
 
 #endif
