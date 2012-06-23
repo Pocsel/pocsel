@@ -229,9 +229,15 @@ namespace Server { namespace Game { namespace Map {
         this->_chunkManager->AddChunk(std::unique_ptr<Chunk>(chunk));
 
         // XXX THIS IS SHIT
+        std::cout << "init\n";
         chunk->InitBody();
+        std::cout << "initend\n";
         if (chunk->GetBody())
+        {
+        std::cout << "add\n";
             this->_engine->GetPhysicsManager().AddBody(chunk->GetBody());
+        std::cout << "addend\n";
+        }
     }
 
     void Map::_GetSpawnPosition(SpawnCallback& response)

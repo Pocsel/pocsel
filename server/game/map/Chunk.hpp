@@ -3,7 +3,7 @@
 
 #include "common/BaseChunk.hpp"
 
-class btBvhTriangleMeshShape;
+class btCompoundShape;
 class btRigidBody;
 
 namespace Server { namespace Game { namespace Map {
@@ -11,7 +11,7 @@ namespace Server { namespace Game { namespace Map {
     struct Chunk : public Common::BaseChunk
     {
     private:
-        btBvhTriangleMeshShape* _shape;
+        btCompoundShape* _shape;
         btRigidBody* _body;
 
     public:

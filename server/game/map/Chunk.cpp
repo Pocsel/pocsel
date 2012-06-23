@@ -67,9 +67,12 @@ namespace Server { namespace Game { namespace Map {
         if (this->IsEmpty())
             return;
 
-        std::vector<glm::dvec3> vertices(Common::ChunkSize3*6*4);
-        std::vector<unsigned int> indices;
-        unsigned int voffset = 0;
+        //std::vector<glm::dvec3> vertices(Common::ChunkSize3*6*4);
+        //std::vector<unsigned int> indices;
+        //unsigned int voffset = 0;
+
+        static btBoxShape* boxShape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
+        this->_shape = new btCompoundShape(false);
 
         CubeType const* cubes = this->GetCubes();
         CubeType nearType;
@@ -85,90 +88,38 @@ namespace Server { namespace Game { namespace Map {
                     if (cubes[cubeOffset] == 0)
                         continue;
 
-                    glm::dvec3 p((float)x, (float)y, (float)z);
-
-                    // Right
-                    if (x != Common::ChunkSize - 1)
-                        nearType = cubes[cubeOffset + 1];
-                    else
-                        nearType = 0;
-                    if (nearType == 0)
+                    if (x == Common::ChunkSize - 1 || !cubes[cubeOffset + 1] ||
+                            y == Common::ChunkSize - 1 || !cubes[cubeOffset + Common::ChunkSize] ||
+                            z == Common::ChunkSize - 1 || !cubes[cubeOffset + Common::ChunkSize2] ||
+                            x == 0 || !cubes[cubeOffset - 1] ||
+                            y == 0 || !cubes[cubeOffset - Common::ChunkSize] ||
+                            z == 0 || !cubes[cubeOffset - Common::ChunkSize2])
                     {
-                        VerticesPushFace(vertices, voffset, p, 2);
-                        IndicesPushFace(indices, voffset);
-                    }
-
-                    // Top
-                    if (y != Common::ChunkSize - 1)
-                        nearType = cubes[cubeOffset + Common::ChunkSize];
-                    else
-                        nearType = 0;
-                    if (nearType == 0)
-                    {
-                        VerticesPushFace(vertices, voffset, p, 1);
-                        IndicesPushFace(indices, voffset);
-                    }
-
-                    // Front
-                    if (z != Common::ChunkSize - 1)
-                        nearType = cubes[cubeOffset + Common::ChunkSize2];
-                    else
-                        nearType = 0;
-                    if (nearType == 0)
-                    {
-                        VerticesPushFace(vertices,voffset,  p, 0);
-                        IndicesPushFace(indices, voffset);
-                    }
-
-                    // Left
-                    if (x != 0)
-                        nearType = cubes[cubeOffset - 1];
-                    else
-                        nearType = 0;
-                    if (nearType == 0)
-                    {
-                        VerticesPushFace(vertices, voffset, p, 4);
-                        IndicesPushFace(indices, voffset);
-                    }
-
-                    // Bottom
-                    if (y != 0)
-                        nearType = cubes[cubeOffset - Common::ChunkSize];
-                    else
-                        nearType = 0;
-                    if (nearType == 0)
-                    {
-                        VerticesPushFace(vertices, voffset, p, 3);
-                        IndicesPushFace(indices, voffset);
-                    }
-
-                    // Back
-                    if (z != 0)
-                        nearType = cubes[cubeOffset - Common::ChunkSize2];
-                    else
-                        nearType = 0;
-                    if (nearType == 0)
-                    {
-                        VerticesPushFace(vertices, voffset, p, 5);
-                        IndicesPushFace(indices, voffset);
+                        btTransform tr;
+                        tr.setIdentity();
+                        tr.setOrigin(btVector3((double)x + 0.5, (double)y + 0.5, (double)z + 0.5));
+                        this->_shape->addChildShape(tr, boxShape);
                     }
                 }
             }
         }
+        std::cout << "number: " << this->_shape->getNumChildShapes() << "\n";
 
-        btTriangleIndexVertexArray* vertexArray = new btTriangleIndexVertexArray(
-                indices.size() / 3,
-                (int*)indices.data(),
-                3*sizeof(int),
-                vertices.size(),
-                (double*)vertices.data(),
-                sizeof(glm::dvec3)
-                );
+        this->_shape->createAabbTreeFromChildren();
 
-        this->_shape = new btBvhTriangleMeshShape(
-                vertexArray,
-                true
-                );
+        //btTriangleIndexVertexArray* vertexArray = new btTriangleIndexVertexArray(
+        //        indices.size() / 3,
+        //        (int*)indices.data(),
+        //        3*sizeof(int),
+        //        vertices.size(),
+        //        (double*)vertices.data(),
+        //        sizeof(glm::dvec3)
+        //        );
+
+        //this->_shape = new btBvhTriangleMeshShape(
+        //        vertexArray,
+        //        true
+        //        );
         //btBvhTriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression, bool buildBvh = true);
 
         btTransform tr;
