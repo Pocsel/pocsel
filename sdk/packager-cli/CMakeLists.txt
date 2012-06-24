@@ -12,6 +12,7 @@ set(src
 
 CreateGroups("${src}")
 add_executable(packager-cli ${src})
+add_dependencies(packager-cli resources)
 
 enable_pch(packager-cli src)
 

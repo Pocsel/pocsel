@@ -45,7 +45,7 @@ namespace Tools { namespace Lua { namespace Utils {
 
     void RegisterColor(Lua::Interpreter& interpreter)
     {
-        Tools::Lua::MetaTable colorsMt(interpreter, Tools::Color4f());
+        auto& colorsMt = Tools::Lua::MetaTable::Create(interpreter, Tools::Color4f());
         auto colorsNs = interpreter.Globals().GetTable("Utils").GetTable("Color");
         colorsNs.Set("Create", interpreter.MakeFunction(_CreateColor));
     }

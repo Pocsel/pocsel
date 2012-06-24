@@ -24,12 +24,12 @@ Server.Entity.Register{
     end,
 
     SpawnBlob = function(self)
-        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 10, z = 67108864 }, "base:Blob")
+        Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 10, 67108864), "base:Blob")
         Server.Message.Later(3, self.id, "SpawnBlob")
     end,
 
     SpawnTank = function(self)
-        Server.Entity.Spawn({ x = 67108864, y = 16777216 + 12, z = 67108864 }, "base:Tank")
+        Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 12, 67108864), "base:Tank")
     end,
 }
 
@@ -69,8 +69,8 @@ Server.Entity.RegisterPositional{
 
     Move = function(self)
         -- local pos = Server.Entity.GetPos(self.id)
-        -- Server.Entity.SetSpeed(self.id, { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
-        Server.Entity.SetAccel(self.id, { x = -0.5+math.random(), y = -0.5+math.random(), z = -0.5+math.random() }) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
+        -- Server.Entity.SetSpeed(self.id, Utils.Vector3(-0.5+math.random(), -0.5+math.random(), -0.5+math.random())) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
+        Server.Entity.SetAccel(self.id, Utils.Vector3(-0.5+math.random(), -0.5+math.random(), -0.5+math.random())) -- { x = pos.x + self.move.x / 8, y = pos.y + self.move.y / 8, z = pos.z + self.move.z / 8 })
         Server.Message.Later(self.moveSpeed, self.id, "Move")
     end,
 

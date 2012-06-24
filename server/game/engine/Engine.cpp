@@ -12,6 +12,7 @@
 #include "server/game/PluginManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "tools/lua/Interpreter.hpp"
+#include "tools/lua/utils/Utils.hpp"
 #include "tools/database/IConnection.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -26,6 +27,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
+        Tools::Lua::Utils::RegisterVector(*this->_interpreter);
         auto namespaceTable = this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
         this->_callbackManager = new CallbackManager(*this);
         this->_entityManager = new EntityManager(*this);

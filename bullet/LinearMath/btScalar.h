@@ -213,6 +213,9 @@ typedef float btScalar;
 #endif
 
 
+#ifdef new
+# undef new
+#endif
 
 #define BT_DECLARE_ALIGNED_ALLOCATOR() \
    SIMD_FORCE_INLINE void* operator new(size_t sizeInBytes)   { return btAlignedAlloc(sizeInBytes,16); }   \

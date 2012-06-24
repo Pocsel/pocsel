@@ -4,8 +4,9 @@ project(Pocsel)
 
 # Modules supplémentaires
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-include(CustomPrecompiledHeader)
 include(CreateGroups)
+include(AddResources)
+include(CustomPrecompiledHeader)
 include(GetGitRevision)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
@@ -91,7 +92,6 @@ file(GLOB_RECURSE   tools_database_src          "tools/database/*.[ch]pp")
 file(GLOB_RECURSE   tools_gui_src               "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE   tools_logger_src            "tools/logger/*.[ch]pp")
 file(GLOB_RECURSE   tools_lua_src               "tools/lua/*.[ch]pp")
-file(GLOB_RECURSE   tools_lua_utils_src         "tools/lua/utils/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_install_src    "tools/plugin-install/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_create_src     "tools/plugin-create/*.[ch]pp")
 file(GLOB_RECURSE   tools_renderers_src         "tools/renderers/*.[ch]pp")
@@ -101,6 +101,8 @@ file(GLOB_RECURSE   tools_stat_src              "tools/stat/*.[ch]pp")
 file(GLOB_RECURSE   tools_thread_src            "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
+# lua resources
+file(GLOB_RECURSE   tools_lua_res         "tools/lua/utils/*.lua")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
@@ -144,6 +146,11 @@ endmacro()
 set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
 configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
+# resources
+AddResources(tools_lua_src
+    "${tools_lua_res}")
+
+add_subdirectory(buildutils)
 add_subdirectory(sdk)
 add_subdirectory(plugins)
 add_subdirectory(bullet)

@@ -16,7 +16,6 @@
 #include "common/FieldUtils.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "server/rcon/EntityManager.hpp"
-#include "tools/lua/utils/Vector.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -733,7 +732,7 @@ namespace Server { namespace Game { namespace Engine {
         if (helper.GetNbArgs() && helper.GetArgList().front().IsTable())
         {
             hasPosition = true;
-            pos = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg());
+            pos = helper.PopArg().Check<glm::dvec3>();
         }
         std::string resourceName = helper.PopArg("Server.Entity.Spawn: Missing argument \"entityName\"").CheckString("Server.Entity.Spawn: Argument \"entityName\" must be a string");
         std::string pluginName = Common::FieldUtils::GetPluginNameFromResource(resourceName);
@@ -858,7 +857,7 @@ namespace Server { namespace Game { namespace Engine {
     void EntityManager::_ApiSetPos(Tools::Lua::CallHelper& helper)
     {
         Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-        Common::Position pos = Tools::Lua::Utils::Vector::TableToVec3<Common::PositionCoordType>(helper.PopArg("Server.Entity.SetPos: Missing argument \"position\""));
+        Common::Position pos = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<Common::Position>();
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
         {
@@ -878,15 +877,13 @@ namespace Server { namespace Game { namespace Engine {
             Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
             return; // retourne nil
         }
-        Tools::Lua::Ref pos(this->_engine.GetInterpreter().GetState());
-        Tools::Lua::Utils::Vector::Vec3ToTable(it->second->GetPosition(), pos);
-        helper.PushRet(pos);
+        helper.PushRet(it->second->GetPosition());
     }
 
     void EntityManager::_ApiSetSpeed(Tools::Lua::CallHelper& helper)
     {
         Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-        glm::dvec3 speed = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg("Server.Entity.SetPos: Missing argument \"position\""));
+        glm::dvec3 speed = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
         {
@@ -906,15 +903,13 @@ namespace Server { namespace Game { namespace Engine {
             Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
             return; // retourne nil
         }
-        Tools::Lua::Ref speed(this->_engine.GetInterpreter().GetState());
-        Tools::Lua::Utils::Vector::Vec3ToTable(it->second->GetSpeed(), speed);
-        helper.PushRet(speed);
+        helper.PushRet(it->second->GetSpeed());
     }
 
     void EntityManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
     {
         Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-        glm::dvec3 accel = Tools::Lua::Utils::Vector::TableToVec3<double>(helper.PopArg("Server.Entity.SetPos: Missing argument \"position\""));
+        glm::dvec3 accel = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
         {
@@ -934,9 +929,7 @@ namespace Server { namespace Game { namespace Engine {
             Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
             return; // retourne nil
         }
-        Tools::Lua::Ref accel(this->_engine.GetInterpreter().GetState());
-        Tools::Lua::Utils::Vector::Vec3ToTable(it->second->GetAccel(), accel);
-        helper.PushRet(accel);
+        helper.PushRet(it->second->GetAccel());
     }
 
 }}}
