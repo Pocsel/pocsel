@@ -3,6 +3,7 @@
 #include "server/game/engine/BodyType.hpp"
 
 #include "tools/lua/Iterator.hpp"
+#include "tools/lua/Function.hpp"
 #include "common/FieldUtils.hpp"
 
 namespace Server { namespace Game { namespace Engine {
