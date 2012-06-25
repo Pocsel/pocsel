@@ -49,6 +49,20 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Delete(this->_interpreter);
     }
 
+    // uniquement en debug (pour pouvoir require() pour faire du hot-swap lua)
+    void Engine::SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> const& modules)
+    {
+        auto itPlugin = modules.begin();
+        auto itPluginEnd = modules.end();
+        for (; itPlugin != itPluginEnd; ++itPlugin)
+        {
+            auto it = itPlugin->second.begin();
+            auto itEnd = itPlugin->second.end();
+            for (; it != itEnd; ++it)
+                this->_modules[itPlugin->first].insert(std::make_pair(it->first, it->second.second));
+        }
+    }
+
     void Engine::Tick(Uint64 currentTime)
     {
         Uint64 deltaTime = currentTime - this->_currentTime;

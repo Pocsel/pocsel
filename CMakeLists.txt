@@ -5,7 +5,7 @@ project(Pocsel)
 # Modules supplémentaires
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 include(CreateGroups)
-include(AddResources)
+include(CreateResourceProject)
 include(CustomPrecompiledHeader)
 include(GetGitRevision)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
@@ -147,7 +147,7 @@ set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
 configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
 # resources
-AddResources(tools_lua_src
+CreateResourceProject(tools_lua_res tools_lua_src
     "${tools_lua_res}")
 
 add_subdirectory(buildutils)

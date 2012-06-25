@@ -12,7 +12,7 @@ set(src
 
 CreateGroups("${src}")
 add_executable(packager-cli ${src})
-add_dependencies(packager-cli resources)
+add_dependencies(packager-cli tools_lua_res)
 
 enable_pch(packager-cli src)
 

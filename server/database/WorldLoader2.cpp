@@ -149,21 +149,23 @@ namespace Server { namespace Database {
             this->_currentMap = itMap->second;
             auto& interpreter = itMap->second->GetEngine().GetInterpreter();
             interpreter.Globals().GetTable("Server").GetTable("Cube").Set("Register", interpreter.MakeFunction(std::bind(&WorldLoader2::_ApiRegisterCube, this, std::placeholders::_1)));
+            interpreter.Globals().Set("require", interpreter.MakeFunction(std::bind(&WorldLoader2::_ApiRequire, this, std::placeholders::_1)));
             while (auto row = query->Fetch())
-            {
                 try
                 {
-                    this->_currentMap->GetEngine().OverrideRunningPluginId(row->GetUint32(0));
-                    interpreter.DoString(row->GetString(2));
+                    this->_LoadServerFile(row->GetUint32(0), row->GetString(1));
                 }
                 catch (std::exception& e)
                 {
                     Log::load << "WorldLoader2::_LoadServerFiles: Failed to load server file \"" << row->GetString(1) << "\" in map \"" << this->_currentMap->GetName() << "\": " << e.what() << std::endl;
                     Tools::error << "WorldLoader2::_LoadServerFiles: Failed to load server file \"" << row->GetString(1) << "\" in map \"" << this->_currentMap->GetName() << "\": " << e.what() << std::endl;
                 }
-            }
             this->_currentMap->GetEngine().OverrideRunningPluginId(0);
+            if (this->_world.GetGame().GetServer().GetSettings().debug)
+                this->_currentMap->GetEngine().SetModules(this->_modules);
+            this->_modules.clear();
             interpreter.Globals().GetTable("Server").Set("Cube", interpreter.MakeNil());
+            interpreter.Globals().Set("require", interpreter.MakeNil());
             query->Reset();
         }
         this->_currentMap = 0;
@@ -176,6 +178,73 @@ namespace Server { namespace Database {
         // enregistre les types d'entités pour rcon
         if (!this->_world._maps.empty())
             this->_world._maps.begin()->second->GetEngine().GetEntityManager().RconAddEntityTypes(this->_world.GetGame().GetServer().GetRcon().GetEntityManager());
+    }
+
+    Tools::Lua::Ref WorldLoader2::_LoadServerFile(Uint32 pluginId, std::string const& name)
+    {
+        // check si le fichier a déjà été chargé
+        auto itPlugin = this->_modules.find(pluginId);
+        if (itPlugin != this->_modules.end())
+        {
+            auto it = itPlugin->second.find(name);
+            if (it != itPlugin->second.end())
+            {
+                if (it->second.first) // loading in progress
+                {
+                    Log::load << "WorldLoader2::_LoadServerFile: Warning: Recursive require() of \"" << name << "\" in plugin " << pluginId << " in map \"" << this->_currentMap->GetName() << "\" (returning nil)." << std::endl;
+                    Tools::error << "WorldLoader2::_LoadServerFile: Warning: Recursive require() of \"" << name << "\" in plugin " << pluginId << " in map \"" << this->_currentMap->GetName() << "\" (returning nil)." << std::endl;
+                }
+                return it->second.second;
+            }
+        }
+
+        // le fichier n'est pas déjà chargé :
+        auto query = this->_conn.CreateQuery("SELECT lua FROM server_file WHERE plugin_id = ? AND name = ?");
+        query->Bind(pluginId).Bind(name);
+        if (auto row = query->Fetch())
+        {
+            // ajoute un bool dans _modules pour eviter une récursion infinie
+            auto it = this->_modules[pluginId].insert(std::make_pair(name, std::make_pair(true /* loading in progress */, this->_currentMap->GetEngine().GetInterpreter().MakeNil())));
+
+            // on change de fichier, donc potentiellement de runningPluginId
+            Uint32 previousRunningPluginId = this->_currentMap->GetEngine().GetRunningPluginId();
+            this->_currentMap->GetEngine().OverrideRunningPluginId(pluginId);
+
+            // chargement du lua
+            Tools::Lua::Ref f = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
+            Tools::Lua::Ref module = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
+            try
+            {
+                auto f = this->_currentMap->GetEngine().GetInterpreter().LoadString(row->GetString(0));
+                auto module = f();
+            }
+            catch (std::exception& e)
+            {
+                this->_currentMap->GetEngine().OverrideRunningPluginId(previousRunningPluginId); // chargement foiré, on revien quand meme dans le plugin précédent
+                it.first->second.first = false; // loading not in progress anymore
+                throw;
+            }
+            if (module == f) // le module se retourne lui-même = pas de return dans le module = on retourne nil
+                module = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
+
+            // chargement fini, on revien dans le fichier qui a appelé require()
+            this->_currentMap->GetEngine().OverrideRunningPluginId(previousRunningPluginId);
+
+            // enregistrement du module chargé (évite de charger plusieurs fois le meme fichier)
+            it.first->second.second = module;
+            it.first->second.first = false; // loading not in progress anymore
+
+            return module;
+        }
+        throw std::runtime_error("WorldLoader2::_LoadServerFile: Server file \"" + name + "\" in plugin " + Tools::ToString(pluginId) + " not found in map \"" + this->_currentMap->GetName() + "\"");
+    }
+
+    void WorldLoader2::_ApiRequire(Tools::Lua::CallHelper& helper)
+    {
+        std::string name = helper.PopArg("require: Missing argument \"name\"").CheckString("require: Argument \"name\" must be a string");
+        Uint32 pluginId = this->_world.GetPluginManager().GetPluginId(Common::FieldUtils::GetPluginNameFromResource(name));
+        std::string fileName = Common::FieldUtils::GetResourceNameFromResource(name);
+        helper.PushRet(this->_LoadServerFile(pluginId, fileName));
     }
 
     void WorldLoader2::_ApiRegisterCube(Tools::Lua::CallHelper& helper)
@@ -217,8 +286,8 @@ namespace Server { namespace Database {
 
                 if (conf.cubes.find(name) != conf.cubes.end())
                 {
-                    Log::load << "WARNING: cube \"" << name << "\" already defined, only one definition will be used.\n";
-                    Tools::error << "WARNING: cube \"" << name << "\" already defined, only one definition will be used.\n";
+                    Log::load << "WARNING: cube \"" << name << "\" already defined in map \"" << map.GetName() << "\", only one definition will be used." << std::endl;
+                    Tools::error << "WARNING: cube \"" << name << "\" already defined in map \"" << map.GetName() << "\", only one definition will be used." << std::endl;
                     continue;
                 }
 
@@ -229,8 +298,8 @@ namespace Server { namespace Database {
                 {
                     if (name != "Void")
                     {
-                        Log::load << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"Void\"\n";
-                        Tools::error << "WARNING: cube \"" << name << "\" is not recognized. It will be ignored. If you want to define empty cubes, name it \"Void\"\n";
+                        Log::load << "WARNING: cube \"" << name << "\" is not recognized \"" << map.GetName() << "\". It will be ignored. If you want to define empty cubes, name it \"Void\"." << std::endl;
+                        Tools::error << "WARNING: cube \"" << name << "\" is not recognized in map \"" << map.GetName() << "\". It will be ignored. If you want to define empty cubes, name it \"Void\"." << std::endl;
                         conf.cubes.erase(name);
                         continue;
                     }

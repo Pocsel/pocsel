@@ -1,15 +1,5 @@
-
-Client.Material.Register{
-    materialName = "BaseChunk",
-    geometryShader = "base:shaders/BaseChunk.fx",
-    shadowMapShader = "base:shaders/BaseChunk.fx",
-    hasAlpha = false,
-    
-    shader = {
-        cubeTexture = Client.Texture("base:cubes/iron/texture.png"),
-    },
-    Update = nil
-}
+require "base:materials/BaseChunk.lua"
+local nombreBonus = require "base:materials/BaseChunk.lua"
 
 local function RegisterSimpleCubeType(name, textureName)
     local material = Client.Material("base:BaseChunk", { cubeTexture = Client.Texture(textureName) })

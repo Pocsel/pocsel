@@ -196,7 +196,8 @@ namespace Tools { namespace Lua {
     template<class T>
     inline T Ref::To() const throw()
     {
-        return reinterpret_cast<T>(this->ToUserData());
+        auto& cppMt = this->_state.GetMetaTable(typeid(typename std::remove_pointer<T>::type).hash_code());
+        return cppMt.MakeNative<T>(*this);
     }
     template<> bool Ref::To<bool>() const throw();
     template<> int Ref::To<int>() const throw();

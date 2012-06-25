@@ -118,7 +118,7 @@ function module.matrix4MetaTable.__mul(m1, m2)
         m32 = m1m30 * m2m02 + m1m31 * m2m12 + m1m32 * m2m22 + m1m33 * m2m32,
         m33 = m1m30 * m2m03 + m1m31 * m2m13 + m1m32 * m2m23 + m1m33 * m2m33,
     }
-    setmetatable(r, matrix4MetaTable)
+    setmetatable(r, module.matrix4MetaTable)
     return r
 end
 
@@ -222,3 +222,5 @@ end
 function Utils.IsMatrix4(m)
     return type(m) == "table" and getmetatable(m) == module.matrix4MetaTable
 end
+
+return module
