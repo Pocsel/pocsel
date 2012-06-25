@@ -52,7 +52,6 @@ namespace Server { namespace Rcon {
         void _HttpBodyReceived(boost::system::error_code const& error, std::size_t size);
 
         void _ParseBody();
-        bool _DecodeUrl(std::string const& in, std::string& out); // utilisé dans _ParseBody() pour lire le x-www-form-urlencoded
         void _Execute(); // lecture de l'url et choix de la methode à appeler
 
         // requetes exposées
@@ -71,6 +70,10 @@ namespace Server { namespace Rcon {
         void _JsonCallbackDispatched(std::string const& json);
         void _WriteHttpResponse(std::string const& status, std::string const& content = std::string());
         void _HttpResponseWritten(boost::system::error_code const& error, std::size_t size);
+
+        // utils
+        bool _DecodeUrl(std::string const& in, std::string& out) const; // utilisé dans _ParseBody() pour lire le x-www-form-urlencoded
+        std::string _GetStringFromUrl(std::vector<std::string> const& url, unsigned int start) const;
     };
 
 }}

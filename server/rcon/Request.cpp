@@ -191,8 +191,8 @@ namespace Server { namespace Rcon {
 
     void Request::_Execute()
     {
-        //Tools::debug << "Rcon: Header: \"" << this->_header << "\"" << std::endl;
-        //Tools::debug << "Rcon: Body: \"" << this->_body << "\"" << std::endl;
+        Tools::debug << "Rcon: Header: \"" << this->_header << "\"" << std::endl;
+        Tools::debug << "Rcon: Body: \"" << this->_body << "\"" << std::endl;
         if (this->_method == "OPTIONS")
             return this->_WriteHttpResponse("200 OK"); // pre-flight "allow cross-domain" ajax queries
         else if (!this->_url.empty())
@@ -216,10 +216,10 @@ namespace Server { namespace Rcon {
                 return this->_PostLogin(this->_content["login"], this->_content["password"]); // POST /login
             else if (this->_url[0] == "rcon_sessions" && this->_url.size() == 1 && this->_method == "GET")
                 return this->_GetRconSessions(); // GET /rcon_sessions
-            else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "GET")
-                return this->_GetEntityFile(this->_url[1], this->_url[2]); // GET /entity_file/<plugin>/<file>
-            else if (this->_url[0] == "entity_file" && this->_url.size() == 3 && this->_method == "POST")
-                return this->_PostEntityFile(this->_url[1], this->_url[2], this->_content["lua"]); // POST /entity_file/<plugin>/<file>
+            else if (this->_url[0] == "entity_file" && this->_url.size() >= 3 && this->_method == "GET")
+                return this->_GetEntityFile(this->_url[1], this->_GetStringFromUrl(this->_url, 2)); // GET /entity_file/<plugin>/<file>
+            else if (this->_url[0] == "entity_file" && this->_url.size() >= 3 && this->_method == "POST")
+                return this->_PostEntityFile(this->_url[1], this->_GetStringFromUrl(this->_url, 2), this->_content["lua"]); // POST /entity_file/<plugin>/<file>
             else if (this->_url[0] == "load_log" && this->_url.size() == 1 && this->_method == "GET")
                 return this->_GetLoadLog();
         }
@@ -397,7 +397,7 @@ namespace Server { namespace Rcon {
         delete this;
     }
 
-    bool Request::_DecodeUrl(std::string const& in, std::string& out)
+    bool Request::_DecodeUrl(std::string const& in, std::string& out) const
     {
         out.clear();
         out.reserve(in.size());
@@ -424,6 +424,19 @@ namespace Server { namespace Rcon {
             else
                 out += in[i];
         return true;
+    }
+
+    std::string Request::_GetStringFromUrl(std::vector<std::string> const& url, unsigned int start) const
+    {
+        std::string ret;
+        while (url.size() > start)
+        {
+            ret += url[start];
+            ++start;
+            if (start != url.size())
+                ret += '/';
+        }
+        return ret;
     }
 
 }}

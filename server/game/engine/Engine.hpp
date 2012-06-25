@@ -48,6 +48,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint64 _currentTime;
         Uint32 _overriddenPluginId;
         Uint32 _overriddenEntityId;
+        std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, Tools::Lua::Ref /* module */>> _modules; // uniquement en debug
 
     public:
         Engine(Map::Map& map, World& world);
@@ -74,6 +75,7 @@ namespace Server { namespace Game { namespace Engine {
         void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
         Uint32 GetRunningEntityId() { return this->_overriddenEntityId ? this->_overriddenEntityId : this->_entityManager->GetRunningEntityId(); }
         void OverrideRunningEntityId(Uint32 entityId) { this->_overriddenEntityId = entityId; }
+        void SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> const& modules);
 
         void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
         void SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet);

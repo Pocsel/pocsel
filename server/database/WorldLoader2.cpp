@@ -161,6 +161,8 @@ namespace Server { namespace Database {
                     Tools::error << "WorldLoader2::_LoadServerFiles: Failed to load server file \"" << row->GetString(1) << "\" in map \"" << this->_currentMap->GetName() << "\": " << e.what() << std::endl;
                 }
             this->_currentMap->GetEngine().OverrideRunningPluginId(0);
+            if (this->_world.GetGame().GetServer().GetSettings().debug)
+                this->_currentMap->GetEngine().SetModules(this->_modules);
             this->_modules.clear();
             interpreter.Globals().GetTable("Server").Set("Cube", interpreter.MakeNil());
             interpreter.Globals().Set("require", interpreter.MakeNil());
