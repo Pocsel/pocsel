@@ -93,10 +93,12 @@ namespace Client { namespace Game { namespace Engine {
         std::string previousRunningPluginName = this->_runningPluginName;
         this->_SetRunningResource(name);
         auto it = this->_modules.insert(std::make_pair(name, std::make_pair(true /* loading in progress */, this->_interpreter->MakeNil())));
+        Tools::Lua::Ref f = this->_interpreter->MakeNil();
+        Tools::Lua::Ref module = this->_interpreter->MakeNil();
         try
         {
-            auto f = this->_interpreter->LoadString(this->_game.GetResourceManager().GetScript(name));
-            auto module = f();
+            f = this->_interpreter->LoadString(this->_game.GetResourceManager().GetScript(name));
+            module = f();
             if (module == f) // le module se retourne lui-même = pas de return dans le module = on retourne nil
                 module = this->_interpreter->MakeNil();
             it.first->second.second = module;
@@ -106,6 +108,8 @@ namespace Client { namespace Game { namespace Engine {
         }
         catch (std::exception& e)
         {
+            this->_SetRunningResource(Common::FieldUtils::GetResourceName(previousRunningResourceName, previousRunningPluginName));
+            it.first->second.first = false; // loading not in progress anymore
             throw std::runtime_error("Error while processing script resource \"" + name + "\" : " + e.what());
         }
     }
