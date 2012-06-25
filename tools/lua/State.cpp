@@ -6,6 +6,7 @@
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Iterator.hpp"
+#include "tools/lua/MetaTable.hpp"
 
 namespace {
 
@@ -102,9 +103,11 @@ namespace Tools { namespace Lua {
         this->_garbageCollectionEnabled = true;
     }
 
-    void State::RegisterMetaTable(Ref const& metaTable, std::size_t hash) throw()
+    MetaTable& State::RegisterMetaTable(MetaTable&& metaTable, std::size_t hash) throw()
     {
-        this->_metaTables.insert(std::unordered_map<std::size_t, Ref*>::value_type(hash, new Ref(metaTable)));
+        auto ptr = new MetaTable(std::move(metaTable));
+        this->_metaTables.insert(std::make_pair(hash, ptr));
+        return *ptr;
     }
 
     Ref State::MakeBoolean(bool val) throw()
@@ -207,7 +210,7 @@ namespace Tools { namespace Lua {
         return val;
     }
 
-    Ref State::GetMetaTable(std::size_t hash) throw(std::runtime_error)
+    MetaTable const& State::GetMetaTable(std::size_t hash) throw(std::runtime_error)
     {
         auto it = this->_metaTables.find(hash);
         if (it == this->_metaTables.end())

@@ -61,4 +61,12 @@ namespace Tools { namespace Lua {
         this->_metaTable.Set("__index", this->_prototype);
     }
 
+    MetaTable::MetaTable(Ref const& metaTable)
+        : _interpreter(metaTable.GetState().GetInterpreter()),
+        _prototype(_interpreter.MakeTable()),
+        _metaTable(metaTable)
+    {
+        this->_metaTable.Set("__index", this->_prototype);
+    }
+
 }}

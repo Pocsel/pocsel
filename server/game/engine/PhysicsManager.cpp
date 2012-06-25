@@ -9,6 +9,8 @@
 
 #include "bullet/bullet-all.hpp"
 
+#include "tools/lua/Function.hpp"
+
 namespace Server { namespace Game { namespace Engine {
 
     void PhysicsManager::AddBody(btRigidBody* body)

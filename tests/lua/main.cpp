@@ -1,8 +1,12 @@
+#include "tools/precompiled.hpp"
+
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/Ref.hpp"
 #include "tools/lua/Iterator.hpp"
 #include "tools/lua/MetaTable.hpp"
+#include "tools/lua/utils/Utils.hpp"
 #include "tools/Matrix4.hpp"
+#include "tools/Timer.hpp"
 
 void f(Tools::Lua::CallHelper& call)
 {
@@ -27,7 +31,7 @@ void TestFunction(int test)
 
 void Init(Interpreter& i)
 {
-    MetaTable m(i, glm::detail::tmat4x4<float>());
+    auto& m = MetaTable::Create(i, glm::detail::tmat4x4<float>());
     m.SetMetaMethod(MetaTable::Serialize,
         [&i](CallHelper& helper)
         {
@@ -49,7 +53,7 @@ void Init(Interpreter& i)
     m.SetMetaMethod(MetaTable::Call, [](CallHelper&) { Tools::log << "call !\n"; });
     m.SetMetaMethod(
         MetaTable::Multiply,// i.Bind(&glm::detail::tmat4x4<float>::operator*, std::placeholders::_1, std::placeholders::_2));
-        [m](CallHelper& helper)
+        [&m](CallHelper& helper)
         {
             auto& m1 = *helper.PopArg().Check<glm::detail::tmat4x4<float>*>();
             auto& m2 = *helper.PopArg().Check<glm::detail::tmat4x4<float>*>();
@@ -175,7 +179,7 @@ int main(int, char**)
         i.DoString("m3 = m * m2");
         i.DoString("m3:Dump()");
 
-        MetaTable mA(i, A());
+        auto& mA = MetaTable::Create(i, A());
         i.Globals().Set("NewA", i.MakeFunction([&i](CallHelper& helper) { helper.PushRet(i.Make(A())); }));
 
         try
@@ -201,7 +205,7 @@ int main(int, char**)
         r(A(), 50);
 
         //// glm::dvec2 - MetaTable
-        MetaTable mVec2(i, glm::dvec2());
+        auto& mVec2 = MetaTable::Create(i, glm::dvec2());
         mVec2.SetMethod("Normalize", i.Bind(static_cast<glm::dvec2(*)(glm::dvec2 const&)>(&glm::normalize), std::placeholders::_1));
         mVec2.SetMethod("Dot", i.Bind(static_cast<double(*)(glm::dvec2 const&, glm::dvec2 const&)>(&glm::dot), std::placeholders::_1, std::placeholders::_2));
         mVec2.SetMetaMethod(MetaTable::Serialize,
@@ -256,7 +260,70 @@ int main(int, char**)
         {
             Tools::log << "error: " << e.what() << std::endl;
         }
+
+        Utils::RegisterMatrix(i);
+        Utils::RegisterVector(i);
+
+        // Benchmark
+        Tools::Timer timer;
+        Tools::log << "Benchmark vector 3\n";
+        i.DoString("a = Utils.Vector3(1.5, 2.5, 3.5)");
+        i.DoString("b = Utils.Vector3(-1.5, -2.5, -3.5)");
+        i.DoString("for i=1,5000 do c = a + b end");
+        Tools::log << "End (time: " << timer.GetPreciseElapsedTime() << " us)\n";
+
+        timer.Reset();
+        Tools::log << "Benchmark matrix 4\n";
+        i.DoString("m = Utils.Matrix4()");
+        i.DoString("m2 = Utils.Matrix4()");
+        i.DoString("for i=1,5000 do m3 = m * m2 end");
+        for (int _ = 0; _ < 2500; ++_)
+        {
+            auto matrix = i.Globals()["m"];
+            //i.Globals()["m"].Check<glm::mat4*>();
+            if (matrix.IsTable())
+            {
+                glm::mat4 m(
+                    matrix["m00"].To<float>(), matrix["m01"].To<float>(), matrix["m02"].To<float>(), matrix["m03"].To<float>(),
+                    matrix["m10"].To<float>(), matrix["m11"].To<float>(), matrix["m12"].To<float>(), matrix["m13"].To<float>(),
+                    matrix["m20"].To<float>(), matrix["m21"].To<float>(), matrix["m22"].To<float>(), matrix["m23"].To<float>(),
+                    matrix["m30"].To<float>(), matrix["m31"].To<float>(), matrix["m32"].To<float>(), matrix["m33"].To<float>());
+            }
+        }
+        Tools::log << "End (time: " << timer.GetPreciseElapsedTime() << " us)\n";
+
+        Tools::log << "Benchmark matrix 4 C++ only\n";
+        timer.Reset();
+        glm::mat4 m;
+        glm::mat4 m2;
+        glm::mat4 m3;
+        for (int _ = 0; _ < 50000; ++_)
+        {
+            m3 += m * m2;
+        }
+        Tools::log << "End (time: " << timer.GetPreciseElapsedTime() << " us)\n";
+        for (int i = 0; i < 3; ++i)
+            Tools::log << m3[i].x << " " << m3[i].y << " " << m3[i].x << " " << m3[i].z << std::endl;
+
+        // Tests
+#define STRINGIFY(...) #__VA_ARGS__
+
+        i.Globals().Set("v", i.Make(glm::dvec4(1.5, 2.25, 3.125, 4.06125)));
+        i.DoString(STRINGIFY(
+            //v = Utils.Vector4(1.5, 2.25, 3.125, 4.06125)
+            print("print(v): (v is a Vector4)")
+            print(v)
+            print("print(m): (m is a Matrix4)")
+            print(m)
+            ));
+
+        auto const& v = i.Globals()["v"].Check<glm::dvec4>();
+        std::cout << "C++: " << v.x << " " << v.y << " " << v.z << " " << v.w << std::endl;
+        std::cout << "C++ tostring:\n" << i.Globals()["v"].ToString();
+
     }
+
+
 #ifdef _WIN32
     std::cin.get();
 #endif

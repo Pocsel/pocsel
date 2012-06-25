@@ -70,46 +70,6 @@ namespace Tools { namespace Lua {
         Ref Bind(T function, TA1 arg1, TA2 arg2, TA3 arg3);
     };
 
-#ifdef new
-# undef new
-#endif
-
-    template <typename T>
-    inline Ref Interpreter::Make(T val) throw(std::runtime_error)
-    {
-        auto m = this->_state->GetMetaTable(typeid(T).hash_code());
-        T* luaValue;
-        auto r = this->_state->MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
-        new (luaValue) T(val);
-        r.SetMetaTable(m);
-        return r;
-    }
-    template<> inline Ref Interpreter::Make<bool>(bool val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<int>(int val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<unsigned int>(unsigned int val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<char>(char val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<unsigned char>(unsigned char val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<double>(double val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<float>(float val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<std::string>(std::string val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<char const*>(char const* val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<std::function<void(CallHelper&)>>(std::function<void(CallHelper&)> val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template<> inline Ref Interpreter::Make<Ref>(Ref val) throw(std::runtime_error) { return this->_state->Make(val); }
-    template <typename T>
-    inline Ref Interpreter::MakeMove(T&& val) throw(std::runtime_error)
-    {
-        auto m = this->_state->GetMetaTable(typeid(T).hash_code());
-        T* luaValue;
-        auto r = this->_state->MakeUserData(reinterpret_cast<void**>(&luaValue), sizeof(T));
-        new (luaValue) T(std::move(val));
-        r.SetMetaTable(m);
-        return r;
-    }
-
-#ifdef DEBUG_NEW
-# define new DEBUG_NEW
-#endif
-
 }}
 
 #include "tools/lua/Function.hpp"

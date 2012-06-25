@@ -3,7 +3,6 @@
 
 #include <boost/lambda/construct.hpp>
 
-#include "tools/lua/Ref.hpp"
 #include "tools/lua/Interpreter.hpp"
 
 namespace Tools { namespace Lua {
@@ -16,7 +15,7 @@ namespace Tools { namespace Lua {
         };
     }
 
-    class MetaTable
+    class MetaTable : private boost::noncopyable
     {
     public:
         enum MetaMethod
@@ -45,26 +44,35 @@ namespace Tools { namespace Lua {
         Interpreter& _interpreter;
         Ref _prototype;
         Ref _metaTable;
+        std::function<Ref(void const*)> _makeRef;
+        std::function<void(Ref const&, void*)> _makeNative;
 
     public:
         template<class T>
-        static MetaTable Create(Interpreter& interpreter)
-        {
-            MetaTable tmp(interpreter);
-            tmp.SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
-            interpreter.GetState().RegisterMetaTable(tmp._metaTable, typeid(T).hash_code());
-            return tmp;
-        }
+        static MetaTable& Create(
+            Interpreter& interpreter,
+            std::function<Ref(void const*)> makeRef = std::function<Ref(void const*)>(),
+            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>());
         template<class T>
-        MetaTable(Interpreter& interpreter, T&&)
-            : _interpreter(interpreter),
-            _prototype(interpreter.MakeTable()),
-            _metaTable(interpreter.MakeTable())
-        {
-            this->_metaTable.Set("__index", this->_prototype);
-            this->SetMetaMethod(MetaTable::Collect, [](CallHelper& helper) { _Destructor(helper.PopArg().To<T*>()); });
-            this->_interpreter.GetState().RegisterMetaTable(this->_metaTable, typeid(T).hash_code());
-        }
+        static MetaTable& Create(
+            Interpreter& interpreter, T&&,
+            std::function<Ref(void const*)> makeRef = std::function<Ref(void const*)>(),
+            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>());
+        template<class T>
+        static MetaTable& Create(
+            Ref const& table, T&&,
+            std::function<Ref(void const*)> makeRef = std::function<Ref(void const*)>(),
+            std::function<void(Ref const&, void*)> makeNative = std::function<void(Ref const&, void*)>());
+
+        MetaTable(MetaTable&& mt);
+
+        template<class T>
+        Ref MakeReference(T&& data) const;
+
+        template<class T>
+        typename std::enable_if<!std::is_pointer<T>::value, T>::type MakeNative(Ref const& ref) const;
+        template<class T>
+        typename std::enable_if<std::is_pointer<T>::value, T>::type MakeNative(Ref const& ref) const;
 
         MetaTable& SetMethod(std::string const& name, std::function<void(CallHelper&)> const& method);
         MetaTable& SetMetaMethod(MetaMethod type, std::function<void(CallHelper&)> const& method);
@@ -75,8 +83,10 @@ namespace Tools { namespace Lua {
         Ref& GetMetaTable() { return this->_metaTable; }
         Ref const& GetPrototype() const { return this->_prototype; }
         Ref const& GetMetaTable() const { return this->_metaTable; }
+
     private:
         MetaTable(Interpreter& interpreter);
+        MetaTable(Ref const& metaTable);
     };
 
 }}

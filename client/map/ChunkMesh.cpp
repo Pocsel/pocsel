@@ -65,6 +65,7 @@ namespace Client { namespace Map {
             {
                 this->packed = (normal.x + 1) * 16 + (normal.y + 1) * 4 + (normal.z + 1);
                 this->packed += (texture.x * 2 + texture.y) * float(1 << 6);
+                this->packed /= 256.0f;
             }
         };
 

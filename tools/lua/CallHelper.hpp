@@ -28,6 +28,18 @@ namespace Tools { namespace Lua {
         std::list<Ref>& GetRetList() throw() { return this->_rets; }
         std::size_t GetNbRets() const throw() { return this->_rets.size(); }
         void ClearRets() throw();
+
+        // arguments helpers
+        template<class T>
+        void PushArg(T const& arg) throw();
+        template<class T>
+        void PushArgMove(T&& arg) throw();
+
+        // return helpers
+        template<class T>
+        void PushRet(T const& ret) throw();
+        template<class T>
+        void PushRetMove(T&& ret) throw();
     };
 
 }}
