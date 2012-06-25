@@ -16,6 +16,7 @@ namespace Client { namespace Game { namespace Engine {
     class ModelManager;
     class BodyManager;
     class BodyType;
+    class PhysicsManager;
 
     class Engine :
         private boost::noncopyable
@@ -26,6 +27,7 @@ namespace Client { namespace Game { namespace Engine {
         DoodadManager* _doodadManager;
         ModelManager* _modelManager;
         BodyManager* _bodyManager;
+        PhysicsManager* _physicsManager;
         std::string _pluginName;
         std::string _resourceName;
         Uint32 _overriddenDoodadId;
@@ -42,6 +44,8 @@ namespace Client { namespace Game { namespace Engine {
         ModelManager const& GetModelManager() const { return *this->_modelManager; }
         BodyManager& GetBodyManager() { return *this->_bodyManager; }
         BodyManager const& GetBodyManager() const { return *this->_bodyManager; }
+        PhysicsManager& GetPhysicsManager() { return *this->_PhysicsManager; }
+        PhysicsManager const& GetPhysicsManager() const { return *this->_physicsManager; }
         std::string const& GetRunningPluginName() const { return this->_pluginName; }
         std::string const& GetRunningResourceName() const { return this->_resourceName; }
         Uint32 GetRunningDoodadId() { return this->_overriddenDoodadId ? this->_overriddenDoodadId : this->_doodadManager->GetRunningDoodadId(); }

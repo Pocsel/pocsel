@@ -2,6 +2,8 @@
 
 #include "client/map/Chunk.hpp"
 
+#include "common/physics/Chunk.hpp"
+
 namespace Client { namespace Map {
 
     Chunk::Chunk(IdType id)
@@ -27,4 +29,15 @@ namespace Client { namespace Map {
             Tools::Delete(this->_mesh);
         this->_mesh = mesh.release();
     }
+
+    void Chunk::InitBody()
+    {
+        this->_physicsChunk = new Common::Physics::Chunk(*this);
+    }
+
+    btRigidBody* Chunk::GetBody()
+    {
+        return this->_physicsChunk->GetBody();
+    }
+
 }}

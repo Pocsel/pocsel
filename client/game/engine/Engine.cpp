@@ -6,6 +6,7 @@
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/ModelManager.hpp"
 #include "client/game/engine/BodyManager.hpp"
+#include "client/game/engine/PhysicsManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/renderers/utils/material/LuaMaterial.hpp"
@@ -37,19 +38,22 @@ namespace Client { namespace Game { namespace Engine {
         this->_doodadManager = new DoodadManager(*this);
         this->_modelManager = new ModelManager(*this);
         this->_bodyManager = new BodyManager(*this, nbBodyTypes);
+        this->_physicsManager = new PhysicsManager(*this, this->_doodadManager->GetDoodads());
     }
 
     Engine::~Engine()
     {
+        Tools::Delete(this->_physicsManager);
+        Tools::Delete(this->_bodyManager);
         Tools::Delete(this->_modelManager);
         Tools::Delete(this->_doodadManager);
         Tools::Delete(this->_interpreter);
-        Tools::Delete(this->_bodyManager);
     }
 
     void Engine::Tick(Uint64 totalTime)
     {
         this->_doodadManager->Tick(totalTime);
+        this->_physicsManager->Tick(totalTime);
         this->_modelManager->Tick(totalTime);
     }
 
