@@ -191,8 +191,8 @@ namespace Server { namespace Rcon {
 
     void Request::_Execute()
     {
-        Tools::debug << "Rcon: Header: \"" << this->_header << "\"" << std::endl;
-        Tools::debug << "Rcon: Body: \"" << this->_body << "\"" << std::endl;
+        //Tools::debug << "Rcon: Header: \"" << this->_header << "\"" << std::endl;
+        //Tools::debug << "Rcon: Body: \"" << this->_body << "\"" << std::endl;
         if (this->_method == "OPTIONS")
             return this->_WriteHttpResponse("200 OK"); // pre-flight "allow cross-domain" ajax queries
         else if (!this->_url.empty())
