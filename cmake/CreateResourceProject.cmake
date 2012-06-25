@@ -1,13 +1,14 @@
-macro(AddResources src resources)
+macro(CreateResourceProject name src resources)
 
     set(headers "")
     foreach (res ${resources})
 
-        message(${res})
         string(REPLACE "${CMAKE_SOURCE_DIR}/" "" res ${res})
         list(APPEND headers "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp")
 
         file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp" "\n")
+        file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp")
+        
         ADD_CUSTOM_COMMAND(
             OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp"
             COMMAND respacker 
@@ -17,6 +18,6 @@ macro(AddResources src resources)
     endforeach()
 
     CreateGroups("${resources}")
-    add_custom_target(resources ALL DEPENDS ${headers})
+    add_custom_target(${name} ALL DEPENDS ${headers})
 
 endmacro()

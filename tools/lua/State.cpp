@@ -87,7 +87,7 @@ namespace Tools { namespace Lua {
         Tools::Delete(this->_weakTable);
         for (auto it = this->_metaTables.begin(), ite = this->_metaTables.end(); it != ite; ++it)
             Tools::Delete(it->second);
-        this->_metaTables.clear(); // leak possible
+        //this->_metaTables.clear(); // leak possible
         lua_close(this->_state);
     }
 

@@ -17,7 +17,7 @@ set(src
 
 CreateGroups("${src}")
 add_executable(server ${src})
-add_dependencies(server resources)
+add_dependencies(server tools_lua_res)
 
 enable_pch(server src)
 

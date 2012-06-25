@@ -12,7 +12,7 @@ set(src
 
 CreateGroups("${src}")
 add_executable(installer-cli ${src})
-add_dependencies(installer-cli resources)
+add_dependencies(installer-cli tools_lua_res)
 
 enable_pch(installer-cli src)
 

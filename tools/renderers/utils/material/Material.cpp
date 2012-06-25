@@ -131,9 +131,17 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     void Material::SetLuaValue(std::string const& key, Lua::Ref value)
     {
-        // TODO: Les autres types
+        // TODO: d'autres types ou pas ?
         if (value.IsNumber())
-            this->_SetValue(key, (float)value.CheckNumber());
+            this->_SetValue(key, (float)value.ToNumber());
+        else if (value.Is<glm::vec2>())
+            this->_SetValue(key, value.To<glm::vec2>());
+        else if (value.Is<glm::vec3>())
+            this->_SetValue(key, value.To<glm::vec3>());
+        else if (value.Is<glm::vec4>())
+            this->_SetValue(key, value.To<glm::vec4>());
+        else if (value.Is<glm::mat4>())
+            this->_SetValue(key, value.To<glm::mat4>());
         else if (value.Is<std::shared_ptr<Texture::ITexture>>())
             this->_SetValue(key, *value.Check<std::shared_ptr<Texture::ITexture>*>());
     }

@@ -10,7 +10,7 @@ set(src
 
 CreateGroups("${src}")
 add_executable(test_lua ${src})
-add_dependencies(test_lua resources)
+add_dependencies(test_lua tools_lua_res)
 
 enable_pch(test_lua src)
 

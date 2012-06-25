@@ -22,7 +22,7 @@ add_definitions(-DTOOLS_WINDOW_BINDACTION_HEADER="client/BindAction.hpp")
 
 CreateGroups("${src}")
 add_executable(client ${src})
-add_dependencies(client resources)
+add_dependencies(client tools_lua_res)
 
 enable_pch(client src)
 
