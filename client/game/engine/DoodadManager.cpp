@@ -58,7 +58,7 @@ namespace Client { namespace Game { namespace Engine {
 
     void DoodadManager::Tick(Uint64 totalTime)
     {
-        this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
+        //this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
 
         auto it = this->_doodads.begin();
         auto itEnd = this->_doodads.end();

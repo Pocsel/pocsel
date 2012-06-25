@@ -72,7 +72,12 @@ namespace Server { namespace Game { namespace Map {
         //unsigned int voffset = 0;
 
         static btBoxShape* boxShape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
+        static btBoxShape* megaBoxShape = new btBoxShape(btVector3(16, 16, 16));
         this->_shape = new btCompoundShape(false);
+
+        std::vector<int> colCubes(Common::ChunkSize3);
+        std::memset(colCubes.data(), 0, Common::ChunkSize3);
+        int number = 0;
 
         CubeType const* cubes = this->GetCubes();
         CubeType nearType;
@@ -95,6 +100,42 @@ namespace Server { namespace Game { namespace Map {
                             y == 0 || !cubes[cubeOffset - Common::ChunkSize] ||
                             z == 0 || !cubes[cubeOffset - Common::ChunkSize2])
                     {
+                        colCubes[cubeOffset] = 1;
+                        ++number;
+                    }
+                    //{
+                    //    btTransform tr;
+                    //    tr.setIdentity();
+                    //    tr.setOrigin(btVector3((double)x + 0.5, (double)y + 0.5, (double)z + 0.5));
+                    //    this->_shape->addChildShape(tr, boxShape);
+                    //}
+                }
+            }
+        }
+
+        std::cout << "number: " << number << "\n";
+        //std::cout << "number: " << this->_shape->getNumChildShapes() << "\n";
+
+        if (number == 5768)
+        {
+            btTransform tr;
+            tr.setIdentity();
+            tr.setOrigin(btVector3(16, 16, 16));
+            this->_shape->addChildShape(tr, megaBoxShape);
+        }
+        else
+        for (z = 0; z < Common::ChunkSize; ++z)
+        {
+            for (y = 0; y < Common::ChunkSize; ++y)
+            {
+                for (x = 0; x < Common::ChunkSize; ++x)
+                {
+                    cubeOffset = x + y * Common::ChunkSize + z * Common::ChunkSize2;
+                    if (cubes[cubeOffset] == 0)
+                        continue;
+
+                    if (colCubes[cubeOffset])
+                    {
                         btTransform tr;
                         tr.setIdentity();
                         tr.setOrigin(btVector3((double)x + 0.5, (double)y + 0.5, (double)z + 0.5));
@@ -103,8 +144,6 @@ namespace Server { namespace Game { namespace Map {
                 }
             }
         }
-        std::cout << "number: " << this->_shape->getNumChildShapes() << "\n";
-
         this->_shape->createAabbTreeFromChildren();
 
         //btTriangleIndexVertexArray* vertexArray = new btTriangleIndexVertexArray(

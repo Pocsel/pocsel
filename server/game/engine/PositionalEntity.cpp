@@ -12,12 +12,12 @@ namespace Server { namespace Game { namespace Engine {
 
         static btCollisionShape* colShape = new
             // btSphereShape(2) // rayon
-            btBoxShape(btVector3(0.1, 4, 2)) // on donne la moitié de la taille
+            btBoxShape(btVector3(1, 2.5, 1)) // on donne la moitié de la taille
             ;
 
         /// Create Dynamic Objects
 
-        btScalar mass(1200);
+        btScalar mass(100);
         btVector3 localInertia(0, 0, 0);
 
         colShape->calculateLocalInertia(mass, localInertia);
