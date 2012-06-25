@@ -1,3 +1,5 @@
+#include "client/game/TargetedCubeRenderer.hpp"
+
 #include "client/precompiled.hpp"
 
 #include "tools/window/Window.hpp"
@@ -6,7 +8,6 @@
 #include "common/CubePosition.hpp"
 #include "common/Position.hpp"
 
-#include "client/game/TargetedCubeRenderer.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
 

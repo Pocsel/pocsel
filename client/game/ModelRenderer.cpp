@@ -15,6 +15,7 @@
 #include "client/game/engine/Model.hpp"
 
 #include "common/CubePosition.hpp"
+#include "common/physics/Node.hpp"
 
 #include "client/Client.hpp"
 
@@ -28,7 +29,11 @@ namespace Client { namespace Game {
     {
     }
 
-    void ModelRenderer::Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Engine::Model const& model, Common::Position const& pos)
+    void ModelRenderer::Render(
+            Tools::Renderers::Utils::DeferredShading& deferredShading,
+            Engine::Model const& model,
+            Common::Physics::Node const& pos,
+            float updateFlag)
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
 
@@ -41,19 +46,33 @@ namespace Client { namespace Game {
             auto& var = materials[i]->GetMaterial().GetVariable<std::vector<glm::mat4x4>>("boneMatrices");
             var.Set(model.GetAnimatedBones());
 
+            auto& varFlag = materials[i]->GetMaterial().GetVariable<float>("updateFlag");
+            varFlag.Set(updateFlag);
+
             deferredShading.RenderGeometry(
                 materials[i]->GetMaterial(),
                 [&, i, vertexBuffer]()
                 {
-                    this->_renderer.SetModelMatrix(glm::translate(glm::fvec3(pos - camera.position)) *
-                        glm::yawPitchRoll(0.0f, -Tools::Math::PiFloat / 2.0f, 0.0f));
+                    glm::quat orientation =
+                        pos.orientation
+                        *
+                        glm::quat(glm::vec3(-Tools::Math::PiFloat / 2.0f, 0.0f, 0.0f))
+                        ;
+
+                    this->_renderer.SetModelMatrix(
+                        glm::translate(glm::fvec3(pos.position - camera.position))
+                        *
+                        glm::toMat4(orientation)
+                        *
+                        glm::translate(glm::fvec3(0, 0, -1))
+                    );
                     vertexBuffer->Bind();
                     indexBuffers[i]->Bind();
                     this->_renderer.DrawElements(meshes[i].num_triangles * 3);
                     indexBuffers[i]->Unbind();
                     vertexBuffer->Unbind();
                 },
-                Uint32(glm::lengthSquared(pos - camera.position)));
+                Uint32(glm::lengthSquared(pos.position - camera.position)));
         }
     }
 

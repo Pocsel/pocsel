@@ -1,7 +1,6 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/lua/Iterator.hpp"
-#include "tools/lua/MetaTable.hpp"
+#include "tools/lua/Interpreter.hpp"
 #include "tools/renderers/utils/material/LuaMaterial.hpp"
 #include "tools/renderers/utils/material/Material.hpp"
 #include "tools/renderers/utils/material/Variable.hpp"
@@ -135,8 +134,6 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         // TODO: Les autres types
         if (value.IsNumber())
             this->_SetValue(key, (float)value.CheckNumber());
-        else if (value.IsString())
-            this->_SetValue(key, std::shared_ptr<Texture::ITexture>(this->_loadTexture(value.CheckString()).release()));
         else if (value.Is<std::shared_ptr<Texture::ITexture>>())
             this->_SetValue(key, *value.Check<std::shared_ptr<Texture::ITexture>*>());
     }
@@ -157,8 +154,9 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             metaTable.Set("__call", interpreter.MakeFunction(
                 [loadTexture, &interpreter](Lua::CallHelper& helper)
                 {
+                    helper.PopArg();
                     auto texture = loadTexture(helper.PopArg().CheckString());
-                    helper.PushRet(interpreter.Make(std::shared_ptr<Texture::ITexture>(texture.release())));
+                    helper.PushRet(std::shared_ptr<Texture::ITexture>(texture.release()));
                 }));
             textureNs.SetMetaTable(metaTable);
         }
@@ -166,7 +164,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         // Register type LuaMaterial
         {
             // MetaTable pour le shader
-            auto table = Lua::MetaTable::Create<std::unique_ptr<Material>>(interpreter);
+            auto& table = Lua::MetaTable::Create<std::unique_ptr<Material>>(interpreter);
             table.SetMetaMethod(Lua::MetaTable::NewIndex,
                 [](Lua::CallHelper& helper)
                 {

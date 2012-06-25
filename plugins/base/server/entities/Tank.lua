@@ -29,8 +29,8 @@ Server.Body.Register{
     },
     shapeTree = {
         {
-            name = "Base", -- nom unique de no eud
-            offset = { 0, 1, 0 }, -- par rappo rt au parent (entité positionnelle)
+            name = "Base", -- nom unique de noeud
+            offset = { 0, 1, 0 }, -- par rapport au parent (entité positionnelle)
             angle = { 0, 0, 0 }, -- idem
             boxes = {
                 {

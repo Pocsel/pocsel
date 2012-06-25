@@ -1,8 +1,11 @@
 file(GLOB_RECURSE server_src "*.[ch]pp")
 
+include_directories(${BULLET_DIR})
+
 set(src
     ${server_src}
     ${common_src}
+    ${common_physics_src}
     ${tools_base_src}
     ${tools_database_src}
     ${tools_logger_src}
@@ -10,15 +13,16 @@ set(src
     ${tools_lua_utils_src}
     ${tools_zlib_src}
     ${tools_plugin_src}
-    ${tools_physics_src}
 )
 
 CreateGroups("${src}")
 add_executable(server ${src})
+add_dependencies(server resources)
 
 enable_pch(server src)
 
 target_link_libraries(server
+    libbullet
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}
