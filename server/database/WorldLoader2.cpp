@@ -209,8 +209,19 @@ namespace Server { namespace Database {
             this->_currentMap->GetEngine().OverrideRunningPluginId(pluginId);
 
             // chargement du lua
-            auto f = this->_currentMap->GetEngine().GetInterpreter().LoadString(row->GetString(0));
-            auto module = f();
+            Tools::Lua::Ref f = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
+            Tools::Lua::Ref module = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
+            try
+            {
+                auto f = this->_currentMap->GetEngine().GetInterpreter().LoadString(row->GetString(0));
+                auto module = f();
+            }
+            catch (std::exception& e)
+            {
+                this->_currentMap->GetEngine().OverrideRunningPluginId(previousRunningPluginId); // chargement foiré, on revien quand meme dans le plugin précédent
+                it.first->second.first = false; // loading not in progress anymore
+                throw;
+            }
             if (module == f) // le module se retourne lui-même = pas de return dans le module = on retourne nil
                 module = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
 
