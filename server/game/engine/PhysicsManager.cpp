@@ -13,6 +13,11 @@
 
 namespace Server { namespace Game { namespace Engine {
 
+    void PhysicsManager::AddBody(btRigidBody* body)
+    {
+        this->_world->GetBtWorld().addRigidBody(body);
+    }
+
     struct _cb
     {
         static void _TickCallback(btDynamicsWorld* world, btScalar timeStep)
