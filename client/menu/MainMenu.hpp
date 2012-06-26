@@ -16,6 +16,7 @@ namespace Client {
     class Client;
     namespace Menu { namespace Widget {
         class Button;
+        class DebugPanel;
     }}
 }
 
@@ -36,6 +37,7 @@ namespace Client { namespace Menu {
         Tools::Window::ActionBinder* _actionBinder;
         Widget::Button* _quitButton;
         Widget::Button* _backButton;
+        Widget::DebugPanel* _debugPanel;
 
     public:
         MainMenu(Client& client, Menu& menu);
