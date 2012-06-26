@@ -23,8 +23,8 @@ namespace Server { namespace Game { namespace Map {
         explicit Chunk(CoordsType const& coords);// : BaseChunk(coords) {}
         ~Chunk();
 
-        void InitBody();
-        btRigidBody* GetBody();
+        Common::Physics::Chunk* GetPhysics() { return this->_physicsChunk; }
+        void SetPhysics(std::unique_ptr<Common::Physics::Chunk> physics);
     };
 
 }}}

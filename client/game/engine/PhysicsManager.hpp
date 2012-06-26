@@ -22,12 +22,14 @@ namespace Client { namespace Game { namespace Engine {
         std::set<Uint32> _bodiesInWorld;
         std::set<btRigidBody const*> _doodadBodies;
         Common::Physics::World* _world;
+        Uint64 _lastTime;
 
     public:
         PhysicsManager(Engine& engine, std::map<Uint32, Doodad*> const& entities);
         ~PhysicsManager();
         void Tick(Uint64 deltaTime);
         void AddBody(btRigidBody* body);
+        void RemoveBody(btRigidBody* body);
     };
 
 }}}

@@ -11,20 +11,28 @@
 
 #include "tools/lua/Function.hpp"
 
-namespace Server { namespace Game { namespace Engine {
+namespace Client { namespace Game { namespace Engine {
 
     void PhysicsManager::AddBody(btRigidBody* body)
     {
-        this->_world->GetBtWorld().addRigidBody(body);
+        if (body)
+            this->_world->GetBtWorld().addRigidBody(body);
+    }
+
+    void PhysicsManager::RemoveBody(btRigidBody* body)
+    {
+        if (body)
+            this->_world->GetBtWorld().removeRigidBody(body);
     }
 
     PhysicsManager::PhysicsManager(Engine& engine, std::map<Uint32, Doodad*> const& doodads) :
         _engine(engine),
         _doodads(doodads),
-        _world(0)
+        _world(0),
+        _lastTime(0)
     {
         this->_world = new Common::Physics::World();
-        this->_world->GetBtWorld().setInternalTickCallback(_cb::_TickCallback, this);
+        //this->_world->GetBtWorld().setInternalTickCallback(_cb::_TickCallback, this);
     }
 
     PhysicsManager::~PhysicsManager()
@@ -32,7 +40,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Delete(this->_world);
     }
 
-    void PhysicsManager::Tick(Uint64 deltaTime)
+    void PhysicsManager::Tick(Uint64 totalTime)
     {
         for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
         {
@@ -44,32 +52,35 @@ namespace Server { namespace Game { namespace Engine {
             }
         }
 
+        Uint64 deltaTime = totalTime - this->_lastTime;
+
         this->_world->Tick(deltaTime);
+        this->_lastTime = totalTime;
 
-        for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
-        {
-            if (!it->second)
-                continue;
-
-            Doodad& entity = *it->second;
-            btRigidBody const& btBody = entity.GetBtBody();
-            Common::Physics::Node& physics = entity.GetPhysics();
-
-            btTransform wt;
-            btBody.getMotionState()->getWorldTransform(wt);
-
-            btVector3 wpos = wt.getOrigin();
-            physics.position = Common::Position(wpos.x(), wpos.y(), wpos.z());
-
-            btQuaternion const& wrot = wt.getRotation();
-            physics.orientation = glm::quat(wrot.w(), wrot.x(), wrot.y(), wrot.z());
-
-            btVector3 const& btVel = btBody.getLinearVelocity();
-            physics.velocity = glm::vec3(btVel.x(), btVel.y(), btVel.z());
-
-            btVector3 const& av = btBody.getAngularVelocity();
-            physics.angularVelocity = glm::vec3(av.x(), av.y(), av.z());
-        }
+//        for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
+//        {
+//            if (!it->second)
+//                continue;
+//
+//            Doodad& entity = *it->second;
+//            btRigidBody const& btBody = entity.GetBtBody();
+//            Common::Physics::Node& physics = entity.GetPhysics();
+//
+//            btTransform wt;
+//            btBody.getMotionState()->getWorldTransform(wt);
+//
+//            btVector3 wpos = wt.getOrigin();
+//            physics.position = Common::Position(wpos.x(), wpos.y(), wpos.z());
+//
+//            btQuaternion const& wrot = wt.getRotation();
+//            physics.orientation = glm::quat(wrot.w(), wrot.x(), wrot.y(), wrot.z());
+//
+//            btVector3 const& btVel = btBody.getLinearVelocity();
+//            physics.velocity = glm::vec3(btVel.x(), btVel.y(), btVel.z());
+//
+//            btVector3 const& av = btBody.getAngularVelocity();
+//            physics.angularVelocity = glm::vec3(av.x(), av.y(), av.z());
+//        }
     }
 
 }}}

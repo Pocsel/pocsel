@@ -9,6 +9,7 @@
 #include "common/CubePosition.hpp"
 #include "common/Packet.hpp"
 #include "common/RayCast.hpp"
+#include "common/physics/Chunk.hpp"
 
 #include "tools/SimpleMessageQueue.hpp"
 
@@ -228,16 +229,18 @@ namespace Server { namespace Game { namespace Map {
 
         this->_chunkManager->AddChunk(std::unique_ptr<Chunk>(chunk));
 
+        this->_RefreshChunkPhysics(chunk);
+
         // XXX THIS IS SHIT
-        std::cout << "init\n";
-        chunk->InitBody();
-        std::cout << "initend\n";
-        if (chunk->GetBody())
-        {
-        std::cout << "add\n";
-            this->_engine->GetPhysicsManager().AddBody(chunk->GetBody());
-        std::cout << "addend\n";
-        }
+        //std::cout << "init\n";
+        //chunk->InitBody();
+        //std::cout << "initend\n";
+        //if (chunk->GetBody())
+        //{
+        //std::cout << "add\n";
+        //    this->_engine->GetPhysicsManager().AddBody(chunk->GetBody());
+        //std::cout << "addend\n";
+        //}
     }
 
     void Map::_GetSpawnPosition(SpawnCallback& response)
@@ -344,6 +347,7 @@ namespace Server { namespace Game { namespace Map {
         {
             chunk->SetCube(cubePos, 0);
             this->_SendChunkToPlayers(chunk);
+            this->_RefreshChunkPhysics(chunk);
         }
     }
 
@@ -351,18 +355,21 @@ namespace Server { namespace Game { namespace Map {
     {
         bool send = false;
 
-        std::for_each(cubePos.begin(), cubePos.end(), [chunk, &send](Chunk::CoordsType& pos)
+        for (auto it = cubePos.begin(), ite = cubePos.end(); it != ite; ++it)
+        {
+            Chunk::CoordsType& pos = *it;
+            if (chunk->GetCube(pos) != 0)
             {
-                if (chunk->GetCube(pos) != 0)
-                {
-                    chunk->SetCube(pos, 0);
-                    send = true;
-                }
+                chunk->SetCube(pos, 0);
+                send = true;
             }
-            );
+        }
 
         if (send)
+        {
             this->_SendChunkToPlayers(chunk);
+            this->_RefreshChunkPhysics(chunk);
+        }
     }
 
     void Map::_DestroyCubes2(Chunk* chunk, std::shared_ptr<Common::CastChunk> pos)
@@ -371,24 +378,28 @@ namespace Server { namespace Game { namespace Map {
 
         auto cubePos = pos->GetCubes();
 
-        std::for_each(cubePos.begin(), cubePos.end(), [chunk, &send](Chunk::CoordsType& pos)
+        for (auto it = cubePos.begin(), ite = cubePos.end(); it != ite; ++it)
+        {
+            Chunk::CoordsType& pos = *it;
+            if (chunk->GetCube(pos) != 0)
             {
-                if (chunk->GetCube(pos) != 0)
-                {
-                    chunk->SetCube(pos, 0);
-                    send = true;
-                }
+                chunk->SetCube(pos, 0);
+                send = true;
             }
-            );
+        }
 
         if (send)
+        {
             this->_SendChunkToPlayers(chunk);
+            this->_RefreshChunkPhysics(chunk);
+        }
     }
 
     void Map::_DestroyChunkCallback(Chunk* chunk)
     {
         chunk->StealCubes();
         this->_SendChunkToPlayers(chunk);
+        this->_RefreshChunkPhysics(chunk);
     }
 
     void Map::_DestroyChunk(Chunk::IdType id)
@@ -413,6 +424,8 @@ namespace Server { namespace Game { namespace Map {
             chunk->StealCubes();
             this->_SendChunkToPlayers(chunk);
         }
+        if (chunk)
+            this->_RefreshChunkPhysics(chunk);
     }
 
     void Map::_PreDestroyCubes(std::shared_ptr<std::vector<Common::CastChunk*>> pos)
@@ -468,6 +481,15 @@ namespace Server { namespace Game { namespace Map {
                 this->_game.GetServer().GetClientManager().SendPacket(it->first, toto);
             }
         }
+    }
+
+    void Map::_RefreshChunkPhysics(Chunk* chunk)
+    {
+        if (chunk->GetPhysics())
+            this->_engine->GetPhysicsManager().RemoveBody(chunk->GetPhysics()->GetBody());
+        Common::Physics::Chunk* newPhysics = new Common::Physics::Chunk(*chunk);
+        chunk->SetPhysics(std::unique_ptr<Common::Physics::Chunk>(newPhysics));
+        this->_engine->GetPhysicsManager().AddBody(chunk->GetPhysics()->GetBody());
     }
 
     void Map::_Tick(Uint64 currentTime)

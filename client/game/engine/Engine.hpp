@@ -46,7 +46,7 @@ namespace Client { namespace Game { namespace Engine {
         ModelManager const& GetModelManager() const { return *this->_modelManager; }
         BodyManager& GetBodyManager() { return *this->_bodyManager; }
         BodyManager const& GetBodyManager() const { return *this->_bodyManager; }
-        PhysicsManager& GetPhysicsManager() { return *this->_PhysicsManager; }
+        PhysicsManager& GetPhysicsManager() { return *this->_physicsManager; }
         PhysicsManager const& GetPhysicsManager() const { return *this->_physicsManager; }
         std::string const& GetRunningPluginName() const { return this->_runningPluginName; }
         std::string const& GetRunningResourceName() const { return this->_runningResourceName; }

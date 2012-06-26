@@ -15,7 +15,14 @@ namespace Server { namespace Game { namespace Engine {
 
     void PhysicsManager::AddBody(btRigidBody* body)
     {
-        this->_world->GetBtWorld().addRigidBody(body);
+        if (body)
+            this->_world->GetBtWorld().addRigidBody(body);
+    }
+
+    void PhysicsManager::RemoveBody(btRigidBody* body)
+    {
+        if (body)
+            this->_world->GetBtWorld().removeRigidBody(body);
     }
 
     struct _cb

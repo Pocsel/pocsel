@@ -32,8 +32,8 @@ namespace Client { namespace Map {
         ChunkMesh* GetMesh() { return this->_mesh; }
         void SetMesh(std::unique_ptr<ChunkMesh> mesh);
 
-        void InitBody();
-        btRigidBody* GetBody();
+        Common::Physics::Chunk* GetPhysics() { return this->_physicsChunk; }
+        void SetPhysics(std::unique_ptr<Common::Physics::Chunk> physics);
     };
 
 }}

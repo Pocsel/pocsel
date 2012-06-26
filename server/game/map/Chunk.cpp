@@ -21,14 +21,10 @@ namespace Server { namespace Game { namespace Map {
     {
     }
 
-    void Chunk::InitBody()
+    void Chunk::SetPhysics(std::unique_ptr<Common::Physics::Chunk> physics)
     {
-        this->_physicsChunk = new Common::Physics::Chunk(*this);
-    }
-
-    btRigidBody* Chunk::GetBody()
-    {
-        return this->_physicsChunk->GetBody();
+        Tools::Delete(this->_physicsChunk);
+        this->_physicsChunk = physics.release();
     }
 
 }}}

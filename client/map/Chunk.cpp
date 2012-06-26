@@ -8,36 +8,34 @@ namespace Client { namespace Map {
 
     Chunk::Chunk(IdType id)
         : Common::BaseChunk(id),
-        _mesh(0)
+        _mesh(0),
+        _physicsChunk(0)
     {
     }
 
     Chunk::Chunk(CoordsType const& c)
         : Common::BaseChunk(c),
-        _mesh(0)
+        _mesh(0),
+        _physicsChunk(0)
     {
     }
 
     Chunk::~Chunk()
     {
         Tools::Delete(this->_mesh);
+        Tools::Delete(this->_physicsChunk);
     }
 
     void Chunk::SetMesh(std::unique_ptr<ChunkMesh> mesh)
     {
-        if (this->_mesh != 0)
-            Tools::Delete(this->_mesh);
+        Tools::Delete(this->_mesh);
         this->_mesh = mesh.release();
     }
 
-    void Chunk::InitBody()
+    void Chunk::SetPhysics(std::unique_ptr<Common::Physics::Chunk> physics)
     {
-        this->_physicsChunk = new Common::Physics::Chunk(*this);
-    }
-
-    btRigidBody* Chunk::GetBody()
-    {
-        return this->_physicsChunk->GetBody();
+        Tools::Delete(this->_physicsChunk);
+        this->_physicsChunk = physics.release();
     }
 
 }}

@@ -53,8 +53,8 @@ namespace Client { namespace Game { namespace Engine {
 
     void Engine::Tick(Uint64 totalTime)
     {
-        this->_doodadManager->Tick(totalTime);
         this->_physicsManager->Tick(totalTime);
+        this->_doodadManager->Tick(totalTime);
         this->_modelManager->Tick(totalTime);
     }
 
