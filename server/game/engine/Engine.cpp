@@ -14,6 +14,7 @@
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/database/IConnection.hpp"
+#include "common/FieldUtils.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -47,20 +48,6 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Delete(this->_entityManager);
         Tools::Delete(this->_callbackManager);
         Tools::Delete(this->_interpreter);
-    }
-
-    // uniquement en debug (pour pouvoir require() pour faire du hot-swap lua)
-    void Engine::SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> const& modules)
-    {
-        auto itPlugin = modules.begin();
-        auto itPluginEnd = modules.end();
-        for (; itPlugin != itPluginEnd; ++itPlugin)
-        {
-            auto it = itPlugin->second.begin();
-            auto itEnd = itPlugin->second.end();
-            for (; it != itEnd; ++it)
-                this->_modules[itPlugin->first].insert(std::make_pair(it->first, it->second.second));
-        }
     }
 
     void Engine::Tick(Uint64 currentTime)
@@ -123,6 +110,49 @@ namespace Server { namespace Game { namespace Engine {
     void Engine::SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet)
     {
         this->_map.SendUdpPacket(playerId, packet);
+    }
+
+    // uniquement en debug (pour pouvoir require() pour faire du hot-swap lua)
+    void Engine::SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> const& modules)
+    {
+        auto itPlugin = modules.begin();
+        auto itPluginEnd = modules.end();
+        for (; itPlugin != itPluginEnd; ++itPlugin)
+        {
+            auto it = itPlugin->second.begin();
+            auto itEnd = itPlugin->second.end();
+            for (; it != itEnd; ++it)
+            {
+                this->_modules[itPlugin->first].insert(std::make_pair(it->first, it->second.second));
+                Tools::log << " - - - - " << it->first << " -> " << it->second.second.GetTypeName() << std::endl;
+            }
+        }
+    }
+
+    // uniquement en debug (pour pouvoir require() pour faire du hot-swap lua)
+    void Engine::RegisterRequire()
+    {
+        this->_interpreter->Globals().Set("require", this->_interpreter->MakeFunction(std::bind(&Engine::_ApiRequire, this, std::placeholders::_1)));
+    }
+
+    // uniquement en debug (pour pouvoir require() pour faire du hot-swap lua)
+    void Engine::_ApiRequire(Tools::Lua::CallHelper& helper)
+    {
+        std::string name = helper.PopArg("require: Missing argument \"name\"").CheckString("require: Argument \"name\" must be a string");
+        Tools::log << "**************** REQUIRE " << name << " **************" << std::endl;
+        Uint32 pluginId = this->_world.GetPluginManager().GetPluginId(Common::FieldUtils::GetPluginNameFromResource(name));
+        std::string fileName = Common::FieldUtils::GetResourceNameFromResource(name);
+        auto itPlugin = this->_modules.find(pluginId);
+        if (itPlugin != this->_modules.end())
+        {
+            auto it = itPlugin->second.find(fileName);
+            if (it != itPlugin->second.end())
+            {
+                Tools::log << " wwwwwwwwwwwwwwwwwwwwwwwwwwwwww " << it->second.GetTypeName() << std::endl;
+                return helper.PushRet(it->second);
+            }
+        }
+        throw std::runtime_error("require: Server file \"" + fileName + "\" in plugin " + Tools::ToString(pluginId) + " not found");
     }
 
     void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)

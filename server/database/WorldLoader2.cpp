@@ -162,15 +162,19 @@ namespace Server { namespace Database {
                 }
             this->_currentMap->GetEngine().OverrideRunningPluginId(0);
             if (this->_world.GetGame().GetServer().GetSettings().debug)
+            {
                 this->_currentMap->GetEngine().SetModules(this->_modules);
-            this->_modules.clear();
+                this->_currentMap->GetEngine().RegisterRequire();
+            }
+            else
+                interpreter.Globals().Set("require", interpreter.MakeNil());
             interpreter.Globals().GetTable("Server").Set("Cube", interpreter.MakeNil());
-            interpreter.Globals().Set("require", interpreter.MakeNil());
+            this->_modules.clear();
             query->Reset();
         }
         this->_currentMap = 0;
 
-        // enregistre la liste des fichiers du serveur pour rcon
+        // enregistre le contenu des server_file pour rcon
         if (this->_world.GetGame().GetServer().GetSettings().debug)
             while (auto row = query->Fetch())
                 this->_world.GetGame().GetServer().GetRcon().GetEntityManager().AddFile(row->GetUint32(0), row->GetString(1), row->GetString(2));
