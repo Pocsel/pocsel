@@ -1,3 +1,5 @@
+#include "client/precompiled.hpp"
+
 #include "tools/renderers/utils/Rectangle.hpp"
 #include "tools/window/Window.hpp"
 #include "tools/window/ActionBinder.hpp"
@@ -7,6 +9,7 @@
 #include "client/Client.hpp"
 #include "client/menu/Menu.hpp"
 #include "client/menu/widget/Button.hpp"
+#include "client/menu/widget/DebugPanel.hpp"
 
 namespace Client { namespace Menu {
 
@@ -46,11 +49,14 @@ namespace Client { namespace Menu {
 
         this->_callbackId = this->_client.GetWindow().RegisterCallback(std::bind(&MainMenu::_Resize, this, std::placeholders::_1));
         this->_Resize(this->_client.GetWindow().GetSize());
+
+        this->_debugPanel = new Widget::DebugPanel(this->_menu, this->_renderer);
     }
 
     MainMenu::~MainMenu()
     {
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
+        Tools::Delete(this->_debugPanel);
         Tools::Delete(this->_backRect);
         Tools::Delete(this->_backButton);
         Tools::Delete(this->_quitButton);
@@ -74,6 +80,8 @@ namespace Client { namespace Menu {
         } while (this->_menu.GetRectShader().EndPass());
         this->_quitButton->Render();
         this->_backButton->Render();
+
+        this->_debugPanel->Render();
         this->_menu.EndMenuDrawing();
     }
 

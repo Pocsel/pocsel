@@ -27,7 +27,8 @@ namespace Tools { namespace Stat {
         {
             std::list<std::pair<IStat*, double>> counters;
             for (auto it = this->_counters.begin(), ite = this->_counters.end(); it != ite; ++it)
-                counters.push_back(std::make_pair(it->first, it->second.front()));
+                if (!it->second.empty())
+                    counters.push_back(std::make_pair(it->first, it->second.front()));
             return counters;
         }
         std::list<std::pair<IStat*, std::list<double>>> const& GetDebugStats() const { return this->_counters; }
@@ -35,7 +36,7 @@ namespace Tools { namespace Stat {
         std::list<std::pair<IStat*, double>> const& GetStats() const { return this->_counters; }
         std::list<std::pair<IStat*, std::list<double>>> GetDebugStats() const { return std::list<std::pair<IStat*, std::list<double>>>(); }
 #endif
-        // Met à jour les stats (à appeler par tick ou frame)
+        // Met à jour des stats (à appeler par tick ou frame)
         void Update();
     };
 
