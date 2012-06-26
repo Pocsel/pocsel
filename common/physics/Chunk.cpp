@@ -12,43 +12,104 @@ namespace Common { namespace Physics {
     }
 
     namespace {
-        inline void VerticesPushFace(std::vector<glm::dvec3>& vertices, unsigned int& offset, glm::dvec3 const& p, int idx)
-        {
-            static glm::dvec3 const positions[] = {
-                glm::dvec3(0, 1, 1), // frontTopLeft = 0;
-                glm::dvec3(1, 1, 1), // frontTopRight = 1;
-                glm::dvec3(1, 1, 0), // backTopRight = 2;
-                glm::dvec3(0, 1, 0), // backTopLeft = 3;
-                glm::dvec3(0, 0, 0), // backBottomLeft = 4;
-                glm::dvec3(1, 0, 0), // backBottomRight = 5;
-                glm::dvec3(1, 0, 1), // frontBottomRight = 6;
-                glm::dvec3(0, 0, 1), // frontBottomLeft = 7;
-            };
-            static int positionIndices[][4] = {
-                {6, 1, 0, 7}, // front = 0;
-                {0, 1, 2, 3}, // top = 1;
-                {5, 2, 1, 6}, // right = 2;
-                {4, 5, 6, 7}, // bottom = 3;
-                {7, 0, 3, 4}, // left = 4;
-                {4, 3, 2, 5}, // back = 5;
-            };
+        template<int Tpow>//, int TorigX, int TorigY, int TorigZ>
+            struct megashit
+            {
+                enum {
+                    Tmax = 1 << Tpow,
+                    TpowLess = Tpow - 1,
+                    TmaxLess = 1 << TpowLess
+                };
+                static inline bool _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape, int TorigX, int TorigY, int TorigZ)
+                {
+                    bool full000 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full001 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full010 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full011 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full100 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full101 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full110 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full111 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
 
-            int *pos = positionIndices[idx];
-            vertices[offset++] = glm::dvec3(positions[*(pos++)] + p);
-            vertices[offset++] = glm::dvec3(positions[*(pos++)] + p);
-            vertices[offset++] = glm::dvec3(positions[*(pos++)] + p);
-            vertices[offset++] = glm::dvec3(positions[*(pos++)] + p);
-        }
-    }
+                    if (
+                            full000 &&
+                            full001 &&
+                            full010 &&
+                            full011 &&
+                            full100 &&
+                            full101 &&
+                            full110 &&
+                            full111
+                            )
 
-    inline void IndicesPushFace(std::vector<unsigned int>& indices, unsigned int voffset)
-    {
-        indices.push_back(voffset - 4);
-        indices.push_back(voffset - 3);
-        indices.push_back(voffset - 2);
-        indices.push_back(voffset - 2);
-        indices.push_back(voffset - 1);
-        indices.push_back(voffset - 4);
+                        return true;
+
+                    btTransform tr;
+                    tr.setIdentity();
+
+                    if (full000)
+                    {
+                        tr.setOrigin(btVector3(TorigX + 0 * TmaxLess + 0.5 * TmaxLess, TorigY + 0 * TmaxLess + 0.5 * TmaxLess, TorigZ + 0 * TmaxLess + 0.5 * TmaxLess));
+                        shape->addChildShape(tr, boxShapes[TpowLess]);
+                    }
+                    if (full001)
+                    {
+                        tr.setOrigin(btVector3(TorigX + 0 * TmaxLess + 0.5 * TmaxLess, TorigY + 0 * TmaxLess + 0.5 * TmaxLess, TorigZ + 1 * TmaxLess + 0.5 * TmaxLess));
+                        shape->addChildShape(tr, boxShapes[TpowLess]);
+                    }
+                    if (full010)
+                    {
+                        tr.setOrigin(btVector3(TorigX + 0 * TmaxLess + 0.5 * TmaxLess, TorigY + 1 * TmaxLess + 0.5 * TmaxLess, TorigZ + 0 * TmaxLess + 0.5 * TmaxLess));
+                        shape->addChildShape(tr, boxShapes[TpowLess]);
+                    }
+                    if (full011)
+                    {
+                        tr.setOrigin(btVector3(TorigX + 0 * TmaxLess + 0.5 * TmaxLess, TorigY + 1 * TmaxLess + 0.5 * TmaxLess, TorigZ + 1 * TmaxLess + 0.5 * TmaxLess));
+                        shape->addChildShape(tr, boxShapes[TpowLess]);
+                    }
+                    if (full100)
+                    {
+                        tr.setOrigin(btVector3(TorigX + 1 * TmaxLess + 0.5 * TmaxLess, TorigY + 0 * TmaxLess + 0.5 * TmaxLess, TorigZ + 0 * TmaxLess + 0.5 * TmaxLess));
+                        shape->addChildShape(tr, boxShapes[TpowLess]);
+                    }
+                    if (full101)
+                    {
+                        tr.setOrigin(btVector3(TorigX + 1 * TmaxLess + 0.5 * TmaxLess, TorigY + 0 * TmaxLess + 0.5 * TmaxLess, TorigZ + 1 * TmaxLess + 0.5 * TmaxLess));
+                        shape->addChildShape(tr, boxShapes[TpowLess]);
+                    }
+                    if (full110)
+                    {
+                        tr.setOrigin(btVector3(TorigX + 1 * TmaxLess + 0.5 * TmaxLess, TorigY + 1 * TmaxLess + 0.5 * TmaxLess, TorigZ + 0 * TmaxLess + 0.5 * TmaxLess));
+                        shape->addChildShape(tr, boxShapes[TpowLess]);
+                    }
+                    if (full111)
+                    {
+                        tr.setOrigin(btVector3(TorigX + 1 * TmaxLess + 0.5 * TmaxLess, TorigY + 1 * TmaxLess + 0.5 * TmaxLess, TorigZ + 1 * TmaxLess + 0.5 * TmaxLess));
+                        shape->addChildShape(tr, boxShapes[TpowLess]);
+                    }
+
+                    //for (int x = TorigX; x < Tmax; ++x)
+                    //{
+                    //    for (int y = TorigY; y < Tmax; ++y)
+                    //    {
+                    //        for (int z = TorigZ; z < Tmax; ++z)
+                    //        {
+                    //        }
+                    //    }
+                    //}
+
+                    return false;
+                }
+            };
+        template<>//int TorigX, int TorigY, int TorigZ>
+            struct megashit<0>//, TorigX, TorigY, TorigZ>
+            {
+                static inline bool _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape, int origX, int origY, int origZ)
+                {
+                    return cubes[origX + origY * Common::ChunkSize + origZ * Common::ChunkSize2] != 0;
+                    //return false;
+                }
+            };
     }
 
     Chunk::Chunk(Common::BaseChunk const& source) :
@@ -58,12 +119,18 @@ namespace Common { namespace Physics {
         if (source.IsEmpty())
             return;
 
-        //std::vector<glm::dvec3> vertices(Common::ChunkSize3*6*4);
-        //std::vector<unsigned int> indices;
-        //unsigned int voffset = 0;
+        static btBoxShape** boxShapes = 0;
+        if (boxShapes == 0)
+        {
+            boxShapes = new btBoxShape*[6];
+            boxShapes[0] = new btBoxShape(btVector3(0.5, 0.5, 0.5));
+            boxShapes[1] = new btBoxShape(btVector3(1, 1, 1));
+            boxShapes[2] = new btBoxShape(btVector3(2, 2, 2));
+            boxShapes[3] = new btBoxShape(btVector3(4, 4, 4));
+            boxShapes[4] = new btBoxShape(btVector3(8, 8, 8));
+            boxShapes[5] = new btBoxShape(btVector3(16, 16, 16));
+        }
 
-        static btBoxShape* boxShape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
-        static btBoxShape* megaBoxShape = new btBoxShape(btVector3(16, 16, 16));
         this->_shape = new btCompoundShape(false);
 
         std::vector<int> colCubes(Common::ChunkSize3);
@@ -71,8 +138,16 @@ namespace Common { namespace Physics {
         int number = 0;
 
         Common::BaseChunk::CubeType const* cubes = source.GetCubes();
-        Common::BaseChunk::CubeType nearType;
 
+        if (megashit<5>/*, 0, 0, 0>*/::_(boxShapes, cubes, this->_shape, 0, 0, 0))
+        {
+            btTransform tr;
+            tr.setIdentity();
+            tr.setOrigin(btVector3(16, 16, 16));
+            this->_shape->addChildShape(tr, boxShapes[5]);
+        }
+
+        /*
         unsigned int x, y, z, cubeOffset;
         for (z = 0; z < Common::ChunkSize; ++z)
         {
@@ -135,23 +210,10 @@ namespace Common { namespace Physics {
                 }
             }
         }
+        */
         this->_shape->createAabbTreeFromChildren();
 
-        //btTriangleIndexVertexArray* vertexArray = new btTriangleIndexVertexArray(
-        //        indices.size() / 3,
-        //        (int*)indices.data(),
-        //        3*sizeof(int),
-        //        vertices.size(),
-        //        (double*)vertices.data(),
-        //        sizeof(glm::dvec3)
-        //        );
-
-        //this->_shape = new btBvhTriangleMeshShape(
-        //        vertexArray,
-        //        true
-        //        );
-        //btBvhTriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression, bool buildBvh = true);
-
+        std::cout << "number: " << this->_shape->getNumChildShapes() << "\n";
         btTransform tr;
         tr.setIdentity();
         tr.setOrigin(btVector3((source.coords.x) * 32, (source.coords.y) * 32,(source.coords.z) * 32));
@@ -159,15 +221,6 @@ namespace Common { namespace Physics {
         btDefaultMotionState* myMotionState = new btDefaultMotionState(tr);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(0, myMotionState, this->_shape, btVector3(0, 0, 0));
         this->_body = new btRigidBody(rbInfo);
-
-//	btTriangleIndexVertexArray(
-//        int numTriangles,
-//        int* triangleIndexBase,
-//        int triangleIndexStride,
-//        int numVertices,
-//        btScalar* vertexBase,
-//        int vertexStride);
-
 
     }
 
