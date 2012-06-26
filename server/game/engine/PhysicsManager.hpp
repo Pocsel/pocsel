@@ -28,6 +28,7 @@ namespace Server { namespace Game { namespace Engine {
         ~PhysicsManager();
         void Tick(Uint64 deltaTime);
         void AddBody(btRigidBody* body);
+        void RemoveBody(btRigidBody* body);
 
         friend struct _cb;
     };

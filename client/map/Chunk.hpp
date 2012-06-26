@@ -4,9 +4,15 @@
 #include "common/BaseChunk.hpp"
 #include "client/map/ChunkMesh.hpp"
 
+namespace Common { namespace Physics {
+    class Chunk;
+}}
+
 namespace Client { namespace Map {
     class Map;
 }}
+
+class btRigidBody;
 
 namespace Client { namespace Map {
 
@@ -16,6 +22,7 @@ namespace Client { namespace Map {
     {
     private:
         ChunkMesh* _mesh;
+        Common::Physics::Chunk* _physicsChunk;
 
     public:
         explicit Chunk(IdType id);
@@ -24,6 +31,9 @@ namespace Client { namespace Map {
 
         ChunkMesh* GetMesh() { return this->_mesh; }
         void SetMesh(std::unique_ptr<ChunkMesh> mesh);
+
+        Common::Physics::Chunk* GetPhysics() { return this->_physicsChunk; }
+        void SetPhysics(std::unique_ptr<Common::Physics::Chunk> physics);
     };
 
 }}

@@ -1,26 +1,30 @@
-#ifndef __SERVER_CHUNK_HPP__
-#define __SERVER_CHUNK_HPP__
+#ifndef __SERVER_GAME_MAP_CHUNK_HPP__
+#define __SERVER_GAME_MAP_CHUNK_HPP__
 
 #include "common/BaseChunk.hpp"
 
-class btCompoundShape;
+namespace Common { namespace Physics {
+    class Chunk;
+}}
+
 class btRigidBody;
 
 namespace Server { namespace Game { namespace Map {
 
-    struct Chunk : public Common::BaseChunk
+    struct Chunk :
+        public Common::BaseChunk,
+        private boost::noncopyable
     {
     private:
-        btCompoundShape* _shape;
-        btRigidBody* _body;
+        Common::Physics::Chunk* _physicsChunk;
 
     public:
         explicit Chunk(IdType id);// : BaseChunk(id) {}
         explicit Chunk(CoordsType const& coords);// : BaseChunk(coords) {}
         ~Chunk();
 
-        void InitBody();
-        btRigidBody* GetBody() { return this->_body; }
+        Common::Physics::Chunk* GetPhysics() { return this->_physicsChunk; }
+        void SetPhysics(std::unique_ptr<Common::Physics::Chunk> physics);
     };
 
 }}}

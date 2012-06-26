@@ -30,7 +30,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 _runningDoodadId; // 0 quand aucun doodad n'est en cours d'éxécution
         Doodad* _runningDoodad; // nul quand aucun doodad n'est en cours d'éxécution
         Uint64 _lastTime;
-        Common::Physics::World* _world;
+        //Common::Physics::World* _world;
         ShapeRenderer* _shapeRenderer;
 
     public:
@@ -39,6 +39,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 GetRunningDoodadId() const { return this->_runningDoodadId; }
         Doodad* GetRunningDoodad() const { return this->_runningDoodad; }
         Doodad const& GetDoodad(Uint32 doodadId) const throw(std::runtime_error); // ne pas garder la référence, le doodad peut etre delete à tout moment
+        std::map<Uint32, Doodad*> const& GetDoodads() const { return this->_doodads; }
         void Tick(Uint64 totalTime);
         void SpawnDoodad(Uint32 doodadId,
                 std::string const& doodadName,

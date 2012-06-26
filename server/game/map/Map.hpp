@@ -134,6 +134,7 @@ namespace Server { namespace Game { namespace Map {
         void _DestroyChunkCallback(Chunk* chunk);
         void _PreDestroyCubes(std::shared_ptr<std::vector<Common::CastChunk*>> cubePos);
         void _SendChunkToPlayers(Chunk* chunk);
+        void _RefreshChunkPhysics(Chunk* chunk);
         void _Tick(Uint64 currentTime);
         void _TimedSave();
 

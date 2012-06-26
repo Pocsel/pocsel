@@ -16,10 +16,10 @@ namespace Client { namespace Game { namespace Engine {
         _runningDoodadId(0),
         _runningDoodad(0),
         _lastTime(0),
-        _world(0),
+        //_world(0),
         _shapeRenderer(0)
     {
-        this->_world = new Common::Physics::World();
+        //this->_world = new Common::Physics::World();
         this->_shapeRenderer = new ShapeRenderer(this->_engine.GetGame());
         auto& i = this->_engine.GetInterpreter();
         auto namespaceTable = i.Globals().GetTable("Client").GetTable("Doodad");
@@ -39,7 +39,7 @@ namespace Client { namespace Game { namespace Engine {
         for (; itPlugin != itPluginEnd; ++itPlugin)
             Tools::Delete(itPlugin->second);
 
-        Tools::Delete(this->_world);
+        //Tools::Delete(this->_world);
         Tools::Delete(this->_shapeRenderer);
     }
 
@@ -58,7 +58,7 @@ namespace Client { namespace Game { namespace Engine {
 
     void DoodadManager::Tick(Uint64 totalTime)
     {
-        this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
+        //this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
 
         auto it = this->_doodads.begin();
         auto itEnd = this->_doodads.end();
@@ -117,7 +117,7 @@ namespace Client { namespace Game { namespace Engine {
             auto const& v = *itValues;
             // TODO
         }
-        this->_world->GetBtWorld().addRigidBody(&this->_doodads[doodadId]->GetBtBody());
+        //this->_world->GetBtWorld().addRigidBody(&this->_doodads[doodadId]->GetBtBody());
         this->_CallDoodadFunction(doodadId, "Spawn");
     }
 

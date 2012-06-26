@@ -6,9 +6,12 @@
 #include "tools/window/Window.hpp"
 #include "tools/window/InputManager.hpp"
 
+#include "common/physics/Chunk.hpp"
+
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/game/Game.hpp"
+#include "client/game/engine/PhysicsManager.hpp"
 #include "client/map/ChunkManager.hpp"
 #include "client/network/PacketCreator.hpp"
 
@@ -90,13 +93,26 @@ namespace Client { namespace Map {
                     this->_octree[i]->InsertElement(node);
         }
 
-        if (node == 0)
-            return;
+        //if (node == 0)
+          //  return;
+
+        {
+            if (node->chunk->GetPhysics())
+                this->_game.GetEngine().GetPhysicsManager().RemoveBody(node->chunk->GetPhysics()->GetBody());
+            Common::Physics::Chunk* newPhysics = new Common::Physics::Chunk(*node->chunk);
+            node->chunk->SetPhysics(std::unique_ptr<Common::Physics::Chunk>(newPhysics));
+            this->_game.GetEngine().GetPhysicsManager().AddBody(node->chunk->GetPhysics()->GetBody());
+        }
+
 
         if (cubes == 0)
             this->_RefreshNode(*node);
         else
             this->_RefreshNode(*node, cubes);
+
+        //node->chunk->InitBody();
+        //if (node->chunk->GetBody())
+        //    this->_game.GetEngine().GetPhysicsManager().AddBody(node->chunk->GetBody());
     }
 
     void ChunkManager::UpdateLoading()
@@ -183,6 +199,7 @@ namespace Client { namespace Map {
                 }
                 this->_octree[i]->RemoveElement(*it);
                 this->_chunks.erase((*it)->chunk->id);
+                this->_game.GetEngine().GetPhysicsManager().RemoveBody((*it)->chunk->GetPhysics()->GetBody());
                 // this->_refreshTasks.erase(*it);
                 Tools::Delete(*it);
             }
