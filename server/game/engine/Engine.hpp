@@ -66,6 +66,8 @@ namespace Server { namespace Game { namespace Engine {
         DoodadManager const& GetDoodadManager() const { return *this->_doodadManager; }
         BodyManager& GetBodyManager() { return *this->_bodyManager; }
         BodyManager const& GetBodyManager() const { return *this->_bodyManager; }
+        PhysicsManager& GetPhysicsManager() { return *this->_physicsManager; }
+        PhysicsManager const& GetPhysicsManager() const { return *this->_physicsManager; }
         Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
         Tools::Lua::Interpreter const& GetInterpreter() const { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }

@@ -11,7 +11,6 @@ namespace Tools { namespace Stat {
     {
     private:
         std::string _name;
-        Tools::Timer _timer;
         double _value;
 
     public:
