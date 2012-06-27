@@ -27,31 +27,14 @@ namespace Common { namespace Physics {
         _dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
 
         _dynamicsWorld->setGravity(btVector3(0.0,-9.81,0.0));
-
-
-
-
-
-//        static btCollisionShape* groundShape = new btBoxShape(btVector3(1000, 10, 1000));
-//
-//        btTransform groundTransform;
-//        groundTransform.setIdentity();
-//        groundTransform.setOrigin(btVector3((1<<21) * 32, (1<<19) * 32 - 50,(1<<21) * 32));
-//
-//        btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
-//        btRigidBody::btRigidBodyConstructionInfo rbInfo(0, myMotionState, groundShape, btVector3(0, 0, 0));
-//        btRigidBody* body = new btRigidBody(rbInfo);
-//
-//        //add the body to the dynamics world
-//        _dynamicsWorld->addRigidBody(body);
     }
 
     World::~World()
     {
         Tools::Delete(this->_dynamicsWorld);
+        Tools::Delete(this->_solver);
         Tools::Delete(this->_broadphase);
         Tools::Delete(this->_dispatcher);
-        Tools::Delete(this->_solver);
         Tools::Delete(this->_collisionConfiguration);
     }
 
