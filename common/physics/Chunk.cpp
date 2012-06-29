@@ -7,8 +7,11 @@ namespace Common { namespace Physics {
 
     Chunk::~Chunk()
     {
+        if (this->_body)
+            this->_body->setUserPointer((void*)1);
         Tools::Delete(this->_body);
         Tools::Delete(this->_shape);
+        Tools::Delete(this->_motionState);
     }
 
     namespace {
@@ -114,7 +117,8 @@ namespace Common { namespace Physics {
 
     Chunk::Chunk(Common::BaseChunk const& source) :
         _shape(0),
-        _body(0)
+        _body(0),
+        _motionState(0)
     {
         if (source.IsEmpty())
             return;
@@ -147,81 +151,24 @@ namespace Common { namespace Physics {
             this->_shape->addChildShape(tr, boxShapes[5]);
         }
 
-        /*
-        unsigned int x, y, z, cubeOffset;
-        for (z = 0; z < Common::ChunkSize; ++z)
+        if (this->_shape->getNumChildShapes() == 0)
         {
-            for (y = 0; y < Common::ChunkSize; ++y)
-            {
-                for (x = 0; x < Common::ChunkSize; ++x)
-                {
-                    cubeOffset = x + y * Common::ChunkSize + z * Common::ChunkSize2;
-                    if (cubes[cubeOffset] == 0)
-                        continue;
-
-                    if (x == Common::ChunkSize - 1 || !cubes[cubeOffset + 1] ||
-                            y == Common::ChunkSize - 1 || !cubes[cubeOffset + Common::ChunkSize] ||
-                            z == Common::ChunkSize - 1 || !cubes[cubeOffset + Common::ChunkSize2] ||
-                            x == 0 || !cubes[cubeOffset - 1] ||
-                            y == 0 || !cubes[cubeOffset - Common::ChunkSize] ||
-                            z == 0 || !cubes[cubeOffset - Common::ChunkSize2])
-                    {
-                        colCubes[cubeOffset] = 1;
-                        ++number;
-                    }
-                    //{
-                    //    btTransform tr;
-                    //    tr.setIdentity();
-                    //    tr.setOrigin(btVector3((double)x + 0.5, (double)y + 0.5, (double)z + 0.5));
-                    //    this->_shape->addChildShape(tr, boxShape);
-                    //}
-                }
-            }
+            Tools::Delete(this->_shape);
+            this->_shape = 0;
+            return;
         }
 
-        std::cout << "number: " << number << "\n";
-        //std::cout << "number: " << this->_shape->getNumChildShapes() << "\n";
-
-        if (number == 5768)
-        {
-            btTransform tr;
-            tr.setIdentity();
-            tr.setOrigin(btVector3(16, 16, 16));
-            this->_shape->addChildShape(tr, megaBoxShape);
-        }
-        else
-        for (z = 0; z < Common::ChunkSize; ++z)
-        {
-            for (y = 0; y < Common::ChunkSize; ++y)
-            {
-                for (x = 0; x < Common::ChunkSize; ++x)
-                {
-                    cubeOffset = x + y * Common::ChunkSize + z * Common::ChunkSize2;
-                    if (cubes[cubeOffset] == 0)
-                        continue;
-
-                    if (colCubes[cubeOffset])
-                    {
-                        btTransform tr;
-                        tr.setIdentity();
-                        tr.setOrigin(btVector3((double)x + 0.5, (double)y + 0.5, (double)z + 0.5));
-                        this->_shape->addChildShape(tr, boxShape);
-                    }
-                }
-            }
-        }
-        */
         this->_shape->createAabbTreeFromChildren();
 
-        std::cout << "number: " << this->_shape->getNumChildShapes() << "\n";
+        Tools::debug << "physics cubes in this chunk: " << this->_shape->getNumChildShapes() << "\n";
         btTransform tr;
         tr.setIdentity();
         tr.setOrigin(btVector3((source.coords.x) * 32, (source.coords.y) * 32,(source.coords.z) * 32));
 
-        btDefaultMotionState* myMotionState = new btDefaultMotionState(tr);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(0, myMotionState, this->_shape, btVector3(0, 0, 0));
+        _motionState = new btDefaultMotionState(tr);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(0, _motionState, this->_shape, btVector3(0, 0, 0));
         this->_body = new btRigidBody(rbInfo);
-
+        this->_body->setUserPointer(this);
     }
 
 }}
