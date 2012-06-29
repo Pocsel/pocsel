@@ -3,8 +3,6 @@
 
 local module = {}
 
-print("*************** module ******************")
-
 module.testVal = 12.5
 
 return module

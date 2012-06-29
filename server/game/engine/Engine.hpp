@@ -77,15 +77,19 @@ namespace Server { namespace Game { namespace Engine {
         void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
         Uint32 GetRunningEntityId() { return this->_overriddenEntityId ? this->_overriddenEntityId : this->_entityManager->GetRunningEntityId(); }
         void OverrideRunningEntityId(Uint32 entityId) { this->_overriddenEntityId = entityId; }
-        void SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> const& modules);
 
         void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
         void SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet);
+
+        // appelés uniquement en debug
+        void SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> const& modules);
+        void RegisterRequire();
 
         // rcon requests
         std::string RconExecute(Uint32 pluginId, std::string const& lua);
 
     private:
+        void _ApiRequire(Tools::Lua::CallHelper& helper);
         void _ApiPrint(Tools::Lua::CallHelper& helper);
     };
 
