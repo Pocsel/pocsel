@@ -122,10 +122,7 @@ namespace Server { namespace Game { namespace Engine {
             auto it = itPlugin->second.begin();
             auto itEnd = itPlugin->second.end();
             for (; it != itEnd; ++it)
-            {
                 this->_modules[itPlugin->first].insert(std::make_pair(it->first, it->second.second));
-                Tools::log << " - - - - " << it->first << " -> " << it->second.second.GetTypeName() << std::endl;
-            }
         }
     }
 
@@ -139,7 +136,6 @@ namespace Server { namespace Game { namespace Engine {
     void Engine::_ApiRequire(Tools::Lua::CallHelper& helper)
     {
         std::string name = helper.PopArg("require: Missing argument \"name\"").CheckString("require: Argument \"name\" must be a string");
-        Tools::log << "**************** REQUIRE " << name << " **************" << std::endl;
         Uint32 pluginId = this->_world.GetPluginManager().GetPluginId(Common::FieldUtils::GetPluginNameFromResource(name));
         std::string fileName = Common::FieldUtils::GetResourceNameFromResource(name);
         auto itPlugin = this->_modules.find(pluginId);
@@ -147,10 +143,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             auto it = itPlugin->second.find(fileName);
             if (it != itPlugin->second.end())
-            {
-                Tools::log << " wwwwwwwwwwwwwwwwwwwwwwwwwwwwww " << it->second.GetTypeName() << std::endl;
                 return helper.PushRet(it->second);
-            }
         }
         throw std::runtime_error("require: Server file \"" + fileName + "\" in plugin " + Tools::ToString(pluginId) + " not found");
     }

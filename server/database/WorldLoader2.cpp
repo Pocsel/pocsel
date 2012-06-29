@@ -219,10 +219,10 @@ namespace Server { namespace Database {
             Tools::Lua::Ref module = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
             try
             {
-                auto f = this->_currentMap->GetEngine().GetInterpreter().LoadString(row->GetString(0));
-                auto module = f();
+                f = this->_currentMap->GetEngine().GetInterpreter().LoadString(row->GetString(0));
+                module = f();
             }
-            catch (std::exception& e)
+            catch (std::exception&)
             {
                 this->_currentMap->GetEngine().OverrideRunningPluginId(previousRunningPluginId); // chargement foiré, on revien quand meme dans le plugin précédent
                 it.first->second.first = false; // loading not in progress anymore
