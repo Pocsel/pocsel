@@ -59,7 +59,10 @@ namespace Client { namespace Map {
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
             Tools::Delete(this->_octree[i]);
         for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite; ++it)
+        {
+            this->_game.GetEngine().GetPhysicsManager().RemoveBody(it->second->chunk->GetPhysics()->GetBody());
             Tools::Delete(it->second);
+        }
     }
 
     void ChunkManager::AddChunk(std::unique_ptr<Chunk>&& chunk)

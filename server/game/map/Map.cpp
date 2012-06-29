@@ -57,10 +57,10 @@ namespace Server { namespace Game { namespace Map {
         this->_conf.cubes.clear();
         this->_conf.cubeTypes.clear();
         Tools::debug << "Map::~Map() -- " << this->_conf.name << "\n";
-        Tools::Delete(this->_gen);
-        Tools::Delete(this->_engine);
-        Tools::Delete(this->_messageQueue);
         Tools::Delete(this->_chunkManager);
+        Tools::Delete(this->_engine);
+        Tools::Delete(this->_gen);
+        Tools::Delete(this->_messageQueue);
         Tools::Delete(this->_spawnPosition);
     }
 
@@ -229,7 +229,7 @@ namespace Server { namespace Game { namespace Map {
 
         this->_chunkManager->AddChunk(std::unique_ptr<Chunk>(chunk));
 
-        this->_RefreshChunkPhysics(chunk);
+//        this->_RefreshChunkPhysics(chunk);
 
         // XXX THIS IS SHIT
         //std::cout << "init\n";
