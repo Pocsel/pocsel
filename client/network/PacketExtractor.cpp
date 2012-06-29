@@ -97,21 +97,19 @@ namespace Client { namespace Network {
         p.Read(position);
     }
 
-    void PacketExtractor::ItemMove(Tools::ByteArray const& p, Common::MovingOrientedPosition& pos, Uint32& id)
-    {
-        p.Read(pos);
-        p.Read(id);
-    }
-
     void PacketExtractor::DoodadSpawn(Tools::ByteArray const& p,
             Uint32& doodadId,
+            Uint32& entityId,
             std::string& doodadName,
             Common::Physics::Node& position,
+            Uint32& bodyId,
             std::list<std::pair<std::string /* key */, std::string /* value */>>& values)
     {
         p.Read(doodadId);
+        p.Read(entityId);
         p.Read(doodadName);
         p.Read(position);
+        p.Read(bodyId);
         while (p.GetBytesLeft())
             values.push_back(std::make_pair(p.ReadString(), p.ReadString()));
     }
@@ -124,12 +122,12 @@ namespace Client { namespace Network {
 
     void PacketExtractor::DoodadUpdate(Tools::ByteArray const& p,
             Uint32& doodadId,
-            std::unique_ptr<Common::Physics::Node>& position,
+            std::unique_ptr<Common::Physics::Body>& body,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands)
     {
         p.Read(doodadId);
         if (p.ReadBool())
-            position = p.Read<Common::Physics::Node>();
+            position = p.Read<Common::Physics::Body>();
         while (p.GetBytesLeft())
         {
             bool functionCall = p.ReadBool();
@@ -137,6 +135,14 @@ namespace Client { namespace Network {
             std::string value = p.ReadString();
             commands.push_back(std::make_tuple(functionCall, functionOrKey, value));
         }
+    }
+
+    void PacketExtractor::EntityUpdate(Tools::ByteArray const& p,
+            Uint32 entityId,
+            Common::Physics::Node& node)
+    {
+        p.Read(entityId);
+        p.Read(node):
     }
 
 }}

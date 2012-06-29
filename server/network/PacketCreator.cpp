@@ -165,28 +165,21 @@ namespace Server { namespace Network {
         return std::unique_ptr<Common::Packet>(ptr);
     }
 
-    std::unique_ptr<UdpPacket> PacketCreator::ItemMove(Common::MovingOrientedPosition const& pos,
-                                                            Uint32 itemId)
-    {
-        UdpPacket* ptr(new UdpPacket);
-        ptr->Write(Protocol::ServerToClient::ItemMove);
-
-        ptr->Write(pos);
-        ptr->Write(itemId);
-        return std::unique_ptr<UdpPacket>(ptr);
-    }
-
     std::unique_ptr<Common::Packet> PacketCreator::DoodadSpawn(Uint32 doodadId,
+            Uint32 entityId,
             std::string const& doodadName,
             Common::Physics::Node const& position,
+            Uint32 bodyId,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
     {
         Common::Packet* ptr(new Common::Packet());
         ptr->Write(Protocol::ServerToClient::DoodadSpawn);
 
         ptr->Write(doodadId);
+        ptr->Write(entityId);
         ptr->Write(doodadName);
         ptr->Write(position);
+        ptr->Write(bodyId);
 
         auto it = values.begin();
         auto itEnd = values.end();
@@ -210,7 +203,7 @@ namespace Server { namespace Network {
     }
 
     std::unique_ptr<UdpPacket> PacketCreator::DoodadUpdate(Uint32 doodadId,
-            Common::Physics::Node const* position,
+            Common::Physics::body const* body,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
         UdpPacket* ptr(new UdpPacket());
@@ -221,7 +214,7 @@ namespace Server { namespace Network {
         if (position != 0)
         {
             ptr->Write(true);
-            ptr->Write(*position);
+            ptr->Write(*body);
         }
         else
         {
@@ -236,6 +229,17 @@ namespace Server { namespace Network {
             ptr->WriteString(std::get<1>(*it));
             ptr->WriteString(std::get<2>(*it));
         }
+
+        return std::unique_ptr<UdpPacket>(ptr);
+    }
+
+    std::unique_ptr<UdpPacket> PacketCreator::EntityUpdate(Uint32 entityId, Common::Physics::node const& position)
+    {
+        UdpPacket* ptr(new UdpPacket());
+        ptr->Write(Protocol::ServerToClient::EntityUpdate);
+
+        ptr->Write(entityId);
+        ptr->Write(position);
 
         return std::unique_ptr<UdpPacket>(ptr);
     }

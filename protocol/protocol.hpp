@@ -178,16 +178,11 @@ namespace Protocol {
         TeleportPlayer,
 
         /**
-         * MovingOrientedPosition pos
-         * Uint32 item id
-         */
-        ItemMove,
-
-        /**
          * Uint32 doodadId
-         * Uint32 pluginId
+         * Uint32 entityId
          * String doodadName
          * PhysicsNode position
+         * Uint32 bodyId
          *  String+ serializedKey
          *  String+ serializedValue
          */
@@ -200,13 +195,19 @@ namespace Protocol {
 
         /**
          * Uint32 doodadId
-         * Bool position
-         * PhysicsNode? position
+         * Bool body
+         * Body? body
          *  Bool+ functionCall
          *  String+ serializedKey || function
          *  String+ serializedValue
          */
         DoodadUpdate,
+
+        /**
+         * Uint32 entityId
+         * PhysicsNode position
+         */
+        EntityUpdate,
 
         NbPacketTypeServer, // pour les tableaux
     };

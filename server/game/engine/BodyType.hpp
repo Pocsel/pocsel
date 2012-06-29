@@ -12,11 +12,13 @@ namespace Server { namespace Game { namespace Engine {
     private:
         std::string _name;
         Uint32 _pluginId;
+        Uint32 _id;
 
     public:
-        BodyType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype);
+        BodyType(std::string const& name, Uint32 pluginId, Uint32 id, Tools::Lua::Ref const& prototype);
         std::string const& GetName() const { return this->_name; }
         Uint32 GetPluginId() const { return this->_pluginId; }
+        Uint32 GetId() const { return this->_id; }
 
     private:
         void _FillShapeTree(Tools::Lua::Ref const& shapeTree, std::vector<unsigned int>& result, int parent);

@@ -52,19 +52,23 @@ namespace Client { namespace Network {
         static std::unique_ptr<Game::Engine::BodyType> BodyType(Tools::ByteArray const& p);
 
         static void TeleportPlayer(Tools::ByteArray const& p, std::string& map, Common::Position& position);
-        static void ItemMove(Tools::ByteArray const& p, Common::MovingOrientedPosition& pos, Uint32& id);
 
         static void DoodadSpawn(Tools::ByteArray const& p,
                 Uint32& doodadId,
+                Uint32& entityId,
                 std::string& doodadName,
                 Common::Physics::Node& position,
+                Uint32& bodyId,
                 std::list<std::pair<std::string /* key */, std::string /* value */>>& values);
         static void DoodadKill(Tools::ByteArray const& p,
                 Uint32& doodadId);
         static void DoodadUpdate(Tools::ByteArray const& p,
                 Uint32& doodadId,
-                std::unique_ptr<Common::Physics::Node>& position,
+                std::unique_ptr<Common::Physics::Body>& body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands);
+        static void EntityUpdate(Tools::ByteArray const& p,
+                Uint32 entityId,
+                Common::Physics::Node& node);
     };
 
 }}

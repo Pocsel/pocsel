@@ -5,6 +5,7 @@
 #include "server/game/engine/Entity.hpp"
 
 class btRigidBody;
+class btTypedConstraint;
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -12,8 +13,16 @@ namespace Server { namespace Game { namespace Engine {
         public Entity
     {
     private:
+        struct DoodadBody
+        {
+            btRigidBody* root;
+            btTypedConstraint* constraint;
+        };
+    private:
         Common::Physics::Node _physics;
         btRigidBody* _btBody;
+        std::map<btRigidBody*, DoodadBody> _doodadBodies;
+
 
     public:
         PositionalEntity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
@@ -30,7 +39,10 @@ namespace Server { namespace Game { namespace Engine {
         void SetPhysics(Common::Physics::Node const& p) { this->_physics = p; }
 
         Common::Physics::Node& GetPhysics() { return this->_physics; }
-        btRigidBody& GetBtBody() { return *this->_btBody; }
+
+        btRigidBody* GetBtBody() { return this->_btBody; }
+        btRigidBody* AddConstraint(btRigidBody* doodadBody); // retourne son propre body
+        std::unique_ptr<btTypedConstraint> PopConstraint(btRigidBody const* doodadBody);
     };
 
 }}}

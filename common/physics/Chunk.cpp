@@ -88,26 +88,15 @@ namespace Common { namespace Physics {
                         shape->addChildShape(tr, boxShapes[TpowLess]);
                     }
 
-                    //for (int x = TorigX; x < Tmax; ++x)
-                    //{
-                    //    for (int y = TorigY; y < Tmax; ++y)
-                    //    {
-                    //        for (int z = TorigZ; z < Tmax; ++z)
-                    //        {
-                    //        }
-                    //    }
-                    //}
-
                     return false;
                 }
             };
-        template<>//int TorigX, int TorigY, int TorigZ>
-            struct megashit<0>//, TorigX, TorigY, TorigZ>
+        template<>
+            struct megashit<0>
             {
                 static inline bool _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape, int origX, int origY, int origZ)
                 {
                     return cubes[origX + origY * Common::ChunkSize + origZ * Common::ChunkSize2] != 0;
-                    //return false;
                 }
             };
     }
@@ -139,7 +128,7 @@ namespace Common { namespace Physics {
 
         Common::BaseChunk::CubeType const* cubes = source.GetCubes();
 
-        if (megashit<5>/*, 0, 0, 0>*/::_(boxShapes, cubes, this->_shape, 0, 0, 0))
+        if (megashit<5>::_(boxShapes, cubes, this->_shape, 0, 0, 0))
         {
             btTransform tr;
             tr.setIdentity();
@@ -147,73 +136,9 @@ namespace Common { namespace Physics {
             this->_shape->addChildShape(tr, boxShapes[5]);
         }
 
-        /*
-        unsigned int x, y, z, cubeOffset;
-        for (z = 0; z < Common::ChunkSize; ++z)
-        {
-            for (y = 0; y < Common::ChunkSize; ++y)
-            {
-                for (x = 0; x < Common::ChunkSize; ++x)
-                {
-                    cubeOffset = x + y * Common::ChunkSize + z * Common::ChunkSize2;
-                    if (cubes[cubeOffset] == 0)
-                        continue;
-
-                    if (x == Common::ChunkSize - 1 || !cubes[cubeOffset + 1] ||
-                            y == Common::ChunkSize - 1 || !cubes[cubeOffset + Common::ChunkSize] ||
-                            z == Common::ChunkSize - 1 || !cubes[cubeOffset + Common::ChunkSize2] ||
-                            x == 0 || !cubes[cubeOffset - 1] ||
-                            y == 0 || !cubes[cubeOffset - Common::ChunkSize] ||
-                            z == 0 || !cubes[cubeOffset - Common::ChunkSize2])
-                    {
-                        colCubes[cubeOffset] = 1;
-                        ++number;
-                    }
-                    //{
-                    //    btTransform tr;
-                    //    tr.setIdentity();
-                    //    tr.setOrigin(btVector3((double)x + 0.5, (double)y + 0.5, (double)z + 0.5));
-                    //    this->_shape->addChildShape(tr, boxShape);
-                    //}
-                }
-            }
-        }
-
-        std::cout << "number: " << number << "\n";
-        //std::cout << "number: " << this->_shape->getNumChildShapes() << "\n";
-
-        if (number == 5768)
-        {
-            btTransform tr;
-            tr.setIdentity();
-            tr.setOrigin(btVector3(16, 16, 16));
-            this->_shape->addChildShape(tr, megaBoxShape);
-        }
-        else
-        for (z = 0; z < Common::ChunkSize; ++z)
-        {
-            for (y = 0; y < Common::ChunkSize; ++y)
-            {
-                for (x = 0; x < Common::ChunkSize; ++x)
-                {
-                    cubeOffset = x + y * Common::ChunkSize + z * Common::ChunkSize2;
-                    if (cubes[cubeOffset] == 0)
-                        continue;
-
-                    if (colCubes[cubeOffset])
-                    {
-                        btTransform tr;
-                        tr.setIdentity();
-                        tr.setOrigin(btVector3((double)x + 0.5, (double)y + 0.5, (double)z + 0.5));
-                        this->_shape->addChildShape(tr, boxShape);
-                    }
-                }
-            }
-        }
-        */
         this->_shape->createAabbTreeFromChildren();
 
-        std::cout << "number: " << this->_shape->getNumChildShapes() << "\n";
+        Tools::debug << "number: " << this->_shape->getNumChildShapes() << "\n";
         btTransform tr;
         tr.setIdentity();
         tr.setOrigin(btVector3((source.coords.x) * 32, (source.coords.y) * 32,(source.coords.z) * 32));

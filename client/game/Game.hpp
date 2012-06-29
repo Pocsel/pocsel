@@ -19,7 +19,6 @@ namespace Client {
     }
     namespace Game {
         class Player;
-        class ItemManager;
     }
 }
 namespace Tools {
