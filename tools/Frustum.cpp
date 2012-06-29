@@ -1,7 +1,6 @@
 #include "tools/AlignedBox.hpp"
 #include "tools/AlignedCube.hpp"
 #include "tools/Frustum.hpp"
-#include "tools/Gjk.hpp"
 #include "tools/Ray.hpp"
 
 namespace Tools {

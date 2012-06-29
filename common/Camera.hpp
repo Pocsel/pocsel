@@ -3,7 +3,6 @@
 
 #include "common/OrientedPosition.hpp"
 #include "tools/Frustum.hpp"
-#include "tools/Matrix4.hpp"
 
 namespace Common {
 

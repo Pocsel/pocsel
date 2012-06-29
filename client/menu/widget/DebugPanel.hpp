@@ -3,7 +3,6 @@
 
 #include "tools/renderers/utils/Rectangle.hpp"
 #include "tools/Vector2.hpp"
-#include "tools/Matrix4.hpp"
 
 namespace Tools {
     namespace Stat {

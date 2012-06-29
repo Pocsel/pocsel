@@ -2,7 +2,6 @@
 #define __TOOLS_FRUSTUM_HPP__
 
 #include "tools/AbstractCollider.hpp"
-#include "tools/Matrix4.hpp"
 #include "tools/Plane.hpp"
 #include "tools/Vector3.hpp"
 

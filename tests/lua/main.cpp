@@ -5,7 +5,6 @@
 #include "tools/lua/Iterator.hpp"
 #include "tools/lua/MetaTable.hpp"
 #include "tools/lua/utils/Utils.hpp"
-#include "tools/Matrix4.hpp"
 #include "tools/Timer.hpp"
 
 #define STRINGIFY(...) #__VA_ARGS__

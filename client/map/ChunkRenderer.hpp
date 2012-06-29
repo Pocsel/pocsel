@@ -17,9 +17,6 @@ namespace Client {
         class Chunk;
         class Map;
     }
-    namespace Resources {
-        class Effect;
-    }
 }
 
 namespace Client { namespace Map {

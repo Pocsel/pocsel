@@ -2,7 +2,6 @@
 #include "tools/precompiled.hpp"
 
 #include "tools/IRenderer.hpp"
-#include "tools/Matrix4.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
 #include "tools/renderers/DX9Renderer.hpp"

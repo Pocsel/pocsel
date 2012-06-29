@@ -1,8 +1,6 @@
 #ifndef __CLIENT_MENU_MAINMENU_HPP__
 #define __CLIENT_MENU_MAINMENU_HPP__
 
-#include "tools/Matrix4.hpp"
-
 namespace Tools {
     namespace Renderers { namespace Utils {
         class Rectangle;

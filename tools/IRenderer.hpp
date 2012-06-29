@@ -1,7 +1,6 @@
 #ifndef __TOOLS_IRENDERER_HPP__
 #define __TOOLS_IRENDERER_HPP__
 
-#include "tools/Matrix4.hpp"
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"

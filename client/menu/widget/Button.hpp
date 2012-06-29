@@ -2,7 +2,6 @@
 #define __CLIENT_MENU_WIDGET_BUTTON_HPP__
 
 #include "tools/Vector2.hpp"
-#include "tools/Matrix4.hpp"
 
 namespace Tools {
     namespace Renderers { namespace Utils {
