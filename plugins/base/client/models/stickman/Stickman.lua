@@ -1,5 +1,5 @@
 Client.Material.Register{
-    materialName = "Stickman2",
+    materialName = "Stickman",
     geometryShader = "base:shaders/BaseModel.fx",
     shadowMapShader = "base:shaders/BaseModel.fx",
     shader = {

@@ -60,7 +60,7 @@ namespace Tools { namespace Renderers {
         IShaderProgram* _currentProgram;
         DX9::VertexBuffer* _vertexBuffer;
 
-        Color4f _clearColor;
+        glm::vec4 _clearColor;
         float _clearDepth;
         int _clearStencil;
 
@@ -111,7 +111,7 @@ namespace Tools { namespace Renderers {
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size);
-        virtual void SetClearColor(Color4f const& color) { this->_clearColor = color; }
+        virtual void SetClearColor(glm::vec4 const& color) { this->_clearColor = color; }
         virtual void SetClearDepth(float value) { this->_clearDepth = value; }
         virtual void SetClearStencil(int value) { this->_clearStencil = value; }
         virtual void SetNormaliseNormals(bool normalise);

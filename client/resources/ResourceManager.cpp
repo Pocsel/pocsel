@@ -2,7 +2,6 @@
 
 #include <IL/il.h>
 
-#include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
 //#include "tools/renderers/utils/texture/TextureAtlas.hpp"
 #include "tools/models/ErrorModel.hpp"
@@ -64,7 +63,7 @@ namespace {
         }
 
         auto frameSize = glm::uvec2(size.x);
-        auto pixmap = new Tools::Color4<Uint8>[frameSize.x * frameSize.y];
+        auto pixmap = new glm::u8vec4[frameSize.x * frameSize.y];
         frames.resize(size.y / size.x);
         for (unsigned int y = 0, i = 0; y < size.y; y += size.x, ++i)
         {

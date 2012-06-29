@@ -87,7 +87,7 @@ namespace Tools { namespace Renderers {
 
         InitDevIL();
 
-        this->_clearColor = Color4f(0, 0, 0, 1);
+        this->_clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         this->_clearDepth = 1.0f;
         this->_clearStencil = 0;
     }

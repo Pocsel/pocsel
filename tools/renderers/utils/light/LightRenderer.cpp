@@ -147,7 +147,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         this->_renderer.SetViewMatrix(view);
         this->_renderer.SetProjectionMatrix(projection);
 
-        this->_renderer.SetClearColor(Color4f(.0f, .0f, .0f, 1.0f));
+        this->_renderer.SetClearColor(glm::vec4(.0f, .0f, .0f, 1.0f));
         this->_renderer.Clear(ClearFlags::Color);
         this->_renderer.SetDepthTest(false);
         this->_RenderPointLights(gbuffer, pointLights);

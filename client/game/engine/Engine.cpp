@@ -31,7 +31,6 @@ namespace Client { namespace Game { namespace Engine {
         Tools::Renderers::Utils::Material::Material::LoadLuaTypes(*this->_interpreter,
             std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetTexture), &game.GetResourceManager(), std::placeholders::_1),
             std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetMaterial), &game.GetResourceManager(), std::placeholders::_1));
-        Tools::Lua::Utils::RegisterColor(*this->_interpreter);
         Tools::Lua::Utils::RegisterVector(*this->_interpreter);
         Tools::Lua::Utils::RegisterMatrix(*this->_interpreter);
 

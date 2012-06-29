@@ -16,10 +16,10 @@ namespace Client { namespace Menu { namespace Widget {
         _maxAverageValues(maxAverageValues)
     {
         this->_rect.SetColor(
-            Tools::Color4f(1.0f, 0.0f, 0.0f, 1.0f),
-            Tools::Color4f(1.0f, 0.0f, 0.0f, 1.0f),
-            Tools::Color4f(0.0f, 1.0f, 0.0f, 1.0f),
-            Tools::Color4f(0.0f, 1.0f, 0.0f, 1.0f));
+            glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+            glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+            glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+            glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
         this->_rect.SetPosition(
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(1.0f, 0.0f, 0.0f),

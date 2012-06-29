@@ -1,7 +1,6 @@
 #ifdef _WIN32
 #include "tools/precompiled.hpp"
 
-#include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/Matrix4.hpp"
 #include "tools/Vector2.hpp"
@@ -43,11 +42,6 @@ namespace Tools { namespace Renderers { namespace DX9 {
     void ShaderParameter::Set(float value)
     {
         this->_effect->SetFloat(this->_param, value);
-    }
-
-    void ShaderParameter::Set(Color4<float> const& color)
-    {
-        this->_effect->SetFloatArray(this->_param, color.colors, 4);
     }
 
     void ShaderParameter::Set(glm::detail::tvec2<float> const& vector)

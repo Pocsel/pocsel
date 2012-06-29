@@ -15,16 +15,16 @@ namespace Client { namespace Menu {
     {
         this->_backRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
         this->_backRect->SetColor(
-                Tools::Color4f(0.25f, 0.25f, 0.25f, 1),
-                Tools::Color4f(0.25f, 0.25f, 0.25f, 1),
-                Tools::Color4f(0.1f, 0.1f, 0.1f, 1),
-                Tools::Color4f(0.1f, 0.1f, 0.1f, 1));
+                glm::vec4(0.25f, 0.25f, 0.25f, 1),
+                glm::vec4(0.25f, 0.25f, 0.25f, 1),
+                glm::vec4(0.1f, 0.1f, 0.1f, 1),
+                glm::vec4(0.1f, 0.1f, 0.1f, 1));
         this->_barRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
         this->_barRect->SetColor(
-                Tools::Color4f(0.93f, 0.1f, 0.1f, 1),
-                Tools::Color4f(0.93f, 0.1f, 0.1f, 1),
-                Tools::Color4f(0.43f, 0.1f, 0.1f, 1),
-                Tools::Color4f(0.43f, 0.1f, 0.1f, 1));
+                glm::vec4(0.93f, 0.1f, 0.1f, 1),
+                glm::vec4(0.93f, 0.1f, 0.1f, 1),
+                glm::vec4(0.43f, 0.1f, 0.1f, 1),
+                glm::vec4(0.43f, 0.1f, 0.1f, 1));
         this->_callbackId = this->_client.GetWindow().RegisterCallback(std::bind(&LoadingScreen::_Resize, this, std::placeholders::_1));
         this->_Resize(this->_client.GetWindow().GetSize());
     }

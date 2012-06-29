@@ -21,10 +21,10 @@ namespace Client { namespace Menu {
     {
         this->_backRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
         this->_backRect->SetColor(
-                Tools::Color4f(0.25f, 0.25f, 0.25f, 0.7f),
-                Tools::Color4f(0.25f, 0.25f, 0.25f, 0.7f),
-                Tools::Color4f(0.25f, 0.25f, 0.25f, 0.7f),
-                Tools::Color4f(0.25f, 0.25f, 0.25f, 0.7f));
+                glm::vec4(0.25f, 0.25f, 0.25f, 0.7f),
+                glm::vec4(0.25f, 0.25f, 0.25f, 0.7f),
+                glm::vec4(0.25f, 0.25f, 0.25f, 0.7f),
+                glm::vec4(0.25f, 0.25f, 0.25f, 0.7f));
 
         this->_actionBinder = new Tools::Window::ActionBinder();
         this->_actionBinder->Bind(Tools::Window::BindAction::Menu, Tools::Window::BindAction::Released, std::bind(&MainMenu::_MenuBind, this));

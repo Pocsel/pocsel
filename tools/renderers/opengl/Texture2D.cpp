@@ -66,7 +66,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         }
 
         unsigned int size = this->_size.x * this->_size.y;
-        auto pixmap = new Color4<Uint8>[size];
+        auto pixmap = new glm::u8vec4[size];
         ilCopyPixels(0, 0, 0, this->_size.x, this->_size.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
 
         ilBindImage(0);
@@ -90,7 +90,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
                 GL_UNSIGNED_BYTE,
                 data));
 
-        Color4<Uint8> const* pixmap = reinterpret_cast<Color4<Uint8> const*>(data);
+        glm::u8vec4 const* pixmap = reinterpret_cast<glm::u8vec4 const*>(data);
         for (unsigned int i = 0; i < size; ++i)
             if (pixmap[i].a != 255)
             {
