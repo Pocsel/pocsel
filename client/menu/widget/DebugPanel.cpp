@@ -9,7 +9,7 @@
 
 namespace Client { namespace Menu { namespace Widget {
 
-    DebugPanel::DebugPanel(Menu& menu, Tools::IRenderer& renderer, int maxAverageValues) :
+    DebugPanel::DebugPanel(Menu& menu, Tools::IRenderer& renderer, Uint32 maxAverageValues) :
         _menu(menu),
         _renderer(renderer),
         _rect(renderer),
