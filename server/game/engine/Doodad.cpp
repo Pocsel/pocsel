@@ -18,8 +18,15 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Doodad::Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, Body* body) :
+    Doodad::Doodad(Engine& engine,
+            Uint32 id,
+            Uint32 pluginId,
+            std::string const& name,
+            Uint32 entityId,
+            PositionalEntity& entity,
+            Body* body) :
         _engine(engine),
+        _world(engine.GetPhysicsManager().GetWorld()),
         _id(id),
         _pluginId(pluginId),
         _name(name),
@@ -30,11 +37,20 @@ namespace Server { namespace Game { namespace Engine {
         _positionDirty(false)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
+
+        if (body)
+        {
+            // TODO add des trucs dans le world
+            entity.AddConstraint(&body.GetRootBtBody());
+        }
     }
 
     Doodad::~Doodad()
     {
         Tools::debug << "Doodad::~Doodad: Doodad destroyed (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
+
+        this->_entity.RemoveConstraint(&this->_body.GetRootBtBody());
+        // TODO retirer des trucs du world
 
         // create kill packet
         auto packet = Network::PacketCreator::DoodadKill(this->_id);

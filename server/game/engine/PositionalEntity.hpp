@@ -6,6 +6,11 @@
 
 class btRigidBody;
 class btTypedConstraint;
+class btDefaultMotionState;
+
+namespace Common { namespace Physics {
+    class World;
+}}
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -13,19 +18,19 @@ namespace Server { namespace Game { namespace Engine {
         public Entity
     {
     private:
-        struct DoodadBody
-        {
-            btRigidBody* root;
-            btTypedConstraint* constraint;
-        };
-    private:
+        Common::Physics::World& _world;
         Common::Physics::Node _physics;
-        btRigidBody* _btBody;
-        std::map<btRigidBody*, DoodadBody> _doodadBodies;
-
+        btRigidBody* _body;
+        btDefaultMotionState* _motionState;
+        std::map<btRigidBody const*, btTypedConstraint*> _doodadBodies;
 
     public:
-        PositionalEntity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
+        PositionalEntity(
+                Tools::Lua::Interpreter& interpreter,
+                Uint32 id,
+                EntityType const& type,
+                Common::Position const& pos,
+                Common::Physics::World& world);
         ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position; }
@@ -40,9 +45,9 @@ namespace Server { namespace Game { namespace Engine {
 
         Common::Physics::Node& GetPhysics() { return this->_physics; }
 
-        btRigidBody* GetBtBody() { return this->_btBody; }
-        btRigidBody* AddConstraint(btRigidBody* doodadBody); // retourne son propre body
-        std::unique_ptr<btTypedConstraint> PopConstraint(btRigidBody const* doodadBody);
+        //btRigidBody* GetBtBody() { return this->_body; }
+        void AddConstraint(btRigidBody* doodadBody); // retourne son propre body
+        void PopConstraint(btRigidBody const* doodadBody);
     };
 
 }}}

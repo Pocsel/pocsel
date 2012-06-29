@@ -2,27 +2,42 @@
 
 #include "bullet/bullet-all.hpp"
 
+#include "common/physics/World.hpp"
+
 namespace Server { namespace Game { namespace Engine {
 
-    PositionalEntity::PositionalEntity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos) :
+    PositionalEntity::PositionalEntity(
+            Tools::Lua::Interpreter& interpreter,
+            Uint32 id,
+            EntityType const& type,
+            Common::Position const& pos,
+            Common::Physics::World& world) :
         Entity(interpreter, id, type),
-        _btBody(0)
+        _world(world),
+        _body(0),
+        _motionState(0)
     {
         _physics.position = pos;
     }
 
     PositionalEntity::~PositionalEntity()
     {
-        Tools::Delete(_btBody);
-        for (auto it = this->_doodadBodies.begin(), ite = this->_doodadBodies.end(); it != ite; ++it)
+        assert(_doodadBodies.empty() && "il faut vider les constraints avant de delete l'entity");
+
+        if (this->_body)
         {
-            Tools::Delete(it->second.constraint);
+            this->_world.GetBtWorld().removeRigidBody(this->_body);
+
+            Tools::Delete(_body);
+            Tools::Delete(_motionState);
         }
     }
 
     void PositionalEntity::AddConstraint(btRigidBody* doodadBody)
     {
-        if (this->_btBody == 0)
+        assert(this->_doodadBodies.count(doodadBody) == 0);
+
+        if (this->_body == 0)
         {
             btScalar mass(0.00000001);
             btVector3 localInertia(0, 0, 0);
@@ -37,28 +52,36 @@ namespace Server { namespace Game { namespace Engine {
             btTransform startTransform;
             startTransform.setIdentity();
             startTransform.setOrigin(btVector3(
-                        btScalar(pos.x),
-                        btScalar(pos.y),
-                        btScalar(pos.z)));
+                        btScalar(_physics.position.x),
+                        btScalar(_physics.position.y),
+                        btScalar(_physics.position.z)));
 
-            btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-            btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, emptyShape, localInertia);
-            _btBody = new btRigidBody(rbInfo);
+            _motionState = new btDefaultMotionState(startTransform);
+            btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, _motionState, emptyShape, localInertia);
+            _body = new btRigidBody(rbInfo);
 
-            _btBody->setUserPointer(this);
+            _body->setUserPointer(this);
+
+            this->_world.GetBtWorld().addRigidBody(_body);
         }
-        DoodadBody& doodadBodyConstraint = this->_doodadBodies[doodadBody];
-        doodadBodyConstraint.root = doodadBody;
+
+        btTypedConstraint*& constraint = this->_doodadBodies[doodadBody];
         btTransform identity;
         identity.setIdentity();
-        doodadBodyConstraint.constraint = new btGeneric6DofConstraint(*this->_btBody, *doodadBody, identity, identity, false);
+        constraint = new btGeneric6DofConstraint(*this->_body, *doodadBody, identity, identity, false);
+
+        this->_world.GetBtWorld().addConstraint(constraint, true);
     }
 
-    std::unique_ptr<btTypedConstraint> PositionalEntity::PopConstraint(btRigidBody const* doodadBody)
+    void PositionalEntity::PopConstraint(btRigidBody const* doodadBody)
     {
-        DoodadBody& doodadBodyConstraint = _doodadBodies[doodadBody];
-        btTypedConstraint* constraint = doodadBodyConstraint;
-        // TODO j'en suis là
+        assert(this->_doodadBodies.count(doodadBody) == 1);
+
+        btTypedConstraint* constraint = _doodadBodies[doodadBody];
+        this->_doodadBodies.erase(doodadBody);
+
+        this->_world.GetBtWorld().removeConstraint(constraint);
+        Tools::Delete(constraint);
     }
 
 }}}

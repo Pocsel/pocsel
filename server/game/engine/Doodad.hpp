@@ -31,11 +31,12 @@ namespace Server { namespace Game { namespace Engine {
 
     private:
         Engine& _engine;
+        Common::Physics::World& _world;
         Uint32 _id;
         Uint32 _pluginId;
         std::string _name;
         Uint32 _entityId;
-        PositionalEntity const& _entity;
+        PositionalEntity& _entity;
         Tools::Lua::Ref _storage;
         Body* _body;
         std::unordered_set<Uint32> _players;
@@ -45,7 +46,13 @@ namespace Server { namespace Game { namespace Engine {
         bool _positionDirty;
 
     public:
-        Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, Body* body);
+        Doodad(Engine& engine,
+                Uint32 id,
+                Uint32 pluginId,
+                std::string const& name,
+                Uint32 entityId,
+                PositionalEntity const& entity,
+                Body* body);
         ~Doodad();
         Uint32 GetId() const { return this->_id; }
         Uint32 GetPluginId() const { return this->_pluginId; }
