@@ -106,7 +106,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Texture {
 
         ilBindImage(result);
         unsigned int size = totalSize.x * totalSize.y;
-        auto pixmap = new Color4<Uint8>[size];
+        auto pixmap = new glm::u8vec4[size];
         ilCopyPixels(0, 0, 0, totalSize.x, totalSize.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
         this->_texture = renderer.CreateTexture2D(PixelFormat::Rgba8, size, pixmap, totalSize, 0).release();
         delete [] pixmap;

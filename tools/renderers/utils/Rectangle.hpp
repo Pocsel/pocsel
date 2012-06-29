@@ -12,7 +12,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         std::unique_ptr<IVertexBuffer> _vertexBuffer;
         std::unique_ptr<IIndexBuffer> _indexBuffer;
         glm::detail::tvec3<float> _point1, _point2, _point3, _point4;
-        Color4f _point1Color, _point2Color, _point3Color, _point4Color;
+        glm::vec4 _point1Color, _point2Color, _point3Color, _point4Color;
 
     public:
         Rectangle(IRenderer& renderer);
@@ -22,10 +22,10 @@ namespace Tools { namespace Renderers { namespace Utils {
         glm::detail::tvec3<float> const& GetPosition2() const { return this->_point2; }
         glm::detail::tvec3<float> const& GetPosition3() const { return this->_point3; }
         glm::detail::tvec3<float> const& GetPosition4() const { return this->_point4; }
-        Color4f const& GetColor1() const { return this->_point1Color; }
-        Color4f const& GetColor2() const { return this->_point2Color; }
-        Color4f const& GetColor3() const { return this->_point3Color; }
-        Color4f const& GetColor4() const { return this->_point4Color; }
+        glm::vec4 const& GetColor1() const { return this->_point1Color; }
+        glm::vec4 const& GetColor2() const { return this->_point2Color; }
+        glm::vec4 const& GetColor3() const { return this->_point3Color; }
+        glm::vec4 const& GetColor4() const { return this->_point4Color; }
 
         void SetPosition(glm::detail::tvec3<float> const& p1, glm::detail::tvec3<float> const& p2, glm::detail::tvec3<float> const& p3, glm::detail::tvec3<float> const& p4)
         {
@@ -35,7 +35,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             this->_point4 = p4;
             this->_RefreshVertexBuffer();
         }
-        void SetColor(Color4f const& lt, Color4f const& rt, Color4f const& rb, Color4f const& lb)
+        void SetColor(glm::vec4 const& lt, glm::vec4 const& rt, glm::vec4 const& rb, glm::vec4 const& lb)
         {
             this->_point1Color = lt;
             this->_point2Color = rt;
@@ -43,7 +43,7 @@ namespace Tools { namespace Renderers { namespace Utils {
             this->_point4Color = lb;
             this->_RefreshVertexBuffer();
         }
-        void SetColor(Color4f const& color) { this->SetColor(color, color, color, color); }
+        void SetColor(glm::vec4 const& color) { this->SetColor(color, color, color, color); }
     private:
         void _RefreshVertexBuffer();
     };

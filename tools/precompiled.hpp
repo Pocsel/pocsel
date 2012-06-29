@@ -72,7 +72,7 @@
 
 #include "glm/all.hpp"
 
-#ifdef WIN32
+#ifdef _MSC_VER
 // warning this utilisé dans le constructeur
 #pragma warning(disable: 4355)
 // utilisation de throw() sur un membre

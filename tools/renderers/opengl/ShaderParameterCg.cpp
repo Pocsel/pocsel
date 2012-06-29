@@ -1,8 +1,6 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
-#include "tools/Matrix4.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
 
@@ -42,11 +40,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     void ShaderParameterCg::Set(float value)
     {
         cgSetParameter1f(this->_param, value);
-    }
-
-    void ShaderParameterCg::Set(Color4<float> const& color)
-    {
-        cgSetParameter4fv(this->_param, color.colors);
     }
 
     void ShaderParameterCg::Set(glm::detail::tvec2<float> const& vector)

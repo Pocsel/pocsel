@@ -3,7 +3,6 @@
 
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/IRenderer.hpp"
-#include "tools/Color.hpp"
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
 
@@ -105,7 +104,7 @@ namespace Tools { namespace Renderers {
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size);
-        virtual void SetClearColor(Color4f const& color);
+        virtual void SetClearColor(glm::vec4 const& color);
         virtual void SetClearDepth(float value);
         virtual void SetClearStencil(int value);
         virtual void SetNormaliseNormals(bool normalise);

@@ -1,7 +1,6 @@
 #ifndef __TOOLS_RENDERERS_UTILS_FONT_HPP__
 #define __TOOLS_RENDERERS_UTILS_FONT_HPP__
 
-#include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/Vector2.hpp"
 

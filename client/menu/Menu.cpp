@@ -33,7 +33,7 @@ namespace Client { namespace Menu {
     void Menu::BeginMenuDrawing()
     {
         this->_client.GetWindow().GetRenderer().BeginDraw2D();
-        this->_fontColor->Set(Tools::Color4f(1, 1, 1, 1));
+        this->_fontColor->Set(glm::vec4(1, 1, 1, 1));
     }
 
     void Menu::EndMenuDrawing()

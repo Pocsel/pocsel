@@ -1,8 +1,6 @@
 #ifndef __TOOLS_IRENDERER_HPP__
 #define __TOOLS_IRENDERER_HPP__
 
-#include "tools/Color.hpp"
-#include "tools/Matrix4.hpp"
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
@@ -225,11 +223,10 @@ namespace Tools {
             virtual void Set(bool value) = 0;
             virtual void Set(int value) = 0;
             virtual void Set(float value) = 0;
-            virtual void Set(Color4<float> const& color) = 0;
-            virtual void Set(glm::detail::tvec2<float> const& vector) = 0;
-            virtual void Set(glm::detail::tvec3<float> const& vector) = 0;
-            virtual void Set(glm::detail::tvec4<float> const& vector) = 0;
-            virtual void Set(glm::detail::tmat4x4<float> const& matrix, bool isProjection = false) = 0;
+            virtual void Set(glm::vec2 const& vector) = 0;
+            virtual void Set(glm::vec3 const& vector) = 0;
+            virtual void Set(glm::vec4 const& vector) = 0;
+            virtual void Set(glm::mat4 const& matrix, bool isProjection = false) = 0;
             virtual void Set(std::vector<glm::mat4x4> const& matrices) = 0;
             virtual void Set(ITexture2D& texture) = 0;
 
@@ -302,7 +299,7 @@ namespace Tools {
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size) = 0;
-        virtual void SetClearColor(Color4f const& color) = 0;
+        virtual void SetClearColor(glm::vec4 const& color) = 0;
         virtual void SetClearDepth(float value) = 0;
         virtual void SetClearStencil(int value) = 0;
         virtual void SetNormaliseNormals(bool normalise) = 0;

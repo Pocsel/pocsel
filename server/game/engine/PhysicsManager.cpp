@@ -123,7 +123,7 @@ namespace Server { namespace Game { namespace Engine {
             physics.position = Common::Position(wpos.x(), wpos.y(), wpos.z());
 
             btQuaternion const& wrot = wt.getRotation();
-            physics.orientation = glm::quat(wrot.w(), wrot.x(), wrot.y(), wrot.z());
+            physics.orientation = glm::quat((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
 
             btVector3 const& btVel = btBody.getLinearVelocity();
             physics.velocity = glm::vec3(btVel.x(), btVel.y(), btVel.z());

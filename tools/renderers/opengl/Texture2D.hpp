@@ -1,7 +1,6 @@
 #ifndef __TOOLS_RENDERERS_OPENGL_TEXTURE2D_HPP__
 #define __TOOLS_RENDERERS_OPENGL_TEXTURE2D_HPP__
 
-#include "tools/Color.hpp"
 #include "tools/Vector2.hpp"
 
 namespace Tools { namespace Renderers {

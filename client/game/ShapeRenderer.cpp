@@ -42,7 +42,7 @@ namespace Client { namespace Game {
         btQuaternion const& bodyRot = bodyTr.getRotation();
         btVector3 const& bodyPos = bodyTr.getOrigin();
 
-        glm::quat orientation(bodyRot.w(), bodyRot.x(), bodyRot.y(), bodyRot.z());
+        glm::quat orientation((float)bodyRot.w(), (float)bodyRot.x(), (float)bodyRot.y(), (float)bodyRot.z());
         glm::dvec3 position(bodyPos.x(), bodyPos.y(), bodyPos.z());
         glm::vec3 relPos = glm::fvec3(position - camera.position);
 

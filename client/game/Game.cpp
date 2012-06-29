@@ -35,7 +35,7 @@ namespace Client { namespace Game {
     {
         this->_cubeTypeManager = new CubeTypeManager(client, nbCubeTypes);
         this->_resourceManager = new Resources::ResourceManager(*this, client.GetNetwork().GetHost(), worldIdentifier, worldName, worldVersion, worldBuildHash);
-        this->_renderer.SetClearColor(Tools::Color4f(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
+        this->_renderer.SetClearColor(glm::vec4(120.f / 255.f, 153.f / 255.f, 201.f / 255.f, 1)); // XXX
         this->_player = new Player(*this);
         this->_engine = new Engine::Engine(*this, nbBodyTypes);
         this->_callbackId = this->_client.GetWindow().RegisterCallback(

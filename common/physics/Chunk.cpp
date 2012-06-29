@@ -7,8 +7,11 @@ namespace Common { namespace Physics {
 
     Chunk::~Chunk()
     {
+        if (this->_body)
+            this->_body->setUserPointer((void*)1);
         Tools::Delete(this->_body);
         Tools::Delete(this->_shape);
+        Tools::Delete(this->_motionState);
     }
 
     namespace {
@@ -103,7 +106,8 @@ namespace Common { namespace Physics {
 
     Chunk::Chunk(Common::BaseChunk const& source) :
         _shape(0),
-        _body(0)
+        _body(0),
+        _motionState(0)
     {
         if (source.IsEmpty())
             return;
@@ -136,17 +140,24 @@ namespace Common { namespace Physics {
             this->_shape->addChildShape(tr, boxShapes[5]);
         }
 
+        if (this->_shape->getNumChildShapes() == 0)
+        {
+            Tools::Delete(this->_shape);
+            this->_shape = 0;
+            return;
+        }
+
         this->_shape->createAabbTreeFromChildren();
 
-        Tools::debug << "number: " << this->_shape->getNumChildShapes() << "\n";
+        Tools::debug << "physics cubes in this chunk: " << this->_shape->getNumChildShapes() << "\n";
         btTransform tr;
         tr.setIdentity();
         tr.setOrigin(btVector3((source.coords.x) * 32, (source.coords.y) * 32,(source.coords.z) * 32));
 
-        btDefaultMotionState* myMotionState = new btDefaultMotionState(tr);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(0, myMotionState, this->_shape, btVector3(0, 0, 0));
+        _motionState = new btDefaultMotionState(tr);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(0, _motionState, this->_shape, btVector3(0, 0, 0));
         this->_body = new btRigidBody(rbInfo);
-
+        this->_body->setUserPointer(this);
     }
 
 }}

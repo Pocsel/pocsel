@@ -1,7 +1,6 @@
 #ifndef __TOOLS_RENDERERS_DX9_TEXTURE2D_HPP__
 #define __TOOLS_RENDERERS_DX9_TEXTURE2D_HPP__
 
-#include "tools/Color.hpp"
 #include "tools/Vector2.hpp"
 
 namespace Tools { namespace Renderers {
@@ -34,7 +33,7 @@ namespace Tools { namespace Renderers {
         virtual void SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter);
 
     private:
-        void _FinishLoading(Color4<Uint8> const* data, std::size_t size, void const* mipmapData);
+        void _FinishLoading(glm::u8vec4 const* data, std::size_t size, void const* mipmapData);
         void _FinishLoading(unsigned int ilID);
     };
 

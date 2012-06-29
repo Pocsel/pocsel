@@ -77,12 +77,12 @@ namespace Client { namespace Game { namespace Engine {
             physics.position.z = wpos.z();
 
             btQuaternion wrot = wt.getRotation();
-            glm::quat glmRot(wrot.w(), wrot.x(), wrot.y(), wrot.z());
+            glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
             physics.orientation = //glm::eulerAngles(glmRot);
             glmRot;
 
             float uf = it->second->GetUpdateFlag();
-            uf -= 0.3;
+            uf -= 0.3f;
             if (uf < 0)
                 uf = 0;
             it->second->SetUpdateFlag(uf);

@@ -23,7 +23,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         virtual void Set(bool value);
         virtual void Set(int value);
         virtual void Set(float value);
-        virtual void Set(Color4<float> const& color);
         virtual void Set(glm::detail::tvec2<float> const& vector);
         virtual void Set(glm::detail::tvec3<float> const& vector);
         virtual void Set(glm::detail::tvec4<float> const& vector);

@@ -2,7 +2,6 @@
 
 #include <IL/il.h>
 
-#include "tools/Color.hpp"
 #include "tools/IRenderer.hpp"
 //#include "tools/renderers/utils/texture/TextureAtlas.hpp"
 #include "tools/models/ErrorModel.hpp"
@@ -24,6 +23,13 @@
 #include "client/resources/ResourceDownloader.hpp"
 #include "client/resources/ResourceManager.hpp"
 #include "client/Settings.hpp"
+
+#define data shaderFxError
+#include "client/resources/ShaderError.fx.hpp"
+#undef data
+#define data materialLuaError
+#include "client/resources/MaterialError.lua.hpp"
+#undef data
 
 namespace {
 
@@ -57,7 +63,7 @@ namespace {
         }
 
         auto frameSize = glm::uvec2(size.x);
-        auto pixmap = new Tools::Color4<Uint8>[frameSize.x * frameSize.y];
+        auto pixmap = new glm::u8vec4[frameSize.x * frameSize.y];
         frames.resize(size.y / size.x);
         for (unsigned int y = 0, i = 0; y < size.y; y += size.x, ++i)
         {
@@ -215,10 +221,16 @@ namespace Client { namespace Resources {
                 return *s;
             }
             else
-                throw std::runtime_error("Bad id (remove your cache)");
+            {
+                it = this->_shaders.find(0);
+                if (it == this->_shaders.end())
+                {
+                    this->_InitErrorShader();
+                    it = this->_shaders.find(0);
+                }
+            }
         }
-        else
-            return *it->second;
+        return *it->second;
     }
 
     std::string ResourceManager::GetScript(Uint32 id)
@@ -282,7 +294,14 @@ namespace Client { namespace Resources {
     {
         auto it = this->_materials.find(name);
         if (it == this->_materials.end())
-            throw std::runtime_error("Material \"" + name + "\" not found");
+        {
+            it = this->_materials.find("error");
+            if (it == this->_materials.end())
+            {
+                this->_InitErrorMaterial();
+                it = this->_materials.find("error");
+            }
+        }
         return std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>(new Tools::Renderers::Utils::Material::LuaMaterial(*it->second));
     }
 
@@ -326,6 +345,23 @@ namespace Client { namespace Resources {
             0, 0, 0, 255
         };
         this->_rawTextures[0] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, sizeof(toto), toto, glm::uvec2(2, 2)).release();
+    }
+
+    void ResourceManager::_InitErrorShader()
+    {
+        this->_shaders[0] = this->_renderer.CreateProgram(std::string((char const*)shaderFxError, sizeof(shaderFxError))).release();
+    }
+
+    void ResourceManager::_InitErrorMaterial()
+    {
+        auto& interpreter = this->_game.GetInterpreter();
+        auto prototype = interpreter.LoadString(std::string((char const*)materialLuaError, sizeof(materialLuaError)))();
+        auto material = std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>(new Tools::Renderers::Utils::Material::LuaMaterial(
+            this->_renderer,
+            prototype,
+            std::bind(static_cast<Tools::Renderers::IShaderProgram&(ResourceManager::*)(std::string const&)>(&ResourceManager::GetShader), this, std::placeholders::_1),
+            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(ResourceManager::*)(std::string const&)>(&ResourceManager::GetTexture), this, std::placeholders::_1)));
+        this->_materials.insert(std::make_pair("error", std::move(material)));
     }
 
     void ResourceManager::RegisterLuaFunctions()

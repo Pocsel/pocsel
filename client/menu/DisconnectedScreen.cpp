@@ -29,10 +29,10 @@ namespace Client { namespace Menu {
                 glm::fvec2(100, 20));
         this->_backRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
         this->_backRect->SetColor(
-                Tools::Color4f(0.31f, 0.03f, 0.03f, 1),
-                Tools::Color4f(0.31f, 0.03f, 0.03f, 1),
-                Tools::Color4f(0.1f, 0.01f, 0.01f, 1),
-                Tools::Color4f(0.1f, 0.01f, 0.01f, 1));
+                glm::vec4(0.31f, 0.03f, 0.03f, 1),
+                glm::vec4(0.31f, 0.03f, 0.03f, 1),
+                glm::vec4(0.1f, 0.01f, 0.01f, 1),
+                glm::vec4(0.1f, 0.01f, 0.01f, 1));
         this->_callbackId = this->_client.GetWindow().RegisterCallback(std::bind(&DisconnectedScreen::_Resize, this, std::placeholders::_1));
         this->_Resize(this->_client.GetWindow().GetSize());
     }

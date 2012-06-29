@@ -27,9 +27,6 @@ namespace Client {
         }
         class Game;
     }
-    namespace Resources {
-        class ITexture;
-    }
 }
 
 namespace Client { namespace Game {

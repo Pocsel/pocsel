@@ -105,6 +105,8 @@ namespace Client { namespace Resources {
     private:
         void _InitErrorTexture();
         void _InitErrorModel();
+        void _InitErrorShader();
+        void _InitErrorMaterial();
         void _ApiRegisterMaterial(Tools::Lua::CallHelper& helper);
     };
 

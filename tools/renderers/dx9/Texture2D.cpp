@@ -34,7 +34,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         {
             DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), imgSize.x, imgSize.y, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
             this->_size = imgSize;
-            this->_FinishLoading((Color4<Uint8> const*)data, size, mipmapData);
+            this->_FinishLoading((glm::u8vec4 const*)data, size, mipmapData);
         }
         else
             throw std::runtime_error("Unsupported texture format");
@@ -77,7 +77,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         }
 
         unsigned int size = this->_size.x * this->_size.y;
-        auto pixmap = new Color4<Uint8>[size];
+        auto pixmap = new glm::u8vec4[size];
         ilCopyPixels(0, 0, 0, this->_size.x, this->_size.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
 
         ilBindImage(0);
@@ -88,7 +88,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         delete [] pixmap;
     }
 
-    void Texture2D::_FinishLoading(Color4<Uint8> const* data, std::size_t size, void const* mipmapData)
+    void Texture2D::_FinishLoading(glm::u8vec4 const* data, std::size_t size, void const* mipmapData)
     {
         D3DLOCKED_RECT lockRect;
         DXCHECKERROR(this->_texture->LockRect(0, &lockRect, 0, 0));
@@ -111,7 +111,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         if (mipmapData != 0)
         {
             int level = 1;
-            Color4<Uint8> const* idx = reinterpret_cast<Color4<Uint8> const*>(mipmapData);
+            glm::u8vec4 const* idx = reinterpret_cast<glm::u8vec4 const*>(mipmapData);
             for (auto vsize = glm::uvec2(this->_size.x / 2, this->_size.y / 2); vsize.x >= 1 && vsize.y >= 1; vsize /= 2)
             {
                 DXCHECKERROR(this->_texture->LockRect(level, &lockRect, 0, D3DLOCK_DISCARD));

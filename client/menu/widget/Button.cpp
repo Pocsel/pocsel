@@ -56,16 +56,16 @@ namespace Client { namespace Menu { namespace Widget {
     {
         if (this->_pressed)
             this->_rect->SetColor(
-                    Tools::Color4f(0.43f, 0.1f, 0.1f, 1),
-                    Tools::Color4f(0.43f, 0.1f, 0.1f, 1),
-                    Tools::Color4f(0.93f, 0.1f, 0.1f, 1),
-                    Tools::Color4f(0.93f, 0.1f, 0.1f, 1));
+                    glm::vec4(0.43f, 0.1f, 0.1f, 1),
+                    glm::vec4(0.43f, 0.1f, 0.1f, 1),
+                    glm::vec4(0.93f, 0.1f, 0.1f, 1),
+                    glm::vec4(0.93f, 0.1f, 0.1f, 1));
         else
             this->_rect->SetColor(
-                    Tools::Color4f(0.93f, 0.1f, 0.1f, 1),
-                    Tools::Color4f(0.93f, 0.1f, 0.1f, 1),
-                    Tools::Color4f(0.43f, 0.1f, 0.1f, 1),
-                    Tools::Color4f(0.43f, 0.1f, 0.1f, 1));
+                    glm::vec4(0.93f, 0.1f, 0.1f, 1),
+                    glm::vec4(0.93f, 0.1f, 0.1f, 1),
+                    glm::vec4(0.43f, 0.1f, 0.1f, 1),
+                    glm::vec4(0.43f, 0.1f, 0.1f, 1));
         this->_rectMatrix =
             glm::translate<float>(this->_size.x / 2 + this->_pos.x, this->_size.y / 2 + this->_pos.y, 0)
             * glm::scale<float>(this->_size.x / 2, this->_size.y / 2, 1);

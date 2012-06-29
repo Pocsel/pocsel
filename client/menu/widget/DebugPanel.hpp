@@ -3,7 +3,6 @@
 
 #include "tools/renderers/utils/Rectangle.hpp"
 #include "tools/Vector2.hpp"
-#include "tools/Matrix4.hpp"
 
 namespace Tools {
     namespace Stat {
@@ -26,10 +25,10 @@ namespace Client { namespace Menu { namespace Widget {
         Tools::Renderers::Utils::Rectangle _rect;
         std::unordered_map<Tools::Stat::IStat*, std::list<double>> _averages;
         std::unordered_map<Tools::Stat::IStat*, std::pair<double, double>> _minMax;
-        int _maxAverageValues;
+        Uint32 _maxAverageValues;
 
     public:
-        DebugPanel(Menu& menu, Tools::IRenderer& renderer, int maxAverageValues = 120);
+        DebugPanel(Menu& menu, Tools::IRenderer& renderer, Uint32 maxAverageValues = 120);
         void Render();
     private:
         void _Update();

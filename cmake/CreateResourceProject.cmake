@@ -1,9 +1,9 @@
 macro(CreateResourceProject name src resources)
 
     set(headers "")
-    foreach (res ${resources})
+    foreach (fullres ${resources})
 
-        string(REPLACE "${CMAKE_SOURCE_DIR}/" "" res ${res})
+        string(REPLACE "${CMAKE_SOURCE_DIR}/" "" res ${fullres})
         list(APPEND headers "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp")
 
         file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp" "\n")
@@ -13,7 +13,7 @@ macro(CreateResourceProject name src resources)
             OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp"
             COMMAND respacker 
             ARGS "${CMAKE_SOURCE_DIR}/${res}" "${CMAKE_CURRENT_BINARY_DIR}/${res}.hpp"
-            MAIN_DEPENDENCY ${res})
+            MAIN_DEPENDENCY ${fullres})
 
     endforeach()
 

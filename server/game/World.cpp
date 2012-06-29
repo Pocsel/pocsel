@@ -7,7 +7,6 @@
 #include "server/Server.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 
-#include "server/database/WorldLoader.hpp"
 #include "server/database/WorldLoader2.hpp"
 
 #include "server/game/map/Map.hpp"
