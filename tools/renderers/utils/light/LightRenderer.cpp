@@ -126,8 +126,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         return PointLight(
             *this->_point.position,
             *this->_point.range,
-            *this->_directionnal.diffuseColor,
-            *this->_directionnal.specularColor);
+            *this->_point.diffuseColor,
+            *this->_point.specularColor);
     }
 
     void LightRenderer::Render(
@@ -140,17 +140,17 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         std::list<DirectionnalLight> const& directionnalLights,
         std::list<PointLight> const& pointLights)
     {
-        this->_RenderDirectionnalLightsShadowMap(absoluteCamera, position, renderScene, directionnalLights);
+        //this->_RenderDirectionnalLightsShadowMap(absoluteCamera, position, renderScene, directionnalLights);
 
         gbuffer.BeginLighting();
 
-        this->_renderer.SetViewMatrix(view);
-        this->_renderer.SetProjectionMatrix(projection);
-
         this->_renderer.SetClearColor(glm::vec4(.0f, .0f, .0f, 1.0f));
         this->_renderer.Clear(ClearFlags::Color);
-        this->_renderer.SetDepthTest(false);
+
+        this->_renderer.SetViewMatrix(view);
+        this->_renderer.SetProjectionMatrix(projection);
         this->_RenderPointLights(gbuffer, pointLights);
+
         this->_RenderDirectionnalLights(gbuffer, directionnalLights);
         gbuffer.EndLighting();
     }
@@ -183,6 +183,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
     {
         if (lights.size() == 0)
             return;
+        Renderers::CullMode::Type cullMode = Renderers::CullMode::CounterClockwise;
         gbuffer.GetNormalsDepth().Bind();
         this->_point.normalDepth->Set(gbuffer.GetNormalsDepth());
         do
@@ -191,12 +192,21 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
             for (auto it = lights.begin(), ite = lights.end(); it != ite; ++it)
             {
                 auto& light = *it;
-                this->_renderer.SetModelMatrix(glm::scale(glm::translate(light.position), glm::vec3(light.range)));
+
+                bool inside = glm::lengthSquared(light.position) <= light.range*light.range;
+                if (inside && cullMode != Renderers::CullMode::Clockwise)
+                    this->_renderer.SetCullMode(cullMode = CullMode::Clockwise);
+                else if (!inside && cullMode != Renderers::CullMode::CounterClockwise)
+                    this->_renderer.SetCullMode(cullMode = CullMode::CounterClockwise);
                 light.SetParameters();
+
+                this->_renderer.SetModelMatrix(glm::translate(light.position) * glm::scale(glm::vec3(light.range)));
                 this->_point.sphere->Render();
             }
         } while (this->_point.shader->EndPass());
         gbuffer.GetNormalsDepth().Unbind();
+        if (cullMode != Renderers::CullMode::CounterClockwise)
+            this->_renderer.SetCullMode(cullMode = CullMode::CounterClockwise);
     }
 
     void LightRenderer::_RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& cameraPosition,  std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights)

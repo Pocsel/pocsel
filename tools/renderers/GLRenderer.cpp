@@ -265,12 +265,18 @@ namespace Tools { namespace Renderers {
         GLCHECK(glDepthMask(enabled ? GL_TRUE : GL_FALSE));
     }
 
-    void GLRenderer::SetCullFace(bool enabled)
+    void GLRenderer::SetCullMode(Renderers::CullMode::Type type)
     {
-        if (enabled)
-            GLCHECK(glEnable(GL_CULL_FACE));
-        else
-            GLCHECK(glDisable(GL_CULL_FACE));
+        switch (type)
+        {
+        case Renderers::CullMode::None: glDisable(GL_CULL_FACE); break;
+        case Renderers::CullMode::Clockwise:
+        case Renderers::CullMode::CounterClockwise:
+            glEnable(GL_CULL_FACE);
+            glFrontFace(type == Renderers::CullMode::Clockwise ? GL_CW : GL_CCW);
+            break;
+        default: throw std::invalid_argument("unknown CullMode");
+        }
     }
 
     void GLRenderer::SetRasterizationMode(RasterizationMode::Type rasterizationMode)

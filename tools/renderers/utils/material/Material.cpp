@@ -26,9 +26,10 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
             this->_luaUpdate.reset(new Lua::Ref(materialSelf["Update"]));
 
         auto& geometryShader = loadShader(this->_type["geometryShader"].Check<std::string>());
-        auto& shadowMapShader = loadShader(this->_type["shadowMapShader"].Check<std::string>());
         this->_geometry.reset(new Effect(geometryShader));
-        this->_shadowMap.reset(new Effect(shadowMapShader));
+        auto const& shadow = this->_type["shadowMapShader"].Check<std::string>();
+        if (!shadow.empty())
+            this->_shadowMap.reset(new Effect(loadShader(shadow)));
         this->_LoadVariables();
 
         materialSelf.SetMetaTable(this->_type);
@@ -38,11 +39,12 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
         _renderer(material._renderer),
         _loadTexture(material._loadTexture),
         _geometry(new Effect(material._geometry->shader)),
-        _shadowMap(new Effect(material._shadowMap->shader)),
         _type(material._type),
         _self(material._type.GetState()),
         _hasAlpha(0)
     {
+        if (material._shadowMap != 0)
+            this->_shadowMap.reset(new Effect(material._shadowMap->shader));
         materialSelf = materialSelf.GetState().MakeTable();
         this->_self = materialSelf;
         if (!materialSelf.IsNoneOrNil() && materialSelf["Update"].Exists())
@@ -90,6 +92,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     void Material::RenderShadowMap(std::function<void()>& render, Uint64 totalTime)
     {
+        if (this->_shadowMap == 0)
+            return;
         do
         {
             this->_shadowMap->shader.BeginPass();
@@ -102,7 +106,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
     {
         if (index == 0)
             this->_geometry->UpdateParameters(totalTime);
-        else
+        else if (this->_shadowMap != 0)
             this->_shadowMap->UpdateParameters(totalTime);
         for (auto it = this->_variables.begin(), ite = this->_variables.end(); it != ite; ++it)
             it->second->UpdateParameter(index);
