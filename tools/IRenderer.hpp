@@ -5,6 +5,10 @@
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
 
+#ifdef None
+# undef None
+#endif
+
 namespace Tools {
 
     namespace ClearFlags
