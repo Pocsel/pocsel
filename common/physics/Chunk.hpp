@@ -7,7 +7,7 @@ namespace Common {
 
 class btCompoundShape;
 class btRigidBody;
-class btDefaultMotionState;
+struct btDefaultMotionState;
 
 namespace Common { namespace Physics {
 

@@ -1,21 +1,34 @@
-float4x4 mvp : WorldViewProjection;
+float4x4 worldViewProjection : WorldViewProjection;
 float4x4 projectionInverse : ProjectionInverse;
 float4x4 view : View;
 float4x4 worldView : WorldView;
 
 float3 lightPosition = float3(0.0, 0.0, 0.0);
 float  lightRange = 20.0;
-float3 lightDiffuseColor = float3(1.0, 1.0, 1.0);
+float3 lightDiffuseColor = float3(1.0, 0.0, 0.0);
 float3 lightSpecularColor = float3(0.9, 1.0, 0.8);
 
 // TODO:
 float   materialShininess = 5.0;
 
+#ifdef DIRECTX
+texture normalDepth;
+
+sampler sNormalDepth = sampler_state
+{
+    Texture = <normalDepth>;
+    minFilter = Linear;
+    magFilter = Linear;
+};
+
+#define normalDepth sNormalDepth
+#else
 sampler2D normalDepth = sampler_state
 {
     minFilter = Point;
     magFilter = Point;
 };
+#endif
 
 struct VSout
 {
@@ -32,7 +45,7 @@ struct FSout
 VSout vs(in float4 position : POSITION)
 {
     VSout vout;
-    vout.position = mul(mvp, position);
+    vout.position = mul(worldViewProjection, position);
     vout.screenPosition = vout.position;
     return vout;
 }
@@ -63,9 +76,13 @@ float3 decodePosition(float4 enc, float2 coords)
 FSout fs(in VSout v)
 {
     float2 coords = (v.screenPosition.xy / v.screenPosition.w) * float2(0.5, -0.5) + 0.5;
+#ifndef DIRECTX
+    coords.y = 1-coords.y;
+#endif
     float4 encNormalDepth = tex2D(normalDepth, coords);
     float3 viewNormal = decodeNormals(encNormalDepth);// * 2 - 1;
     float3 viewPosition = decodePosition(encNormalDepth, coords);
+    float specularPower = encNormalDepth.w;
 
     float3 viewLightDirection = normalize(mul((float3x3)view, lightPosition) - viewPosition);
 
@@ -73,7 +90,7 @@ FSout fs(in VSout v)
 
     float3 viewDirection = normalize(viewPosition);
     float3 reflection = reflect(viewLightDirection, viewNormal);
-    float specular = pow(max(0.0, dot(reflection, viewDirection)), materialShininess);
+    float specular = 0; //pow(max(0.0, dot(reflection, viewDirection)), (1.0 - specularPower) * 25);
 
     float dist = distance(viewPosition, mul((float3x3)view, lightPosition));
     float attenuation = clamp(1 - 1/lightRange*dist, 0, 1);
@@ -85,9 +102,6 @@ FSout fs(in VSout v)
     f.diffuse.a = NdL;
     f.specular.a = specular;
 
-    f.diffuse.r = 1.0;
-    f.diffuse.a = 1.0;
-
     return f;
 }
 
@@ -98,6 +112,7 @@ technique tech_glsl
     pass p0
     {
         AlphaBlendEnable = true;
+        ZWriteEnable = false;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -107,6 +122,7 @@ technique tech
     pass p0
     {
         AlphaBlendEnable = true;
+        ZWriteEnable = false;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }
@@ -123,8 +139,9 @@ technique tech
         AlphaRef = 0;
         SrcBlend = One;
         DestBlend = One;
-        ZEnable = false;
-        CullMode = CCW;
+        ZWriteEnable = false;
+        //ZEnable = false;
+        //CullMode = CCW;
         //CullMode = CW;
         //CullMode = None;
         VertexShader = compile vs_3_0 vs();

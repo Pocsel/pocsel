@@ -110,7 +110,7 @@ namespace Tools { namespace Renderers {
         virtual void SetNormaliseNormals(bool normalise);
         virtual void SetDepthTest(bool enabled);
         virtual void SetDepthWrite(bool enabled);
-        virtual void SetCullFace(bool enabled);
+        virtual void SetCullMode(Renderers::CullMode::Type type);
         virtual void SetRasterizationMode(RasterizationMode::Type rasterizationMode);
         void SetMatrixMode(unsigned int mode);
 

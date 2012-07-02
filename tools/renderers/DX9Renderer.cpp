@@ -256,9 +256,15 @@ namespace Tools { namespace Renderers {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZWRITEENABLE, enabled ? TRUE : FALSE));
     }
 
-    void DX9Renderer::SetCullFace(bool enabled)
+    void DX9Renderer::SetCullMode(Renderers::CullMode::Type type)
     {
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, enabled == true ? D3DCULL_CW : D3DCULL_NONE));
+        switch (type)
+        {
+        case Renderers::CullMode::None: this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE); break;
+        case Renderers::CullMode::Clockwise: this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW); break;
+        case Renderers::CullMode::CounterClockwise: this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW); break;
+        default: throw std::invalid_argument("unknown CullMode");
+        }
     }
 
     void DX9Renderer::SetRasterizationMode(RasterizationMode::Type rasterizationMode)

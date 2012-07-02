@@ -64,11 +64,11 @@ namespace Client { namespace Game {
         this->_directionnalLights.back().diffuseColor =  glm::vec3(1.0f, 1.0f, 1.0f);
         this->_directionnalLights.back().specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
-        //this->_pointLights.push_back(this->_lightRenderer->CreatePointLight());
-        //this->_pointLights.back().position = glm::vec3(.0f, .0f, .0f);
-        //this->_pointLights.back().range = 20.0f;
-        //this->_pointLights.back().diffuseColor =  glm::vec3(0.8f, 0.9f, 1.0f);
-        //this->_pointLights.back().specularColor = glm::vec3(0.8f, 0.9f, 1.0f);
+        this->_pointLights.push_back(this->_lightRenderer->CreatePointLight());
+        this->_pointLights.back().position = glm::vec3(.0f, .0f, .0f);
+        this->_pointLights.back().range = 32.0f;
+        this->_pointLights.back().diffuseColor =  glm::vec3(0.8f, 0.75f, 0.4f);
+        this->_pointLights.back().specularColor = glm::vec3(.0f, .0f, .0f);
 
         //this->_testImage.reset(new Tools::Renderers::Utils::Image(this->_renderer));
         //this->_testShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
@@ -121,8 +121,9 @@ namespace Client { namespace Game {
 
         Uint64 totalTime = this->_gameTimer.GetPreciseElapsedTime();
         auto& camera = this->GetPlayer().GetCamera();
+        auto const& viewMatrix = camera.GetViewMatrix();
         this->_renderer.SetProjectionMatrix(camera.projection);
-        this->_renderer.SetViewMatrix(camera.GetViewMatrix());
+        this->_renderer.SetViewMatrix(viewMatrix);
 
         auto absoluteViewProjection = glm::dmat4x4(camera.projection) * glm::lookAt(camera.position, camera.position + glm::dvec3(camera.direction), glm::dvec3(0, 1, 0));
 
@@ -144,10 +145,12 @@ namespace Client { namespace Game {
         this->_gBuffer->Unbind();
 
         // XXX
+        //this->_pointLights.front().position = glm::vec3(glm::dvec3(67108864.0, 16777216.0, 67108864.0) - camera.position); // au spawn
+        this->_pointLights.front().position = camera.direction * 1.0f; // ~1 cube devant la caméra
         std::function<void(glm::dmat4)> renderScene = std::bind(&Game::_RenderScene, this, std::placeholders::_1);
         this->_lightRenderer->Render(
             *this->_gBuffer,
-            camera.GetViewMatrix(),
+            viewMatrix,
             camera.projection,
             Tools::Frustum(absoluteViewProjection),
             camera.position,

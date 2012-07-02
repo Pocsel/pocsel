@@ -5,6 +5,10 @@
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
 
+#ifdef None
+# undef None
+#endif
+
 namespace Tools {
 
     namespace ClearFlags
@@ -103,6 +107,16 @@ namespace Tools {
                 Custom4
             };
         }
+
+        namespace CullMode
+        {
+            enum Type
+            {
+                None,
+                Clockwise,
+                CounterClockwise
+            };
+        };
 
         namespace DrawingMode
         {
@@ -305,7 +319,7 @@ namespace Tools {
         virtual void SetNormaliseNormals(bool normalise) = 0;
         virtual void SetDepthTest(bool enabled) = 0;
         virtual void SetDepthWrite(bool enabled) = 0;
-        virtual void SetCullFace(bool enabled) = 0;
+        virtual void SetCullMode(Renderers::CullMode::Type type) = 0;
         virtual void SetRasterizationMode(Renderers::RasterizationMode::Type rasterizationMode) = 0;
 
     protected:

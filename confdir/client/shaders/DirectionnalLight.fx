@@ -66,7 +66,11 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
     vout.position = mul(screenWorldViewProjection, position);
+#ifdef DIRECTX
     vout.texCoord = texCoord;
+#else
+    vout.texCoord = float2(texCoord.x, 1-texCoord.y);
+#endif
     return vout;
 }
 
