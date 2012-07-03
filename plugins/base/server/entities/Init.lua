@@ -22,7 +22,7 @@ Server.Entity.Register{
     Save = function(self, chunkUnloaded) -- save to database
         print("Save() ", tostring(chunkUnloaded))
         Server.Entity.Save(self.id)
-        return true
+        return false
     end,
 
     Load = function(self) -- load from database
@@ -62,7 +62,7 @@ Server.Entity.RegisterPositional{
     Save = function(self, chunkUnloaded)
         print("Save() ", tostring(chunkUnloaded))
         Server.Entity.Save()
-        return true
+        return false
     end,
 
     Load = function(self)
