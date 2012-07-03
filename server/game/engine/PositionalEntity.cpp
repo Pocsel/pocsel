@@ -1,12 +1,15 @@
 #include "server/game/engine/PositionalEntity.hpp"
 
 #include "bullet/bullet-all.hpp"
+#include "common/physics/World.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
-    PositionalEntity::PositionalEntity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos) :
+    PositionalEntity::PositionalEntity(Common::Physics::World& world, Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos) :
         Entity(interpreter, id, type),
-        _btBody(0)
+        _world(world),
+        _btBody(0),
+        _motionState(0)
     {
         _physics.position = pos;
 
@@ -30,19 +33,23 @@ namespace Server { namespace Game { namespace Engine {
                     btScalar(pos.z)));
 
         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-        btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+        _motionState = new btDefaultMotionState(startTransform);
         //myMotionState->setWorldTransform(startTransform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, _motionState, colShape, localInertia);
         _btBody = new btRigidBody(rbInfo);
 
         _btBody->setActivationState(DISABLE_DEACTIVATION);
 
         _btBody->setUserPointer(this);
+
+        _world.GetBtWorld().addRigidBody(_btBody);
     }
 
     PositionalEntity::~PositionalEntity()
     {
+        _world.GetBtWorld().removeRigidBody(_btBody);
         Tools::Delete(_btBody);
+        Tools::Delete(_motionState);
     }
 
 

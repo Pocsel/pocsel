@@ -5,6 +5,11 @@
 #include "server/game/engine/Entity.hpp"
 
 class btRigidBody;
+class btDefaultMotionState;
+
+namespace Common { namespace Physics {
+    class World;
+}}
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -12,11 +17,13 @@ namespace Server { namespace Game { namespace Engine {
         public Entity
     {
     private:
+        Common::Physics::World& _world;
         Common::Physics::Node _physics;
         btRigidBody* _btBody;
+        btDefaultMotionState* _motionState;
 
     public:
-        PositionalEntity(Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
+        PositionalEntity(Common::Physics::World& world, Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
         ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position; }
