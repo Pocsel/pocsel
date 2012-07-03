@@ -1,17 +1,13 @@
 #include "server/game/engine/PositionalEntity.hpp"
 
 #include "bullet/bullet-all.hpp"
+#include "common/physics/World.hpp"
 
 #include "common/physics/World.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
-    PositionalEntity::PositionalEntity(
-            Tools::Lua::Interpreter& interpreter,
-            Uint32 id,
-            EntityType const& type,
-            Common::Position const& pos,
-            Common::Physics::World& world) :
+    PositionalEntity::PositionalEntity(Common::Physics::World& world, Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos) :
         Entity(interpreter, id, type),
         _world(world),
         _body(0),

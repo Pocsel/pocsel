@@ -32,6 +32,9 @@ namespace Server { namespace Game { namespace Engine {
         Common::Physics::World& GetWorld() { return *this->_world; }
         Common::Physics::World const& GetWorld() const { return *this->_world; }
 
+        Common::Physics::World& GetWorld() { return *this->_world; }
+        Common::Physics::World const& GetWorld() const { return *this->_world; }
+
         friend struct _cb;
     };
 

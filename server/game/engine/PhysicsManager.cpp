@@ -99,7 +99,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             if (!this->_bodiesInWorld.count(it->first))
             {
-                this->_world->GetBtWorld().addRigidBody(&it->second->GetBtBody());
+                //this->_world->GetBtWorld().addRigidBody(&it->second->GetBtBody());
                 this->_bodiesInWorld.insert(it->first);
                 this->_entityBodies.insert(&it->second->GetBtBody());
             }

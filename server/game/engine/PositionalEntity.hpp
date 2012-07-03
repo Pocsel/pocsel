@@ -25,12 +25,7 @@ namespace Server { namespace Game { namespace Engine {
         std::map<btRigidBody const*, btTypedConstraint*> _doodadBodies;
 
     public:
-        PositionalEntity(
-                Tools::Lua::Interpreter& interpreter,
-                Uint32 id,
-                EntityType const& type,
-                Common::Position const& pos,
-                Common::Physics::World& world);
+        PositionalEntity(Common::Physics::World& world, Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
         ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position; }

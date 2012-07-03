@@ -6,6 +6,7 @@
 #include "server/game/engine/PositionalEntity.hpp"
 #include "server/game/engine/DoodadManager.hpp"
 #include "server/game/engine/EntityType.hpp"
+#include "server/game/engine/PhysicsManager.hpp"
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
@@ -698,7 +699,7 @@ namespace Server { namespace Game { namespace Engine {
         Entity* entity;
         if (itType->second->IsPositional())
         {
-            PositionalEntity* positionalEntity = new PositionalEntity(this->_engine.GetInterpreter(), entityId, *itType->second, pos);
+            PositionalEntity* positionalEntity = new PositionalEntity(this->_engine.GetPhysicsManager().GetWorld(), this->_engine.GetInterpreter(), entityId, *itType->second, pos);
             assert(!this->_positionalEntities.count(entityId) && "impossible de créer une nouvelle entité car l'id est déjà utilisé dans la map des entités positionnelles");
             this->_positionalEntities[entityId] = positionalEntity;
             entity = positionalEntity;
