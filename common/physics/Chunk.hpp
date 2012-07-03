@@ -17,6 +17,7 @@ namespace Common { namespace Physics {
     private:
         btCompoundShape* _shape;
         btRigidBody* _body;
+        btDefaultMotionState* _motionState;
 
     public:
         explicit Chunk(Common::BaseChunk const& source);

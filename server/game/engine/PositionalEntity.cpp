@@ -12,12 +12,12 @@ namespace Server { namespace Game { namespace Engine {
 
         static btCollisionShape* colShape = new
             // btSphereShape(2) // rayon
-            btBoxShape(btVector3(1, 2.5, 1)) // on donne la moitié de la taille
+            btBoxShape(btVector3(0.6, 1.8, 0.8)) // on donne la moitié de la taille
             ;
 
         /// Create Dynamic Objects
 
-        btScalar mass(100);
+        btScalar mass(60);
         btVector3 localInertia(0, 0, 0);
 
         colShape->calculateLocalInertia(mass, localInertia);
@@ -34,6 +34,8 @@ namespace Server { namespace Game { namespace Engine {
         //myMotionState->setWorldTransform(startTransform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
         _btBody = new btRigidBody(rbInfo);
+
+        _btBody->setActivationState(DISABLE_DEACTIVATION);
 
         _btBody->setUserPointer(this);
     }
