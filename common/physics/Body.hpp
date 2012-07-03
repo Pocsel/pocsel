@@ -19,9 +19,10 @@ namespace Common { namespace Physics {
     public:
         struct BodyNode
         {
-            BodyNode() : dirty(false) {}
+            BodyNode() : body(0), motionState(0), constraint(0), dirty(false) {}
             Common::Physics::Node node;
             btRigidBody* body;
+            btMotionState* motionState;
             btTypedConstraint* constraint;
             bool dirty;
         };
@@ -29,6 +30,8 @@ namespace Common { namespace Physics {
         World& _world;
         BodyType const& _type;
         std::vector<BodyNode> _nodes;
+        btRigidBody* _rootBody;
+        btDefaultMotionState* _rootMotionState;
 
     public:
         Body(World& world, BodyType const& bodyType);//, Common::Physics::Node const& pos);

@@ -15,4 +15,12 @@ namespace Common { namespace Physics {
 
     }
 
+    BodyType::~BodyType()
+    {
+        for (auto it = this->_shapes.begin(), ite = this->_shapes.end(); it != ite; ++it)
+        {
+            Tools::Delete(it->shape);
+        }
+    }
+
 }}

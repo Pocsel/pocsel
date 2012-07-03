@@ -10,8 +10,21 @@ namespace Common { namespace Physics {
     Body::Body(World& world, BodyType const& bodyType) :
         _world(world),
         _type(bodyType),
-        _nodes(bodyType.GetShapes().size())
+        _nodes(bodyType.GetShapes().size()),
+        _rootBody(0),
+        _rootMotionState(0)
     {
+        static btCollisionShape* emptyShape = new btEmptyShape();
+
+        // TODO j'en suis là
+
+        this->_rootBody = new btRigidBody(0.000001, );
+        for (auto rootsIt = this->_type.GetRoots().begin(),
+                rootsIte = this->_type.GetRoots().end();
+                rootsIt != rootsIte; ++rootsIt)
+        {
+            this->_BuildBodyNode(*rootsIt);
+        }
     }
 
     Body::~Body()
@@ -24,6 +37,7 @@ namespace Common { namespace Physics {
         }
         this->_world.GetBtWorld().removeRigidBody(this->_rootBody);
         Tools::Delete(this->_rootBody);
+        Tools::Delete(this->_rootMotionState);
     }
 
     void Body::_CleanBodyNode(Uint32 nodeId)
