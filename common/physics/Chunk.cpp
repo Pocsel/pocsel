@@ -11,7 +11,6 @@ namespace Common { namespace Physics {
             this->_body->setUserPointer((void*)1);
         Tools::Delete(this->_body);
         Tools::Delete(this->_shape);
-        Tools::Delete(this->_motionState);
     }
 
     namespace {
@@ -117,8 +116,7 @@ namespace Common { namespace Physics {
 
     Chunk::Chunk(Common::BaseChunk const& source) :
         _shape(0),
-        _body(0),
-        _motionState(0)
+        _body(0)
     {
         if (source.IsEmpty())
             return;
@@ -165,11 +163,9 @@ namespace Common { namespace Physics {
         tr.setIdentity();
         tr.setOrigin(btVector3((source.coords.x) * 32, (source.coords.y) * 32,(source.coords.z) * 32));
 
-        _motionState = new btDefaultMotionState(tr);
-
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(0, _motionState, this->_shape, btVector3(0, 0, 0));
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(0, 0, this->_shape, btVector3(0, 0, 0));
         this->_body = new btRigidBody(rbInfo);
-        //this->_body->setCenterOfMassTransform(tr);
+        this->_body->setCenterOfMassTransform(tr);
         this->_body->setUserPointer(this);
     }
 
