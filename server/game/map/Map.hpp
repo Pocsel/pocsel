@@ -56,7 +56,7 @@ namespace Server { namespace Game { namespace Map {
 
     private:
         enum {
-            SaveTime = 30,
+            SaveTime = 600,
             SaveRetryTime = 10
         };
         Conf _conf;
