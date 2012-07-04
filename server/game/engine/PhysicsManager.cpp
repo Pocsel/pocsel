@@ -101,7 +101,7 @@ namespace Server { namespace Game { namespace Engine {
             {
                 //this->_world->GetBtWorld().addRigidBody(&it->second->GetBtBody());
                 this->_bodiesInWorld.insert(it->first);
-                this->_entityBodies.insert(&it->second->GetBtBody());
+                //this->_entityBodies.insert(&it->second->GetBtBody());
             }
         }
 

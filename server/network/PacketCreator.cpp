@@ -17,6 +17,7 @@
 #include "common/FieldUtils.hpp"
 #include "common/MovingOrientedPositionSerializer.hpp"
 #include "common/physics/NodeSerializer.hpp"
+#include "common/physics/BodySerializer.hpp"
 
 namespace Server { namespace Network {
 

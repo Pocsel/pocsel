@@ -24,53 +24,45 @@ Server.Entity.RegisterPositional{
 Server.Body.Register{
     bodyName = "Tank",
     physics = {
-        -- friction, bounciness, etc
-        -- peut etre que ca sera par noeud ou pshape
+        friction = 0.5,
+        restitution = 0.0
+        -- valeurs par defaut, peuvent etre changees a chaque noeud
     },
     shapeTree = {
         {
-            name = "Base", -- nom unique de noeud
-            offset = { 0, 1, 0 }, -- par rapport au parent (entité positionnelle)
-            angle = { 0, 0, 0 }, -- idem
-            boxes = {
-                {
-                    -- par rapport au noeud   }
-                    { X, Y, Z },
-                    { W, H, L },
-                    { A, B, C },
-                },
+            name = "Hull", -- nom unique de noeud
+            position = { 0, 0, 0 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {4, 2, 4}
             },
-            spheres = {
-                {
-                    -- par rapport au noeud
-                    { X, Y, Z },
-                    R
-                },
-            },
+            friction = 0.5,
+            restitution = 0.0,
+
             children = {
                 {
                     name = "Turret",
-                    offset = { X, Y, Z }, -- par rapport au parent (noeud Base)
-                    angle = { A, B, C }, -- idem
-                    boxes = {
-                        {
-                            { X, Y, Z },
-                            { W, H, L },
-                            { A, B, C },
-                        },
+                    position = { 0, 3, 0 }, -- par rapport au parent (noeud Hull)
+                    orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                    shape = {
+                        shapeType = "sphere",
+                        radius = 1
                     },
+                    friction = 0.5,
+                    restitution = 0.0,
+
                     children = {
                         {
-                            name = "Cannon",
-                            offset = { X, Y, Z },
-                            angle = { A, B, C },
-                            boxes = {
-                                {
-                                    { X, Y, Z },
-                                    { W, H, L },
-                                    { A, B, C },
-                                },
+                            name = "Gun",
+                            position = { 3, 0, 0 }, -- par rapport au parent (noeud Hull)
+                            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                            shape = {
+                                shapeType = "box",
+                                halfExtents = {3, 0.1, 0.1}
                             },
+                            friction = 0.5,
+                            restitution = 0.0,
                         },
                     }
                 },

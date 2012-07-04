@@ -8,10 +8,11 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    BodyType::BodyType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype) :
+    BodyType::BodyType(std::string const& name, Uint32 pluginId, Uint32 id, Tools::Lua::Ref const& prototype) :
         Common::Physics::BodyType(),
         _name(name),
-        _pluginId(pluginId)//, _prototype(prototype)
+        _pluginId(pluginId),//, _prototype(prototype)
+        _id(id)
     {
         _shapes.reserve(ShapesMax);
         if (prototype["shapeTree"].Exists())
@@ -67,6 +68,31 @@ namespace Server { namespace Game { namespace Engine {
                 if (!children.IsTable())
                     throw std::runtime_error("Client.Body.Register: Field \"children\" must be of type table");
                 this->_FillShapeTree(it.GetValue(), node.children, idx);
+            }
+            else if (key == "position")
+            {
+                Tools::Lua::Ref position = it.GetValue();
+                if (!position.IsTable())
+                    throw std::runtime_error("Client.Body.Register: Field \"position\" must be of type table");
+                node.position.position.x = position[1].ToNumber();
+                node.position.position.y = position[2].ToNumber();
+                node.position.position.z = position[3].ToNumber();
+            }
+            else if (key == "orientation")
+            {
+                Tools::Lua::Ref orientation = it.GetValue();
+                if (!position.IsTable())
+                    throw std::runtime_error("Client.Body.Register: Field \"orientation\" must be of type table");
+                glm::vec3 pitchyawroll;
+                pitchyawroll.x = position[2].ToNumber();
+                pitchyawroll.y = position[1].ToNumber();
+                pitchyawroll.z = position[3].ToNumber();
+                node.position.orientation = glm::quat(pitchyawroll); // pitch, yaw, roll
+            }
+            else if (key == "shape")
+            {
+                Tools::Lua::Ref shape = it.GetValue();
+                // TODO j'en suis là
             }
         }
         if (!Common::FieldUtils::IsRegistrableType(node.name))

@@ -11,7 +11,7 @@ namespace Common { namespace Physics {
         struct BodySerializer
         {
 
-            static void Write(TBody const& b, ByteArray& p) // Used by Packet::Write<T>(T const&)
+            static void Write(TBody const& b, Tools::ByteArray& p) // Used by Packet::Write<T>(T const&)
             {
                 std::vector<Body::BodyNode> const& nodes = b.GetNodes();
                 for (auto it = nodes.begin(), ite = nodes.end(); it != ite; ++it)
@@ -29,10 +29,10 @@ namespace Common { namespace Physics {
             }
 
             private:
-            static std::unique_ptr<TBody> Read(ByteArray const& p); // Used by Packet::Read<T>()
+            static std::unique_ptr<TBody> Read(Tools::ByteArray const& p); // Used by Packet::Read<T>()
 
             private:
-            static void Read(ByteArray const& p, TBody& b);  // Used by Packet::Read<T>(T&)
+            static void Read(Tools::ByteArray const& p, TBody& b);  // Used by Packet::Read<T>(T&)
         };
 
 }}

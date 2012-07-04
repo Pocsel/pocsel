@@ -5,6 +5,7 @@
 
 class btRigidBody;
 class btTypedConstraint;
+class btDefaultMotionState;
 
 namespace Common { namespace Physics {
     class BodyType;
@@ -22,7 +23,7 @@ namespace Common { namespace Physics {
             BodyNode() : body(0), motionState(0), constraint(0), dirty(false) {}
             Common::Physics::Node node;
             btRigidBody* body;
-            btMotionState* motionState;
+            btDefaultMotionState* motionState;
             btTypedConstraint* constraint;
             bool dirty;
         };
@@ -34,12 +35,16 @@ namespace Common { namespace Physics {
         btDefaultMotionState* _rootMotionState;
 
     public:
-        Body(World& world, BodyType const& bodyType);//, Common::Physics::Node const& pos);
+        Body(World& world, Common::Physics::Node const& position, BodyType const& bodyType);
         ~Body();
         BodyType const& GetType() const { return this->_type; }
         std::vector<BodyNode> const& GetNodes() const { return this->_nodes; }
 
         btRigidBody& GetRootBtBody();
+
+    private:
+        void _BuildBodyNode(Uint32 nodeId);
+        void _CleanBodyNode(Uint32 nodeId);
     };
 
 }}
