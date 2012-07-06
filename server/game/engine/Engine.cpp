@@ -41,11 +41,11 @@ namespace Server { namespace Game { namespace Engine {
     Engine::~Engine()
     {
         Tools::debug << "Engine::~Engine()\n";
-        Tools::Delete(this->_physicsManager);
         Tools::Delete(this->_bodyManager);
         Tools::Delete(this->_doodadManager);
         Tools::Delete(this->_messageManager);
         Tools::Delete(this->_entityManager);
+        Tools::Delete(this->_physicsManager);
         Tools::Delete(this->_callbackManager);
         Tools::Delete(this->_interpreter);
     }

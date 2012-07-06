@@ -37,7 +37,7 @@ if (UNIX)
         add_definitions(-std=c++11)
         set(CMAKE_CXX_FLAGS "-Wall -Wextra -Winvalid-pch")
         set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -D_DEBUG -UNDEBUG -msse2")
-        set(CMAKE_CXX_FLAGS_RELEASE "-O4 -ffast-math -g -DNDEBUG -UDEBUG -U_DEBUG -msse2")
+        set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g -DNDEBUG -UDEBUG -U_DEBUG -msse2")
     else(USE_CLANG)
         add_definitions(-std=c++0x) #Enable C++0x mode
         set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -Winvalid-pch")
