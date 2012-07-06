@@ -33,7 +33,6 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
             IShaderParameter* shadowMap;
             IShaderParameter* lightViewProjection;
 
-            IShaderProgram* depthShader;
             std::vector<std::pair<glm::mat4, std::unique_ptr<IRenderTarget>>> shadowMaps;
 
             glm::mat4 modelViewProjection;
@@ -50,14 +49,13 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
             IShaderParameter* specularColor;
             IShaderParameter* shadowMap;
 
-            IShaderProgram* depthShader;
             std::vector<std::unique_ptr<IRenderTarget>> shadowMaps;
 
             std::unique_ptr<Sphere> sphere;
         } _point;
 
     public:
-        LightRenderer(IRenderer& renderer, IShaderProgram& depthShader, IShaderProgram& directionnalShader, IShaderProgram& pointShader);
+        LightRenderer(IRenderer& renderer, IShaderProgram& directionnalShader, IShaderProgram& pointShader);
 
         DirectionnalLight CreateDirectionnalLight();
         PointLight CreatePointLight();
@@ -70,12 +68,33 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
             std::function<void(glm::dmat4)>& renderScene,
             std::list<DirectionnalLight> const& directionnalLights,
             std::list<PointLight> const& pointLights);
+        void Render(
+            GBuffer& gbuffer,
+            glm::mat4 const& view,
+            glm::mat4 const& projection,
+            Frustum const& absoluteCamera,
+            glm::dvec3 const& position,
+            std::function<void(glm::dmat4)>& renderScene,
+            std::list<DirectionnalLight*> const& directionnalLights,
+            std::list<PointLight*> const& pointLights);
 
         ITexture2D& GetDirectionnalShadowMap(int idx) { return this->_directionnal.shadowMaps[idx].second->GetTexture(0); }
     private:
-        void _RenderDirectionnalLights(GBuffer& gbuffer, std::list<DirectionnalLight> const& lights);
-        void _RenderPointLights(GBuffer& gbuffer, std::list<PointLight> const& lights);
         void _RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& position, std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights);
+        template<class T>
+        void _RenderDirectionnalLights(GBuffer& gbuffer, T& lights);
+        template<class T>
+        void _RenderPointLights(GBuffer& gbuffer, T& lights);
+        template<class TDirectionnal, class TPoint>
+        void _Render(
+            GBuffer& gbuffer,
+            glm::mat4 const& view,
+            glm::mat4 const& projection,
+            Frustum const& absoluteCamera,
+            glm::dvec3 const& position,
+            std::function<void(glm::dmat4)>& renderScene,
+            TDirectionnal directionnalIterator,
+            TPoint pointIterator);
     };
 
 }}}}

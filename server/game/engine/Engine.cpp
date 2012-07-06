@@ -47,6 +47,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Delete(this->_entityManager);
         Tools::Delete(this->_physicsManager);
         Tools::Delete(this->_callbackManager);
+        this->_modules.clear();
         Tools::Delete(this->_interpreter);
     }
 

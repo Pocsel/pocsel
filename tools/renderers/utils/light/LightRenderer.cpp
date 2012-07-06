@@ -74,9 +74,45 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
             projection = glm::ortho(size.x, size.y, -size.z, size.z);
 
         }
+
+        template<class TIter, bool = std::is_pointer<typename TIter::value_type>::value>
+        class LightIterator
+        {
+        private:
+            typedef typename TIter::value_type TValue;
+            TIter _it;
+            TIter _ite;
+        public:
+            LightIterator(TIter it, TIter ite) : _it(it), _ite(ite) {}
+            typename std::remove_pointer<TValue>::type const& operator *()  { return **_it; }
+            typename std::remove_pointer<TValue>::type const& operator ->() { return **_it; }
+            LightIterator operator ++() { ++_it; return *this; }
+            bool IsEnd() const { return _it == _ite; }
+        };
+
+        template<class TIter>
+        class LightIterator<TIter, false>
+        {
+        private:
+            typedef typename TIter::value_type TValue;
+            TIter _it;
+            TIter _ite;
+        public:
+            LightIterator(TIter it, TIter ite) : _it(it), _ite(ite) {}
+            TValue const& operator *()  { return *_it; }
+            TValue const& operator ->() { return *_it; }
+            LightIterator operator ++() { ++_it; return *this; }
+            bool IsEnd() const { return _it == _ite; }
+        };
+
+        template<class TIter>
+        LightIterator<TIter> CreateLightIterator(TIter&& it, TIter&& ite)
+        {
+            return LightIterator<TIter>(it, ite);
+        }
     }
 
-    LightRenderer::LightRenderer(IRenderer& renderer, IShaderProgram& depthShader, IShaderProgram& directionnalShader, IShaderProgram& pointShader) :
+    LightRenderer::LightRenderer(IRenderer& renderer, IShaderProgram& directionnalShader, IShaderProgram& pointShader) :
         _renderer(renderer)
     {
         int nbDirectionnalShadowMap = 4;
@@ -91,7 +127,6 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         this->_directionnal.shadowMap = &this->_directionnal.shader->GetParameter("lightShadowMap");
         this->_directionnal.lightViewProjection = &this->_directionnal.shader->GetParameter("lightViewProjection");
 
-        this->_directionnal.depthShader = &depthShader;
         this->_directionnal.screen.reset(new Image(renderer));
         this->_directionnal.modelViewProjection = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
         for (int i = 0; i < nbDirectionnalShadowMap; ++i)
@@ -140,8 +175,74 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         std::list<DirectionnalLight> const& directionnalLights,
         std::list<PointLight> const& pointLights)
     {
-        //this->_RenderDirectionnalLightsShadowMap(absoluteCamera, position, renderScene, directionnalLights);
+        this->_Render(
+            gbuffer,
+            view,
+            projection,
+            absoluteCamera,
+            position,
+            renderScene,
+            CreateLightIterator(directionnalLights.begin(), directionnalLights.end()),
+            CreateLightIterator(pointLights.begin(), pointLights.end()));
+    }
+    void LightRenderer::Render(
+        GBuffer& gbuffer,
+        glm::mat4 const& view,
+        glm::mat4 const& projection,
+        Frustum const& absoluteCamera,
+        glm::dvec3 const& position,
+        std::function<void(glm::dmat4)>& renderScene,
+        std::list<DirectionnalLight*> const& directionnalLights,
+        std::list<PointLight*> const& pointLights)
+    {
+        this->_Render(
+            gbuffer,
+            view,
+            projection,
+            absoluteCamera,
+            position,
+            renderScene,
+            CreateLightIterator(directionnalLights.begin(), directionnalLights.end()),
+            CreateLightIterator(pointLights.begin(), pointLights.end()));
+    }
 
+    void LightRenderer::_RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& cameraPosition,  std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights)
+    {
+        //unsigned int i = 0;
+        //for (auto it = lights.begin(), ite = lights.end(); it != ite && i < this->_directionnal.shadowMaps.size(); ++it, ++i)
+        //{
+        //    glm::dmat4 lightView;
+        //    glm::dmat4 lightProjection;
+        //    _CalculateLightViewAndProjection(absoluteCamera, glm::dvec3(0, 0, 0), glm::dvec3(it->direction), lightView, lightProjection);
+        //    auto lightAbsoluteViewProjection = lightProjection * lightView;
+        //    _CalculateLightViewAndProjection(absoluteCamera, cameraPosition, glm::dvec3(it->direction), lightView, lightProjection);
+
+        //    this->_renderer.SetViewMatrix(glm::mat4(lightView));
+        //    this->_renderer.SetProjectionMatrix(glm::mat4(lightProjection));
+
+        //    this->_directionnal.shadowMaps[i].first = glm::mat4(lightAbsoluteViewProjection);
+        //    this->_renderer.BeginDraw(this->_directionnal.shadowMaps[i].second.get());
+        //    do
+        //    {
+        //        this->_directionnal.depthShader->BeginPass();
+        //        renderScene(lightAbsoluteViewProjection);
+        //    } while (this->_directionnal.depthShader->EndPass());
+        //    this->_renderer.EndDraw();
+        //}
+    }
+
+    template<class TDirectionnal, class TPoint>
+    void LightRenderer::_Render(
+        GBuffer& gbuffer,
+        glm::mat4 const& view,
+        glm::mat4 const& projection,
+        Frustum const& absoluteCamera,
+        glm::dvec3 const& position,
+        std::function<void(glm::dmat4)>& renderScene,
+        TDirectionnal directionnalIterator,
+        TPoint pointIterator)
+    {
+        //this->_RenderDirectionnalLightsShadowMap(absoluteCamera, position, renderScene, directionnalLights);
         gbuffer.BeginLighting();
 
         this->_renderer.SetClearColor(glm::vec4(.0f, .0f, .0f, 1.0f));
@@ -149,15 +250,16 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
 
         this->_renderer.SetViewMatrix(view);
         this->_renderer.SetProjectionMatrix(projection);
-        this->_RenderPointLights(gbuffer, pointLights);
+        this->_RenderPointLights(gbuffer, pointIterator);
 
-        this->_RenderDirectionnalLights(gbuffer, directionnalLights);
+        this->_RenderDirectionnalLights(gbuffer, directionnalIterator);
         gbuffer.EndLighting();
     }
 
-    void LightRenderer::_RenderDirectionnalLights(GBuffer& gbuffer, std::list<DirectionnalLight> const& lights)
+    template<class T>
+    void LightRenderer::_RenderDirectionnalLights(GBuffer& gbuffer, T& lights)
     {
-        if (lights.size() == 0)
+        if (lights.IsEnd())
             return;
         this->_renderer.SetModelMatrix(glm::mat4::identity);
         //this->_directionnal.normalDepth->Set(gbuffer.GetSpecular());
@@ -166,9 +268,9 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         {
             this->_directionnal.shader->BeginPass();
             unsigned int i = 0;
-            for (auto it = lights.begin(), ite = lights.end(); it != ite; ++it, ++i)
+            for (; !lights.IsEnd(); ++lights, ++i)
             {
-                it->SetParameters();
+                (*lights).SetParameters();
                 if (i < this->_directionnal.shadowMaps.size())
                 {
                     this->_directionnal.lightViewProjection->Set(this->_directionnal.shadowMaps[i].first);
@@ -179,9 +281,10 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         } while (this->_directionnal.shader->EndPass());
     }
 
-    void LightRenderer::_RenderPointLights(GBuffer& gbuffer, std::list<PointLight> const& lights)
+    template<class T>
+    void LightRenderer::_RenderPointLights(GBuffer& gbuffer, T& lights)
     {
-        if (lights.size() == 0)
+        if (lights.IsEnd())
             return;
         Renderers::CullMode::Type cullMode = Renderers::CullMode::CounterClockwise;
         gbuffer.GetNormalsDepth().Bind();
@@ -189,9 +292,9 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         do
         {
             this->_point.shader->BeginPass();
-            for (auto it = lights.begin(), ite = lights.end(); it != ite; ++it)
+            for (; !lights.IsEnd(); ++lights)
             {
-                auto& light = *it;
+                auto& light = *lights;
 
                 bool inside = glm::lengthSquared(light.position) <= light.range*light.range;
                 if (inside && cullMode != Renderers::CullMode::Clockwise)
@@ -207,31 +310,6 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         gbuffer.GetNormalsDepth().Unbind();
         if (cullMode != Renderers::CullMode::CounterClockwise)
             this->_renderer.SetCullMode(cullMode = CullMode::CounterClockwise);
-    }
-
-    void LightRenderer::_RenderDirectionnalLightsShadowMap(Frustum const& absoluteCamera, glm::dvec3 const& cameraPosition,  std::function<void(glm::dmat4)>& renderScene, std::list<DirectionnalLight> const& lights)
-    {
-        unsigned int i = 0;
-        for (auto it = lights.begin(), ite = lights.end(); it != ite && i < this->_directionnal.shadowMaps.size(); ++it, ++i)
-        {
-            glm::dmat4 lightView;
-            glm::dmat4 lightProjection;
-            _CalculateLightViewAndProjection(absoluteCamera, glm::dvec3(0, 0, 0), glm::dvec3(it->direction), lightView, lightProjection);
-            auto lightAbsoluteViewProjection = lightProjection * lightView;
-            _CalculateLightViewAndProjection(absoluteCamera, cameraPosition, glm::dvec3(it->direction), lightView, lightProjection);
-
-            this->_renderer.SetViewMatrix(glm::mat4(lightView));
-            this->_renderer.SetProjectionMatrix(glm::mat4(lightProjection));
-
-            this->_directionnal.shadowMaps[i].first = glm::mat4(lightAbsoluteViewProjection);
-            this->_renderer.BeginDraw(this->_directionnal.shadowMaps[i].second.get());
-            do
-            {
-                this->_directionnal.depthShader->BeginPass();
-                renderScene(lightAbsoluteViewProjection);
-            } while (this->_directionnal.depthShader->EndPass());
-            this->_renderer.EndDraw();
-        }
     }
 
 }}}}

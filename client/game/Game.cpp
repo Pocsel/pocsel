@@ -55,7 +55,6 @@ namespace Client { namespace Game {
         this->_lightRenderer.reset(
             new Tools::Renderers::Utils::Light::LightRenderer(
                 this->_renderer,
-                this->_client.GetLocalResourceManager().GetShader("DirectionnalDepth.fx"),
                 this->_client.GetLocalResourceManager().GetShader("DirectionnalLight.fx"),
                 this->_client.GetLocalResourceManager().GetShader("PointLight.fx")));
         this->_directionnalLights.push_back(this->_lightRenderer->CreateDirectionnalLight());
@@ -125,7 +124,7 @@ namespace Client { namespace Game {
         this->_renderer.SetProjectionMatrix(camera.projection);
         this->_renderer.SetViewMatrix(viewMatrix);
 
-        auto absoluteViewProjection = glm::dmat4x4(camera.projection) * glm::lookAt(camera.position, camera.position + glm::dvec3(camera.direction), glm::dvec3(0, 1, 0));
+        auto absoluteViewProjection = camera.GetAbsoluteViewProjectionMatrix();
 
         this->_renderer.BeginDraw();
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
