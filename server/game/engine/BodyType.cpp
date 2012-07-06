@@ -4,7 +4,9 @@
 
 #include "tools/lua/Iterator.hpp"
 #include "tools/lua/Function.hpp"
+
 #include "common/FieldUtils.hpp"
+#include "common/physics/ShapeDesc.hpp"
 
 #include "bullet/bullet-all.hpp"
 
@@ -42,7 +44,7 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    unsigned int BodyType::_BuildShapeNode(Tools::Lua::Ref& shapeTree, int parent)
+    unsigned int BodyType::_BuildShapeNode(Tools::Lua::Ref const& shapeTree, int parent)
     {
         auto idx = (unsigned int)this->_shapes.size();
         if (idx == ShapesMax)
@@ -96,51 +98,21 @@ namespace Server { namespace Game { namespace Engine {
                 Tools::Lua::Ref shape = it.GetValue();
                 if (!shape.IsTable())
                     throw std::runtime_error("Client.Body.Register: Field \"shape\" must be of type table");
-                node.shape = _BuildShape(shape);
+                try
+                {
+                    node.shapeDesc = Common::Physics::ShapeDesc::BuildShapeDesc(shape).release();
+                }
+                catch (std::exception& e)
+                {
+                    throw std::runtime_error(std::string("Client.Body.Register: Field \"shape\": ") + e.what());
+                }
+                node.shape = node.shapeDesc->CreateShape().release();
             }
         }
         if (!Common::FieldUtils::IsRegistrableType(node.name))
             throw std::runtime_error("Client.Body.Register: A shapeTree node needs a name");
         this->_shapesMap[node.name] = idx;
         return idx;
-    }
-
-    btCollisionShape* BodyType::_BuildShape(Tools::Lua::Ref& lua)
-    {
-        Tools::Lua::Ref shapeTypeLua = lua["shapeType"];
-        if (!shapeTypeLua.IsString())
-            throw std::runtime_error("Client.Body.Register: Field \"shapeType\" must be of type string");
-        std::string shapeType = shapeTypeLua.ToString();
-
-        if (shapeType == "box")
-            return _BuildBoxShape(lua);
-        else if (shapeType == "sphere")
-            return _BuildSphereShape(lua);
-        else if (shapeType == "empty")
-            return new btEmptyShape();
-
-        throw std::runtime_error("Client.Body.Register: you need a correct shapeType");
-    }
-
-    btCollisionShape* BodyType::_BuildBoxShape(Tools::Lua::Ref& lua)
-    {
-        Tools::Lua::Ref halfExtentsLua = lua["halfExtents"];
-        if (!halfExtentsLua.IsTable())
-            throw std::runtime_error("Client.Body.Register: Field \"halfExtents\" must be of type table");
-        btVector3 halfExtents(
-                halfExtentsLua[1].ToNumber(),
-                halfExtentsLua[2].ToNumber(),
-                halfExtentsLua[3].ToNumber()
-                );
-        return new btBoxShape(halfExtents);
-    }
-
-    btCollisionShape* BodyType::_BuildSphereShape(Tools::Lua::Ref& lua)
-    {
-        Tools::Lua::Ref radiusLua = lua["radius"];
-        if (!radiusLua.IsNumber())
-            throw std::runtime_error("Client.Body.Register: Field \"radius\" must be of type number");
-        return new btSphereShape(radiusLua.ToNumber());
     }
 
 }}}

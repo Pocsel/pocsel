@@ -7,17 +7,20 @@ class btCollisionShape;
 
 namespace Common { namespace Physics {
 
+    class ShapeDesc;
+
     class BodyType
     {
     public:
         struct ShapeNode
         {
-            ShapeNode() : shape(0) {}
-            ShapeNode(Int32 parent) : shape(0), parent(parent) {}
+            ShapeNode() : shape(0), shapeDesc(0) {}
+            ShapeNode(Int32 parent) : shape(0), shapeDesc(0), parent(parent) {}
             std::string name;
             std::vector<Uint32> children;
             Node position;
             btCollisionShape* shape;
+            ShapeDesc* shapeDesc;
             Int32 parent;
         };
         static const unsigned int ShapesMax = 50;

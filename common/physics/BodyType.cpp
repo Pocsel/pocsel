@@ -1,4 +1,7 @@
 #include "common/physics/BodyType.hpp"
+#include "common/physics/ShapeDesc.hpp"
+
+#include "bullet/bullet-all.hpp"
 
 namespace Common { namespace Physics {
 
@@ -20,6 +23,7 @@ namespace Common { namespace Physics {
         for (auto it = this->_shapes.begin(), ite = this->_shapes.end(); it != ite; ++it)
         {
             Tools::Delete(it->shape);
+            Tools::Delete(it->shapeDesc);
         }
     }
 
