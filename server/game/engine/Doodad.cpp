@@ -4,9 +4,11 @@
 #include "server/game/World.hpp"
 #include "server/game/engine/Doodad.hpp"
 #include "server/game/engine/DoodadManager.hpp"
+#include "server/game/engine/PhysicsManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/PositionalEntity.hpp"
 #include "server/game/engine/Body.hpp"
+#include "server/game/engine/BodyType.hpp"
 #include "server/game/map/Map.hpp"
 #include "server/network/PacketCreator.hpp"
 #include "server/network/UdpPacket.hpp"
@@ -40,8 +42,7 @@ namespace Server { namespace Game { namespace Engine {
 
         if (body)
         {
-            // TODO add des trucs dans le world
-            entity.AddConstraint(&body.GetRootBtBody());
+            entity.AddConstraint(&body->GetRootBtBody());
         }
     }
 
@@ -49,8 +50,8 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::debug << "Doodad::~Doodad: Doodad destroyed (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
 
-        this->_entity.RemoveConstraint(&this->_body.GetRootBtBody());
-        // TODO retirer des trucs du world
+        if (this->_body)
+            this->_entity.PopConstraint(&this->_body->GetRootBtBody());
 
         // create kill packet
         auto packet = Network::PacketCreator::DoodadKill(this->_id);

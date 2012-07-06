@@ -2,17 +2,25 @@
 #define __SERVER_GAME_ENGINE_BODY_HPP__
 
 #include "common/physics/Body.hpp"
+#include "server/game/engine/BodyType.hpp"
+
+namespace Common { namespace Physics {
+    class World;
+}}
 
 namespace Server { namespace Game { namespace Engine {
 
     class Engine;
-    class BodyType;
 
     class Body :
         public Common::Physics::Body
     {
     public:
-        Body(BodyType const& bodyType);
+        Body(Common::Physics::World& world, Common::Physics::Node const& position, BodyType const& bodyType);
+        BodyType const& GetType() const
+        {
+            return reinterpret_cast<::Server::Game::Engine::BodyType const&>(this->_type);
+        }
     };
 
 }}}

@@ -4,6 +4,7 @@
 #include "server/network/PacketCreator.hpp"
 #include "server/network/ChunkSerializer.hpp"
 #include "server/network/BodyTypeSerializer.hpp"
+#include "server/network/BodySerializer.hpp"
 #include "server/network/UdpPacket.hpp"
 
 #include "tools/VectorSerializer.hpp"
@@ -204,7 +205,7 @@ namespace Server { namespace Network {
     }
 
     std::unique_ptr<UdpPacket> PacketCreator::DoodadUpdate(Uint32 doodadId,
-            Common::Physics::body const* body,
+            Server::Game::Engine::Body const* body,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
         UdpPacket* ptr(new UdpPacket());
@@ -212,7 +213,7 @@ namespace Server { namespace Network {
 
         ptr->Write(doodadId);
 
-        if (position != 0)
+        if (body != 0)
         {
             ptr->Write(true);
             ptr->Write(*body);
@@ -234,7 +235,7 @@ namespace Server { namespace Network {
         return std::unique_ptr<UdpPacket>(ptr);
     }
 
-    std::unique_ptr<UdpPacket> PacketCreator::EntityUpdate(Uint32 entityId, Common::Physics::node const& position)
+    std::unique_ptr<UdpPacket> PacketCreator::EntityUpdate(Uint32 entityId, Common::Physics::Node const& position)
     {
         UdpPacket* ptr(new UdpPacket());
         ptr->Write(Protocol::ServerToClient::EntityUpdate);

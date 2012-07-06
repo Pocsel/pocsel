@@ -2,6 +2,7 @@
 #include "server/game/engine/BodyManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/Doodad.hpp"
+#include "server/game/engine/PositionalEntity.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
 #include "server/game/map/Map.hpp"
@@ -120,7 +121,7 @@ namespace Server { namespace Game { namespace Engine {
                 Tools::debug << "<< Load << " << table << " << Doodad (id: " << doodadId << ", pluginId: " << pluginId << ", doodadName: \"" << name << "\", entityId: " << entityId << ", storage: <lua>)" << std::endl;
                 if (!storage.IsTable())
                     throw std::runtime_error("Storage must be of type table and not " + storage.GetTypeName());
-                PositionalEntity const* entity;
+                PositionalEntity* entity;
                 try
                 {
                     entity = &this->_engine.GetEntityManager().GetPositionalEntity(entityId);
@@ -233,12 +234,26 @@ namespace Server { namespace Game { namespace Engine {
                 (*it)->PositionIsDirty();
     }
 
-    Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, std::string const& bodyName)
+    Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity& entity, std::string const& bodyName)
     {
         if (this->_doodads.count(doodadId))
             throw std::runtime_error("a doodad with id " + Tools::ToString(doodadId) + " already exists");
 
-        Doodad* d = new Doodad(this->_engine, doodadId, pluginId, name, entityId, entity, bodyName == "" ? 0 : this->_engine.GetBodyManager().CreateBody(pluginId, bodyName));
+        Body* body = 0;
+        if (bodyName != "")
+        {
+            body = this->_engine.GetBodyManager().CreateBody(pluginId, bodyName, entity.GetPhysics());
+        }
+
+        Doodad* d = new Doodad(
+                this->_engine,
+                doodadId,
+                pluginId,
+                name,
+                entityId,
+                entity,
+                body
+                );
         this->_doodads[doodadId] = d;
         this->_doodadsByEntity[entityId].push_back(d);
         return d;

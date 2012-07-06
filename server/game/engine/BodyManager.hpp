@@ -5,6 +5,10 @@
 #include "server/game/engine/CallbackManager.hpp"
 #include "common/Position.hpp"
 
+namespace Common { namespace Physics {
+    struct Node;
+}}
+
 namespace Server { namespace Game { namespace Engine {
 
     class Engine;
@@ -23,7 +27,7 @@ namespace Server { namespace Game { namespace Engine {
         BodyManager(Engine& engine);
         ~BodyManager();
 
-        Body* CreateBody(Uint32 pluginId, std::string BodyName) throw(std::runtime_error);
+        Body* CreateBody(Uint32 pluginId, std::string BodyName, Common::Physics::Node const& pos) throw(std::runtime_error);
         // rcon requests
         //std::string RconGetBodies() const;
         //void RconAddBodyTypes(Rcon::BodyManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon

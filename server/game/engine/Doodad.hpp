@@ -3,6 +3,10 @@
 
 #include "tools/lua/Ref.hpp"
 
+namespace Common { namespace Physics {
+    class World;
+}}
+
 namespace Server { namespace Game { namespace Engine {
 
     class PositionalEntity;
@@ -51,7 +55,7 @@ namespace Server { namespace Game { namespace Engine {
                 Uint32 pluginId,
                 std::string const& name,
                 Uint32 entityId,
-                PositionalEntity const& entity,
+                PositionalEntity& entity,
                 Body* body);
         ~Doodad();
         Uint32 GetId() const { return this->_id; }

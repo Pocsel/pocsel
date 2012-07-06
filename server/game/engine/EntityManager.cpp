@@ -517,11 +517,27 @@ namespace Server { namespace Game { namespace Engine {
         return *it->second;
     }
 
+    PositionalEntity& EntityManager::GetPositionalEntity(Uint32 entityId) throw(std::runtime_error)
+    {
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+            throw std::runtime_error("EntityManager: Positional entity not found.");
+        return *it->second;
+    }
+
     PositionalEntity const& EntityManager::GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error)
     {
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
             throw std::runtime_error("EntityManager: Positional entity not found.");
+        return *it->second;
+    }
+
+    PositionalEntity& EntityManager::GetDisabledEntity(Uint32 entityId) throw(std::runtime_error)
+    {
+        auto it = this->_disabledEntities.find(entityId);
+        if (it == this->_disabledEntities.end())
+            throw std::runtime_error("EntityManager: Disabled entity not found.");
         return *it->second;
     }
 

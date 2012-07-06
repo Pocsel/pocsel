@@ -40,6 +40,7 @@ namespace Server { namespace Game { namespace Engine {
 
         Common::Physics::Node& GetPhysics() { return this->_physics; }
 
+        void UpdatePhysics();
         //btRigidBody* GetBtBody() { return this->_body; }
         void AddConstraint(btRigidBody* doodadBody); // retourne son propre body
         void PopConstraint(btRigidBody const* doodadBody);

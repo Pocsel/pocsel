@@ -31,6 +31,7 @@ namespace Common { namespace Physics {
         this->_rootMotionState = new btDefaultMotionState(tr);
         btRigidBody::btRigidBodyConstructionInfo rootInfo(0.00001, this->_rootMotionState, emptyShape, btVector3());
         this->_rootBody = new btRigidBody(rootInfo);
+        this->_world.GetBtWorld().addRigidBody(this->_rootBody);
         for (auto rootsIt = this->_type.GetRoots().begin(),
                 rootsIte = this->_type.GetRoots().end();
                 rootsIt != rootsIte; ++rootsIt)
@@ -70,6 +71,9 @@ namespace Common { namespace Physics {
         node.body = new btRigidBody(rbInfo);
 
         node.constraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, thisTr, false);
+
+        this->_world.GetBtWorld().addRigidBody(node.body);
+        this->_world.GetBtWorld().addConstraint(node.constraint);
 
         for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
                 childIte = this->_type.GetShapes()[nodeId].children.end();

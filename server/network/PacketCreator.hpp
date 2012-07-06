@@ -11,13 +11,14 @@ namespace Common {
     struct MovingOrientedPosition;
     namespace Physics {
         struct Node;
-        struct Body;
+        class Body;
     }
 }
 
 namespace Server {
     namespace Game { namespace Engine {
         class BodyType;
+        class Body;
     }}
     namespace Game {
         class PluginManager;
@@ -73,7 +74,7 @@ namespace Server { namespace Network {
         static std::unique_ptr<Common::Packet> DoodadKill(Uint32 doodadId);
 
         static std::unique_ptr<UdpPacket> DoodadUpdate(Uint32 doodadId,
-                Common::Physics::Body const* body,
+                Game::Engine::Body const* body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function */, std::string /* value */>> const& commands);
 
         static std::unique_ptr<UdpPacket> EntityUpdate(Uint32 entityId, Common::Physics::Node const& position);
