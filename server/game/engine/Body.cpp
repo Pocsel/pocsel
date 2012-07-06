@@ -4,8 +4,8 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Body::Body(Common::Physics::World& world, Common::Physics::Node const& position, BodyType const& bodyType) :
-        Common::Physics::Body(world, position, bodyType)
+    Body::Body(Common::Physics::BodyCluster& parent, BodyType const& bodyType) :
+        Common::Physics::Body(parent, bodyType)
     {
     }
 

@@ -39,19 +39,11 @@ namespace Server { namespace Game { namespace Engine {
         _positionDirty(false)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
-
-        if (body)
-        {
-            entity.AddConstraint(&body->GetRootBtBody());
-        }
     }
 
     Doodad::~Doodad()
     {
         Tools::debug << "Doodad::~Doodad: Doodad destroyed (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
-
-        if (this->_body)
-            this->_entity.PopConstraint(&this->_body->GetRootBtBody());
 
         // create kill packet
         auto packet = Network::PacketCreator::DoodadKill(this->_id);
@@ -113,7 +105,7 @@ namespace Server { namespace Game { namespace Engine {
                 this->_entityId,
                 this->_name,
                 this->_entity.GetPhysics(),
-                this->_body ? this->_body->GetType().GetId() : 0,
+                this->_body.get() ? this->_body->GetType().GetId() : 0,
                 values);
 
         // send packet to new players
@@ -157,7 +149,7 @@ namespace Server { namespace Game { namespace Engine {
                 this->_storage.Set(c.key, c.value); // update of server state
             this->_commands.pop();
         }
-        auto packet = Network::PacketCreator::DoodadUpdate(this->_id, this->_body, commands); // vérifier si le body est dirty
+        auto packet = Network::PacketCreator::DoodadUpdate(this->_id, this->_body.get(), commands); // vérifier si le body est dirty
         this->_positionDirty = false;
 
         // send packet to players

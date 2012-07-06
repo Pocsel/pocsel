@@ -42,7 +42,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 _entityId;
         PositionalEntity& _entity;
         Tools::Lua::Ref _storage;
-        Body* _body;
+        std::unique_ptr<Body> _body;
         std::unordered_set<Uint32> _players;
         std::unordered_set<Uint32> _newPlayers;
         std::queue<Command> _commands;

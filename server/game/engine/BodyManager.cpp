@@ -1,6 +1,5 @@
 #include "server/game/engine/BodyManager.hpp"
 #include "server/game/engine/Engine.hpp"
-#include "server/game/engine/PhysicsManager.hpp"
 #include "server/game/engine/Body.hpp"
 #include "server/game/engine/BodyType.hpp"
 #include "server/game/World.hpp"
@@ -35,7 +34,7 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    Body* BodyManager::CreateBody(Uint32 pluginId, std::string bodyName, Common::Physics::Node const& pos) throw(std::runtime_error)
+    Body* BodyManager::CreateBody(Uint32 pluginId, std::string bodyName, Common::Physics::BodyCluster& parent) throw(std::runtime_error)
     {
         // trouve le plugin
         auto itPlugin = this->_bodyTypes.find(pluginId);
@@ -49,7 +48,7 @@ namespace Server { namespace Game { namespace Engine {
 
         // allocation
         Body* body;
-        body = new Body(this->_engine.GetPhysicsManager().GetWorld(), pos, *itType->second);
+        body = new Body(parent, *itType->second);
 
         Tools::debug << "BodyManager::_CreateBody: New Body \"" << bodyName << "\" (plugin " << pluginId << ") created.\n";
         return body;

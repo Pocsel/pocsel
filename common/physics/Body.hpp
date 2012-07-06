@@ -8,12 +8,9 @@ class btTypedConstraint;
 class btDefaultMotionState;
 
 namespace Common { namespace Physics {
+
     class BodyType;
-}}
-
-namespace Common { namespace Physics {
-
-    class World;
+    class BodyCluster;
 
     class Body
     {
@@ -28,14 +25,14 @@ namespace Common { namespace Physics {
             bool dirty;
         };
     protected:
-        World& _world;
+        BodyCluster& _parent;
         BodyType const& _type;
         std::vector<BodyNode> _nodes;
         btRigidBody* _rootBody;
         btDefaultMotionState* _rootMotionState;
 
     public:
-        Body(World& world, Common::Physics::Node const& position, BodyType const& bodyType);
+        Body(BodyCluster& parent, BodyType const& bodyType);
         ~Body();
         BodyType const& GetType() const { return this->_type; }
         std::vector<BodyNode> const& GetNodes() const { return this->_nodes; }

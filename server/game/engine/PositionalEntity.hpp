@@ -4,12 +4,9 @@
 #include "common/physics/Node.hpp"
 #include "server/game/engine/Entity.hpp"
 
-class btRigidBody;
-class btTypedConstraint;
-class btDefaultMotionState;
-
 namespace Common { namespace Physics {
     class World;
+    class BodyCluster;
 }}
 
 namespace Server { namespace Game { namespace Engine {
@@ -18,14 +15,16 @@ namespace Server { namespace Game { namespace Engine {
         public Entity
     {
     private:
-        Common::Physics::World& _world;
+        Common::Physics::BodyCluster* _bodyCluster;
         Common::Physics::Node _physics;
-        btRigidBody* _body;
-        btDefaultMotionState* _motionState;
-        std::map<btRigidBody const*, btTypedConstraint*> _doodadBodies;
 
     public:
-        PositionalEntity(Common::Physics::World& world, Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
+        PositionalEntity(
+                Common::Physics::World& world,
+                Tools::Lua::Interpreter& interpreter,
+                Uint32 id,
+                EntityType const& type,
+                Common::Position const& pos);
         ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position; }
@@ -40,10 +39,9 @@ namespace Server { namespace Game { namespace Engine {
 
         Common::Physics::Node& GetPhysics() { return this->_physics; }
 
+        Common::Physics::BodyCluster& GetBodyCluster() { return *this->_bodyCluster; }
+
         void UpdatePhysics();
-        //btRigidBody* GetBtBody() { return this->_body; }
-        void AddConstraint(btRigidBody* doodadBody); // retourne son propre body
-        void PopConstraint(btRigidBody const* doodadBody);
     };
 
 }}}

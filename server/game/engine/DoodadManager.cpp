@@ -242,7 +242,7 @@ namespace Server { namespace Game { namespace Engine {
         Body* body = 0;
         if (bodyName != "")
         {
-            body = this->_engine.GetBodyManager().CreateBody(pluginId, bodyName, entity.GetPhysics());
+            body = this->_engine.GetBodyManager().CreateBody(pluginId, bodyName, entity.GetBodyCluster());
         }
 
         Doodad* d = new Doodad(

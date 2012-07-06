@@ -1,14 +1,15 @@
 #include "common/physics/Body.hpp"
 #include "common/physics/BodyType.hpp"
 #include "common/physics/World.hpp"
+#include "common/physics/BodyCluster.hpp"
 
 #include "bullet/bullet-all.hpp"
 
 
 namespace Common { namespace Physics {
 
-    Body::Body(World& world, Common::Physics::Node const& position, BodyType const& bodyType) :
-        _world(world),
+    Body::Body(BodyCluster& parent, BodyType const& bodyType) :
+        _parent(parent),
         _type(bodyType),
         _nodes(bodyType.GetShapes().size()),
         _rootBody(0),
@@ -17,27 +18,19 @@ namespace Common { namespace Physics {
         static btCollisionShape* emptyShape = new btEmptyShape();
 
         btTransform tr;
-        tr.setIdentity();
-        tr.setOrigin(btVector3(
-                    position.position.x,
-                    position.position.y,
-                    position.position.z));
-        tr.setRotation(btQuaternion(
-                    position.orientation.x,
-                    position.orientation.y,
-                    position.orientation.z,
-                    position.orientation.w));
+        this->_parent.GetBody().getMotionState()->getWorldTransform(tr);
 
         this->_rootMotionState = new btDefaultMotionState(tr);
         btRigidBody::btRigidBodyConstructionInfo rootInfo(0.00001, this->_rootMotionState, emptyShape, btVector3());
         this->_rootBody = new btRigidBody(rootInfo);
-        this->_world.GetBtWorld().addRigidBody(this->_rootBody);
+        this->_parent.GetWorld().GetBtWorld().addRigidBody(this->_rootBody);
         for (auto rootsIt = this->_type.GetRoots().begin(),
                 rootsIte = this->_type.GetRoots().end();
                 rootsIt != rootsIte; ++rootsIt)
         {
             this->_BuildBodyNode(*rootsIt);
         }
+        this->_parent.AddConstraint(this);
     }
 
     void Body::_BuildBodyNode(Uint32 nodeId)
@@ -72,8 +65,8 @@ namespace Common { namespace Physics {
 
         node.constraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, thisTr, false);
 
-        this->_world.GetBtWorld().addRigidBody(node.body);
-        this->_world.GetBtWorld().addConstraint(node.constraint);
+        this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
+        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint);
 
         for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
                 childIte = this->_type.GetShapes()[nodeId].children.end();
@@ -83,13 +76,14 @@ namespace Common { namespace Physics {
 
     Body::~Body()
     {
+        this->_parent.RemoveConstraint(this);
         for (auto rootsIt = this->_type.GetRoots().begin(),
                 rootsIte = this->_type.GetRoots().end();
                 rootsIt != rootsIte; ++rootsIt)
         {
             this->_CleanBodyNode(*rootsIt);
         }
-        this->_world.GetBtWorld().removeRigidBody(this->_rootBody);
+        this->_parent.GetWorld().GetBtWorld().removeRigidBody(this->_rootBody);
         Tools::Delete(this->_rootBody);
         Tools::Delete(this->_rootMotionState);
     }
@@ -102,9 +96,9 @@ namespace Common { namespace Physics {
             this->_CleanBodyNode(*childIt);
 
         BodyNode& node = this->_nodes[nodeId];
-        this->_world.GetBtWorld().removeConstraint(node.constraint);
+        this->_parent.GetWorld().GetBtWorld().removeConstraint(node.constraint);
         Tools::Delete(node.constraint);
-        this->_world.GetBtWorld().removeRigidBody(node.body);
+        this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
         Tools::Delete(node.body);
     }
 
