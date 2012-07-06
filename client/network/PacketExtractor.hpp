@@ -14,6 +14,7 @@ namespace Common {
     struct MovingOrientedPosition;
     namespace Physics {
         struct Node;
+        class Body;
     }
 }
 
