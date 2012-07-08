@@ -19,6 +19,7 @@ namespace Client { namespace Game { namespace Engine {
     class Engine;
     class Doodad;
     class DoodadType;
+    class Entity;
 
     class DoodadManager :
         private boost::noncopyable
@@ -27,10 +28,10 @@ namespace Client { namespace Game { namespace Engine {
         Engine& _engine;
         std::map<std::string /* doodadName */, DoodadType*> _doodadTypes;
         std::map<Uint32 /* doodadId */, Doodad*> _doodads;
+        std::map<Uint32 /* entityId */, Entity*> _entities;
         Uint32 _runningDoodadId; // 0 quand aucun doodad n'est en cours d'éxécution
         Doodad* _runningDoodad; // nul quand aucun doodad n'est en cours d'éxécution
         Uint64 _lastTime;
-        //Common::Physics::World* _world;
         ShapeRenderer* _shapeRenderer;
 
     public:
@@ -42,6 +43,8 @@ namespace Client { namespace Game { namespace Engine {
         std::map<Uint32, Doodad*> const& GetDoodads() const { return this->_doodads; }
         void Tick(Uint64 totalTime);
         void SpawnDoodad(Uint32 doodadId,
+                Uint32 entityId,
+                Uint32 bodyId,
                 std::string const& doodadName,
                 Common::Physics::Node const& position,
                 std::list<std::pair<std::string /* key */, std::string /* value */>> const& values);

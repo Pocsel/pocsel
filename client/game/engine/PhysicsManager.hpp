@@ -30,6 +30,9 @@ namespace Client { namespace Game { namespace Engine {
         void Tick(Uint64 deltaTime);
         void AddBody(btRigidBody* body);
         void RemoveBody(btRigidBody* body);
+
+        Common::Physics::World& GetWorld() { return *this->_world; }
+        Common::Physics::World const& GetWorld() const { return *this->_world; }
     };
 
 }}}

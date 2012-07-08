@@ -3,6 +3,8 @@
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/DoodadType.hpp"
 #include "client/game/engine/Engine.hpp"
+#include "client/game/engine/Entity.hpp"
+#include "client/game/engine/PhysicsManager.hpp"
 #include "client/game/ShapeRenderer.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
@@ -16,7 +18,6 @@ namespace Client { namespace Game { namespace Engine {
         _runningDoodadId(0),
         _runningDoodad(0),
         _lastTime(0),
-        //_world(0),
         _shapeRenderer(0)
     {
         //this->_world = new Common::Physics::World();
@@ -94,6 +95,8 @@ namespace Client { namespace Game { namespace Engine {
     }
 
     void DoodadManager::SpawnDoodad(Uint32 doodadId,
+            Uint32 entityId,
+            Uint32 bodyId,
             std::string const& doodadName,
             Common::Physics::Node const& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
@@ -109,6 +112,14 @@ namespace Client { namespace Game { namespace Engine {
             Tools::error << "DoodadManager::SpawnDoodad: Doodad type \"" << doodadName << "\" not found." << std::endl;
             return;
         }
+        if (this->_entities.count(entityId) == 0)
+        {
+            this->_entities[entityId] =
+                new Entity(this->_engine.GetPhysicsManager().GetWorld(), entityId, position);
+        }
+
+        // XXX TODO j'en suis la
+
         this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(), doodadId, position, *it->second);
         auto itValues = values.begin();
         auto itValuesEnd = values.end();

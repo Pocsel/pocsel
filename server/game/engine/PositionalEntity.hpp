@@ -24,7 +24,7 @@ namespace Server { namespace Game { namespace Engine {
                 Tools::Lua::Interpreter& interpreter,
                 Uint32 id,
                 EntityType const& type,
-                Common::Position const& pos);
+                Common::Physics::Node const& pos);
         ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position; }

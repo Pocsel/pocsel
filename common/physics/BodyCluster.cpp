@@ -6,7 +6,7 @@
 
 namespace Common { namespace Physics {
 
-    BodyCluster::BodyCluster(Common::Physics::World& world, Common::Position const& pos) :
+    BodyCluster::BodyCluster(World& world, Node const& pos) :
         _world(world),
         _motionState(0),
         _body(0)
@@ -23,7 +23,11 @@ namespace Common { namespace Physics {
 
         btTransform startTransform;
         startTransform.setIdentity();
-        startTransform.setOrigin(btVector3(pos.x, pos.y, pos.z));
+        startTransform.setOrigin(btVector3(pos.position.x, pos.position.y, pos.position.z));
+        startTransform.setRotation(btQuaternion(pos.orientation.x,
+                    pos.orientation.y,
+                    pos.orientation.z,
+                    pos.orientation.w));
 
         _motionState = new btDefaultMotionState(startTransform);
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, _motionState, emptyShape, localInertia);

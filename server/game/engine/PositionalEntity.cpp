@@ -11,7 +11,7 @@ namespace Server { namespace Game { namespace Engine {
             Tools::Lua::Interpreter& interpreter,
             Uint32 id,
             EntityType const& type,
-            Common::Position const& pos) :
+            Common::Physics::Node const& pos) :
         Entity(interpreter, id, type),
         _bodyCluster(0)
     {

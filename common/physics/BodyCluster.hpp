@@ -11,6 +11,7 @@ namespace Common { namespace Physics {
 
     class World;
     class Body;
+    struct Node;
 
     class BodyCluster
     {
@@ -21,7 +22,7 @@ namespace Common { namespace Physics {
         std::map<Body*, btTypedConstraint*> _constraints;
 
     public:
-        BodyCluster(Common::Physics::World& world, Common::Position const& pos);
+        BodyCluster(World& world, Node const& pos);
         ~BodyCluster();
 
         btRigidBody const& GetBody() const { return *this->_body; }
