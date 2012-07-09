@@ -2,6 +2,7 @@
 
 #include "client/network/ChunkSerializer.hpp"
 #include "client/network/BodyTypeSerializer.hpp"
+#include "client/network/BodySerializer.hpp"
 #include "client/network/PacketExtractor.hpp"
 #include "client/game/engine/BodyType.hpp"
 #include "common/Packet.hpp"
@@ -122,12 +123,12 @@ namespace Client { namespace Network {
 
     void PacketExtractor::DoodadUpdate(Tools::ByteArray const& p,
             Uint32& doodadId,
-            std::unique_ptr<Common::Physics::Body>& body,
+            std::unique_ptr<Client::Game::Engine::Body>& body,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands)
     {
         p.Read(doodadId);
         if (p.ReadBool())
-            position = p.Read<Common::Physics::Body>();
+            body = p.Read<Client::Game::Engine::Body>();
         while (p.GetBytesLeft())
         {
             bool functionCall = p.ReadBool();
@@ -142,7 +143,7 @@ namespace Client { namespace Network {
             Common::Physics::Node& node)
     {
         p.Read(entityId);
-        p.Read(node):
+        p.Read(node);
     }
 
 }}
