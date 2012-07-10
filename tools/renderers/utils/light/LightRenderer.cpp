@@ -294,7 +294,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
             this->_point.shader->BeginPass();
             for (; !lights.IsEnd(); ++lights)
             {
-                auto& light = *lights;
+                PointLight const& light = *lights;
 
                 bool inside = glm::lengthSquared(light.position) <= light.range*light.range;
                 if (inside && cullMode != Renderers::CullMode::Clockwise)
