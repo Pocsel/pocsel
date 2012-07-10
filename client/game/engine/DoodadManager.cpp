@@ -5,6 +5,7 @@
 #include "client/game/engine/Engine.hpp"
 #include "client/game/engine/Entity.hpp"
 #include "client/game/engine/PhysicsManager.hpp"
+#include "client/game/engine/BodyManager.hpp"
 #include "client/game/ShapeRenderer.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
@@ -117,10 +118,16 @@ namespace Client { namespace Game { namespace Engine {
             this->_entities[entityId] =
                 new Entity(this->_engine.GetPhysicsManager().GetWorld(), entityId, position);
         }
+        Entity& entity = *this->_entities[entityId];
 
-        // XXX TODO j'en suis la
+        entity.AddDoodad(doodadId);
+        entity.SetPosition(position);
 
-        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(), doodadId, position, *it->second);
+        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(),
+                doodadId,
+                bodyId ? &this->_engine.GetBodyManager().GetBodyType(bodyId) : 0,
+                entity.GetBodyCluster(),
+                *it->second);
         auto itValues = values.begin();
         auto itValuesEnd = values.end();
         for (; itValues != itValuesEnd; ++itValues)

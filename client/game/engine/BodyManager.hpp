@@ -20,6 +20,11 @@ namespace Client { namespace Game { namespace Engine {
     public:
         BodyManager(Engine& engine, Uint32 nbBodyTypes);
         void AddBodyType(std::unique_ptr<BodyType> bodyType);
+        BodyType const& GetBodyType(Uint32 bodyId) const
+        {
+            assert(bodyId > 0 && bodyId <= this->_bodyTypes.size());
+            return *this->_bodyTypes[bodyId - 1];
+        }
     private:
         void _AskOneType();
     };
