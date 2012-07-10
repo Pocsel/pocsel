@@ -14,6 +14,7 @@ namespace Common { namespace Physics {
             static void Write(TBody const& b, Tools::ByteArray& p) // Used by Packet::Write<T>(T const&)
             {
                 std::vector<Body::BodyNode> const& nodes = b.GetNodes();
+                p.Write8(nodes.size());
                 for (auto it = nodes.begin(), ite = nodes.end(); it != ite; ++it)
                 {
                     if (it->dirty == true)
@@ -28,11 +29,24 @@ namespace Common { namespace Physics {
                 }
             }
 
-            private:
-            static std::unique_ptr<TBody> Read(Tools::ByteArray const& p); // Used by Packet::Read<T>()
+            static std::unique_ptr<std::vector<std::pair<bool, Node>>> Deserialize(Tools::ByteArray const& p)
+            {
+                unsigned int size = p.Read8();
+                std::vector<std::pair<bool, Node>>* res = new std::vector<std::pair<bool, Node>>(size);
+                for (unsigned int i = 0; i < size; ++i)
+                {
+                    p.Read((*res)[i].first);
+                    if ((*res)[i].first)
+                        p.Read((*res)[i].second);
+                }
+                return std::unique_ptr<std::vector<std::pair<bool, Node>>>(res);
+            }
 
             private:
             static void Read(Tools::ByteArray const& p, TBody& b);  // Used by Packet::Read<T>(T&)
+
+            private:
+            static std::unique_ptr<TBody> Read(Tools::ByteArray const& p); // Used by Packet::Read<T>()
         };
 
 }}

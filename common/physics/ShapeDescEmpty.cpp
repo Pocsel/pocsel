@@ -13,6 +13,12 @@ namespace Common { namespace Physics {
     {
     }
 
+    std::string const& ShapeDescEmpty::GetName() const
+    {
+        static std::string ret("empty");
+        return ret;
+    }
+
     std::unique_ptr<btCollisionShape> ShapeDescEmpty::CreateShape() const
     {
         return std::unique_ptr<btCollisionShape>(new btEmptyShape());

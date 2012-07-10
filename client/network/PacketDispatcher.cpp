@@ -116,10 +116,10 @@ namespace Client { namespace Network {
                     this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for doodad update");
                 Uint32 doodadId;
-                std::unique_ptr<Common::Physics::Node> position;
+                std::unique_ptr<std::vector<std::pair<bool, Common::Physics::Node>>> body;
                 std::list<std::tuple<bool, std::string /* key */, std::string /* value */>> commands;
-                PacketExtractor::DoodadUpdate(p, doodadId, position, commands);
-                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, position.get(), commands); // TODO position -> physics node
+                PacketExtractor::DoodadUpdate(p, doodadId, body, commands);
+                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, body.get(), commands);
             };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::EntityUpdate] =
             [this](Tools::ByteArray& p)

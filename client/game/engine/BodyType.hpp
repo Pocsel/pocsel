@@ -9,11 +9,7 @@ namespace Client { namespace Game { namespace Engine {
         public Common::Physics::BodyType
     {
     public:
-        //BodyType() {}
-        BodyType(std::vector<ShapeNode> const& shapes) :
-            Common::Physics::BodyType(shapes)
-        {
-        }
+        BodyType(std::vector<ShapeNode> const& shapes);
     };
 
 }}}

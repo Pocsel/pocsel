@@ -1,6 +1,7 @@
 #include "common/physics/ShapeDescBox.hpp"
 
 #include "tools/lua/Ref.hpp"
+#include "tools/lua/Function.hpp"
 #include "tools/ByteArray.hpp"
 
 namespace Common { namespace Physics {
@@ -17,6 +18,12 @@ namespace Common { namespace Physics {
 
     ShapeDescBox::~ShapeDescBox()
     {
+    }
+
+    std::string const& ShapeDescBox::GetName() const
+    {
+        static std::string ret("box");
+        return ret;
     }
 
     std::unique_ptr<btCollisionShape> ShapeDescBox::CreateShape() const

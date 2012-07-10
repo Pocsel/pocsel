@@ -2,6 +2,7 @@
 #define __COMMON_PHYSICS_BODYTYPE_HPP__
 
 #include "common/physics/Node.hpp"
+#include "common/physics/ShapeDesc.hpp"
 
 class btCollisionShape;
 
@@ -43,7 +44,7 @@ namespace Common { namespace Physics {
             auto it = shapeNodes.begin(), ite = shapeNodes.end();
             for (; it != ite; ++it)
             {
-                Tools::debug << off << "> " << _shapes[*it].name << "\n";
+                Tools::debug << off << "> " << _shapes[*it].name << " (" << _shapes[*it].shapeDesc->GetName() << ")\n";
                 _DumpTree(_shapes[*it].children, off + "    ");
             }
         }

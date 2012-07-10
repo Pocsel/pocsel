@@ -147,7 +147,7 @@ namespace Client { namespace Game { namespace Engine {
     }
 
     void DoodadManager::UpdateDoodad(Uint32 doodadId,
-            Common::Physics::Node const* position,
+            std::vector<std::pair<bool, Common::Physics::Node>> const* body,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
         auto it = this->_doodads.find(doodadId);
@@ -156,9 +156,12 @@ namespace Client { namespace Game { namespace Engine {
             Tools::error << "DoodadManager::UpdateDoodad: Doodad " << doodadId << " not found." << std::endl;
             return;
         }
-        if (position)
+        if (body)
         {
-            it->second->SetPhysics(*position);
+            // TODO faire ce qu'il faut pour le body
+
+            // TODO faire ce qu'il faut pour le updateEntity
+            /*it->second->SetPhysics(*position);
 
             btRigidBody& btBody = it->second->GetBtBody();
 
@@ -187,7 +190,7 @@ namespace Client { namespace Game { namespace Engine {
                         position->angularVelocity.z));
 
 
-            it->second->SetUpdateFlag(1.1f);
+            it->second->SetUpdateFlag(1.1f);*/
         }
 
         auto itCommands = commands.begin();

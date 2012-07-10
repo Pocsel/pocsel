@@ -123,12 +123,12 @@ namespace Client { namespace Network {
 
     void PacketExtractor::DoodadUpdate(Tools::ByteArray const& p,
             Uint32& doodadId,
-            std::unique_ptr<Client::Game::Engine::Body>& body,
+            std::unique_ptr<std::vector<std::pair<bool, Common::Physics::Node>>>& body,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands)
     {
         p.Read(doodadId);
         if (p.ReadBool())
-            body = p.Read<Client::Game::Engine::Body>();
+            body = Common::Physics::BodySerializer<Game::Engine::Body>::Deserialize(p);
         while (p.GetBytesLeft())
         {
             bool functionCall = p.ReadBool();

@@ -29,6 +29,7 @@ namespace Common { namespace Physics {
         static std::unique_ptr<ShapeDesc> DeSerialize(Tools::ByteArray const& byteArray);
 
     public:
+        virtual std::string const& GetName() const = 0;
         virtual std::unique_ptr<btCollisionShape> CreateShape() const = 0;
         virtual void Serialize(Tools::ByteArray& byteArray) const = 0;
         virtual ~ShapeDesc() {}

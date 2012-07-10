@@ -17,6 +17,12 @@ namespace Common { namespace Physics {
     {
     }
 
+    std::string const& ShapeDescSphere::GetName() const
+    {
+        static std::string ret("sphere");
+        return ret;
+    }
+
     std::unique_ptr<btCollisionShape> ShapeDescSphere::CreateShape() const
     {
         return std::unique_ptr<btCollisionShape>(new btSphereShape(this->_radius));

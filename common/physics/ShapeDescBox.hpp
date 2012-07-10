@@ -18,6 +18,7 @@ namespace Common { namespace Physics {
         ShapeDescBox(Tools::ByteArray const& byteArray);
         virtual ~ShapeDescBox();
 
+        virtual std::string const& GetName() const;
         virtual std::unique_ptr<btCollisionShape> CreateShape() const;
         virtual void Serialize(Tools::ByteArray& byteArray) const;
     };

@@ -18,7 +18,6 @@ namespace Common { namespace Physics {
         if (emptyShape == 0)
         {
             emptyShape = new btEmptyShape();
-            emptyShape->calculateLocalInertia(mass, localInertia);
         }
 
         btTransform startTransform;

@@ -14,7 +14,7 @@ namespace Client { namespace Game { namespace Engine {
     {
     private:
         Engine& _engine;
-        std::vector<BodyType> _bodyTypes;
+        std::vector<std::unique_ptr<BodyType>> _bodyTypes;
         Uint32 _nbBodyTypes;
 
     public:

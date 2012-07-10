@@ -50,7 +50,7 @@ namespace Client { namespace Game { namespace Engine {
                 std::list<std::pair<std::string /* key */, std::string /* value */>> const& values);
         void KillDoodad(Uint32 doodadId);
         void UpdateDoodad(Uint32 doodadId,
-                Common::Physics::Node const* position,
+                std::vector<std::pair<bool, Common::Physics::Node>> const* body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands);
         void Render();
     private:

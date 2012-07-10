@@ -65,7 +65,7 @@ namespace Client { namespace Network {
                 Uint32& doodadId);
         static void DoodadUpdate(Tools::ByteArray const& p,
                 Uint32& doodadId,
-                std::unique_ptr<Client::Game::Engine::Body>& body,
+                std::unique_ptr<std::vector<std::pair<bool, Common::Physics::Node>>>& body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands);
         static void EntityUpdate(Tools::ByteArray const& p,
                 Uint32 entityId,
