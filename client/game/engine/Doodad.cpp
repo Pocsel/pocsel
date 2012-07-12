@@ -11,8 +11,7 @@ namespace Client { namespace Game { namespace Engine {
             DoodadType const& type) :
         _type(type),
         _self(interpreter.MakeTable()),
-        _body(0),
-        _updateFlag(0.0f)
+        _body(0)
     {
         this->_self.Set("id", id);
         Tools::debug << "Doodad::Doodad: New doodad \"" << this->_type.GetName() << "\" spawned (id: " << id << ", pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;

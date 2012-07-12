@@ -6,7 +6,8 @@ namespace Client { namespace Game { namespace Engine {
 
     Entity::Entity(Common::Physics::World& world, Uint32 id, Common::Physics::Node const& pos) :
         _id(id),
-        _bodyCluster(0)
+        _bodyCluster(0),
+        _updateFlag(0.0f)
     {
         this->_bodyCluster = new Common::Physics::BodyCluster(world, pos);
     }

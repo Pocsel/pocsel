@@ -26,8 +26,6 @@ namespace Client { namespace Game { namespace Engine {
         Common::Physics::BodyCluster const& bodyCluster;
         std::unique_ptr<Body> _body;
 
-        float _updateFlag;
-
     public:
         Doodad(Tools::Lua::Interpreter& interpreter,
                 Uint32 id,
@@ -37,6 +35,8 @@ namespace Client { namespace Game { namespace Engine {
         ~Doodad();
         DoodadType const& GetType() const { return this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
+
+        Body const* GetBody() const { return this->_body.get(); }
 
         //Common::Position const& GetPosition() const { return this->_physics.position; }
         //void SetPosition(Common::Position const& pos) { this->_physics.position = pos; }
@@ -50,9 +50,6 @@ namespace Client { namespace Game { namespace Engine {
 
         //Common::Physics::Node& GetPhysics() { return this->_physics; }
         //btRigidBody& GetBtBody() { return *this->_btBody; }
-
-        void SetUpdateFlag(float value) { this->_updateFlag = value; }
-        float GetUpdateFlag() const { return this->_updateFlag; }
     };
 
 }}}

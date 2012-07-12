@@ -15,6 +15,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 _id;
         Common::Physics::BodyCluster* _bodyCluster;
         std::vector<Uint32> _doodads;
+        float _updateFlag;
     public:
         Entity(Common::Physics::World& world, Uint32 id, Common::Physics::Node const& pos);
         ~Entity();
@@ -26,6 +27,12 @@ namespace Client { namespace Game { namespace Engine {
 
         std::vector<Uint32> const& GetDoodads() const { return this->_doodads; }
         Common::Physics::BodyCluster& GetBodyCluster() { return *this->_bodyCluster; }
+
+
+
+
+        void SetUpdateFlag(float value) { this->_updateFlag = value; }
+        float GetUpdateFlag() const { return this->_updateFlag; }
     };
 
 }}}

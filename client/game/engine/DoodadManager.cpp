@@ -62,36 +62,42 @@ namespace Client { namespace Game { namespace Engine {
     {
         //this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
 
-        auto it = this->_doodads.begin();
-        auto itEnd = this->_doodads.end();
-        for (; it != itEnd; ++it)
+        for (auto it = this->_entities.begin(),
+                itEnd = this->_entities.end(); it != itEnd; ++it)
         {
-            Doodad& entity = *it->second;
+            Entity& entity = *it->second;
             //btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
-            Common::Physics::Node& physics = entity.GetPhysics();
+            //Common::Physics::Node& physics = entity.GetPhysics();
 
-            btTransform wt;
-            entity.GetBtBody().getMotionState()->getWorldTransform(wt);
-            btVector3 wpos = wt.getOrigin();
+            //btTransform wt;
+            //entity.GetBtBody().getMotionState()->getWorldTransform(wt);
+            //btVector3 wpos = wt.getOrigin();
 
-            physics.position.x = wpos.x();
-            physics.position.y = wpos.y();
-            physics.position.z = wpos.z();
+            //physics.position.x = wpos.x();
+            //physics.position.y = wpos.y();
+            //physics.position.z = wpos.z();
 
-            btQuaternion wrot = wt.getRotation();
-            glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
-            physics.orientation = //glm::eulerAngles(glmRot);
-            glmRot;
+            //btQuaternion wrot = wt.getRotation();
+            //glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
+            //physics.orientation = //glm::eulerAngles(glmRot);
+            //glmRot;
 
-            float uf = it->second->GetUpdateFlag();
+            float uf = entity.GetUpdateFlag();
             uf -= 0.3f;
             if (uf < 0)
                 uf = 0;
-            it->second->SetUpdateFlag(uf);
+            entity.SetUpdateFlag(uf);
 
             //Common::Physics::MoveNode(it->second->GetPhysics(), deltaTime);
+        }
+
+
+        for (auto it = this->_doodads.begin(),
+                itEnd = this->_doodads.end(); it != itEnd; ++it)
+        {
             this->_CallDoodadFunction(it->first, "Think");
         }
+
         this->_lastTime = totalTime;
     }
 
@@ -220,7 +226,9 @@ namespace Client { namespace Game { namespace Engine {
     {
         for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
         {
-            this->_shapeRenderer->Render(it->second->GetBtBody());
+            Body const* body = it->second->GetBody();
+            if (body != 0)
+                this->_shapeRenderer->Render(*body);
         }
     }
 
