@@ -2,7 +2,7 @@ Server.Entity.RegisterPositional{
     entityName = "Tank",
 
     Spawn = function(self)
-        self.d = Server.Doodad.Spawn(self.id, "Tank", "Tank")
+        self.d = Server.Doodad.Spawn("base:Tank", "base:Tank")
     end,
 
     DoStuff = function(self)

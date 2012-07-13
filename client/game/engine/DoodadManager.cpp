@@ -88,6 +88,8 @@ namespace Client { namespace Game { namespace Engine {
                 uf = 0;
             entity.SetUpdateFlag(uf);
 
+            entity.DeprecatePhysics();
+
             //Common::Physics::MoveNode(it->second->GetPhysics(), deltaTime);
         }
 
@@ -132,7 +134,7 @@ namespace Client { namespace Game { namespace Engine {
         this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(),
                 doodadId,
                 bodyId ? &this->_engine.GetBodyManager().GetBodyType(bodyId) : 0,
-                entity.GetBodyCluster(),
+                entity,
                 *it->second);
         auto itValues = values.begin();
         auto itValuesEnd = values.end();

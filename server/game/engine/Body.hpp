@@ -19,7 +19,7 @@ namespace Server { namespace Game { namespace Engine {
         Body(Common::Physics::BodyCluster& parent, BodyType const& bodyType);
         BodyType const& GetType() const
         {
-            return reinterpret_cast<::Server::Game::Engine::BodyType const&>(this->_type);
+            return reinterpret_cast< ::Server::Game::Engine::BodyType const&>(this->_type);
         }
     };
 

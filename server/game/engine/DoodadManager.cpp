@@ -242,7 +242,10 @@ namespace Server { namespace Game { namespace Engine {
         Body* body = 0;
         if (bodyName != "")
         {
-            body = this->_engine.GetBodyManager().CreateBody(pluginId, bodyName, entity.GetBodyCluster());
+            std::string bodyName0 = Common::FieldUtils::GetResourceNameFromResource(bodyName);
+            std::string bodyPluginName = Common::FieldUtils::GetPluginNameFromResource(bodyName);
+            Uint32 bodyPluginId = this->_engine.GetWorld().GetPluginManager().GetPluginId(bodyPluginName);
+            body = this->_engine.GetBodyManager().CreateBody(bodyPluginId, bodyName0, entity.GetBodyCluster());
         }
 
         Doodad* d = new Doodad(

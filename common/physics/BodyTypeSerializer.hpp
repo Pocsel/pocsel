@@ -22,7 +22,9 @@ namespace Common { namespace Physics {
             {
                 std::vector<BodyType::ShapeNode> vec;
                 p.Read(vec);
-                return std::unique_ptr<TBodyType>(new TBodyType(vec));
+                std::unique_ptr<TBodyType> ret(new TBodyType(vec));
+                ret->CreateBtShapes();
+                return ret;
             }
 
             private:

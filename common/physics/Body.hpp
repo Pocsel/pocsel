@@ -5,7 +5,7 @@
 
 class btRigidBody;
 class btTypedConstraint;
-class btDefaultMotionState;
+struct btDefaultMotionState;
 
 namespace Common { namespace Physics {
 
@@ -38,6 +38,7 @@ namespace Common { namespace Physics {
         std::vector<BodyNode> const& GetNodes() const { return this->_nodes; }
 
         btRigidBody& GetRootBtBody() { return *this->_rootBody; }
+        btRigidBody const& GetRootBtBody() const { return *this->_rootBody; }
 
     private:
         void _BuildBodyNode(Uint32 nodeId);

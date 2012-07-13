@@ -12,7 +12,7 @@ Server.Entity.Register{
             print("Test Module nil")
         end
         Server.Message.Later(20, self.id, "SpawnBlob")
-        -- Server.Message.Later(20, self.id, "SpawnTank")
+        Server.Message.Later(25, self.id, "SpawnTank")
     end,
 
     Die = function(self) -- destructor
@@ -36,7 +36,7 @@ Server.Entity.Register{
     end,
 
     SpawnTank = function(self)
-        Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 12, 67108864), "base:Tank")
+        Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 12, 67108864), "base:Tank") -- , "base:Tank")
     end,
 }
 

@@ -10,6 +10,7 @@
 #include "client/Client.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
+#include "client/game/engine/Body.hpp"
 #include "client/resources/LocalResourceManager.hpp"
 
 #include "bullet/bullet-all.hpp"
@@ -31,38 +32,37 @@ namespace Client { namespace Game {
         Tools::Delete(this->_cube);
     }
 
-    void ShapeRenderer::Render(
-            const btRigidBody& body)
-         //Common::Physics::Node const& node)
+    void ShapeRenderer::Render(Engine::Body const& body)
     {
-        auto const& camera = this->_game.GetPlayer().GetCamera();
-
-        btTransform bodyTr;
-        body.getMotionState()->getWorldTransform(bodyTr);
-        btQuaternion const& bodyRot = bodyTr.getRotation();
-        btVector3 const& bodyPos = bodyTr.getOrigin();
-
-        glm::quat orientation((float)bodyRot.w(), (float)bodyRot.x(), (float)bodyRot.y(), (float)bodyRot.z());
-        glm::dvec3 position(bodyPos.x(), bodyPos.y(), bodyPos.z());
-        glm::vec3 relPos = glm::fvec3(position - camera.position);
-
-        this->_shader->BeginPass();
-
-        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Line);
-        {
-            const btCollisionShape* colShape = body.getCollisionShape();
-            const btSphereShape* sphereShape;
-            const btBoxShape* boxShape;
-
-            if ((sphereShape = dynamic_cast<const btSphereShape*>(colShape)) != 0)
-                this->_RenderSphere(sphereShape, orientation, relPos);
-            else if ((boxShape = dynamic_cast<const btBoxShape*>(colShape)) != 0)
-                this->_RenderBox(boxShape, orientation, relPos);
-        }
-        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
-
-
-        this->_shader->EndPass();
+        // TODO utiliser le debugdrawer de bullet ??
+//        auto const& camera = this->_game.GetPlayer().GetCamera();
+//
+//        btTransform bodyTr;
+//        body.GetRootBtBody().getMotionState()->getWorldTransform(bodyTr);
+//        btQuaternion const& bodyRot = bodyTr.getRotation();
+//        btVector3 const& bodyPos = bodyTr.getOrigin();
+//
+//        glm::quat orientation((float)bodyRot.w(), (float)bodyRot.x(), (float)bodyRot.y(), (float)bodyRot.z());
+//        glm::dvec3 position(bodyPos.x(), bodyPos.y(), bodyPos.z());
+//        glm::vec3 relPos = glm::fvec3(position - camera.position);
+//
+//        this->_shader->BeginPass();
+//
+//        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Line);
+//        {
+//            const btCollisionShape* colShape = body.getCollisionShape();
+//            const btSphereShape* sphereShape;
+//            const btBoxShape* boxShape;
+//
+//            if ((sphereShape = dynamic_cast<const btSphereShape*>(colShape)) != 0)
+//                this->_RenderSphere(sphereShape, orientation, relPos);
+//            else if ((boxShape = dynamic_cast<const btBoxShape*>(colShape)) != 0)
+//                this->_RenderBox(boxShape, orientation, relPos);
+//        }
+//        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
+//
+//
+//        this->_shader->EndPass();
     }
 
     void ShapeRenderer::_RenderBox(

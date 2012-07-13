@@ -16,6 +16,7 @@ namespace Client { namespace Game { namespace Engine {
 
     class BodyType;
     class Body;
+    class Entity;
 
     class Doodad :
         private boost::noncopyable
@@ -23,20 +24,23 @@ namespace Client { namespace Game { namespace Engine {
     private:
         DoodadType const& _type;
         Tools::Lua::Ref _self;
-        Common::Physics::BodyCluster const& bodyCluster;
+        Entity const& _entity;
         std::unique_ptr<Body> _body;
 
     public:
         Doodad(Tools::Lua::Interpreter& interpreter,
                 Uint32 id,
                 BodyType const* bodyType,
-                Common::Physics::BodyCluster& bodyCluster,
+                Entity& entity,
                 DoodadType const& type);
         ~Doodad();
         DoodadType const& GetType() const { return this->_type; }
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
 
         Body const* GetBody() const { return this->_body.get(); }
+
+        Common::Physics::Node const& GetPhysics() const;
+        float GetUpdateFlag() const;
 
         //Common::Position const& GetPosition() const { return this->_physics.position; }
         //void SetPosition(Common::Position const& pos) { this->_physics.position = pos; }

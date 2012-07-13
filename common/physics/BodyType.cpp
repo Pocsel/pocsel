@@ -27,4 +27,12 @@ namespace Common { namespace Physics {
         }
     }
 
+    void BodyType::CreateBtShapes()
+    {
+        for (auto it = this->_shapes.begin(), ite = this->_shapes.end(); it != ite; ++it)
+        {
+            it->shape = it->shapeDesc->CreateShape().release();
+        }
+    }
+
 }}

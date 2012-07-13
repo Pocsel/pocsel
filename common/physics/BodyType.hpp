@@ -37,6 +37,8 @@ namespace Common { namespace Physics {
         std::vector<Uint32> const& GetRoots() const { return this->_roots; }
         std::map<std::string, unsigned int> const& GetShapesMap() const { return this->_shapesMap; }
 
+        void CreateBtShapes();
+
     protected:
         BodyType() {}
         void _DumpTree(std::vector<unsigned int> const& shapeNodes, std::string off)

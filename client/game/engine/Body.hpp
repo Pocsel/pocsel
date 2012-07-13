@@ -16,7 +16,7 @@ namespace Client { namespace Game { namespace Engine {
         Body(Common::Physics::BodyCluster& parent, BodyType const& bodyType);
         BodyType const& GetType() const
         {
-            return reinterpret_cast<::Client::Game::Engine::BodyType const&>(this->_type);
+            return reinterpret_cast< ::Client::Game::Engine::BodyType const&>(this->_type);
         }
     };
 

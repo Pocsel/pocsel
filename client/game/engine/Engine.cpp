@@ -43,10 +43,10 @@ namespace Client { namespace Game { namespace Engine {
 
     Engine::~Engine()
     {
-        Tools::Delete(this->_physicsManager);
-        Tools::Delete(this->_bodyManager);
         Tools::Delete(this->_modelManager);
         Tools::Delete(this->_doodadManager);
+        Tools::Delete(this->_physicsManager);
+        Tools::Delete(this->_bodyManager);
         Tools::Delete(this->_interpreter);
     }
 

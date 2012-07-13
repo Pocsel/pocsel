@@ -176,6 +176,12 @@ namespace Client { namespace Resources {
 
     Tools::Models::MqmModel const& ResourceManager::GetMqmModel(Uint32 id)
     {
+        if (id == 0)
+        {
+            if (this->_models.count(0) == 0)
+                this->_InitErrorModel();
+            return *this->_models[0];
+        }
         auto it = this->_models.find(id);
         if (it == this->_models.end())
         {

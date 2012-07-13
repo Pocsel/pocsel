@@ -19,15 +19,17 @@ namespace Common { namespace Physics {
     struct Node;
 }}
 
-namespace Client { namespace Game {
-    class Game;
-}}
+namespace Client { namespace Game { namespace Engine {
+    class Body;
+}}}
 
 class btRigidBody;
 class btBoxShape;
 class btSphereShape;
 
 namespace Client { namespace Game {
+
+    class Game;
 
     class ShapeRenderer
     {
@@ -42,9 +44,7 @@ namespace Client { namespace Game {
     public:
         ShapeRenderer(Game& game);
         ~ShapeRenderer();
-        void Render(
-                btRigidBody const& body);
-        //Common::Physics::Node const& node);
+        void Render(Engine::Body const& body);
 
     private:
         void _RenderBox(
