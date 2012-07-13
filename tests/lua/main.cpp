@@ -5,6 +5,7 @@
 #include "tools/lua/Iterator.hpp"
 #include "tools/lua/MetaTable.hpp"
 #include "tools/lua/utils/Utils.hpp"
+#include "tools/lua/ResourceManager.hpp"
 #include "tools/Timer.hpp"
 
 #define STRINGIFY(...) #__VA_ARGS__
@@ -141,7 +142,7 @@ static void MetaTableCpp(Interpreter& i)
 {
     struct A
     {
-        void Print(int nb) { Tools::log << "A::Print()\n"; }
+        void Print(int /* nb */) { Tools::log << "A::Print()\n"; }
     };
 
     MetaTable::Create(i, A());
@@ -268,6 +269,42 @@ static void RegisteredTypes(Interpreter& i)
         std::cout << "(" << m[i][0] << " " << m[i][1] << " " << m[i][2] << " " << m[i][3] << ")\n";
 }
 
+static void Resources(Interpreter& i)
+{
+    struct Plop
+    {
+        Plop() : field1(0) {}
+        Plop(int field1, std::string field2 = std::string()) : field1(field1), field2(field2) {}
+        bool operator ==(Plop const& p) const { return this->field1 == p.field1 && this->field2 == p.field2; }
+        bool operator <(Plop const& p) const { return this->field1 < p.field1; }
+        int field1;
+        std::string field2;
+    };
+    Plop invalidResource(0);
+    ResourceManager<Plop> manager(i, invalidResource);
+
+    Plop maResource1(12, "resource 1");
+    Plop maResource2(24, "resource 2");
+    i.Globals().Set("maResource1", manager.NewResource(maResource1));
+    i.Globals().Set("maResource2", manager.NewResource(maResource2));
+    i.DoString(STRINGIFY(
+                print("---- Test resources ----")
+                print(" -- avant delete")
+                print("type of maResource1: ", type(maResource1))
+                print("call: ", tostring(maResource1()))
+                print("type of maResource2: ", type(maResource2))
+                print("call: ", tostring(maResource2()))
+                ));
+    manager.DeleteResource(maResource1);
+    i.DoString(STRINGIFY(
+                print(" -- apres delete")
+                print("type of maResource1: ", type(maResource1))
+                print("call: ", tostring(maResource1()))
+                print("type of maResource2: ", type(maResource2))
+                print("call: ", tostring(maResource2()))
+                ));
+}
+
 int main(int, char**)
 {
     {
@@ -297,6 +334,9 @@ int main(int, char**)
 
         // Test les types Vector et matrix
         RegisteredTypes(i);
+
+        // Test ResourceManager
+        Resources(i);
 
     }
 
