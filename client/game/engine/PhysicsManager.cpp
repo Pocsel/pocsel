@@ -3,6 +3,8 @@
 #include "client/game/engine/Engine.hpp"
 #include "client/game/engine/DoodadManager.hpp"
 
+#include "client/game/BulletDebugDrawer.hpp"
+
 #include "common/physics/Node.hpp"
 #include "common/physics/Vector.hpp"
 #include "common/physics/World.hpp"
@@ -32,6 +34,10 @@ namespace Client { namespace Game { namespace Engine {
         _lastTime(0)
     {
         this->_world = new Common::Physics::World();
+
+        this->_debugDrawer = new BulletDebugDrawer(this->_engine.GetGame());
+        this->_debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+        this->_world->GetBtWorld().setDebugDrawer(this->_debugDrawer);
         //this->_world->GetBtWorld().setInternalTickCallback(_cb::_TickCallback, this);
     }
 

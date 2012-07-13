@@ -156,6 +156,8 @@ namespace Common { namespace Physics {
         this->_body = new btRigidBody(rbInfo);
         this->_body->setCenterOfMassTransform(tr);
         this->_body->setUserPointer(this);
+
+        this->_body->setFlags(this->_body->getFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
     }
 
 }}

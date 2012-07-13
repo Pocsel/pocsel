@@ -6,7 +6,10 @@
 #include "client/game/engine/Entity.hpp"
 #include "client/game/engine/PhysicsManager.hpp"
 #include "client/game/engine/BodyManager.hpp"
+
 #include "client/game/ShapeRenderer.hpp"
+#include "client/game/BulletDebugDrawer.hpp"
+
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/physics/World.hpp"
@@ -226,12 +229,16 @@ namespace Client { namespace Game { namespace Engine {
 
     void DoodadManager::Render()
     {
-        for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
-        {
-            Body const* body = it->second->GetBody();
-            if (body != 0)
-                this->_shapeRenderer->Render(*body);
-        }
+        this->_engine.GetPhysicsManager().GetDebugDrawer().BeginDraw();
+        this->_engine.GetPhysicsManager().GetWorld().GetBtWorld().debugDrawWorld();
+        this->_engine.GetPhysicsManager().GetDebugDrawer().EndDraw();
+
+        //for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
+        //{
+        //    Body const* body = it->second->GetBody();
+        //    if (body != 0)
+        //        this->_shapeRenderer->Render(*body);
+        //}
     }
 
     void DoodadManager::_CallDoodadFunction(Uint32 doodadId, std::string const& function)
