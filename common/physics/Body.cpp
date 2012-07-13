@@ -15,14 +15,17 @@ namespace Common { namespace Physics {
         _rootBody(0),
         _rootMotionState(0)
     {
-        static btCollisionShape* emptyShape = new btEmptyShape();
+        btScalar mass(0.00000001);
+        btVector3 localInertia(0, 0, 0);
+        static btCollisionShape* emptyShape = new btEmptyShape(); //btSphereShape(1);
 
         btTransform tr;
         this->_parent.GetBody().getMotionState()->getWorldTransform(tr);
 
         this->_rootMotionState = new btDefaultMotionState(tr);
-        btRigidBody::btRigidBodyConstructionInfo rootInfo(0.00001, this->_rootMotionState, emptyShape, btVector3());
+        btRigidBody::btRigidBodyConstructionInfo rootInfo(mass, this->_rootMotionState, emptyShape, localInertia);
         this->_rootBody = new btRigidBody(rootInfo);
+        this->_rootBody->setActivationState(DISABLE_DEACTIVATION);
         this->_parent.GetWorld().GetBtWorld().addRigidBody(this->_rootBody);
         for (auto rootsIt = this->_type.GetRoots().begin(),
                 rootsIte = this->_type.GetRoots().end();
@@ -31,6 +34,8 @@ namespace Common { namespace Physics {
             this->_BuildBodyNode(*rootsIt);
         }
         this->_parent.AddConstraint(this);
+
+        this->Dump();
     }
 
     void Body::_BuildBodyNode(Uint32 nodeId)
@@ -60,14 +65,55 @@ namespace Common { namespace Physics {
         tr.mult(parentTr, thisTr);
         node.motionState = new btDefaultMotionState(tr);
 
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(60, node.motionState, shape.shape, btVector3());
-        node.body = new btRigidBody(rbInfo);
+        std::cout << "_BuildBodyNode: \n" <<
+            "tr: " << tr.getOrigin().x() <<
+            ", " << tr.getOrigin().y() <<
+            ", " << tr.getOrigin().z() <<
+            "\n" <<
+            "thisTr: " << thisTr.getOrigin().x() <<
+            ", " << thisTr.getOrigin().y() <<
+            ", " << thisTr.getOrigin().z() <<
+            "\n"
+            <<
+            "parentTr: " << parentTr.getOrigin().x() <<
+            ", " << parentTr.getOrigin().y() <<
+            ", " << parentTr.getOrigin().z() <<
+            "\n"
+            ;
 
-        node.constraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, thisTr, false);
+        {
+            btTransform testTr;
+            node.motionState->getWorldTransform(testTr);
+            std::cout <<
+                "testTr: " << testTr.getOrigin().x() <<
+                ", " << testTr.getOrigin().y() <<
+                ", " << testTr.getOrigin().z() <<
+                "\n";
+        }
+
+        btScalar mass(60);
+        btVector3 localInertia(0, 0, 0);
+
+        shape.shape->calculateLocalInertia(mass, localInertia);
+
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, node.motionState, shape.shape, localInertia);
+        node.body = new btRigidBody(rbInfo);
+        node.body->setActivationState(DISABLE_DEACTIVATION);
+
+        node.constraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, thisTr.getIdentity(), false);
 
         this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
-        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint);
+        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint, true);
 
+        {
+            btTransform testTr;
+            node.motionState->getWorldTransform(testTr);
+            std::cout <<
+                "testTr: " << testTr.getOrigin().x() <<
+                ", " << testTr.getOrigin().y() <<
+                ", " << testTr.getOrigin().z() <<
+                "\n";
+        }
         for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
                 childIte = this->_type.GetShapes()[nodeId].children.end();
                 childIt != childIte; ++childIt)
@@ -100,6 +146,30 @@ namespace Common { namespace Physics {
         Tools::Delete(node.constraint);
         this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
         Tools::Delete(node.body);
+    }
+
+    void Body::Dump() const
+    {
+        std::cout << "      Body::Dump()\n";
+
+        {
+            btTransform tr;
+            this->_rootMotionState->getWorldTransform(tr);
+            std::cout << "         " <<
+                tr.getOrigin().x() << ", " <<
+                tr.getOrigin().y() << ", " <<
+                tr.getOrigin().z() << "\n";
+        }
+
+        for (auto it = this->_nodes.begin(), ite = this->_nodes.end(); it != ite; ++it)
+        {
+            btTransform tr;
+            it->motionState->getWorldTransform(tr);
+            std::cout << "             " <<
+                tr.getOrigin().x() << ", " <<
+                tr.getOrigin().y() << ", " <<
+                tr.getOrigin().z() << "\n";
+        }
     }
 
 }}

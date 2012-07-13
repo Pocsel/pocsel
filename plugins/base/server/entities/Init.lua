@@ -11,8 +11,8 @@ Server.Entity.Register{
         else
             print("Test Module nil")
         end
-        Server.Message.Later(20, self.id, "SpawnBlob")
-        Server.Message.Later(25, self.id, "SpawnTank")
+        -- Server.Message.Later(20, self.id, "SpawnBlob")
+        Server.Message.Later(15, self.id, "SpawnTank")
     end,
 
     Die = function(self) -- destructor

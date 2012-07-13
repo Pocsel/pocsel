@@ -43,7 +43,7 @@ Server.Body.Register{
             children = {
                 {
                     name = "Turret",
-                    position = { 0, 3, 0 }, -- par rapport au parent (noeud Hull)
+                    position = { 0, 10, 0 }, -- par rapport au parent (noeud Hull)
                     orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                     shape = {
                         shapeType = "sphere",
@@ -55,7 +55,7 @@ Server.Body.Register{
                     children = {
                         {
                             name = "Gun",
-                            position = { 3, 0, 0 }, -- par rapport au parent (noeud Hull)
+                            position = { 10, 0, 0 }, -- par rapport au parent (noeud Hull)
                             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                             shape = {
                                 shapeType = "box",

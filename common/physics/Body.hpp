@@ -12,7 +12,8 @@ namespace Common { namespace Physics {
     class BodyType;
     class BodyCluster;
 
-    class Body
+    class Body :
+        private boost::noncopyable
     {
     public:
         struct BodyNode
@@ -39,6 +40,8 @@ namespace Common { namespace Physics {
 
         btRigidBody& GetRootBtBody() { return *this->_rootBody; }
         btRigidBody const& GetRootBtBody() const { return *this->_rootBody; }
+
+        void Dump() const;
 
     private:
         void _BuildBodyNode(Uint32 nodeId);

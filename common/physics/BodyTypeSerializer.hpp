@@ -42,6 +42,7 @@ namespace Tools {
             p.Write(sn.name);
             p.Write(sn.children);
             p.Write(sn.parent);
+            p.Write(sn.position);
             p.Write(*sn.shapeDesc);
         }
 
@@ -50,6 +51,7 @@ namespace Tools {
             p.Read(sn.name);
             p.Read(sn.children);
             p.Read(sn.parent);
+            p.Read(sn.position);
             sn.shapeDesc = p.Read<Common::Physics::ShapeDesc>().release();
         }
 

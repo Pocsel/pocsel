@@ -42,6 +42,13 @@ namespace Server { namespace Game { namespace Engine {
 
         btVector3 const& av = btBody.getAngularVelocity();
         physics.angularVelocity = glm::vec3(av.x(), av.y(), av.z());
+
+        //std::cout << "positional entity: " <<
+        //    wt.getOrigin().x() << ", " <<
+        //    wt.getOrigin().y() << ", " <<
+        //    wt.getOrigin().z() << "\n";
+
+        //this->_bodyCluster->Dump();
     }
 
 }}}

@@ -30,6 +30,8 @@ namespace Common { namespace Physics {
 
         void AddConstraint(Body* body);
         void RemoveConstraint(Body* body);
+
+        void Dump() const;
     };
 
 }}
