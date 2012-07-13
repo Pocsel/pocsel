@@ -11,22 +11,22 @@ namespace Common { namespace Physics {
     Body::Body(BodyCluster& parent, BodyType const& bodyType) :
         _parent(parent),
         _type(bodyType),
-        _nodes(bodyType.GetShapes().size()),
-        _rootBody(0),
-        _rootMotionState(0)
+        _nodes(bodyType.GetShapes().size())//,
+        //_rootBody(0),
+        //_rootMotionState(0)
     {
-        btScalar mass(0.00000001);
-        btVector3 localInertia(0, 0, 0);
-        static btCollisionShape* emptyShape = new btEmptyShape(); //btSphereShape(1);
+        //btScalar mass(0.00000001);
+        //btVector3 localInertia(0, 0, 0);
+        //static btCollisionShape* emptyShape = new btEmptyShape(); //btSphereShape(1);
 
-        btTransform tr;
-        this->_parent.GetBody().getMotionState()->getWorldTransform(tr);
+        //btTransform tr;
+        //this->_parent.GetBody().getMotionState()->getWorldTransform(tr);
 
-        this->_rootMotionState = new btDefaultMotionState(tr);
-        btRigidBody::btRigidBodyConstructionInfo rootInfo(mass, this->_rootMotionState, emptyShape, localInertia);
-        this->_rootBody = new btRigidBody(rootInfo);
-        this->_rootBody->setActivationState(DISABLE_DEACTIVATION);
-        this->_parent.GetWorld().GetBtWorld().addRigidBody(this->_rootBody);
+        //this->_rootMotionState = new btDefaultMotionState(tr);
+        //btRigidBody::btRigidBodyConstructionInfo rootInfo(mass, this->_rootMotionState, emptyShape, localInertia);
+        //this->_rootBody = new btRigidBody(rootInfo);
+        //this->_rootBody->setActivationState(DISABLE_DEACTIVATION);
+        //this->_parent.GetWorld().GetBtWorld().addRigidBody(this->_rootBody);
         for (auto rootsIt = this->_type.GetRoots().begin(),
                 rootsIte = this->_type.GetRoots().end();
                 rootsIt != rootsIte; ++rootsIt)
@@ -44,7 +44,7 @@ namespace Common { namespace Physics {
         // step 2 - créer les fils (avec eux-meme qui créent leur constraint)
         BodyNode& node = this->_nodes[nodeId];
         BodyType::ShapeNode const& shape = this->_type.GetShapes()[nodeId];
-        btRigidBody* parent = shape.parent == -1 ? this->_rootBody : this->_nodes[shape.parent].body;
+        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBody() : this->_nodes[shape.parent].body;
 
         btTransform parentTr;
         parent->getMotionState()->getWorldTransform(parentTr);
@@ -100,7 +100,66 @@ namespace Common { namespace Physics {
         node.body = new btRigidBody(rbInfo);
         node.body->setActivationState(DISABLE_DEACTIVATION);
 
-        node.constraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, thisTr.getIdentity(), false);
+        btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform(), true);
+
+        //{
+        //    btVector3 anglLimit(0.01, 0.01, 0.01);
+        //    newConstraint->setAngularLowerLimit(anglLimit);
+        //}
+        //{
+        //    btVector3 anglLimit(-0.01, -0.01, -0.01);
+        //    newConstraint->setAngularUpperLimit(anglLimit);
+        //}
+
+        //{
+        //    btVector3 anglLimit(0.01, 0.01, 0.01);
+        //    newConstraint->setLinearLowerLimit(anglLimit);
+        //}
+        //{
+        //    btVector3 anglLimit(-0.01, -0.01, -0.01);
+        //    newConstraint->setLinearUpperLimit(anglLimit);
+        //}
+
+
+        {
+            btVector3 anglTest;
+            newConstraint->getAngularLowerLimit(anglTest);
+            std::cout <<
+                "anglTest: " <<
+                anglTest.x() << ", " <<
+                anglTest.y() << ", " <<
+                anglTest.z() << "\n";
+        }
+        {
+            btVector3 anglTest;
+            newConstraint->getAngularUpperLimit(anglTest);
+            std::cout <<
+                "anglTest: " <<
+                anglTest.x() << ", " <<
+                anglTest.y() << ", " <<
+                anglTest.z() << "\n";
+        }
+
+        {
+            btVector3 anglTest;
+            newConstraint->getLinearLowerLimit(anglTest);
+            std::cout <<
+                "linTest: " <<
+                anglTest.x() << ", " <<
+                anglTest.y() << ", " <<
+                anglTest.z() << "\n";
+        }
+        {
+            btVector3 anglTest;
+            newConstraint->getLinearUpperLimit(anglTest);
+            std::cout <<
+                "linTest: " <<
+                anglTest.x() << ", " <<
+                anglTest.y() << ", " <<
+                anglTest.z() << "\n";
+        }
+
+        node.constraint = newConstraint;
 
         this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
         this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint, true);
@@ -129,9 +188,9 @@ namespace Common { namespace Physics {
         {
             this->_CleanBodyNode(*rootsIt);
         }
-        this->_parent.GetWorld().GetBtWorld().removeRigidBody(this->_rootBody);
-        Tools::Delete(this->_rootBody);
-        Tools::Delete(this->_rootMotionState);
+        //this->_parent.GetWorld().GetBtWorld().removeRigidBody(this->_rootBody);
+        //Tools::Delete(this->_rootBody);
+        //Tools::Delete(this->_rootMotionState);
     }
 
     void Body::_CleanBodyNode(Uint32 nodeId)
@@ -148,18 +207,28 @@ namespace Common { namespace Physics {
         Tools::Delete(node.body);
     }
 
+    btRigidBody& Body::GetRootBtBody()
+    {
+        return this->_parent.GetBody();
+    }
+
+    btRigidBody const& Body::GetRootBtBody() const
+    {
+        return this->_parent.GetBody();
+    }
+
     void Body::Dump() const
     {
         std::cout << "      Body::Dump()\n";
 
-        {
-            btTransform tr;
-            this->_rootMotionState->getWorldTransform(tr);
-            std::cout << "         " <<
-                tr.getOrigin().x() << ", " <<
-                tr.getOrigin().y() << ", " <<
-                tr.getOrigin().z() << "\n";
-        }
+        //{
+        //    btTransform tr;
+        //    this->_rootMotionState->getWorldTransform(tr);
+        //    std::cout << "         " <<
+        //        tr.getOrigin().x() << ", " <<
+        //        tr.getOrigin().y() << ", " <<
+        //        tr.getOrigin().z() << "\n";
+        //}
 
         for (auto it = this->_nodes.begin(), ite = this->_nodes.end(); it != ite; ++it)
         {

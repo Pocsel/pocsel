@@ -25,6 +25,7 @@ namespace Common { namespace Physics {
         BodyCluster(World& world, Node const& pos);
         ~BodyCluster();
 
+        btRigidBody& GetBody() { return *this->_body; }
         btRigidBody const& GetBody() const { return *this->_body; }
         World& GetWorld() { return this->_world; }
 

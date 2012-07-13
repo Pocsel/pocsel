@@ -29,8 +29,6 @@ namespace Common { namespace Physics {
         BodyCluster& _parent;
         BodyType const& _type;
         std::vector<BodyNode> _nodes;
-        btRigidBody* _rootBody;
-        btDefaultMotionState* _rootMotionState;
 
     public:
         Body(BodyCluster& parent, BodyType const& bodyType);
@@ -38,8 +36,8 @@ namespace Common { namespace Physics {
         BodyType const& GetType() const { return this->_type; }
         std::vector<BodyNode> const& GetNodes() const { return this->_nodes; }
 
-        btRigidBody& GetRootBtBody() { return *this->_rootBody; }
-        btRigidBody const& GetRootBtBody() const { return *this->_rootBody; }
+        btRigidBody& GetRootBtBody();// { return *this->_rootBody; }
+        btRigidBody const& GetRootBtBody() const;// { return *this->_rootBody; }
 
         void Dump() const;
 
