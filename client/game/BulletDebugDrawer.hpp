@@ -7,6 +7,7 @@ namespace Tools {
     class IRenderer;
     namespace Renderers {
         class IShaderProgram;
+        class IShaderParameter;
         namespace Utils {
             class Sphere;
             class Cube;
@@ -29,6 +30,7 @@ namespace Client { namespace Game {
         Game& _game;
         Tools::IRenderer& _renderer;
         Tools::Renderers::IShaderProgram* _shader;
+        Tools::Renderers::IShaderParameter* _shaderColor;
 
         std::unique_ptr<Tools::Renderers::Utils::Sphere> _sphere;
         std::unique_ptr<Tools::Renderers::Utils::Cube> _cube;
@@ -100,6 +102,9 @@ namespace Client { namespace Game {
                 btScalar distance, int lifeTime, const btVector3& color);
         virtual void setDebugMode(int debugMode);
         virtual int getDebugMode() const;
+
+    private:
+        void _SetColor(btVector3 const& color);
     };
 
 }}

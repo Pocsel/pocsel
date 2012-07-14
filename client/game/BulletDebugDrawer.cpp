@@ -18,7 +18,8 @@ namespace Client { namespace Game {
         _game(game),
         _renderer(renderer)
     {
-        this->_shader = &game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fx");
+        this->_shader = &game.GetClient().GetLocalResourceManager().GetShader("BaseShaderColorParam.fx");
+        this->_shaderColor = &this->_shader->GetParameter("colorParam");
     }
 
     BulletDebugDrawer::~BulletDebugDrawer()
@@ -47,7 +48,7 @@ namespace Client { namespace Game {
 
     void BulletDebugDrawer::drawLine(
             const btVector3& from, const btVector3& to,
-            const btVector3& /*fromColor*/, const btVector3& /*toColor*/)
+            const btVector3& fromColor, const btVector3& /*toColor*/)
     {
         if (this->_line.get() == 0)
             this->_line.reset(new Tools::Renderers::Utils::Line(this->_renderer));
@@ -69,7 +70,21 @@ namespace Client { namespace Game {
                 glm::fvec3(0, 0, 0),
                 glm::fvec3(tf.x(), tf.y(), tf.z()));
 
+        this->_SetColor(fromColor);
         this->_line->Render();
+    }
+
+    void BulletDebugDrawer::_SetColor(btVector3 const& fromColor)
+    {
+        glm::vec4 color(fromColor.x(), fromColor.y(), fromColor.z(), 1.0);
+        for (unsigned int i = 0; i < 4; ++i)
+        {
+            if (color[i] < 0.01)
+                color[i] = 0.01;
+            if (color[i] > 0.99)
+                color[i] = 0.99;
+        }
+        this->_shaderColor->Set(color);
     }
 
     void BulletDebugDrawer::drawLine(
@@ -79,7 +94,7 @@ namespace Client { namespace Game {
         this->drawLine(from, to, color, color);
     }
 
-    void BulletDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& /*color*/)
+    void BulletDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color)
     {
         if (this->_sphere.get() == 0)
             this->_sphere.reset(new Tools::Renderers::Utils::Sphere(this->_renderer));
@@ -101,6 +116,7 @@ namespace Client { namespace Game {
                     )
                 );
 
+        this->_SetColor(color);
         this->_sphere->Render();
     }
 
@@ -114,7 +130,7 @@ namespace Client { namespace Game {
 
     void BulletDebugDrawer::drawBox(
             const btVector3& bbMin, const btVector3& bbMax,
-            const btTransform& trans, const btVector3& /*color*/)
+            const btTransform& trans, const btVector3& color)
     {
         if (this->_cube.get() == 0)
             this->_cube.reset(new Tools::Renderers::Utils::Cube(this->_renderer));
@@ -137,10 +153,11 @@ namespace Client { namespace Game {
                     )
                 );
 
+        this->_SetColor(color);
         this->_cube->Render();
     }
 
-    void BulletDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, const btVector3& /*color*/)
+    void BulletDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, const btVector3& color)
     {
         if (this->_cube.get() == 0)
             this->_cube.reset(new Tools::Renderers::Utils::Cube(this->_renderer));
@@ -159,6 +176,7 @@ namespace Client { namespace Game {
                     )
                 );
 
+        this->_SetColor(color);
         this->_cube->Render();
     }
 
