@@ -10,6 +10,7 @@ namespace Tools {
         namespace Utils {
             class Sphere;
             class Cube;
+            class Line;
         }
     }
 }
@@ -31,6 +32,7 @@ namespace Client { namespace Game {
 
         std::unique_ptr<Tools::Renderers::Utils::Sphere> _sphere;
         std::unique_ptr<Tools::Renderers::Utils::Cube> _cube;
+        std::unique_ptr<Tools::Renderers::Utils::Line> _line;
 
     public:
         BulletDebugDrawer(Game& game, Tools::IRenderer& renderer);

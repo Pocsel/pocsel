@@ -12,9 +12,11 @@ namespace Tools { namespace Renderers { namespace Utils {
         std::unique_ptr<IVertexBuffer> _vertexBuffer;
 
     public:
-        Line(IRenderer& renderer, glm::vec3 const& start, glm::vec3 const& end);
+        Line(IRenderer& renderer);
 
         void Render();
+
+        void Set(glm::vec3 const& start, glm::vec3 const& end);
     };
 
 }}}

@@ -49,19 +49,27 @@ namespace Client { namespace Game {
             const btVector3& from, const btVector3& to,
             const btVector3& /*fromColor*/, const btVector3& /*toColor*/)
     {
+        if (this->_line.get() == 0)
+            this->_line.reset(new Tools::Renderers::Utils::Line(this->_renderer));
+
         btVector3 f = from - this->_cameraPos;
         btVector3 tf = to - from;
 
-        Tools::Renderers::Utils::Line line(
-                this->_renderer,
-                glm::fvec3(0, 0, 0),
-                glm::fvec3(tf.x(), tf.y(), tf.z()));
+
+        //Tools::Renderers::Utils::Line line(
+        //        this->_renderer,
+        //        glm::fvec3(0, 0, 0),
+        //        glm::fvec3(tf.x(), tf.y(), tf.z()));
 
         this->_renderer.SetModelMatrix(
                 glm::translate<float>(glm::fvec3(f.x(), f.y(), f.z()))
                 );
 
-        line.Render();
+        this->_line->Set(
+                glm::fvec3(0, 0, 0),
+                glm::fvec3(tf.x(), tf.y(), tf.z()));
+
+        this->_line->Render();
     }
 
     void BulletDebugDrawer::drawLine(
@@ -130,7 +138,6 @@ namespace Client { namespace Game {
                 );
 
         this->_cube->Render();
-        std::cout << "box\n";
     }
 
     void BulletDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, const btVector3& /*color*/)

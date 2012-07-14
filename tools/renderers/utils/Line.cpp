@@ -4,10 +4,33 @@
 
 namespace Tools { namespace Renderers { namespace Utils {
 
-    Line::Line(IRenderer& renderer, glm::vec3 const& start, glm::vec3 const& end)
+    Line::Line(IRenderer& renderer)
         : _renderer(renderer)
     {
         this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
+        float vertices[9];
+        vertices[0] = 0;
+        vertices[1] = 0;
+        vertices[2] = 0;
+        vertices[3] = 0;
+        vertices[4] = 0;
+        vertices[5] = 0;
+        vertices[6] = 1;
+        vertices[7] = 1;
+        vertices[8] = 1;
+        this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3); // position
+        this->_vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
+    }
+
+    void Line::Render()
+    {
+        this->_vertexBuffer->Bind();
+        this->_renderer.DrawVertexBuffer(0, 3);//, Renderers::DrawingMode::Lines);
+        this->_vertexBuffer->Unbind();
+    }
+
+    void Line::Set(glm::vec3 const& start, glm::vec3 const& end)
+    {
         float vertices[9];
         vertices[0] = start.x;
         vertices[1] = start.y;
@@ -18,15 +41,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         vertices[6] = end.x;
         vertices[7] = end.y;
         vertices[8] = end.z;
-        this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3); // position
         this->_vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
-    }
-
-    void Line::Render()
-    {
-        this->_vertexBuffer->Bind();
-        this->_renderer.DrawVertexBuffer(0, 3);//, Renderers::DrawingMode::Lines);
-        this->_vertexBuffer->Unbind();
     }
 
 }}}

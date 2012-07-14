@@ -11,14 +11,14 @@ namespace Common { namespace Physics {
         _motionState(0),
         _body(0)
     {
-        btScalar mass(0.00000001);
+        btScalar mass(0.0000000000001);
         btVector3 localInertia(0, 0, 0);
 
         static btCollisionShape* emptyShape = 0;
         if (emptyShape == 0)
         {
-            emptyShape = new btSphereShape(1);//btEmptyShape();
-            emptyShape->calculateLocalInertia(mass, localInertia);
+            emptyShape = new btEmptyShape(); //btSphereShape(1);//btEmptyShape();
+            //emptyShape->calculateLocalInertia(mass, localInertia);
         }
 
         btTransform startTransform;
@@ -33,6 +33,7 @@ namespace Common { namespace Physics {
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, _motionState, emptyShape, localInertia);
         _body = new btRigidBody(rbInfo);
         _body->setActivationState(DISABLE_DEACTIVATION);
+        this->_body->setGravity(btVector3(0, 0, 0));
 
         _body->setUserPointer(this);
 
@@ -56,9 +57,6 @@ namespace Common { namespace Physics {
         btTypedConstraint*& constraint = this->_constraints[body];
         btTransform identity;
         identity.setIdentity();
-        //constraint = new btGeneric6DofConstraint(*this->_body, body->GetRootBtBody(), identity, identity, true);
-
-        //this->_world.GetBtWorld().addConstraint(constraint, true);
     }
 
     void BodyCluster::RemoveConstraint(Body* body)
@@ -67,9 +65,6 @@ namespace Common { namespace Physics {
 
         btTypedConstraint* constraint = this->_constraints[body];
         this->_constraints.erase(body);
-
-        //this->_world.GetBtWorld().removeConstraint(constraint);
-        //Tools::Delete(constraint);
     }
 
     void BodyCluster::Dump() const

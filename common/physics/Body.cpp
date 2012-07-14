@@ -11,22 +11,8 @@ namespace Common { namespace Physics {
     Body::Body(BodyCluster& parent, BodyType const& bodyType) :
         _parent(parent),
         _type(bodyType),
-        _nodes(bodyType.GetShapes().size())//,
-        //_rootBody(0),
-        //_rootMotionState(0)
+        _nodes(bodyType.GetShapes().size())
     {
-        //btScalar mass(0.00000001);
-        //btVector3 localInertia(0, 0, 0);
-        //static btCollisionShape* emptyShape = new btEmptyShape(); //btSphereShape(1);
-
-        //btTransform tr;
-        //this->_parent.GetBody().getMotionState()->getWorldTransform(tr);
-
-        //this->_rootMotionState = new btDefaultMotionState(tr);
-        //btRigidBody::btRigidBodyConstructionInfo rootInfo(mass, this->_rootMotionState, emptyShape, localInertia);
-        //this->_rootBody = new btRigidBody(rootInfo);
-        //this->_rootBody->setActivationState(DISABLE_DEACTIVATION);
-        //this->_parent.GetWorld().GetBtWorld().addRigidBody(this->_rootBody);
         for (auto rootsIt = this->_type.GetRoots().begin(),
                 rootsIte = this->_type.GetRoots().end();
                 rootsIt != rootsIte; ++rootsIt)
@@ -101,6 +87,9 @@ namespace Common { namespace Physics {
         node.body->setActivationState(DISABLE_DEACTIVATION);
 
         btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform(), true);
+
+        btScalar len = thisTr.getOrigin().length();
+        newConstraint->setDbgDrawSize(len > 1.0 ? len * 0.5 : 0.5);
 
         //{
         //    btVector3 anglLimit(0.01, 0.01, 0.01);

@@ -36,8 +36,8 @@ namespace Common { namespace Physics {
         BodyType const& GetType() const { return this->_type; }
         std::vector<BodyNode> const& GetNodes() const { return this->_nodes; }
 
-        btRigidBody& GetRootBtBody();// { return *this->_rootBody; }
-        btRigidBody const& GetRootBtBody() const;// { return *this->_rootBody; }
+        btRigidBody& GetRootBtBody();
+        btRigidBody const& GetRootBtBody() const;
 
         void Dump() const;
 
