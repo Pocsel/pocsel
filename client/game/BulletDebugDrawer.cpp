@@ -8,15 +8,21 @@
 #include "tools/IRenderer.hpp"
 
 #include "tools/renderers/utils/Line.hpp"
+#include "tools/renderers/utils/Cube.hpp"
+#include "tools/renderers/utils/Sphere.hpp"
 
 namespace Client { namespace Game {
 
     BulletDebugDrawer::BulletDebugDrawer(Game& game, Tools::IRenderer& renderer) :
+        _debugMode(0),
         _game(game),
-        _renderer(renderer),
-        _debugMode(0)
+        _renderer(renderer)
     {
         this->_shader = &game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fx");
+    }
+
+    BulletDebugDrawer::~BulletDebugDrawer()
+    {
     }
 
     void BulletDebugDrawer::BeginDraw()
@@ -29,77 +35,129 @@ namespace Client { namespace Game {
 
         this->_shader->BeginPass();
         this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Line);
-//        this->_renderer.SetProjectionMatrix(
-//                glm::mat4x4()
-//                //camera.projection
-//                );
-//        this->_renderer.SetModelMatrix(
-//                glm::mat4x4()
-//                //camera.projection
-//                );
-                //camera.projection
-//                glm::translate<float>(
-//                    glm::fvec3(pos)
-//                    )
-//                *
-                //glm::toMat4(camera.orientation)
-//                *
-//                glm::scale(
-//                    glm::fvec3(halfExtents.x(), halfExtents.y(), halfExtents.z())
-//                    )
-//                );
+        this->_renderer.SetCullMode(Tools::Renderers::CullMode::None);
     }
 
     void BulletDebugDrawer::EndDraw()
     {
+        this->_renderer.SetCullMode(Tools::Renderers::CullMode::Clockwise);
         this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
         this->_shader->EndPass();
     }
 
-    void BulletDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& fromColor, const btVector3& toColor)
+    void BulletDebugDrawer::drawLine(
+            const btVector3& from, const btVector3& to,
+            const btVector3& /*fromColor*/, const btVector3& /*toColor*/)
     {
         btVector3 f = from - this->_cameraPos;
-        btVector3 t = to - this->_cameraPos;
-
-        btVector3 tf = t - f;
-
-        //std::cout << "f: " <<
-        //    f.x() << ", " << f.y() << ", " << f.z() << "\n";
-        //std::cout << "from: " <<
-        //    from.x() << ", " << from.y() << ", " << from.z() << "\n";
+        btVector3 tf = to - from;
 
         Tools::Renderers::Utils::Line line(
                 this->_renderer,
-                glm::fvec3(0, 0, 0),//f.x(), f.y(), f.z()),
+                glm::fvec3(0, 0, 0),
                 glm::fvec3(tf.x(), tf.y(), tf.z()));
-                //glm::fvec3(t.x(), t.y(), t.z()));
 
         this->_renderer.SetModelMatrix(
                 glm::translate<float>(glm::fvec3(f.x(), f.y(), f.z()))
-                //glm::mat4x4()
-                //camera.projection
                 );
-        //glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());
-        line.Render();
-        //glColor3f(toColor.getX(), toColor.getY(), toColor.getZ());
 
-        //glBegin(GL_LINES);
-        //glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());
-        //glVertex3d(f.getX(), f.getY(), f.getZ());
-        //glColor3f(toColor.getX(), toColor.getY(), toColor.getZ());
-        //glVertex3d(t.getX(), t.getY(), t.getZ());
-        //glEnd();
+        line.Render();
     }
 
-    void BulletDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& color)
+    void BulletDebugDrawer::drawLine(
+            const btVector3& from, const btVector3& to,
+            const btVector3& color)
     {
         this->drawLine(from, to, color, color);
     }
 
+    void BulletDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& /*color*/)
+    {
+        if (this->_sphere.get() == 0)
+            this->_sphere.reset(new Tools::Renderers::Utils::Sphere(this->_renderer));
+
+        btVector3 position = transform.getOrigin() - this->_cameraPos;
+        btQuaternion rotation = transform.getRotation();
+
+        this->_renderer.SetModelMatrix(
+                glm::translate<float>(
+                    glm::fvec3(position.x(), position.y(), position.z())
+                    )
+                *
+                glm::toMat4<float>(
+                    glm::quat(rotation.w(), rotation.x(), rotation.y(), rotation.z())
+                    )
+                *
+                glm::scale(
+                    glm::fvec3(radius, radius, radius)
+                    )
+                );
+
+        this->_sphere->Render();
+    }
+
+    void BulletDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color)
+    {
+        btTransform tr;
+        tr.setIdentity();
+        tr.setOrigin(p);
+        this->drawSphere(radius, tr, color);
+    }
+
+    void BulletDebugDrawer::drawBox(
+            const btVector3& bbMin, const btVector3& bbMax,
+            const btTransform& trans, const btVector3& /*color*/)
+    {
+        if (this->_cube.get() == 0)
+            this->_cube.reset(new Tools::Renderers::Utils::Cube(this->_renderer));
+        btVector3 extents = bbMax - bbMin;
+
+        btVector3 position = trans.getOrigin() - this->_cameraPos;
+        btQuaternion rotation = trans.getRotation();
+
+        this->_renderer.SetModelMatrix(
+                glm::translate<float>(
+                    glm::fvec3(position.x(), position.y(), position.z())
+                    )
+                *
+                glm::toMat4<float>(
+                    glm::quat(rotation.w(), rotation.x(), rotation.y(), rotation.z())
+                    )
+                *
+                glm::scale(
+                    glm::fvec3(extents.x() / 2, extents.y() / 2, extents.z() / 2)
+                    )
+                );
+
+        this->_cube->Render();
+        std::cout << "box\n";
+    }
+
+    void BulletDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, const btVector3& /*color*/)
+    {
+        if (this->_cube.get() == 0)
+            this->_cube.reset(new Tools::Renderers::Utils::Cube(this->_renderer));
+
+        btVector3 extents = boxMax - boxMin;
+
+        btVector3 position = boxMin - this->_cameraPos;
+
+        this->_renderer.SetModelMatrix(
+                glm::translate<float>(
+                    glm::fvec3(position.x(), position.y(), position.z())
+                    )
+                *
+                glm::scale(
+                    glm::fvec3(extents.x() / 2, extents.y() / 2, extents.z() / 2)
+                    )
+                );
+
+        this->_cube->Render();
+    }
+
     void BulletDebugDrawer::setDebugMode(int debugMode)
     {
-        _debugMode = debugMode;
-
+        this->_debugMode = debugMode;
     }
 
     int BulletDebugDrawer::getDebugMode() const
@@ -107,40 +165,23 @@ namespace Client { namespace Game {
         return this->_debugMode;
     }
 
-    void BulletDebugDrawer::draw3dText(const btVector3& location,const char* textString)
+    void BulletDebugDrawer::draw3dText(const btVector3& location, const char* textString)
     {
-        //glRasterPos3f(location.x(),  location.y(),  location.z());
-        //BMF_DrawString(BMF_GetFont(BMF_kHelvetica10),textString);
     }
 
     void BulletDebugDrawer::reportErrorWarning(const char* warningString)
     {
-        printf("%s\n",warningString);
+        Tools::log << "btDebug: WARNING: " << warningString << "\n";
     }
 
-    void BulletDebugDrawer::drawContactPoint(const btVector3& pointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color)
+    void BulletDebugDrawer::drawContactPoint(
+            const btVector3& pointOnB, const btVector3& normalOnB,
+            btScalar /*distance*/, int /*lifeTime*/, const btVector3& color)
     {
+        btVector3 to = pointOnB + normalOnB * 1;
+        const btVector3&from = pointOnB;
 
-        {
-            btVector3 to=pointOnB+normalOnB*1;//distance;
-            const btVector3&from = pointOnB;
-
-            this->drawLine(from, to, color);
-
-            //           glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
-            //           //glColor4f(0,0,0,1.f);
-            //           glBegin(GL_LINES);
-            //           glVertex3d(from.getX(), from.getY(), from.getZ());
-            //           glVertex3d(to.getX(), to.getY(), to.getZ());
-            //           glEnd();
-
-
-            //  glRasterPos3f(from.x(),  from.y(),  from.z());
-            //  char buf[12];
-            //  sprintf(buf," %d",lifeTime);
-            //BMF_DrawString(BMF_GetFont(BMF_kHelvetica10),buf);
-
-
-        }
+        this->drawLine(from, to, color);
     }
+
 }}

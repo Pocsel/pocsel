@@ -37,7 +37,11 @@ namespace Client { namespace Game { namespace Engine {
         this->_world = new Common::Physics::World();
 
         this->_debugDrawer = new BulletDebugDrawer(this->_engine.GetGame(), this->_engine.GetGame().GetRenderer());
-        this->_debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+        this->_debugDrawer->setDebugMode(
+                btIDebugDraw::DBG_DrawWireframe |
+                btIDebugDraw::DBG_DrawConstraints
+//                btIDebugDraw::DBG_DrawConstraintLimits
+                );
         this->_world->GetBtWorld().setDebugDrawer(this->_debugDrawer);
         //this->_world->GetBtWorld().setInternalTickCallback(_cb::_TickCallback, this);
     }
