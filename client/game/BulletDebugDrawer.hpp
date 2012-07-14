@@ -3,6 +3,13 @@
 
 #include "bullet/bullet-all.hpp"
 
+namespace Tools {
+    class IRenderer;
+    namespace Renderers {
+        class IShaderProgram;
+    }
+}
+
 namespace Client { namespace Game {
 
     class Game;
@@ -12,11 +19,13 @@ namespace Client { namespace Game {
     {
     private:
         Game& _game;
+        Tools::IRenderer& _renderer;
+        Tools::Renderers::IShaderProgram* _shader;
         int _debugMode;
         btVector3 _cameraPos;
 
     public:
-        BulletDebugDrawer(Game& game);
+        BulletDebugDrawer(Game& game, Tools::IRenderer& renderer);
 
         void BeginDraw();
         void EndDraw();

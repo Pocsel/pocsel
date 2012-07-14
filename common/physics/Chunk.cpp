@@ -157,7 +157,7 @@ namespace Common { namespace Physics {
         this->_body->setCenterOfMassTransform(tr);
         this->_body->setUserPointer(this);
 
-        this->_body->setFlags(this->_body->getFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
+        this->_body->setCollisionFlags(this->_body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
     }
 
 }}

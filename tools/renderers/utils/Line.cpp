@@ -1,0 +1,34 @@
+#include "tools/precompiled.hpp"
+
+#include "tools/renderers/utils/Line.hpp"
+
+namespace Tools { namespace Renderers { namespace Utils {
+
+    Line::Line(IRenderer& renderer, glm::vec3 const& start, glm::vec3 const& end)
+        : _renderer(renderer)
+    {
+        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
+        float vertices[9];
+        vertices[0] = start.x;
+        vertices[1] = start.y;
+        vertices[2] = start.z;
+        vertices[3] = (start.x + end.x) / 2;
+        vertices[4] = (start.y + end.y) / 2;
+        vertices[5] = (start.z + end.z) / 2;
+        vertices[6] = end.x;
+        vertices[7] = end.y;
+        vertices[8] = end.z;
+        this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3); // position
+        this->_vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
+    }
+
+    void Line::Render()
+    {
+        this->_vertexBuffer->Bind();
+        this->_renderer.DrawVertexBuffer(0, 3);//, Renderers::DrawingMode::Lines);
+        this->_vertexBuffer->Unbind();
+    }
+
+}}}
+
+

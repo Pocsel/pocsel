@@ -4,6 +4,7 @@
 #include "client/game/engine/DoodadManager.hpp"
 
 #include "client/game/BulletDebugDrawer.hpp"
+#include "client/game/Game.hpp"
 
 #include "common/physics/Node.hpp"
 #include "common/physics/Vector.hpp"
@@ -35,7 +36,7 @@ namespace Client { namespace Game { namespace Engine {
     {
         this->_world = new Common::Physics::World();
 
-        this->_debugDrawer = new BulletDebugDrawer(this->_engine.GetGame());
+        this->_debugDrawer = new BulletDebugDrawer(this->_engine.GetGame(), this->_engine.GetGame().GetRenderer());
         this->_debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
         this->_world->GetBtWorld().setDebugDrawer(this->_debugDrawer);
         //this->_world->GetBtWorld().setInternalTickCallback(_cb::_TickCallback, this);
