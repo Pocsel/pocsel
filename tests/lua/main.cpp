@@ -6,6 +6,7 @@
 #include "tools/lua/MetaTable.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/lua/ResourceManager.hpp"
+#include "tools/lua/AResource.hpp"
 #include "tools/Timer.hpp"
 
 #define STRINGIFY(...) #__VA_ARGS__
@@ -271,38 +272,63 @@ static void RegisteredTypes(Interpreter& i)
 
 static void Resources(Interpreter& i)
 {
-    struct Plop
+    struct MitoResourceManager
     {
-        Plop() : field1(0) {}
-        Plop(int field1, std::string field2 = std::string()) : field1(field1), field2(field2) {}
-        bool operator ==(Plop const& p) const { return this->field1 == p.field1 && this->field2 == p.field2; }
-        bool operator <(Plop const& p) const { return this->field1 < p.field1; }
+        MitoResourceManager() : coucou(1336) {}
+        int coucou;
+    };
+
+    struct ResourceDeTest : Tools::Lua::AResource<MitoResourceManager>
+    {
+        ResourceDeTest() : field1(0) {}
+        ResourceDeTest(int field1, std::string field2) : field1(field1), field2(field2) {}
+        virtual bool IsValid() { return this->field1 && !this->field2.empty(); }
+        virtual void Invalidate() { this->field1 = 0; this->field2.clear(); }
+        virtual void Index(MitoResourceManager& manager, CallHelper& helper)
+        {
+            Tools::log << "__index with \"" << helper.PopArg().ToString() << "\", manager test: " << manager.coucou << std::endl;
+            Tools::log << "field1: " << this->field1 << ", field2 " << this->field2 << std::endl;
+            helper.PushRet(helper.GetInterpreter().MakeInteger(4097));
+        }
         int field1;
         std::string field2;
     };
-    Plop invalidResource(0);
-    ResourceManager<Plop> manager(i, invalidResource);
 
-    Plop maResource1(12, "resource 1");
-    Plop maResource2(24, "resource 2");
-    i.Globals().Set("maResource1", manager.NewResource(maResource1));
-    i.Globals().Set("maResource2", manager.NewResource(maResource2));
+    MitoResourceManager realManager;
+    ResourceManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager);
+
+    auto pair1 = luaManager.NewResource(ResourceDeTest(12, "resource1"));
+    Uint32 resource1Id = pair1.first;
+    Ref resource1 = pair1.second;
+    auto pair2 = luaManager.NewResource(ResourceDeTest(24, "resource2"));
+    Uint32 resource2Id = pair2.first;
+    Ref resource2 = pair2.second;
+    i.Globals().Set("maResource1", resource1);
+    i.Globals().Set("maResource2", resource2);
     i.DoString(STRINGIFY(
-                print("---- Test resources ----")
-                print(" -- avant delete")
-                print("type of maResource1: ", type(maResource1))
-                print("call: ", tostring(maResource1()))
-                print("type of maResource2: ", type(maResource2))
-                print("call: ", tostring(maResource2()))
+                print("--- test resources ---")
+                print(" - avant delete")
+                print("call 1 : ", tostring(maResource1()))
+                print("call 2 : ", tostring(maResource2()))
                 ));
-    manager.DeleteResource(maResource1);
+    luaManager.InvalidateResource(resource1Id);
     i.DoString(STRINGIFY(
-                print(" -- apres delete")
-                print("type of maResource1: ", type(maResource1))
-                print("call: ", tostring(maResource1()))
-                print("type of maResource2: ", type(maResource2))
-                print("call: ", tostring(maResource2()))
+                print(" - apres delete")
+                print("call 1 : ", tostring(maResource1()))
+                print("call 2 : ", tostring(maResource2()))
                 ));
+    luaManager.UpdateResource(resource2Id, ResourceDeTest(25, "resource2.1"));
+    try
+    {
+        i.DoString(STRINGIFY(
+                    print(tostring(maResource2.test))
+                    maResource1.test = 12
+                    ));
+    }
+    catch (std::exception& e)
+    {
+        Tools::log << "This is expected: " << e.what() << std::endl;
+    }
 }
 
 int main(int, char**)
