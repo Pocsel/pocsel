@@ -87,6 +87,27 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Delete(this->_luaResourceManager);
     }
 
+    void EntityManager::LuaResource::Index(EntityManager& entityManager, Tools::Lua::CallHelper& helper)
+    {
+        Tools::Lua::Ref targetTable = entityManager.GetEntity(this->entityId).GetSelf();
+        if (!targetTable.IsTable()) // le moddeur a fait de la merde et l'entité ciblée n'a pas un self normal
+        {
+            helper.PushRet(helper.GetInterpreter().MakeNil());
+            return;
+        }
+        Tools::Lua::Ref targetField = targetTable[helper.PopArg("EntityManager::LuaResource::Index: Metamethod __index without key argument")];
+        if (targetField.IsFunction())
+        {
+        }
+        else
+            helper.PushRet(targetField);
+    }
+
+    void EntityManager::LuaResource::NewIndex(EntityManager& entityManager, Tools::Lua::CallHelper& helper)
+    {
+        Tools::error << "This shit is not implemented yet" << std::endl;
+    }
+
     CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */)
     {
         auto it = this->_entities.find(entityId);
