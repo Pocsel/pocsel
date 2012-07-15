@@ -59,10 +59,7 @@ namespace Client { namespace Map {
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
             Tools::Delete(this->_octree[i]);
         for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite; ++it)
-        {
-            this->_game.GetEngine().GetPhysicsManager().RemoveBody(it->second->chunk->GetPhysics()->GetBody());
             Tools::Delete(it->second);
-        }
     }
 
     void ChunkManager::AddChunk(std::unique_ptr<Chunk>&& chunk)
@@ -100,11 +97,9 @@ namespace Client { namespace Map {
           //  return;
 
         {
-            if (node->chunk->GetPhysics())
-                this->_game.GetEngine().GetPhysicsManager().RemoveBody(node->chunk->GetPhysics()->GetBody());
-            Common::Physics::Chunk* newPhysics = new Common::Physics::Chunk(*node->chunk);
+            Common::Physics::Chunk* newPhysics =
+                new Common::Physics::Chunk(this->_game.GetEngine().GetPhysicsManager().GetWorld(), *node->chunk);
             node->chunk->SetPhysics(std::unique_ptr<Common::Physics::Chunk>(newPhysics));
-            this->_game.GetEngine().GetPhysicsManager().AddBody(node->chunk->GetPhysics()->GetBody());
         }
 
 
@@ -202,7 +197,6 @@ namespace Client { namespace Map {
                 }
                 this->_octree[i]->RemoveElement(*it);
                 this->_chunks.erase((*it)->chunk->id);
-                this->_game.GetEngine().GetPhysicsManager().RemoveBody((*it)->chunk->GetPhysics()->GetBody());
                 // this->_refreshTasks.erase(*it);
                 Tools::Delete(*it);
             }

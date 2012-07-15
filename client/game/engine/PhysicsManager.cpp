@@ -16,18 +16,6 @@
 
 namespace Client { namespace Game { namespace Engine {
 
-    void PhysicsManager::AddBody(btRigidBody* body)
-    {
-        if (body)
-            this->_world->GetBtWorld().addRigidBody(body);
-    }
-
-    void PhysicsManager::RemoveBody(btRigidBody* body)
-    {
-        if (body)
-            this->_world->GetBtWorld().removeRigidBody(body);
-    }
-
     PhysicsManager::PhysicsManager(Engine& engine, std::map<Uint32, Doodad*> const& doodads) :
         _engine(engine),
         _doodads(doodads),

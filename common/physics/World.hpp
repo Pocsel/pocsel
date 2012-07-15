@@ -28,7 +28,6 @@ namespace Common { namespace Physics {
         World();
         ~World();
         void Tick(Uint64 totalTime);
-        void AddBody(Body& body);
 
         btDynamicsWorld& GetBtWorld() { return *this->_dynamicsWorld; }
     };

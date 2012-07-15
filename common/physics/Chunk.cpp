@@ -1,4 +1,5 @@
 #include "common/physics/Chunk.hpp"
+#include "common/physics/World.hpp"
 #include "common/BaseChunk.hpp"
 
 #include "bullet/bullet-all.hpp"
@@ -8,14 +9,17 @@ namespace Common { namespace Physics {
     Chunk::~Chunk()
     {
         if (this->_body)
+        {
             this->_body->setUserPointer((void*)1);
+            this->_world.GetBtWorld().removeRigidBody(this->_body);
+        }
         Tools::Delete(this->_body);
         Tools::Delete(this->_shape);
     }
 
     namespace {
         template<int Tpow>//, int TorigX, int TorigY, int TorigZ>
-            struct megashit
+            struct _FillCompoundShape
             {
                 enum {
                     Tmax = 1 << Tpow,
@@ -24,14 +28,14 @@ namespace Common { namespace Physics {
                 };
                 static inline bool _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape, int TorigX, int TorigY, int TorigZ)
                 {
-                    bool full000 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
-                    bool full001 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
-                    bool full010 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
-                    bool full011 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
-                    bool full100 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
-                    bool full101 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
-                    bool full110 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
-                    bool full111 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full000 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full001 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full010 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full011 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full100 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full101 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full110 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full111 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
 
                     if (
                             full000 &&
@@ -94,7 +98,7 @@ namespace Common { namespace Physics {
                 }
             };
         template<>
-            struct megashit<0>
+            struct _FillCompoundShape<0>
             {
                 static inline bool _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape, int origX, int origY, int origZ)
                 {
@@ -103,7 +107,8 @@ namespace Common { namespace Physics {
             };
     }
 
-    Chunk::Chunk(Common::BaseChunk const& source) :
+    Chunk::Chunk(Common::Physics::World& world, Common::BaseChunk const& source) :
+        _world(world),
         _shape(0),
         _body(0)
     {
@@ -130,7 +135,7 @@ namespace Common { namespace Physics {
 
         Common::BaseChunk::CubeType const* cubes = source.GetCubes();
 
-        if (megashit<5>::_(boxShapes, cubes, this->_shape, 0, 0, 0))
+        if (_FillCompoundShape<5>::_(boxShapes, cubes, this->_shape, 0, 0, 0))
         {
             btTransform tr;
             tr.setIdentity();
@@ -159,6 +164,8 @@ namespace Common { namespace Physics {
         this->_body->setUserPointer(this);
 
         this->_body->setCollisionFlags(this->_body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
+
+        this->_world.GetBtWorld().addRigidBody(this->_body);
     }
 
 }}
