@@ -86,66 +86,28 @@ namespace Common { namespace Physics {
         node.body = new btRigidBody(rbInfo);
         node.body->setActivationState(DISABLE_DEACTIVATION);
 
-        btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform(), true);
 
-        btScalar len = thisTr.getOrigin().length();
-        newConstraint->setDbgDrawSize(len > 1.0 ? len * 0.5 : 0.5);
+        btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform::getIdentity(), true);
 
-        //{
-        //    btVector3 anglLimit(0.01, 0.01, 0.01);
-        //    newConstraint->setAngularLowerLimit(anglLimit);
-        //}
-        //{
-        //    btVector3 anglLimit(-0.01, -0.01, -0.01);
-        //    newConstraint->setAngularUpperLimit(anglLimit);
-        //}
-
-        //{
-        //    btVector3 anglLimit(0.01, 0.01, 0.01);
-        //    newConstraint->setLinearLowerLimit(anglLimit);
-        //}
-        //{
-        //    btVector3 anglLimit(-0.01, -0.01, -0.01);
-        //    newConstraint->setLinearUpperLimit(anglLimit);
-        //}
-
-
+        //if (false && parent == &this->_parent.GetBody())
         {
-            btVector3 anglTest;
-            newConstraint->getAngularLowerLimit(anglTest);
+            btQuaternion angl = thisTr.getRotation();
+            glm::quat glAngl(angl.w(), angl.x(), angl.y(), angl.z());
+            glm::vec3 pyr = glm::eulerAngles(glAngl);
             std::cout <<
-                "anglTest: " <<
-                anglTest.x() << ", " <<
-                anglTest.y() << ", " <<
-                anglTest.z() << "\n";
-        }
-        {
-            btVector3 anglTest;
-            newConstraint->getAngularUpperLimit(anglTest);
-            std::cout <<
-                "anglTest: " <<
-                anglTest.x() << ", " <<
-                anglTest.y() << ", " <<
-                anglTest.z() << "\n";
-        }
+                "yaw " << pyr.y <<
+                ", pitch " << pyr.x <<
+                ", roll " << pyr.z <<
+                "\n";
 
-        {
-            btVector3 anglTest;
-            newConstraint->getLinearLowerLimit(anglTest);
-            std::cout <<
-                "linTest: " <<
-                anglTest.x() << ", " <<
-                anglTest.y() << ", " <<
-                anglTest.z() << "\n";
-        }
-        {
-            btVector3 anglTest;
-            newConstraint->getLinearUpperLimit(anglTest);
-            std::cout <<
-                "linTest: " <<
-                anglTest.x() << ", " <<
-                anglTest.y() << ", " <<
-                anglTest.z() << "\n";
+            {
+                btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
+                newConstraint->setAngularLowerLimit(anglLimit);
+            }
+            {
+                btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
+                newConstraint->setAngularUpperLimit(anglLimit);
+            }
         }
 
         node.constraint = newConstraint;

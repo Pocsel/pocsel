@@ -17,8 +17,8 @@ namespace Common { namespace Physics {
         static btCollisionShape* emptyShape = 0;
         if (emptyShape == 0)
         {
-            emptyShape = new btEmptyShape(); //btSphereShape(1);//btEmptyShape();
-            //emptyShape->calculateLocalInertia(mass, localInertia);
+            emptyShape = new btSphereShape(0.00000000001); //btSphereShape(1);//btEmptyShape();
+            emptyShape->calculateLocalInertia(mass, localInertia);
         }
 
         btTransform startTransform;
