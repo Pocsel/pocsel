@@ -21,7 +21,7 @@ namespace Common { namespace Physics {
         }
         this->_parent.AddConstraint(this);
 
-        this->Dump();
+       // this->Dump();
     }
 
     void Body::_BuildBodyNode(Uint32 nodeId)
@@ -51,32 +51,6 @@ namespace Common { namespace Physics {
         tr.mult(parentTr, thisTr);
         node.motionState = new btDefaultMotionState(tr);
 
-        std::cout << "_BuildBodyNode: \n" <<
-            "tr: " << tr.getOrigin().x() <<
-            ", " << tr.getOrigin().y() <<
-            ", " << tr.getOrigin().z() <<
-            "\n" <<
-            "thisTr: " << thisTr.getOrigin().x() <<
-            ", " << thisTr.getOrigin().y() <<
-            ", " << thisTr.getOrigin().z() <<
-            "\n"
-            <<
-            "parentTr: " << parentTr.getOrigin().x() <<
-            ", " << parentTr.getOrigin().y() <<
-            ", " << parentTr.getOrigin().z() <<
-            "\n"
-            ;
-
-        {
-            btTransform testTr;
-            node.motionState->getWorldTransform(testTr);
-            std::cout <<
-                "testTr: " << testTr.getOrigin().x() <<
-                ", " << testTr.getOrigin().y() <<
-                ", " << testTr.getOrigin().z() <<
-                "\n";
-        }
-
         btScalar mass(shape.mass);
         btVector3 localInertia(0, 0, 0);
 
@@ -92,23 +66,12 @@ namespace Common { namespace Physics {
 
         //if (false && parent == &this->_parent.GetBody())
         {
-            btQuaternion angl = thisTr.getRotation();
-            glm::quat glAngl(angl.w(), angl.x(), angl.y(), angl.z());
-            glm::vec3 pyr = glm::eulerAngles(glAngl);
-            std::cout <<
-                "yaw " << pyr.y <<
-                ", pitch " << pyr.x <<
-                ", roll " << pyr.z <<
-                "\n";
-
-            {
-                btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
-                newConstraint->setAngularLowerLimit(anglLimit);
-            }
-            {
-                btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
-                newConstraint->setAngularUpperLimit(anglLimit);
-            }
+            btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
+            newConstraint->setAngularLowerLimit(anglLimit);
+        }
+        {
+            btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
+            newConstraint->setAngularUpperLimit(anglLimit);
         }
 
         node.constraint = newConstraint;
@@ -116,15 +79,6 @@ namespace Common { namespace Physics {
         this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
         this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint, true);
 
-        {
-            btTransform testTr;
-            node.motionState->getWorldTransform(testTr);
-            std::cout <<
-                "testTr: " << testTr.getOrigin().x() <<
-                ", " << testTr.getOrigin().y() <<
-                ", " << testTr.getOrigin().z() <<
-                "\n";
-        }
         for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
                 childIte = this->_type.GetShapes()[nodeId].children.end();
                 childIt != childIte; ++childIt)
