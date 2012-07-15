@@ -5,8 +5,8 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    PositionalEntity::PositionalEntity(Common::Physics::World& world, Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos) :
-        Entity(interpreter, id, type),
+    PositionalEntity::PositionalEntity(Common::Physics::World& world, Engine& engine, Uint32 id, EntityType const& type, Common::Position const& pos) :
+        Entity(engine, id, type),
         _world(world),
         _btBody(0),
         _motionState(0)

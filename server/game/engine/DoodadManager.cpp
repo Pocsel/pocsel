@@ -246,7 +246,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = this->_engine.GetRunningEntityId();
+        Uint32 entityId = helper.PopArg("Server.Doodad.Spawn: Missing argument \"owner\"").To<Uint32>();
         std::list<Tools::Lua::Ref>& args = helper.GetArgList();
         if (!args.size())
             throw std::runtime_error("Server.Doodad.Spawn: Need arguments ([id ,] doodadName [, bodyName])");

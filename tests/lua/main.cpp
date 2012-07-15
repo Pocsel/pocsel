@@ -295,7 +295,7 @@ static void Resources(Interpreter& i)
     };
 
     MitoResourceManager realManager;
-    ResourceManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager);
+    ResourceManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager, ResourceDeTest());
 
     auto pair1 = luaManager.NewResource(ResourceDeTest(12, "resource1"));
     Uint32 resource1Id = pair1.first;
@@ -317,7 +317,7 @@ static void Resources(Interpreter& i)
                 print("call 1 : ", tostring(maResource1()))
                 print("call 2 : ", tostring(maResource2()))
                 ));
-    luaManager.UpdateResource(resource2Id, ResourceDeTest(25, "resource2.1"));
+    luaManager.ReplaceResource(resource2Id, ResourceDeTest(25, "resource2.1"));
     try
     {
         i.DoString(STRINGIFY(

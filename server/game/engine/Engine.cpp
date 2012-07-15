@@ -19,7 +19,7 @@
 namespace Server { namespace Game { namespace Engine {
 
     Engine::Engine(Map::Map& map, World& world) :
-        _map(map), _world(world), _currentTime(0), _overriddenPluginId(0), _overriddenEntityId(0)
+        _map(map), _world(world), _currentTime(0), _currentPluginRegistering(0)
     {
         Tools::debug << "Engine::Engine()\n";
         this->_interpreter = new Tools::Lua::Interpreter();
@@ -151,22 +151,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)
     {
-        std::string str = "[" + this->_map.GetName() + "/";
-        if (this->GetRunningPluginId())
-            str += this->_world.GetPluginManager().GetPluginIdentifier(this->GetRunningPluginId());
-        else
-            str += "?";
-        str += "/";
-        try
-        {
-            auto& e = this->_entityManager->GetEntity(this->GetRunningEntityId());
-            str += e.GetType().GetName() + "/" + Tools::ToString(this->GetRunningEntityId());
-        }
-        catch (std::exception&)
-        {
-            str += "?";
-        }
-        str += "] ";
+        std::string str = "[" + this->_map.GetName() + "] ";
         auto it = helper.GetArgList().begin();
         auto itEnd = helper.GetArgList().end();
         for (; it != itEnd; ++it)
@@ -178,7 +163,8 @@ namespace Server { namespace Game { namespace Engine {
     {
         std::string json = "{\n"
             "\t\"log\": \"";
-        this->OverrideRunningPluginId(pluginId);
+        // TODO ne pas avoir besoin du plugin id
+        //this->OverrideRunningPluginId(pluginId);
         try
         {
             this->_interpreter->DoString(lua);
@@ -188,7 +174,7 @@ namespace Server { namespace Game { namespace Engine {
             Tools::error << "Engine::RconExecute: Error: " << e.what() << std::endl;
             json += Rcon::ToJsonStr(e.what());
         }
-        this->OverrideRunningPluginId(0);
+        // this->OverrideRunningPluginId(0);
         json += "\"\n}\n";
         return json;
     }

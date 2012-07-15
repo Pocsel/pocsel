@@ -23,7 +23,7 @@ namespace Server { namespace Game { namespace Engine {
         btDefaultMotionState* _motionState;
 
     public:
-        PositionalEntity(Common::Physics::World& world, Tools::Lua::Interpreter& interpreter, Uint32 id, EntityType const& type, Common::Position const& pos);
+        PositionalEntity(Common::Physics::World& world, Engine& engine, Uint32 id, EntityType const& type, Common::Position const& pos);
         ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position; }

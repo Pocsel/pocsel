@@ -47,7 +47,7 @@ Server.Entity.RegisterPositional{
     Spawn = function(self)
         self.moveSpeed = 10 -- 3 + math.random() * 3
 
-        self.doodad = Server.Doodad.Spawn("base:Test")
+        self.doodad = Server.Doodad.Spawn(self.id, "base:Test")
 --        Server.Message.Later(30, self.id, "Suicide")
         if self.id < 50 then
             Server.Message.Later(4, self.id, "Test")

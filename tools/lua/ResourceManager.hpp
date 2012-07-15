@@ -14,9 +14,10 @@ namespace Tools { namespace Lua {
         std::unordered_map<Uint32 /* resource id */, Ref /* UserData */> _resources;
         Uint32 _nextResourceId;
         ManagerType& _resourceManager;
+        Uint32 _invalidResource;
 
     public:
-        ResourceManager(Interpreter& interpreter, ManagerType& resourceManager) :
+        ResourceManager(Interpreter& interpreter, ManagerType& resourceManager, ResourceType const& invalidResource) :
             _interpreter(interpreter),
             _metaTable(MetaTable::Create(interpreter, ResourceType())),
             _nextResourceId(1),
@@ -25,6 +26,17 @@ namespace Tools { namespace Lua {
             this->_metaTable.SetMetaMethod(MetaTable::Call, std::bind(&ResourceManager::_MetaMethodCall, this, std::placeholders::_1));
             this->_metaTable.SetMetaMethod(MetaTable::Index, std::bind(&ResourceManager::_MetaMethodIndex, this, std::placeholders::_1));
             this->_metaTable.SetMetaMethod(MetaTable::NewIndex, std::bind(&ResourceManager::_MetaMethodNewIndex, this, std::placeholders::_1));
+            this->_invalidResource = this->NewResource(invalidResource).first;
+        }
+
+        Ref GetInvalidResourceReference() const
+        {
+            return this->_resources.find(this->_invalidResource)->second;
+        }
+
+        Uint32 GetInvalidResourceId() const
+        {
+            return this->_invalidResource;
         }
 
         std::pair<Uint32, Ref> NewResource(ResourceType const& resource)
@@ -37,19 +49,29 @@ namespace Tools { namespace Lua {
             return *this->_resources.insert(std::make_pair(newId, userData)).first;
         }
 
-        Ref GetUserDataForResource(Uint32 resourceId) throw(std::runtime_error)
+        Ref GetResourceReference(Uint32 resourceId) throw(std::runtime_error)
         {
             auto it = this->_resources.find(resourceId);
             if (it == this->_resources.end())
-                throw std::runtime_error("ResourceManager::GetUserDataForResource: No resource with id " + Tools::ToString(resourceId));
+                throw std::runtime_error("ResourceManager::GetResourceReference: No resource with id " + Tools::ToString(resourceId));
             return it->second;
         }
 
-        void UpdateResource(Uint32 resourceId, ResourceType const& newResource) throw(std::runtime_error)
+        // ne pas garder la reference longtemps...
+        ResourceType& GetResource(Uint32 resourceId) throw(std::runtime_error)
         {
             auto it = this->_resources.find(resourceId);
             if (it == this->_resources.end())
-                throw std::runtime_error("ResourceManager::UpdateResource: No resource with id " + Tools::ToString(resourceId));
+                throw std::runtime_error("ResourceManager::GetResource: No resource with id " + Tools::ToString(resourceId));
+            Ref& ref = it->second;
+            return *ref.To<ResourceType*>();
+        }
+
+        void ReplaceResource(Uint32 resourceId, ResourceType const& newResource) throw(std::runtime_error)
+        {
+            auto it = this->_resources.find(resourceId);
+            if (it == this->_resources.end())
+                throw std::runtime_error("ResourceManager::ReplaceResource: No resource with id " + Tools::ToString(resourceId));
             Ref& ref = it->second;
             ResourceType* resource = ref.To<ResourceType*>(); // pourquoi ça ne marche qu'en deux étapes ?
             *resource = newResource;
@@ -63,6 +85,11 @@ namespace Tools { namespace Lua {
             Ref& ref = it->second;
             ref.To<ResourceType*>()->Invalidate(); // pourquoi ça ne marche qu'en deux étapes ?
             this->_resources.erase(it);
+        }
+
+        MetaTable& GetMetaTable()
+        {
+            return this->_metaTable;
         }
 
     private:
