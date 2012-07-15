@@ -11,15 +11,12 @@ namespace Common { namespace Physics {
         _motionState(0),
         _body(0)
     {
-        btScalar mass(0.0000000000001);
-        btVector3 localInertia(0, 0, 0);
+        btScalar mass(0.000000001);
+        btVector3 localInertia(0.000000001, 0.000000001, 0.000000001);
 
-        static btCollisionShape* emptyShape = 0;
-        if (emptyShape == 0)
-        {
-            emptyShape = new btSphereShape(0.00000000001); //btSphereShape(1);//btEmptyShape();
-            emptyShape->calculateLocalInertia(mass, localInertia);
-        }
+        static btCollisionShape* emptyShape = new btEmptyShape(); //btSphereShape(1);//btEmptyShape();
+        //emptyShape->calculateLocalInertia(mass, localInertia);
+        //std::cout << "INERTIAAIAIAIAI " << localInertia.x() << ", " << localInertia.y() << ", " << localInertia.z() << "\n";
 
         btTransform startTransform;
         startTransform.setIdentity();
@@ -33,11 +30,11 @@ namespace Common { namespace Physics {
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, _motionState, emptyShape, localInertia);
         _body = new btRigidBody(rbInfo);
         _body->setActivationState(DISABLE_DEACTIVATION);
-        this->_body->setGravity(btVector3(0, 0, 0));
 
         _body->setUserPointer(this);
 
         this->_world.GetBtWorld().addRigidBody(_body);
+        this->_body->setGravity(btVector3(0, 0, 0));
     }
 
     BodyCluster::~BodyCluster()

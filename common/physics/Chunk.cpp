@@ -153,6 +153,7 @@ namespace Common { namespace Physics {
         tr.setOrigin(btVector3((source.coords.x) * 32, (source.coords.y) * 32,(source.coords.z) * 32));
 
         btRigidBody::btRigidBodyConstructionInfo rbInfo(0, 0, this->_shape, btVector3(0, 0, 0));
+        rbInfo.m_restitution = 0.5;
         this->_body = new btRigidBody(rbInfo);
         this->_body->setCenterOfMassTransform(tr);
         this->_body->setUserPointer(this);

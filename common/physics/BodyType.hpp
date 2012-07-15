@@ -15,13 +15,19 @@ namespace Common { namespace Physics {
     public:
         struct ShapeNode
         {
-            ShapeNode() : shape(0), shapeDesc(0) {}
-            ShapeNode(Int32 parent) : shape(0), shapeDesc(0), parent(parent) {}
+            ShapeNode() :
+                shape(0), shapeDesc(0), mass(1), friction(0.5), restitution(0) {}
+            ShapeNode(Int32 parent) :
+                shape(0), shapeDesc(0), mass(1), friction(0.5), restitution(0), parent(parent) {}
+
             std::string name;
             std::vector<Uint32> children;
             Node position;
             btCollisionShape* shape;
             ShapeDesc* shapeDesc;
+            float mass;
+            float friction;
+            float restitution;
             Int32 parent;
         };
         static const unsigned int ShapesMax = 50;

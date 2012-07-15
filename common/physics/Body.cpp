@@ -77,17 +77,18 @@ namespace Common { namespace Physics {
                 "\n";
         }
 
-        btScalar mass(60);
+        btScalar mass(shape.mass);
         btVector3 localInertia(0, 0, 0);
 
         shape.shape->calculateLocalInertia(mass, localInertia);
 
         btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, node.motionState, shape.shape, localInertia);
+        rbInfo.m_friction = shape.friction;
+        rbInfo.m_restitution = shape.restitution;
         node.body = new btRigidBody(rbInfo);
         node.body->setActivationState(DISABLE_DEACTIVATION);
 
-
-        btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform::getIdentity(), true);
+        btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform::getIdentity(), false);
 
         //if (false && parent == &this->_parent.GetBody())
         {

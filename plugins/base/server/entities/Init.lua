@@ -11,8 +11,8 @@ Server.Entity.Register{
         else
             print("Test Module nil")
         end
-        -- Server.Message.Later(25, self.id, "SpawnBlob")
-        Server.Message.Later(8, self.id, "SpawnTank")
+        Server.Message.Later(12, self.id, "SpawnBlob")
+        Server.Message.Later(18, self.id, "SpawnTank")
     end,
 
     Die = function(self) -- destructor
@@ -32,11 +32,12 @@ Server.Entity.Register{
 
     SpawnBlob = function(self)
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 10, 67108864), "base:Blob")
-        Server.Message.Later(3, self.id, "SpawnBlob")
+        Server.Message.Later(6, self.id, "SpawnBlob")
     end,
 
     SpawnTank = function(self)
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 3, 67108864), "base:Tank") -- , "base:Tank")
+        Server.Message.Later(11, self.id, "SpawnTank")
     end,
 }
 
@@ -49,9 +50,9 @@ Server.Entity.RegisterPositional{
 
         self.doodad = Server.Doodad.Spawn("base:Test", "base:Test")
 --        Server.Message.Later(30, self.id, "Suicide")
-        if self.id < 50 then
-            Server.Message.Later(4, self.id, "Test")
-        end
+--         if self.id < 50 then
+--             Server.Message.Later(4, self.id, "Test")
+--         end
         self:Move()
     end,
 
@@ -105,6 +106,7 @@ Server.Body.Register{
             },
             friction = 0.5,
             restitution = 0.0,
+            mass = 70,
         }
 --        {
 --            ... -- autre noeud a la racine

@@ -13,6 +13,8 @@ namespace Server { namespace Game { namespace Engine {
         std::string _name;
         Uint32 _pluginId;
         Uint32 _id;
+        float _defaultFriction;
+        float _defaultRestitution;
 
     public:
         BodyType(std::string const& name, Uint32 pluginId, Uint32 id, Tools::Lua::Ref const& prototype);
@@ -21,6 +23,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 GetId() const { return this->_id; }
 
     private:
+        void _InitDefaultPhysics(Tools::Lua::Ref const& lua);
         void _FillShapeTree(Tools::Lua::Ref const& shapeTree, std::vector<unsigned int>& result, int parent);
         unsigned int _BuildShapeNode(Tools::Lua::Ref const& shapeTree, int parent);
     };

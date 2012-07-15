@@ -15,7 +15,6 @@ namespace Common { namespace Physics {
             if (this->_shapes[i].parent == -1)
                 this->_roots.push_back(i);
         }
-
     }
 
     BodyType::~BodyType()

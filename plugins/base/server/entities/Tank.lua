@@ -37,32 +37,31 @@ Server.Body.Register{
                 shapeType = "box", -- pour le moment y'a que box ou sphere
                 halfExtents = {4, 2, 4}
             },
-            friction = 0.5,
-            restitution = 0.0,
+            mass = 1200,
 
             children = {
                 {
                     name = "Turret",
-                    position = { 0, 10, 0 }, -- par rapport au parent (noeud Hull)
+                    position = { 0, 4, 0 }, -- par rapport au parent (noeud Hull)
                     orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                     shape = {
                         shapeType = "sphere",
-                        radius = 1
+                        radius = 2
                     },
-                    friction = 0.5,
-                    restitution = 0.0,
+                    mass = 300,
 
                     children = {
                         {
                             name = "Gun",
-                            position = { 10, 0, 0 }, -- par rapport au parent (noeud Hull)
+                            position = { 3, 0, 0 }, -- par rapport au parent (noeud Turret)
                             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                             shape = {
                                 shapeType = "box",
-                                halfExtents = {3, 0.1, 0.1}
+                                halfExtents = {3, 0.2, 0.2}
                             },
-                            friction = 0.5,
-                            restitution = 0.0,
+                            friction = 0.01,
+                            restitution = 9.99,
+                            mass = 100,
                         },
                     }
                 },

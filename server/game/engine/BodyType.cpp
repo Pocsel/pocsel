@@ -15,10 +15,20 @@ namespace Server { namespace Game { namespace Engine {
     BodyType::BodyType(std::string const& name, Uint32 pluginId, Uint32 id, Tools::Lua::Ref const& prototype) :
         Common::Physics::BodyType(),
         _name(name),
-        _pluginId(pluginId),//, _prototype(prototype)
-        _id(id)
+        _pluginId(pluginId),
+        _id(id),
+        _defaultFriction(0.5),
+        _defaultRestitution(0)
     {
         _shapes.reserve(ShapesMax);
+
+        if (prototype["physics"].Exists())
+        {
+            if (!prototype["physics"].IsTable())
+                throw std::runtime_error("Client.Body.Register: Field \"physics\" must be of type table");
+            Tools::Lua::Ref physicsTable = prototype.GetTable("physics");
+            this->_InitDefaultPhysics(physicsTable);
+        }
         if (prototype["shapeTree"].Exists())
         {
             if (!prototype["shapeTree"].IsTable())
@@ -30,6 +40,30 @@ namespace Server { namespace Game { namespace Engine {
 #ifdef DEBUG
         this->_DumpTree(_roots, "");
 #endif
+    }
+
+    void BodyType::_InitDefaultPhysics(Tools::Lua::Ref const& lua)
+    {
+        Tools::Lua::Iterator it = lua.Begin(), ite = lua.End();
+        for (; it != ite; ++it)
+        {
+            std::string key =  it.GetKey().ToString();
+
+            if (key == "friction")
+            {
+                Tools::Lua::Ref friction = it.GetValue();
+                if (!friction.IsNumber())
+                    throw std::runtime_error("Client.Body.Register: Field \"friction\" must be of type number");
+                this->_defaultFriction = friction.ToNumber();
+            }
+            else if (key == "restitution")
+            {
+                Tools::Lua::Ref restitution = it.GetValue();
+                if (!restitution.IsNumber())
+                    throw std::runtime_error("Client.Body.Register: Field \"restitution\" must be of type number");
+                this->_defaultRestitution = restitution.ToNumber();
+            }
+        }
     }
 
     void BodyType::_FillShapeTree(Tools::Lua::Ref const& shapeTree, std::vector<unsigned int>& result, int parent)
@@ -51,6 +85,9 @@ namespace Server { namespace Game { namespace Engine {
             throw std::runtime_error("Client.Body.Register: Too many shapes (" + Tools::ToString(ShapesMax)+ " max)");
         this->_shapes.push_back(ShapeNode(parent));
         ShapeNode& node = this->_shapes.back();
+        node.friction = this->_defaultFriction;
+        node.restitution = this->_defaultRestitution;
+
         Tools::Lua::Iterator it = shapeTree.Begin(), ite = shapeTree.End();
         for (; it != ite; ++it)
         {
@@ -92,6 +129,27 @@ namespace Server { namespace Game { namespace Engine {
                 pitchyawroll.y = orientation[1].ToNumber();
                 pitchyawroll.z = orientation[3].ToNumber();
                 node.position.orientation = glm::quat(pitchyawroll); // pitch, yaw, roll
+            }
+            else if (key == "mass")
+            {
+                Tools::Lua::Ref mass = it.GetValue();
+                if (!mass.IsNumber())
+                    throw std::runtime_error("Client.Body.Register: Field \"mass\" must be of type number");
+                node.mass = mass.ToNumber();
+            }
+            else if (key == "friction")
+            {
+                Tools::Lua::Ref friction = it.GetValue();
+                if (!friction.IsNumber())
+                    throw std::runtime_error("Client.Body.Register: Field \"friction\" must be of type number");
+                node.friction = friction.ToNumber();
+            }
+            else if (key == "restitution")
+            {
+                Tools::Lua::Ref restitution = it.GetValue();
+                if (!restitution.IsNumber())
+                    throw std::runtime_error("Client.Body.Register: Field \"restitution\" must be of type number");
+                node.restitution = restitution.ToNumber();
             }
             else if (key == "shape")
             {
