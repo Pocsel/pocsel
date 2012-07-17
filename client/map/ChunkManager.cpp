@@ -66,7 +66,7 @@ namespace Client { namespace Map {
     {
         ChunkNode* node = 0;
 
-        std::shared_ptr<Chunk::CubeType> cubes(0);
+        std::shared_ptr<Chunk::CubeArray> cubes(0);
 
         if (this->_chunks.find(chunk->id) != this->_chunks.end())
         { // Chunk Update

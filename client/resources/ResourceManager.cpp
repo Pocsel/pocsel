@@ -70,7 +70,7 @@ namespace {
             ilCopyPixels(0, y, 0, frameSize.x, frameSize.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
             frames[i] = renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, frameSize.x * frameSize.y * 4, pixmap, frameSize, 0).release();
         }
-        Tools::Delete(pixmap);
+        Tools::DeleteTab(pixmap);
         ilBindImage(0);
         ilDeleteImage(id);
     }

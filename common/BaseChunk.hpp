@@ -10,21 +10,19 @@ namespace Common {
     {
     public:
         typedef Uint16 CubeType;
+        typedef std::array<CubeType, Common::ChunkSize3> CubeArray;
 
     private:
-        std::shared_ptr<CubeType> _sharedCubes;
-        CubeType* _cubes;
+        std::shared_ptr<CubeArray> _sharedCubes;
 
     public:
         explicit BaseChunk(IdType id) :
-            NChunk<0>(id),
-            _cubes(0)
+            NChunk<0>(id)
         {
         }
 
         explicit BaseChunk(CoordsType const& c) :
-            NChunk<0>(c),
-            _cubes(0)
+            NChunk<0>(c)
         {
         }
 
@@ -34,7 +32,7 @@ namespace Common {
 
         inline bool IsEmpty() const
         {
-            return this->_cubes == 0;
+            return this->_sharedCubes.get() == 0;
         }
 
         inline CubeType GetCube(CoordsType const& coords) const
@@ -47,9 +45,9 @@ namespace Common {
             assert(x < ChunkSize);
             assert(y < ChunkSize);
             assert(z < ChunkSize);
-            if (this->_cubes == 0)
+            if (this->IsEmpty())
                 return 0;
-            return this->_cubes[x + y * ChunkSize + z * ChunkSize2];
+            return this->_sharedCubes->data()[x + y * ChunkSize + z * ChunkSize2];
         }
 
         inline void SetCube(CoordsType const& coords, CubeType type)
@@ -62,45 +60,41 @@ namespace Common {
             assert(x < ChunkSize);
             assert(y < ChunkSize);
             assert(z < ChunkSize);
-            if (this->_cubes == 0)
+            if (this->_sharedCubes.get() == 0)
             {
                 if (type == 0)
                     return;
-                this->_cubes = new CubeType[ChunkSize3];
-                std::memset(this->_cubes, 0, ChunkSize3 * sizeof(CubeType)); // vraiment ?
-                this->_sharedCubes.reset(this->_cubes);
+                this->_sharedCubes.reset(new CubeArray);
+                std::memset(this->_sharedCubes->data(), 0, ChunkSize3 * sizeof(CubeType)); // vraiment ?
             }
-            this->_cubes[x + y * ChunkSize + z * ChunkSize2] = type;
+            this->_sharedCubes->data()[x + y * ChunkSize + z * ChunkSize2] = type;
         }
 
         inline CubeType const* GetCubes() const
         {
-            assert(this->_cubes != 0 && "GetCubes() called on empty BaseChunk");
-            return this->_cubes;
+            assert(this->_sharedCubes.get() != 0 && "GetCubes() called on empty BaseChunk");
+            return this->_sharedCubes->data();
         }
 
-        inline std::shared_ptr<CubeType> GetSharedCubes()
+        inline std::shared_ptr<CubeArray> GetSharedCubes()
         {
             return this->_sharedCubes;
         }
 
-        inline void SetCubes(std::unique_ptr<CubeType> cubes)
+        inline void SetCubes(std::unique_ptr<CubeArray> cubes)
         {
-            this->_cubes = cubes.release();
-            this->_sharedCubes.reset(this->_cubes);
+            this->_sharedCubes.reset(cubes.release());
         }
 
-        inline void SetCubes(std::shared_ptr<CubeType> cubes)
+        inline void SetCubes(std::shared_ptr<CubeArray> cubes)
         {
             this->_sharedCubes = cubes;
-            this->_cubes = cubes.get();
         }
 
-        inline std::shared_ptr<CubeType> StealCubes()
+        inline std::shared_ptr<CubeArray> StealCubes()
         {
-            std::shared_ptr<CubeType> ret = this->_sharedCubes;
+            std::shared_ptr<CubeArray> ret = this->_sharedCubes;
             this->_sharedCubes.reset();
-            this->_cubes = 0;
             return ret;
         }
 
