@@ -9,7 +9,11 @@
 #include "common/FieldUtils.hpp"
 #include "common/constants.hpp"
 
+#if BOOST_VERSION >= 105000
+namespace boost { namespace filesystem {
+#else
 namespace boost { namespace filesystem3 {
+#endif
 
     // pour MakeRelative() qui suit
     template<>

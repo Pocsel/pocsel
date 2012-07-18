@@ -127,15 +127,18 @@ namespace Client { namespace Map {
         }
     }
 
-    bool ChunkMesh::Refresh(ChunkRenderer& chunkRenderer, std::vector<Game::CubeType> const& cubeTypes, std::shared_ptr<Chunk::CubeType> myCubes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
+    bool ChunkMesh::Refresh(ChunkRenderer& chunkRenderer,
+            std::vector<Game::CubeType> const& cubeTypes,
+            std::shared_ptr<Chunk::CubeArray> myCubes,
+            std::vector<std::shared_ptr<Chunk::CubeArray>> neighbors)
     {
         boost::lock_guard<boost::mutex> lock(this->_refreshMutex);
-        auto const& chunkLeft   = neighbors[0].get();
-        auto const& chunkRight  = neighbors[1].get();
-        auto const& chunkFront  = neighbors[2].get();
-        auto const& chunkBack   = neighbors[3].get();
-        auto const& chunkTop    = neighbors[4].get();
-        auto const& chunkBottom = neighbors[5].get();
+        auto const& chunkLeft   = neighbors[0]->data();
+        auto const& chunkRight  = neighbors[1]->data();
+        auto const& chunkFront  = neighbors[2]->data();
+        auto const& chunkBack   = neighbors[3]->data();
+        auto const& chunkTop    = neighbors[4]->data();
+        auto const& chunkBottom = neighbors[5]->data();
 
 //        if (chunkLeft   == 0 ||
 //            chunkRight  == 0 ||
@@ -164,7 +167,7 @@ namespace Client { namespace Map {
 
         bool hasTransparentCube = false;
 
-        Common::BaseChunk::CubeType const* cubes = myCubes.get();
+        Common::BaseChunk::CubeType const* cubes = myCubes->data();
         Common::BaseChunk::CubeType nearType;
 
         std::vector<Vertex> vertices((Common::ChunkSize3 * 6 * 4) / 2 * 2);

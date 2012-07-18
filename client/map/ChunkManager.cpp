@@ -321,7 +321,7 @@ namespace Client { namespace Map {
             }
     }
 
-    void ChunkManager::_RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeType> oldCubes)
+    void ChunkManager::_RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeArray> oldCubes)
     {
         static Chunk::CubeType* voidCubes = 0;
         if (voidCubes == 0)
@@ -336,32 +336,32 @@ namespace Client { namespace Map {
         else
             newCubes = node.chunk->GetCubes();
 
-        if (CheckModif<0, -1, -1>(oldCubes.get(), newCubes))
+        if (CheckModif<0, -1, -1>(oldCubes->data(), newCubes))
         {
             auto chunkLeft  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0)));
             if (chunkLeft != this->_chunks.end()) this->_AddNodeToRefresh(*chunkLeft->second);
         }
-        if (CheckModif<Common::ChunkSize - 1, -1, -1>(oldCubes.get(), newCubes))
+        if (CheckModif<Common::ChunkSize - 1, -1, -1>(oldCubes->data(), newCubes))
         {
             auto chunkRight  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 1,  0,  0)));
             if (chunkRight != this->_chunks.end()) this->_AddNodeToRefresh(*chunkRight->second);
         }
-        if (CheckModif<-1, -1, Common::ChunkSize - 1>(oldCubes.get(), newCubes))
+        if (CheckModif<-1, -1, Common::ChunkSize - 1>(oldCubes->data(), newCubes))
         {
             auto chunkFront  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0,  1)));
             if (chunkFront != this->_chunks.end()) this->_AddNodeToRefresh(*chunkFront->second);
         }
-        if (CheckModif<-1, -1, 0>(oldCubes.get(), newCubes))
+        if (CheckModif<-1, -1, 0>(oldCubes->data(), newCubes))
         {
             auto chunkBack   = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0, -1)));
             if (chunkBack != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBack->second);
         }
-        if (CheckModif<-1, Common::ChunkSize - 1, -1>(oldCubes.get(), newCubes))
+        if (CheckModif<-1, Common::ChunkSize - 1, -1>(oldCubes->data(), newCubes))
         {
             auto chunkTop    = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0)));
             if (chunkTop != this->_chunks.end()) this->_AddNodeToRefresh(*chunkTop->second);
         }
-        if (CheckModif<-1, 0, -1>(oldCubes.get(), newCubes))
+        if (CheckModif<-1, 0, -1>(oldCubes->data(), newCubes))
         {
             auto chunkBottom = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
             if (chunkBottom != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBottom->second);
@@ -374,7 +374,7 @@ namespace Client { namespace Map {
         auto it = this->_refreshTasks.find(&node);
         if (it != this->_refreshTasks.end())
             it->second->Cancel();
-        std::vector<std::shared_ptr<Chunk::CubeType>> neighbors(6);
+        std::vector<std::shared_ptr<Chunk::CubeArray>> neighbors(6);
 
         auto chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0)));
         if (chk != 0)
@@ -414,7 +414,11 @@ namespace Client { namespace Map {
         this->_refreshTasks[&node] = t;
     }
 
-    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Game::CubeType> const& cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
+    bool ChunkManager::_RefreshChunkMesh(
+            std::shared_ptr<Chunk> chunk,
+            std::shared_ptr<Chunk::CubeArray> cubes, 
+            std::vector<Game::CubeType> const& cubeTypes,
+            std::vector<std::shared_ptr<Chunk::CubeArray>> neighbors)
     {
         return chunk->GetMesh()->Refresh(this->_chunkRenderer, cubeTypes, cubes, neighbors);
     }
