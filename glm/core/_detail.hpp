@@ -8,10 +8,10 @@
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-///
+/// 
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-///
+/// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -259,7 +259,7 @@ namespace detail
 			_NO = 1
 		};
 	};
-
+	
 	template <>
 	struct is_bool<bool>
 	{
@@ -269,7 +269,7 @@ namespace detail
 			_NO = 0
 		};
 	};
-
+	
 	//////////////////
 	// vector
 
@@ -332,26 +332,26 @@ namespace detail
 			is_bool = is_bool<T>::_YES
 		};
 	};
-
+	
 	//////////////////
 	// type
-
+	
 	typedef signed char							int8;
 	typedef signed short						int16;
 	typedef signed int							int32;
 	typedef detail::sint64						int64;
-
+	
 	typedef unsigned char						uint8;
 	typedef unsigned short						uint16;
 	typedef unsigned int						uint32;
 	typedef detail::uint64						uint64;
-
+	
 	typedef detail::half						float16;
 	typedef float								float32;
 	typedef double								float64;
-
+	
 	//////////////////
-	// float_or_int_trait
+	// float_or_int_trait 
 
 	struct float_or_int_value
 	{
@@ -440,10 +440,13 @@ namespace detail
 
 #if((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2005))
 #	define GLM_DEPRECATED __declspec(deprecated)
-#	define GLM_ALIGN(x) __declspec(align(x))
-#	define GLM_ALIGNED_STRUCT(x) __declspec(align(x)) struct
+#	define GLM_ALIGN(x) __declspec(align(x)) 
+#	define GLM_ALIGNED_STRUCT(x) __declspec(align(x)) struct 
 #	define GLM_RESTRICT __declspec(restrict)
 #	define GLM_RESTRICT_VAR __restrict
+// XXX CHANGED
+// #elif((GLM_COMPILER & (GLM_COMPILER_GCC | GLM_COMPILER_LLVM_GCC)) && (GLM_COMPILER >= GLM_COMPILER_GCC31))
+// -> #elif((GLM_COMPILER & (GLM_COMPILER_CLANG | GLM_COMPILER_GCC | GLM_COMPILER_LLVM_GCC)) && (GLM_COMPILER >= GLM_COMPILER_GCC31))
 #elif((GLM_COMPILER & (GLM_COMPILER_CLANG | GLM_COMPILER_GCC | GLM_COMPILER_LLVM_GCC)) && (GLM_COMPILER >= GLM_COMPILER_GCC31))
 #	define GLM_DEPRECATED __attribute__((__deprecated__))
 #	define GLM_ALIGN(x) __attribute__((aligned(x)))
@@ -460,7 +463,7 @@ namespace detail
 #else
 #	define GLM_DEPRECATED
 #	define GLM_ALIGN
-#	define GLM_ALIGNED_STRUCT(x)
+#	define GLM_ALIGNED_STRUCT(x) 
 #	define GLM_RESTRICT
 #	define GLM_RESTRICT_VAR
 #endif//GLM_COMPILER
