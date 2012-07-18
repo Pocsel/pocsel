@@ -36,6 +36,7 @@ namespace Client { namespace Game { namespace Engine {
 
     PhysicsManager::~PhysicsManager()
     {
+        Tools::Delete(this->_debugDrawer);
         Tools::Delete(this->_world);
     }
 
