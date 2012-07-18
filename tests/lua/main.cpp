@@ -282,7 +282,7 @@ static void Resources(Interpreter& i)
     {
         ResourceDeTest() : field1(0) {}
         ResourceDeTest(int field1, std::string field2) : field1(field1), field2(field2) {}
-        virtual bool IsValid() { return this->field1 && !this->field2.empty(); }
+        virtual bool IsValid() const { return this->field1 && !this->field2.empty(); }
         virtual void Invalidate() { this->field1 = 0; this->field2.clear(); }
         virtual void Index(MitoResourceManager& manager, CallHelper& helper)
         {

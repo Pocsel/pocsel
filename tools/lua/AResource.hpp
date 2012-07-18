@@ -19,7 +19,7 @@ namespace Tools { namespace Lua {
             throw std::runtime_error("Tools::Lua::AResource: Metamethod __newindex is not implemented for this type of resource");
         }
 
-        virtual bool IsValid() = 0;
+        virtual bool IsValid() const = 0;
         virtual void Invalidate() = 0;
     };
 

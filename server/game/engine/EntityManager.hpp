@@ -55,7 +55,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             LuaResource() : entityId(0), disabled(true) {}
             LuaResource(Uint32 entityId) : entityId(entityId), disabled(false) {}
-            virtual bool IsValid() { return this->entityId && !this->disabled; }
+            virtual bool IsValid() const { return this->entityId && !this->disabled; }
             virtual void Invalidate() { this->entityId = 0; this->disabled = true; }
             virtual void Index(EntityManager& entityManager, Tools::Lua::CallHelper& helper);
             virtual void NewIndex(EntityManager& entityManager, Tools::Lua::CallHelper& helper);

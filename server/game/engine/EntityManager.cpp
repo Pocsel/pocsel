@@ -89,23 +89,51 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::LuaResource::Index(EntityManager& entityManager, Tools::Lua::CallHelper& helper)
     {
-        Tools::Lua::Ref targetTable = entityManager.GetEntity(this->entityId).GetSelf();
-        if (!targetTable.IsTable()) // le moddeur a fait de la merde et l'entité ciblée n'a pas un self normal
+        Entity const& entity = entityManager.GetEntity(this->entityId);
+        if (!entity.GetSelf().IsTable()) // le moddeur a fait de la merde et l'entité ciblée n'a pas un self normal
         {
             helper.PushRet(helper.GetInterpreter().MakeNil());
             return;
         }
-        Tools::Lua::Ref targetField = targetTable[helper.PopArg("EntityManager::LuaResource::Index: Metamethod __index without key argument")];
-        if (targetField.IsFunction())
+        Tools::Lua::Ref key = helper.PopArg("EntityManager::LuaResource::Index: Metamethod __index without key argument");
+        Tools::Lua::Ref value = entity.GetSelf()[key];
+        if (!value.Exists() && entity.GetType().GetPrototype().IsTable())
         {
+            value = entity.GetType().GetPrototype()[key];
+            if (!value.Exists())
+            {
+                helper.PushRet(helper.GetInterpreter().MakeNil());
+                return;
+            }
+        }
+        if (value.IsFunction())
+        {
+            std::string functionName(key.ToString());
+            helper.PushRet(helper.GetInterpreter().MakeFunction(
+                        [functionName, &entityManager](Tools::Lua::CallHelper& helper)
+                        {
+                            LuaResource* resource = helper.PopArg("EntityManager::LuaResource::Index: Missing argument self for call").Check<LuaResource*>("EntityManager::LuaResource::Index: Invalid type of self for call");
+                            entityManager.CallEntityFunction(resource->entityId, functionName, helper.GetInterpreter().MakeNil(), helper.GetInterpreter().MakeNil());
+                        }
+                        ));
         }
         else
-            helper.PushRet(targetField);
+            helper.PushRet(value);
     }
 
     void EntityManager::LuaResource::NewIndex(EntityManager& entityManager, Tools::Lua::CallHelper& helper)
     {
         Tools::error << "This shit is not implemented yet" << std::endl;
+    }
+
+    CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, std::list<Ref> const& args, std::list<Ref>* rets /* = 0 */)
+    {
+        auto it = this->_entities.find(entityId);
+        if (it == this->_entities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::CallEntityFunction: Call to \"" << function << "\" for entity " << entityId << " failed: entity not found.\n";
+            return CallbackManager::EntityNotFound;
+        }
     }
 
     CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */)
