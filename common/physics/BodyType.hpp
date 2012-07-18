@@ -52,7 +52,10 @@ namespace Common { namespace Physics {
             auto it = shapeNodes.begin(), ite = shapeNodes.end();
             for (; it != ite; ++it)
             {
-                Tools::debug << off << "> " << _shapes[*it].name << " (" << _shapes[*it].shapeDesc->GetName() << ")\n";
+                Tools::debug << off <<
+                    "> " << _shapes[*it].name <<
+                    " -> " << _shapes[*it].shapeDesc->ToString() << "\n";
+
                 _DumpTree(_shapes[*it].children, off + "    ");
             }
         }

@@ -13,7 +13,7 @@ namespace Common { namespace Physics {
     {
     }
 
-    std::string const& ShapeDescEmpty::GetName() const
+    std::string const& ShapeDescEmpty::ToString() const
     {
         static std::string ret("empty");
         return ret;

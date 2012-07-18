@@ -12,13 +12,14 @@ namespace Common { namespace Physics {
     {
     private:
         btVector3 _halfExtents;
+        mutable std::unique_ptr<std::string> _string;
 
     public:
         ShapeDescBox(Tools::Lua::Ref const& lua);
         ShapeDescBox(Tools::ByteArray const& byteArray);
         virtual ~ShapeDescBox();
 
-        virtual std::string const& GetName() const;
+        virtual std::string const& ToString() const;
         virtual std::unique_ptr<btCollisionShape> CreateShape() const;
         virtual void Serialize(Tools::ByteArray& byteArray) const;
     };
