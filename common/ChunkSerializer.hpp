@@ -64,7 +64,7 @@ namespace Common {
                 return chunkPtr;
             }
 
-            std::unique_ptr<CubeArray> cubesPtr(new CubeArray());
+            std::unique_ptr<CubeArray> cubesPtr(new CubeArray);
             CubeType* cubes = cubesPtr->data();
 
             if (number_of_types == 1)

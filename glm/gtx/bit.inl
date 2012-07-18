@@ -575,6 +575,7 @@ namespace glm
 		int const & ToBit
 	)
 	{
+        (void)FromBit;
 		assert(FromBit <= ToBit);
 		assert(ToBit <= sizeof(genIUType) * std::size_t(8));
 
@@ -595,6 +596,7 @@ namespace glm
 		int const & ToBit
 	)
 	{
+        (void)FromBit;
 		assert(FromBit <= ToBit);
 		assert(ToBit <= sizeof(genIUType) * std::size_t(8));
 
