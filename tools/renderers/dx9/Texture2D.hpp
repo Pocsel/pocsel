@@ -12,10 +12,12 @@ namespace Tools { namespace Renderers {
     class Texture2D : public ITexture2D
     {
     private:
+        struct _Release { void operator()(IUnknown* ptr) { ptr->Release(); } };
+
         DX9Renderer& _renderer;
         glm::uvec2 _size;
         bool _hasAlpha;
-        IDirect3DTexture9* _texture;
+        std::unique_ptr<IDirect3DTexture9, _Release> _texture;
         int _bindId;
 
     public:
@@ -27,7 +29,7 @@ namespace Tools { namespace Renderers {
         virtual void Bind();
         virtual void Unbind();
 
-        IDirect3DTexture9* GetTexture() const { return this->_texture; }
+        IDirect3DTexture9* GetTexture() const { return this->_texture.get(); }
         virtual glm::uvec2 const& GetSize() const { return this->_size; }
         virtual bool HasAlpha() const { return this->_hasAlpha; }
         virtual void SetFilters(TextureFilter::Type minFilter, TextureFilter::Type magFilter);

@@ -28,6 +28,7 @@ namespace Common { namespace Physics {
 
     std::unique_ptr<btCollisionShape> ShapeDescBox::CreateShape() const
     {
+#undef new
         return std::unique_ptr<btCollisionShape>(new btBoxShape(this->_halfExtents));
     }
 

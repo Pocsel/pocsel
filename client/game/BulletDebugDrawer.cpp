@@ -79,10 +79,10 @@ namespace Client { namespace Game {
         glm::vec4 color(fromColor.x(), fromColor.y(), fromColor.z(), 1.0);
         for (unsigned int i = 0; i < 4; ++i)
         {
-            if (color[i] < 0.01)
-                color[i] = 0.01;
-            if (color[i] > 0.99)
-                color[i] = 0.99;
+            if (color[i] < 0.01f)
+                color[i] = 0.01f;
+            if (color[i] > 0.99f)
+                color[i] = 0.99f;
         }
         this->_shaderColor->Set(color);
     }
@@ -103,16 +103,16 @@ namespace Client { namespace Game {
         btQuaternion rotation = transform.getRotation();
 
         this->_renderer.SetModelMatrix(
-                glm::translate<float>(
+                glm::translate(
                     glm::fvec3(position.x(), position.y(), position.z())
                     )
                 *
-                glm::toMat4<float>(
-                    glm::quat(rotation.w(), rotation.x(), rotation.y(), rotation.z())
+                glm::toMat4(
+                    glm::quat((float)rotation.w(), (float)rotation.x(), (float)rotation.y(), (float)rotation.z())
                     )
                 *
                 glm::scale(
-                    glm::fvec3(radius, radius, radius)
+                    glm::fvec3((float)radius)
                     )
                 );
 
@@ -140,12 +140,12 @@ namespace Client { namespace Game {
         btQuaternion rotation = trans.getRotation();
 
         this->_renderer.SetModelMatrix(
-                glm::translate<float>(
+                glm::translate(
                     glm::fvec3(position.x(), position.y(), position.z())
                     )
                 *
-                glm::toMat4<float>(
-                    glm::quat(rotation.w(), rotation.x(), rotation.y(), rotation.z())
+                glm::toMat4(
+                    glm::quat((float)rotation.w(), (float)rotation.x(), (float)rotation.y(), (float)rotation.z())
                     )
                 *
                 glm::scale(

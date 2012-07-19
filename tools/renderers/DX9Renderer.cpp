@@ -67,6 +67,7 @@ namespace Tools { namespace Renderers {
         present_parameters.MultiSampleType = D3DMULTISAMPLE_NONE;
 
         DXCHECKERROR(this->_object->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, GetActiveWindow(), D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE, &present_parameters, &this->_device));
+        this->_presentParameters = present_parameters;
 
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE));
@@ -238,7 +239,7 @@ namespace Tools { namespace Renderers {
     void DX9Renderer::SetScreenSize(glm::uvec2 const& size)
     {
         this->_screenSize = size;
-        this->_RefreshDevice();
+        this->_RefreshDevice(true);
     }
 
     void DX9Renderer::SetNormaliseNormals(bool normalise)
@@ -304,46 +305,53 @@ namespace Tools { namespace Renderers {
         this->_allPrograms.remove(&program);
     }
 
-    void DX9Renderer::_RefreshDevice()
+    void DX9Renderer::_RefreshDevice(bool force)
     {
-        D3DPRESENT_PARAMETERS present_parameters = {0};
-        present_parameters.Windowed = !this->_fullscreen;
-        present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
-        present_parameters.EnableAutoDepthStencil = true;
-        present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
-        present_parameters.hDeviceWindow = GetActiveWindow();
-        present_parameters.BackBufferWidth = this->_screenSize.x;
-        present_parameters.BackBufferHeight = this->_screenSize.y;
-        present_parameters.BackBufferFormat = this->_fullscreen ? D3DFMT_X8R8G8B8 : D3DFMT_UNKNOWN;
+        bool invalidate = force || this->_deviceState == Ok;
+        auto hr = this->_device->TestCooperativeLevel();
+        if ((force && hr == S_OK) || hr == D3DERR_DEVICENOTRESET)
+            this->_deviceState = NotReset;
+        else
+            this->_deviceState = hr != S_OK ? Lost : Ok;
+        if (this->_deviceState == Ok)
+            return;
 
-        Tools::debug << "ScreenSize = " << ToString(this->_screenSize) << std::endl;
+        if (invalidate)
+        {
+            Tools::debug << "ScreenSize = " << ToString(this->_screenSize) << std::endl;
 
-        // Release...
-        auto& rs = this->_states.back();
-        delete rs.target;
-        for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
-            (*it)->GetEffect()->OnLostDevice();
-        for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
-            (*it)->OnLostDevice();
+            // Release...
+            auto& rs = this->_states.back();
+            delete rs.target;
+            for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
+                (*it)->GetEffect()->OnLostDevice();
+            for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
+                (*it)->OnLostDevice();
+        }
 
-        DXCHECKERROR(this->_device->Reset(&present_parameters));
+        if (this->_deviceState == NotReset)
+        {
+            DXCHECKERROR(this->_device->Reset(&this->_presentParameters));
 
-        // Recreate...
-        IDirect3DSurface9 *backColor, *backZBuffer;
-        DXCHECKERROR(this->_device->GetRenderTarget(0, &backColor));
-        DXCHECKERROR(this->_device->GetDepthStencilSurface(&backZBuffer));
-        rs.target = new DX9::RenderTarget(*this, this->_screenSize, backColor, backZBuffer);
-        for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
-            (*it)->OnResetDevice();
-        for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
-            (*it)->GetEffect()->OnResetDevice();
+            // Recreate...
+            IDirect3DSurface9 *backColor, *backZBuffer;
+            DXCHECKERROR(this->_device->GetRenderTarget(0, &backColor));
+            DXCHECKERROR(this->_device->GetDepthStencilSurface(&backZBuffer));
+            for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
+                (*it)->OnResetDevice();
+            for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
+                (*it)->GetEffect()->OnResetDevice();
+            this->_states.back().target = new DX9::RenderTarget(*this, this->_screenSize, backColor, backZBuffer);
 
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE));
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE));
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE));
 
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
-        DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA));
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA));
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD));
+
+            this->_deviceState = Ok;
+        }
     }
 
     void DX9Renderer::_PushState(DX9Renderer::RenderState const& state)
