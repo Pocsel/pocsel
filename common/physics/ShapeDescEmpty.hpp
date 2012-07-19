@@ -15,7 +15,7 @@ namespace Common { namespace Physics {
         ShapeDescEmpty(Tools::ByteArray const& byteArray);
         virtual ~ShapeDescEmpty();
 
-        virtual std::string const& GetName() const;
+        virtual std::string const& ToString() const;
         virtual std::unique_ptr<btCollisionShape> CreateShape() const;
         virtual void Serialize(Tools::ByteArray& byteArray) const;
     };

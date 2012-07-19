@@ -12,13 +12,14 @@ namespace Common { namespace Physics {
     {
     private:
         btScalar _radius;
+        mutable std::unique_ptr<std::string> _string;
 
     public:
         ShapeDescSphere(Tools::Lua::Ref const& lua);
         ShapeDescSphere(Tools::ByteArray const& byteArray);
         virtual ~ShapeDescSphere();
 
-        virtual std::string const& GetName() const;
+        virtual std::string const& ToString() const;
         virtual std::unique_ptr<btCollisionShape> CreateShape() const;
         virtual void Serialize(Tools::ByteArray& byteArray) const;
     };

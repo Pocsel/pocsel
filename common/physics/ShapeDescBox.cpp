@@ -20,10 +20,18 @@ namespace Common { namespace Physics {
     {
     }
 
-    std::string const& ShapeDescBox::GetName() const
+    std::string const& ShapeDescBox::ToString() const
     {
-        static std::string ret("box");
-        return ret;
+        if (this->_string.get() == 0)
+        {
+            std::string* newString = new std::string("box");
+            *newString += " (" +
+                Tools::ToString(_halfExtents.x()) + ", " +
+                Tools::ToString(_halfExtents.y()) + ", " +
+                Tools::ToString(_halfExtents.z()) + ")";
+            this->_string.reset(newString);
+        }
+        return *this->_string;
     }
 
     std::unique_ptr<btCollisionShape> ShapeDescBox::CreateShape() const
@@ -40,9 +48,11 @@ namespace Common { namespace Physics {
         byteArray.Write(_halfExtents.z());
     }
 
-    ShapeDescBox::ShapeDescBox(Tools::ByteArray const& byteArray) :
-        _halfExtents(byteArray.ReadDouble(), byteArray.ReadDouble(), byteArray.ReadDouble())
+    ShapeDescBox::ShapeDescBox(Tools::ByteArray const& byteArray)
     {
+        _halfExtents.setX(byteArray.ReadDouble());
+        _halfExtents.setY(byteArray.ReadDouble());
+        _halfExtents.setZ(byteArray.ReadDouble());
     }
 
 }}
