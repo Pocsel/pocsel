@@ -89,6 +89,8 @@ namespace Tools { namespace Renderers {
         cgGLSetManageTextureParameters(this->_cgContext, CG_TRUE);
 
         InitDevIL();
+
+        GLCHECK(glCullFace(GL_FRONT));
     }
 
     void GLRenderer::Shutdown()

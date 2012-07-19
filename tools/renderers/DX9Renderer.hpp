@@ -49,6 +49,13 @@ namespace Tools { namespace Renderers {
 
         LPDIRECT3D9 _object;
         LPDIRECT3DDEVICE9 _device;
+        D3DPRESENT_PARAMETERS _presentParameters;
+        enum
+        {
+            Ok,
+            NotReset,
+            Lost
+        } _deviceState;
         LPD3DXEFFECTPOOL _effectPool;
         std::list<DX9::ShaderProgram*> _allPrograms;
         std::list<DX9::RenderTarget*> _allRenderTargets;
@@ -65,7 +72,7 @@ namespace Tools { namespace Renderers {
         int _clearStencil;
 
     public:
-        DX9Renderer(glm::uvec2 const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _object(0), _device(0), _currentProgram(0) {}
+        DX9Renderer(glm::uvec2 const& screenSize, bool fullscreen) : _screenSize(screenSize), _fullscreen(fullscreen), _object(0), _device(0), _deviceState(Ok), _currentProgram(0) {}
         virtual ~DX9Renderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -132,7 +139,7 @@ namespace Tools { namespace Renderers {
         void Unregister(DX9::ShaderProgram& program);
         void Unregister(DX9::RenderTarget& renderTarget);
     private:
-        void _RefreshDevice();
+        void _RefreshDevice(bool force = false);
         void _PushState(RenderState const& state);
         void _PopState();
     };

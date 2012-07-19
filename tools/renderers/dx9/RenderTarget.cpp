@@ -10,8 +10,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     RenderTarget::RenderTarget(DX9Renderer& renderer, glm::uvec2 const& size) :
         _renderer(renderer),
-        _size(size),
-        _depthBuffer(0)
+        _size(size)
     {
         this->OnResetDevice();
     }
@@ -21,29 +20,29 @@ namespace Tools { namespace Renderers { namespace DX9 {
         _size(size),
         _depthBuffer(depthBuffer)
     {
-        this->_surfaces.push_back(color);
+        this->_surfaces.emplace_back(color);
     }
 
     RenderTarget::~RenderTarget()
     {
         this->_renderer.Unregister(*this);
-        for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
-            (*it)->Release();
-        this->_surfaces.clear();
-        this->_textures.clear();
-        if (this->_depthBuffer != 0)
-            this->_depthBuffer->Release();
+        //for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
+        //    Tools::debug << "Release surface: " << (*it)->Release() << std::endl;
+        //this->_surfaces.clear();
+        //this->_textures.clear();
+        //if (this->_depthBuffer != 0)
+        //    Tools::debug << "Release depth buffer: " << this->_depthBuffer->Release() << std::endl;
     }
 
     void RenderTarget::OnLostDevice()
     {
-        for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
-            (*it)->Release();
+        //for (auto it = this->_surfaces.begin(), ite = this->_surfaces.end(); it != ite; ++it)
+        //    Tools::debug << "Release surface: " << (*it)->Release() << std::endl;
         this->_surfaces.clear();
         this->_textures.clear();
-        if (this->_depthBuffer != 0)
-            this->_depthBuffer->Release();
-        this->_depthBuffer = 0;
+        //if (this->_depthBuffer != 0)
+        //    Tools::debug << "Release depth buffer: " << this->_depthBuffer->Release() << std::endl;
+        this->_depthBuffer = nullptr;
     }
 
     void RenderTarget::OnResetDevice()
@@ -65,22 +64,17 @@ namespace Tools { namespace Renderers { namespace DX9 {
     {
         size_t i;
         for (i = 0; i < this->_surfaces.size(); ++i)
-            this->_renderer.GetDevice()->SetRenderTarget((DWORD)i, this->_surfaces[i]);
+            this->_renderer.GetDevice()->SetRenderTarget((DWORD)i, this->_surfaces[i].get());
         for (; i < DX9Renderer::MaxRenderTargets; ++i)
             this->_renderer.GetDevice()->SetRenderTarget((DWORD)i, 0);
         if (this->_depthBuffer)
-            this->_renderer.GetDevice()->SetDepthStencilSurface(this->_depthBuffer);
+            this->_renderer.GetDevice()->SetDepthStencilSurface(this->_depthBuffer.get());
     }
 
     void RenderTarget::Resize(glm::uvec2 const& newSize)
     {
         this->_size = newSize;
-        if (this->_depthBuffer)
-            this->_depthBuffer->Release();
-        this->_surfaces.clear();
-        this->_textures.clear();
-        for (auto it = this->_targets.begin(), ite = this->_targets.end(); it != ite; ++it)
-            this->_PushRenderTarget(it->first, it->second);
+        this->OnResetDevice();
     }
 
     void RenderTarget::_PushRenderTarget(PixelFormat::Type format, RenderTargetUsage::Type usage)
@@ -98,9 +92,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         IDirect3DSurface9* surface;
         DXCHECKERROR(tex->GetSurfaceLevel(0, &surface));
         if (usage == RenderTargetUsage::Color)
-            this->_surfaces.push_back(surface);
+            this->_surfaces.emplace_back(surface);
         else
-            this->_depthBuffer = surface;
+            this->_depthBuffer.reset(surface);
     }
 
 }}}

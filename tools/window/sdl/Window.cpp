@@ -28,7 +28,9 @@ namespace Tools { namespace Window { namespace Sdl {
 #ifdef _WIN32
         rendererFlag = directX ? 0 : SDL_OPENGL;
 #endif
-        if (!(this->_screen = SDL_SetVideoMode(this->_size.x, this->_size.y, 0, (fullscreen ? SDL_FULLSCREEN : SDL_RESIZABLE) | rendererFlag)))
+        rendererFlag |= fullscreen ? SDL_FULLSCREEN : SDL_RESIZABLE;
+        this->_rendererFlag = rendererFlag;
+        if (!(this->_screen = SDL_SetVideoMode(this->_size.x, this->_size.y, 32, this->_rendererFlag)))
         {
             SDL_Quit();
             throw std::runtime_error(std::string("SDL_SetVideoMode(): ") + SDL_GetError());
@@ -67,11 +69,11 @@ namespace Tools { namespace Window { namespace Sdl {
 #endif
         if (this->_targetSize.x && this->_targetSize.y)
         {
-            if (!(this->_screen = SDL_SetVideoMode(this->_targetSize.x, this->_targetSize.y, 0, SDL_RESIZABLE | SDL_OPENGL)))
-            {
-                SDL_Quit();
-                throw std::runtime_error(SDL_GetError());
-            }
+            //if (!(this->_screen = SDL_SetVideoMode(this->_targetSize.x, this->_targetSize.y, 0, this->_rendererFlag)))
+            //{
+            //    SDL_Quit();
+            //    throw std::runtime_error(SDL_GetError());
+            //}
             this->_size = this->_targetSize;
             this->_renderer->SetScreenSize(this->_size);
             //this->_renderer->SetViewport(Tools::Rectangle(glm::ivec2(0), this->_size));

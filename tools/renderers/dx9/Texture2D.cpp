@@ -14,8 +14,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     Texture2D::Texture2D(DX9Renderer& renderer, PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize, void const* mipmapData) :
         _renderer(renderer),
-        _hasAlpha(false),
-        _texture(0)
+        _hasAlpha(false)
     {
         if (format == PixelFormat::Png && mipmapData == 0)
         {
@@ -32,7 +31,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         }
         else if (format == PixelFormat::Rgba8)
         {
-            DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), imgSize.x, imgSize.y, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
+            IDirect3DTexture9* tex;
+            DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), imgSize.x, imgSize.y, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &tex));
+            this->_texture.reset(tex);
             this->_size = imgSize;
             this->_FinishLoading((glm::u8vec4 const*)data, size, mipmapData);
         }
@@ -42,8 +43,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     Texture2D::Texture2D(DX9Renderer& renderer, std::string const& imagePath) :
         _renderer(renderer),
-        _hasAlpha(false),
-        _texture(0)
+        _hasAlpha(false)
     {
             ILuint ilID;
             ilGenImages(1, &ilID);
@@ -83,7 +83,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         ilBindImage(0);
         ilDeleteImage(ilID);
 
-        DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), this->_size.x, this->_size.y, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &this->_texture));
+        IDirect3DTexture9* tex;
+        DXCHECKERROR(D3DXCreateTexture(this->_renderer.GetDevice(), this->_size.x, this->_size.y, 0, D3DUSAGE_AUTOGENMIPMAP, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, &tex));
+        this->_texture.reset(tex);
         this->_FinishLoading(pixmap, size, 0);
         delete [] pixmap;
     }
@@ -134,8 +136,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
 
     Texture2D::~Texture2D()
     {
-        if (this->_texture)
-            this->_texture->Release();
+        //if (this->_texture)
+        //    this->_texture->Release();
     }
 
     void Texture2D::Bind()
