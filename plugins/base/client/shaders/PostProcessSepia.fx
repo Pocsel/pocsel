@@ -4,50 +4,46 @@ float4x4 projectionInverse : ProjectionInverse;
 float4x4 viewProjectionInverse : ViewProjectionInverse;
 float4x4 quadWorldViewProjection;
 
-float3 lightPos = float3(0, 0, 0);
-float3 lightDiffuse = float3(1.0, 1.0, 1.0);
-float3 lightSpecular = float3(0.9, 1.0, 0.8);
-
 #ifdef DIRECTX
-texture lighting;
-texture specular;
 texture diffuse;
+texture normalDepth;
+texture mask;
 
-sampler sLighting = sampler_state
-{
-    Texture = <lighting>;
-    minFilter = Point;
-    magFilter = Point;
-};
-sampler sSpecular = sampler_state
-{
-    Texture = <specular>;
-    minFilter = Point;
-    magFilter = Point;
-};
 sampler sDiffuse = sampler_state
 {
     Texture = <diffuse>;
     minFilter = Point;
     magFilter = Point;
 };
+sampler sNormalDepth = sampler_state
+{
+    Texture = <normalDepth>;
+    minFilter = Point;
+    magFilter = Point;
+};
+sampler sMask = sampler_state
+{
+    Texture = <mask>;
+    minFilter = Point;
+    magFilter = Point;
+};
 
-#define lighting sLighting
-#define specular sSpecular
 #define diffuse sDiffuse
+#define normalDepth sNormalDepth
+#define mask sMask
 
 #else
-sampler2D lighting = sampler_state
-{
-    minFilter = Point;
-    magFilter = Point;
-};
-sampler2D specular = sampler_state
-{
-    minFilter = Point;
-    magFilter = Point;
-};
 sampler2D diffuse = sampler_state
+{
+    minFilter = Point;
+    magFilter = Point;
+};
+sampler2D normalDepth = sampler_state
+{
+    minFilter = Point;
+    magFilter = Point;
+};
+sampler2D mask = sampler_state
 {
     minFilter = Point;
     magFilter = Point;
@@ -70,30 +66,16 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 
 float4 fs(in VSout v) : COLOR
 {
-    //if (v.texCoord.y < 0.25)
-    //{
-    //    float2 coord = v.texCoord * 4;
-    //    if (coord.x < 1)
-    //        return float4(tex2D(lighting, coord).rgb, 1);
-    //    if (coord.x < 2)
-    //        return float4(tex2D(specular, coord + float2(-1, 0)).rgb, 1);
-    //    if (coord.x < 3)
-    //        return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
-    //}
 #ifndef DIRECTX
     v.texCoord = float2(v.texCoord.x, 1-v.texCoord.y);
 #endif
-    float4 diff = tex2D(diffuse, v.texCoord);
-    float4 spec = tex2D(specular, v.texCoord) * diff.a;
-    float3 light = tex2D(lighting, v.texCoord).rgb * diff.a;
 
-    float3 color = light * diff.rgb + diff.rgb * (1 - diff.a);
-    color += spec.rgb;
+    float4 maskColor = tex2D(mask, v.texCoord * 10);
 
-    if (light.r < 0.1 && diff.r == 0)
-        color = float3(0.9, 0.9, 0.3);
-
-    return float4(color, diff.a);
+    float4 color = tex2D(diffuse, v.texCoord);
+    color = color * 0.75 + color * maskColor * 0.25;
+    color.a = 1.0;
+    return color;
 }
 
 #ifndef DIRECTX

@@ -30,7 +30,6 @@ namespace Client { namespace Game {
         _map(0),
         _statUpdateTime("Game update"),
         _statRenderTime("Game render"),
-        _statOutTime("Not game time"),
         _deferredShading(client.GetWindow().GetRenderer())
     {
         this->_cubeTypeManager = new CubeTypeManager(client, nbCubeTypes);
@@ -77,6 +76,7 @@ namespace Client { namespace Game {
 
     Game::~Game()
     {
+        this->_postProcessSepia.reset();
         this->_client.GetWindow().UnregisterCallback(this->_callbackId);
         Tools::Delete(this->_map);
         Tools::Delete(this->_player);
@@ -127,7 +127,7 @@ namespace Client { namespace Game {
         auto absoluteViewProjection = camera.GetAbsoluteViewProjectionMatrix();
 
         this->_renderer.BeginDraw();
-        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
+        //this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
 
         this->_gBuffer->Bind();
         this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
@@ -158,7 +158,11 @@ namespace Client { namespace Game {
             this->_pointLights);
         // XXX
 
-        this->_gBuffer->Render();
+        std::list<Tools::Renderers::Utils::Material::LuaMaterial*> postProcess;
+        if (this->_postProcessSepia == 0)
+            this->_postProcessSepia = this->_resourceManager->GetMaterial("base:PostProcessSepia");
+        postProcess.push_back(this->_postProcessSepia.get());
+        this->_gBuffer->Render(totalTime, postProcess);
 
         this->_renderer.EndDraw();
         // XXX

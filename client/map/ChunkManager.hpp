@@ -4,6 +4,8 @@
 #include "common/BaseChunk.hpp"
 #include "common/Position.hpp"
 #include "tools/AlignedCube.hpp"
+#include "tools/stat/Counter.hpp"
+#include "tools/stat/Timer.hpp"
 #include "client/map/Chunk.hpp"
 #include "client/map/ChunkRenderer.hpp"
 
@@ -48,6 +50,8 @@ namespace Client { namespace Map {
         float _loadingProgression;
         Common::Position _oldPosition;
         Tools::Thread::ThreadPool& _threadPool;
+        Tools::Stat::Counter _statAdded;
+        Tools::Stat::Timer _statAdd;
 
     public:
         ChunkManager(Game::Game& game);
