@@ -1,0 +1,159 @@
+#ifndef __TOOLS_LUA_WEAKRESOURCEREFMANAGER_HPP__
+#define __TOOLS_LUA_WEAKRESOURCEREFMANAGER_HPP__
+
+#include "tools/lua/Interpreter.hpp"
+
+namespace Tools { namespace Lua {
+
+    template<typename WeakResourceRefType, typename ManagerType> class WeakResourceRefManager :
+        private boost::noncopyable
+    {
+    private:
+        struct FakeReference
+        {
+            FakeReference() : trueReference(0) {}
+            FakeReference(Ref const& ref) { this->trueReference = new Ref(ref); }
+            ~FakeReference() { Tools::Delete(this->trueReference); }
+            bool IsValid() const { return this->trueReference; }
+            void Invalidate() { Tools::Delete(this->trueReference); this->trueReference = 0; }
+            Ref GetReference() const { assert(this->trueReference && "verifier avec IsValid() avant"); return *this->trueReference; }
+            Tools::Lua::Ref* trueReference;
+        };
+
+    private:
+        Interpreter& _interpreter;
+        ManagerType& _resourceManager;
+        Uint32 _nextReferenceId;
+        std::unordered_map<Uint32 /* ref id */, Ref /* weak ref UserData */>* _weakReferences;
+        MetaTable* _weakReferenceMetaTable;
+        std::list<Ref /* fake ref UserData */>* _fakeReferences;
+        MetaTable* _fakeReferenceMetaTable;
+
+    public:
+        WeakResourceRefManager(Interpreter& interpreter, ManagerType& resourceManager, bool useFakeReferences = false) :
+            _interpreter(interpreter),
+            _resourceManager(resourceManager),
+            _nextReferenceId(1),
+            _fakeReferences(0),
+            _fakeReferenceMetaTable(0)
+        {
+            this->_weakReferences = new std::unordered_map<Uint32, Ref>();
+            this->_weakReferenceMetaTable = &MetaTable::Create(interpreter, WeakResourceRefType());
+            this->_weakReferenceMetaTable->SetMethod("Lock", std::bind(&WeakResourceRefManager::_WeakReferenceLock, this, std::placeholders::_1));
+            if (useFakeReferences)
+            {
+                this->_fakeReferences = new std::list<Ref>();
+                this->_fakeReferenceMetaTable = &MetaTable::Create(interpreter, FakeReference());
+                this->_fakeReferenceMetaTable->SetMetaMethod(MetaTable::Index, std::bind(&WeakResourceRefManager::_FakeReferenceIndex, this, std::placeholders::_1));
+                this->_fakeReferenceMetaTable->SetMetaMethod(MetaTable::NewIndex, std::bind(&WeakResourceRefManager::_FakeReferenceNewIndex, this, std::placeholders::_1));
+            }
+        }
+
+        ~WeakResourceRefManager()
+        {
+            Tools::Delete(this->_weakReferences);
+            Tools::Delete(this->_fakeReferences);
+        }
+
+        std::pair<Uint32, Ref> NewResource(WeakResourceRefType const& resource)
+        {
+            while (!this->_nextReferenceId // 0 est la valeur spéciale "pas de ref", on la saute
+                    || this->_weakReferences->count(this->_nextReferenceId))
+                ++this->_nextReferenceId;
+            Uint32 newId = this->_nextReferenceId++;
+            Ref userData = this->_interpreter.Make(resource);
+            return *this->_weakReferences->insert(std::make_pair(newId, userData)).first;
+        }
+
+        void InvalidateResource(Uint32 refId) throw(std::runtime_error)
+        {
+            auto it = this->_weakReferences->find(refId);
+            if (it == this->_weakReferences->end())
+                throw std::runtime_error("WeakResourceRefManager::InvalidateResource: No resource with id " + Tools::ToString(refId));
+            Ref& ref = it->second;
+            ref.To<WeakResourceRefType*>()->Invalidate(this->_resourceManager);
+            this->_weakReferences->erase(it);
+        }
+
+        Ref GetWeakReference(Uint32 refId) const throw(std::runtime_error)
+        {
+            auto it = this->_weakReferences->find(refId);
+            if (it == this->_weakReferences->end())
+                throw std::runtime_error("WeakResourceRefManager::GetWeakReference: No weak reference with id " + Tools::ToString(refId));
+            return it->second;
+        }
+
+        void InvalidateAllFakeReferences()
+        {
+            if (!this->_fakeReferences)
+                return;
+            auto it = this->_fakeReferences->begin();
+            auto itEnd = this->_fakeReferences->end();
+            for (; it != itEnd; ++it)
+            {
+                Ref& ref = it->second;
+                ref.To<FakeReference*>()->Invalidate();
+            }
+            this->_fakeReferences->clear();
+        }
+
+    private:
+        void _WeakReferenceLock(CallHelper& helper)
+        {
+            WeakResourceRefType* weakRef = helper.PopArg("WeakResourceRefManager::_WeakReferenceCall: Missing self argument for __index metamethod").To<WeakResourceRefType*>();
+            if (weakRef->IsValid(this->_resourceManager))
+            {
+                if (this->_fakeReferences)
+                {
+                    Ref fakeRef = this->_interpreter.Make(FakeReference(weakRef->GetReference(this->_resourceManager)));
+                    this->_fakeReferences->push_back(fakeRef);
+                    helper.PushRet(fakeRef);
+                }
+                else
+                    helper.PushRet(weakRef->GetReference(this->_resourceManager));
+            }
+            else
+                helper.PushRet(helper.GetInterpreter().MakeNil());
+        }
+
+        void _FakeReferenceIndex(CallHelper& helper)
+        {
+            FakeReference* ref = helper.PopArg("WeakResourceRefManager::_FakeReferenceIndex: Missing self argument for __index metamethod").To<FakeReference*>();
+            Ref key = helper.PopArg("WeakResourceRefManager::_FakeReferenceIndex: Missing key argument for __index metamethod");
+            if (!ref->IsValid())
+                throw std::runtime_error("WeakResourceRefManager::_FakeReferenceIndex: This reference was invalidated - you must not keep true references to resources, only weak references");
+            Ref table = ref->GetReference();
+            if (!table.IsTable())
+                throw std::runtime_error("WeakResourceRefManager::_FakeReferenceIndex: __index metamethod called on a reference of type " + table.GetTypeName());
+            Ref value = ref->GetReference()[key];
+            //if (value.IsFunction())
+            //    helper.PushRet(helper.GetInterpreter().MakeFunction(
+            //                [value](CallHelper& helper)
+            //                {
+            //                    if (helper.GetNbArgs() && helper.GetArgList().front().Is<FakeReference*>())
+            //                    {
+            //                        FakeReference* ref = helper.GetArgList().front().To<FakeReference*>();
+            //                        helper.GetArgList().pop_front();
+            //                        helper.GetArgList().push_front(ref->GetReference());
+            //                    }
+            //                    value(helper);
+            //                }
+            //                ));
+            //else
+                helper.PushRet(value);
+        }
+
+        void _FakeReferenceNewIndex(CallHelper& helper)
+        {
+            FakeReference* ref = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing self argument for __newindex metamethod").To<FakeReference*>();
+            Ref key = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing key argument for __newindex metamethod");
+            Ref value = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing value argument for __newindex metamethod");
+            if (!ref->IsValid())
+                throw std::runtime_error("WeakResourceRefManager::_FakeReferenceNewIndex: This reference was invalidated - you must not keep true references to resources, only weak references");
+            ref->GetReference().Set(key, value);
+        }
+    };
+
+}}
+
+#endif

@@ -5,8 +5,8 @@
 #include "tools/lua/Iterator.hpp"
 #include "tools/lua/MetaTable.hpp"
 #include "tools/lua/utils/Utils.hpp"
-#include "tools/lua/ResourceManager.hpp"
-#include "tools/lua/AFakeResourceRef.hpp"
+#include "tools/lua/WeakResourceRefManager.hpp"
+#include "tools/lua/AWeakResourceRef.hpp"
 #include "tools/Timer.hpp"
 
 #define STRINGIFY(...) #__VA_ARGS__
@@ -274,28 +274,24 @@ static void Resources(Interpreter& i)
 {
     struct MitoResourceManager
     {
-        MitoResourceManager() : coucou(1336) {}
+        MitoResourceManager(Interpreter& i) : coucou(1336), coucou2(i.MakeString("Heyyyyyyy")) {}
         int coucou;
+        Ref coucou2;
     };
 
-    struct ResourceDeTest : Tools::Lua::AFakeResourceRef<MitoResourceManager>
+    struct ResourceDeTest : Tools::Lua::AWeakResourceRef<MitoResourceManager>
     {
         ResourceDeTest() : field1(0) {}
         ResourceDeTest(int field1, std::string field2) : field1(field1), field2(field2) {}
-        virtual bool IsValid() const { return this->field1 && !this->field2.empty(); }
-        virtual void Invalidate() { this->field1 = 0; this->field2.clear(); }
-        virtual void Index(MitoResourceManager& manager, CallHelper& helper)
-        {
-            Tools::log << "__index with \"" << helper.PopArg().ToString() << "\", manager test: " << manager.coucou << std::endl;
-            Tools::log << "field1: " << this->field1 << ", field2 " << this->field2 << std::endl;
-            helper.PushRet(helper.GetInterpreter().MakeInteger(4097));
-        }
+        virtual bool IsValid(MitoResourceManager const&) const { return this->field1 && !this->field2.empty(); }
+        virtual void Invalidate(MitoResourceManager const&) { this->field1 = 0; this->field2.clear(); }
+        virtual Ref GetReference(MitoResourceManager const& manager) const { return manager.coucou2; }
         int field1;
         std::string field2;
     };
 
-    MitoResourceManager realManager;
-    ResourceManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager, ResourceDeTest());
+    MitoResourceManager realManager(i);
+    WeakResourceRefManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager, true);
 
     auto pair1 = luaManager.NewResource(ResourceDeTest(12, "resource1"));
     Uint32 resource1Id = pair1.first;
@@ -307,17 +303,16 @@ static void Resources(Interpreter& i)
     i.Globals().Set("maResource2", resource2);
     i.DoString(STRINGIFY(
                 print("--- test resources ---")
-                print(" - avant delete")
-                print("call 1 : ", tostring(maResource1()))
-                print("call 2 : ", tostring(maResource2()))
+                print(" - avant invalidation")
+                print("call 1 : ", tostring(maResource1:Lock()))
+                print("call 2 : ", tostring(maResource2:Lock()))
                 ));
     luaManager.InvalidateResource(resource1Id);
     i.DoString(STRINGIFY(
-                print(" - apres delete")
-                print("call 1 : ", tostring(maResource1()))
-                print("call 2 : ", tostring(maResource2()))
+                print(" - apres invalidation")
+                print("call 1 : ", tostring(maResource1:Lock()))
+                print("call 2 : ", tostring(maResource2:Lock()))
                 ));
-    luaManager.ReplaceResource(resource2Id, ResourceDeTest(25, "resource2.1"));
     try
     {
         i.DoString(STRINGIFY(

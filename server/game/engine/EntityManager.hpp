@@ -2,8 +2,8 @@
 #define __SERVER_GAME_ENGINE_ENTITYMANAGER_HPP__
 
 #include "tools/lua/Ref.hpp"
-#include "tools/lua/AFakeResourceRef.hpp"
-#include "tools/lua/ResourceManager.hpp"
+#include "tools/lua/AWeakResourceRef.hpp"
+#include "tools/lua/WeakResourceRefManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
 #include "common/Position.hpp"
 

@@ -5,11 +5,10 @@ namespace Tools { namespace Lua {
 
     template<typename ManagerType> struct AWeakResourceRef
     {
-        virtual ~WeakResourceRef()
-        {
-        }
-
-        virtual void Lock(ManagerType&, CallHelper&) = 0;
+        virtual ~AWeakResourceRef() {}
+        virtual bool IsValid(ManagerType const&) const = 0;
+        virtual void Invalidate(ManagerType const&) = 0;
+        virtual Ref GetReference(ManagerType const&) const = 0;
     };
 
 }}
