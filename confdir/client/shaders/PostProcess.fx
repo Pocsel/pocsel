@@ -80,18 +80,14 @@ float4 fs(in VSout v) : COLOR
     //    if (coord.x < 3)
     //        return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
     //}
-#ifdef DIRECTX
-    float4 diff = tex2D(diffuse, v.texCoord);
-    float4 spec = tex2D(specular, v.texCoord);
-    float3 light = tex2D(lighting, v.texCoord).rgb;
-#else
+#ifndef DIRECTX
     v.texCoord = float2(v.texCoord.x, 1-v.texCoord.y);
-    float4 diff = tex2D(diffuse, v.texCoord);
-    float4 spec = tex2D(specular, v.texCoord);
-    float3 light = tex2D(lighting, v.texCoord).rgb;
 #endif
+    float4 diff = tex2D(diffuse, v.texCoord);
+    float4 spec = tex2D(specular, v.texCoord) * diff.a;
+    float3 light = tex2D(lighting, v.texCoord).rgb * diff.a;
 
-    float3 color = light * diff.rgb;
+    float3 color = light * diff.rgb + diff.rgb * (1 - diff.a);
     color += spec.rgb;
 
     if (light.r < 0.1 && diff.r == 0)

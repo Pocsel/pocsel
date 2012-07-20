@@ -74,6 +74,7 @@ namespace Tools { namespace Window { namespace Sdl {
             //    SDL_Quit();
             //    throw std::runtime_error(SDL_GetError());
             //}
+            SDL_UpdateRect(0, 0, 0, 0);
             this->_size = this->_targetSize;
             this->_renderer->SetScreenSize(this->_size);
             //this->_renderer->SetViewport(Tools::Rectangle(glm::ivec2(0), this->_size));

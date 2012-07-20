@@ -331,6 +331,8 @@ namespace Tools { namespace Renderers {
 
         if (this->_deviceState == NotReset)
         {
+            this->_presentParameters.BackBufferWidth = this->_screenSize.x;
+            this->_presentParameters.BackBufferHeight = this->_screenSize.y;
             DXCHECKERROR(this->_device->Reset(&this->_presentParameters));
 
             // Recreate...

@@ -16,7 +16,8 @@ namespace Client { namespace Game {
     BulletDebugDrawer::BulletDebugDrawer(Game& game, Tools::IRenderer& renderer) :
         _debugMode(0),
         _game(game),
-        _renderer(renderer)
+        _renderer(renderer),
+        _timer("Bullet drawer")
     {
         this->_shader = &game.GetClient().GetLocalResourceManager().GetShader("BaseShaderColorParam.fx");
         this->_shaderColor = &this->_shader->GetParameter("colorParam");
@@ -28,6 +29,7 @@ namespace Client { namespace Game {
 
     void BulletDebugDrawer::BeginDraw()
     {
+        this->_timer.Begin();
         auto& camera = this->_game.GetPlayer().GetCamera();
         this->_cameraPos = btVector3(
                 camera.position.x,
@@ -44,6 +46,7 @@ namespace Client { namespace Game {
         this->_renderer.SetCullMode(Tools::Renderers::CullMode::Clockwise);
         this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
         this->_shader->EndPass();
+        this->_timer.End();
     }
 
     void BulletDebugDrawer::drawLine(
@@ -77,7 +80,7 @@ namespace Client { namespace Game {
     void BulletDebugDrawer::_SetColor(btVector3 const& fromColor)
     {
         glm::vec4 color(fromColor.x(), fromColor.y(), fromColor.z(), 1.0);
-        for (unsigned int i = 0; i < 4; ++i)
+        for (unsigned int i = 0; i < 3; ++i)
         {
             if (color[i] < 0.01f)
                 color[i] = 0.01f;
