@@ -85,6 +85,7 @@ namespace Client {
         Uint32 GetClientId() const { return this->_clientId; }
     private:
         void _MenuBind();
+        void _ToggleDrawPhysicsBind();
     };
 
 }

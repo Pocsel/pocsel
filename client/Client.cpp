@@ -37,6 +37,7 @@ namespace Client {
         actions["altfire"] = Tools::Window::BindAction::AltFire;
         actions["use"] = Tools::Window::BindAction::Use;
         actions["togglesprint"] = Tools::Window::BindAction::ToggleSprint;
+        actions["toggle-draw-physics"] = Tools::Window::BindAction::ToggleDrawPhysics;
 
         this->_window = new Tools::Window::Sdl::Window(actions, this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen);
         this->_threadPool = new Tools::Thread::ThreadPool(2);
@@ -46,6 +47,7 @@ namespace Client {
 
         this->_window->GetInputManager().Bind(Tools::Window::BindAction::Quit, Tools::Window::BindAction::Released, std::bind(&Client::Quit, this));
         this->_window->GetInputManager().Bind(Tools::Window::BindAction::Menu, Tools::Window::BindAction::Released, std::bind(&Client::_MenuBind, this));
+        this->_window->GetInputManager().Bind(Tools::Window::BindAction::ToggleDrawPhysics, Tools::Window::BindAction::Released, std::bind(&Client::_ToggleDrawPhysicsBind, this));
         this->_window->GetInputManager().GetInputBinder().LoadFile(this->_settings.bindingsFile.string());
     }
 
@@ -213,6 +215,11 @@ namespace Client {
     void Client::_MenuBind()
     {
         this->_menu->GetMainMenu().SetVisible();
+    }
+
+    void Client::_ToggleDrawPhysicsBind()
+    {
+        this->_settings.drawPhysics = !this->_settings.drawPhysics;
     }
 
 }

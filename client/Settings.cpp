@@ -26,7 +26,8 @@ namespace {
 
 namespace Client {
 
-    Settings::Settings(int ac, char** av)
+    Settings::Settings(int ac, char** av) :
+        drawPhysics(false)
     {
         std::string defaultConfDir = Common::ConfDir::Client().string();
 
