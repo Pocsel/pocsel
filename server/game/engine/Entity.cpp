@@ -11,13 +11,13 @@ namespace Server { namespace Game { namespace Engine {
     {
         this->_self.Set("id", id);
         this->_self.Set("storage", this->_engine.GetInterpreter().MakeTable());
-        this->_luaResourceId = this->_engine.GetEntityManager().GetLuaResourceManager().NewResource(EntityManager::LuaResource(id)).first;
+        this->_luaResourceId = this->_engine.GetEntityManager().GetFakeEntityRefManager().NewResource(EntityManager::FakeEntityRef(id)).first;
         this->Enable();
     }
 
     Entity::~Entity()
     {
-        this->_engine.GetEntityManager().GetLuaResourceManager().InvalidateResource(this->_luaResourceId);
+        this->_engine.GetEntityManager().GetFakeEntityRefManager().InvalidateResource(this->_luaResourceId);
     }
 
     Tools::Lua::Ref Entity::GetStorage() const
@@ -45,7 +45,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_self = this->_engine.GetInterpreter().MakeTable(); // perte de toutes les references/variables de l'instance
         this->_self.Set("id", idSave); // on garde qu'une table avec l'id
         this->_self.Set("storage", storageSave); // et le storage
-        this->_engine.GetEntityManager().GetLuaResourceManager().GetResource(this->_luaResourceId).disabled = true;
+        this->_engine.GetEntityManager().GetFakeEntityRefManager().GetResource(this->_luaResourceId).disabled = true;
     }
 
     void Entity::Enable()
@@ -56,7 +56,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_self.SetMetaTable(metatable);
         this->_self.Set("prototype", this->_type.GetPrototype());
         metatable.Set("__index", this->_type.GetPrototype());
-        this->_engine.GetEntityManager().GetLuaResourceManager().GetResource(this->_luaResourceId).disabled = false;
+        this->_engine.GetEntityManager().GetFakeEntityRefManager().GetResource(this->_luaResourceId).disabled = false;
     }
 
     void Entity::SaveToStorage()

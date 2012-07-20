@@ -135,10 +135,10 @@ technique tech
    pass p0
    {
         AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        AlphaRef = 0;
-        SrcBlend = One;
-        DestBlend = One;
+        //AlphaTestEnable = true;
+        //AlphaRef = 0;
+        //SrcBlend = One;
+        //DestBlend = One;
         ZWriteEnable = false;
         //ZEnable = false;
         //CullMode = CCW;

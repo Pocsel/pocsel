@@ -4,9 +4,11 @@
 #include "server/game/World.hpp"
 #include "server/game/engine/Doodad.hpp"
 #include "server/game/engine/DoodadManager.hpp"
+#include "server/game/engine/PhysicsManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/PositionalEntity.hpp"
 #include "server/game/engine/Body.hpp"
+#include "server/game/engine/BodyType.hpp"
 #include "server/game/map/Map.hpp"
 #include "server/network/PacketCreator.hpp"
 #include "server/network/UdpPacket.hpp"
@@ -18,8 +20,15 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    Doodad::Doodad(Engine& engine, Uint32 id, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity const& entity, Body* body) :
+    Doodad::Doodad(Engine& engine,
+            Uint32 id,
+            Uint32 pluginId,
+            std::string const& name,
+            Uint32 entityId,
+            PositionalEntity& entity,
+            Body* body) :
         _engine(engine),
+        _world(engine.GetPhysicsManager().GetWorld()),
         _id(id),
         _pluginId(pluginId),
         _name(name),
@@ -91,7 +100,13 @@ namespace Server { namespace Game { namespace Engine {
         auto itTableEnd = this->_storage.End();
         for (; itTable != itTableEnd; ++itTable)
             values.push_back(std::make_pair(serializer.Serialize(itTable.GetKey(), true /* nilOnError */), serializer.Serialize(itTable.GetValue(), true /* nilOnError */)));
-        auto packet = Network::PacketCreator::DoodadSpawn(this->_id, this->_name, this->_entity.GetPhysics(), values);
+        auto packet = Network::PacketCreator::DoodadSpawn(
+                this->_id,
+                this->_entityId,
+                this->_name,
+                this->_entity.GetPhysics(),
+                this->_body.get() ? this->_body->GetType().GetId() : 0,
+                values);
 
         // send packet to new players
         auto it = this->_newPlayers.begin();
@@ -134,7 +149,7 @@ namespace Server { namespace Game { namespace Engine {
                 this->_storage.Set(c.key, c.value); // update of server state
             this->_commands.pop();
         }
-        auto packet = Network::PacketCreator::DoodadUpdate(this->_id, this->_positionDirty ? &this->_entity.GetPhysics() : 0, commands);
+        auto packet = Network::PacketCreator::DoodadUpdate(this->_id, this->_body.get(), commands); // vérifier si le body est dirty
         this->_positionDirty = false;
 
         // send packet to players

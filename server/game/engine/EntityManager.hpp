@@ -2,7 +2,7 @@
 #define __SERVER_GAME_ENGINE_ENTITYMANAGER_HPP__
 
 #include "tools/lua/Ref.hpp"
-#include "tools/lua/AResource.hpp"
+#include "tools/lua/AFakeResourceRef.hpp"
 #include "tools/lua/ResourceManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
 #include "common/Position.hpp"
@@ -51,10 +51,10 @@ namespace Server { namespace Game { namespace Engine {
             Uint32 notificationCallbackId;
         };
     public:
-        struct LuaResource : public Tools::Lua::AResource<EntityManager>
+        struct FakeEntityRef : public Tools::Lua::AFakeResourceRef<EntityManager>
         {
-            LuaResource() : entityId(0), disabled(true) {}
-            LuaResource(Uint32 entityId) : entityId(entityId), disabled(false) {}
+            FakeEntityRef() : entityId(0), disabled(true) {}
+            FakeEntityRef(Uint32 entityId) : entityId(entityId), disabled(false) {}
             virtual bool IsValid() const { return this->entityId && !this->disabled; }
             virtual void Invalidate() { this->entityId = 0; this->disabled = true; }
             virtual void Index(EntityManager& entityManager, Tools::Lua::CallHelper& helper);
@@ -72,7 +72,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 _nextEntityId;
         std::list<SpawnEvent*> _spawnEvents;
         std::list<KillEvent*> _killEvents;
-        Tools::Lua::ResourceManager<LuaResource, EntityManager>* _luaResourceManager;
+        Tools::Lua::ResourceManager<FakeEntityRef, EntityManager>* _fakeEntityRefManager;
 
     public:
         EntityManager(Engine& engine);
@@ -91,7 +91,9 @@ namespace Server { namespace Game { namespace Engine {
         void Load(Tools::Database::IConnection& conn);
         void BootstrapPlugin(Uint32 pluginId, Tools::Database::IConnection& conn);
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
+        PositionalEntity& GetPositionalEntity(Uint32 entityId) throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
+        PositionalEntity& GetDisabledEntity(Uint32 entityId) throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         PositionalEntity const& GetDisabledEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         bool IsEntityPositional(Uint32 entityId) const;
         void DisableEntity(Uint32 entityId, bool chunkUnloaded = true) throw(std::runtime_error);
@@ -99,7 +101,7 @@ namespace Server { namespace Game { namespace Engine {
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
         std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
         std::map<Uint32, PositionalEntity*> const& GetPositionalEntities() const { return this->_positionalEntities; }
-        Tools::Lua::ResourceManager<LuaResource, EntityManager>& GetLuaResourceManager() { return *this->_luaResourceManager; }
+        Tools::Lua::ResourceManager<FakeEntityRef, EntityManager>& GetFakeEntityRefManager() { return *this->_fakeEntityRefManager; }
 
         // rcon requests
         std::string RconGetEntities() const;

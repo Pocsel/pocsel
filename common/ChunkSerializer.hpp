@@ -50,6 +50,7 @@ namespace Common {
     struct ChunkSerializer
     {
         typedef typename ChunkType::CubeType CubeType;
+        typedef typename ChunkType::CubeArray CubeArray;
 
         static std::unique_ptr<ChunkType> Read(Tools::ByteArray const& p)
         {
@@ -63,8 +64,8 @@ namespace Common {
                 return chunkPtr;
             }
 
-            std::unique_ptr<CubeType> cubesPtr(new CubeType[Common::ChunkSize3]);
-            CubeType* cubes = cubesPtr.get();
+            std::unique_ptr<CubeArray> cubesPtr(new CubeArray);
+            CubeType* cubes = cubesPtr->data();
 
             if (number_of_types == 1)
             {

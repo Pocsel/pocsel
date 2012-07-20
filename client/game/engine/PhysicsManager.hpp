@@ -5,14 +5,16 @@ namespace Common { namespace Physics {
     class World;
 }}
 
-namespace Client { namespace Game { namespace Engine {
-    class Doodad;
-    class Engine;
-}}}
+namespace Client { namespace Game {
+    class BulletDebugDrawer;
+}}
 
 class btRigidBody;
 
 namespace Client { namespace Game { namespace Engine {
+
+    class Doodad;
+    class Engine;
 
     class PhysicsManager
     {
@@ -24,12 +26,17 @@ namespace Client { namespace Game { namespace Engine {
         Common::Physics::World* _world;
         Uint64 _lastTime;
 
+        BulletDebugDrawer* _debugDrawer;
+
     public:
         PhysicsManager(Engine& engine, std::map<Uint32, Doodad*> const& entities);
         ~PhysicsManager();
         void Tick(Uint64 deltaTime);
-        void AddBody(btRigidBody* body);
-        void RemoveBody(btRigidBody* body);
+
+        Common::Physics::World& GetWorld() { return *this->_world; }
+        Common::Physics::World const& GetWorld() const { return *this->_world; }
+
+        BulletDebugDrawer& GetDebugDrawer() { return *this->_debugDrawer; }
     };
 
 }}}

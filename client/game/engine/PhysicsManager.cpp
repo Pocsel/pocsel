@@ -3,6 +3,9 @@
 #include "client/game/engine/Engine.hpp"
 #include "client/game/engine/DoodadManager.hpp"
 
+#include "client/game/BulletDebugDrawer.hpp"
+#include "client/game/Game.hpp"
+
 #include "common/physics/Node.hpp"
 #include "common/physics/Vector.hpp"
 #include "common/physics/World.hpp"
@@ -13,18 +16,6 @@
 
 namespace Client { namespace Game { namespace Engine {
 
-    void PhysicsManager::AddBody(btRigidBody* body)
-    {
-        if (body)
-            this->_world->GetBtWorld().addRigidBody(body);
-    }
-
-    void PhysicsManager::RemoveBody(btRigidBody* body)
-    {
-        if (body)
-            this->_world->GetBtWorld().removeRigidBody(body);
-    }
-
     PhysicsManager::PhysicsManager(Engine& engine, std::map<Uint32, Doodad*> const& doodads) :
         _engine(engine),
         _doodads(doodads),
@@ -32,11 +23,20 @@ namespace Client { namespace Game { namespace Engine {
         _lastTime(0)
     {
         this->_world = new Common::Physics::World();
+
+        this->_debugDrawer = new BulletDebugDrawer(this->_engine.GetGame(), this->_engine.GetGame().GetRenderer());
+        this->_debugDrawer->setDebugMode(
+                btIDebugDraw::DBG_DrawWireframe |
+                btIDebugDraw::DBG_DrawConstraints |
+                btIDebugDraw::DBG_DrawConstraintLimits
+                );
+        this->_world->GetBtWorld().setDebugDrawer(this->_debugDrawer);
         //this->_world->GetBtWorld().setInternalTickCallback(_cb::_TickCallback, this);
     }
 
     PhysicsManager::~PhysicsManager()
     {
+        Tools::Delete(this->_debugDrawer);
         Tools::Delete(this->_world);
     }
 
@@ -46,9 +46,9 @@ namespace Client { namespace Game { namespace Engine {
         {
             if (!this->_bodiesInWorld.count(it->first))
             {
-                this->_world->GetBtWorld().addRigidBody(&it->second->GetBtBody());
+//                this->_world->GetBtWorld().addRigidBody(&it->second->GetBtBody());
                 this->_bodiesInWorld.insert(it->first);
-                this->_doodadBodies.insert(&it->second->GetBtBody());
+//                this->_doodadBodies.insert(&it->second->GetBtBody());
             }
         }
 

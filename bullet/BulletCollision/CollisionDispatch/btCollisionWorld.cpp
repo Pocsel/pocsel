@@ -1232,7 +1232,7 @@ void btCollisionWorld::debugDrawObject(const btTransform& worldTransform, const 
 	{
 
 		/// for polyhedral shapes
-		if (shape->isPolyhedral())
+		if (shape->isPolyhedral() && shape->getShapeType() != BOX_SHAPE_PROXYTYPE)
 		{
 			btPolyhedralConvexShape* polyshape = (btPolyhedralConvexShape*) shape;
 

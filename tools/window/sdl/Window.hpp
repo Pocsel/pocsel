@@ -19,6 +19,7 @@ namespace Tools { namespace Window { namespace Sdl {
         SDL_Surface* _screen;
         glm::uvec2 _size;
         glm::uvec2 _targetSize;
+        Uint32 _rendererFlag;
 #ifdef _WIN32
         bool _directX;
 #endif

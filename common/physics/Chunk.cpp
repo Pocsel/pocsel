@@ -1,4 +1,5 @@
 #include "common/physics/Chunk.hpp"
+#include "common/physics/World.hpp"
 #include "common/BaseChunk.hpp"
 
 #include "bullet/bullet-all.hpp"
@@ -8,14 +9,17 @@ namespace Common { namespace Physics {
     Chunk::~Chunk()
     {
         if (this->_body)
+        {
             this->_body->setUserPointer((void*)1);
+            this->_world.GetBtWorld().removeRigidBody(this->_body);
+        }
         Tools::Delete(this->_body);
         Tools::Delete(this->_shape);
     }
 
     namespace {
         template<int Tpow>//, int TorigX, int TorigY, int TorigZ>
-            struct megashit
+            struct _FillCompoundShape
             {
                 enum {
                     Tmax = 1 << Tpow,
@@ -24,14 +28,14 @@ namespace Common { namespace Physics {
                 };
                 static inline bool _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape, int TorigX, int TorigY, int TorigZ)
                 {
-                    bool full000 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
-                    bool full001 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
-                    bool full010 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
-                    bool full011 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
-                    bool full100 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
-                    bool full101 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
-                    bool full110 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
-                    bool full111 = megashit<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full000 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full001 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full010 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full011 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 0 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full100 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full101 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 0 * TmaxLess, TorigZ + 1 * TmaxLess);
+                    bool full110 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 0 * TmaxLess);
+                    bool full111 = _FillCompoundShape<TpowLess>::_(boxShapes, cubes, shape, TorigX + 1 * TmaxLess, TorigY + 1 * TmaxLess, TorigZ + 1 * TmaxLess);
 
                     if (
                             full000 &&
@@ -90,31 +94,21 @@ namespace Common { namespace Physics {
                         shape->addChildShape(tr, boxShapes[TpowLess]);
                     }
 
-                    //for (int x = TorigX; x < Tmax; ++x)
-                    //{
-                    //    for (int y = TorigY; y < Tmax; ++y)
-                    //    {
-                    //        for (int z = TorigZ; z < Tmax; ++z)
-                    //        {
-                    //        }
-                    //    }
-                    //}
-
                     return false;
                 }
             };
-        template<>//int TorigX, int TorigY, int TorigZ>
-            struct megashit<0>//, TorigX, TorigY, TorigZ>
+        template<>
+            struct _FillCompoundShape<0>
             {
                 static inline bool _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape, int origX, int origY, int origZ)
                 {
                     return cubes[origX + origY * Common::ChunkSize + origZ * Common::ChunkSize2] != 0;
-                    //return false;
                 }
             };
     }
 
-    Chunk::Chunk(Common::BaseChunk const& source) :
+    Chunk::Chunk(Common::Physics::World& world, Common::BaseChunk const& source) :
+        _world(world),
         _shape(0),
         _body(0)
     {
@@ -141,7 +135,7 @@ namespace Common { namespace Physics {
 
         Common::BaseChunk::CubeType const* cubes = source.GetCubes();
 
-        if (megashit<5>/*, 0, 0, 0>*/::_(boxShapes, cubes, this->_shape, 0, 0, 0))
+        if (_FillCompoundShape<5>::_(boxShapes, cubes, this->_shape, 0, 0, 0))
         {
             btTransform tr;
             tr.setIdentity();
@@ -164,9 +158,14 @@ namespace Common { namespace Physics {
         tr.setOrigin(btVector3((source.coords.x) * 32, (source.coords.y) * 32,(source.coords.z) * 32));
 
         btRigidBody::btRigidBodyConstructionInfo rbInfo(0, 0, this->_shape, btVector3(0, 0, 0));
+        rbInfo.m_restitution = 0.5;
         this->_body = new btRigidBody(rbInfo);
         this->_body->setCenterOfMassTransform(tr);
         this->_body->setUserPointer(this);
+
+        this->_body->setCollisionFlags(this->_body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
+
+        this->_world.GetBtWorld().addRigidBody(this->_body);
     }
 
 }}

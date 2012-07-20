@@ -3,7 +3,13 @@
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/DoodadType.hpp"
 #include "client/game/engine/Engine.hpp"
+#include "client/game/engine/Entity.hpp"
+#include "client/game/engine/PhysicsManager.hpp"
+#include "client/game/engine/BodyManager.hpp"
+
 #include "client/game/ShapeRenderer.hpp"
+#include "client/game/BulletDebugDrawer.hpp"
+
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/physics/World.hpp"
@@ -16,7 +22,6 @@ namespace Client { namespace Game { namespace Engine {
         _runningDoodadId(0),
         _runningDoodad(0),
         _lastTime(0),
-        //_world(0),
         _shapeRenderer(0)
     {
         //this->_world = new Common::Physics::World();
@@ -60,40 +65,50 @@ namespace Client { namespace Game { namespace Engine {
     {
         //this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
 
-        auto it = this->_doodads.begin();
-        auto itEnd = this->_doodads.end();
-        for (; it != itEnd; ++it)
+        for (auto it = this->_entities.begin(),
+                itEnd = this->_entities.end(); it != itEnd; ++it)
         {
-            Doodad& entity = *it->second;
+            Entity& entity = *it->second;
             //btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
-            Common::Physics::Node& physics = entity.GetPhysics();
+            //Common::Physics::Node& physics = entity.GetPhysics();
 
-            btTransform wt;
-            entity.GetBtBody().getMotionState()->getWorldTransform(wt);
-            btVector3 wpos = wt.getOrigin();
+            //btTransform wt;
+            //entity.GetBtBody().getMotionState()->getWorldTransform(wt);
+            //btVector3 wpos = wt.getOrigin();
 
-            physics.position.x = wpos.x();
-            physics.position.y = wpos.y();
-            physics.position.z = wpos.z();
+            //physics.position.x = wpos.x();
+            //physics.position.y = wpos.y();
+            //physics.position.z = wpos.z();
 
-            btQuaternion wrot = wt.getRotation();
-            glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
-            physics.orientation = //glm::eulerAngles(glmRot);
-            glmRot;
+            //btQuaternion wrot = wt.getRotation();
+            //glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
+            //physics.orientation = //glm::eulerAngles(glmRot);
+            //glmRot;
 
-            float uf = it->second->GetUpdateFlag();
+            float uf = entity.GetUpdateFlag();
             uf -= 0.3f;
             if (uf < 0)
                 uf = 0;
-            it->second->SetUpdateFlag(uf);
+            entity.SetUpdateFlag(uf);
+
+            entity.DeprecatePhysics();
 
             //Common::Physics::MoveNode(it->second->GetPhysics(), deltaTime);
+        }
+
+
+        for (auto it = this->_doodads.begin(),
+                itEnd = this->_doodads.end(); it != itEnd; ++it)
+        {
             this->_CallDoodadFunction(it->first, "Think");
         }
+
         this->_lastTime = totalTime;
     }
 
     void DoodadManager::SpawnDoodad(Uint32 doodadId,
+            Uint32 entityId,
+            Uint32 bodyId,
             std::string const& doodadName,
             Common::Physics::Node const& position,
             std::list<std::pair<std::string /* key */, std::string /* value */>> const& values)
@@ -109,7 +124,21 @@ namespace Client { namespace Game { namespace Engine {
             Tools::error << "DoodadManager::SpawnDoodad: Doodad type \"" << doodadName << "\" not found." << std::endl;
             return;
         }
-        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(), doodadId, position, *it->second);
+        if (this->_entities.count(entityId) == 0)
+        {
+            this->_entities[entityId] =
+                new Entity(this->_engine.GetPhysicsManager().GetWorld(), entityId, position);
+        }
+        Entity& entity = *this->_entities[entityId];
+
+        entity.AddDoodad(doodadId);
+        entity.SetPosition(position);
+
+        this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(),
+                doodadId,
+                bodyId ? &this->_engine.GetBodyManager().GetBodyType(bodyId) : 0,
+                entity,
+                *it->second);
         auto itValues = values.begin();
         auto itValuesEnd = values.end();
         for (; itValues != itValuesEnd; ++itValues)
@@ -136,7 +165,7 @@ namespace Client { namespace Game { namespace Engine {
     }
 
     void DoodadManager::UpdateDoodad(Uint32 doodadId,
-            Common::Physics::Node const* position,
+            std::vector<std::pair<bool, Common::Physics::Node>> const* body,
             std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands)
     {
         auto it = this->_doodads.find(doodadId);
@@ -145,9 +174,12 @@ namespace Client { namespace Game { namespace Engine {
             Tools::error << "DoodadManager::UpdateDoodad: Doodad " << doodadId << " not found." << std::endl;
             return;
         }
-        if (position)
+        if (body)
         {
-            it->second->SetPhysics(*position);
+            // TODO faire ce qu'il faut pour le body
+
+            // TODO faire ce qu'il faut pour le updateEntity
+            /*it->second->SetPhysics(*position);
 
             btRigidBody& btBody = it->second->GetBtBody();
 
@@ -176,7 +208,7 @@ namespace Client { namespace Game { namespace Engine {
                         position->angularVelocity.z));
 
 
-            it->second->SetUpdateFlag(1.1f);
+            it->second->SetUpdateFlag(1.1f);*/
         }
 
         auto itCommands = commands.begin();
@@ -197,10 +229,16 @@ namespace Client { namespace Game { namespace Engine {
 
     void DoodadManager::Render()
     {
-        for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
-        {
-            this->_shapeRenderer->Render(it->second->GetBtBody());
-        }
+        this->_engine.GetPhysicsManager().GetDebugDrawer().BeginDraw();
+        this->_engine.GetPhysicsManager().GetWorld().GetBtWorld().debugDrawWorld();
+        this->_engine.GetPhysicsManager().GetDebugDrawer().EndDraw();
+
+        //for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
+        //{
+        //    Body const* body = it->second->GetBody();
+        //    if (body != 0)
+        //        this->_shapeRenderer->Render(*body);
+        //}
     }
 
     void DoodadManager::_CallDoodadFunction(Uint32 doodadId, std::string const& function)

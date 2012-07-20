@@ -1,0 +1,29 @@
+#ifndef __COMMON_PHYSICS_SHAPEDESCBOX_HPP__
+#define __COMMON_PHYSICS_SHAPEDESCBOX_HPP__
+
+#include "common/physics/ShapeDesc.hpp"
+
+#include "bullet/bullet-all.hpp"
+
+namespace Common { namespace Physics {
+
+    class ShapeDescBox :
+        public ShapeDesc
+    {
+    private:
+        btVector3 _halfExtents;
+        mutable std::unique_ptr<std::string> _string;
+
+    public:
+        ShapeDescBox(Tools::Lua::Ref const& lua);
+        ShapeDescBox(Tools::ByteArray const& byteArray);
+        virtual ~ShapeDescBox();
+
+        virtual std::string const& ToString() const;
+        virtual std::unique_ptr<btCollisionShape> CreateShape() const;
+        virtual void Serialize(Tools::ByteArray& byteArray) const;
+    };
+
+}}
+
+#endif

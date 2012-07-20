@@ -3,8 +3,8 @@
 
 namespace Client { namespace Game { namespace Engine {
 
-    Body::Body(BodyType const& bodyType) :
-        Common::Physics::Body(bodyType)
+    Body::Body(Common::Physics::BodyCluster& parent, BodyType const& bodyType) :
+        Common::Physics::Body(parent, bodyType)
     {
     }
 

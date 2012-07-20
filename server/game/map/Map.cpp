@@ -336,8 +336,8 @@ namespace Server { namespace Game { namespace Map {
         {
             if (id == it->first)
                 continue;
-            auto toto = Network::PacketCreator::ItemMove(pos, id);
-            this->_game.GetServer().GetClientManager().SendUdpPacket(it->first, toto);
+//            auto toto = Network::PacketCreator::ItemMove(pos, id);
+//            this->_game.GetServer().GetClientManager().SendUdpPacket(it->first, toto);
         }
     }
 
@@ -485,11 +485,8 @@ namespace Server { namespace Game { namespace Map {
 
     void Map::_RefreshChunkPhysics(Chunk* chunk)
     {
-        if (chunk->GetPhysics())
-            this->_engine->GetPhysicsManager().RemoveBody(chunk->GetPhysics()->GetBody());
-        Common::Physics::Chunk* newPhysics = new Common::Physics::Chunk(*chunk);
+        Common::Physics::Chunk* newPhysics = new Common::Physics::Chunk(this->_engine->GetPhysicsManager().GetWorld(), *chunk);
         chunk->SetPhysics(std::unique_ptr<Common::Physics::Chunk>(newPhysics));
-        this->_engine->GetPhysicsManager().AddBody(chunk->GetPhysics()->GetBody());
     }
 
     void Map::_Tick(Uint64 currentTime)

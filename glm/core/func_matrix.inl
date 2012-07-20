@@ -8,10 +8,10 @@
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-///
+/// 
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-///
+/// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,14 +34,14 @@ namespace glm
 	template <typename matType>
 	GLM_FUNC_QUALIFIER matType matrixCompMult
 	(
-		matType const & x,
+		matType const & x, 
 		matType const & y
 	)
 	{
 		GLM_STATIC_ASSERT(detail::type<typename matType::value_type>::is_float, "'matrixCompMult' only accept floating-point inputs");
 
 		matType result(matType::null);
-		for(typename matType::size_type i = 0; i < matType::col_size(); ++i)
+		for(typename matType::size_type i = 0; i < matType::row_size(); ++i)
 			result[i] = x[i] * y[i];
 		return result;
 	}
@@ -50,7 +50,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat2x2<T> outerProduct
 	(
-		detail::tvec2<T> const & c,
+		detail::tvec2<T> const & c, 
 		detail::tvec2<T> const & r
 	)
 	{
@@ -67,7 +67,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat3x3<T> outerProduct
 	(
-		detail::tvec3<T> const & c,
+		detail::tvec3<T> const & c, 
 		detail::tvec3<T> const & r
 	)
 	{
@@ -82,7 +82,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat4x4<T> outerProduct
 	(
-		detail::tvec4<T> const & c,
+		detail::tvec4<T> const & c, 
 		detail::tvec4<T> const & r
 	)
 	{
@@ -97,7 +97,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat2x3<T> outerProduct
 	(
-		detail::tvec3<T> const & c,
+		detail::tvec3<T> const & c, 
 		detail::tvec2<T> const & r
 	)
 	{
@@ -116,7 +116,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat3x2<T> outerProduct
 	(
-		detail::tvec2<T> const & c,
+		detail::tvec2<T> const & c, 
 		detail::tvec3<T> const & r
 	)
 	{
@@ -135,7 +135,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat2x4<T> outerProduct
 	(
-		detail::tvec4<T> const & c,
+		detail::tvec4<T> const & c, 
 		detail::tvec2<T> const & r
 	)
 	{
@@ -156,7 +156,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat4x2<T> outerProduct
 	(
-		detail::tvec2<T> const & c,
+		detail::tvec2<T> const & c, 
 		detail::tvec4<T> const & r
 	)
 	{
@@ -177,7 +177,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat3x4<T> outerProduct
 	(
-		detail::tvec4<T> const & c,
+		detail::tvec4<T> const & c, 
 		detail::tvec3<T> const & r
 	)
 	{
@@ -202,7 +202,7 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tmat4x3<T> outerProduct
 	(
-		detail::tvec3<T> const & c,
+		detail::tvec3<T> const & c, 
 		detail::tvec4<T> const & r
 	)
 	{
@@ -437,7 +437,7 @@ namespace glm
 	{
 		GLM_STATIC_ASSERT(detail::type<T>::is_float, "'determinant' only accept floating-point inputs");
 
-		return
+		return 
 			+ m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
 			- m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
 			+ m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]);
@@ -470,27 +470,27 @@ namespace glm
 				+ m[0][3] * DetCof[3];
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tmat2x2<T> inverse
 	(
 		detail::tmat2x2<T> const & m
 	)
 	{
 		GLM_STATIC_ASSERT(detail::type<T>::is_float, "'inverse' only accept floating-point inputs");
-
+			
 		//valType Determinant = m[0][0] * m[1][1] - m[1][0] * m[0][1];
 		T Determinant = determinant(m);
 
 		detail::tmat2x2<T> Inverse(
 			+ m[1][1] / Determinant,
-			- m[0][1] / Determinant,
+			- m[0][1] / Determinant, 
 			- m[1][0] / Determinant,
 			+ m[0][0] / Determinant);
 
 		return Inverse;
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tmat3x3<T> inverse
 	(
 		detail::tmat3x3<T> const & m
@@ -519,7 +519,7 @@ namespace glm
 		return Inverse;
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tmat4x4<T> inverse
 	(
 		detail::tmat4x4<T> const & m
@@ -578,7 +578,7 @@ namespace glm
 		T Determinant = glm::dot(m[0], Row0);
 
 		Inverse /= Determinant;
-
+	    
 		return Inverse;
 	}
 }//namespace glm

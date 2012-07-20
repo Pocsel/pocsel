@@ -261,7 +261,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
     {
         if (lights.IsEnd())
             return;
-        this->_renderer.SetModelMatrix(glm::mat4::identity);
+        this->_renderer.SetModelMatrix(glm::mat4());
         //this->_directionnal.normalDepth->Set(gbuffer.GetSpecular());
         this->_directionnal.screenModelViewProjection->Set(this->_directionnal.modelViewProjection, true);
         do
@@ -286,7 +286,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
     {
         if (lights.IsEnd())
             return;
-        Renderers::CullMode::Type cullMode = Renderers::CullMode::CounterClockwise;
+        Renderers::CullMode::Type cullMode = Renderers::CullMode::Clockwise;
         gbuffer.GetNormalsDepth().Bind();
         this->_point.normalDepth->Set(gbuffer.GetNormalsDepth());
         do
@@ -297,10 +297,10 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
                 PointLight const& light = *lights;
 
                 bool inside = glm::lengthSquared(light.position) <= light.range*light.range;
-                if (inside && cullMode != Renderers::CullMode::Clockwise)
-                    this->_renderer.SetCullMode(cullMode = CullMode::Clockwise);
-                else if (!inside && cullMode != Renderers::CullMode::CounterClockwise)
+                if (inside && cullMode != Renderers::CullMode::CounterClockwise)
                     this->_renderer.SetCullMode(cullMode = CullMode::CounterClockwise);
+                else if (!inside && cullMode != Renderers::CullMode::Clockwise)
+                    this->_renderer.SetCullMode(cullMode = CullMode::Clockwise);
                 light.SetParameters();
 
                 this->_renderer.SetModelMatrix(glm::translate(light.position) * glm::scale(glm::vec3(light.range)));
@@ -308,8 +308,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
             }
         } while (this->_point.shader->EndPass());
         gbuffer.GetNormalsDepth().Unbind();
-        if (cullMode != Renderers::CullMode::CounterClockwise)
-            this->_renderer.SetCullMode(cullMode = CullMode::CounterClockwise);
+        if (cullMode != Renderers::CullMode::Clockwise)
+            this->_renderer.SetCullMode(cullMode = CullMode::Clockwise);
     }
 
 }}}}

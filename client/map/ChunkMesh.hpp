@@ -57,8 +57,8 @@ namespace Client { namespace Map {
 
         bool Refresh(ChunkRenderer& chunkRenderer,
                      std::vector<Game::CubeType> const& cubeTypes,
-                     std::shared_ptr<Common::BaseChunk::CubeType> cubes,
-                     std::vector<std::shared_ptr<Common::BaseChunk::CubeType>> neighbors);
+                     std::shared_ptr<Common::BaseChunk::CubeArray> cubes,
+                     std::vector<std::shared_ptr<Common::BaseChunk::CubeArray>> neighbors);
 
         bool RefreshGraphics(Tools::IRenderer& renderer);
         void Render(Tools::IRenderer& renderer, Tools::Renderers::Utils::DeferredShading& deferredShading, glm::mat4 const& world, Uint32 squaredDistance);

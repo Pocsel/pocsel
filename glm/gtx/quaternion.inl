@@ -11,43 +11,43 @@
 
 namespace glm
 {
-	template <typename valType>
+	template <typename valType> 
 	GLM_FUNC_QUALIFIER detail::tvec3<valType> cross
 	(
-		detail::tvec3<valType> const & v,
+		detail::tvec3<valType> const & v, 
 		detail::tquat<valType> const & q
 	)
 	{
 		return inverse(q) * v;
 	}
 
-	template <typename valType>
+	template <typename valType> 
 	GLM_FUNC_QUALIFIER detail::tvec3<valType> cross
 	(
-		detail::tquat<valType> const & q,
+		detail::tquat<valType> const & q, 
 		detail::tvec3<valType> const & v
 	)
 	{
 		return q * v;
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tquat<T> squad
 	(
-		detail::tquat<T> const & q1,
-		detail::tquat<T> const & q2,
-		detail::tquat<T> const & s1,
-		detail::tquat<T> const & s2,
+		detail::tquat<T> const & q1, 
+		detail::tquat<T> const & q2, 
+		detail::tquat<T> const & s1, 
+		detail::tquat<T> const & s2, 
 		T const & h)
 	{
 		return mix(mix(q1, q2, h), mix(s1, s2, h), T(2) * h (T(1) - h));
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tquat<T> intermediate
 	(
-		detail::tquat<T> const & prev,
-		detail::tquat<T> const & curr,
+		detail::tquat<T> const & prev, 
+		detail::tquat<T> const & curr, 
 		detail::tquat<T> const & next
 	)
 	{
@@ -55,10 +55,10 @@ namespace glm
 		return ext((log(next + invQuat) + log(prev + invQuat)) / T(-4)) * curr;
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tquat<T> exp
 	(
-		detail::tquat<T> const & q,
+		detail::tquat<T> const & q, 
 		T const &
 	)
 	{
@@ -68,7 +68,7 @@ namespace glm
 		return detail::tquat<T>(cos(a), sin(a) * v);
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tquat<T> log
 	(
 		detail::tquat<T> const & q
@@ -82,8 +82,8 @@ namespace glm
 				return detail::tquat<T>(log(-q.w), T(3.1415926535897932384626433832795), T(0),T(0));
 			else
 				return detail::tquat<T>(std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity());
-		}
-		else
+		} 
+		else 
 		{
 			T Vec3Len = sqrt(q.x * q.x + q.y * q.y + q.z * q.z);
 			T QuatLen = sqrt(Vec3Len * Vec3Len + q.w * q.w);
@@ -92,10 +92,10 @@ namespace glm
 		}
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tquat<T> pow
 	(
-		detail::tquat<T> const & x,
+		detail::tquat<T> const & x, 
 		T const & y
 	)
 	{
@@ -111,7 +111,7 @@ namespace glm
 			x.z * Div);
 	}
 
-	//template <typename T>
+	//template <typename T> 
 	//GLM_FUNC_QUALIFIER detail::tquat<T> sqrt
 	//(
 	//	detail::tquat<T> const & q
@@ -121,27 +121,27 @@ namespace glm
 	//	return T(2) * (T(1) + q0) * q;
 	//}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tvec3<T> rotate
 	(
-		detail::tquat<T> const & q,
+		detail::tquat<T> const & q, 
 		detail::tvec3<T> const & v
 	)
 	{
 		return q * v;
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tvec4<T> rotate
 	(
-		detail::tquat<T> const & q,
+		detail::tquat<T> const & q, 
 		detail::tvec4<T> const & v
 	)
 	{
 		return q * v;
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER T angle
 	(
 		detail::tquat<T> const & x
@@ -150,7 +150,7 @@ namespace glm
 		return glm::degrees(acos(x.w) * T(2));
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tvec3<T> axis
 	(
 		detail::tquat<T> const & x
@@ -163,22 +163,22 @@ namespace glm
 		return detail::tvec3<T>(x.x * tmp2, x.y * tmp2, x.z * tmp2);
 	}
 
-	template <typename valType>
+	template <typename valType> 
 	GLM_FUNC_QUALIFIER detail::tquat<valType> angleAxis
 	(
-		valType const & angle,
-		valType const & x,
-		valType const & y,
+		valType const & angle, 
+		valType const & x, 
+		valType const & y, 
 		valType const & z
 	)
 	{
 		return angleAxis(angle, detail::tvec3<valType>(x, y, z));
 	}
 
-	template <typename valType>
+	template <typename valType> 
 	GLM_FUNC_QUALIFIER detail::tquat<valType> angleAxis
 	(
-		valType const & angle,
+		valType const & angle, 
 		detail::tvec3<valType> const & v
 	)
 	{
@@ -194,7 +194,7 @@ namespace glm
 		return result;
 	}
 
-	template <typename T>
+	template <typename T> 
 	GLM_FUNC_QUALIFIER T extractRealComponent
 	(
 		detail::tquat<T> const & q
@@ -207,7 +207,7 @@ namespace glm
 			return -sqrt(w);
 	}
 
-	template <typename valType>
+	template <typename valType> 
 	GLM_FUNC_QUALIFIER valType roll
 	(
 		detail::tquat<valType> const & q
@@ -216,7 +216,7 @@ namespace glm
 		return glm::degrees(atan2(valType(2) * (q.x * q.y + q.w * q.z), q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z));
 	}
 
-	template <typename valType>
+	template <typename valType> 
 	GLM_FUNC_QUALIFIER valType pitch
 	(
 		detail::tquat<valType> const & q
@@ -225,7 +225,7 @@ namespace glm
 		return glm::degrees(atan2(valType(2) * (q.y * q.z + q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z));
 	}
 
-	template <typename valType>
+	template <typename valType> 
 	GLM_FUNC_QUALIFIER valType yaw
 	(
 		detail::tquat<valType> const & q
@@ -234,20 +234,11 @@ namespace glm
 		return glm::degrees(asin(valType(-2) * (q.x * q.z - q.w * q.y)));
 	}
 
-	template <typename valType>
-	GLM_FUNC_QUALIFIER detail::tvec3<valType> eulerAngles
-	(
-		detail::tquat<valType> const & x
-	)
-	{
-		return detail::tvec3<valType>(pitch(x), yaw(x), roll(x));
-	}
-
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tquat<T> shortMix
 	(
-		detail::tquat<T> const & x,
-		detail::tquat<T> const & y,
+		detail::tquat<T> const & x, 
+		detail::tquat<T> const & y, 
 		T const & a
 	)
 	{
@@ -288,8 +279,8 @@ namespace glm
 	template <typename T>
 	GLM_FUNC_QUALIFIER detail::tquat<T> fastMix
 	(
-		detail::tquat<T> const & x,
-		detail::tquat<T> const & y,
+		detail::tquat<T> const & x, 
+		detail::tquat<T> const & y, 
 		T const & a
 	)
 	{

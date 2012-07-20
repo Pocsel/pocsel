@@ -11,8 +11,8 @@ Server.Entity.Register{
         else
             print("Test Module nil")
         end
-        Server.Message.Later(20, self.id, "SpawnBlob")
-        -- Server.Message.Later(20, self.id, "SpawnTank")
+        Server.Message.Later(12, self.id, "SpawnBlob")
+        Server.Message.Later(18, self.id, "SpawnTank")
     end,
 
     Die = function(self) -- destructor
@@ -32,11 +32,12 @@ Server.Entity.Register{
 
     SpawnBlob = function(self)
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 10, 67108864), "base:Blob")
-        Server.Message.Later(3, self.id, "SpawnBlob")
+        Server.Message.Later(6, self.id, "SpawnBlob")
     end,
 
     SpawnTank = function(self)
-        Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 12, 67108864), "base:Tank")
+        Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 3, 67108864), "base:Tank") -- , "base:Tank")
+        Server.Message.Later(11, self.id, "SpawnTank")
     end,
 }
 
@@ -47,11 +48,11 @@ Server.Entity.RegisterPositional{
     Spawn = function(self)
         self.moveSpeed = 10 -- 3 + math.random() * 3
 
-        self.doodad = Server.Doodad.Spawn(self.id, "base:Test")
+        self.doodad = Server.Doodad.Spawn("base:Test", "base:Test")
 --        Server.Message.Later(30, self.id, "Suicide")
-        if self.id < 50 then
-            Server.Message.Later(4, self.id, "Test")
-        end
+--         if self.id < 50 then
+--             Server.Message.Later(4, self.id, "Test")
+--         end
         self:Move()
     end,
 
@@ -85,4 +86,30 @@ Server.Entity.RegisterPositional{
         Server.Entity.Spawn(Server.Entity.GetPos(self.id), "base:Blob")
     end
 
+}
+
+Server.Body.Register{
+    bodyName = "Test",
+    physics = {
+        friction = 0.5,
+        restitution = 0.0
+        -- valeurs par defaut, peuvent etre changees a chaque noeud
+    },
+    shapeTree = {
+        {
+            name = "NoeudDeTestALaCon", -- nom unique de noeud
+            position = { 0, 0, 0 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+        }
+--        {
+--            ... -- autre noeud a la racine
+--        },
+    }
 }

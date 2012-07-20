@@ -72,17 +72,6 @@ namespace Client { namespace Network {
                 PacketExtractor::TeleportPlayer(p, map, position);
                 this->_client.GetGame().TeleportPlayer(map, position);
             };
-        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::ItemMove] =
-            [this](Tools::ByteArray& p)
-            {
-                //if (this->_client.GetState() != Client::LoadingChunks &&
-                //    this->_client.GetState() != Client::Running)
-                //    throw std::runtime_error("Bad state for item move");
-                //Common::MovingOrientedPosition pos;
-                //Uint32 id;
-                //PacketExtractor::ItemMove(p, pos, id);
-                //this->_client.GetGame().GetItemManager().MoveItem(id, pos);
-            };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadSpawn] =
             [this](Tools::ByteArray& p)
             {
@@ -90,11 +79,25 @@ namespace Client { namespace Network {
                     this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for doodad spawn");
                 Uint32 doodadId;
+                Uint32 entityId;
+                Uint32 bodyId;
                 std::string doodadName;
                 Common::Physics::Node position;
                 std::list<std::pair<std::string /* key */, std::string /* value */>> values;
-                PacketExtractor::DoodadSpawn(p, doodadId, doodadName, position, values);
-                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(doodadId, doodadName, position, values); // TODO position -> physics node
+                PacketExtractor::DoodadSpawn(p,
+                        doodadId,
+                        entityId,
+                        doodadName,
+                        position,
+                        bodyId,
+                        values);
+                this->_client.GetGame().GetEngine().GetDoodadManager().SpawnDoodad(
+                        doodadId,
+                        entityId,
+                        bodyId,
+                        doodadName,
+                        position,
+                        values);
             };
         this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::DoodadKill] =
             [this](Tools::ByteArray& p)
@@ -113,10 +116,17 @@ namespace Client { namespace Network {
                     this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for doodad update");
                 Uint32 doodadId;
-                std::unique_ptr<Common::Physics::Node> position;
+                std::unique_ptr<std::vector<std::pair<bool, Common::Physics::Node>>> body;
                 std::list<std::tuple<bool, std::string /* key */, std::string /* value */>> commands;
-                PacketExtractor::DoodadUpdate(p, doodadId, position, commands);
-                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, position.get(), commands); // TODO position -> physics node
+                PacketExtractor::DoodadUpdate(p, doodadId, body, commands);
+                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateDoodad(doodadId, body.get(), commands);
+            };
+        this->_dispatcher[(Protocol::ActionType)Protocol::ServerToClient::EntityUpdate] =
+            [this](Tools::ByteArray& p)
+            {
+                if (this->_client.GetState() != Client::LoadingChunks &&
+                    this->_client.GetState() != Client::Running)
+                    throw std::runtime_error("Bad state for entity update");
             };
     }
 

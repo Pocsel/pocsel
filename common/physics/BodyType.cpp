@@ -1,4 +1,7 @@
 #include "common/physics/BodyType.hpp"
+#include "common/physics/ShapeDesc.hpp"
+
+#include "bullet/bullet-all.hpp"
 
 namespace Common { namespace Physics {
 
@@ -12,7 +15,23 @@ namespace Common { namespace Physics {
             if (this->_shapes[i].parent == -1)
                 this->_roots.push_back(i);
         }
+    }
 
+    BodyType::~BodyType()
+    {
+        for (auto it = this->_shapes.begin(), ite = this->_shapes.end(); it != ite; ++it)
+        {
+            Tools::Delete(it->shape);
+            Tools::Delete(it->shapeDesc);
+        }
+    }
+
+    void BodyType::CreateBtShapes()
+    {
+        for (auto it = this->_shapes.begin(), ite = this->_shapes.end(); it != ite; ++it)
+        {
+            it->shape = it->shapeDesc->CreateShape().release();
+        }
     }
 
 }}

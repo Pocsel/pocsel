@@ -31,10 +31,7 @@ namespace Server { namespace Game { namespace Map {
     ChunkManager::~ChunkManager()
     {
         for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite ; ++it)
-        {
-            this->_map.GetEngine().GetPhysicsManager().RemoveBody(it->second->GetPhysics()->GetBody());
             Tools::Delete(it->second);
-        }
         for (auto it = this->_deflatedChunks.begin(), ite = this->_deflatedChunks.end(); it != ite ; ++it)
             Tools::Delete(it->second);
         for (auto it = this->_deflatedBigChunks.begin(), ite = this->_deflatedBigChunks.end(); it != ite ; ++it)
@@ -341,11 +338,9 @@ namespace Server { namespace Game { namespace Map {
         // value
         this->_inflatedValues.push_front(chunk->id);
 
-        if (chunk->GetPhysics())
-            this->_map.GetEngine().GetPhysicsManager().RemoveBody(chunk->GetPhysics()->GetBody());
-        Common::Physics::Chunk* newPhysics = new Common::Physics::Chunk(*chunk);
+        Common::Physics::Chunk* newPhysics =
+            new Common::Physics::Chunk(this->_map.GetEngine().GetPhysicsManager().GetWorld(), *chunk);
         chunk->SetPhysics(std::unique_ptr<Common::Physics::Chunk>(newPhysics));
-        this->_map.GetEngine().GetPhysicsManager().AddBody(chunk->GetPhysics()->GetBody());
     }
 
     Chunk* ChunkManager::_PopInflated(Chunk::IdType id)

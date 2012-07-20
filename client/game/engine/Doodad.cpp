@@ -1,50 +1,44 @@
 #include "client/game/engine/Doodad.hpp"
+#include "client/game/engine/Body.hpp"
+#include "client/game/engine/Entity.hpp"
+
 #include "tools/lua/Interpreter.hpp"
+
 #include "bullet/bullet-all.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
-    Doodad::Doodad(Tools::Lua::Interpreter& interpreter, Uint32 id, Common::Physics::Node const& physics, DoodadType const& type) :
+    Doodad::Doodad(Tools::Lua::Interpreter& interpreter,
+            Uint32 id,
+            BodyType const* bodyType,
+            Entity& entity,
+            DoodadType const& type) :
         _type(type),
         _self(interpreter.MakeTable()),
-        _physics(physics),
-        _updateFlag(0.0f)
+        _entity(entity)
     {
         this->_self.Set("id", id);
-        Tools::debug << "Doodad::Doodad: New doodad \"" << this->_type.GetName() << "\" spawned (id: " << id << ", pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;
+        Tools::debug << "Doodad::Doodad: New doodad \"" << this->_type.GetName() << "\" spawned (id: " << id << ")\n";//", pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;
 
-        static btCollisionShape* colShape = new
-            //btSphereShape(2) // on donne le rayon
-            btBoxShape(btVector3(0.6, 1.8, 0.8)) // on donne la moitié de la taille
-            ;
+        if (bodyType)
+            this->_body.reset(new Body(entity.GetBodyCluster(), *bodyType));
 
-        /// Create Dynamic Objects
-
-        btScalar mass(60);
-        btVector3 localInertia(0, 0, 0);
-
-        colShape->calculateLocalInertia(mass, localInertia);
-
-        btTransform startTransform;
-        startTransform.setIdentity();
-        startTransform.setOrigin(btVector3(
-                    btScalar(physics.position.x),
-                    btScalar(physics.position.y),
-                    btScalar(physics.position.z)));
-
-        //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-        btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-        myMotionState->setWorldTransform(startTransform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-
-        _btBody = new btRigidBody(rbInfo);
-
-        _btBody->setActivationState(DISABLE_DEACTIVATION);
+        //_btBody->setActivationState(DISABLE_DEACTIVATION);
     }
 
     Doodad::~Doodad()
     {
-        Tools::debug << "Doodad::~Doodad: Destroying doodad \"" << this->_type.GetName() << "\" (pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;
+        Tools::debug << "Doodad::~Doodad: Destroying doodad \"" << this->_type.GetName() << ")\n"; // \" (pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;
+    }
+
+    Common::Physics::Node const& Doodad::GetPhysics() const
+    {
+        return this->_entity.GetPhysics();
+    }
+
+    float Doodad::GetUpdateFlag() const
+    {
+        return this->_entity.GetUpdateFlag();
     }
 
 }}}

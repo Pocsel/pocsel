@@ -19,7 +19,7 @@ namespace Client { namespace Game { namespace Engine {
     void BodyManager::AddBodyType(std::unique_ptr<BodyType> bodyType)
     {
         Tools::debug << "new bodytype in bodymanager\n";
-        this->_bodyTypes.emplace_back(*bodyType);
+        this->_bodyTypes.emplace_back(std::move(bodyType));
         this->_AskOneType();
     }
 

@@ -26,7 +26,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::debug << "EntityManager::EntityManager()\n";
         auto& i = this->_engine.GetInterpreter();
-        this->_luaResourceManager = new Tools::Lua::ResourceManager<LuaResource, EntityManager>(i, *this /* resource manager */, LuaResource() /* invalid resource */);
+        this->_fakeEntityRefManager = new Tools::Lua::ResourceManager<FakeEntityRef, EntityManager>(i, *this /* resource manager */, FakeEntityRef() /* invalid resource */);
         auto namespaceTable = i.Globals()["Server"].Set("Entity", i.MakeTable());
 
         namespaceTable.Set("GetEntityById", i.MakeFunction(std::bind(&EntityManager::_ApiGetEntityById, this, std::placeholders::_1)));
@@ -84,10 +84,10 @@ namespace Server { namespace Game { namespace Engine {
         for (; itKill != itKillEnd; ++itKill)
             Tools::Delete(*itKill);
         // resource manager
-        Tools::Delete(this->_luaResourceManager);
+        Tools::Delete(this->_fakeEntityRefManager);
     }
 
-    void EntityManager::LuaResource::Index(EntityManager& entityManager, Tools::Lua::CallHelper& helper)
+    void EntityManager::FakeEntityRef::Index(EntityManager& entityManager, Tools::Lua::CallHelper& helper)
     {
         Entity const& entity = entityManager.GetEntity(this->entityId);
         if (!entity.GetSelf().IsTable()) // le moddeur a fait de la merde et l'entité ciblée n'a pas un self normal
@@ -112,7 +112,7 @@ namespace Server { namespace Game { namespace Engine {
             helper.PushRet(helper.GetInterpreter().MakeFunction(
                         [functionName, &entityManager](Tools::Lua::CallHelper& helper)
                         {
-                            LuaResource* resource = helper.PopArg("EntityManager::LuaResource::Index: Missing argument self for call").Check<LuaResource*>("EntityManager::LuaResource::Index: Invalid type of self for call");
+                            FakeEntityRef* resource = helper.PopArg("EntityManager::LuaResource::Index: Missing argument self for call").Check<FakeEntityRef*>("EntityManager::LuaResource::Index: Invalid type of self for call");
                             entityManager.CallEntityFunction(resource->entityId, functionName, helper.GetInterpreter().MakeNil(), helper.GetInterpreter().MakeNil());
                         }
                         ));
@@ -121,19 +121,9 @@ namespace Server { namespace Game { namespace Engine {
             helper.PushRet(value);
     }
 
-    void EntityManager::LuaResource::NewIndex(EntityManager& entityManager, Tools::Lua::CallHelper& helper)
+    void EntityManager::FakeEntityRef::NewIndex(EntityManager& entityManager, Tools::Lua::CallHelper& helper)
     {
         Tools::error << "This shit is not implemented yet" << std::endl;
-    }
-
-    CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, std::list<Ref> const& args, std::list<Ref>* rets /* = 0 */)
-    {
-        auto it = this->_entities.find(entityId);
-        if (it == this->_entities.end() || !it->second)
-        {
-            Tools::error << "EntityManager::CallEntityFunction: Call to \"" << function << "\" for entity " << entityId << " failed: entity not found.\n";
-            return CallbackManager::EntityNotFound;
-        }
     }
 
     CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */)
@@ -557,11 +547,27 @@ namespace Server { namespace Game { namespace Engine {
         return *it->second;
     }
 
+    PositionalEntity& EntityManager::GetPositionalEntity(Uint32 entityId) throw(std::runtime_error)
+    {
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+            throw std::runtime_error("EntityManager: Positional entity not found.");
+        return *it->second;
+    }
+
     PositionalEntity const& EntityManager::GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error)
     {
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
             throw std::runtime_error("EntityManager: Positional entity not found.");
+        return *it->second;
+    }
+
+    PositionalEntity& EntityManager::GetDisabledEntity(Uint32 entityId) throw(std::runtime_error)
+    {
+        auto it = this->_disabledEntities.find(entityId);
+        if (it == this->_disabledEntities.end())
+            throw std::runtime_error("EntityManager: Disabled entity not found.");
         return *it->second;
     }
 
@@ -739,7 +745,9 @@ namespace Server { namespace Game { namespace Engine {
         Entity* entity;
         if (itType->second->IsPositional())
         {
-            PositionalEntity* positionalEntity = new PositionalEntity(this->_engine.GetPhysicsManager().GetWorld(), this->_engine, entityId, *itType->second, pos);
+            Common::Physics::Node position;
+            position.position = pos;
+            PositionalEntity* positionalEntity = new PositionalEntity(this->_engine.GetPhysicsManager().GetWorld(), this->_engine, entityId, *itType->second, position);
             assert(!this->_positionalEntities.count(entityId) && "impossible de créer une nouvelle entité car l'id est déjà utilisé dans la map des entités positionnelles");
             this->_positionalEntities[entityId] = positionalEntity;
             entity = positionalEntity;
@@ -773,10 +781,10 @@ namespace Server { namespace Game { namespace Engine {
         if (it == this->_entities.end() || !it->second)
         {
             Tools::error << "EntityManager::_ApiGetEntityById: Entity " << entityId << " not found, invalid resource returned." << std::endl;
-            helper.PushRet(this->_luaResourceManager->GetInvalidResourceReference());
+            helper.PushRet(this->_fakeEntityRefManager->GetInvalidResourceReference());
             return;
         }
-        helper.PushRet(this->_luaResourceManager->GetResourceReference(it->second->GetLuaResourceId()));
+        helper.PushRet(this->_fakeEntityRefManager->GetResourceReference(it->second->GetLuaResourceId()));
     }
 
     void EntityManager::_ApiSpawn(Tools::Lua::CallHelper& helper)

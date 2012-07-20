@@ -59,17 +59,14 @@ namespace Client { namespace Map {
         for (size_t i = 0; i < sizeof(this->_octree)/sizeof(*this->_octree); ++i)
             Tools::Delete(this->_octree[i]);
         for (auto it = this->_chunks.begin(), ite = this->_chunks.end(); it != ite; ++it)
-        {
-            this->_game.GetEngine().GetPhysicsManager().RemoveBody(it->second->chunk->GetPhysics()->GetBody());
             Tools::Delete(it->second);
-        }
     }
 
     void ChunkManager::AddChunk(std::unique_ptr<Chunk>&& chunk)
     {
         ChunkNode* node = 0;
 
-        std::shared_ptr<Chunk::CubeType> cubes(0);
+        std::shared_ptr<Chunk::CubeArray> cubes(0);
 
         if (this->_chunks.find(chunk->id) != this->_chunks.end())
         { // Chunk Update
@@ -100,11 +97,9 @@ namespace Client { namespace Map {
           //  return;
 
         {
-            if (node->chunk->GetPhysics())
-                this->_game.GetEngine().GetPhysicsManager().RemoveBody(node->chunk->GetPhysics()->GetBody());
-            Common::Physics::Chunk* newPhysics = new Common::Physics::Chunk(*node->chunk);
+            Common::Physics::Chunk* newPhysics =
+                new Common::Physics::Chunk(this->_game.GetEngine().GetPhysicsManager().GetWorld(), *node->chunk);
             node->chunk->SetPhysics(std::unique_ptr<Common::Physics::Chunk>(newPhysics));
-            this->_game.GetEngine().GetPhysicsManager().AddBody(node->chunk->GetPhysics()->GetBody());
         }
 
 
@@ -202,7 +197,6 @@ namespace Client { namespace Map {
                 }
                 this->_octree[i]->RemoveElement(*it);
                 this->_chunks.erase((*it)->chunk->id);
-                this->_game.GetEngine().GetPhysicsManager().RemoveBody((*it)->chunk->GetPhysics()->GetBody());
                 // this->_refreshTasks.erase(*it);
                 Tools::Delete(*it);
             }
@@ -327,7 +321,7 @@ namespace Client { namespace Map {
             }
     }
 
-    void ChunkManager::_RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeType> oldCubes)
+    void ChunkManager::_RefreshNode(ChunkNode& node, std::shared_ptr<Chunk::CubeArray> oldCubes)
     {
         static Chunk::CubeType* voidCubes = 0;
         if (voidCubes == 0)
@@ -342,32 +336,32 @@ namespace Client { namespace Map {
         else
             newCubes = node.chunk->GetCubes();
 
-        if (CheckModif<0, -1, -1>(oldCubes.get(), newCubes))
+        if (CheckModif<0, -1, -1>(oldCubes->data(), newCubes))
         {
             auto chunkLeft  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0)));
             if (chunkLeft != this->_chunks.end()) this->_AddNodeToRefresh(*chunkLeft->second);
         }
-        if (CheckModif<Common::ChunkSize - 1, -1, -1>(oldCubes.get(), newCubes))
+        if (CheckModif<Common::ChunkSize - 1, -1, -1>(oldCubes->data(), newCubes))
         {
             auto chunkRight  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 1,  0,  0)));
             if (chunkRight != this->_chunks.end()) this->_AddNodeToRefresh(*chunkRight->second);
         }
-        if (CheckModif<-1, -1, Common::ChunkSize - 1>(oldCubes.get(), newCubes))
+        if (CheckModif<-1, -1, Common::ChunkSize - 1>(oldCubes->data(), newCubes))
         {
             auto chunkFront  = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0,  1)));
             if (chunkFront != this->_chunks.end()) this->_AddNodeToRefresh(*chunkFront->second);
         }
-        if (CheckModif<-1, -1, 0>(oldCubes.get(), newCubes))
+        if (CheckModif<-1, -1, 0>(oldCubes->data(), newCubes))
         {
             auto chunkBack   = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  0, -1)));
             if (chunkBack != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBack->second);
         }
-        if (CheckModif<-1, Common::ChunkSize - 1, -1>(oldCubes.get(), newCubes))
+        if (CheckModif<-1, Common::ChunkSize - 1, -1>(oldCubes->data(), newCubes))
         {
             auto chunkTop    = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0,  1,  0)));
             if (chunkTop != this->_chunks.end()) this->_AddNodeToRefresh(*chunkTop->second);
         }
-        if (CheckModif<-1, 0, -1>(oldCubes.get(), newCubes))
+        if (CheckModif<-1, 0, -1>(oldCubes->data(), newCubes))
         {
             auto chunkBottom = this->_chunks.find(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType( 0, -1,  0)));
             if (chunkBottom != this->_chunks.end()) this->_AddNodeToRefresh(*chunkBottom->second);
@@ -380,7 +374,7 @@ namespace Client { namespace Map {
         auto it = this->_refreshTasks.find(&node);
         if (it != this->_refreshTasks.end())
             it->second->Cancel();
-        std::vector<std::shared_ptr<Chunk::CubeType>> neighbors(6);
+        std::vector<std::shared_ptr<Chunk::CubeArray>> neighbors(6);
 
         auto chk = this->GetChunk(Common::BaseChunk::CoordsToId(node.chunk->coords + Common::BaseChunk::CoordsType(-1,  0,  0)));
         if (chk != 0)
@@ -420,7 +414,11 @@ namespace Client { namespace Map {
         this->_refreshTasks[&node] = t;
     }
 
-    bool ChunkManager::_RefreshChunkMesh(std::shared_ptr<Chunk> chunk, std::shared_ptr<Chunk::CubeType> cubes, std::vector<Game::CubeType> const& cubeTypes, std::vector<std::shared_ptr<Chunk::CubeType>> neighbors)
+    bool ChunkManager::_RefreshChunkMesh(
+            std::shared_ptr<Chunk> chunk,
+            std::shared_ptr<Chunk::CubeArray> cubes, 
+            std::vector<Game::CubeType> const& cubeTypes,
+            std::vector<std::shared_ptr<Chunk::CubeArray>> neighbors)
     {
         return chunk->GetMesh()->Refresh(this->_chunkRenderer, cubeTypes, cubes, neighbors);
     }

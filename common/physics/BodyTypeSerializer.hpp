@@ -5,6 +5,7 @@
 #include "tools/StdVectorSerializer.hpp"
 
 #include "common/physics/BodyType.hpp"
+#include "common/physics/ShapeDescSerializer.hpp"
 
 namespace Common { namespace Physics {
 
@@ -21,7 +22,9 @@ namespace Common { namespace Physics {
             {
                 std::vector<BodyType::ShapeNode> vec;
                 p.Read(vec);
-                return std::unique_ptr<TBodyType>(new TBodyType(vec));
+                std::unique_ptr<TBodyType> ret(new TBodyType(vec));
+                ret->CreateBtShapes();
+                return ret;
             }
 
             private:
@@ -39,6 +42,11 @@ namespace Tools {
             p.Write(sn.name);
             p.Write(sn.children);
             p.Write(sn.parent);
+            p.Write(sn.position);
+            p.Write(sn.mass);
+            p.Write(sn.friction);
+            p.Write(sn.restitution);
+            p.Write(*sn.shapeDesc);
         }
 
         static void Read(ByteArray const& p, Common::Physics::BodyType::ShapeNode& sn)  // Used by Packet::Read<T>(T&)
@@ -46,6 +54,11 @@ namespace Tools {
             p.Read(sn.name);
             p.Read(sn.children);
             p.Read(sn.parent);
+            p.Read(sn.position);
+            p.Read(sn.mass);
+            p.Read(sn.friction);
+            p.Read(sn.restitution);
+            sn.shapeDesc = p.Read<Common::Physics::ShapeDesc>().release();
         }
 
         private:

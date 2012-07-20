@@ -13,18 +13,6 @@
 
 namespace Server { namespace Game { namespace Engine {
 
-    void PhysicsManager::AddBody(btRigidBody* body)
-    {
-        if (body)
-            this->_world->GetBtWorld().addRigidBody(body);
-    }
-
-    void PhysicsManager::RemoveBody(btRigidBody* body)
-    {
-        if (body)
-            this->_world->GetBtWorld().removeRigidBody(body);
-    }
-
     struct _cb
     {
         static void _TickCallback(btDynamicsWorld* world, btScalar timeStep)
@@ -101,7 +89,7 @@ namespace Server { namespace Game { namespace Engine {
             {
                 //this->_world->GetBtWorld().addRigidBody(&it->second->GetBtBody());
                 this->_bodiesInWorld.insert(it->first);
-                this->_entityBodies.insert(&it->second->GetBtBody());
+                //this->_entityBodies.insert(&it->second->GetBtBody());
             }
         }
 
@@ -113,23 +101,7 @@ namespace Server { namespace Game { namespace Engine {
                 continue;
 
             PositionalEntity& entity = *it->second;
-            btRigidBody const& btBody = entity.GetBtBody();
-            Common::Physics::Node& physics = entity.GetPhysics();
-
-            btTransform wt;
-            btBody.getMotionState()->getWorldTransform(wt);
-
-            btVector3 wpos = wt.getOrigin();
-            physics.position = Common::Position(wpos.x(), wpos.y(), wpos.z());
-
-            btQuaternion const& wrot = wt.getRotation();
-            physics.orientation = glm::quat((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
-
-            btVector3 const& btVel = btBody.getLinearVelocity();
-            physics.velocity = glm::vec3(btVel.x(), btVel.y(), btVel.z());
-
-            btVector3 const& av = btBody.getAngularVelocity();
-            physics.angularVelocity = glm::vec3(av.x(), av.y(), av.z());
+            entity.UpdatePhysics();
         }
     }
 

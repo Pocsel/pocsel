@@ -4,11 +4,9 @@
 #include "common/physics/Node.hpp"
 #include "server/game/engine/Entity.hpp"
 
-class btRigidBody;
-class btDefaultMotionState;
-
 namespace Common { namespace Physics {
     class World;
+    class BodyCluster;
 }}
 
 namespace Server { namespace Game { namespace Engine {
@@ -17,13 +15,16 @@ namespace Server { namespace Game { namespace Engine {
         public Entity
     {
     private:
-        Common::Physics::World& _world;
+        Common::Physics::BodyCluster* _bodyCluster;
         Common::Physics::Node _physics;
-        btRigidBody* _btBody;
-        btDefaultMotionState* _motionState;
 
     public:
-        PositionalEntity(Common::Physics::World& world, Engine& engine, Uint32 id, EntityType const& type, Common::Position const& pos);
+        PositionalEntity(
+                Common::Physics::World& world,
+                Engine& engine,
+                Uint32 id,
+                EntityType const& type,
+                Common::Physics::Node const& pos);
         ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position; }
@@ -37,7 +38,10 @@ namespace Server { namespace Game { namespace Engine {
         void SetPhysics(Common::Physics::Node const& p) { this->_physics = p; }
 
         Common::Physics::Node& GetPhysics() { return this->_physics; }
-        btRigidBody& GetBtBody() { return *this->_btBody; }
+
+        Common::Physics::BodyCluster& GetBodyCluster() { return *this->_bodyCluster; }
+
+        void UpdatePhysics();
     };
 
 }}}

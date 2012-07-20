@@ -10,6 +10,7 @@
 #include "client/Client.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
+#include "client/game/engine/Body.hpp"
 #include "client/resources/LocalResourceManager.hpp"
 
 #include "bullet/bullet-all.hpp"
@@ -31,26 +32,29 @@ namespace Client { namespace Game {
         Tools::Delete(this->_cube);
     }
 
-    void ShapeRenderer::Render(
-            const btRigidBody& body)
-         //Common::Physics::Node const& node)
+    void ShapeRenderer::Render(Engine::Body const& body)
     {
         auto const& camera = this->_game.GetPlayer().GetCamera();
 
-        btTransform bodyTr;
-        body.getMotionState()->getWorldTransform(bodyTr);
-        btQuaternion const& bodyRot = bodyTr.getRotation();
-        btVector3 const& bodyPos = bodyTr.getOrigin();
-
-        glm::quat orientation((float)bodyRot.w(), (float)bodyRot.x(), (float)bodyRot.y(), (float)bodyRot.z());
-        glm::dvec3 position(bodyPos.x(), bodyPos.y(), bodyPos.z());
-        glm::vec3 relPos = glm::fvec3(position - camera.position);
 
         this->_shader->BeginPass();
 
         this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Line);
+
+        for (auto it = body.GetNodes().begin(), ite = body.GetNodes().end(); it != ite; ++it)
         {
-            const btCollisionShape* colShape = body.getCollisionShape();
+            btRigidBody const& btBody = *it->body;
+
+            btTransform bodyTr;
+            btBody.getMotionState()->getWorldTransform(bodyTr);
+            btQuaternion const& bodyRot = bodyTr.getRotation();
+            btVector3 const& bodyPos = bodyTr.getOrigin();
+
+            glm::quat orientation((float)bodyRot.w(), (float)bodyRot.x(), (float)bodyRot.y(), (float)bodyRot.z());
+            glm::dvec3 position(bodyPos.x(), bodyPos.y(), bodyPos.z());
+            glm::vec3 relPos = glm::fvec3(position - camera.position);
+
+            const btCollisionShape* colShape = btBody.getCollisionShape();
             const btSphereShape* sphereShape;
             const btBoxShape* boxShape;
 
@@ -70,6 +74,11 @@ namespace Client { namespace Game {
             glm::quat const& orientation,
             glm::vec3 const& pos)
     {
+        //std::cout << "renderBox " << pos.x << ", " << pos.y << ", " << pos.z << " : " <<
+        //    orientation.x << ", " <<
+        //    orientation.y << ", " <<
+        //    orientation.z << ", " <<
+        //    orientation.w << "\n";
         btVector3 const& halfExtents = box->getHalfExtentsWithoutMargin();
         this->_renderer.SetModelMatrix(
                 glm::translate<float>(
@@ -93,6 +102,11 @@ namespace Client { namespace Game {
             glm::quat const& orientation,
             glm::vec3 const& pos)
     {
+        //std::cout << "renderSphere " << pos.x << ", " << pos.y << ", " << pos.z << " : " <<
+        //    orientation.x << ", " <<
+        //    orientation.y << ", " <<
+        //    orientation.z << ", " <<
+        //    orientation.w << "\n";
         btScalar radius = sphere->getRadius();
         this->_renderer.SetModelMatrix(
                 glm::translate<float>(
