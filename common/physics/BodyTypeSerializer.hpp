@@ -58,7 +58,7 @@ namespace Tools {
             p.Read(sn.mass);
             p.Read(sn.friction);
             p.Read(sn.restitution);
-            sn.shapeDesc = p.Read<Common::Physics::ShapeDesc>().release();
+            sn.shapeDesc = p.Read<Common::Physics::IShapeDesc>().release();
         }
 
         private:
