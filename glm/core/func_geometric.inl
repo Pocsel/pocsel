@@ -8,10 +8,10 @@
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-///
+/// 
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-///
+/// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,6 +30,8 @@
 
 namespace glm
 {
+    // XXX CHANGED
+    // (new)
     // length
     template <typename genType>
 	GLM_FUNC_QUALIFIER genType lengthSquared
@@ -88,7 +90,8 @@ namespace glm
     {
 		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'length' only accept floating-point inputs");
 
-        return sqrt(lengthSquared(x));
+        genType sqr = x * x;
+        return sqrt(sqr);
     }
 
 	template <typename T>
@@ -99,7 +102,8 @@ namespace glm
     {
 		GLM_STATIC_ASSERT(detail::type<T>::is_float, "'length' only accept floating-point inputs");
 
-        return sqrt(lengthSquared(v));
+        typename detail::tvec2<T>::value_type sqr = v.x * v.x + v.y * v.y;
+        return sqrt(sqr);
     }
 
     template <typename T>
@@ -110,7 +114,8 @@ namespace glm
     {
 		GLM_STATIC_ASSERT(detail::type<T>::is_float, "'length' only accept floating-point inputs");
 
-        return sqrt(lengthSquared(v));
+        typename detail::tvec3<T>::value_type sqr = v.x * v.x + v.y * v.y + v.z * v.z;
+        return sqrt(sqr);
     }
 
     template <typename T>
@@ -121,9 +126,12 @@ namespace glm
     {
 		GLM_STATIC_ASSERT(detail::type<T>::is_float, "'length' only accept floating-point inputs");
 
-        return sqrt(lengthSquared(v));
+        typename detail::tvec4<T>::value_type sqr = v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w;
+        return sqrt(sqr);
     }
 
+    // XXX CHANGED
+    // (new)
     // distance
 	template <typename genType>
     GLM_FUNC_QUALIFIER genType distanceSquared
@@ -177,7 +185,7 @@ namespace glm
 	template <typename genType>
     GLM_FUNC_QUALIFIER genType distance
 	(
-		genType const & p0,
+		genType const & p0, 
 		genType const & p1
 	)
     {
@@ -185,7 +193,7 @@ namespace glm
 
 		return length(p1 - p0);
     }
-
+ 
 	template <typename T>
 	GLM_FUNC_QUALIFIER typename detail::tvec2<T>::value_type distance
 	(
@@ -226,9 +234,9 @@ namespace glm
 	template <typename genType>
 	GLM_FUNC_QUALIFIER genType dot
 	(
-		genType const & x,
+		genType const & x, 
 		genType const & y
-
+        
 	)
 	{
 		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'dot' only accept floating-point inputs");
@@ -239,7 +247,7 @@ namespace glm
     template <typename T>
 	GLM_FUNC_QUALIFIER typename detail::tvec2<T>::value_type dot
 	(
-		detail::tvec2<T> const & x,
+		detail::tvec2<T> const & x, 
 		detail::tvec2<T> const & y
 	)
     {
@@ -251,7 +259,7 @@ namespace glm
     template <typename T>
     GLM_FUNC_QUALIFIER T dot
 	(
-		detail::tvec3<T> const & x,
+		detail::tvec3<T> const & x, 
 		detail::tvec3<T> const & y
 	)
     {
@@ -279,7 +287,7 @@ namespace glm
     template <typename T>
     GLM_FUNC_QUALIFIER T dot
 	(
-		detail::tvec4<T> const & x,
+		detail::tvec4<T> const & x, 
 		detail::tvec4<T> const & y
 	)
     {
@@ -292,7 +300,7 @@ namespace glm
     template <typename T>
     GLM_FUNC_QUALIFIER detail::tvec3<T> cross
 	(
-		detail::tvec3<T> const & x,
+		detail::tvec3<T> const & x, 
 		detail::tvec3<T> const & y
 	)
     {
@@ -324,7 +332,7 @@ namespace glm
 	)
     {
 		GLM_STATIC_ASSERT(detail::type<T>::is_float, "'normalize' only accept floating-point inputs");
-
+		
 		typename detail::tvec2<T>::value_type sqr = x.x * x.x + x.y * x.y;
 	    return x * inversesqrt(sqr);
     }
@@ -348,7 +356,7 @@ namespace glm
 	)
     {
         GLM_STATIC_ASSERT(detail::type<T>::is_float, "'normalize' only accept floating-point inputs");
-
+		
 		typename detail::tvec4<T>::value_type sqr = x.x * x.x + x.y * x.y + x.z * x.z + x.w * x.w;
 	    return x * inversesqrt(sqr);
     }
@@ -357,8 +365,8 @@ namespace glm
 	template <typename genType>
 	GLM_FUNC_QUALIFIER genType faceforward
 	(
-		genType const & N,
-		genType const & I,
+		genType const & N, 
+		genType const & I, 
 		genType const & Nref
 	)
 	{
@@ -369,7 +377,7 @@ namespace glm
 	template <typename genType>
 	genType reflect
 	(
-		genType const & I,
+		genType const & I, 
 		genType const & N
 	)
 	{
@@ -380,8 +388,8 @@ namespace glm
     template <typename genType>
     GLM_FUNC_QUALIFIER genType refract
 	(
-		genType const & I,
-		genType const & N,
+		genType const & I, 
+		genType const & N, 
 		genType const & eta
 	)
     {
@@ -399,8 +407,8 @@ namespace glm
     template <typename genType>
     GLM_FUNC_QUALIFIER genType refract
 	(
-		genType const & I,
-		genType const & N,
+		genType const & I, 
+		genType const & N, 
 		typename genType::value_type const & eta
 	)
     {

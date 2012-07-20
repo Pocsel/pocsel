@@ -8,10 +8,10 @@
 /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 /// copies of the Software, and to permit persons to whom the Software is
 /// furnished to do so, subject to the following conditions:
-///
+/// 
 /// The above copyright notice and this permission notice shall be included in
 /// all copies or substantial portions of the Software.
-///
+/// 
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,7 +36,7 @@
 #define GLM_VERSION_MAJOR			0
 #define GLM_VERSION_MINOR			9
 #define GLM_VERSION_PATCH			3
-#define GLM_VERSION_REVISION		1
+#define GLM_VERSION_REVISION		4
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Platform
@@ -49,16 +49,19 @@
 #define GLM_PLATFORM_ANDROID		0x00100000
 #define GLM_PLATFORM_CHROME_NACL	0x00200000
 #define GLM_PLATFORM_UNIX			0x00400000
+#define GLM_PLATFORM_QNXNTO			0x00800000
 
 #ifdef GLM_FORCE_PLATFORM_UNKNOWN
 #	define GLM_PLATFORM GLM_PLATFORM_UNKNOWN
+#elif defined(__QNXNTO__)
+#   define GLM_PLATFORM GLM_PLATFORM_QNXNTO
 #elif defined(__APPLE__)
 #   define GLM_PLATFORM GLM_PLATFORM_APPLE
 #elif defined(_WIN32)
 #	define GLM_PLATFORM GLM_PLATFORM_WINDOWS
 #elif defined(__native_client__)
 #	define GLM_PLATFORM GLM_PLATFORM_CHROME_NACL
-#elif defined(ANDROID)
+#elif defined(__ANDROID__)
 #   define GLM_PLATFORM GLM_PLATFORM_ANDROID
 #elif defined(__linux)
 #   define GLM_PLATFORM GLM_PLATFORM_LINUX
@@ -96,7 +99,7 @@
 // Compiler
 
 // User defines: GLM_FORCE_COMPILER_UNKNOWN
-// TODO ? __llvm__
+// TODO ? __llvm__ 
 
 #define GLM_COMPILER_UNKNOWN		0x00000000
 
@@ -219,15 +222,15 @@
 #	if CUDA_VERSION < 3000
 #		error "GLM requires CUDA 3.0 or higher"
 #	elif CUDA_VERSION == 3000
-#		define GLM_COMPILER GLM_COMPILER_CUDA30
+#		define GLM_COMPILER GLM_COMPILER_CUDA30	
 #	elif CUDA_VERSION == 3010
-#		define GLM_COMPILER GLM_COMPILER_CUDA31
+#		define GLM_COMPILER GLM_COMPILER_CUDA31	
 #	elif CUDA_VERSION == 3020
-#		define GLM_COMPILER GLM_COMPILER_CUDA32
+#		define GLM_COMPILER GLM_COMPILER_CUDA32	
 #	elif CUDA_VERSION == 4000
-#		define GLM_COMPILER GLM_COMPILER_CUDA40
+#		define GLM_COMPILER GLM_COMPILER_CUDA40	
 #	elif CUDA_VERSION == 4010
-#		define GLM_COMPILER GLM_COMPILER_CUDA41
+#		define GLM_COMPILER GLM_COMPILER_CUDA41	
 #	elif CUDA_VERSION == 4020
 #		define GLM_COMPILER GLM_COMPILER_CUDA42
 #	else
@@ -283,7 +286,7 @@
 #		define GLM_COMPILER GLM_COMPILER_CLANG
 #   endif
 
-// G++
+// G++ 
 #elif(defined(__GNUC__) || defined(__MINGW32__))// || defined(__llvm__) || defined(__clang__)
 #   if defined (__llvm__)
 #       define GLM_COMPILER_GCC_EXTRA GLM_COMPILER_GCC_LLVM
@@ -426,7 +429,7 @@
 #	define GLM_LANG GLM_LANG_CXX98
 #else
 //  -std=c++0x or -std=gnu++0x
-#	if(((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) && defined(__GXX_EXPERIMENTAL_CXX0X__))
+#	if(((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) && defined(__GXX_EXPERIMENTAL_CXX0X__)) 
 #		define GLM_LANG GLM_LANG_CXX0X
 #	elif(((GLM_COMPILER & GLM_COMPILER_VC) == GLM_COMPILER_VC) && defined(_MSC_EXTENSIONS))
 #		define GLM_LANG GLM_LANG_CXXMS
@@ -438,7 +441,7 @@
 #		endif//(GLM_COMPILER == GLM_COMPILER_VC2010)
 #	elif((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) //&& defined(__STRICT_ANSI__))
 #		define GLM_LANG GLM_LANG_CXX98
-#	elif((GLM_COMPILER & GLM_COMPILER_CLANG) == GLM_COMPILER_CLANG)
+#	elif((GLM_COMPILER & GLM_COMPILER_CLANG) == GLM_COMPILER_CLANG) 
 #		define GLM_LANG GLM_LANG_CXX98
 #	else
 #		define GLM_LANG GLM_LANG_CXX
@@ -465,19 +468,25 @@
 #endif//GLM_MESSAGE
 
 /////////////////
-// Platform
+// Platform 
 
 // User defines: GLM_FORCE_PURE GLM_FORCE_SSE2 GLM_FORCE_AVX
 
-#define GLM_ARCH_PURE		0x0000 //(0x0000)
-#define GLM_ARCH_SSE2		0x0001 //(0x0001)
-#define GLM_ARCH_SSE3		0x0003 //(0x0002 | GLM_ARCH_SSE2)
-#define GLM_ARCH_AVX		0x0007 //(0x0004 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#define GLM_ARCH_PURE		0x0000
+#define GLM_ARCH_SSE2		0x0001
+#define GLM_ARCH_SSE3		(0x0002 | GLM_ARCH_SSE2)
+#define GLM_ARCH_SSE4		(0x0004 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#define GLM_ARCH_AVX		(0x0008 | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#define GLM_ARCH_AVX2		(0x0010 | GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
 
 #if(defined(GLM_FORCE_PURE))
 #	define GLM_ARCH GLM_ARCH_PURE
+#elif(defined(GLM_FORCE_AVX2))
+#	define GLM_ARCH GLM_ARCH_AVX2
 #elif(defined(GLM_FORCE_AVX))
 #	define GLM_ARCH GLM_ARCH_AVX
+#elif(defined(GLM_FORCE_SSE4))
+#	define GLM_ARCH GLM_ARCH_SSE4
 #elif(defined(GLM_FORCE_SSE3))
 #	define GLM_ARCH GLM_ARCH_SSE3
 #elif(defined(GLM_FORCE_SSE2))
@@ -491,26 +500,25 @@
 #		else
 #			define GLM_ARCH GLM_ARCH_SSE3
 #		endif
-#	elif(GLM_COMPILER >= GLM_COMPILER_VC2008)
+#	elif(GLM_COMPILER >= GLM_COMPILER_VC2008) 
 #		define GLM_ARCH GLM_ARCH_SSE3
 #	elif(GLM_COMPILER >= GLM_COMPILER_VC2005)
 #		define GLM_ARCH GLM_ARCH_SSE2
 #	else
 #		define GLM_ARCH GLM_ARCH_PURE
 #	endif
-#elif(GLM_COMPILER & (GLM_COMPILER_LLVM_GCC | GLM_COMPILER_CLANG))
-#	if(defined(__AVX__))
+#elif((GLM_PLATFORM & GLM_PLATFORM_APPLE) && (GLM_COMPILER & GLM_COMPILER_GCC))
+#	define GLM_ARCH GLM_ARCH_PURE
+// XXX CHANGED
+//#elif(((GLM_COMPILER & GLM_COMPILER_GCC) && (defined(__i386__) || defined(__x86_64__))) || (GLM_COMPILER & GLM_COMPILER_LLVM_GCC))
+// -> #elif(((GLM_COMPILER & GLM_COMPILER_GCC) && (defined(__i386__) || defined(__x86_64__))) || (GLM_COMPILER & (GLM_COMPILER_LLVM_GCC | GLM_COMPILER_CLANG)))
+#elif(((GLM_COMPILER & GLM_COMPILER_GCC) && (defined(__i386__) || defined(__x86_64__))) || (GLM_COMPILER & (GLM_COMPILER_LLVM_GCC | GLM_COMPILER_CLANG)))
+#	if(defined(__AVX2__))
+#		define GLM_ARCH GLM_ARCH_AVX2
+#	elif(defined(__AVX__))
 #		define GLM_ARCH GLM_ARCH_AVX
-#	elif(defined(__SSE3__))
-#		define GLM_ARCH GLM_ARCH_SSE3
-#	elif(defined(__SSE2__))
-#		define GLM_ARCH GLM_ARCH_SSE2
-#	else
-#		define GLM_ARCH GLM_ARCH_PURE
-#	endif
-#elif((GLM_COMPILER & GLM_COMPILER_GCC) && (defined(__i386__) || defined(__x86_64__)))
-#	if(defined(__AVX__))
-#		define GLM_ARCH GLM_ARCH_AVX
+#	elif(defined(__SSE4__))
+#		define GLM_ARCH GLM_ARCH_SSE4
 #	elif(defined(__SSE3__))
 #		define GLM_ARCH GLM_ARCH_SSE3
 #	elif(defined(__SSE2__))
@@ -522,9 +530,15 @@
 #	define GLM_ARCH GLM_ARCH_PURE
 #endif
 
-#if(GLM_ARCH != GLM_ARCH_PURE)
+//#if(GLM_ARCH != GLM_ARCH_PURE)
+#if((GLM_ARCH & GLM_ARCH_AVX2) == GLM_ARCH_AVX2)
+#	include <immintrin.h>
+#endif//GLM_ARCH
 #if((GLM_ARCH & GLM_ARCH_AVX) == GLM_ARCH_AVX)
 #	include <immintrin.h>
+#endif//GLM_ARCH
+#if((GLM_ARCH & GLM_ARCH_SSE4) == GLM_ARCH_SSE4)
+#	include <smmintrin.h>
 #endif//GLM_ARCH
 #if((GLM_ARCH & GLM_ARCH_SSE3) == GLM_ARCH_SSE3)
 #	include <pmmintrin.h>
@@ -532,7 +546,7 @@
 #if((GLM_ARCH & GLM_ARCH_SSE2) == GLM_ARCH_SSE2)
 #	include <emmintrin.h>
 #endif//GLM_ARCH
-#endif//(GLM_ARCH != GLM_ARCH_PURE)
+//#endif//(GLM_ARCH != GLM_ARCH_PURE)
 
 #if(defined(GLM_MESSAGES) && !defined(GLM_MESSAGE_ARCH_DISPLAYED))
 #	define GLM_MESSAGE_ARCH_DISPLAYED
@@ -542,8 +556,12 @@
 #		pragma message("GLM: SSE2 instruction set")
 #	elif(GLM_ARCH == GLM_ARCH_SSE3)
 #		pragma message("GLM: SSE3 instruction set")
+#	elif(GLM_ARCH == GLM_ARCH_SSE4)
+#		pragma message("GLM: SSE4 instruction set")
 #	elif(GLM_ARCH == GLM_ARCH_AVX)
 #		pragma message("GLM: AVX instruction set")
+#	elif(GLM_ARCH == GLM_ARCH_AVX2)
+#		pragma message("GLM: AVX2 instruction set")
 #	endif//GLM_ARCH
 #endif//GLM_MESSAGE
 
@@ -553,8 +571,13 @@
 #define GLM_SUPPORT_ANONYMOUS_UNION() \
 	((GLM_LANG & GLM_LANG_CXX98) == GLM_LANG_CXX98)
 
+/*
 #define GLM_SUPPORT_ANONYMOUS_UNION_OF_STRUCTURE() \
-	(((GLM_LANG & GLM_LANG_CXX11) == GLM_LANG_CXX11) || ((GLM_LANG & GLM_LANG_CXXMS) == GLM_LANG_CXXMS) || ((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_LANG == GLM_LANG_CXX0X)))
+	(((GLM_LANG & GLM_LANG_CXX11) == GLM_LANG_CXX11) || ((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_LANG & GLM_LANG_CXXMS) == GLM_LANG_CXXMS) || ((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_LANG == GLM_LANG_CXX0X)))
+*/
+
+#define GLM_SUPPORT_ANONYMOUS_UNION_OF_STRUCTURE() \
+	(((GLM_LANG & GLM_LANG_CXX11) == GLM_LANG_CXX11) || ((GLM_COMPILER & GLM_COMPILER_VC) && ((GLM_LANG & GLM_LANG_CXXMS) == GLM_LANG_CXXMS)) || ((GLM_LANG == GLM_LANG_CXX0X) == GLM_LANG_CXX0X))
 
 #define GLM_SUPPORT_SWIZZLE_OPERATOR() \
 	(/*defined(GLM_SWIZZLE) && */GLM_SUPPORT_ANONYMOUS_UNION_OF_STRUCTURE())
@@ -566,7 +589,7 @@
 
 //#define GLM_FORCE_ONLY_XYZW
 #define GLM_COMPONENT_ONLY_XYZW				0 // To disable multiple vector component names access.
-#define GLM_COMPONENT_CXX98					1 //
+#define GLM_COMPONENT_CXX98					1 //  
 #define GLM_COMPONENT_CXX11					2 // To use anonymous union to provide multiple component names access for class valType. Visual C++ only.
 
 #if(GLM_SUPPORT_ANONYMOUS_UNION_OF_STRUCTURE() && !defined(GLM_FORCE_ONLY_XYZW))
@@ -605,13 +628,13 @@
 #endif//GLM_LANG
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// Qualifiers
+// Qualifiers 
 
 // User defines: GLM_FORCE_INLINE GLM_FORCE_CUDA
 
 #if(defined(GLM_FORCE_CUDA) || (GLM_COMPILER & GLM_COMPILER_CUDA))
-#   define GLM_CUDA_FUNC_DEF __device__ __host__
-#	define GLM_CUDA_FUNC_DECL __device__ __host__
+#   define GLM_CUDA_FUNC_DEF __device__ __host__ 
+#	define GLM_CUDA_FUNC_DECL __device__ __host__ 
 #else
 #   define GLM_CUDA_FUNC_DEF
 #	define GLM_CUDA_FUNC_DECL

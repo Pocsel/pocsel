@@ -261,7 +261,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
     {
         if (lights.IsEnd())
             return;
-        this->_renderer.SetModelMatrix(glm::mat4::identity);
+        this->_renderer.SetModelMatrix(glm::mat4());
         //this->_directionnal.normalDepth->Set(gbuffer.GetSpecular());
         this->_directionnal.screenModelViewProjection->Set(this->_directionnal.modelViewProjection, true);
         do

@@ -1,14 +1,14 @@
 #ifndef __COMMON_PHYSICS_SHAPEDESCBOX_HPP__
 #define __COMMON_PHYSICS_SHAPEDESCBOX_HPP__
 
-#include "common/physics/ShapeDesc.hpp"
+#include "common/physics/IShapeDesc.hpp"
 
 #include "bullet/bullet-all.hpp"
 
 namespace Common { namespace Physics {
 
     class ShapeDescBox :
-        public ShapeDesc
+        public IShapeDesc
     {
     private:
         btVector3 _halfExtents;

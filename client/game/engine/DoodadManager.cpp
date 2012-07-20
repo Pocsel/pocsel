@@ -7,8 +7,12 @@
 #include "client/game/engine/PhysicsManager.hpp"
 #include "client/game/engine/BodyManager.hpp"
 
+#include "client/game/Game.hpp"
 #include "client/game/ShapeRenderer.hpp"
 #include "client/game/BulletDebugDrawer.hpp"
+
+#include "client/Client.hpp"
+#include "client/Settings.hpp"
 
 #include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
@@ -229,9 +233,12 @@ namespace Client { namespace Game { namespace Engine {
 
     void DoodadManager::Render()
     {
-        this->_engine.GetPhysicsManager().GetDebugDrawer().BeginDraw();
-        this->_engine.GetPhysicsManager().GetWorld().GetBtWorld().debugDrawWorld();
-        this->_engine.GetPhysicsManager().GetDebugDrawer().EndDraw();
+        if (this->_engine.GetGame().GetClient().GetSettings().drawPhysics)
+        {
+            this->_engine.GetPhysicsManager().GetDebugDrawer().BeginDraw();
+            this->_engine.GetPhysicsManager().GetWorld().GetBtWorld().debugDrawWorld();
+            this->_engine.GetPhysicsManager().GetDebugDrawer().EndDraw();
+        }
 
         //for (auto it = this->_doodads.begin(), ite = this->_doodads.end(); it != ite; ++it)
         //{

@@ -1,6 +1,7 @@
 #include "common/physics/ShapeDescSphere.hpp"
 
 #include "tools/lua/Ref.hpp"
+#include "tools/lua/Function.hpp"
 #include "tools/ByteArray.hpp"
 
 namespace Common { namespace Physics {

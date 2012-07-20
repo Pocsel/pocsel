@@ -1,5 +1,4 @@
 #include "common/physics/BodyType.hpp"
-#include "common/physics/ShapeDesc.hpp"
 
 #include "bullet/bullet-all.hpp"
 

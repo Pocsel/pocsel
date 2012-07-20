@@ -26,6 +26,7 @@ namespace Client {
         unsigned int chunkCacheArea;
         unsigned int chunkMinimumArea;
         float mouseSensitivity;
+        bool drawPhysics;
 
     public:
         Settings(int ac, char** av);
