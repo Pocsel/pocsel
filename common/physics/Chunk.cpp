@@ -6,7 +6,10 @@
 
 // viewdistance 4, minimumarea 4:
 // 203175 c'est avec la technique "arbre" a la con
-// 38488 avec des trucs qui "depassent"
+// 24113 avec des trucs qui se chevauchent sans bug
+// 26686 sans les trucs qui se chevauchent sans bug
+
+// à tester: le temps
 
 namespace Common { namespace Physics {
 
@@ -34,8 +37,8 @@ namespace Common { namespace Physics {
         {
             static inline void _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape)
             {
-                unsigned int fastForward[ChunkSize3 * 3];
-                for (unsigned int i = 0; i < ChunkSize3 * 3; ++i)
+                unsigned int fastForward[ChunkSize3];
+                for (unsigned int i = 0; i < ChunkSize3; ++i)
                     fastForward[i] = 0;
                 btTransform tr;
                 tr.setIdentity();
@@ -44,23 +47,11 @@ namespace Common { namespace Physics {
 
                 for (z = 0; z < Common::ChunkSize;)
                 {
-                    //ff = fastForward[(z * Common::ChunkSize2) * 3 + 2];
-                    //if (ff)
-                    //{
-                    //    z += ff;
-                    //    continue;
-                    //}
                     for (y = 0; y < Common::ChunkSize;)
                     {
-                        //ff = fastForward[(y * Common::ChunkSize + z * Common::ChunkSize2) * 3 + 1];
-                        //if (ff)
-                        //{
-                        //    y += ff;
-                        //    continue;
-                        //}
                         for (x = 0; x < Common::ChunkSize;)
                         {
-                            ff = fastForward[(x + y * Common::ChunkSize + z * Common::ChunkSize2) * 3 + 0];
+                            ff = fastForward[x + y * Common::ChunkSize + z * Common::ChunkSize2];
                             if (ff)
                             {
                                 x += ff;
@@ -68,19 +59,15 @@ namespace Common { namespace Physics {
                             }
                             if (!cubes[x + y * Common::ChunkSize + z * Common::ChunkSize2])
                             {
-                                assert(fastForward[(x + y * Common::ChunkSize + z * Common::ChunkSize2) * 3 + 0] == 0 &&
-                                        "J'ai fait de la merde");
-                                assert(fastForward[(x + y * Common::ChunkSize + z * Common::ChunkSize2) * 3 + 1] == 0 &&
-                                        "J'ai fait de la merde");
-                                assert(fastForward[(x + y * Common::ChunkSize + z * Common::ChunkSize2) * 3 + 2] == 0 &&
+                                assert(fastForward[x + y * Common::ChunkSize + z * Common::ChunkSize2] == 0 &&
                                         "J'ai fait de la merde");
                                 ++x;
                                 continue;
                             }
 
-                            sizeX = _x(cubes, x, y, z);
-                            sizeY = _y(cubes, x, y, z, sizeX);
-                            sizeZ = _z(cubes, x, y, z, sizeX, sizeY);
+                            sizeX = _x(fastForward, cubes, x, y, z);
+                            sizeY = _y(fastForward, cubes, x, y, z, sizeX);
+                            sizeZ = _z(fastForward, cubes, x, y, z, sizeX, sizeY);
                             idxX = sizeX - 1;
                             idxY = sizeY - 1;
                             idxZ = sizeZ - 1;
@@ -88,63 +75,52 @@ namespace Common { namespace Physics {
                             tr.setOrigin(btVector3(x + sizeX * 0.5, y + sizeY * 0.5, z + sizeZ * 0.5));
                             shape->addChildShape(tr, boxShapes[idxX + idxY * ChunkSize + idxZ * ChunkSize2]);
 
-                            idxX = 0;
-                            idxY = 0;
-                            idxZ = 0;
-                            for (;idxX < sizeX; ++idxX)
-                                for (;idxY < sizeY; ++idxY)
-                                    for (;idxZ < sizeZ; ++idxZ)
+                            for (idxX = 0; idxX < sizeX; ++idxX)
+                                for (idxY = 0; idxY < sizeY; ++idxY)
+                                    for (idxZ = 0; idxZ < sizeZ; ++idxZ)
                                     {
-                                        fastForward[((x + idxX) + (y + idxY) * Common::ChunkSize + (z + idxZ) * Common::ChunkSize2) * 3 + 0] = sizeX;
-                                        //fastForward[((x + idxX) + (y + idxY) * Common::ChunkSize + (z + idxZ) * Common::ChunkSize2) * 3 + 1] = sizeY;
-                                        //fastForward[((x + idxX) + (y + idxY) * Common::ChunkSize + (z + idxZ) * Common::ChunkSize2) * 3 + 2] = sizeZ;
+                                        fastForward[(x + idxX) + (y + idxY) * Common::ChunkSize + (z + idxZ) * Common::ChunkSize2] = sizeX;
                                     }
 
-                            x += fastForward[(x + y * Common::ChunkSize + z * Common::ChunkSize2) * 3 + 0];
+                            x += fastForward[x + y * Common::ChunkSize + z * Common::ChunkSize2];
                         }
-                        //ff = fastForward[(y * Common::ChunkSize + z * Common::ChunkSize2) * 3 + 1];
-                        //y += ff ? ff : 1;
                         ++y;
                     }
-                    //std::cout << "z: " << z << "\n";
-                    //std::cout << "ZfastForward: " << fastForward[(z * Common::ChunkSize2) * 3 + 2] << "\n";
-                    //ff = fastForward[(z * Common::ChunkSize2) * 3 + 2];
-                    //z += ff ? ff : 1;
                     ++z;
                 }
             }
-            static inline unsigned int _x(Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z)
+            static inline unsigned int _x(unsigned int const* fastForward, Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z)
             {
                 unsigned int i = 1;
-                while (x + i < ChunkSize && cubes[x + i + y * ChunkSize + z * ChunkSize2])
+                while (x + i < ChunkSize && cubes[x + i + y * ChunkSize + z * ChunkSize2] && !fastForward[x + i + y * ChunkSize + z * ChunkSize2])
                     ++i;
                 return i;
             }
-            static inline unsigned int _y(Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z, unsigned int sizeX)
+            static inline unsigned int _y(unsigned int const* fastForward, Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z, unsigned int sizeX)
             {
                 unsigned int i = 1;
-                while (y + i < ChunkSize && _checkX(cubes, x, y + i, z, sizeX))
+                while (y + i < ChunkSize && _checkX(fastForward, cubes, x, y + i, z, sizeX))
                     ++i;
                 return i;
             }
-            static inline unsigned int _z(Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z, unsigned int sizeX, unsigned int sizeY)
+            static inline unsigned int _z(unsigned int const* fastForward, Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z, unsigned int sizeX, unsigned int sizeY)
             {
                 unsigned int i = 1;
-                while (z + i < ChunkSize && _checkY(cubes, x, y, z + i, sizeX, sizeY))
+                while (z + i < ChunkSize && _checkY(fastForward, cubes, x, y, z + i, sizeX, sizeY))
                     ++i;
                 return i;
             }
-            static inline bool _checkX(Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z, unsigned int sizeX)
+            static inline bool _checkX(unsigned int const* fastForward, Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z, unsigned int sizeX)
             {
                 for (unsigned int i = 0; i < sizeX; ++i)
-                    if (cubes[x + i + y * ChunkSize + z * ChunkSize2] == 0)
+                    if (cubes[x + i + y * ChunkSize + z * ChunkSize2] == 0 || fastForward[x + i + y * ChunkSize + z * ChunkSize2])
                         return false;
                 return true;
             }
-            static inline bool _checkY(Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z, unsigned int sizeX, unsigned int sizeY)
+            static inline bool _checkY(unsigned int const* fastForward, Common::BaseChunk::CubeType const* cubes, unsigned int x, unsigned int y, unsigned int z, unsigned int sizeX, unsigned int sizeY)
             {
                 for (unsigned int i = 0; i < sizeY; ++i)
-                    if (_checkX(cubes, x, y + i, z, sizeX) == false)
+                    if (_checkX(fastForward, cubes, x, y + i, z, sizeX) == false)
                         return false;
                 return true;
             }
@@ -197,14 +173,14 @@ namespace Common { namespace Physics {
         this->_body->setCenterOfMassTransform(tr);
         this->_body->setUserPointer(this);
 
-        //this->_body->setCollisionFlags(this->_body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
+        this->_body->setCollisionFlags(this->_body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
 
         this->_world.GetBtWorld().addRigidBody(this->_body);
 
 #ifdef DEBUG
-        Tools::debug << "physics cubes in this chunk: " << this->_shape->getNumChildShapes() << "\n";
-        _totalNumberOfCubes += this->_shape->getNumChildShapes();
-        Tools::debug << "Total physics cubes in world: " << _totalNumberOfCubes << "\n";
+//        Tools::debug << "physics cubes in this chunk: " << this->_shape->getNumChildShapes() << "\n";
+//        _totalNumberOfCubes += this->_shape->getNumChildShapes();
+//        Tools::debug << "Total physics cubes in world: " << _totalNumberOfCubes << "\n";
 #endif
     }
 
