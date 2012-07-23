@@ -2,7 +2,7 @@
 #define __SERVER_GAME_ENGINE_ENTITYMANAGER_HPP__
 
 #include "tools/lua/Ref.hpp"
-#include "tools/lua/AWeakResourceRef.hpp"
+#include "tools/lua/IWeakResourceRef.hpp"
 #include "tools/lua/WeakResourceRefManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
 #include "common/Position.hpp"
@@ -51,14 +51,13 @@ namespace Server { namespace Game { namespace Engine {
             Uint32 notificationCallbackId;
         };
     public:
-        struct FakeEntityRef : public Tools::Lua::AFakeResourceRef<EntityManager>
+        struct WeakEntityRef : public Tools::Lua::IWeakResourceRef<EntityManager>
         {
-            FakeEntityRef() : entityId(0), disabled(true) {}
-            FakeEntityRef(Uint32 entityId) : entityId(entityId), disabled(false) {}
-            virtual bool IsValid() const { return this->entityId && !this->disabled; }
-            virtual void Invalidate() { this->entityId = 0; this->disabled = true; }
-            virtual void Index(EntityManager& entityManager, Tools::Lua::CallHelper& helper);
-            virtual void NewIndex(EntityManager& entityManager, Tools::Lua::CallHelper& helper);
+            WeakEntityRef() : entityId(0), disabled(true) {}
+            WeakEntityRef(Uint32 entityId) : entityId(entityId), disabled(false) {}
+            virtual bool IsValid(EntityManager const&) const { return this->entityId && !this->disabled; }
+            virtual void Invalidate(EntityManager const&) { this->entityId = 0; this->disabled = true; }
+            virtual Tools::Lua::Ref GetReference(EntityManager const& entityManager) const;
             Uint32 entityId;
             bool disabled;
         };
@@ -72,7 +71,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 _nextEntityId;
         std::list<SpawnEvent*> _spawnEvents;
         std::list<KillEvent*> _killEvents;
-        Tools::Lua::ResourceManager<FakeEntityRef, EntityManager>* _fakeEntityRefManager;
+        Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>* _weakEntityRefManager;
 
     public:
         EntityManager(Engine& engine);
@@ -101,7 +100,7 @@ namespace Server { namespace Game { namespace Engine {
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
         std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
         std::map<Uint32, PositionalEntity*> const& GetPositionalEntities() const { return this->_positionalEntities; }
-        Tools::Lua::ResourceManager<FakeEntityRef, EntityManager>& GetFakeEntityRefManager() { return *this->_fakeEntityRefManager; }
+        Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>& GetWeakEntityRefManager() { return *this->_weakEntityRefManager; }
 
         // rcon requests
         std::string RconGetEntities() const;

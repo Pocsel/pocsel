@@ -1,11 +1,11 @@
-#ifndef __TOOLS_LUA_AWEAKRESOURCEREF_HPP__
-#define __TOOLS_LUA_AWEAKRESOURCEREF_HPP__
+#ifndef __TOOLS_LUA_IWEAKRESOURCEREF_HPP__
+#define __TOOLS_LUA_IWEAKRESOURCEREF_HPP__
 
 namespace Tools { namespace Lua {
 
-    template<typename ManagerType> struct AWeakResourceRef
+    template<typename ManagerType> struct IWeakResourceRef
     {
-        virtual ~AWeakResourceRef() {}
+        virtual ~IWeakResourceRef() {}
         virtual bool IsValid(ManagerType const&) const = 0;
         virtual void Invalidate(ManagerType const&) = 0;
         virtual Ref GetReference(ManagerType const&) const = 0;
