@@ -55,6 +55,11 @@ namespace Tools { namespace Lua {
         this->_ref = LUA_NOREF;
     }
 
+    bool Ref::IsValid() const throw()
+    {
+        return this->_ref != LUA_NOREF;
+    }
+
     size_t Ref::GetLength() const throw()
     {
         this->ToStack();

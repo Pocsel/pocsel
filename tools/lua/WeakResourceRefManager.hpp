@@ -11,13 +11,12 @@ namespace Tools { namespace Lua {
     private:
         struct FakeReference
         {
-            FakeReference() : trueReference(0) {}
-            FakeReference(Ref const& ref) { this->trueReference = new Ref(ref); }
-            ~FakeReference() { Tools::Delete(this->trueReference); }
-            bool IsValid() const { return this->trueReference; }
-            void Invalidate() { Tools::Delete(this->trueReference); this->trueReference = 0; }
-            Ref GetReference() const { assert(this->trueReference && "verifier avec IsValid() avant"); return *this->trueReference; }
-            Tools::Lua::Ref* trueReference;
+            FakeReference(Ref const& ref) : trueReference(ref) {}
+            ~FakeReference() { this->trueReference.Unref(); }
+            bool IsValid() const { return this->trueReference.IsValid(); }
+            void Invalidate() { this->trueReference.Unref(); }
+            Ref GetReference() const { return this->trueReference; }
+            Tools::Lua::Ref trueReference;
         };
 
     private:
@@ -28,9 +27,10 @@ namespace Tools { namespace Lua {
         MetaTable* _weakReferenceMetaTable;
         std::list<Ref /* fake ref UserData */>* _fakeReferences;
         MetaTable* _fakeReferenceMetaTable;
+        Ref* _invalidRef;
 
     public:
-        WeakResourceRefManager(Interpreter& interpreter, ManagerType& resourceManager, bool useFakeReferences = false) :
+        WeakResourceRefManager(Interpreter& interpreter, ManagerType& resourceManager, WeakResourceRefType const& invalidRef = WeakResourceRefType(), bool useFakeReferences = false) :
             _interpreter(interpreter),
             _resourceManager(resourceManager),
             _nextReferenceId(1),
@@ -43,14 +43,16 @@ namespace Tools { namespace Lua {
             if (useFakeReferences)
             {
                 this->_fakeReferences = new std::list<Ref>();
-                this->_fakeReferenceMetaTable = &MetaTable::Create(interpreter, FakeReference());
+                this->_fakeReferenceMetaTable = &MetaTable::Create(interpreter, FakeReference(this->_interpreter.MakeNil()));
                 this->_fakeReferenceMetaTable->SetMetaMethod(MetaTable::Index, std::bind(&WeakResourceRefManager::_FakeReferenceIndex, this, std::placeholders::_1));
                 this->_fakeReferenceMetaTable->SetMetaMethod(MetaTable::NewIndex, std::bind(&WeakResourceRefManager::_FakeReferenceNewIndex, this, std::placeholders::_1));
             }
+            this->_invalidRef = new Tools::Lua::Ref(this->_interpreter.Make(invalidRef));
         }
 
         ~WeakResourceRefManager()
         {
+            Tools::Delete(this->_invalidRef);
             Tools::Delete(this->_weakReferences);
             Tools::Delete(this->_fakeReferences);
         }
@@ -75,12 +77,27 @@ namespace Tools { namespace Lua {
             this->_weakReferences->erase(it);
         }
 
+        Ref GetInvalidWeakReference() const
+        {
+            return *this->_invalidRef;
+        }
+
         Ref GetWeakReference(Uint32 refId) const throw(std::runtime_error)
         {
             auto it = this->_weakReferences->find(refId);
             if (it == this->_weakReferences->end())
                 throw std::runtime_error("WeakResourceRefManager::GetWeakReference: No weak reference with id " + Tools::ToString(refId));
             return it->second;
+        }
+
+        // ne pas garder la reference longtemps...
+        WeakResourceRefType& GetResource(Uint32 refId) throw(std::runtime_error)
+        {
+            auto it = this->_weakReferences->find(refId);
+            if (it == this->_weakReferences->end())
+                throw std::runtime_error("WeakResourceRefManager::GetResource: No resource with id " + Tools::ToString(refId));
+            Ref& ref = it->second;
+            return *ref.To<WeakResourceRefType*>();
         }
 
         void InvalidateAllFakeReferences()
@@ -91,7 +108,7 @@ namespace Tools { namespace Lua {
             auto itEnd = this->_fakeReferences->end();
             for (; it != itEnd; ++it)
             {
-                Ref& ref = it->second;
+                Ref& ref = *it;
                 ref.To<FakeReference*>()->Invalidate();
             }
             this->_fakeReferences->clear();

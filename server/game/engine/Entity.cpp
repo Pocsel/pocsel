@@ -11,13 +11,13 @@ namespace Server { namespace Game { namespace Engine {
     {
         this->_self.Set("id", id);
         this->_self.Set("storage", this->_engine.GetInterpreter().MakeTable());
-        this->_weakRefId = this->_engine.GetEntityManager().GetWeakEntityRefManager().NewResource(EntityManager::WeakEntityRef(id)).first;
+        this->_weakReferenceId = this->_engine.GetEntityManager().GetWeakEntityRefManager().NewResource(EntityManager::WeakEntityRef(id)).first;
         this->Enable();
     }
 
     Entity::~Entity()
     {
-        this->_engine.GetEntityManager().GetWeakEntityRefManager().InvalidateResource(this->_weakRefId);
+        this->_engine.GetEntityManager().GetWeakEntityRefManager().InvalidateResource(this->_weakReferenceId);
     }
 
     Tools::Lua::Ref Entity::GetStorage() const
@@ -45,7 +45,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_self = this->_engine.GetInterpreter().MakeTable(); // perte de toutes les references/variables de l'instance
         this->_self.Set("id", idSave); // on garde qu'une table avec l'id
         this->_self.Set("storage", storageSave); // et le storage
-        this->_engine.GetEntityManager().GetWeakEntityRefManager().GetResource(this->_weakRefId).disabled = true;
+        this->_engine.GetEntityManager().GetWeakEntityRefManager().GetResource(this->_weakReferenceId).disabled = true;
     }
 
     void Entity::Enable()
@@ -56,7 +56,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_self.SetMetaTable(metatable);
         this->_self.Set("prototype", this->_type.GetPrototype());
         metatable.Set("__index", this->_type.GetPrototype());
-        this->_engine.GetEntityManager().GetWeakEntityRefManager().GetResource(this->_weakRefId).disabled = false;
+        this->_engine.GetEntityManager().GetWeakEntityRefManager().GetResource(this->_weakReferenceId).disabled = false;
     }
 
     void Entity::SaveToStorage()

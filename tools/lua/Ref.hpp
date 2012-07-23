@@ -24,6 +24,7 @@ namespace Tools { namespace Lua {
         template <typename T>
             bool Equals(T value) const throw(); // idem
         void Unref() throw();
+        bool IsValid() const throw(); // retourne false si Unref() a été appelé, ou si la reference a été construite sans copie (avec un state)
         size_t GetLength() const throw(); // retourne la longueur pour une chaine, la taille pour un tableau (#), le nombre d'octets pour un user data et 0 pour le reste
         // function call
         void operator ()(CallHelper& callHelper) const throw(std::runtime_error);

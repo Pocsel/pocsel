@@ -291,7 +291,7 @@ static void Resources(Interpreter& i)
     };
 
     MitoResourceManager realManager(i);
-    WeakResourceRefManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager, true);
+    WeakResourceRefManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager, ResourceDeTest(), true);
 
     auto pair1 = luaManager.NewResource(ResourceDeTest(12, "resource1"));
     Uint32 resource1Id = pair1.first;
@@ -308,6 +308,7 @@ static void Resources(Interpreter& i)
                 print("call 2 : ", tostring(maResource2:Lock()))
                 ));
     luaManager.InvalidateResource(resource1Id);
+    luaManager.InvalidateAllFakeReferences();
     i.DoString(STRINGIFY(
                 print(" - apres invalidation")
                 print("call 1 : ", tostring(maResource1:Lock()))

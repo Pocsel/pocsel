@@ -15,7 +15,7 @@ namespace Server { namespace Game { namespace Engine {
         Engine& _engine;
         EntityType const& _type;
         Tools::Lua::Ref _self;
-        Uint32 _weakRefId;
+        Uint32 _weakReferenceId;
 
     public:
         Entity(Engine& interpreter, Uint32 id, EntityType const& type);
@@ -28,7 +28,7 @@ namespace Server { namespace Game { namespace Engine {
         void Enable();
         void SaveToStorage();
         void LoadFromStorage();
-        Uint32 GetWeakRefId() const { return this->_weakRefId; }
+        Uint32 GetWeakReferenceId() const { return this->_weakReferenceId; }
     };
 
 }}}

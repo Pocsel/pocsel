@@ -26,7 +26,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::debug << "EntityManager::EntityManager()\n";
         auto& i = this->_engine.GetInterpreter();
-        this->_fakeEntityRefManager = new Tools::Lua::ResourceManager<FakeEntityRef, EntityManager>(i, *this /* resource manager */, FakeEntityRef() /* invalid resource */);
+        this->_weakEntityRefManager = new Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>(i, *this /* manager */, true /* use fake references */);
         auto namespaceTable = i.Globals()["Server"].Set("Entity", i.MakeTable());
 
         namespaceTable.Set("GetEntityById", i.MakeFunction(std::bind(&EntityManager::_ApiGetEntityById, this, std::placeholders::_1)));
@@ -84,10 +84,10 @@ namespace Server { namespace Game { namespace Engine {
         for (; itKill != itKillEnd; ++itKill)
             Tools::Delete(*itKill);
         // resource manager
-        Tools::Delete(this->_fakeEntityRefManager);
+        Tools::Delete(this->_weakEntityRefManager);
     }
 
-    void EntityManager::WeakEntityRef::GetReference(EntityManager const& entityManager) const
+    Tools::Lua::Ref EntityManager::WeakEntityRef::GetReference(EntityManager const& entityManager) const
     {
         return entityManager.GetEntity(this->entityId).GetSelf();
     }
@@ -747,10 +747,10 @@ namespace Server { namespace Game { namespace Engine {
         if (it == this->_entities.end() || !it->second)
         {
             Tools::error << "EntityManager::_ApiGetEntityById: Entity " << entityId << " not found, invalid resource returned." << std::endl;
-            helper.PushRet(this->_fakeEntityRefManager->GetInvalidResourceReference());
+            helper.PushRet(this->_weakEntityRefManager->GetInvalidWeakReference());
             return;
         }
-        helper.PushRet(this->_fakeEntityRefManager->GetResourceReference(it->second->GetLuaResourceId()));
+        helper.PushRet(this->_weakEntityRefManager->GetWeakReference(it->second->GetWeakReferenceId()));
     }
 
     void EntityManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
