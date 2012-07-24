@@ -19,6 +19,9 @@ namespace Common { namespace Physics {
         private boost::noncopyable
     {
     private:
+#ifdef DEBUG
+        static int _totalNumberOfCubes;
+#endif
         Common::Physics::World& _world;
         btCompoundShape* _shape;
         btRigidBody* _body;

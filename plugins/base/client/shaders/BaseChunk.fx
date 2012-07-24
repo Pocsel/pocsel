@@ -68,7 +68,7 @@ FSout fs(in VSout v)
 
     FSout f;
 
-    f.diffuse = diffuse;
+    f.diffuse = float4(diffuse.rgb, 1);
     f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, specularPower);
 
     return f;

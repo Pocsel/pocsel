@@ -1,5 +1,8 @@
 #include "tools/precompiled.hpp"
 #include "tools/renderers/utils/GBuffer.hpp"
+#include "tools/renderers/utils/material/LuaMaterial.hpp"
+#include "tools/renderers/utils/texture/ITexture.hpp"
+#include "tools/renderers/utils/texture/Texture.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils {
 
@@ -15,24 +18,27 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_lightRenderTarget = this->_renderer.CreateRenderTarget(size);
         this->_lightRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Light data
         this->_lightRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Specular data
+        this->_finalRenderTarget = this->_renderer.CreateRenderTarget(size);
+        this->_finalRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba8, Tools::Renderers::RenderTargetUsage::Color); // Final image without postprocessing
 
         this->_quadModelViewProj = &this->_combineShader.GetParameter("quadWorldViewProjection");
         this->_diffuseTexture = &this->_combineShader.GetParameter("diffuse");
         this->_lightTexture = &this->_combineShader.GetParameter("lighting");
         this->_specularTexture = &this->_combineShader.GetParameter("specular");
 
-        glm::fvec2 sizef(size);
-        this->_mvp = glm::ortho(0.0f, sizef.x, sizef.y, 0.0f)
-            * glm::scale(sizef.x, sizef.y, 1.0f)
-            * glm::translate(0.5f, 0.5f, 1.0f);
+        //glm::fvec2 sizef(size);
+        //this->_mvp = glm::ortho(0.0f, sizef.x, sizef.y, 0.0f)
+        //    * glm::scale(sizef.x, sizef.y, 1.0f)
+        //    * glm::translate(0.5f, 0.5f, 1.0f);
+        this->_mvp = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
     }
 
     void GBuffer::Resize(glm::uvec2 const& size)
     {
         this->_gbufferRenderTarget->Resize(size);
         this->_lightRenderTarget->Resize(size);
+        this->_finalRenderTarget->Resize(size);
 
-        glm::fvec2 sizef(size);
         this->_mvp = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
     }
 
@@ -56,22 +62,59 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_renderer.EndDraw();
     }
 
-    void GBuffer::Render()
+    void GBuffer::Render(Uint64 totalTime, std::list<Material::LuaMaterial*> const& postProcess)
     {
+        auto& colors = this->GetColors();
+        auto& normalDepth = this->GetNormalsDepth();
+        auto& lighting = this->GetLighting();
+        auto& specular = this->GetSpecular();
+        auto& finalImg = this->GetFinal();
+
+        // Combine lighting with albedo
+        if (!postProcess.empty())
+            this->_renderer.BeginDraw(this->_finalRenderTarget.get());
+        colors.Bind();
+        lighting.Bind();
+        specular.Bind();
+        this->_diffuseTexture->Set(colors);
+        this->_lightTexture->Set(this->GetLighting());
+        this->_specularTexture->Set(this->GetSpecular());
         this->_quadModelViewProj->Set(this->_mvp, true);
         do
         {
             this->_combineShader.BeginPass();
-
-            this->GetLighting().Bind();
-            this->_lightTexture->Set(this->GetLighting());
-            this->GetSpecular().Bind();
-            this->_specularTexture->Set(this->GetSpecular());
-            this->_quad.Render(*this->_diffuseTexture, this->GetColors());
-            this->GetSpecular().Unbind();
-            this->GetLighting().Unbind();
-
+            this->_quad.Render();
         } while (this->_combineShader.EndPass());
+        colors.Unbind();
+        lighting.Unbind();
+        specular.Unbind();
+
+        if (postProcess.empty())
+            return;
+        this->_renderer.EndDraw();
+
+        this->_renderer.SetDepthTest(false);
+        this->_renderer.SetCullMode(CullMode::None);
+        // Post processing shaders
+        finalImg.Bind();
+        normalDepth.Bind();
+        for (auto it = postProcess.begin(), ite = postProcess.end(); it != ite; ++it)
+        {
+            auto& material = (*it)->GetMaterial();
+            auto& shader = material.GetGeometryShader();
+            material.Update(totalTime);
+            material.UpdateParameters(shader, totalTime);
+            shader.GetParameter("quadWorldViewProjection").Set(this->_mvp, true);
+            shader.GetParameter("diffuse").Set(finalImg);
+            shader.GetParameter("normalDepth").Set(normalDepth);
+            do
+            {
+                shader.BeginPass();
+                this->_quad.Render();
+            } while (shader.EndPass());
+        }
+        finalImg.Unbind();
+        normalDepth.Unbind();
     }
 
 }}}

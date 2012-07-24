@@ -28,7 +28,7 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 FSout fs(in VSout v)
 {
     FSout f;
-    f.color = colorParam;
+    f.color = float4(colorParam.rgb, 0);
     f.normalDepth = float4(0, 0, 0, 0);
     return f;
 }
@@ -39,9 +39,7 @@ technique tech_glsl
 {
     pass p0
     {
-        AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
+        AlphaBlendEnable = false;
         VertexProgram = compile glslv vs();
         FragmentProgram = compile glslf fs();
     }
@@ -50,9 +48,7 @@ technique tech
 {
     pass p0
     {
-        AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
+        AlphaBlendEnable = false;
         VertexProgram = compile arbvp1 vs();
         FragmentProgram = compile arbfp1 fs();
     }
@@ -64,7 +60,7 @@ technique tech
 {
     pass p0
     {
-        AlphaBlendEnable = true;
+        AlphaBlendEnable = false;
         VertexShader = compile vs_2_0 vs();
         PixelShader = compile ps_2_0 fs();
     }

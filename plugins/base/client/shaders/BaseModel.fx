@@ -79,7 +79,7 @@ FSout fs(in VSout v)
 
     FSout f;
 
-    f.diffuse = diffuse;
+    f.diffuse = float4(diffuse.rgb, 1);
     f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, specularPower);
     f.diffuse.rgb = f.diffuse.rgb + float3(updateFlag, updateFlag, updateFlag);
 
