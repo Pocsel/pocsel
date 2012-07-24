@@ -747,7 +747,7 @@ namespace Server { namespace Game { namespace Engine {
         if (it == this->_entities.end() || !it->second)
         {
             Tools::error << "EntityManager::_ApiGetEntityById: Entity " << entityId << " not found, invalid resource returned." << std::endl;
-            helper.PushRet(this->_weakEntityRefManager->GetInvalidWeakReference());
+            helper.PushRet(this->_engine.GetInterpreter().MakeNil());
             return;
         }
         helper.PushRet(this->_weakEntityRefManager->GetWeakReference(it->second->GetWeakReferenceId()));
