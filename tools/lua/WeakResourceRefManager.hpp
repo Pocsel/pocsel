@@ -12,7 +12,6 @@ namespace Tools { namespace Lua {
         struct FakeReference
         {
             FakeReference(Ref const& ref) : trueReference(ref) {}
-            ~FakeReference() { this->trueReference.Unref(); }
             bool IsValid() const { return this->trueReference.IsValid(); }
             void Invalidate() { this->trueReference.Unref(); }
             Ref GetReference() const { return this->trueReference; }

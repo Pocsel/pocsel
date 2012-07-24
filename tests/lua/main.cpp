@@ -274,7 +274,7 @@ static void Resources(Interpreter& i)
 {
     struct MitoResourceManager
     {
-        MitoResourceManager(Interpreter& i) : coucou(1336), coucou2(i.MakeString("Heyyyyyyy")) {}
+        MitoResourceManager(Interpreter& i) : coucou(1336), coucou2(i.MakeString("bite")) {}
         int coucou;
         Ref coucou2;
     };
@@ -306,6 +306,7 @@ static void Resources(Interpreter& i)
                 print(" - avant invalidation")
                 print("call 1 : ", tostring(maResource1:Lock()))
                 print("call 2 : ", tostring(maResource2:Lock()))
+                resource2FakeRef = maResource2:Lock()
                 ));
     luaManager.InvalidateResource(resource1Id);
     luaManager.InvalidateAllFakeReferences();
@@ -313,6 +314,8 @@ static void Resources(Interpreter& i)
                 print(" - apres invalidation")
                 print("call 1 : ", tostring(maResource1:Lock()))
                 print("call 2 : ", tostring(maResource2:Lock()))
+                resource2FakeRef = maResource2:Lock()
+                resource2FakeRef.test = 12
                 ));
     try
     {

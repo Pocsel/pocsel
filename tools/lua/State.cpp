@@ -49,9 +49,9 @@ namespace {
         int ret = _RealLuaCall(state);
         if (ret == -1)
         {
-            std::string err(lua_tostring(state, -1));
+            auto err = lua_tostring(state, -1);
             lua_pop(state, 1);
-            return luaL_error(state, "%s", err.c_str());
+            return luaL_error(state, "%s", err);
         }
         return ret;
     }
