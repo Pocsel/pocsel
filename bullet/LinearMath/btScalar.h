@@ -175,7 +175,7 @@ inline int	btGetVersion()
 		///@todo: check out alignment methods for other platforms/compilers
 
 // XXX CHANGED
-		#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (64)))
+		#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
 		#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
 		#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
 		//#define ATTRIBUTE_ALIGNED16(a) a

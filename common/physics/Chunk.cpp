@@ -13,16 +13,16 @@
 
 namespace Common { namespace Physics {
 
-#ifdef DEBUG
-    int Chunk::_totalNumberOfCubes = 0;
-#endif
+    Tools::Stat::Counter* Chunk::_chunkCounter(0);
+    Tools::Stat::Counter* Chunk::_boxCounter(0);
 
     Chunk::~Chunk()
     {
-#ifdef DEBUG
         if (this->_shape)
-            _totalNumberOfCubes -= this->_shape->getNumChildShapes();
-#endif
+        {
+            *_chunkCounter -= 1;
+            *_boxCounter -= this->_shape->getNumChildShapes();
+        }
         if (this->_body)
         {
             this->_body->setUserPointer((void*)1);
@@ -177,11 +177,14 @@ namespace Common { namespace Physics {
 
         this->_world.GetBtWorld().addRigidBody(this->_body);
 
-#ifdef DEBUG
 //        Tools::debug << "physics cubes in this chunk: " << this->_shape->getNumChildShapes() << "\n";
-//        _totalNumberOfCubes += this->_shape->getNumChildShapes();
-//        Tools::debug << "Total physics cubes in world: " << _totalNumberOfCubes << "\n";
-#endif
+        if (!_boxCounter)
+        {
+            _chunkCounter = new Tools::Stat::Counter("Chunks");
+            _boxCounter = new Tools::Stat::Counter("Chunk physics boxes");
+        }
+        *_chunkCounter += 1;
+        *_boxCounter += this->_shape->getNumChildShapes();
     }
 
 }}
