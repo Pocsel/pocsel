@@ -31,6 +31,7 @@ namespace Common { namespace Physics {
 
     std::unique_ptr<btCollisionShape> ShapeDescSphere::CreateShape() const
     {
+#undef new
         return std::unique_ptr<btCollisionShape>(new btSphereShape(this->_radius));
     }
 

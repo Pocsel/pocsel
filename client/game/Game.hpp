@@ -58,7 +58,6 @@ namespace Client { namespace Game {
         Tools::Timer _gameTimer;
         Tools::Stat::Timer _statUpdateTime;
         Tools::Stat::Timer _statRenderTime;
-        Tools::Stat::Timer _statOutTime;
         // XXX
         std::unique_ptr<Tools::Renderers::Utils::GBuffer> _gBuffer;
         std::unique_ptr<Tools::Renderers::Utils::Light::LightRenderer> _lightRenderer;
@@ -67,6 +66,7 @@ namespace Client { namespace Game {
 
         Tools::Renderers::Utils::DeferredShading _deferredShading;
 
+        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> _postProcessSepia;
         //std::unique_ptr<Tools::Renderers::Utils::Image> _testImage;
         //Tools::Renderers::IShaderProgram* _testShader;
         //std::unique_ptr<Tools::Renderers::IShaderParameter> _testTexture;

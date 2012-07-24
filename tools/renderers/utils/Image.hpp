@@ -18,6 +18,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         ~Image();
 
         void Render(IShaderParameter& textureParameter, ITexture2D& texture);
+        void Render();
 
     private:
         static void _InitBuffers(IRenderer& renderer);

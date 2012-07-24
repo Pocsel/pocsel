@@ -27,6 +27,17 @@ namespace Tools { namespace Renderers { namespace Utils {
         Image::_vertexBuffer->Unbind();
     }
 
+    void Image::Render()
+    {
+        Image::_vertexBuffer->Bind();
+        Image::_indexBuffer->Bind();
+
+        this->_renderer.DrawElements(6, DataType::UnsignedShort);
+
+        Image::_indexBuffer->Unbind();
+        Image::_vertexBuffer->Unbind();
+    }
+
     IVertexBuffer* Image::_vertexBuffer = 0;
     IIndexBuffer* Image::_indexBuffer = 0;
 

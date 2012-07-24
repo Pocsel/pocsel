@@ -21,7 +21,9 @@ namespace Client { namespace Map {
         : _game(game),
         _chunkRenderer(game),
         _loadingProgression(0),
-        _threadPool(game.GetClient().GetThreadPool())
+        _threadPool(game.GetClient().GetThreadPool()),
+        _statAdded("Added chunks"),
+        _statAdd("Add chunk")
     {
         glm::dvec3 coords;
         coords.y = 0;
@@ -64,6 +66,9 @@ namespace Client { namespace Map {
 
     void ChunkManager::AddChunk(std::unique_ptr<Chunk>&& chunk)
     {
+        this->_statAdd.Continue();
+        this->_statAdded += 1;
+
         ChunkNode* node = 0;
 
         std::shared_ptr<Chunk::CubeArray> cubes(0);
@@ -111,6 +116,8 @@ namespace Client { namespace Map {
         //node->chunk->InitBody();
         //if (node->chunk->GetBody())
         //    this->_game.GetEngine().GetPhysicsManager().AddBody(node->chunk->GetBody());
+
+        this->_statAdd.End();
     }
 
     void ChunkManager::UpdateLoading()
