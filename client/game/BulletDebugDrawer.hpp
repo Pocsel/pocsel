@@ -2,6 +2,7 @@
 #define __CLIENT_GAME_BULLETDEBUGDRAWER_HPP__
 
 #include "bullet/bullet-all.hpp"
+#include "tools/stat/Timer.hpp"
 
 namespace Tools {
     class IRenderer;
@@ -35,6 +36,8 @@ namespace Client { namespace Game {
         std::unique_ptr<Tools::Renderers::Utils::Sphere> _sphere;
         std::unique_ptr<Tools::Renderers::Utils::Cube> _cube;
         std::unique_ptr<Tools::Renderers::Utils::Line> _line;
+
+        Tools::Stat::Timer _timer;
 
     public:
         BulletDebugDrawer(Game& game, Tools::IRenderer& renderer);

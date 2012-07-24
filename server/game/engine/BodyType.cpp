@@ -6,7 +6,7 @@
 #include "tools/lua/Function.hpp"
 
 #include "common/FieldUtils.hpp"
-#include "common/physics/ShapeDesc.hpp"
+#include "common/physics/IShapeDesc.hpp"
 
 #include "bullet/bullet-all.hpp"
 
@@ -158,7 +158,7 @@ namespace Server { namespace Game { namespace Engine {
                     throw std::runtime_error("Client.Body.Register: Field \"shape\" must be of type table");
                 try
                 {
-                    node.shapeDesc = Common::Physics::ShapeDesc::BuildShapeDesc(shape).release();
+                    node.shapeDesc = Common::Physics::IShapeDesc::BuildShapeDesc(shape).release();
                 }
                 catch (std::exception& e)
                 {

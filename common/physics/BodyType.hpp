@@ -2,13 +2,13 @@
 #define __COMMON_PHYSICS_BODYTYPE_HPP__
 
 #include "common/physics/Node.hpp"
-#include "common/physics/ShapeDesc.hpp"
+#include "common/physics/IShapeDesc.hpp"
 
 class btCollisionShape;
 
 namespace Common { namespace Physics {
 
-    class ShapeDesc;
+    class IShapeDesc;
 
     class BodyType
     {
@@ -24,7 +24,7 @@ namespace Common { namespace Physics {
             std::vector<Uint32> children;
             Node position;
             btCollisionShape* shape;
-            ShapeDesc* shapeDesc;
+            IShapeDesc* shapeDesc;
             float mass;
             float friction;
             float restitution;

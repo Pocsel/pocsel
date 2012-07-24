@@ -4,6 +4,10 @@
 #include "tools/IRenderer.hpp"
 #include "tools/renderers/utils/Image.hpp"
 
+namespace Tools { namespace Renderers { namespace Utils { namespace Material {
+    class LuaMaterial;
+}}}}
+
 namespace Tools { namespace Renderers { namespace Utils {
 
     class GBuffer
@@ -12,6 +16,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         IRenderer& _renderer;
         std::unique_ptr<IRenderTarget> _gbufferRenderTarget;
         std::unique_ptr<IRenderTarget> _lightRenderTarget;
+        std::unique_ptr<IRenderTarget> _finalRenderTarget;
 
         // Shaders
         IShaderProgram& _combineShader;
@@ -36,13 +41,14 @@ namespace Tools { namespace Renderers { namespace Utils {
         void BeginLighting();
         void EndLighting();
 
-        void Render();
+        void Render(Uint64 totalTime, std::list<Material::LuaMaterial*> const& postProcess = std::list<Material::LuaMaterial*>());
 
         ITexture2D& GetColors() { return this->_gbufferRenderTarget->GetTexture(0); }
         ITexture2D& GetNormalsDepth() { return this->_gbufferRenderTarget->GetTexture(1); }
         ITexture2D& GetInternalDepthBuffer() { return this->_gbufferRenderTarget->GetTexture(2); }
         ITexture2D& GetLighting() { return this->_lightRenderTarget->GetTexture(0); }
         ITexture2D& GetSpecular() { return this->_lightRenderTarget->GetTexture(1); }
+        ITexture2D& GetFinal() { return this->_finalRenderTarget->GetTexture(0); }
     };
 
 }}}

@@ -1,28 +1,28 @@
-#ifndef __COMMON_PHYSICS_ShapeDescSERIALIZER_HPP__
-#define __COMMON_PHYSICS_ShapeDescSERIALIZER_HPP__
+#ifndef __COMMON_PHYSICS_SHAPEDESCSERIALIZER_HPP__
+#define __COMMON_PHYSICS_SHAPEDESCSERIALIZER_HPP__
 
 #include "tools/ByteArray.hpp"
 
-#include "common/physics/ShapeDesc.hpp"
+#include "common/physics/IShapeDesc.hpp"
 
 namespace Tools {
 
-    template<> struct ByteArray::Serializer< Common::Physics::ShapeDesc >
+    template<> struct ByteArray::Serializer< Common::Physics::IShapeDesc >
     {
 
-        static void Write(Common::Physics::ShapeDesc const& sd, ByteArray& p) // Used by Packet::Write<T>(T const&)
+        static void Write(Common::Physics::IShapeDesc const& sd, ByteArray& p) // Used by Packet::Write<T>(T const&)
         {
             sd.Serialize(p);
         }
 
-        static std::unique_ptr<Common::Physics::ShapeDesc> Read(ByteArray const& p) // Used by Packet::Read<T>()
+        static std::unique_ptr<Common::Physics::IShapeDesc> Read(ByteArray const& p) // Used by Packet::Read<T>()
         {
-            return Common::Physics::ShapeDesc::DeSerialize(p);
+            return Common::Physics::IShapeDesc::DeSerialize(p);
         }
 
 
         private:
-        static void Read(ByteArray const& p, Common::Physics::ShapeDesc& sn);  // Used by Packet::Read<T>(T&)
+        static void Read(ByteArray const& p, Common::Physics::IShapeDesc& sn);  // Used by Packet::Read<T>(T&)
     };
 
 }

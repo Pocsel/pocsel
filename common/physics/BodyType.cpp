@@ -3,6 +3,8 @@
 
 #include "bullet/bullet-all.hpp"
 
+#include "bullet/bullet-all.hpp"
+
 namespace Common { namespace Physics {
 
     BodyType::BodyType(std::vector<ShapeNode> const& shapes) :

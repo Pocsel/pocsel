@@ -42,6 +42,7 @@ bind("RightClick", "altfire")
 bind("Z", "altfire")
 
 bind("Escape", "menu")
+bind("F1", "toggle-draw-physics")
 
 bind("W", "toggle-wireframe")
 

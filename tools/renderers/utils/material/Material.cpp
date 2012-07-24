@@ -37,8 +37,8 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Material {
 
     Material::Material(Material const& material, Lua::Ref& materialSelf) :
         _renderer(material._renderer),
-        _loadTexture(material._loadTexture),
         _geometry(new Effect(material._geometry->shader)),
+        _loadTexture(material._loadTexture),
         _type(material._type),
         _self(material._type.GetState()),
         _hasAlpha(0)

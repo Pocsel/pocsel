@@ -19,7 +19,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         vertices[7] = 1;
         vertices[8] = 1;
         this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3); // position
-        this->_vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
+        this->_vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Dynamic);
     }
 
     void Line::Render()
@@ -41,9 +41,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         vertices[6] = end.x;
         vertices[7] = end.y;
         vertices[8] = end.z;
-        this->_vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
+        this->_vertexBuffer->SetSubData(0, sizeof(vertices), vertices);
     }
 
 }}}
-
-

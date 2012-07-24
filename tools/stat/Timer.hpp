@@ -20,7 +20,9 @@ namespace Tools { namespace Stat {
         Timer(std::string name) : _name(name), _value(0) { Tools::Stat::statManager.Register(*this); }
         ~Timer() { Tools::Stat::statManager.Unregister(*this); }
 
+        void Reset() { this->_value = 0; }
         void Begin() { this->_timer.Reset(); }
+        void Continue() { this->_timer.Set(Uint64(this->_value * 1000000.0)); }
         void End() { this->_value = (double)this->_timer.GetPreciseElapsedTime() / 1000000.0; }
 
         virtual std::string const& GetName() const { return this->_name; }
@@ -34,10 +36,12 @@ namespace Tools { namespace Stat {
 
     public:
         FakeTimer(std::string name) : _name(name) {}
+        void Reset() {}
         void Begin() {}
+        void Continue() {}
         void End() {}
-        std::string const& GetName() const { return this->_name; }
-        double GetValue() const { return 0.0; }
+        virtual std::string const& GetName() const { return this->_name; }
+        virtual double GetValue() const { return 0.0; }
     };
 
 #ifdef DEBUG

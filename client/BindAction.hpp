@@ -18,6 +18,7 @@ namespace Tools { namespace Window { namespace BindAction {
         AltFire,
         Use,
         ToggleSprint,
+        ToggleDrawPhysics,
         // Pour les tableaux
         NbBindActions
     };
