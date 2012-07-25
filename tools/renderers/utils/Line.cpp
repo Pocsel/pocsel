@@ -45,5 +45,3 @@ namespace Tools { namespace Renderers { namespace Utils {
     }
 
 }}}
-
-
