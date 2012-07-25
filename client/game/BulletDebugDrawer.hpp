@@ -25,6 +25,16 @@ namespace Client { namespace Game {
         public btIDebugDraw
     {
     private:
+        struct ContactPoint
+        {
+            ContactPoint(btVector3 const& from, btVector3 const& to, btVector3 const& color, Uint32 endTime) :
+                from(from), to(to), color(color), endTime(endTime) {}
+            btVector3 from;
+            btVector3 to;
+            btVector3 color;
+            Uint32 endTime;
+        };
+    private:
         int _debugMode;
         btVector3 _cameraPos;
 
@@ -38,6 +48,10 @@ namespace Client { namespace Game {
         std::unique_ptr<Tools::Renderers::Utils::Line> _line;
 
         Tools::Stat::Timer _timer;
+
+        Tools::Timer _contactPointsTimer;
+        Uint32 _curTime;
+        std::list<ContactPoint> _contactPoints;
 
     public:
         BulletDebugDrawer(Game& game, Tools::IRenderer& renderer);
@@ -108,6 +122,8 @@ namespace Client { namespace Game {
 
     private:
         void _SetColor(btVector3 const& color);
+        void _ClearContactPoints();
+        void _DrawContactPoints();
     };
 
 }}
