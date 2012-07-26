@@ -39,10 +39,14 @@ namespace Client { namespace Game {
         this->_shader->BeginPass();
         this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Line);
         this->_renderer.SetCullMode(Tools::Renderers::CullMode::None);
+
+        this->_ClearContactPoints();
     }
 
     void BulletDebugDrawer::EndDraw()
     {
+        this->_DrawContactPoints();
+
         this->_renderer.SetCullMode(Tools::Renderers::CullMode::Clockwise);
         this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
         this->_shader->EndPass();
@@ -53,17 +57,19 @@ namespace Client { namespace Game {
             const btVector3& from, const btVector3& to,
             const btVector3& fromColor, const btVector3& /*toColor*/)
     {
+        Tools::debug << "BICOLOR LINE\n";
+        this->drawLine(from, to, fromColor);
+    }
+
+    void BulletDebugDrawer::drawLine(
+            const btVector3& from, const btVector3& to,
+            const btVector3& color)
+    {
         if (this->_line.get() == 0)
             this->_line.reset(new Tools::Renderers::Utils::Line(this->_renderer));
 
         btVector3 f = from - this->_cameraPos;
         btVector3 tf = to - from;
-
-
-        //Tools::Renderers::Utils::Line line(
-        //        this->_renderer,
-        //        glm::fvec3(0, 0, 0),
-        //        glm::fvec3(tf.x(), tf.y(), tf.z()));
 
         this->_renderer.SetModelMatrix(
                 glm::translate<float>(glm::fvec3(f.x(), f.y(), f.z()))
@@ -73,28 +79,8 @@ namespace Client { namespace Game {
                 glm::fvec3(0, 0, 0),
                 glm::fvec3(tf.x(), tf.y(), tf.z()));
 
-        this->_SetColor(fromColor);
+        this->_SetColor(color);
         this->_line->Render();
-    }
-
-    void BulletDebugDrawer::_SetColor(btVector3 const& fromColor)
-    {
-        glm::vec4 color(fromColor.x(), fromColor.y(), fromColor.z(), 1.0);
-        for (unsigned int i = 0; i < 3; ++i)
-        {
-            if (color[i] < 0.01f)
-                color[i] = 0.01f;
-            if (color[i] > 0.99f)
-                color[i] = 0.99f;
-        }
-        this->_shaderColor->Set(color);
-    }
-
-    void BulletDebugDrawer::drawLine(
-            const btVector3& from, const btVector3& to,
-            const btVector3& color)
-    {
-        this->drawLine(from, to, color, color);
     }
 
     void BulletDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color)
@@ -204,12 +190,61 @@ namespace Client { namespace Game {
 
     void BulletDebugDrawer::drawContactPoint(
             const btVector3& pointOnB, const btVector3& normalOnB,
-            btScalar /*distance*/, int /*lifeTime*/, const btVector3& color)
+            btScalar distance, int lifeTime, const btVector3& color)
     {
-        btVector3 to = pointOnB + normalOnB * 1;
-        const btVector3&from = pointOnB;
+        if (distance < 0.001)
+            return;
+        btVector3 to = normalOnB.normalized() * (distance * 10.0) + pointOnB;
+        const btVector3& from = pointOnB;
 
-        this->drawLine(from, to, color);
+        Uint32 endTime = this->_curTime + lifeTime * 10;
+        bool added = false;
+
+        for (auto it = this->_contactPoints.begin(), ite = this->_contactPoints.end(); it != ite; ++it)
+        {
+            if (endTime > it->endTime)
+            {
+                this->_contactPoints.emplace(it, from, to, color, endTime);
+                added = true;
+                break;
+            }
+        }
+        if (!added)
+            this->_contactPoints.emplace_back(from, to, color, endTime);
+    }
+
+    void BulletDebugDrawer::_SetColor(btVector3 const& fromColor)
+    {
+        glm::vec4 color(fromColor.x(), fromColor.y(), fromColor.z(), 1.0);
+        for (unsigned int i = 0; i < 3; ++i)
+        {
+            if (color[i] < 0.01f)
+                color[i] = 0.01f;
+            if (color[i] > 0.99f)
+                color[i] = 0.99f;
+        }
+        this->_shaderColor->Set(color);
+    }
+
+    void BulletDebugDrawer::_ClearContactPoints()
+    {
+        this->_curTime = this->_contactPointsTimer.GetElapsedTime();
+        for (auto it = this->_contactPoints.begin(), ite = this->_contactPoints.end(); it != ite; ++it)
+        {
+            if (it->endTime < this->_curTime)
+            {
+                this->_contactPoints.erase(it, ite);
+                break;
+            }
+        }
+    }
+
+    void BulletDebugDrawer::_DrawContactPoints()
+    {
+        for (auto it = this->_contactPoints.begin(), ite = this->_contactPoints.end(); it != ite; ++it)
+        {
+            this->drawLine(it->from, it->to, it->color);
+        }
     }
 
 }}

@@ -1,6 +1,8 @@
 #ifndef __COMMON_PHYSICS_CHUNK_HPP__
 #define __COMMON_PHYSICS_CHUNK_HPP__
 
+#include "tools/stat/Counter.hpp"
+
 namespace Common {
     struct BaseChunk;
 }
@@ -19,9 +21,10 @@ namespace Common { namespace Physics {
         private boost::noncopyable
     {
     private:
-#ifdef DEBUG
-        static int _totalNumberOfCubes;
-#endif
+        static Tools::Stat::Counter* _chunkCounter;
+        static Tools::Stat::Counter* _boxCounter;
+
+    private:
         Common::Physics::World& _world;
         btCompoundShape* _shape;
         btRigidBody* _body;
