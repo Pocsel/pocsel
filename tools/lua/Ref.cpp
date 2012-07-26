@@ -28,8 +28,11 @@ namespace Tools { namespace Lua {
 
     Ref& Ref::operator =(Ref const& ref) throw()
     {
-        ref.ToStack();
-        this->FromStack();
+        if (this != &ref)
+        {
+            ref.ToStack();
+            this->FromStack();
+        }
         return *this;
     }
 
@@ -334,7 +337,7 @@ namespace Tools { namespace Lua {
     { \
         this->ToStack(); \
         bool ret = lua_func(this->_state, -1); \
-        lua_pop(this->_state, -1); \
+        lua_pop(this->_state, 1); \
         return ret; \
     }
 
