@@ -12,8 +12,6 @@
 # pragma clang diagnostic ignored "-Wextra"
 #endif
 
-#define BT_USE_DOUBLE_PRECISION
-
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
