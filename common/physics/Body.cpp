@@ -111,6 +111,7 @@ namespace Common { namespace Physics {
         Tools::Delete(node.constraint);
         this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
         Tools::Delete(node.body);
+        Tools::Delete(node.motionState);
     }
 
     btRigidBody& Body::GetRootBtBody()

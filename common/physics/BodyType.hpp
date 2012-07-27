@@ -8,8 +8,6 @@ class btCollisionShape;
 
 namespace Common { namespace Physics {
 
-    class IShapeDesc;
-
     class BodyType
     {
     public:
