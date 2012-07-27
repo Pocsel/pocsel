@@ -1,3 +1,5 @@
+#include "tools/precompiled.hpp"
+
 #include "common/physics/Chunk.hpp"
 #include "common/physics/World.hpp"
 #include "common/BaseChunk.hpp"
@@ -35,7 +37,7 @@ namespace Common { namespace Physics {
     namespace {
         struct _FillCompoundShape
         {
-            static inline void _(btBoxShape** boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape)
+            static inline void _(std::unique_ptr<btBoxShape>* boxShapes, Common::BaseChunk::CubeType const* cubes, btCompoundShape* shape)
             {
                 unsigned int fastForward[ChunkSize3];
                 for (unsigned int i = 0; i < ChunkSize3; ++i)
@@ -73,7 +75,7 @@ namespace Common { namespace Physics {
                             idxZ = sizeZ - 1;
 
                             tr.setOrigin(btVector3(x + sizeX * 0.5, y + sizeY * 0.5, z + sizeZ * 0.5));
-                            shape->addChildShape(tr, boxShapes[idxX + idxY * ChunkSize + idxZ * ChunkSize2]);
+                            shape->addChildShape(tr, boxShapes[idxX + idxY * ChunkSize + idxZ * ChunkSize2].get());
 
                             for (idxX = 0; idxX < sizeX; ++idxX)
                                 for (idxY = 0; idxY < sizeY; ++idxY)
@@ -135,16 +137,16 @@ namespace Common { namespace Physics {
         if (source.IsEmpty())
             return;
 
-        static btBoxShape** boxShapes = 0;
-        if (boxShapes == 0)
+        static bool boxShapesInit = true;
+        static std::unique_ptr<btBoxShape> boxShapes[ChunkSize3];
+        if (boxShapesInit)
         {
-            boxShapes = new btBoxShape*[ChunkSize3];
+            boxShapesInit = false;
             for (unsigned int x = 0; x < ChunkSize; ++x)
                 for (unsigned int y = 0; y < ChunkSize; ++y)
                     for (unsigned int z = 0; z < ChunkSize; ++z)
                     {
-                        boxShapes[x + y * ChunkSize + z * ChunkSize2] =
-                            new btBoxShape(btVector3(btScalar(x + 1) * 0.5, btScalar(y + 1) * 0.5, btScalar(z + 1) * 0.5));
+                        boxShapes[x + y * ChunkSize + z * ChunkSize2].reset(new btBoxShape(btVector3(btScalar(x + 1) * 0.5, btScalar(y + 1) * 0.5, btScalar(z + 1) * 0.5)));
                     }
         }
 
