@@ -48,6 +48,12 @@ namespace Client { namespace Game { namespace Engine {
         for (; itPlugin != itPluginEnd; ++itPlugin)
             Tools::Delete(itPlugin->second);
 
+        // entities
+        auto itEntity = this->_entities.begin();
+        auto itEntityEnd = this->_entities.end();
+        for (; itEntity != itEntityEnd; ++itEntity)
+            Tools::Delete(itEntity->second);
+
         //Tools::Delete(this->_world);
         Tools::Delete(this->_shapeRenderer);
     }
