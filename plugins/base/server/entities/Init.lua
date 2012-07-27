@@ -39,6 +39,17 @@ Server.Entity.Register{
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 3, 67108864), "base:Tank") -- , "base:Tank")
         Server.Message.Later(11, self.id, "SpawnTank")
     end,
+
+    CallMe = function(self, continue)
+        if not self.toto then
+            self.toto = 20
+        else
+            self.toto = self.toto + 2
+        end
+        if continue then
+            self:CallMe(self.toto < 30)
+        end
+    end,
 }
 
 Server.Entity.RegisterPositional{

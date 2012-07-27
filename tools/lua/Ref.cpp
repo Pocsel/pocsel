@@ -71,13 +71,13 @@ namespace Tools { namespace Lua {
     Ref Ref::operator ()() const throw(std::runtime_error)
     {
         CallHelper callHelper(this->_state.GetInterpreter());
-        (*this)(callHelper);
+        this->Call(callHelper);
         if (callHelper.GetNbRets())
             return callHelper.PopRet();
         return Ref(*this);
     }
 
-    void Ref::operator ()(CallHelper& call) const throw(std::runtime_error)
+    void Ref::Call(CallHelper& call) const throw(std::runtime_error)
     {
         this->ToStack();
         if (!lua_isfunction(this->_state, -1))

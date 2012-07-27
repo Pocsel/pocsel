@@ -1,5 +1,7 @@
 #include "server/precompiled.hpp"
 
+#include "server/Server.hpp"
+#include "server/Settings.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/Entity.hpp"
@@ -26,7 +28,13 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::debug << "EntityManager::EntityManager()\n";
         auto& i = this->_engine.GetInterpreter();
-        this->_weakEntityRefManager = new Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>(i, *this /* manager */, true /* use fake references */);
+
+        this->_weakEntityRefManager = new Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>(
+                i, /* interpreter */
+                *this /* resource manager */,
+                WeakEntityRef() /* invalid resource */,
+                this->_engine.GetWorld().GetGame().GetServer().GetSettings().debug /* use fake references */);
+
         auto namespaceTable = i.Globals()["Server"].Set("Entity", i.MakeTable());
 
         namespaceTable.Set("GetEntityById", i.MakeFunction(std::bind(&EntityManager::_ApiGetEntityById, this, std::placeholders::_1)));

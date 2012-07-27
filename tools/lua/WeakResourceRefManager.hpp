@@ -141,22 +141,33 @@ namespace Tools { namespace Lua {
             Ref table = ref->GetReference();
             if (!table.IsTable())
                 throw std::runtime_error("WeakResourceRefManager::_FakeReferenceIndex: __index metamethod called on a reference of type " + table.GetTypeName());
-            Ref value = ref->GetReference()[key];
-            //if (value.IsFunction())
-            //    helper.PushRet(helper.GetInterpreter().MakeFunction(
-            //                [value](CallHelper& helper)
-            //                {
-            //                    if (helper.GetNbArgs() && helper.GetArgList().front().Is<FakeReference*>())
-            //                    {
-            //                        FakeReference* ref = helper.GetArgList().front().To<FakeReference*>();
-            //                        helper.GetArgList().pop_front();
-            //                        helper.GetArgList().push_front(ref->GetReference());
-            //                    }
-            //                    value(helper);
-            //                }
-            //                ));
-            //else
-                helper.PushRet(value);
+            Ref value = table[key];
+            // reproduction du comportement du lua pour __index
+            if (!value.Exists())
+            {
+                Ref metaTable = table.GetMetaTable();
+                if (metaTable.IsTable())
+                {
+                    Ref index = metaTable["__index"];
+                    if (index.IsFunction())
+                    {
+                        helper.GetArgList().clear();
+                        helper.PushArg(table);
+                        helper.PushArg(key);
+                        index(helper);
+                        return;
+                    }
+                    else if (index.IsTable())
+                    {
+                        helper.PushRet(index[key]); // ne permet pas le chainage de __index (c'est un rawset) -- comportement different du lua normal
+                        return;
+                    }
+                    else if (index.Exists()) // si __index est à nil on Get quand meme
+                        throw std::runtime_error("WeakResourceRefManager::_FakeReferenceIndex: __index metamethod is of type " + index.GetTypeName());
+                }
+            }
+            // action normal sans __index
+            helper.PushRet(value);
         }
 
         void _FakeReferenceNewIndex(CallHelper& helper)
@@ -166,6 +177,31 @@ namespace Tools { namespace Lua {
             Ref value = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing value argument for __newindex metamethod");
             if (!ref->IsValid())
                 throw std::runtime_error("WeakResourceRefManager::_FakeReferenceNewIndex: This reference was invalidated - you must not keep true references to resources, only weak references");
+            Ref table = ref->GetReference();
+            if (!table.IsTable())
+                throw std::runtime_error("WeakResourceRefManager::_FakeReferenceNewIndex: __newindex metamethod called on a reference of type " + table.GetTypeName());
+            // reproduction du comportement du lua pour __newindex
+            if (!table[key].Exists())
+            {
+                Ref metaTable = table.GetMetaTable();
+                if (metaTable.IsTable())
+                {
+                    Ref newIndex = metaTable["__newindex"];
+                    if (newIndex.IsFunction())
+                    {
+                        newIndex(table, key, value);
+                        return;
+                    }
+                    else if (newIndex.IsTable())
+                    {
+                        newIndex.Set(key, value); // ne permet pas le chainage de __newindex (c'est un rawset) -- comportement different du lua normal
+                        return;
+                    }
+                    else if (newIndex.Exists()) // si __newindex est à nil, on Set quand meme
+                        throw std::runtime_error("WeakResourceRefManager::_FakeReferenceNewIndex: __newindex metamethod is of type " + newIndex.GetTypeName());
+                }
+            }
+            // action normale sans __newindex
             ref->GetReference().Set(key, value);
         }
     };
