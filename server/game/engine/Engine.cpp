@@ -60,6 +60,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_physicsManager->Tick(deltaTime);
         this->_messageManager->DispatchMessages();
         this->_doodadManager->ExecuteCommands(); // PS: l'ordre a une importance de ouf
+        this->_entityManager->GetWeakEntityRefManager().InvalidateAllFakeReferences();
     }
 
     void Engine::Load(Tools::Database::IConnection& conn)

@@ -264,21 +264,10 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = helper.PopArg("Server.Doodad.Spawn: Missing argument \"owner\"").To<Uint32>();
-        std::list<Tools::Lua::Ref>& args = helper.GetArgList();
-        if (!args.size())
-            throw std::runtime_error("Server.Doodad.Spawn: Need arguments ([id ,] doodadName [, bodyName])");
-        if (args.begin()->IsNumber())
-        {
-            entityId = args.begin()->To<Uint32>();
-            args.pop_front();
-        }
-        if (!args.size())
-            throw std::runtime_error("Server.Doodad.Spawn: Need a doodad name ([id ,] doodadName [, bodyName])");
-        std::string doodadName = args.begin()->CheckString("Server.Doodad.Spawn: Argument \"doodadName\" must be a string");
-        args.pop_front();
-        std::string bodyName = !args.size() ? "" : args.begin()->CheckString("Server.Doodad.Spawn: Argument \"bodyName\" must be a string");
-        if (!entityId || !this->_engine.GetEntityManager().IsEntityPositional(entityId))
+        Uint32 entityId = helper.PopArg("Server.Doodad.Spawn: Missing argument \"entityId\"").Check<Uint32>("Server.Doodad.Spawn: Argument \"entityId\" must be a number");
+        std::string doodadName = helper.PopArg("Server.Doodad.Spawn: Missing argument \"doodadName\"").CheckString("Server.Doodad.Spawn: Argument \"doodadName\" must be a string");
+        std::string bodyName = helper.PopArg("Server.Doodad.Spawn: Missing argument \"bodyName\"").CheckString("Server.Doodad.Spawn: Argument \"bodyName\" must be a string");
+        if (!this->_engine.GetEntityManager().IsEntityPositional(entityId))
         {
             Tools::error << "DoodadManager::_ApiSpawn: No positional entity with id " << entityId << ", cannot spawn doodad." << std::endl;
             return; // retourne nil

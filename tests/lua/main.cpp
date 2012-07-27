@@ -274,7 +274,7 @@ static void Resources(Interpreter& i)
 {
     struct MitoResourceManager
     {
-        MitoResourceManager(Interpreter& i) : coucou(1336), coucou2(i.MakeString("bite")) {}
+        MitoResourceManager(Interpreter& i) : coucou(1336), coucou2(i.MakeTable()) {}
         int coucou;
         Ref coucou2;
     };
@@ -297,7 +297,7 @@ static void Resources(Interpreter& i)
     Uint32 resource1Id = pair1.first;
     Ref resource1 = pair1.second;
     auto pair2 = luaManager.NewResource(ResourceDeTest(24, "resource2"));
-    Uint32 resource2Id = pair2.first;
+    //Uint32 resource2Id = pair2.first;
     Ref resource2 = pair2.second;
     i.Globals().Set("maResource1", resource1);
     i.Globals().Set("maResource2", resource2);
@@ -320,8 +320,8 @@ static void Resources(Interpreter& i)
     try
     {
         i.DoString(STRINGIFY(
-                    print(tostring(maResource2.test))
-                    maResource1.test = 12
+                    resource1FakeRef = maResource1:Lock()
+                    resource1FakeRef.test = 12
                     ));
     }
     catch (std::exception& e)
@@ -362,7 +362,6 @@ int main(int, char**)
 
         // Test ResourceManager
         Resources(i);
-
     }
 
 

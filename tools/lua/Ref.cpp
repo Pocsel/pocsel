@@ -339,7 +339,7 @@ namespace Tools { namespace Lua {
     { \
         this->ToStack(); \
         bool ret = lua_func(this->_state, -1); \
-        lua_pop(this->_state, -1); \
+        lua_pop(this->_state, 1); \
         return ret; \
     }
 
