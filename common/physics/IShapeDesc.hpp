@@ -33,8 +33,6 @@ namespace Common { namespace Physics {
         virtual std::unique_ptr<btCollisionShape> CreateShape() const = 0;
         virtual void Serialize(Tools::ByteArray& byteArray) const = 0;
         virtual ~IShapeDesc() {}
-    protected:
-        IShapeDesc() {}
     };
 
 }}
