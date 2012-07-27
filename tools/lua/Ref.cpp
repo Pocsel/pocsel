@@ -28,8 +28,11 @@ namespace Tools { namespace Lua {
 
     Ref& Ref::operator =(Ref const& ref) throw()
     {
-        ref.ToStack();
-        this->FromStack();
+        if (this != &ref)
+        {
+            ref.ToStack();
+            this->FromStack();
+        }
         return *this;
     }
 

@@ -17,10 +17,13 @@ namespace Tools { namespace Lua {
 
     Iterator& Iterator::operator =(Iterator const& iterator) throw()
     {
-        this->_table = iterator.GetTable();
-        this->_key = iterator.GetKey();
-        this->_value = iterator.GetValue();
-        this->_end = iterator.IsEnd();
+        if (this != &iterator)
+        {
+            this->_table = iterator.GetTable();
+            this->_key = iterator.GetKey();
+            this->_value = iterator.GetValue();
+            this->_end = iterator.IsEnd();
+        }
         return *this;
     }
 

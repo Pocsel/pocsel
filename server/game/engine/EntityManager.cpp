@@ -170,7 +170,8 @@ namespace Server { namespace Game { namespace Engine {
                 // XXX Spawn() hook
                 Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
                 this->_CreateEntity(newId, e->pluginId, e->entityName, e->hasPosition, e->pos);
-                if (this->CallEntityFunction(newId, "Spawn", e->arg, this->_engine.GetInterpreter().MakeNumber(e->spawnerId), &ret) == CallbackManager::Ok)
+                auto bonus = this->_engine.GetInterpreter().MakeNumber(e->spawnerId);
+                if (this->CallEntityFunction(newId, "Spawn", e->arg, bonus, &ret) == CallbackManager::Ok)
                     resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
 
                 resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(newId));
