@@ -5,6 +5,7 @@
 namespace Tools { namespace Stat {
 
     StatManager statManager;
+    static bool _destroyed = false;
 
     StatManager::StatManager() :
         _ticks(0)
@@ -13,6 +14,7 @@ namespace Tools { namespace Stat {
 
     StatManager::~StatManager()
     {
+        _destroyed = true;
     }
 
     void StatManager::Register(IStat& stat)
@@ -26,6 +28,8 @@ namespace Tools { namespace Stat {
 
     void StatManager::Unregister(IStat& stat)
     {
+        if (_destroyed)
+            return;
         auto it = this->_counters.begin();
         while (it != this->_counters.end() && it->first != &stat)
             ++it;

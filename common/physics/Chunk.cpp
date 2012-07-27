@@ -15,8 +15,8 @@
 
 namespace Common { namespace Physics {
 
-    Tools::Stat::Counter* Chunk::_chunkCounter(0);
-    Tools::Stat::Counter* Chunk::_boxCounter(0);
+    std::unique_ptr<Tools::Stat::Counter> Chunk::_chunkCounter;
+    std::unique_ptr<Tools::Stat::Counter> Chunk::_boxCounter;
 
     Chunk::~Chunk()
     {
@@ -182,8 +182,8 @@ namespace Common { namespace Physics {
 //        Tools::debug << "physics cubes in this chunk: " << this->_shape->getNumChildShapes() << "\n";
         if (!_boxCounter)
         {
-            _chunkCounter = new Tools::Stat::Counter("Chunks");
-            _boxCounter = new Tools::Stat::Counter("Chunk physics boxes");
+            _chunkCounter.reset(new Tools::Stat::Counter("Chunks"));
+            _boxCounter.reset(new Tools::Stat::Counter("Chunk physics boxes"));
         }
         *_chunkCounter += 1;
         *_boxCounter += this->_shape->getNumChildShapes();

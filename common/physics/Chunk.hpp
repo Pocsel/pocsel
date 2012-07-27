@@ -21,8 +21,8 @@ namespace Common { namespace Physics {
         private boost::noncopyable
     {
     private:
-        static Tools::Stat::Counter* _chunkCounter;
-        static Tools::Stat::Counter* _boxCounter;
+        static std::unique_ptr<Tools::Stat::Counter> _chunkCounter;
+        static std::unique_ptr<Tools::Stat::Counter> _boxCounter;
 
     private:
         Common::Physics::World& _world;

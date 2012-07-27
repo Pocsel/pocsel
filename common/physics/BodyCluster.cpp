@@ -14,7 +14,7 @@ namespace Common { namespace Physics {
         btScalar mass(0.000000001);
         btVector3 localInertia(0.000000001, 0.000000001, 0.000000001);
 
-        static btCollisionShape* emptyShape = new btEmptyShape(); //btSphereShape(1);//btEmptyShape();
+        static std::unique_ptr<btCollisionShape> emptyShape(new btEmptyShape()); //btSphereShape(1);//btEmptyShape();
         //emptyShape->calculateLocalInertia(mass, localInertia);
         //std::cout << "INERTIAAIAIAIAI " << localInertia.x() << ", " << localInertia.y() << ", " << localInertia.z() << "\n";
 
@@ -27,7 +27,7 @@ namespace Common { namespace Physics {
                     pos.orientation.w));
 
         _motionState = new btDefaultMotionState(startTransform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, _motionState, emptyShape, localInertia);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, _motionState, emptyShape.get(), localInertia);
         _body = new btRigidBody(rbInfo);
         _body->setActivationState(DISABLE_DEACTIVATION);
 
