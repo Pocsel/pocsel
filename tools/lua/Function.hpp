@@ -276,7 +276,7 @@ namespace Tools { namespace Lua {
         {
             CallHelper callHelper(this->_state.GetInterpreter());
             callHelper.PushArg(this->_state.GetInterpreter().Make(a1));
-            (*this)(callHelper);
+            this->Call(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
             return Ref(*this);
@@ -288,7 +288,7 @@ namespace Tools { namespace Lua {
             CallHelper callHelper(this->_state.GetInterpreter());
             callHelper.PushArg(this->_state.GetInterpreter().Make(a1));
             callHelper.PushArg(this->_state.GetInterpreter().Make(a2));
-            (*this)(callHelper);
+            this->Call(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
             return Ref(*this);
@@ -301,7 +301,7 @@ namespace Tools { namespace Lua {
             callHelper.PushArg(this->_state.GetInterpreter().Make(a1));
             callHelper.PushArg(this->_state.GetInterpreter().Make(a2));
             callHelper.PushArg(this->_state.GetInterpreter().Make(a3));
-            (*this)(callHelper);
+            this->Call(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
             return Ref(*this);
@@ -315,7 +315,7 @@ namespace Tools { namespace Lua {
             callHelper.PushArg(this->_state.GetInterpreter().Make(a2));
             callHelper.PushArg(this->_state.GetInterpreter().Make(a3));
             callHelper.PushArg(this->_state.GetInterpreter().Make(a4));
-            (*this)(callHelper);
+            this->Call(callHelper);
             if (callHelper.GetNbRets())
                 return callHelper.PopRet();
             return Ref(*this);

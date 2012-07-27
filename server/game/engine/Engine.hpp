@@ -46,9 +46,8 @@ namespace Server { namespace Game { namespace Engine {
         PhysicsManager* _physicsManager;
         BodyManager* _bodyManager;
         Uint64 _currentTime;
-        Uint32 _overriddenPluginId;
-        Uint32 _overriddenEntityId;
         std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, Tools::Lua::Ref /* module */>> _modules; // uniquement en debug
+        Uint32 _currentPluginRegistering;
 
     public:
         Engine(Map::Map& map, World& world);
@@ -73,10 +72,8 @@ namespace Server { namespace Game { namespace Engine {
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
         World& GetWorld() { return this->_world; }
-        Uint32 GetRunningPluginId() { return this->_overriddenPluginId ? this->_overriddenPluginId : this->_entityManager->GetRunningPluginId(); }
-        void OverrideRunningPluginId(Uint32 pluginId) { this->_overriddenPluginId = pluginId; }
-        Uint32 GetRunningEntityId() { return this->_overriddenEntityId ? this->_overriddenEntityId : this->_entityManager->GetRunningEntityId(); }
-        void OverrideRunningEntityId(Uint32 entityId) { this->_overriddenEntityId = entityId; }
+        void SetCurrentPluginRegistering(Uint32 pluginId) { this->_currentPluginRegistering = pluginId; }
+        Uint32 GetCurrentPluginRegistering() const { return this->_currentPluginRegistering; }
 
         void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
         void SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet);

@@ -2,6 +2,8 @@
 #define __SERVER_GAME_ENGINE_ENTITYMANAGER_HPP__
 
 #include "tools/lua/Ref.hpp"
+#include "tools/lua/IWeakResourceRef.hpp"
+#include "tools/lua/WeakResourceRefManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
 #include "common/Position.hpp"
 
@@ -48,6 +50,17 @@ namespace Server { namespace Game { namespace Engine {
             Uint32 killerId;
             Uint32 notificationCallbackId;
         };
+    public:
+        struct WeakEntityRef : public Tools::Lua::IWeakResourceRef<EntityManager>
+        {
+            WeakEntityRef() : entityId(0), disabled(true) {}
+            WeakEntityRef(Uint32 entityId) : entityId(entityId), disabled(false) {}
+            virtual bool IsValid(EntityManager const&) const { return this->entityId && !this->disabled; }
+            virtual void Invalidate(EntityManager const&) { this->entityId = 0; this->disabled = true; }
+            virtual Tools::Lua::Ref GetReference(EntityManager const& entityManager) const;
+            Uint32 entityId;
+            bool disabled;
+        };
 
     private:
         Engine& _engine;
@@ -56,10 +69,9 @@ namespace Server { namespace Game { namespace Engine {
         std::map<Uint32 /* entityId */, PositionalEntity*> _positionalEntities; // pointeur nul quand une entité est désactivée
         std::map<Uint32 /* entityId */, PositionalEntity*> _disabledEntities;
         Uint32 _nextEntityId;
-        Uint32 _runningEntityId; // 0 quand aucune entité n'est en cours d'éxécution
-        Entity* _runningEntity; // nul quand aucune entité n'est en cours d'éxécution
         std::list<SpawnEvent*> _spawnEvents;
         std::list<KillEvent*> _killEvents;
+        Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>* _weakEntityRefManager;
 
     public:
         EntityManager(Engine& engine);
@@ -77,8 +89,6 @@ namespace Server { namespace Game { namespace Engine {
         void Save(Tools::Database::IConnection& conn);
         void Load(Tools::Database::IConnection& conn);
         void BootstrapPlugin(Uint32 pluginId, Tools::Database::IConnection& conn);
-        Uint32 GetRunningEntityId() const { return this->_runningEntityId; }
-        Uint32 GetRunningPluginId() const;
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         PositionalEntity& GetPositionalEntity(Uint32 entityId) throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
@@ -90,6 +100,7 @@ namespace Server { namespace Game { namespace Engine {
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
         std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
         std::map<Uint32, PositionalEntity*> const& GetPositionalEntities() const { return this->_positionalEntities; }
+        Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>& GetWeakEntityRefManager() { return *this->_weakEntityRefManager; }
 
         // rcon requests
         std::string RconGetEntities() const;
@@ -98,6 +109,7 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool hasPosition = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
+        void _ApiGetEntityById(Tools::Lua::CallHelper& helper);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiSave(Tools::Lua::CallHelper& helper);
         void _ApiLoad(Tools::Lua::CallHelper& helper);

@@ -160,7 +160,7 @@ namespace Server { namespace Database {
                     Log::load << "WorldLoader2::_LoadServerFiles: Failed to load server file \"" << row->GetString(1) << "\" in map \"" << this->_currentMap->GetName() << "\": " << e.what() << std::endl;
                     Tools::error << "WorldLoader2::_LoadServerFiles: Failed to load server file \"" << row->GetString(1) << "\" in map \"" << this->_currentMap->GetName() << "\": " << e.what() << std::endl;
                 }
-            this->_currentMap->GetEngine().OverrideRunningPluginId(0);
+            this->_currentMap->GetEngine().SetCurrentPluginRegistering(0);
             if (this->_world.GetGame().GetServer().GetSettings().debug)
             {
                 this->_currentMap->GetEngine().SetModules(this->_modules);
@@ -211,8 +211,8 @@ namespace Server { namespace Database {
             auto it = this->_modules[pluginId].insert(std::make_pair(name, std::make_pair(true /* loading in progress */, this->_currentMap->GetEngine().GetInterpreter().MakeNil())));
 
             // on change de fichier, donc potentiellement de runningPluginId
-            Uint32 previousRunningPluginId = this->_currentMap->GetEngine().GetRunningPluginId();
-            this->_currentMap->GetEngine().OverrideRunningPluginId(pluginId);
+            Uint32 previousRunningPluginId = this->_currentMap->GetEngine().GetCurrentPluginRegistering();
+            this->_currentMap->GetEngine().SetCurrentPluginRegistering(pluginId);
 
             // chargement du lua
             Tools::Lua::Ref f = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
@@ -224,7 +224,7 @@ namespace Server { namespace Database {
             }
             catch (std::exception&)
             {
-                this->_currentMap->GetEngine().OverrideRunningPluginId(previousRunningPluginId); // chargement foiré, on revien quand meme dans le plugin précédent
+                this->_currentMap->GetEngine().SetCurrentPluginRegistering(previousRunningPluginId); // chargement foiré, on revien quand meme dans le plugin précédent
                 it.first->second.first = false; // loading not in progress anymore
                 throw;
             }
@@ -232,7 +232,7 @@ namespace Server { namespace Database {
                 module = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
 
             // chargement fini, on revien dans le fichier qui a appelé require()
-            this->_currentMap->GetEngine().OverrideRunningPluginId(previousRunningPluginId);
+            this->_currentMap->GetEngine().SetCurrentPluginRegistering(previousRunningPluginId);
 
             // enregistrement du module chargé (évite de charger plusieurs fois le meme fichier)
             it.first->second.second = module;
@@ -255,12 +255,12 @@ namespace Server { namespace Database {
     {
         Tools::Lua::Ref prototype = helper.PopArg();
         std::string name = prototype["cubeName"].Check<std::string>("Server.Cube.Register: Field \"cubeName\" must exist and be a string");
-        auto id = this->_GetCubeTypeIdByName(this->_currentMap->GetEngine().GetRunningPluginId(), name);
+        auto id = this->_GetCubeTypeIdByName(this->_currentMap->GetEngine().GetCurrentPluginRegistering(), name);
 
         Game::Map::CubeType desc(
                 id,
                 name,
-                this->_currentMap->GetEngine().GetRunningPluginId(),
+                this->_currentMap->GetEngine().GetCurrentPluginRegistering(),
                 prototype["material"].Check<std::string>("Server.Cube.Register: Field \"material\" must exist be a string"),
                 prototype["solid"].To<bool>(),
                 prototype,
@@ -269,7 +269,7 @@ namespace Server { namespace Database {
 
         Log::load << "[map: " << this->_currentMap->GetName() << "] " <<
             "Load cube type " << id <<
-            ", plugin_id: " << this->_currentMap->GetEngine().GetRunningPluginId() <<
+            ", plugin_id: " << this->_currentMap->GetEngine().GetCurrentPluginRegistering() <<
             ", name: " << name << "\n";
     }
 

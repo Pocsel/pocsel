@@ -56,7 +56,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void BodyManager::_ApiRegister(Tools::Lua::CallHelper& helper)
     {
-        Uint32 pluginId = this->_engine.GetRunningPluginId();
+        Uint32 pluginId = this->_engine.GetCurrentPluginRegistering();
         if (!pluginId)
             throw std::runtime_error("Server.Body.Register: Could not determine currently running plugin, aborting registration.");
         std::string pluginName = this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(pluginId);

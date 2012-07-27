@@ -8,11 +8,11 @@ namespace Server { namespace Game { namespace Engine {
 
     PositionalEntity::PositionalEntity(
             Common::Physics::World& world,
-            Tools::Lua::Interpreter& interpreter,
+            Engine& engine,
             Uint32 id,
             EntityType const& type,
             Common::Physics::Node const& pos) :
-        Entity(interpreter, id, type),
+        Entity(engine, id, type),
         _bodyCluster(0)
     {
         this->_bodyCluster = new Common::Physics::BodyCluster(world, pos);

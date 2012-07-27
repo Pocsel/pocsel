@@ -39,6 +39,17 @@ Server.Entity.Register{
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 3, 67108864), "base:Tank") -- , "base:Tank")
         Server.Message.Later(11, self.id, "SpawnTank")
     end,
+
+    CallMe = function(self, continue)
+        if not self.toto then
+            self.toto = 20
+        else
+            self.toto = self.toto + 2
+        end
+        if continue then
+            self:CallMe(self.toto < 30)
+        end
+    end,
 }
 
 Server.Entity.RegisterPositional{
@@ -48,7 +59,7 @@ Server.Entity.RegisterPositional{
     Spawn = function(self)
         self.moveSpeed = 10 -- 3 + math.random() * 3
 
-        self.doodad = Server.Doodad.Spawn("base:Test", "base:Test")
+        self.doodad = Server.Doodad.Spawn(self.id, "base:Test", "base:Test")
 --        Server.Message.Later(30, self.id, "Suicide")
 --         if self.id < 50 then
 --             Server.Message.Later(4, self.id, "Test")

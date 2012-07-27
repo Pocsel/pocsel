@@ -21,7 +21,7 @@ namespace Server { namespace Game { namespace Engine {
     public:
         PositionalEntity(
                 Common::Physics::World& world,
-                Tools::Lua::Interpreter& interpreter,
+                Engine& engine,
                 Uint32 id,
                 EntityType const& type,
                 Common::Physics::Node const& pos);

@@ -5,8 +5,8 @@
 #include "tools/lua/Iterator.hpp"
 #include "tools/lua/MetaTable.hpp"
 #include "tools/lua/utils/Utils.hpp"
-#include "tools/lua/ResourceManager.hpp"
-#include "tools/lua/AResource.hpp"
+#include "tools/lua/WeakResourceRefManager.hpp"
+#include "tools/lua/IWeakResourceRef.hpp"
 #include "tools/Timer.hpp"
 
 #define STRINGIFY(...) #__VA_ARGS__
@@ -274,55 +274,54 @@ static void Resources(Interpreter& i)
 {
     struct MitoResourceManager
     {
-        MitoResourceManager() : coucou(1336) {}
+        MitoResourceManager(Interpreter& i) : coucou(1336), coucou2(i.MakeTable()) {}
         int coucou;
+        Ref coucou2;
     };
 
-    struct ResourceDeTest : Tools::Lua::AResource<MitoResourceManager>
+    struct ResourceDeTest : Tools::Lua::IWeakResourceRef<MitoResourceManager>
     {
         ResourceDeTest() : field1(0) {}
         ResourceDeTest(int field1, std::string field2) : field1(field1), field2(field2) {}
-        virtual bool IsValid() { return this->field1 && !this->field2.empty(); }
-        virtual void Invalidate() { this->field1 = 0; this->field2.clear(); }
-        virtual void Index(MitoResourceManager& manager, CallHelper& helper)
-        {
-            Tools::log << "__index with \"" << helper.PopArg().ToString() << "\", manager test: " << manager.coucou << std::endl;
-            Tools::log << "field1: " << this->field1 << ", field2 " << this->field2 << std::endl;
-            helper.PushRet(helper.GetInterpreter().MakeInteger(4097));
-        }
+        virtual bool IsValid(MitoResourceManager const&) const { return this->field1 && !this->field2.empty(); }
+        virtual void Invalidate(MitoResourceManager const&) { this->field1 = 0; this->field2.clear(); }
+        virtual Ref GetReference(MitoResourceManager const& manager) const { return manager.coucou2; }
         int field1;
         std::string field2;
     };
 
-    MitoResourceManager realManager;
-    ResourceManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager);
+    MitoResourceManager realManager(i);
+    WeakResourceRefManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager, ResourceDeTest(), true);
 
     auto pair1 = luaManager.NewResource(ResourceDeTest(12, "resource1"));
     Uint32 resource1Id = pair1.first;
     Ref resource1 = pair1.second;
     auto pair2 = luaManager.NewResource(ResourceDeTest(24, "resource2"));
-    Uint32 resource2Id = pair2.first;
+    //Uint32 resource2Id = pair2.first;
     Ref resource2 = pair2.second;
     i.Globals().Set("maResource1", resource1);
     i.Globals().Set("maResource2", resource2);
     i.DoString(STRINGIFY(
                 print("--- test resources ---")
-                print(" - avant delete")
-                print("call 1 : ", tostring(maResource1()))
-                print("call 2 : ", tostring(maResource2()))
+                print(" - avant invalidation")
+                print("call 1 : ", tostring(maResource1:Lock()))
+                print("call 2 : ", tostring(maResource2:Lock()))
+                resource2FakeRef = maResource2:Lock()
                 ));
     luaManager.InvalidateResource(resource1Id);
+    luaManager.InvalidateAllFakeReferences();
     i.DoString(STRINGIFY(
-                print(" - apres delete")
-                print("call 1 : ", tostring(maResource1()))
-                print("call 2 : ", tostring(maResource2()))
+                print(" - apres invalidation")
+                print("call 1 : ", tostring(maResource1:Lock()))
+                print("call 2 : ", tostring(maResource2:Lock()))
+                resource2FakeRef = maResource2:Lock()
+                resource2FakeRef.test = 12
                 ));
-    luaManager.UpdateResource(resource2Id, ResourceDeTest(25, "resource2.1"));
     try
     {
         i.DoString(STRINGIFY(
-                    print(tostring(maResource2.test))
-                    maResource1.test = 12
+                    resource1FakeRef = maResource1:Lock()
+                    resource1FakeRef.test = 12
                     ));
     }
     catch (std::exception& e)
@@ -363,7 +362,6 @@ int main(int, char**)
 
         // Test ResourceManager
         Resources(i);
-
     }
 
 

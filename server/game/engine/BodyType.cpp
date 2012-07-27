@@ -6,6 +6,7 @@
 #include "tools/lua/Function.hpp"
 
 #include "common/FieldUtils.hpp"
+#include "common/physics/IShapeDesc.hpp"
 
 #include "bullet/bullet-all.hpp"
 
