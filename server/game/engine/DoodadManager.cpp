@@ -222,17 +222,17 @@ namespace Server { namespace Game { namespace Engine {
         this->_disabledDoodads.erase(listIt);
     }
 
-    void DoodadManager::EntityHasMoved(Uint32 entityId)
-    {
-        auto itList = this->_doodadsByEntity.find(entityId);
-        if (itList == this->_doodadsByEntity.end())
-            return;
-        auto it = itList->second.begin();
-        auto itEnd = itList->second.end();
-        for (; it != itEnd; ++it)
-            if ((*it))
-                (*it)->PositionIsDirty();
-    }
+    //void DoodadManager::EntityHasMoved(Uint32 entityId)
+    //{
+    //    auto itList = this->_doodadsByEntity.find(entityId);
+    //    if (itList == this->_doodadsByEntity.end())
+    //        return;
+    //    auto it = itList->second.begin();
+    //    auto itEnd = itList->second.end();
+    //    for (; it != itEnd; ++it)
+    //        if ((*it))
+    //            (*it)->PositionIsDirty();
+    //}
 
     Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity& entity, std::string const& bodyName)
     {

@@ -17,6 +17,7 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Common::Physics::BodyCluster* _bodyCluster;
         Common::Physics::Node _physics;
+        bool _isDirty;
 
     public:
         PositionalEntity(
@@ -42,6 +43,8 @@ namespace Server { namespace Game { namespace Engine {
         Common::Physics::BodyCluster& GetBodyCluster() { return *this->_bodyCluster; }
 
         void UpdatePhysics();
+        void SetIsDirty(bool isDirty) { this->_isDirty = isDirty; }
+        bool GetIsDirty() const { return this->_isDirty; }
     };
 
 }}}

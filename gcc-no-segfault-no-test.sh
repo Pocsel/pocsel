@@ -11,10 +11,10 @@ make installer-cli_gccPCH_fc
 #make test_udp_cl_gccPCH_fc
 #make sdk_gccPCH_fc
 
-make client $1
-make server $1
-make packager-cli $1
-make installer-cli $1
-make base_plugin
-make dev_world
+make server client $1
+# make server $1
+# make packager-cli $1
+# make installer-cli $1
+# make base_plugin
+# make dev_world
 #make $1

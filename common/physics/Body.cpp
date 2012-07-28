@@ -83,6 +83,10 @@ namespace Common { namespace Physics {
                 childIte = this->_type.GetShapes()[nodeId].children.end();
                 childIt != childIte; ++childIt)
             this->_BuildBodyNode(*childIt);
+
+        void* userData = this->_parent.GetUserData();
+        if (userData)
+            node.body->setUserPointer(userData);
     }
 
     Body::~Body()

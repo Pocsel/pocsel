@@ -893,80 +893,80 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::_ApiSetPos(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-        Common::Position pos = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<Common::Position>();
-        auto it = this->_positionalEntities.find(entityId);
-        if (it == this->_positionalEntities.end() || !it->second)
-        {
-            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
-            return;
-        }
-        it->second->SetPosition(pos);
-        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
+//        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
+//        Common::Position pos = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<Common::Position>();
+//        auto it = this->_positionalEntities.find(entityId);
+//        if (it == this->_positionalEntities.end() || !it->second)
+//        {
+//            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
+//            return;
+//        }
+//        it->second->SetPosition(pos);
+//        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
     void EntityManager::_ApiGetPos(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
-        auto it = this->_positionalEntities.find(entityId);
-        if (it == this->_positionalEntities.end() || !it->second)
-        {
-            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
-            return; // retourne nil
-        }
-        helper.PushRet(it->second->GetPosition());
+//        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
+//        auto it = this->_positionalEntities.find(entityId);
+//        if (it == this->_positionalEntities.end() || !it->second)
+//        {
+//            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
+//            return; // retourne nil
+//        }
+//        helper.PushRet(it->second->GetPosition());
     }
 
     void EntityManager::_ApiSetSpeed(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-        glm::dvec3 speed = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
-        auto it = this->_positionalEntities.find(entityId);
-        if (it == this->_positionalEntities.end() || !it->second)
-        {
-            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
-            return;
-        }
-        it->second->SetSpeed(speed);
-        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
+//        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
+//        glm::dvec3 speed = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
+//        auto it = this->_positionalEntities.find(entityId);
+//        if (it == this->_positionalEntities.end() || !it->second)
+//        {
+//            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
+//            return;
+//        }
+//        it->second->SetSpeed(speed);
+//        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
     void EntityManager::_ApiGetSpeed(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
-        auto it = this->_positionalEntities.find(entityId);
-        if (it == this->_positionalEntities.end() || !it->second)
-        {
-            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
-            return; // retourne nil
-        }
-        helper.PushRet(it->second->GetSpeed());
+//        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
+//        auto it = this->_positionalEntities.find(entityId);
+//        if (it == this->_positionalEntities.end() || !it->second)
+//        {
+//            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
+//            return; // retourne nil
+//        }
+//        helper.PushRet(it->second->GetSpeed());
     }
 
     void EntityManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-        glm::dvec3 accel = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
-        auto it = this->_positionalEntities.find(entityId);
-        if (it == this->_positionalEntities.end() || !it->second)
-        {
-            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
-            return;
-        }
-        it->second->SetAccel(accel);
-        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
+//        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
+//        glm::dvec3 accel = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
+//        auto it = this->_positionalEntities.find(entityId);
+//        if (it == this->_positionalEntities.end() || !it->second)
+//        {
+//            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
+//            return;
+//        }
+//        it->second->SetAccel(accel);
+//        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
     void EntityManager::_ApiGetAccel(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
-        auto it = this->_positionalEntities.find(entityId);
-        if (it == this->_positionalEntities.end() || !it->second)
-        {
-            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
-            return; // retourne nil
-        }
-        helper.PushRet(it->second->GetAccel());
+//        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
+//        auto it = this->_positionalEntities.find(entityId);
+//        if (it == this->_positionalEntities.end() || !it->second)
+//        {
+//            Tools::error << "EntityManager::_ApiGetPos: Positional entity " << entityId << " not found." << std::endl;
+//            return; // retourne nil
+//        }
+//        helper.PushRet(it->second->GetAccel());
     }
 
 }}}

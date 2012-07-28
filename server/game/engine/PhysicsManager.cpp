@@ -34,19 +34,23 @@ namespace Server { namespace Game { namespace Engine {
                     if (pt.getDistance()<0.f)
                     {
                         // XXX
-                        btRigidBody const* body0 = (btRigidBody const*)contactManifold->getBody0();
-                        btRigidBody const* body1 = (btRigidBody const*)contactManifold->getBody1();
-                        if (pm->_entityBodies.count(body0) && pm->_entityBodies.count(body1))
+                        btRigidBody* body0 = (btRigidBody*)contactManifold->getBody0();
+                        btRigidBody* body1 = (btRigidBody*)contactManifold->getBody1();
+
+                        if (body0->getUserPointer() && body1->getUserPointer() &&
+                                body0->getUserPointer() != body1->getUserPointer())
                         {
-                            PositionalEntity const* entity0 = (PositionalEntity const*)body0->getUserPointer();
-                            Uint32 id0 = entity0->GetSelf()["id"].To<Uint32>();
+                            PositionalEntity* entity0 = (PositionalEntity*)body0->getUserPointer();
+                            entity0->SetIsDirty(true);
+                            //Uint32 id0 = entity0->GetSelf()["id"].To<Uint32>();
 
-                            pm->_engine.GetDoodadManager().EntityHasMoved(id0);
+                            //pm->_engine.GetDoodadManager().EntityHasMoved(id0);
 
-                            PositionalEntity const* entity1 = (PositionalEntity const*)body1->getUserPointer();
-                            Uint32 id1 = entity1->GetSelf()["id"].To<Uint32>();
+                            PositionalEntity* entity1 = (PositionalEntity*)body1->getUserPointer();
+                            entity1->SetIsDirty(true);
+                            //Uint32 id1 = entity1->GetSelf()["id"].To<Uint32>();
 
-                            pm->_engine.GetDoodadManager().EntityHasMoved(id1);
+                            //pm->_engine.GetDoodadManager().EntityHasMoved(id1);
                         }
 
                         break;
@@ -83,15 +87,15 @@ namespace Server { namespace Game { namespace Engine {
 
     void PhysicsManager::Tick(Uint64 deltaTime)
     {
-        for (auto it = this->_entities.begin(), ite = this->_entities.end(); it != ite; ++it)
-        {
-            if (!this->_bodiesInWorld.count(it->first))
-            {
-                //this->_world->GetBtWorld().addRigidBody(&it->second->GetBtBody());
-                this->_bodiesInWorld.insert(it->first);
-                //this->_entityBodies.insert(&it->second->GetBtBody());
-            }
-        }
+//        for (auto it = this->_entities.begin(), ite = this->_entities.end(); it != ite; ++it)
+//        {
+//            if (!this->_bodiesInWorld.count(it->first))
+//            {
+//                //this->_world->GetBtWorld().addRigidBody(&it->second->GetBtBody());
+//                this->_bodiesInWorld.insert(it->first);
+//                //this->_entityBodies.insert(&it->second->GetBtBody());
+//            }
+//        }
 
         this->_world->Tick(deltaTime);
 

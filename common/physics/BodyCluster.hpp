@@ -21,6 +21,8 @@ namespace Common { namespace Physics {
         btRigidBody* _body;
         std::map<Body*, btTypedConstraint*> _constraints;
 
+        void* _userData;
+
     public:
         BodyCluster(World& world, Node const& pos);
         ~BodyCluster();
@@ -33,6 +35,9 @@ namespace Common { namespace Physics {
         void RemoveConstraint(Body* body);
 
         void Dump() const;
+
+        void SetUserData(void* userData);
+        void* GetUserData() { return this->_userData; }
     };
 
 }}

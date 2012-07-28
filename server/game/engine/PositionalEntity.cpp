@@ -16,6 +16,7 @@ namespace Server { namespace Game { namespace Engine {
         _bodyCluster(0)
     {
         this->_bodyCluster = new Common::Physics::BodyCluster(world, pos);
+        this->_bodyCluster->SetUserData(this);
     }
 
     PositionalEntity::~PositionalEntity()
