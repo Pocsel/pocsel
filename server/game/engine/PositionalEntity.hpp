@@ -45,6 +45,7 @@ namespace Server { namespace Game { namespace Engine {
         void UpdatePhysics();
         void SetIsDirty(bool isDirty) { this->_isDirty = isDirty; }
         bool GetIsDirty() const { return this->_isDirty; }
+        void SendIfDirty();
     };
 
 }}}

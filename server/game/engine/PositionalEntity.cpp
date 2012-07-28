@@ -52,4 +52,9 @@ namespace Server { namespace Game { namespace Engine {
         //this->_bodyCluster->Dump();
     }
 
+    void PositionalEntity::SendIfDirty()
+    {
+        // TODO
+    }
+
 }}}

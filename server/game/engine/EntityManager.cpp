@@ -680,6 +680,16 @@ namespace Server { namespace Game { namespace Engine {
         return false;
     }
 
+    void EntityManager::SendDirtyPositionalEntities()
+    {
+        for (auto it = this->_positionalEntities.begin(), ite = this->_positionalEntities.end(); it != ite; ++it)
+        {
+            PositionalEntity* entity = it->second;
+
+            entity->SendIfDirty();
+        }
+    }
+
     std::string EntityManager::RconGetEntities() const
     {
         std::string json = "[\n";
