@@ -13,6 +13,7 @@ namespace Server { namespace Game { namespace Engine {
     {
     protected:
         Engine& _engine;
+        Uint32 _id;
         EntityType const& _type;
         Tools::Lua::Ref _self;
         Uint32 _weakReferenceId;

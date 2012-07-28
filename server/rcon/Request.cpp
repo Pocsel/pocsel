@@ -199,17 +199,17 @@ namespace Server { namespace Rcon {
         {
             if (this->_url[0] == "logs" && this->_url.size() == 1 && this->_method == "GET")
                 return this->_GetLogs(); // GET /logs
-            else if (this->_url[0] == "map" && this->_url.size() >= 3)
+            else if (this->_url[0] == "map" && this->_url.size() == 3)
             {
                 if (this->_server.GetGame().GetWorld().HasMap(this->_url[1]))
                 {
                     Game::Map::Map const& map = this->_server.GetGame().GetWorld().GetMap(this->_url[1]);
-                    if (this->_url[2] == "entities" && this->_url.size() == 3 && this->_method == "GET")
+                    if (this->_url[2] == "entities" && this->_method == "GET")
                         return this->_GetEntities(map); // GET /map/<map>/entities
-                    else if (this->_url[2] == "messages" && this->_url.size() == 3 && this->_method == "GET")
+                    else if (this->_url[2] == "messages" && this->_method == "GET")
                         return this->_GetMessages(map); // GET /map/<map>/messages
-                    else if (this->_url[2] == "execute" && this->_url.size() == 4 && this->_method == "POST")
-                        return this->_PostExecute(map, this->_url[3], this->_content["lua"]); // POST /map/<map>/execute/<plugin>
+                    else if (this->_url[2] == "execute" && this->_method == "POST")
+                        return this->_PostExecute(map, this->_content["lua"]); // POST /map/<map>/execute
                 }
             }
             else if (this->_url[0] == "login" && this->_url.size() == 1 && this->_method == "POST")
@@ -344,16 +344,10 @@ namespace Server { namespace Rcon {
             this->_WriteHttpResponse("401 Unauthorized");
     }
 
-    void Request::_PostExecute(Game::Map::Map const& map, std::string const& pluginIdentifier, std::string const& lua)
+    void Request::_PostExecute(Game::Map::Map const& map, std::string const& lua)
     {
         if (this->_server.GetRcon().GetSessionManager().HasRights(this->_token, "execute"))
-        {
-            Uint32 pluginId = this->_server.GetGame().GetWorld().GetPluginManager().GetPluginId(pluginIdentifier);
-            if (pluginId)
-                map.RconExecute(pluginId, lua, std::bind(&Request::_JsonCallback, this, std::placeholders::_1));
-            else
-                this->_WriteHttpResponse("404 Not Found");
-        }
+            map.RconExecute(lua, std::bind(&Request::_JsonCallback, this, std::placeholders::_1));
         else
             this->_WriteHttpResponse("401 Unauthorized");
     }

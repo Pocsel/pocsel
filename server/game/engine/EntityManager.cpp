@@ -137,14 +137,14 @@ namespace Server { namespace Game { namespace Engine {
         return CallbackManager::Ok;
     }
 
-    void EntityManager::AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, bool hasPosition /* = false */, Common::Position const& pos /* = Common::Position() */)
+    void EntityManager::AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition /* = false */, Common::Position const& pos /* = Common::Position() */)
     {
-        this->_spawnEvents.push_back(new SpawnEvent(pluginId, entityName, arg, spawnerId, notificationCallbackId, hasPosition, pos));
+        this->_spawnEvents.push_back(new SpawnEvent(pluginId, entityName, arg, notificationCallbackId, hasPosition, pos));
     }
 
-    void EntityManager::AddKillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId)
+    void EntityManager::AddKillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId)
     {
-        this->_killEvents.push_back(new KillEvent(entityId, arg, killerId, notificationCallbackId));
+        this->_killEvents.push_back(new KillEvent(entityId, arg, notificationCallbackId));
     }
 
     void EntityManager::DispatchSpawnEvents()
@@ -170,8 +170,7 @@ namespace Server { namespace Game { namespace Engine {
                 // XXX Spawn() hook
                 Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
                 this->_CreateEntity(newId, e->pluginId, e->entityName, e->hasPosition, e->pos);
-                auto bonus = this->_engine.GetInterpreter().MakeNumber(e->spawnerId);
-                if (this->CallEntityFunction(newId, "Spawn", e->arg, bonus, &ret) == CallbackManager::Ok)
+                if (this->CallEntityFunction(newId, "Spawn", e->arg, this->_engine.GetInterpreter().MakeNil() /* bonus */, &ret) == CallbackManager::Ok)
                     resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
 
                 resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(newId));
@@ -215,7 +214,7 @@ namespace Server { namespace Game { namespace Engine {
                 Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
 
                 // XXX Die() hook
-                if (this->CallEntityFunction(e->entityId, "Die", e->arg, this->_engine.GetInterpreter().MakeNumber(e->killerId), &ret) == CallbackManager::Ok)
+                if (this->CallEntityFunction(e->entityId, "Die", e->arg, this->_engine.GetInterpreter().MakeNil() /* bonus */, &ret) == CallbackManager::Ok)
                     resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
                 this->_DeleteEntity(it->first, it->second);
                 resultTable.Set("success", this->_engine.GetInterpreter().MakeBoolean(true)); // meme si le call a fail, l'entité est tuée quand même alors on retourne true
@@ -353,7 +352,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             std::string table = this->_engine.GetMap().GetName() + "_spawn_event";
             conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
-            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, plugin_id, entity_name, arg, spawner_id, notification_callback_id, has_position, pos_x, pos_y, pos_z) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, plugin_id, entity_name, arg, notification_callback_id, has_position, pos_x, pos_y, pos_z) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
             unsigned int id = 0;
             auto it = this->_spawnEvents.begin();
             auto itEnd = this->_spawnEvents.end();
@@ -365,8 +364,8 @@ namespace Server { namespace Game { namespace Engine {
                 auto const& pos = e->pos;
                 try
                 {
-                    Tools::debug << ">> Save >> " << table << " >> Spawn Event (id: " << id << ", pluginId: " << e->pluginId << ", entityName: \"" << e->entityName << "\", spawnerId: " << e->spawnerId << ", notificationCallbackId: " << e->notificationCallbackId << ", hasPosition: " << (e->hasPosition ? "yes" : "no") << ", x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
-                    query->Bind(id).Bind(e->pluginId).Bind(e->entityName).Bind(arg).Bind(e->spawnerId).Bind(e->notificationCallbackId).Bind(e->hasPosition ? 1 : 0).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
+                    Tools::debug << ">> Save >> " << table << " >> Spawn Event (id: " << id << ", pluginId: " << e->pluginId << ", entityName: \"" << e->entityName << "\", notificationCallbackId: " << e->notificationCallbackId << ", hasPosition: " << (e->hasPosition ? "yes" : "no") << ", x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
+                    query->Bind(id).Bind(e->pluginId).Bind(e->entityName).Bind(arg).Bind(e->notificationCallbackId).Bind(e->hasPosition ? 1 : 0).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
                 }
                 catch (std::exception& ex)
                 {
@@ -379,7 +378,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             std::string table = this->_engine.GetMap().GetName() + "_kill_event";
             conn.CreateQuery("DELETE FROM " + table)->ExecuteNonSelect();
-            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, entity_id, arg, killer_id, notification_callback_id) VALUES (?, ?, ?, ?, ?);");
+            auto query = conn.CreateQuery("INSERT INTO " + table + " (id, entity_id, arg, notification_callback_id) VALUES (?, ?, ?, ?);");
             unsigned int id = 0;
             auto it = this->_killEvents.begin();
             auto itEnd = this->_killEvents.end();
@@ -390,8 +389,8 @@ namespace Server { namespace Game { namespace Engine {
                 std::string arg = this->_engine.GetInterpreter().GetSerializer().Serialize(e->arg, true /* nilOnError */);
                 try
                 {
-                    Tools::debug << ">> Save >> " << table << " >> Kill Event (id: " << id << ", entityId: " << e->entityId << ", arg: " << arg.size() << " bytes, killerId: " << e->killerId << ", notificationCallbackId: " << e->notificationCallbackId << ")" << std::endl;
-                    query->Bind(id).Bind(e->entityId).Bind(arg).Bind(e->killerId).Bind(e->notificationCallbackId).ExecuteNonSelect().Reset();
+                    Tools::debug << ">> Save >> " << table << " >> Kill Event (id: " << id << ", entityId: " << e->entityId << ", arg: " << arg.size() << " bytes, notificationCallbackId: " << e->notificationCallbackId << ")" << std::endl;
+                    query->Bind(id).Bind(e->entityId).Bind(arg).Bind(e->notificationCallbackId).ExecuteNonSelect().Reset();
                 }
                 catch (std::exception& ex)
                 {
@@ -455,20 +454,19 @@ namespace Server { namespace Game { namespace Engine {
         // spawn events
         {
             std::string table = this->_engine.GetMap().GetName() + "_spawn_event";
-            auto query = conn.CreateQuery("SELECT plugin_id, entity_name, arg, spawner_id, notification_callback_id, has_position, pos_x, pos_y, pos_z FROM " + table + " ORDER BY id;");
+            auto query = conn.CreateQuery("SELECT plugin_id, entity_name, arg, notification_callback_id, has_position, pos_x, pos_y, pos_z FROM " + table + " ORDER BY id;");
             while (auto row = query->Fetch())
             {
                 Uint32 pluginId = row->GetUint32(0);
                 std::string entityName = row->GetString(1);
-                Uint32 spawnerId = row->GetUint32(3);
-                Uint32 notificationCallbackId = row->GetUint32(4);
-                bool hasPosition = row->GetUint32(5) == 1;
-                Common::Position pos(row->GetDouble(6), row->GetDouble(7), row->GetDouble(8));
+                Uint32 notificationCallbackId = row->GetUint32(3);
+                bool hasPosition = row->GetUint32(4) == 1;
+                Common::Position pos(row->GetDouble(4), row->GetDouble(5), row->GetDouble(7));
                 try
                 {
-                    Tools::debug << "<< Load << " << table << " << Spawn Event (pluginId: " << pluginId << ", entityName: \"" << entityName << "\", spawnerId: " << spawnerId << ", notificationCallbackId: " << notificationCallbackId << ", hasPosition: " << (hasPosition ? "yes" : "no") << ", x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
+                    Tools::debug << "<< Load << " << table << " << Spawn Event (pluginId: " << pluginId << ", entityName: \"" << entityName << "\", notificationCallbackId: " << notificationCallbackId << ", hasPosition: " << (hasPosition ? "yes" : "no") << ", x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
                     Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(2));
-                    this->AddSpawnEvent(pluginId, entityName, arg, spawnerId, notificationCallbackId, hasPosition, pos);
+                    this->AddSpawnEvent(pluginId, entityName, arg, notificationCallbackId, hasPosition, pos);
                 }
                 catch (std::exception& e) // erreur de deserialization
                 {
@@ -480,17 +478,16 @@ namespace Server { namespace Game { namespace Engine {
         // kill events
         {
             std::string table = this->_engine.GetMap().GetName() + "_kill_event";
-            auto query = conn.CreateQuery("SELECT entity_id, arg, killer_id, notification_callback_id FROM " + table + " ORDER BY id;");
+            auto query = conn.CreateQuery("SELECT entity_id, arg, notification_callback_id FROM " + table + " ORDER BY id;");
             while (auto row = query->Fetch())
             {
                 Uint32 entityId = row->GetUint32(0);
-                Uint32 killerId = row->GetUint32(2);
-                Uint32 notificationCallbackId = row->GetUint32(3);
+                Uint32 notificationCallbackId = row->GetUint32(2);
                 try
                 {
-                    Tools::debug << "<< Load << " << table << " << Kill Event (entityId: " << entityId << ", arg: <lua>, killerId: " << killerId << ", notificationCallbackId: " << notificationCallbackId << ")" << std::endl;
+                    Tools::debug << "<< Load << " << table << " << Kill Event (entityId: " << entityId << ", arg: <lua>, notificationCallbackId: " << notificationCallbackId << ")" << std::endl;
                     Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(1));
-                    this->AddKillEvent(entityId, arg, killerId, notificationCallbackId);
+                    this->AddKillEvent(entityId, arg, notificationCallbackId);
                 }
                 catch (std::exception& e) // erreur de deserialization
                 {
@@ -511,22 +508,40 @@ namespace Server { namespace Game { namespace Engine {
             return;
         }
         Tools::debug << "<< Load << " << table << " << Non-Initialized Plugin (pluginId: " << pluginId << ", spawning entity)" << std::endl;
-        this->AddSpawnEvent(pluginId, "Init", this->_engine.GetInterpreter().MakeNil() /* arg */, 0 /* spawnerId */, 0 /* callbackId */);
+        this->AddSpawnEvent(pluginId, "Init", this->_engine.GetInterpreter().MakeNil() /* arg */, 0 /* callbackId */);
     }
 
     Entity const& EntityManager::GetEntity(Uint32 entityId) const throw(std::runtime_error)
     {
         auto it = this->_entities.find(entityId);
         if (it == this->_entities.end() || !it->second)
-            throw std::runtime_error("EntityManager: Entity not found.");
+            throw std::runtime_error("EntityManager::GetEntity: Entity not found.");
         return *it->second;
+    }
+
+    Entity const& EntityManager::GetEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
+    {
+        if (ref.IsTable())
+            return this->GetEntity(ref["id"].Check<Uint32>("EntityManager::GetEntity: Table argument has no id number field"));
+        else if (ref.IsNumber())
+            return this->GetEntity(ref.To<Uint32>());
+        else if (ref.IsUserData())
+        {
+            WeakEntityRef* e = ref.Check<WeakEntityRef*>("EntityManager::GetEntity: Userdata argument is not of WeakEntityRef type");
+            if (e->IsValid(*this))
+                return this->GetEntity(e->entityId);
+            else
+                throw std::runtime_error("EntityManager::GetEntity: This reference was invalidated - you must not keep true references to entities, only weak references");
+        }
+        else
+            throw std::runtime_error("EntityManager::GetEntity: Argument of type " + ref.GetTypeName() + " given");
     }
 
     PositionalEntity& EntityManager::GetPositionalEntity(Uint32 entityId) throw(std::runtime_error)
     {
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
-            throw std::runtime_error("EntityManager: Positional entity not found.");
+            throw std::runtime_error("EntityManager::GetPositionalEntity: Positional entity not found.");
         return *it->second;
     }
 
@@ -534,15 +549,33 @@ namespace Server { namespace Game { namespace Engine {
     {
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
-            throw std::runtime_error("EntityManager: Positional entity not found.");
+            throw std::runtime_error("EntityManager::GetPositionalEntity: Positional entity not found.");
         return *it->second;
+    }
+
+    PositionalEntity const& EntityManager::GetPositionalEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
+    {
+        if (ref.IsTable())
+            return this->GetPositionalEntity(ref["id"].Check<Uint32>("EntityManager::GetPositionalEntity: Table argument has no id number field"));
+        else if (ref.IsNumber())
+            return this->GetPositionalEntity(ref.To<Uint32>());
+        else if (ref.IsUserData())
+        {
+            WeakEntityRef* e = ref.Check<WeakEntityRef*>("EntityManager::GetPositionalEntity: Userdata argument is not of WeakEntityRef type");
+            if (e->IsValid(*this))
+                return this->GetPositionalEntity(e->entityId);
+            else
+                throw std::runtime_error("EntityManager::GetPositionalEntity: This reference was invalidated - you must not keep true references to entities, only weak references");
+        }
+        else
+            throw std::runtime_error("EntityManager::GetPositionalEntity: Argument of type " + ref.GetTypeName() + " given");
     }
 
     PositionalEntity& EntityManager::GetDisabledEntity(Uint32 entityId) throw(std::runtime_error)
     {
         auto it = this->_disabledEntities.find(entityId);
         if (it == this->_disabledEntities.end())
-            throw std::runtime_error("EntityManager: Disabled entity not found.");
+            throw std::runtime_error("EntityManager::GetDisabledEntity: Disabled entity not found.");
         return *it->second;
     }
 
@@ -550,7 +583,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         auto it = this->_disabledEntities.find(entityId);
         if (it == this->_disabledEntities.end())
-            throw std::runtime_error("EntityManager: Disabled entity not found.");
+            throw std::runtime_error("EntityManager::GetDisabledEntity: Disabled entity not found.");
         return *it->second;
     }
 
@@ -793,7 +826,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 callbackId = 0;
         if (cbTargetId)
             callbackId = this->_engine.GetCallbackManager().MakeCallback(cbTargetId, cbFunction, cbArg);
-        this->AddSpawnEvent(pluginId, entityName, arg, 0 /* TODO plus besoin du plugin id */, callbackId, hasPosition, pos);
+        this->AddSpawnEvent(pluginId, entityName, arg, callbackId, hasPosition, pos);
     }
 
     void EntityManager::_ApiSave(Tools::Lua::CallHelper& helper)
@@ -841,7 +874,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 callbackId = 0;
         if (cbTargetId)
             callbackId = this->_engine.GetCallbackManager().MakeCallback(cbTargetId, cbFunction, cbArg);
-        this->AddKillEvent(entityId, arg, 0 /* TODO plus besoin du plugin id */, callbackId);
+        this->AddKillEvent(entityId, arg, callbackId);
     }
 
     void EntityManager::_ApiRegister(Tools::Lua::CallHelper& helper)
