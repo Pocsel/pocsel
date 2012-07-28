@@ -194,10 +194,10 @@ namespace Client { namespace Game {
     {
         if (distance < 0.001)
             return;
-        btVector3 to = normalOnB.normalized() * (distance * 10.0) + pointOnB;
+        btVector3 to = normalOnB.normalized() * (distance * 100.0) + pointOnB;
         const btVector3& from = pointOnB;
 
-        Uint32 endTime = this->_curTime + lifeTime * 10;
+        Uint32 endTime = this->_curTime + lifeTime;
         bool added = false;
 
         for (auto it = this->_contactPoints.begin(), ite = this->_contactPoints.end(); it != ite; ++it)
