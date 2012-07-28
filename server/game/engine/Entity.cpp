@@ -7,9 +7,8 @@
 namespace Server { namespace Game { namespace Engine {
 
     Entity::Entity(Engine& engine, Uint32 id, EntityType const& type) :
-        _engine(engine), _type(type), _self(engine.GetInterpreter().MakeTable())
+        _engine(engine), _id(id), _type(type), _self(engine.GetInterpreter().MakeTable())
     {
-        this->_self.Set("id", id);
         this->_self.Set("storage", this->_engine.GetInterpreter().MakeTable());
         this->_weakReferenceId = this->_engine.GetEntityManager().GetWeakEntityRefManager().NewResource(EntityManager::WeakEntityRef(id)).first;
         this->Enable();
@@ -22,37 +21,30 @@ namespace Server { namespace Game { namespace Engine {
 
     Tools::Lua::Ref Entity::GetStorage() const
     {
-        if (this->_self.IsTable()) // toujours vrai en théorie, sauf si le moddeur fait nimp avec self
-            return this->_self["storage"];
-        return Tools::Lua::Ref(this->_self.GetState()); // nil
+        assert(this->_self.IsTable());
+        return this->_self["storage"];
     }
 
     void Entity::SetStorage(Tools::Lua::Ref const& storage)
     {
-        if (this->_self.IsTable()) // toujours vrai en théorie, sauf si le moddeur a fait nimp avec self
-            this->_self.Set("storage", storage);
+        assert(this->_self.IsTable());
+        this->_self.Set("storage", storage);
     }
 
     void Entity::Disable()
     {
-        Tools::Lua::Ref idSave = this->_engine.GetInterpreter().MakeNil();
-        Tools::Lua::Ref storageSave = this->_engine.GetInterpreter().MakeNil();
-        if (this->_self.IsTable()) // toujours vrai en théorie, sauf si le moddeur fait nimp avec self
-        {
-            idSave = this->_self["id"];
-            storageSave = this->_self["storage"];
-        }
-        this->_self = this->_engine.GetInterpreter().MakeTable(); // perte de toutes les references/variables de l'instance
-        this->_self.Set("id", idSave); // on garde qu'une table avec l'id
-        this->_self.Set("storage", storageSave); // et le storage
+        assert(this->_self.IsTable());
+        Tools::Lua::Ref storage = this->_self["storage"];
+        this->_self = this->_engine.GetInterpreter().MakeTable(); // perte de toutes les references lua
+        this->_self.Set("storage", storage); // garde uniquement le storage
         this->_engine.GetEntityManager().GetWeakEntityRefManager().GetResource(this->_weakReferenceId).disabled = true;
     }
 
     void Entity::Enable()
     {
-        if (!this->_self.IsTable()) // toujours faux en théorie, sauf si le moddeur fait nimp avec self
-            this->_self = this->_engine.GetInterpreter().MakeTable(); // il n'y aura plus "id" & "storage" mais de toute maniere le moddeur ne les avait pas avant...
-        Tools::Lua::Ref metatable = this->_engine.GetInterpreter().MakeTable();
+        assert(this->_self.IsTable());
+        this->_self.Set("id", this->_id);
+        Tools::Lua::Ref metatable(this->_engine.GetInterpreter().MakeTable());
         this->_self.SetMetaTable(metatable);
         this->_self.Set("prototype", this->_type.GetPrototype());
         metatable.Set("__index", this->_type.GetPrototype());
@@ -61,8 +53,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void Entity::SaveToStorage()
     {
-        if (!this->_self.IsTable())
-            return;
+        assert(this->_self.IsTable());
         if (!this->_self["storage"].IsTable())
             this->_self.Set("storage", this->_self.GetState().MakeTable());
         Tools::Lua::Ref storage = this->_self["storage"];
@@ -75,7 +66,8 @@ namespace Server { namespace Game { namespace Engine {
 
     void Entity::LoadFromStorage()
     {
-        if (!this->_self.IsTable() || !this->_self["storage"].IsTable())
+        assert(this->_self.IsTable());
+        if (!this->_self["storage"].IsTable())
             return;
         auto it = this->_self["storage"].Begin();
         auto itEnd = this->_self["storage"].End();
