@@ -517,16 +517,16 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushTimedMessage(SaveTime * 1000000, m);
     }
 
-    void Map::RconExecute(Uint32 pluginId, std::string lua, std::function<void(std::string)> cb) const
+    void Map::RconExecute(std::string lua, std::function<void(std::string)> cb) const
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&Map::_RconExecute, this, pluginId, lua, cb));
+            m(std::bind(&Map::_RconExecute, this, lua, cb));
         this->_messageQueue->PushMessage(m);
     }
 
-    void Map::_RconExecute(Uint32 pluginId, std::string const& lua, std::function<void(std::string)> cb) const
+    void Map::_RconExecute(std::string const& lua, std::function<void(std::string)> cb) const
     {
-        cb(this->_engine->RconExecute(pluginId, lua));
+        cb(this->_engine->RconExecute(lua));
     }
 
     void Map::RconGetEntities(std::function<void(std::string)> cb) const

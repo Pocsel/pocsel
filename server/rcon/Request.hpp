@@ -63,7 +63,7 @@ namespace Server { namespace Rcon {
         void _GetMessages(Game::Map::Map const& map); // GET /map/<map>/messages
         void _GetEntityFile(std::string const& pluginIdentifier, std::string const& file); // GET /entity_file/<plugin>/<file>
         void _PostEntityFile(std::string const& pluginIdentifier, std::string const& file, std::string const& lua); // POST /entity_file/<plugin>/<file>
-        void _PostExecute(Game::Map::Map const& map, std::string const& pluginIdentifier, std::string const& lua); // POST /map/<map>/execute/<plugin>
+        void _PostExecute(Game::Map::Map const& map, std::string const& lua); // POST /map/<map>/execute/<plugin>
 
         // réponse
         void _JsonCallback(std::string json);

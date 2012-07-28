@@ -27,27 +27,25 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct SpawnEvent
         {
-            SpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position()) :
-                pluginId(pluginId), entityName(entityName), arg(arg), spawnerId(spawnerId), notificationCallbackId(notificationCallbackId), hasPosition(hasPosition), pos(pos)
+            SpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position()) :
+                pluginId(pluginId), entityName(entityName), arg(arg), notificationCallbackId(notificationCallbackId), hasPosition(hasPosition), pos(pos)
             {
             }
             Uint32 pluginId;
             std::string entityName;
             Tools::Lua::Ref arg;
-            Uint32 spawnerId;
             Uint32 notificationCallbackId;
             bool hasPosition;
             Common::Position pos;
         };
         struct KillEvent
         {
-            KillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId) :
-                entityId(entityId), arg(arg), killerId(killerId), notificationCallbackId(notificationCallbackId)
+            KillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId) :
+                entityId(entityId), arg(arg), notificationCallbackId(notificationCallbackId)
             {
             }
             Uint32 entityId;
             Tools::Lua::Ref arg;
-            Uint32 killerId;
             Uint32 notificationCallbackId;
         };
     public:
@@ -82,18 +80,26 @@ namespace Server { namespace Game { namespace Engine {
         // si Error est retourné, l'entité a été supprimée
         CallbackManager::Result CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0);
 
-        void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 spawnerId, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position());
-        void AddKillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 killerId, Uint32 notificationCallbackId);
+        void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position());
+        void AddKillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId);
         void DispatchSpawnEvents();
         void DispatchKillEvents();
         void Save(Tools::Database::IConnection& conn);
         void Load(Tools::Database::IConnection& conn);
         void BootstrapPlugin(Uint32 pluginId, Tools::Database::IConnection& conn);
-        Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
-        PositionalEntity& GetPositionalEntity(Uint32 entityId) throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
-        PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
-        PositionalEntity& GetDisabledEntity(Uint32 entityId) throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
-        PositionalEntity const& GetDisabledEntity(Uint32 entityId) const throw(std::runtime_error); // ne pas garder la reference, l'entité peut etre delete à tout moment
+
+        /*
+         * Entity getters
+         * Ne pas garder la reference/le pointeur, l'entité peut etre delete
+         */
+        Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error);
+        Entity const& GetEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
+        PositionalEntity& GetPositionalEntity(Uint32 entityId) throw(std::runtime_error);
+        PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error);
+        PositionalEntity const& GetPositionalEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
+        PositionalEntity& GetDisabledEntity(Uint32 entityId) throw(std::runtime_error);
+        PositionalEntity const& GetDisabledEntity(Uint32 entityId) const throw(std::runtime_error);
+
         bool IsEntityPositional(Uint32 entityId) const;
         void DisableEntity(Uint32 entityId, bool chunkUnloaded = true) throw(std::runtime_error);
         void EnableEntity(Uint32 entityId) throw(std::runtime_error);
