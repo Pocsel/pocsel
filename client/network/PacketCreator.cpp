@@ -144,13 +144,13 @@ namespace Client { namespace Network {
         return p;
     }
 
-    std::unique_ptr<UdpPacket> PacketCreator::DoodadRemoved(Uint32 id,
-                                                            Uint32 doodadId)
+    std::unique_ptr<UdpPacket> PacketCreator::EntityRemoved(Uint32 id,
+                                                            Uint32 entityId)
     {
         std::unique_ptr<UdpPacket> p(new UdpPacket(id));
-        p->Write(Protocol::ClientToServer::DoodadRemoved);
+        p->Write(Protocol::ClientToServer::EntityRemoved);
 
-        p->Write(doodadId);
+        p->Write(entityId);
         return p;
     }
 

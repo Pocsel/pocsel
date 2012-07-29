@@ -61,6 +61,7 @@ namespace Server { namespace Game { namespace Engine {
     void PositionalEntity::AddPlayer(Uint32 playerId)
     {
         this->_newPlayers.insert(playerId);
+        std::cout << "              ---            addplayer\n";
     }
 
     void PositionalEntity::RemovePlayer(Uint32 playerId)
@@ -71,7 +72,10 @@ namespace Server { namespace Game { namespace Engine {
 
     void PositionalEntity::UpdatePlayers()
     {
-        if (this->_isDirty && this->_engine.GetDoodadManager().EntityHasDoodad(this->_id))
+        if (!this->_engine.GetDoodadManager().EntityHasDoodad(this->_id))
+            return;
+
+        if (this->_isDirty)
         {
             this->_isDirty = false;
 
@@ -81,8 +85,8 @@ namespace Server { namespace Game { namespace Engine {
             {
                 if (this->_engine.GetMap().HasPlayer(*it))
                 {
-                    auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
-                    this->_engine.SendPacket(*it, packetCopy);
+                    auto packetCopy = std::unique_ptr<Network::UdpPacket>(new Network::UdpPacket(*packet));
+                    this->_engine.SendUdpPacket(*it, packetCopy);
                 }
                 else
                 {
@@ -92,6 +96,8 @@ namespace Server { namespace Game { namespace Engine {
             for (auto it = toDel.begin(), ite = toDel.end(); it != ite; ++it)
                 this->_players.erase(*it);
         }
+
+        std::cout << "updateplayers\n";
 
 
         for (auto it = this->_newPlayers.begin(), ite = this->_newPlayers.end(); it != ite; ++it)

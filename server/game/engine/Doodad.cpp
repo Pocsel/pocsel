@@ -91,7 +91,10 @@ namespace Server { namespace Game { namespace Engine {
     void Doodad::_SpawnForNewPlayers()
     {
         if (this->_entity.GetNewPlayers().empty())
+        {
+            std::cout << "             ----             empty fuck\n";
             return;
+        }
 
         // create packet
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();

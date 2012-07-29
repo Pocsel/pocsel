@@ -107,6 +107,7 @@ namespace Server { namespace Game { namespace Engine {
         std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
         std::map<Uint32, PositionalEntity*> const& GetPositionalEntities() const { return this->_positionalEntities; }
         void UpdatePositionalEntitiesPlayers();
+        void EntityRemovedForPlayer(Uint32 playerId, Uint32 EntityId);
         Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>& GetWeakEntityRefManager() { return *this->_weakEntityRefManager; }
 
         // rcon requests

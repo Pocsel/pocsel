@@ -162,12 +162,12 @@ namespace Server { namespace Game { namespace Engine {
         this->_dirtyDoodads.clear();
     }
 
-    void DoodadManager::DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId)
-    {
-        auto it = this->_doodads.find(doodadId);
-        if (it != this->_doodads.end() && it->second)
-            it->second->RemovePlayer(playerId);
-    }
+//    void DoodadManager::DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId)
+//    {
+//        auto it = this->_doodads.find(doodadId);
+//        if (it != this->_doodads.end() && it->second)
+//            it->second->RemovePlayer(playerId);
+//    }
 
     void DoodadManager::DeleteDoodadsOfEntity(Uint32 entityId)
     {
@@ -291,11 +291,11 @@ namespace Server { namespace Game { namespace Engine {
         helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
 
         // XXX test
-        auto const& players = this->_engine.GetMap().GetPlayers();
-        auto it = players.begin();
-        auto itEnd = players.end();
-        for (; it != itEnd; ++it)
-            d->AddPlayer(it->first);
+        //auto const& players = this->_engine.GetMap().GetPlayers();
+        //auto it = players.begin();
+        //auto itEnd = players.end();
+        //for (; it != itEnd; ++it)
+        //    d->AddPlayer(it->first);
     }
 
     void DoodadManager::_ApiKill(Tools::Lua::CallHelper& helper)

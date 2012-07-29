@@ -690,6 +690,13 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
+    void EntityManager::EntityRemovedForPlayer(Uint32 playerId, Uint32 entityId)
+    {
+        auto it = this->_positionalEntities.find(entityId);
+        if (it != this->_positionalEntities.end() && it->second)
+            it->second->RemovePlayer(playerId);
+    }
+
     std::string EntityManager::RconGetEntities() const
     {
         std::string json = "[\n";
@@ -769,6 +776,13 @@ namespace Server { namespace Game { namespace Engine {
             assert(!this->_positionalEntities.count(entityId) && "impossible de créer une nouvelle entité car l'id est déjà utilisé dans la map des entités positionnelles");
             this->_positionalEntities[entityId] = positionalEntity;
             entity = positionalEntity;
+
+            // XXX test
+            auto const& players = this->_engine.GetMap().GetPlayers();
+            auto it = players.begin();
+            auto itEnd = players.end();
+            for (; it != itEnd; ++it)
+                positionalEntity->AddPlayer(it->first);
         }
         else
             entity = new Entity(this->_engine, entityId, *itType->second);

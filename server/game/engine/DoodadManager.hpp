@@ -33,7 +33,7 @@ namespace Server { namespace Game { namespace Engine {
         void Save(Tools::Database::IConnection& conn);
         void Load(Tools::Database::IConnection& conn);
         void ExecuteCommands();
-        void DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId);
+        //void DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId);
         void DeleteDoodadsOfEntity(Uint32 entityId);
         void DisableDoodadsOfEntity(Uint32 entityId);
         void EnableDoodadsOfEntity(Uint32 entityId);

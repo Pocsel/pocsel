@@ -101,9 +101,9 @@ namespace Server { namespace Network {
         p.Read(actionId);
     }
 
-    void PacketExtractor::DoodadRemoved(Tools::ByteArray const& p, Uint32& doodadId)
+    void PacketExtractor::EntityRemoved(Tools::ByteArray const& p, Uint32& entityId)
     {
-        p.Read(doodadId);
+        p.Read(entityId);
     }
 
 }}
