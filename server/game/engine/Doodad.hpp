@@ -48,6 +48,7 @@ namespace Server { namespace Game { namespace Engine {
         std::queue<Command> _commands;
         std::queue<Command> _commandsUdp;
         bool _positionDirty;
+        bool _isNew;
 
     public:
         Doodad(Engine& engine,

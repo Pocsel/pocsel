@@ -97,9 +97,6 @@ namespace Server { namespace Game { namespace Engine {
                 this->_players.erase(*it);
         }
 
-        std::cout << "updateplayers\n";
-
-
         for (auto it = this->_newPlayers.begin(), ite = this->_newPlayers.end(); it != ite; ++it)
             this->_players.insert(*it);
         this->_newPlayers.clear();

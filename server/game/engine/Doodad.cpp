@@ -36,9 +36,11 @@ namespace Server { namespace Game { namespace Engine {
         _entity(entity),
         _storage(engine.GetInterpreter().MakeTable()),
         _body(body),
-        _positionDirty(false)
+        _positionDirty(false),
+        _isNew(true)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
+        this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
     Doodad::~Doodad()
@@ -90,11 +92,8 @@ namespace Server { namespace Game { namespace Engine {
 
     void Doodad::_SpawnForNewPlayers()
     {
-        if (this->_entity.GetNewPlayers().empty())
-        {
-            std::cout << "             ----             empty fuck\n";
+        if (!this->_isNew && this->_entity.GetNewPlayers().empty())
             return;
-        }
 
         // create packet
         Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
@@ -120,6 +119,20 @@ namespace Server { namespace Game { namespace Engine {
                 auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
                 this->_engine.SendPacket(*it, packetCopy);
             }
+
+        // send packet to everyone
+        if (this->_isNew)
+        {
+            auto it = this->_entity.GetPlayers().begin();
+            auto itEnd = this->_entity.GetPlayers().end();
+            for (; it != itEnd; ++it)
+                if (this->_engine.GetMap().HasPlayer(*it))
+                {
+                    auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
+                    this->_engine.SendPacket(*it, packetCopy);
+                }
+            this->_isNew = false;
+        }
     }
 
     void Doodad::ExecuteCommands()
