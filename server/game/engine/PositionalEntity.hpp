@@ -17,6 +17,8 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Common::Physics::BodyCluster* _bodyCluster;
         Common::Physics::Node _physics;
+        std::set<Uint32> _players;
+        std::set<Uint32> _newPlayers;
         bool _isDirty;
 
     public:
@@ -45,7 +47,12 @@ namespace Server { namespace Game { namespace Engine {
         void UpdatePhysics();
         void SetIsDirty(bool isDirty) { this->_isDirty = isDirty; }
         bool GetIsDirty() const { return this->_isDirty; }
-        void SendIfDirty();
+        void UpdatePlayers();
+
+        void AddPlayer(Uint32 playerId);
+        void RemovePlayer(Uint32 playerId);
+        std::set<Uint32> const& GetPlayers() { return this->_players; }
+        std::set<Uint32> const& GetNewPlayers() { return this->_newPlayers; }
     };
 
 }}}

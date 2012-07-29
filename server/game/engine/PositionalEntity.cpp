@@ -1,4 +1,10 @@
 #include "server/game/engine/PositionalEntity.hpp"
+#include "server/game/engine/Engine.hpp"
+#include "server/game/engine/DoodadManager.hpp"
+#include "server/game/map/Map.hpp"
+
+#include "server/network/PacketCreator.hpp"
+#include "server/network/UdpPacket.hpp"
 
 #include "common/physics/BodyCluster.hpp"
 
@@ -52,9 +58,45 @@ namespace Server { namespace Game { namespace Engine {
         //this->_bodyCluster->Dump();
     }
 
-    void PositionalEntity::SendIfDirty()
+    void PositionalEntity::AddPlayer(Uint32 playerId)
     {
-        // TODO
+        this->_newPlayers.insert(playerId);
+    }
+
+    void PositionalEntity::RemovePlayer(Uint32 playerId)
+    {
+        this->_newPlayers.erase(playerId);
+        this->_players.erase(playerId);
+    }
+
+    void PositionalEntity::UpdatePlayers()
+    {
+        if (this->_isDirty && this->_engine.GetDoodadManager().EntityHasDoodad(this->_id))
+        {
+            this->_isDirty = false;
+
+            auto packet = Network::PacketCreator::EntityUpdate(this->_id, this->_physics);
+            std::vector<Uint32> toDel;
+            for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+            {
+                if (this->_engine.GetMap().HasPlayer(*it))
+                {
+                    auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
+                    this->_engine.SendPacket(*it, packetCopy);
+                }
+                else
+                {
+                    toDel.push_back(*it);
+                }
+            }
+            for (auto it = toDel.begin(), ite = toDel.end(); it != ite; ++it)
+                this->_players.erase(*it);
+        }
+
+
+        for (auto it = this->_newPlayers.begin(), ite = this->_newPlayers.end(); it != ite; ++it)
+            this->_players.insert(*it);
+        this->_newPlayers.clear();
     }
 
 }}}

@@ -106,7 +106,7 @@ namespace Server { namespace Game { namespace Engine {
         bool IsEntityTypePositional(Uint32 pluginId, std::string const& entityName) const;
         std::map<Uint32, PositionalEntity*> const& GetDisabledEntities() const { return this->_disabledEntities; }
         std::map<Uint32, PositionalEntity*> const& GetPositionalEntities() const { return this->_positionalEntities; }
-        void SendDirtyPositionalEntities();
+        void UpdatePositionalEntitiesPlayers();
         Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>& GetWeakEntityRefManager() { return *this->_weakEntityRefManager; }
 
         // rcon requests

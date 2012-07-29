@@ -222,6 +222,11 @@ namespace Server { namespace Game { namespace Engine {
         this->_disabledDoodads.erase(listIt);
     }
 
+    bool DoodadManager::EntityHasDoodad(Uint32 entityId) const
+    {
+        return this->_doodadsByEntity.count(entityId) > 0;
+    }
+
     //void DoodadManager::EntityHasMoved(Uint32 entityId)
     //{
     //    auto itList = this->_doodadsByEntity.find(entityId);

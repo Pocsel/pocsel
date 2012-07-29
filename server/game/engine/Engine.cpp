@@ -60,7 +60,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_physicsManager->Tick(deltaTime);
         this->_messageManager->DispatchMessages();
         this->_doodadManager->ExecuteCommands(); // PS: l'ordre a une importance de ouf
-        this->_entityManager->SendDirtyPositionalEntities();
+        this->_entityManager->UpdatePositionalEntitiesPlayers(); // absolument APRES le ExecuteCommands() des doodads
         this->_entityManager->GetWeakEntityRefManager().InvalidateAllFakeReferences();
     }
 

@@ -680,13 +680,13 @@ namespace Server { namespace Game { namespace Engine {
         return false;
     }
 
-    void EntityManager::SendDirtyPositionalEntities()
+    void EntityManager::UpdatePositionalEntitiesPlayers()
     {
         for (auto it = this->_positionalEntities.begin(), ite = this->_positionalEntities.end(); it != ite; ++it)
         {
             PositionalEntity* entity = it->second;
 
-            entity->SendIfDirty();
+            entity->UpdatePlayers();
         }
     }
 
