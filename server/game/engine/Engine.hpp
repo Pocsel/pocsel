@@ -83,7 +83,7 @@ namespace Server { namespace Game { namespace Engine {
         void RegisterRequire();
 
         // rcon requests
-        std::string RconExecute(Uint32 pluginId, std::string const& lua);
+        std::string RconExecute(std::string const& lua);
 
     private:
         void _ApiRequire(Tools::Lua::CallHelper& helper);

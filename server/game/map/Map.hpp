@@ -114,7 +114,7 @@ namespace Server { namespace Game { namespace Map {
         void SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet);
 
         // rcon requests
-        void RconExecute(Uint32 pluginId, std::string lua, std::function<void(std::string)> cb) const;
+        void RconExecute(std::string lua, std::function<void(std::string)> cb) const;
         void RconGetEntities(std::function<void(std::string)> cb) const;
         void RconGetMessages(std::function<void(std::string)> cb) const;
 
@@ -139,7 +139,7 @@ namespace Server { namespace Game { namespace Map {
         void _TimedSave();
 
         // rcon requests
-        void _RconExecute(Uint32 pluginId, std::string const& lua, std::function<void(std::string)> cb) const;
+        void _RconExecute(std::string const& lua, std::function<void(std::string)> cb) const;
         void _RconGetEntities(std::function<void(std::string)> cb) const;
         void _RconGetMessages(std::function<void(std::string)> cb) const;
     };

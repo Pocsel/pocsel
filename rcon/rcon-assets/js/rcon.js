@@ -75,7 +75,7 @@ $(document).ready(function() {
         $('#execute_alert').hide('fast');
         $('#execute_preloader').show('fast');
         $.ajax({
-            url: rconUrl + 'map/' + currentMap + '/execute/' + $('#execute_plugin').val(),
+            url: rconUrl + 'map/' + currentMap + '/execute',
             type: 'POST',
             timeout: 5000,
             data: {
@@ -170,9 +170,6 @@ function fillStaticTables() {
             activateMap(e.data.map);
         });
     }
-    $.each(rconPlugins, function() {
-        $('#execute_plugin').append('<option>' + this.identifier + '</option>');
-    });
     $('#category-maps').show('fast');
 
     // entities category

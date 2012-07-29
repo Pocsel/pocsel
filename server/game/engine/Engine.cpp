@@ -160,12 +160,10 @@ namespace Server { namespace Game { namespace Engine {
         Tools::log << str << std::endl;
     }
 
-    std::string Engine::RconExecute(Uint32 pluginId, std::string const& lua)
+    std::string Engine::RconExecute(std::string const& lua)
     {
         std::string json = "{\n"
             "\t\"log\": \"";
-        // TODO ne pas avoir besoin du plugin id
-        //this->OverrideRunningPluginId(pluginId);
         try
         {
             this->_interpreter->DoString(lua);
@@ -175,7 +173,6 @@ namespace Server { namespace Game { namespace Engine {
             Tools::error << "Engine::RconExecute: Error: " << e.what() << std::endl;
             json += Rcon::ToJsonStr(e.what());
         }
-        // this->OverrideRunningPluginId(0);
         json += "\"\n}\n";
         return json;
     }
