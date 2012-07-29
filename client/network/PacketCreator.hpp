@@ -40,7 +40,7 @@ namespace Client { namespace Network {
                                                  Common::CubePosition const& target,
                                                  Uint32 actionId);
 
-        static std::unique_ptr<UdpPacket> DoodadRemoved(Uint32 id, Uint32 doodadId);
+        static std::unique_ptr<UdpPacket> EntityRemoved(Uint32 id, Uint32 entityId);
     };
 
 }}

@@ -9,7 +9,8 @@ namespace Common { namespace Physics {
     BodyCluster::BodyCluster(World& world, Node const& pos) :
         _world(world),
         _motionState(0),
-        _body(0)
+        _body(0),
+        _userData(0)
     {
         btScalar mass(0.000000001);
         btVector3 localInertia(0.000000001, 0.000000001, 0.000000001);
@@ -77,6 +78,12 @@ namespace Common { namespace Physics {
 
         for (auto it = this->_constraints.begin(), ite = this->_constraints.end(); it != ite; ++it)
             it->first->Dump();
+    }
+
+    void BodyCluster::SetUserData(void* userData)
+    {
+        this->_userData = userData;
+        this->_body->setUserPointer(userData);
     }
 
 }}

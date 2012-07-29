@@ -109,7 +109,7 @@ namespace Server { namespace Game { namespace Map {
         void AddPlayer(std::shared_ptr<Player> const& p);
         void RemovePlayer(Uint32 id);
         void MovePlayer(Uint32 id, Common::MovingOrientedPosition const& pos);
-        void DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId);
+        void EntityRemovedForPlayer(Uint32 playerId, Uint32 entityId);
         void SendPacket(Uint32 playerId, std::unique_ptr<Common::Packet>& packet);
         void SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet);
 

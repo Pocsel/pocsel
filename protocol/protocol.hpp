@@ -97,7 +97,7 @@ namespace Protocol {
         /**
          * Uint32 doodadId
          */
-        DoodadRemoved,
+        EntityRemoved,
 
         NbPacketTypeClient, // pour les tableaux
     };

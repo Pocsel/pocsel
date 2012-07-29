@@ -162,12 +162,12 @@ namespace Server { namespace Game { namespace Engine {
         this->_dirtyDoodads.clear();
     }
 
-    void DoodadManager::DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId)
-    {
-        auto it = this->_doodads.find(doodadId);
-        if (it != this->_doodads.end() && it->second)
-            it->second->RemovePlayer(playerId);
-    }
+//    void DoodadManager::DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId)
+//    {
+//        auto it = this->_doodads.find(doodadId);
+//        if (it != this->_doodads.end() && it->second)
+//            it->second->RemovePlayer(playerId);
+//    }
 
     void DoodadManager::DeleteDoodadsOfEntity(Uint32 entityId)
     {
@@ -222,17 +222,22 @@ namespace Server { namespace Game { namespace Engine {
         this->_disabledDoodads.erase(listIt);
     }
 
-    void DoodadManager::EntityHasMoved(Uint32 entityId)
+    bool DoodadManager::EntityHasDoodad(Uint32 entityId) const
     {
-        auto itList = this->_doodadsByEntity.find(entityId);
-        if (itList == this->_doodadsByEntity.end())
-            return;
-        auto it = itList->second.begin();
-        auto itEnd = itList->second.end();
-        for (; it != itEnd; ++it)
-            if ((*it))
-                (*it)->PositionIsDirty();
+        return this->_doodadsByEntity.count(entityId) > 0;
     }
+
+    //void DoodadManager::EntityHasMoved(Uint32 entityId)
+    //{
+    //    auto itList = this->_doodadsByEntity.find(entityId);
+    //    if (itList == this->_doodadsByEntity.end())
+    //        return;
+    //    auto it = itList->second.begin();
+    //    auto itEnd = itList->second.end();
+    //    for (; it != itEnd; ++it)
+    //        if ((*it))
+    //            (*it)->PositionIsDirty();
+    //}
 
     Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity& entity, std::string const& bodyName)
     {
@@ -286,11 +291,11 @@ namespace Server { namespace Game { namespace Engine {
         helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
 
         // XXX test
-        auto const& players = this->_engine.GetMap().GetPlayers();
-        auto it = players.begin();
-        auto itEnd = players.end();
-        for (; it != itEnd; ++it)
-            d->AddPlayer(it->first);
+        //auto const& players = this->_engine.GetMap().GetPlayers();
+        //auto it = players.begin();
+        //auto itEnd = players.end();
+        //for (; it != itEnd; ++it)
+        //    d->AddPlayer(it->first);
     }
 
     void DoodadManager::_ApiKill(Tools::Lua::CallHelper& helper)

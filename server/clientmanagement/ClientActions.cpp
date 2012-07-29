@@ -177,14 +177,14 @@ namespace Server { namespace ClientManagement {
                 Tools::log << "client " << client.id << ": unknown action " << actionId << ".\n";
         }
 
-        void _HandleDoodadRemoved(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
+        void _HandleEntityRemoved(ClientManager& manager, Client& client, Tools::ByteArray const& packet)
         {
             Tools::debug << "_HandleDoodadRemoved (client " << client.id << ")\n";
 
-            Uint32 doodadId;
-            Network::PacketExtractor::DoodadRemoved(packet, doodadId);
+            Uint32 entityId;
+            Network::PacketExtractor::EntityRemoved(packet, entityId);
 
-            manager.GetServer().GetGame().DoodadRemovedForPlayer(client.id, doodadId);
+            manager.GetServer().GetGame().EntityRemovedForPlayer(client.id, entityId);
         }
     }}
 
@@ -206,7 +206,7 @@ namespace Server { namespace ClientManagement {
             &ClientActionsNS::_HandleTeleportOk,
             &ClientActionsNS::_HandleMove,
             &ClientActionsNS::_HandleAction,
-            &ClientActionsNS::_HandleDoodadRemoved
+            &ClientActionsNS::_HandleEntityRemoved
         };
 
         static_assert((int) Protocol::ClientToServer::Login == 3, "wrong callback index");
@@ -220,7 +220,7 @@ namespace Server { namespace ClientManagement {
         static_assert((int) Protocol::ClientToServer::TeleportOk == 11, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::Move == 12, "wrong callback index");
         static_assert((int) Protocol::ClientToServer::Action == 13, "wrong callback index");
-        static_assert((int) Protocol::ClientToServer::DoodadRemoved == 14, "wrong callback index");
+        static_assert((int) Protocol::ClientToServer::EntityRemoved == 14, "wrong callback index");
 
 
         static_assert((size_t)Protocol::ClientToServer::NbPacketTypeClient == sizeof(actions) / sizeof(*actions),
