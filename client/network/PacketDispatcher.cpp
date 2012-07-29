@@ -127,6 +127,12 @@ namespace Client { namespace Network {
                 if (this->_client.GetState() != Client::LoadingChunks &&
                     this->_client.GetState() != Client::Running)
                     throw std::runtime_error("Bad state for entity update");
+
+                Uint32 entityId;
+                Common::Physics::Node node;
+                PacketExtractor::EntityUpdate(p, entityId, node);
+
+                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateEntity(entityId, node);
             };
     }
 

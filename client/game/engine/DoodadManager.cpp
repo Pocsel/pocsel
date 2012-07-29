@@ -188,7 +188,6 @@ namespace Client { namespace Game { namespace Engine {
         {
             // TODO faire ce qu'il faut pour le body
 
-            // TODO faire ce qu'il faut pour le updateEntity
             /*it->second->SetPhysics(*position);
 
             btRigidBody& btBody = it->second->GetBtBody();
@@ -235,6 +234,11 @@ namespace Client { namespace Game { namespace Engine {
                 // TODO
             }
         }
+    }
+
+    void DoodadManager::UpdateEntity(Uint32 entityId, Common::Physics::Node const& node)
+    {
+
     }
 
     void DoodadManager::Render()

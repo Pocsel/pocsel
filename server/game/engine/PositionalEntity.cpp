@@ -61,7 +61,6 @@ namespace Server { namespace Game { namespace Engine {
     void PositionalEntity::AddPlayer(Uint32 playerId)
     {
         this->_newPlayers.insert(playerId);
-        std::cout << "              ---            addplayer\n";
     }
 
     void PositionalEntity::RemovePlayer(Uint32 playerId)

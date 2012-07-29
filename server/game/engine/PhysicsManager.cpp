@@ -41,15 +41,18 @@ namespace Server { namespace Game { namespace Engine {
                                 body0->getUserPointer() != body1->getUserPointer())
                         {
                             PositionalEntity* entity0 = (PositionalEntity*)body0->getUserPointer();
-                            entity0->SetIsDirty(true);
-                            //Uint32 id0 = entity0->GetSelf()["id"].To<Uint32>();
-
-                            //pm->_engine.GetDoodadManager().EntityHasMoved(id0);
-
                             PositionalEntity* entity1 = (PositionalEntity*)body1->getUserPointer();
-                            entity1->SetIsDirty(true);
-                            //Uint32 id1 = entity1->GetSelf()["id"].To<Uint32>();
 
+
+                            pm->_newCollidingEntities.insert(entity0);
+                            pm->_newCollidingEntities.insert(entity1);
+
+                            //entity0->SetIsDirty(true);
+                            //entity1->SetIsDirty(true);
+
+                            //Uint32 id0 = entity0->GetSelf()["id"].To<Uint32>();
+                            //Uint32 id1 = entity1->GetSelf()["id"].To<Uint32>();
+                            //pm->_engine.GetDoodadManager().EntityHasMoved(id0);
                             //pm->_engine.GetDoodadManager().EntityHasMoved(id1);
                         }
 
@@ -99,6 +102,8 @@ namespace Server { namespace Game { namespace Engine {
 
         this->_world->Tick(deltaTime);
 
+        this->_UpdateCollidingEntities();
+
         for (auto it = this->_entities.begin(), ite = this->_entities.end(); it != ite; ++it)
         {
             if (!it->second)
@@ -107,6 +112,23 @@ namespace Server { namespace Game { namespace Engine {
             PositionalEntity& entity = *it->second;
             entity.UpdatePhysics();
         }
+    }
+
+    void PhysicsManager::_UpdateCollidingEntities()
+    {
+        for (auto it = this->_newCollidingEntities.begin(), ite = this->_newCollidingEntities.end(); it != ite; ++it)
+        {
+            (*it)->SetIsDirty(true);
+        }
+        for (auto it = this->_collidingEntities.begin(), ite = this->_collidingEntities.end(); it != ite; ++it)
+        {
+            if (!this->_newCollidingEntities.count(*it))
+            {
+                (*it)->SetIsDirty(true);
+            }
+        }
+        this->_collidingEntities = this->_newCollidingEntities;
+        this->_newCollidingEntities.clear();
     }
 
 }}}

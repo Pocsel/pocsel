@@ -52,7 +52,9 @@ namespace Client { namespace Game { namespace Engine {
         void UpdateDoodad(Uint32 doodadId,
                 std::vector<std::pair<bool, Common::Physics::Node>> const* body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands);
+        void UpdateEntity(Uint32 entityId, Common::Physics::Node const& node);
         void Render();
+
     private:
         void _CallDoodadFunction(Uint32 doodadId, std::string const& function);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
