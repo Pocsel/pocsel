@@ -139,7 +139,7 @@ namespace Client { namespace Network {
     }
 
     void PacketExtractor::EntityUpdate(Tools::ByteArray const& p,
-            Uint32 entityId,
+            Uint32& entityId,
             Common::Physics::Node& node)
     {
         p.Read(entityId);

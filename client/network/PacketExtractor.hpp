@@ -68,7 +68,7 @@ namespace Client { namespace Network {
                 std::unique_ptr<std::vector<std::pair<bool, Common::Physics::Node>>>& body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands);
         static void EntityUpdate(Tools::ByteArray const& p,
-                Uint32 entityId,
+                Uint32& entityId,
                 Common::Physics::Node& node);
     };
 

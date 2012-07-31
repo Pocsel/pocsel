@@ -58,6 +58,7 @@ namespace Client { namespace Game { namespace Engine {
     private:
         void _CallDoodadFunction(Uint32 doodadId, std::string const& function);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
+        void _UpdateEntityPosition(Entity& entity, Common::Physics::Node const& node);
     };
 
 }}}

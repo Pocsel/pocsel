@@ -48,9 +48,24 @@ namespace Client { namespace Game { namespace Engine {
         this->_doodads.push_back(doodad);
     }
 
-    void Entity::SetPosition(Common::Physics::Node const& position)
+    void Entity::UpdatePosition(Common::Physics::Node const& position)
     {
+        // TODO j'en suis là
+    //    btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
+    //    Common::Physics::Node& physics = entity.GetPhysics();
 
+    //    btTransform wt;
+    //    entity.GetBtBody().getMotionState()->getWorldTransform(wt);
+    //    btVector3 wpos = wt.getOrigin();
+
+    //    physics.position.x = wpos.x();
+    //    physics.position.y = wpos.y();
+    //    physics.position.z = wpos.z();
+
+    //    btQuaternion wrot = wt.getRotation();
+    //    glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
+    //    physics.orientation = //glm::eulerAngles(glmRot);
+    //    glmRot;
     }
 
 }}}

@@ -39,6 +39,7 @@ namespace Client { namespace Game { namespace Engine {
 
         Body const* GetBody() const { return this->_body.get(); }
 
+        void UpdatePosition(Common::Physics::Node const& node);
         Common::Physics::Node const& GetPhysics() const;
         float GetUpdateFlag() const;
 

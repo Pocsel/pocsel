@@ -27,7 +27,7 @@ namespace Client { namespace Game { namespace Engine {
         void AddDoodad(Uint32 doodad);
         void RemoveDoodad(Uint32 doodad);
 
-        void SetPosition(Common::Physics::Node const& position);
+        void UpdatePosition(Common::Physics::Node const& position);
 
         std::vector<Uint32> const& GetDoodads() const { return this->_doodads; }
         Common::Physics::BodyCluster& GetBodyCluster() { return *this->_bodyCluster; }
