@@ -38,6 +38,7 @@ struct FSout
 
 VSout vs(in float4 position : POSITION, in float normalTexCoord : TEXCOORD0)
 {
+    normalTexCoord /= 256.0;
     float3 normal = floor(frac(float3(normalTexCoord * 4, normalTexCoord * 16, normalTexCoord * 64)) * 4);
     normal = normal - 1.0;
 

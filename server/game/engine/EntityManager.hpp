@@ -2,7 +2,7 @@
 #define __SERVER_GAME_ENGINE_ENTITYMANAGER_HPP__
 
 #include "tools/lua/Ref.hpp"
-#include "tools/lua/IWeakResourceRef.hpp"
+#include "tools/lua/AWeakResourceRef.hpp"
 #include "tools/lua/WeakResourceRefManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
 #include "common/Position.hpp"
@@ -49,13 +49,14 @@ namespace Server { namespace Game { namespace Engine {
             Uint32 notificationCallbackId;
         };
     public:
-        struct WeakEntityRef : public Tools::Lua::IWeakResourceRef<EntityManager>
+        struct WeakEntityRef : public Tools::Lua::AWeakResourceRef<EntityManager>
         {
             WeakEntityRef() : entityId(0), disabled(true) {}
             WeakEntityRef(Uint32 entityId) : entityId(entityId), disabled(false) {}
             virtual bool IsValid(EntityManager const&) const { return this->entityId && !this->disabled; }
             virtual void Invalidate(EntityManager const&) { this->entityId = 0; this->disabled = true; }
             virtual Tools::Lua::Ref GetReference(EntityManager const& entityManager) const;
+            virtual std::string Serialize(EntityManager const& entityManager) const;
             Uint32 entityId;
             bool disabled;
         };
@@ -123,6 +124,7 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiLoad(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
+        void _ApiGetWeakPointer(Tools::Lua::CallHelper& helper);
 
         // positionnal
         void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
