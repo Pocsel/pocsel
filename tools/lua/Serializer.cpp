@@ -141,7 +141,7 @@ namespace Tools { namespace Lua {
         {
             auto res = serializeFunc(ref);
             if (!res.IsString())
-                throw std::runtime_error("return value of serialization function is of type " + res.GetTypeName());
+                throw std::runtime_error("Lua::Serializer: Return value of serialization function for type " + ref.GetTypeName() + " is of type " + res.GetTypeName());
             return "(function() " + res.ToString() + " end)()";
         }
         catch (std::exception& e)
