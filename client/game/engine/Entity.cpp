@@ -50,22 +50,44 @@ namespace Client { namespace Game { namespace Engine {
 
     void Entity::UpdatePosition(Common::Physics::Node const& position)
     {
-        // TODO j'en suis là
-    //    btVector3 const& btPos = entity.GetBtBody().getCenterOfMassPosition();
-    //    Common::Physics::Node& physics = entity.GetPhysics();
+        btRigidBody& btBody = this->_bodyCluster->GetBody();
 
-    //    btTransform wt;
-    //    entity.GetBtBody().getMotionState()->getWorldTransform(wt);
-    //    btVector3 wpos = wt.getOrigin();
+        /*
+        {
+            btTransform curWt;
+            btBody.getMotionState()->getWorldTransform(curWt);
+            std::cout << "Entity::UpdatePosition: " << "\n" <<
+                std::setprecision(50) <<
+                "curX = " << curWt.getOrigin().x() << "\n" <<
+                "curY = " << curWt.getOrigin().y() << "\n" <<
+                "curZ = " << curWt.getOrigin().z() << "\n" <<
+                "newX = " << position.position.x << "\n" <<
+                "newY = " << position.position.y << "\n" <<
+                "newZ = " << position.position.z << "\n";
+        }
+        */
 
-    //    physics.position.x = wpos.x();
-    //    physics.position.y = wpos.y();
-    //    physics.position.z = wpos.z();
+        btTransform wt;
+        wt.setOrigin(btVector3(position.position.x,
+                    position.position.y,
+                    position.position.z));
+        wt.setRotation(btQuaternion(
+                    position.orientation.x,
+                    position.orientation.y,
+                    position.orientation.z,
+                    position.orientation.w));
 
-    //    btQuaternion wrot = wt.getRotation();
-    //    glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
-    //    physics.orientation = //glm::eulerAngles(glmRot);
-    //    glmRot;
+        btBody.getMotionState()->setWorldTransform(wt);
+
+        btBody.setLinearVelocity(
+                btVector3(position.velocity.x,
+                    position.velocity.y,
+                    position.velocity.z));
+
+        btBody.setAngularVelocity(
+                btVector3(position.angularVelocity.x,
+                    position.angularVelocity.y,
+                    position.angularVelocity.z));
     }
 
 }}}

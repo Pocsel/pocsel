@@ -39,11 +39,14 @@ namespace Common { namespace Physics {
         btRigidBody& GetRootBtBody();
         btRigidBody const& GetRootBtBody() const;
 
+        void UpdatePosition(Common::Physics::Node const& position);
+
         void Dump() const;
 
     private:
         void _BuildBodyNode(Uint32 nodeId);
         void _CleanBodyNode(Uint32 nodeId);
+        void _UpdateNodePosition(Uint32 nodeId, Common::Physics::Node const& parentPosition);
     };
 
 }}

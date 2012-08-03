@@ -141,8 +141,8 @@ namespace Client { namespace Game { namespace Engine {
         }
         Entity& entity = *this->_entities[entityId];
 
-        entity.AddDoodad(doodadId);
         this->_UpdateEntityPosition(entity, position);
+        entity.AddDoodad(doodadId);
 
         this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(),
                 doodadId,

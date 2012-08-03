@@ -33,6 +33,7 @@ namespace Client { namespace Game { namespace Engine {
 
     void Doodad::UpdatePosition(Common::Physics::Node const& node)
     {
+        this->_body->UpdatePosition(node);
     }
 
     Common::Physics::Node const& Doodad::GetPhysics() const

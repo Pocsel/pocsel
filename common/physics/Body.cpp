@@ -128,6 +128,83 @@ namespace Common { namespace Physics {
         return this->_parent.GetBody();
     }
 
+    void Body::UpdatePosition(Common::Physics::Node const& position)
+    {
+        for (auto rootsIt = this->_type.GetRoots().begin(),
+                rootsIte = this->_type.GetRoots().end();
+                rootsIt != rootsIte; ++rootsIt)
+        {
+            this->_UpdateNodePosition(*rootsIt, position);
+        }
+    }
+
+    void Body::_UpdateNodePosition(Uint32 nodeId, Common::Physics::Node const& parentPosition)
+    {
+        BodyNode& node = this->_nodes[nodeId];
+        BodyType::ShapeNode const& shape = this->_type.GetShapes()[nodeId];
+        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBody() : this->_nodes[shape.parent].body;
+
+        btTransform parentTr;
+        parent->getMotionState()->getWorldTransform(parentTr);
+
+        btTransform thisTr;
+        thisTr.setIdentity();
+        thisTr.setOrigin(btVector3(
+                    shape.position.position.x,
+                    shape.position.position.y,
+                    shape.position.position.z));
+        thisTr.setRotation(btQuaternion(
+                    shape.position.orientation.x,
+                    shape.position.orientation.y,
+                    shape.position.orientation.z,
+                    shape.position.orientation.w));
+
+        btTransform tr;
+        tr.mult(parentTr, thisTr);
+
+        this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
+
+        node.body->getMotionState()->setWorldTransform(tr);
+        node.body->setCenterOfMassTransform(tr);
+
+
+        parentTr.setIdentity();
+        parentTr.setOrigin(parent->getLinearVelocity());
+        parentTr.setRotation(btQuaternion(
+                    parent->getAngularVelocity().x(),
+                    parent->getAngularVelocity().y(),
+                    parent->getAngularVelocity().z()));
+
+        tr.mult(parentTr, thisTr);
+
+        //node.body->setLinearVelocity(tr.getOrigin());
+        btScalar yaw, pitch, roll;
+        tr.getBasis().getEulerYPR(yaw, pitch, roll);
+        node.body->setAngularVelocity(btVector3(yaw, pitch, roll));
+
+
+        this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
+
+
+
+
+        //btVector3 vel = parent->getLinearVelocity();
+        //node.body->setLinearVelocity(vel);
+
+        //vel = parent->getAngularVelocity();
+        //btQuaternion velQ(
+        //node.body->setAngularVelocity(thisTr.inverse()(vel));
+
+
+        Common::Physics::Node position;
+        //position.velocity = ;
+
+        for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
+                childIte = this->_type.GetShapes()[nodeId].children.end();
+                childIt != childIte; ++childIt)
+            this->_UpdateNodePosition(*childIt, position);
+    }
+
     void Body::Dump() const
     {
         std::cout << "      Body::Dump()\n";
