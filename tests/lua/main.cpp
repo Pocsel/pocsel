@@ -6,7 +6,7 @@
 #include "tools/lua/MetaTable.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/lua/WeakResourceRefManager.hpp"
-#include "tools/lua/IWeakResourceRef.hpp"
+#include "tools/lua/AWeakResourceRef.hpp"
 #include "tools/Timer.hpp"
 
 #define STRINGIFY(...) #__VA_ARGS__
@@ -279,7 +279,7 @@ static void Resources(Interpreter& i)
         Ref coucou2;
     };
 
-    struct ResourceDeTest : Tools::Lua::IWeakResourceRef<MitoResourceManager>
+    struct ResourceDeTest : Tools::Lua::AWeakResourceRef<MitoResourceManager>
     {
         ResourceDeTest() : field1(0) {}
         ResourceDeTest(int field1, std::string field2) : field1(field1), field2(field2) {}

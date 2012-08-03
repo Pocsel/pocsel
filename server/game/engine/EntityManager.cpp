@@ -45,6 +45,7 @@ namespace Server { namespace Game { namespace Engine {
         namespaceTable.Set("Load", i.MakeFunction(std::bind(&EntityManager::_ApiLoad, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&EntityManager::_ApiKill, this, std::placeholders::_1)));
         namespaceTable.Set("Register", i.MakeFunction(std::bind(&EntityManager::_ApiRegister, this, std::placeholders::_1)));
+        namespaceTable.Set("GetWeakPointer", i.MakeFunction(std::bind(&EntityManager::_ApiGetWeakPointer, this, std::placeholders::_1)));
 
         // positionnal
         namespaceTable.Set("RegisterPositional", i.MakeFunction(std::bind(&EntityManager::_ApiRegisterPositional, this, std::placeholders::_1)));
@@ -98,6 +99,11 @@ namespace Server { namespace Game { namespace Engine {
     Tools::Lua::Ref EntityManager::WeakEntityRef::GetReference(EntityManager const& entityManager) const
     {
         return entityManager.GetEntity(this->entityId).GetSelf();
+    }
+
+    std::string EntityManager::WeakEntityRef::Serialize(EntityManager const& entityManager) const
+    {
+        return "return Server.Entity.GetWeakPointer(" + Tools::ToString(this->entityId) + ")";
     }
 
     CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */)
@@ -252,9 +258,10 @@ namespace Server { namespace Game { namespace Engine {
                 while (itTmp != itEnd)
                 {
                     auto it = itTmp++;
-                    if (it->second)
+                    Entity* entity = it->second;
+                    if (entity)
                     {
-                        Entity* entity = it->second;
+                        Uint32 id = it->first;
                         auto const& type = entity->GetType();
                         if (!type.IsPositional()) // saute les entités positionnelles, elles sont gérées differement après
                             try
@@ -262,25 +269,25 @@ namespace Server { namespace Game { namespace Engine {
                                 Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
 
                                 // XXX Save() database hook
-                                CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
+                                CallbackManager::Result callRet = this->CallEntityFunction(id, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
                                 if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                     throw std::runtime_error("call to Save() failed");
                                 std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);
 
                                 if (ret.ToBoolean())
                                 {
-                                    Tools::debug << ">> Save >> " << table << " >> Enabled Non-Positional Entity " << it->first << " not saved." << std::endl;
-                                    this->_DeleteEntity(it->first, it->second);
+                                    Tools::debug << ">> Save >> " << table << " >> Enabled Non-Positional Entity " << id << " not saved." << std::endl;
+                                    this->_DeleteEntity(id, entity);
                                 }
                                 else
                                 {
-                                    Tools::debug << ">> Save >> " << table << " >> Enabled Non-Positional Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes)" << std::endl;
-                                    query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(0).Bind(0).Bind(0).ExecuteNonSelect().Reset();
+                                    Tools::debug << ">> Save >> " << table << " >> Enabled Non-Positional Entity (id: " << id << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes)" << std::endl;
+                                    query->Bind(id).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(0).Bind(0).Bind(0).ExecuteNonSelect().Reset();
                                 }
                             }
                             catch (std::exception& e)
                             {
-                                Tools::log << "EntityManager::Save: Could not save non positional entity " << it->first << ": " << e.what() << std::endl;
+                                Tools::log << "EntityManager::Save: Could not save non positional entity " << id << ": " << e.what() << std::endl;
                             }
                     }
                 }
@@ -292,9 +299,10 @@ namespace Server { namespace Game { namespace Engine {
                 while (itTmp != itEnd)
                 {
                     auto it = itTmp++;
-                    if (it->second)
+                    PositionalEntity* entity = it->second;
+                    if (entity)
                     {
-                        PositionalEntity* entity = it->second;
+                        Uint32 id = it->first;
                         auto const& pos = entity->GetPosition();
                         auto const& type = entity->GetType();
                         try
@@ -302,25 +310,25 @@ namespace Server { namespace Game { namespace Engine {
                             Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
 
                             // XXX Save() database hook
-                            CallbackManager::Result callRet = this->CallEntityFunction(it->first, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
+                            CallbackManager::Result callRet = this->CallEntityFunction(id, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
                             if (callRet == CallbackManager::Error || callRet == CallbackManager::EntityNotFound)
                                 throw std::runtime_error("call to Save() failed");
                             std::string storage = this->_engine.GetInterpreter().GetSerializer().Serialize(entity->GetStorage(), true /* nilOnError */);
 
                             if (ret.ToBoolean())
                             {
-                                Tools::debug << ">> Save >> " << table << " >> Enabled Positional Entity " << it->first << " not saved." << std::endl;
-                                this->_DeleteEntity(it->first, it->second);
+                                Tools::debug << ">> Save >> " << table << " >> Enabled Positional Entity " << id << " not saved." << std::endl;
+                                this->_DeleteEntity(id, it->second);
                             }
                             else
                             {
-                                Tools::debug << ">> Save >> " << table << " >> Enabled Positional Entity (id: " << it->first << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes, x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
-                                query->Bind(it->first).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
+                                Tools::debug << ">> Save >> " << table << " >> Enabled Positional Entity (id: " << id << ", pluginId: " << type.GetPluginId() << ", entityName: \"" << type.GetName() << "\", storage: " << storage.size() << " bytes, x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
+                                query->Bind(id).Bind(type.GetPluginId()).Bind(type.GetName()).Bind(0).Bind(storage).Bind(pos.x).Bind(pos.y).Bind(pos.z).ExecuteNonSelect().Reset();
                             }
                         }
                         catch (std::exception& e)
                         {
-                            Tools::error << "EntityManager::Save: Could not save positional entity " << it->first << ": " << e.what() << std::endl;
+                            Tools::error << "EntityManager::Save: Could not save positional entity " << id << ": " << e.what() << std::endl;
                         }
                     }
                 }
@@ -515,7 +523,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         auto it = this->_entities.find(entityId);
         if (it == this->_entities.end() || !it->second)
-            throw std::runtime_error("EntityManager::GetEntity: Entity not found.");
+            throw std::runtime_error("EntityManager::GetEntity: Entity " + Tools::ToString(entityId) + " not found.");
         return *it->second;
     }
 
@@ -534,14 +542,14 @@ namespace Server { namespace Game { namespace Engine {
                 throw std::runtime_error("EntityManager::GetEntity: This reference was invalidated - you must not keep true references to entities, only weak references");
         }
         else
-            throw std::runtime_error("EntityManager::GetEntity: Argument of type " + ref.GetTypeName() + " given");
+            throw std::runtime_error("EntityManager::GetEntity: Invalid argument type " + ref.GetTypeName() + " given");
     }
 
     PositionalEntity& EntityManager::GetPositionalEntity(Uint32 entityId) throw(std::runtime_error)
     {
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
-            throw std::runtime_error("EntityManager::GetPositionalEntity: Positional entity not found.");
+            throw std::runtime_error("EntityManager::GetPositionalEntity: Positional " + Tools::ToString(entityId) + " entity not found.");
         return *it->second;
     }
 
@@ -549,7 +557,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         auto it = this->_positionalEntities.find(entityId);
         if (it == this->_positionalEntities.end() || !it->second)
-            throw std::runtime_error("EntityManager::GetPositionalEntity: Positional entity not found.");
+            throw std::runtime_error("EntityManager::GetPositionalEntity: Positional " + Tools::ToString(entityId) + " entity not found.");
         return *it->second;
     }
 
@@ -916,6 +924,11 @@ namespace Server { namespace Game { namespace Engine {
             this->_entityTypes[pluginId][entityName] = new EntityType(entityName, pluginId, prototype, positional);
             Tools::debug << "EntityManager::_ApiRegister: New entity type \"" << entityName << "\" registered from \"" << pluginName << "\" (plugin " << pluginId << ", positional: " << (positional ? "yes" : "no") << ").\n";
         }
+    }
+
+    void EntityManager::_ApiGetWeakPointer(Tools::Lua::CallHelper& helper)
+    {
+        Entity const& e = this->GetEntity(helper.PopArg("Server.Entity.GetWeakPointer: Missing argument \"entity\""));
     }
 
     void EntityManager::_ApiRegisterPositional(Tools::Lua::CallHelper& helper)
