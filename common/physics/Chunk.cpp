@@ -27,7 +27,7 @@ namespace Common { namespace Physics {
         }
         if (this->_body)
         {
-            this->_body->setUserPointer((void*)1);
+            //this->_body->setUserPointer((void*)1);
             this->_world.GetBtWorld().removeRigidBody(this->_body);
         }
         Tools::Delete(this->_body);
@@ -173,7 +173,7 @@ namespace Common { namespace Physics {
         rbInfo.m_restitution = 0.5;
         this->_body = new btRigidBody(rbInfo);
         this->_body->setCenterOfMassTransform(tr);
-        this->_body->setUserPointer(this);
+        //this->_body->setUserPointer(this);
 
         this->_body->setCollisionFlags(this->_body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
 

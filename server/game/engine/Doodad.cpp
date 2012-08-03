@@ -36,9 +36,11 @@ namespace Server { namespace Game { namespace Engine {
         _entity(entity),
         _storage(engine.GetInterpreter().MakeTable()),
         _body(body),
-        _positionDirty(false)
+        _positionDirty(false),
+        _isNew(true)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
+        this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
     Doodad::~Doodad()
@@ -49,8 +51,8 @@ namespace Server { namespace Game { namespace Engine {
         auto packet = Network::PacketCreator::DoodadKill(this->_id);
 
         // send kill packet to players
-        auto it = this->_players.begin();
-        auto itEnd = this->_players.end();
+        auto it = this->_entity.GetPlayers().begin();
+        auto itEnd = this->_entity.GetPlayers().end();
         for (; it != itEnd; ++it)
         {
             auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
@@ -76,21 +78,21 @@ namespace Server { namespace Game { namespace Engine {
         this->_storage = ref;
     }
 
-    void Doodad::AddPlayer(Uint32 playerId)
-    {
-        this->_newPlayers.insert(playerId);
-        this->_engine.GetDoodadManager().DoodadIsDirty(this);
-    }
+    //void Doodad::AddPlayer(Uint32 playerId)
+    //{
+    //    this->_newPlayers.insert(playerId);
+    //    this->_engine.GetDoodadManager().DoodadIsDirty(this);
+    //}
 
-    void Doodad::RemovePlayer(Uint32 playerId)
-    {
-        this->_players.erase(playerId);
-        this->_newPlayers.erase(playerId);
-    }
+    //void Doodad::RemovePlayer(Uint32 playerId)
+    //{
+    //    this->_players.erase(playerId);
+    //    this->_newPlayers.erase(playerId);
+    //}
 
     void Doodad::_SpawnForNewPlayers()
     {
-        if (this->_newPlayers.empty())
+        if (!this->_isNew && this->_entity.GetNewPlayers().empty())
             return;
 
         // create packet
@@ -109,16 +111,28 @@ namespace Server { namespace Game { namespace Engine {
                 values);
 
         // send packet to new players
-        auto it = this->_newPlayers.begin();
-        auto itEnd = this->_newPlayers.end();
+        auto it = this->_entity.GetNewPlayers().begin();
+        auto itEnd = this->_entity.GetNewPlayers().end();
         for (; it != itEnd; ++it)
             if (this->_engine.GetMap().HasPlayer(*it))
             {
                 auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
                 this->_engine.SendPacket(*it, packetCopy);
-                this->_players.insert(*it);
             }
-        this->_newPlayers.clear();
+
+        // send packet to everyone
+        if (this->_isNew)
+        {
+            auto it = this->_entity.GetPlayers().begin();
+            auto itEnd = this->_entity.GetPlayers().end();
+            for (; it != itEnd; ++it)
+                if (this->_engine.GetMap().HasPlayer(*it))
+                {
+                    auto packetCopy = std::unique_ptr<Common::Packet>(new Common::Packet(*packet));
+                    this->_engine.SendPacket(*it, packetCopy);
+                }
+            this->_isNew = false;
+        }
     }
 
     void Doodad::ExecuteCommands()
@@ -153,8 +167,8 @@ namespace Server { namespace Game { namespace Engine {
         this->_positionDirty = false;
 
         // send packet to players
-        auto it = this->_players.begin();
-        auto itEnd = this->_players.end();
+        auto it = this->_entity.GetPlayers().begin();
+        auto itEnd = this->_entity.GetPlayers().end();
         while (it != itEnd)
             if (this->_engine.GetMap().HasPlayer(*it))
             {
@@ -170,8 +184,6 @@ namespace Server { namespace Game { namespace Engine {
                 }
                 ++it;
             }
-            else
-                this->_players.erase(it++);
     }
 
     void Doodad::Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value)

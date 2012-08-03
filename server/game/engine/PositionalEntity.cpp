@@ -1,4 +1,10 @@
 #include "server/game/engine/PositionalEntity.hpp"
+#include "server/game/engine/Engine.hpp"
+#include "server/game/engine/DoodadManager.hpp"
+#include "server/game/map/Map.hpp"
+
+#include "server/network/PacketCreator.hpp"
+#include "server/network/UdpPacket.hpp"
 
 #include "common/physics/BodyCluster.hpp"
 
@@ -16,6 +22,7 @@ namespace Server { namespace Game { namespace Engine {
         _bodyCluster(0)
     {
         this->_bodyCluster = new Common::Physics::BodyCluster(world, pos);
+        this->_bodyCluster->SetUserData(this);
     }
 
     PositionalEntity::~PositionalEntity()
@@ -49,6 +56,50 @@ namespace Server { namespace Game { namespace Engine {
         //    wt.getOrigin().z() << "\n";
 
         //this->_bodyCluster->Dump();
+    }
+
+    void PositionalEntity::AddPlayer(Uint32 playerId)
+    {
+        this->_newPlayers.insert(playerId);
+        std::cout << "              ---            addplayer\n";
+    }
+
+    void PositionalEntity::RemovePlayer(Uint32 playerId)
+    {
+        this->_newPlayers.erase(playerId);
+        this->_players.erase(playerId);
+    }
+
+    void PositionalEntity::UpdatePlayers()
+    {
+        if (!this->_engine.GetDoodadManager().EntityHasDoodad(this->_id))
+            return;
+
+        if (this->_isDirty)
+        {
+            this->_isDirty = false;
+
+            auto packet = Network::PacketCreator::EntityUpdate(this->_id, this->_physics);
+            std::vector<Uint32> toDel;
+            for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
+            {
+                if (this->_engine.GetMap().HasPlayer(*it))
+                {
+                    auto packetCopy = std::unique_ptr<Network::UdpPacket>(new Network::UdpPacket(*packet));
+                    this->_engine.SendUdpPacket(*it, packetCopy);
+                }
+                else
+                {
+                    toDel.push_back(*it);
+                }
+            }
+            for (auto it = toDel.begin(), ite = toDel.end(); it != ite; ++it)
+                this->_players.erase(*it);
+        }
+
+        for (auto it = this->_newPlayers.begin(), ite = this->_newPlayers.end(); it != ite; ++it)
+            this->_players.insert(*it);
+        this->_newPlayers.clear();
     }
 
 }}}

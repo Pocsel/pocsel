@@ -19,8 +19,8 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Engine& _engine;
         std::map<Uint32, PositionalEntity*> const& _entities;
-        std::set<Uint32> _bodiesInWorld;
-        std::set<btRigidBody const*> _entityBodies;
+//        std::set<Uint32> _bodiesInWorld;
+//        std::set<btRigidBody const*> _entityBodies;
         Common::Physics::World* _world;
 
     public:

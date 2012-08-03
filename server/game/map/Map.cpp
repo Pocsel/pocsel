@@ -175,10 +175,10 @@ namespace Server { namespace Game { namespace Map {
         this->_messageQueue->PushMessage(m);
     }
 
-    void Map::DoodadRemovedForPlayer(Uint32 playerId, Uint32 doodadId)
+    void Map::EntityRemovedForPlayer(Uint32 playerId, Uint32 entityId)
     {
         Tools::SimpleMessageQueue::Message
-            m(std::bind(&Engine::DoodadManager::DoodadRemovedForPlayer, &this->_engine->GetDoodadManager(), playerId, doodadId));
+            m(std::bind(&Engine::EntityManager::EntityRemovedForPlayer, &this->_engine->GetEntityManager(), playerId, entityId));
         this->_messageQueue->PushMessage(m);
     }
 
