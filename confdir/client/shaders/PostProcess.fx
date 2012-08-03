@@ -16,20 +16,30 @@ texture diffuse;
 sampler sLighting = sampler_state
 {
     Texture = <lighting>;
-    minFilter = Point;
-    magFilter = Point;
+    AddressU  = Wrap;
+    AddressV  = Wrap;
+    MagFilter = Point;
+    MinFilter = Point;
+    MipFilter = None;
+
 };
 sampler sSpecular = sampler_state
 {
     Texture = <specular>;
-    minFilter = Point;
-    magFilter = Point;
+    AddressU  = Wrap;
+    AddressV  = Wrap;
+    MagFilter = Point;
+    MinFilter = Point;
+    MipFilter = None;
 };
 sampler sDiffuse = sampler_state
 {
     Texture = <diffuse>;
-    minFilter = Point;
-    magFilter = Point;
+    AddressU  = Wrap;
+    AddressV  = Wrap;
+    MagFilter = Point;
+    MinFilter = Point;
+    MipFilter = None;
 };
 
 #define lighting sLighting
@@ -39,18 +49,18 @@ sampler sDiffuse = sampler_state
 #else
 sampler2D lighting = sampler_state
 {
-    minFilter = Point;
-    magFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
 };
 sampler2D specular = sampler_state
 {
-    minFilter = Point;
-    magFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
 };
 sampler2D diffuse = sampler_state
 {
-    minFilter = Point;
-    magFilter = Point;
+    MagFilter = Point;
+    MinFilter = Point;
 };
 #endif
 
@@ -124,8 +134,9 @@ technique tech
    pass p0
    {
        AlphaBlendEnable = false;
-       VertexShader = compile vs_3_0 vs();
-       PixelShader = compile ps_3_0 fs();
+       ZEnable = false;
+       VertexShader = compile vs_2_0 vs();
+       PixelShader = compile ps_2_0 fs();
    }
 }
 

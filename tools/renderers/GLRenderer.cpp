@@ -231,6 +231,11 @@ namespace Tools { namespace Renderers {
         GLCHECK(::glViewport(0, 0, size.x, size.y));
     }
 
+    void GLRenderer::SetViewport(glm::uvec2 const& offset, glm::uvec2 const& size)
+    {
+        GLCHECK(::glViewport(offset.x, offset.y, size.x, size.y));
+    }
+
     void GLRenderer::SetClearColor(glm::vec4 const& color)
     {
         GLCHECK(::glClearColor(color.r, color.g, color.b, color.a));

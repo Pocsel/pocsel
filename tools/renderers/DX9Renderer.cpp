@@ -242,6 +242,18 @@ namespace Tools { namespace Renderers {
         this->_RefreshDevice(true);
     }
 
+    void DX9Renderer::SetViewport(glm::uvec2 const& offset, glm::uvec2 const& size)
+    {
+        D3DVIEWPORT9 vp;
+        vp.Width = size.x;
+        vp.Height = size.y;
+        vp.X = offset.x;
+        vp.Y = offset.y;
+        vp.MinZ = 0.0f;
+        vp.MaxZ = 1.0f;
+        DXCHECKERROR(this->_device->SetViewport(&vp));
+    }
+
     void DX9Renderer::SetNormaliseNormals(bool normalise)
     {
         DXCHECKERROR(this->_device->SetRenderState(D3DRS_NORMALIZENORMALS, normalise ? TRUE : FALSE));

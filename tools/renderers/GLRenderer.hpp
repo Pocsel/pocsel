@@ -104,6 +104,7 @@ namespace Tools { namespace Renderers {
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size);
+        virtual void SetViewport(glm::uvec2 const& offset, glm::uvec2 const& size);
         virtual void SetClearColor(glm::vec4 const& color);
         virtual void SetClearDepth(float value);
         virtual void SetClearStencil(int value);
