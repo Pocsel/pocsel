@@ -15,6 +15,24 @@ namespace Tools {
         ::memcpy(this->_data, ByteArray._data, this->_size);
     }
 
+    ByteArray::ByteArray(std::vector<char> const& vector) :
+        _size(vector.size()),
+        _allocSize(0),
+        _offset(0)
+    {
+        this->_Resize(this->_allocSize);
+        ::memcpy(this->_data, vector.data(), this->_size);
+    }
+
+    ByteArray::ByteArray(char const* data, Uint32 size) :
+        _size(size),
+        _allocSize(0),
+        _offset(0)
+    {
+        this->_Resize(this->_allocSize);
+        ::memcpy(this->_data, data, this->_size);
+    }
+
     ByteArray::~ByteArray()
     {
         delete [] this->_data;

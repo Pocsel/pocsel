@@ -1,6 +1,10 @@
 #ifndef __TOOLS_IRENDERER_HPP__
 #define __TOOLS_IRENDERER_HPP__
 
+#ifdef _MSC_VER
+#include "tools/precompiled.hpp"
+#endif
+
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"

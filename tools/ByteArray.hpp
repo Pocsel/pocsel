@@ -31,8 +31,10 @@ namespace Tools {
         mutable Uint32 _offset;
 
     public:
-        explicit ByteArray();
+        ByteArray();
         explicit ByteArray(ByteArray const& ByteArray);
+        explicit ByteArray(std::vector<char> const& vector);
+        ByteArray(char const* data, Uint32 size);
         virtual ~ByteArray();
 
         ByteArray& operator =(ByteArray const& ByteArray);
