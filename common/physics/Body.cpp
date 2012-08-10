@@ -134,11 +134,11 @@ namespace Common { namespace Physics {
                 rootsIte = this->_type.GetRoots().end();
                 rootsIt != rootsIte; ++rootsIt)
         {
-            this->_UpdateNodePosition(*rootsIt, position);
+            this->_UpdateNodePosition(*rootsIt);
         }
     }
 
-    void Body::_UpdateNodePosition(Uint32 nodeId, Common::Physics::Node const& parentPosition)
+    void Body::_UpdateNodePosition(Uint32 nodeId)
     {
         BodyNode& node = this->_nodes[nodeId];
         BodyType::ShapeNode const& shape = this->_type.GetShapes()[nodeId];
@@ -165,23 +165,14 @@ namespace Common { namespace Physics {
         this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
 
         node.body->getMotionState()->setWorldTransform(tr);
-        node.body->setCenterOfMassTransform(tr);
+        //node.body->setCenterOfMassTransform(tr);
 
-
-        parentTr.setIdentity();
-        parentTr.setOrigin(parent->getLinearVelocity());
-        parentTr.setRotation(btQuaternion(
-                    parent->getAngularVelocity().x(),
-                    parent->getAngularVelocity().y(),
-                    parent->getAngularVelocity().z()));
-
-        tr.mult(parentTr, thisTr);
-
-        //node.body->setLinearVelocity(tr.getOrigin());
-        btScalar yaw, pitch, roll;
-        tr.getBasis().getEulerYPR(yaw, pitch, roll);
-        node.body->setAngularVelocity(btVector3(yaw, pitch, roll));
-
+        node.body->setLinearVelocity(parent->getVelocityInLocalPoint(
+                    tr.getOrigin()
+                    -
+                    parentTr.getOrigin()
+                    ));
+        node.body->setAngularVelocity(parent->getAngularVelocity());
 
         this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
 
@@ -196,13 +187,11 @@ namespace Common { namespace Physics {
         //node.body->setAngularVelocity(thisTr.inverse()(vel));
 
 
-        Common::Physics::Node position;
-        //position.velocity = ;
 
         for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
                 childIte = this->_type.GetShapes()[nodeId].children.end();
                 childIt != childIte; ++childIt)
-            this->_UpdateNodePosition(*childIt, position);
+            this->_UpdateNodePosition(*childIt);
     }
 
     void Body::Dump() const

@@ -1,6 +1,7 @@
 #include "client/game/engine/Entity.hpp"
 
 #include "common/physics/BodyCluster.hpp"
+#include "common/physics/World.hpp"
 
 #include "bullet/bullet-all.hpp"
 
@@ -67,6 +68,7 @@ namespace Client { namespace Game { namespace Engine {
         }
         */
 
+
         btTransform wt;
         wt.setOrigin(btVector3(position.position.x,
                     position.position.y,
@@ -77,7 +79,10 @@ namespace Client { namespace Game { namespace Engine {
                     position.orientation.z,
                     position.orientation.w));
 
+        this->_bodyCluster->GetWorld().GetBtWorld().removeRigidBody(&btBody);
+
         btBody.getMotionState()->setWorldTransform(wt);
+        //btBody.setCenterOfMassTransform(wt);
 
         btBody.setLinearVelocity(
                 btVector3(position.velocity.x,
@@ -88,6 +93,8 @@ namespace Client { namespace Game { namespace Engine {
                 btVector3(position.angularVelocity.x,
                     position.angularVelocity.y,
                     position.angularVelocity.z));
+
+        this->_bodyCluster->GetWorld().GetBtWorld().addRigidBody(&btBody);
     }
 
 }}}

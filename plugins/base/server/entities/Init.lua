@@ -109,7 +109,7 @@ Server.Body.Register{
     shapeTree = {
         {
             name = "NoeudDeTestALaCon", -- nom unique de noeud
-            position = { 0, 0, 0 }, -- par rapport au parent (entité positionnelle)
+            position = { 3, 3, 3 }, -- par rapport au parent (entité positionnelle)
             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
             shape = {
                 shapeType = "box", -- pour le moment y'a que box ou sphere

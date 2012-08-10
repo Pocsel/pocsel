@@ -6,6 +6,7 @@
 #include "common/physics/Node.hpp"
 #include "common/physics/Vector.hpp"
 #include "common/physics/World.hpp"
+#include "common/physics/BodyCluster.hpp"
 
 #include "bullet/bullet-all.hpp"
 
@@ -36,6 +37,12 @@ namespace Server { namespace Game { namespace Engine {
                         // XXX
                         btRigidBody* body0 = (btRigidBody*)contactManifold->getBody0();
                         btRigidBody* body1 = (btRigidBody*)contactManifold->getBody1();
+
+                        //if (body0->getUserPointer())
+                        //    pm->_newCollidingEntities.insert((PositionalEntity*)body0->getUserPointer());
+                        //if (body1->getUserPointer())
+                        //    pm->_newCollidingEntities.insert((PositionalEntity*)body1->getUserPointer());
+
 
                         if (body0->getUserPointer() && body1->getUserPointer() &&
                                 body0->getUserPointer() != body1->getUserPointer())
@@ -99,6 +106,48 @@ namespace Server { namespace Game { namespace Engine {
 //                //this->_entityBodies.insert(&it->second->GetBtBody());
 //            }
 //        }
+
+        static Uint64 totalTime = 0;
+        static Uint64 lastTime = 0;
+
+        totalTime += deltaTime;
+        if (totalTime > lastTime)
+        {
+            while (lastTime < totalTime)
+                lastTime += 1000000;
+            for (auto it = _entities.begin(), ite = _entities.end(); it != ite; ++it)
+            {
+                it->second->SetIsDirty(true);
+            }
+        }
+
+
+
+
+        if (_entities.size())
+            for (auto it = _entities.begin(); it == _entities.begin(); ++it)
+            {
+                PositionalEntity* entity = it->second;
+                btRigidBody& body = entity->GetBodyCluster().GetBody();
+
+                std::cout << 
+                    "vel:     " <<
+                    body.getLinearVelocity().x() << ", " <<
+                    body.getLinearVelocity().y() << ", " <<
+                    body.getLinearVelocity().z() << "\n";
+
+                std::cout <<
+                    "angvel:  " <<
+                    body.getAngularVelocity().x() << ", " <<
+                    body.getAngularVelocity().y() << ", " <<
+                    body.getAngularVelocity().z() << "\n";
+
+                std::cout <<
+                    "othershit: " <<
+                    body.getVelocityInLocalPoint(btVector3(3, 3, 3)).x() << ", " <<
+                    body.getVelocityInLocalPoint(btVector3(3, 3, 3)).y() << ", " <<
+                    body.getVelocityInLocalPoint(btVector3(3, 3, 3)).z() << "\n";
+            }
 
         this->_world->Tick(deltaTime);
 

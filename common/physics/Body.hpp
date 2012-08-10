@@ -46,7 +46,7 @@ namespace Common { namespace Physics {
     private:
         void _BuildBodyNode(Uint32 nodeId);
         void _CleanBodyNode(Uint32 nodeId);
-        void _UpdateNodePosition(Uint32 nodeId, Common::Physics::Node const& parentPosition);
+        void _UpdateNodePosition(Uint32 nodeId);
     };
 
 }}
