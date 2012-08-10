@@ -133,6 +133,22 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         throw std::runtime_error("Bad TextureFilter ?!");
     }
 
+    inline GLint GetVertexAttributeIndex(VertexAttributeUsage::Type type)
+    {
+        switch (type)
+        {
+            case VertexAttributeUsage::Position: return 0;
+            case VertexAttributeUsage::Normal: return 2;
+            case VertexAttributeUsage::Color: return 3;
+            case VertexAttributeUsage::TexCoord: return 8;
+            case VertexAttributeUsage::Custom1: return 9;
+            case VertexAttributeUsage::Custom2: return 10;
+            case VertexAttributeUsage::Custom3: return 11;
+            case VertexAttributeUsage::Custom4: return 12;
+        }
+        throw std::runtime_error("Bad VertexAttributeUsage ?!");
+    }
+
     void GLCheckError(std::string const& file, unsigned int line, char const* function);
     void CGCheckError(CGcontext ctx, std::string const& file, unsigned int line, char const* function);
 

@@ -15,7 +15,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
         struct VertexAttribute
         {
-            GLint location;
+            VertexAttributeUsage::Type location;
             GLint nbElements;
             GLint type;
             GLvoid* offset;

@@ -36,9 +36,11 @@ struct FSout
     float4 normalDepth  : COLOR1;
 };
 
-VSout vs(in float4 position : POSITION, in float normalTexCoord : TEXCOORD0)
+VSout vs(in float4 position : POSITION)
 {
-    normalTexCoord /= 256.0;
+    float normalTexCoord = position.w / 256.0;
+    position.w = 1.0;
+
     float3 normal = floor(frac(float3(normalTexCoord * 4, normalTexCoord * 16, normalTexCoord * 64)) * 4);
     normal = normal - 1.0;
 

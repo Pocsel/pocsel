@@ -57,8 +57,8 @@ namespace Client { namespace Map {
     namespace {
         struct Vertex
         {
-            glm::u16vec3 position;
-            Uint16 packed;
+            glm::u8vec3 position;
+            Uint8 packed;
             Vertex() {}
             Vertex(glm::fvec3 const& position, glm::fvec3 const& normal, glm::fvec2 const& texture)
                 : position(position)
@@ -295,8 +295,8 @@ namespace Client { namespace Map {
             return true;
 
         this->_vertices = renderer.CreateVertexBuffer().release();
-        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Short, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Short, Tools::Renderers::VertexAttributeUsage::TexCoord, 1); // Normales + Textures
+        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::UnsignedByte, Tools::Renderers::VertexAttributeUsage::Position, 4); // position
+        //this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Short, Tools::Renderers::VertexAttributeUsage::TexCoord, 1); // Normales + Textures
         this->_vertices->SetData(this->_tmpNbVertices * (3+3+2) * sizeof(*this->_tmpVertices), this->_tmpVertices, Tools::Renderers::VertexBufferUsage::Static);
         for (auto it = this->_tmpIndices.begin(), ite = this->_tmpIndices.end(); it !=ite; ++it)
         {
