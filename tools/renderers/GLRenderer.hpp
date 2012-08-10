@@ -2,6 +2,7 @@
 #define __TOOLS_RENDERERS_GLRENDERER_HPP__
 
 #include "tools/renderers/opengl/opengl.hpp"
+#include "tools/renderers/ARenderer.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
@@ -22,43 +23,16 @@ namespace Tools { namespace Renderers {
         class ShaderProgram;
     }
 
-    class GLRenderer : public Tools::IRenderer
+    class GLRenderer : public ARenderer
     {
     private:
-        struct RenderState
-        {
-            enum DrawState
-            {
-                None,
-                Draw2D,
-                Draw3D
-            };
-
-            DrawState state;
-            IRenderTarget* target;
-
-            glm::detail::tmat4x4<float> modelViewProjection;
-            glm::detail::tmat4x4<float> model;
-            glm::detail::tmat4x4<float> view;
-            glm::detail::tmat4x4<float> projection;
-            unsigned int matrixMode;
-        };
-
-    private:
-        glm::uvec2 _screenSize;
         CGcontext _cgContext;
-        std::list<std::function<void()>> _shutdownCallbacks;
-
-        std::list<RenderState> _states;
-        RenderState* _currentState;
-
-        IShaderProgram* _currentProgram;
 
     public:
         OpenGL::IndexBuffer* bindedIndexBuffer;
 
     public:
-        GLRenderer() : _currentProgram(0), bindedIndexBuffer(0) {}
+        GLRenderer(glm::uvec2 const& screenSize, bool fullscreen) : ARenderer(screenSize, fullscreen), _cgContext(0), bindedIndexBuffer(0) {}
         virtual ~GLRenderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const
@@ -69,9 +43,6 @@ namespace Tools { namespace Renderers {
 
         virtual void Initialise();
         virtual void Shutdown();
-
-        // Callbacks
-        virtual void RegisterShutdownCallback(std::function<void()>&& callback) { this->_shutdownCallbacks.push_back(callback); }
 
         // Resources
         virtual std::unique_ptr<IVertexBuffer> CreateVertexBuffer();
@@ -88,19 +59,8 @@ namespace Tools { namespace Renderers {
         virtual void BeginDraw(IRenderTarget* target);
         virtual void EndDraw();
 
-        virtual void UpdateCurrentParameters();
         virtual void DrawElements(Uint32 count, DataType::Type indicesType = DataType::UnsignedInt, void const* indices = 0, DrawingMode::Type mode = DrawingMode::Triangles);
         virtual void DrawVertexBuffer(Uint32 offset, Uint32 count, DrawingMode::Type mode = DrawingMode::Triangles);
-
-        // Matrices
-        virtual void SetModelMatrix(glm::detail::tmat4x4<float> const& matrix);
-        virtual void SetViewMatrix(glm::detail::tmat4x4<float> const& matrix);
-        virtual void SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix);
-
-        glm::detail::tmat4x4<float> const& GetModelViewProjectionMatrix() const { return this->_states.front().modelViewProjection; }
-        glm::detail::tmat4x4<float> const& GetModelMatrix() const { return this->_states.front().model; }
-        glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_states.front().view; }
-        glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_states.front().projection; }
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size);
@@ -115,14 +75,9 @@ namespace Tools { namespace Renderers {
         virtual void SetRasterizationMode(RasterizationMode::Type rasterizationMode);
         void SetMatrixMode(unsigned int mode);
 
-        IShaderProgram& GetCurrentProgram() { return *this->_currentProgram; }
-        void SetCurrentProgram(IShaderProgram& program)
-        {
-            this->_currentProgram = &program;
-        }
         CGcontext GetCgContext() const { return this->_cgContext; }
     private:
-        void _PushState(RenderState const& state);
+        void _PushState(ARenderer::RenderState const& state);
         void _PopState();
     };
 

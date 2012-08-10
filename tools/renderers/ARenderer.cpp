@@ -1,16 +1,6 @@
-#ifdef _WIN32
-
 #include "tools/precompiled.hpp"
 
-#include <IL/il.h>
-
-#include "tools/renderers/dx9/directx.hpp"
-#include "tools/renderers/dx9/IndexBuffer.hpp"
-#include "tools/renderers/dx9/RenderTarget.hpp"
-#include "tools/renderers/dx9/ShaderProgram.hpp"
-#include "tools/renderers/dx9/Texture2D.hpp"
-#include "tools/renderers/dx9/VertexBuffer.hpp"
-#include "tools/renderers/DX9Renderer.hpp"
+#include "tools/renderers/ARenderer.hpp"
 #include "tools/logger/Logger.hpp"
 
 #ifdef _MSC_VER
@@ -183,6 +173,18 @@ namespace Tools { namespace Renderers {
         this->_PopState();
     }
 
+    void DX9Renderer::UpdateCurrentParameters()
+    {
+        assert(this->_currentProgram != 0 && "Il faut obligatoirement un shader !");
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewProjectionMatrix);
+        this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
+        this->_currentProgram->UpdateCurrentPass();
+    }
+
     void DX9Renderer::DrawElements(Uint32 count, DataType::Type indicesType, void const* indices, DrawingMode::Type mode)
     {
         this->UpdateCurrentParameters();
@@ -202,6 +204,19 @@ namespace Tools { namespace Renderers {
     {
         this->UpdateCurrentParameters();
         DXCHECKERROR(this->_device->DrawPrimitive(DX9::GetDrawingMode(mode), offset, DX9::GetPrimitiveCount(mode, count)));
+    }
+
+    // Matrices
+    void DX9Renderer::SetModelMatrix(glm::detail::tmat4x4<float> const& matrix)
+    {
+        this->_currentState->model = matrix;
+        this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
+    }
+
+    void DX9Renderer::SetViewMatrix(glm::detail::tmat4x4<float> const& matrix)
+    {
+        this->_currentState->view = matrix;
+        this->_currentState->modelViewProjection = this->_currentState->projection * this->_currentState->view * this->_currentState->model;
     }
 
     void DX9Renderer::SetProjectionMatrix(glm::detail::tmat4x4<float> const& matrix)
@@ -343,17 +358,50 @@ namespace Tools { namespace Renderers {
         }
     }
 
-    void DX9Renderer::_PushState(ARenderer::RenderState const& state)
+    void DX9Renderer::_PushState(DX9Renderer::RenderState const& state)
     {
         bool startScene = false;
+
+        RenderState rsOld;
         if (this->_states.size() > 0)
         {
+            rsOld = this->_states.front();
             if (state.target != 0)
                 DXCHECKERROR(this->_device->EndScene());
             startScene = this->_states.size() == 1 || state.target != 0;
         }
+        this->_states.push_front(state);
+        auto& rs = this->_states.front();
+        this->_currentState = &rs;
 
-        this->_GenericPushState(state, DX9Renderer::glToDirectX);
+        if (rs.target != 0)
+        {
+            rs.target->Bind();
+            D3DVIEWPORT9 vp;
+            vp.Width = rs.target->GetSize().x;
+            vp.Height = rs.target->GetSize().y;
+            vp.X = 0;
+            vp.Y = 0;
+            vp.MinZ = 0.0f;
+            vp.MaxZ = 1.0f;
+            DXCHECKERROR(this->_device->SetViewport(&vp));
+        }
+
+        if (rs.state == DX9Renderer::RenderState::Draw2D)
+        {
+            rs.view = glm::translate<float>(0, 0, 1);
+            auto size = rs.target == 0 ? this->_screenSize : rs.target->GetSize();
+            rs.projection = DX9Renderer::glToDirectX * glm::ortho<float>(0, size.x, size.y, 0);
+            rs.model = rsOld.model;
+            rs.modelViewProjection = rs.projection * rs.view * rs.model;
+        }
+        else
+        {
+            rs.view = rsOld.view;
+            rs.projection = rsOld.projection;
+            rs.model = rsOld.model;
+            rs.modelViewProjection = rs.projection * rs.view * rs.model;
+        }
 
         if (startScene)
             DXCHECKERROR(this->_device->BeginScene());
@@ -370,16 +418,53 @@ namespace Tools { namespace Renderers {
         }
 
         auto rsOld = this->_states.front();
-        this->_GenericPopState();
+        this->_states.pop_front();
+        auto& rs = this->_states.front();
+        this->_currentState = &rs;
 
-        if (rsOld.state != this->_currentState->state)
+        if (rsOld.target != 0)
         {
-            if (this->_currentState->state == RenderState::Draw3D)
+            if (rs.target != 0)
+            {
+                rs.target->Bind();
+                D3DVIEWPORT9 vp;
+                vp.Width = rs.target->GetSize().x;
+                vp.Height = rs.target->GetSize().y;
+                vp.X = 0;
+                vp.Y = 0;
+                vp.MinZ = 0.0f;
+                vp.MaxZ = 1.0f;
+                DXCHECKERROR(this->_device->SetViewport(&vp));
+            }
+            else
+            {
+                for (auto it = this->_states.begin(), ite = this->_states.end(); it != ite; ++it)
+                {
+                    if (it->target)
+                    {
+                        it->target->Bind();
+                        D3DVIEWPORT9 vp;
+                        vp.Width = it->target->GetSize().x;
+                        vp.Height = it->target->GetSize().y;
+                        vp.X = 0;
+                        vp.Y = 0;
+                        vp.MinZ = 0.0f;
+                        vp.MaxZ = 1.0f;
+                        DXCHECKERROR(this->_device->SetViewport(&vp));
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (rsOld.state != rs.state)
+        {
+            if (rs.state == RenderState::Draw3D)
             {
                 DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE));
                 DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW));
             }
-            else if (this->_currentState->state == RenderState::Draw2D)
+            else if (rs.state == RenderState::Draw2D)
             {
                 DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE));
                 DXCHECKERROR(this->_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE));
