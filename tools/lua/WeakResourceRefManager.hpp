@@ -22,7 +22,8 @@ namespace Tools { namespace Lua {
         Interpreter& _interpreter;
         ManagerType& _resourceManager;
         Uint32 _nextReferenceId;
-        std::unordered_map<Uint32 /* ref id */, Ref /* weak ref UserData */>* _weakReferences;
+        std::unordered_map<Uint32 /* ref id */, std::list<std::pair<WeakResourceRefType* /* pointer to Lua resource */, Ref /* corresponding UserData */>>>* _weakReferences;
+        std::map<WeakResourceRefType, std::pair<Uint32 /* ref id */, std::list<std::pair<WeakResourceRefType* /* pointer to Lua resource */, Ref /* corresponding UserData */>>*>>* _weakReferencesByResource;
         MetaTable* _weakReferenceMetaTable;
         std::list<Ref /* fake ref UserData */>* _fakeReferences;
         MetaTable* _fakeReferenceMetaTable;
@@ -36,7 +37,8 @@ namespace Tools { namespace Lua {
             _fakeReferences(0),
             _fakeReferenceMetaTable(0)
         {
-            this->_weakReferences = new std::unordered_map<Uint32, Ref>();
+            this->_weakReferences = new std::unordered_map<Uint32, std::list<std::pair<WeakResourceRefType*, Ref>>>();
+            this->_weakReferencesByResource = new std::map<WeakResourceRefType, std::pair<Uint32, std::list<std::pair<WeakResourceRefType*, Ref>>*>>();
             this->_weakReferenceMetaTable = &MetaTable::Create(interpreter, WeakResourceRefType());
             this->_weakReferenceMetaTable->SetMethod("Lock", std::bind(&WeakResourceRefManager::_WeakReferenceLock, this, std::placeholders::_1));
             this->_weakReferenceMetaTable->SetMetaMethod(MetaTable::Serialize, std::bind(&WeakResourceRefManager::_WeakReferenceSerialize, this, std::placeholders::_1));
@@ -54,17 +56,37 @@ namespace Tools { namespace Lua {
         {
             Tools::Delete(this->_invalidRef);
             Tools::Delete(this->_weakReferences);
+            Tools::Delete(this->_weakReferencesByResource);
             Tools::Delete(this->_fakeReferences);
         }
 
         std::pair<Uint32, Ref> NewResource(WeakResourceRefType const& resource)
         {
-            while (!this->_nextReferenceId // 0 est la valeur spéciale "pas de ref", on la saute
-                    || this->_weakReferences->count(this->_nextReferenceId))
-                ++this->_nextReferenceId;
-            Uint32 newId = this->_nextReferenceId++;
-            Ref userData = this->_interpreter.Make(resource);
-            return *this->_weakReferences->insert(std::make_pair(newId, userData)).first;
+            auto it = this->_weakReferencesByResource->find(resource);
+            if (it == this->_weakReferencesByResource->end())
+            {
+                while (!this->_nextReferenceId // 0 est la valeur spéciale "pas de ref", on la saute
+                        || this->_weakReferences->count(this->_nextReferenceId))
+                    ++this->_nextReferenceId;
+                Uint32 newId = this->_nextReferenceId++;
+                Ref userData = this->_interpreter.Make(resource);
+                auto& refList = this->_weakReferences->operator[](newId);
+                refList.push_back(std::make_pair(userData.To<WeakResourceRefType*>(), userData));
+                this->_weakReferencesByResource->insert(std::make_pair(resource, std::make_pair(newId, &refList)));
+                return std::make_pair(newId, userData);
+            }
+            else
+            {
+                assert(!it->second.second->empty());
+                return std::make_pair(it->second.first, it->second.second->front().second);
+            }
+        }
+
+        Ref NewUnloadedResource(WeakResourceRefType const& resource)
+        {
+            WeakResourceRefType unloadedResource = resource;
+            unloadedResource.SetLoaded(false);
+            return this->_interpreter.Make(unloadedResource);
         }
 
         void InvalidateResource(Uint32 refId) throw(std::runtime_error)
@@ -72,8 +94,12 @@ namespace Tools { namespace Lua {
             auto it = this->_weakReferences->find(refId);
             if (it == this->_weakReferences->end())
                 throw std::runtime_error("WeakResourceRefManager::InvalidateResource: No resource with id " + Tools::ToString(refId));
-            Ref& ref = it->second;
-            ref.To<WeakResourceRefType*>()->Invalidate(this->_resourceManager);
+            auto itList = it->second.begin();
+            auto itListEnd = it->second.end();
+            assert(!it->second.empty());
+            this->_weakReferencesByResource->erase(*itList->first);
+            for (; itList != itListEnd; ++itList)
+                itList->first->Invalidate(this->_resourceManager);
             this->_weakReferences->erase(it);
         }
 
@@ -87,7 +113,8 @@ namespace Tools { namespace Lua {
             auto it = this->_weakReferences->find(refId);
             if (it == this->_weakReferences->end())
                 throw std::runtime_error("WeakResourceRefManager::GetWeakReference: No weak reference with id " + Tools::ToString(refId));
-            return it->second;
+            assert(!it->second.empty());
+            return it->second.front().second;
         }
 
         // ne pas garder la reference longtemps...
@@ -96,8 +123,8 @@ namespace Tools { namespace Lua {
             auto it = this->_weakReferences->find(refId);
             if (it == this->_weakReferences->end())
                 throw std::runtime_error("WeakResourceRefManager::GetResource: No resource with id " + Tools::ToString(refId));
-            Ref& ref = it->second;
-            return *ref.To<WeakResourceRefType*>();
+            assert(!it->second.empty());
+            return *it->second.front().first;
         }
 
         void InvalidateAllFakeReferences()
@@ -124,6 +151,15 @@ namespace Tools { namespace Lua {
         void _WeakReferenceLock(CallHelper& helper)
         {
             WeakResourceRefType* weakRef = helper.PopArg("WeakResourceRefManager::_WeakReferenceLock: Missing self argument for __index metamethod").To<WeakResourceRefType*>();
+            if (!weakRef->IsLoaded())
+            {
+                auto it = this->_weakReferencesByResource->find(*weakRef);
+                if (it == this->_weakReferencesByResource->end())
+                {
+                    helper.PushRet(helper.GetInterpreter().MakeNil());
+                    return;
+                }
+            }
             if (weakRef->IsValid(this->_resourceManager))
             {
                 if (this->_fakeReferences)
