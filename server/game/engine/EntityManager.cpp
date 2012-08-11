@@ -106,6 +106,16 @@ namespace Server { namespace Game { namespace Engine {
         return "return Server.Entity.GetWeakPointer(" + Tools::ToString(this->entityId) + ")";
     }
 
+    bool EntityManager::WeakEntityRef::operator <(WeakEntityRef const& rhs) const
+    {
+        if (this->disabled && !rhs.disabled)
+            return true;
+        else if (!this->disabled && rhs.disabled)
+            return false;
+        else
+            return this->entityId < rhs.entityId;
+    }
+
     CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */)
     {
         auto it = this->_entities.find(entityId);

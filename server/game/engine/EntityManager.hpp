@@ -57,6 +57,7 @@ namespace Server { namespace Game { namespace Engine {
             virtual void Invalidate(EntityManager const&) { this->entityId = 0; this->disabled = true; }
             virtual Tools::Lua::Ref GetReference(EntityManager const& entityManager) const;
             virtual std::string Serialize(EntityManager const& entityManager) const;
+            bool operator <(WeakEntityRef const& rhs) const;
             Uint32 entityId;
             bool disabled;
         };
