@@ -115,43 +115,43 @@ namespace Server { namespace Game { namespace Engine {
         {
             while (lastTime < totalTime)
                 lastTime += 1000000;
-            for (auto it = _entities.begin(), ite = _entities.end(); it != ite; ++it)
-            {
-                it->second->SetIsDirty(true);
-            }
+        //    for (auto it = _entities.begin(), ite = _entities.end(); it != ite; ++it)
+        //    {
+        //        it->second->SetIsDirty(true);
+        //    }
         }
 
 
 
 
-        if (_entities.size())
-            for (auto it = _entities.begin(); it == _entities.begin(); ++it)
-            {
-                PositionalEntity* entity = it->second;
-                btRigidBody& body = entity->GetBodyCluster().GetBody();
+        //if (_entities.size())
+        //    for (auto it = _entities.begin(); it == _entities.begin(); ++it)
+        //    {
+        //        PositionalEntity* entity = it->second;
+        //        btRigidBody& body = entity->GetBodyCluster().GetBody();
 
-                std::cout << 
-                    "vel:     " <<
-                    body.getLinearVelocity().x() << ", " <<
-                    body.getLinearVelocity().y() << ", " <<
-                    body.getLinearVelocity().z() << "\n";
+        //        std::cout << 
+        //            "vel:     " <<
+        //            body.getLinearVelocity().x() << ", " <<
+        //            body.getLinearVelocity().y() << ", " <<
+        //            body.getLinearVelocity().z() << "\n";
 
-                std::cout <<
-                    "angvel:  " <<
-                    body.getAngularVelocity().x() << ", " <<
-                    body.getAngularVelocity().y() << ", " <<
-                    body.getAngularVelocity().z() << "\n";
+        //        std::cout <<
+        //            "angvel:  " <<
+        //            body.getAngularVelocity().x() << ", " <<
+        //            body.getAngularVelocity().y() << ", " <<
+        //            body.getAngularVelocity().z() << "\n";
 
-                std::cout <<
-                    "othershit: " <<
-                    body.getVelocityInLocalPoint(btVector3(3, 3, 3)).x() << ", " <<
-                    body.getVelocityInLocalPoint(btVector3(3, 3, 3)).y() << ", " <<
-                    body.getVelocityInLocalPoint(btVector3(3, 3, 3)).z() << "\n";
-            }
+        //        std::cout <<
+        //            "othershit: " <<
+        //            body.getVelocityInLocalPoint(btVector3(3, 3, 3)).x() << ", " <<
+        //            body.getVelocityInLocalPoint(btVector3(3, 3, 3)).y() << ", " <<
+        //            body.getVelocityInLocalPoint(btVector3(3, 3, 3)).z() << "\n";
+        //    }
 
         this->_world->Tick(deltaTime);
 
-        this->_UpdateCollidingEntities();
+        //this->_UpdateCollidingEntities();
 
         for (auto it = this->_entities.begin(), ite = this->_entities.end(); it != ite; ++it)
         {

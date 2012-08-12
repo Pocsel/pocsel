@@ -34,6 +34,9 @@ namespace Common { namespace Physics {
 
         _body->setUserPointer(this);
 
+        _body->setLinearFactor(btVector3(1,1,1));
+        _body->setAngularFactor(btVector3(1,1,1));
+
         this->_world.GetBtWorld().addRigidBody(_body);
         this->_body->setGravity(btVector3(0, 0, 0));
     }

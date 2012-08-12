@@ -81,9 +81,6 @@ namespace Client { namespace Game { namespace Engine {
 
         this->_bodyCluster->GetWorld().GetBtWorld().removeRigidBody(&btBody);
 
-        btBody.getMotionState()->setWorldTransform(wt);
-        //btBody.setCenterOfMassTransform(wt);
-
         btBody.setLinearVelocity(
                 btVector3(position.velocity.x,
                     position.velocity.y,
@@ -93,6 +90,10 @@ namespace Client { namespace Game { namespace Engine {
                 btVector3(position.angularVelocity.x,
                     position.angularVelocity.y,
                     position.angularVelocity.z));
+
+        btBody.clearForces();
+        btBody.getMotionState()->setWorldTransform(wt);
+        btBody.setCenterOfMassTransform(wt);
 
         this->_bodyCluster->GetWorld().GetBtWorld().addRigidBody(&btBody);
     }

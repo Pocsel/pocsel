@@ -12,6 +12,7 @@ Server.Entity.Register{
             print("Test Module nil")
         end
         Server.Message.Later(12, self.id, "SpawnBlob")
+        Server.Message.Later(22, self.id, "SpawnBlob")
         -- Server.Message.Later(17, self.id, "SpawnTank")
     end,
 
@@ -32,7 +33,7 @@ Server.Entity.Register{
 
     SpawnBlob = function(self)
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 10, 67108864), "base:Blob")
-        Server.Message.Later(6, self.id, "SpawnBlob")
+        --Server.Message.Later(6, self.id, "SpawnBlob")
     end,
 
     SpawnTank = function(self)
@@ -107,8 +108,193 @@ Server.Body.Register{
         -- valeurs par defaut, peuvent etre changees a chaque noeud
     },
     shapeTree = {
+        --[[--
         {
             name = "NoeudDeTestALaCon", -- nom unique de noeud
+            position = { 2, 0, 0 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+            children = {
+                {
+                    name = "nique0",
+                    position = { 5, 0, 0 }, -- par rapport au parent (entité positionnelle)
+                    orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                    shape = {
+                        shapeType = "box", -- pour le moment y'a que box ou sphere
+                        halfExtents = {0.8, 1.9, 1.2}
+                    },
+                    friction = 0.5,
+                    restitution = 0.0,
+                    mass = 70,
+                },
+                {
+                    name = "nique1",
+                    position = { 0, 5, 0 }, -- par rapport au parent (entité positionnelle)
+                    orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                    shape = {
+                        shapeType = "box", -- pour le moment y'a que box ou sphere
+                        halfExtents = {0.8, 1.9, 1.2}
+                    },
+                    friction = 0.5,
+                    restitution = 0.0,
+                    mass = 70,
+                },
+                {
+                    name = "nique2",
+                    position = { 0, 0, 5 }, -- par rapport au parent (entité positionnelle)
+                    orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                    shape = {
+                        shapeType = "box", -- pour le moment y'a que box ou sphere
+                        halfExtents = {0.8, 1.9, 1.2}
+                    },
+                    friction = 0.5,
+                    restitution = 0.0,
+                    mass = 70,
+                },
+                {
+                    name = "nique_0",
+                    position = { -5, 0, 0 }, -- par rapport au parent (entité positionnelle)
+                    orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                    shape = {
+                        shapeType = "box", -- pour le moment y'a que box ou sphere
+                        halfExtents = {0.8, 1.9, 1.2}
+                    },
+                    friction = 0.5,
+                    restitution = 0.0,
+                    mass = 70,
+                },
+                {
+                    name = "nique_1",
+                    position = { 0, -5, 0 }, -- par rapport au parent (entité positionnelle)
+                    orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                    shape = {
+                        shapeType = "box", -- pour le moment y'a que box ou sphere
+                        halfExtents = {0.8, 1.9, 1.2}
+                    },
+                    friction = 0.5,
+                    restitution = 0.0,
+                    mass = 70,
+                },
+                {
+                    name = "nique_2",
+                    position = { 0, 0, -5 }, -- par rapport au parent (entité positionnelle)
+                    orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                    shape = {
+                        shapeType = "box", -- pour le moment y'a que box ou sphere
+                        halfExtents = {0.8, 1.9, 1.2}
+                    },
+                    friction = 0.5,
+                    restitution = 0.0,
+                    mass = 70,
+                },
+            }
+        },
+        --]]--
+        ---[[--
+        {
+            name = "NoeudDeTestALaCon", -- nom unique de noeud
+            position = { 0, 0, 0 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {1.1, 1.1, 1.1},
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+            children = {
+        {
+            name = "NoeudDeTestALaCon000", -- nom unique de noeud
+            position = { -3, -3, -3 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+        },
+        {
+            name = "NoeudDeTestALaCon001", -- nom unique de noeud
+            position = { -3, -3, 3 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+        },
+        {
+            name = "NoeudDeTestALaCon010", -- nom unique de noeud
+            position = { -3, 3, -3 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+        },
+        {
+            name = "NoeudDeTestALaCon011", -- nom unique de noeud
+            position = { -3, 3, 3 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+        },
+        {
+            name = "NoeudDeTestALaCon100", -- nom unique de noeud
+            position = { 3, -3, -3 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+        },
+        {
+            name = "NoeudDeTestALaCon101", -- nom unique de noeud
+            position = { 3, -3, 3 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+        },
+        {
+            name = "NoeudDeTestALaCon110", -- nom unique de noeud
+            position = { 3, 3, -3 }, -- par rapport au parent (entité positionnelle)
+            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+            shape = {
+                shapeType = "box", -- pour le moment y'a que box ou sphere
+                halfExtents = {0.8, 1.9, 1.2}
+            },
+            friction = 0.5,
+            restitution = 0.0,
+            mass = 70,
+        },
+        {
+            name = "NoeudDeTestALaCon111", -- nom unique de noeud
             position = { 3, 3, 3 }, -- par rapport au parent (entité positionnelle)
             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
             shape = {
@@ -118,7 +304,10 @@ Server.Body.Register{
             friction = 0.5,
             restitution = 0.0,
             mass = 70,
+        },
         }
+        }
+        --]]--
 --        {
 --            ... -- autre noeud a la racine
 --        },

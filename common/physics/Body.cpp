@@ -62,7 +62,17 @@ namespace Common { namespace Physics {
         node.body = new btRigidBody(rbInfo);
         node.body->setActivationState(DISABLE_DEACTIVATION);
 
+        node.body->setLinearFactor(btVector3(1,1,1));
+        node.body->setAngularFactor(btVector3(1,1,1));
+
         btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform::getIdentity(), false);
+
+        for (int i = 0; i < 6; ++i)
+        {
+            //newConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.2, i);
+            newConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.04, i);
+            //newConstraint->setParam(BT_CONSTRAINT_CFM, 0.1, i);
+        }
 
         //if (false && parent == &this->_parent.GetBody())
         {
@@ -73,6 +83,7 @@ namespace Common { namespace Physics {
             btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
             newConstraint->setAngularUpperLimit(anglLimit);
         }
+
 
         node.constraint = newConstraint;
 
@@ -164,9 +175,6 @@ namespace Common { namespace Physics {
 
         this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
 
-        node.body->getMotionState()->setWorldTransform(tr);
-        //node.body->setCenterOfMassTransform(tr);
-
         node.body->setLinearVelocity(parent->getVelocityInLocalPoint(
                     tr.getOrigin()
                     -
@@ -174,8 +182,11 @@ namespace Common { namespace Physics {
                     ));
         node.body->setAngularVelocity(parent->getAngularVelocity());
 
-        this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
+        node.body->clearForces();
+        node.body->getMotionState()->setWorldTransform(tr);
+        node.body->setCenterOfMassTransform(tr);
 
+        this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
 
 
 
