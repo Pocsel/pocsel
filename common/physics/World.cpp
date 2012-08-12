@@ -15,19 +15,18 @@ namespace Common { namespace Physics {
         _lastTime(0)
     {
         ///collision configuration contains default setup for memory, collision setup
-        this->_collisionConfiguration = new btDefaultCollisionConfiguration();
+        _collisionConfiguration = new btDefaultCollisionConfiguration();
         ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-        this->_dispatcher = new btCollisionDispatcher(_collisionConfiguration);
+        _dispatcher = new btCollisionDispatcher(_collisionConfiguration);
 
-        this->_broadphase = new btDbvtBroadphase();
+        _broadphase = new btDbvtBroadphase();
 
         ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
-        this->_solver = new btSequentialImpulseConstraintSolver();
+        _solver = new btSequentialImpulseConstraintSolver();
 
-        this->_dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
+        _dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
 
-        this->_dynamicsWorld->setGravity(btVector3(0.0,-9.81,0.0));
-        this->_dynamicsWorld->getSolverInfo().m_numIterations = 4;
+        _dynamicsWorld->setGravity(btVector3(0.0,-9.81,0.0));
     }
 
     World::~World()
@@ -42,7 +41,7 @@ namespace Common { namespace Physics {
     void World::Tick(Uint64 totalTime)
     {
         double deltaTime = (totalTime - this->_lastTime) * 0.000001;
-        this->_dynamicsWorld->stepSimulation(deltaTime, 16, 1.0 / 60.0);
+        this->_dynamicsWorld->stepSimulation(deltaTime, 4, 1.0 / 60.0);
     }
 
 }}
