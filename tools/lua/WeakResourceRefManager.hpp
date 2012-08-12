@@ -150,7 +150,8 @@ namespace Tools { namespace Lua {
 
         void _WeakReferenceLock(CallHelper& helper)
         {
-            WeakResourceRefType* weakRef = helper.PopArg("WeakResourceRefManager::_WeakReferenceLock: Missing self argument for __index metamethod").To<WeakResourceRefType*>();
+            Ref ref = helper.PopArg("WeakResourceRefManager::_WeakReferenceLock: Missing self argument for __index metamethod");
+            WeakResourceRefType* weakRef = ref.To<WeakResourceRefType*>();
             if (!weakRef->IsLoaded())
             {
                 auto it = this->_weakReferencesByResource->find(*weakRef);
@@ -159,6 +160,7 @@ namespace Tools { namespace Lua {
                     helper.PushRet(helper.GetInterpreter().MakeNil());
                     return;
                 }
+                it->second.second->push_back(std::make_pair(weakRef, ref));
             }
             if (weakRef->IsValid(this->_resourceManager))
             {
