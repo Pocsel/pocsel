@@ -9,7 +9,14 @@ namespace Tools { namespace Renderers { namespace Effect {
     {
         enum Type
         {
-
+            Never,
+            Less,
+            LessEqual,
+            Equal,
+            NotEqual,
+            Greater,
+            GreaterEqual,
+            Always
         };
     }
 
@@ -19,21 +26,26 @@ namespace Tools { namespace Renderers { namespace Effect {
         {
             Zero,
             One,
-            SrcColor,
-            InvSrcColor,
-            SrcAlpha,
-            InvSrcAlpha,
-            DestAlpha,
-            InvDestAlpha,
             DestColor,
+            OneMinusDestColor,
             InvDestColor,
+            SrcAlpha,
+            OneMinusSrcAlpha,
+            InvSrcAlpha,
+            DstAlpha,
+            OneMinusDstAlpha,
+            InvDestAlpha,
+            SrcAlphaSaturate,
             SrcAlphaSat,
-            BothSrcAlpha,
-            BothInvSrcAlpha,
+            SrcColor,
+            OneMinusSrcColor,
+            InvSrcColor,
+            ConstantColor,
             BlendFactor,
+            OneMinusConstantColor,
             InvBlendFactor,
-            SrcColor2,
-            InvSrcColor2
+            ConstantAlpha,
+            OneMinusConstantAlpha
         };
     }
 
@@ -44,8 +56,8 @@ namespace Tools { namespace Renderers { namespace Effect {
         ZFunc::Type zFunc;
         RasterizationMode::Type fillMode;
         bool alphaTestEnable;
-        Blend::Type srcBlend;
-        Blend::Type destBlend;
+        Blend::Type blendSrc;
+        Blend::Type blendDest;
         CullMode::Type cullMode;
 
         RenderState(ByteArray& stream);

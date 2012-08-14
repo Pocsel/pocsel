@@ -1,6 +1,7 @@
 #ifndef __TOOLS_RENDERERS_ARENDERER_HPP__
 #define __TOOLS_RENDERERS_ARENDERER_HPP__
 
+#include "tools/ByteArray.hpp"
 #include "tools/IRenderer.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
@@ -52,7 +53,21 @@ namespace Tools { namespace Renderers {
         // Resources
         //virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0);
         //virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath);
-        //virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect);
+        virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect) = 0;
+        virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(ByteArray& stream)
+        {
+            Uint32 size = 0;
+            std::unique_ptr<Renderers::IShaderProgram> program;
+            do
+            {
+                auto type = stream.ReadString();
+                size = stream.Read32();
+                auto data = stream.ReadRawData(size);
+                if (type == "cg")
+                    program = this->CreateProgram(std::string(data, size));
+            } while (size > 0);
+            return program;
+        }
 
         // Drawing
         virtual void UpdateCurrentParameters()

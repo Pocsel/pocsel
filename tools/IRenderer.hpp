@@ -14,6 +14,10 @@
 #endif
 
 namespace Tools {
+    class ByteArray;
+}
+
+namespace Tools {
 
     namespace ClearFlags
     {
@@ -298,6 +302,7 @@ namespace Tools {
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath) = 0;
         virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect) = 0;
+        virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(ByteArray& stream) = 0;
 
         // Drawing
         virtual void Clear(int clearFlags) = 0;
