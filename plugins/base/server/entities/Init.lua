@@ -14,6 +14,7 @@ Server.Entity.Register{
         Server.Message.Later(12, self.id, "SpawnBlob")
         Server.Message.Later(22, self.id, "SpawnBlob")
         -- Server.Message.Later(17, self.id, "SpawnTank")
+        Server.Entity.Spawn("base:TestWeakPtr")
     end,
 
     Die = function(self) -- destructor

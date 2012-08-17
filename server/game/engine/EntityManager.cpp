@@ -962,7 +962,22 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::_ApiGetWeakPointer(Tools::Lua::CallHelper& helper)
     {
-        Entity const& e = this->GetEntity(helper.PopArg("Server.Entity.GetWeakPointer: Missing argument \"entity\""));
+        Tools::Lua::Ref entityId = helper.PopArg("Server.Entity.GetWeakPointer: Missing argument \"entity\"");
+        try
+        {
+            Entity const& e = this->GetEntity(entityId);
+            helper.PushRet(this->_weakEntityRefManager->GetWeakReference(e.GetWeakReferenceId()));
+        }
+        catch (std::exception&)
+        {
+            if (entityId.IsNumber())
+            {
+                WeakEntityRef unloadedEntityRef(entityId.To<Uint32>());
+                helper.PushRet(this->_weakEntityRefManager->NewUnloadedResource(unloadedEntityRef));
+            }
+            else
+                throw std::runtime_error("Server.Entity.GetWeakPointer: Entity not found - if you want to create a weak pointer to a non/maybe-existing entity, use a number, not a " + entityId.GetTypeName());
+        }
     }
 
     void EntityManager::_ApiRegisterPositional(Tools::Lua::CallHelper& helper)
