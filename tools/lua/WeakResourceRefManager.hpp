@@ -30,7 +30,7 @@ namespace Tools { namespace Lua {
         Ref* _invalidRef;
 
     public:
-        WeakResourceRefManager(Interpreter& interpreter, ManagerType& resourceManager, WeakResourceRefType const& invalidRef = WeakResourceRefType(), bool useFakeReferences = false) :
+        WeakResourceRefManager(Interpreter& interpreter, ManagerType& resourceManager, bool useFakeReferences = false) :
             _interpreter(interpreter),
             _resourceManager(resourceManager),
             _nextReferenceId(1),
@@ -49,7 +49,7 @@ namespace Tools { namespace Lua {
                 this->_fakeReferenceMetaTable->SetMetaMethod(MetaTable::Index, std::bind(&WeakResourceRefManager::_FakeReferenceIndex, this, std::placeholders::_1));
                 this->_fakeReferenceMetaTable->SetMetaMethod(MetaTable::NewIndex, std::bind(&WeakResourceRefManager::_FakeReferenceNewIndex, this, std::placeholders::_1));
             }
-            this->_invalidRef = new Tools::Lua::Ref(this->_interpreter.Make(invalidRef));
+            this->_invalidRef = new Tools::Lua::Ref(this->_interpreter.Make(WeakResourceRefType()));
         }
 
         ~WeakResourceRefManager()
@@ -154,12 +154,14 @@ namespace Tools { namespace Lua {
             WeakResourceRefType* weakRef = ref.To<WeakResourceRefType*>();
             if (!weakRef->IsLoaded())
             {
+                weakRef->TryToLoad(this->_resourceManager);
                 auto it = this->_weakReferencesByResource->find(*weakRef);
                 if (it == this->_weakReferencesByResource->end())
                 {
                     helper.PushRet(helper.GetInterpreter().MakeNil());
                     return;
                 }
+                weakRef->SetLoaded(true);
                 it->second.second->push_back(std::make_pair(weakRef, ref));
             }
             if (weakRef->IsValid(this->_resourceManager))

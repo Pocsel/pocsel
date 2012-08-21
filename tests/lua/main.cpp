@@ -63,7 +63,7 @@ static void Basic(Interpreter& i)
         Tools::Lua::CallHelper helper(i);
         helper.PushArg(i.Make(true));
         helper.PushArg(i.Make("Hey!!"));
-        bite(helper);
+        bite.Call(helper);
         auto const& rets = helper.GetRetList();
         auto it = rets.begin();
         auto itEnd = rets.end();
@@ -292,7 +292,7 @@ static void Resources(Interpreter& i)
     };
 
     MitoResourceManager realManager(i);
-    WeakResourceRefManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager, ResourceDeTest(), true);
+    WeakResourceRefManager<ResourceDeTest, MitoResourceManager> luaManager(i, realManager, true /* use fake references */);
 
     auto pair1 = luaManager.NewResource(ResourceDeTest(12, "resource1"));
     Uint32 resource1Id = pair1.first;
@@ -331,6 +331,57 @@ static void Resources(Interpreter& i)
     }
 }
 
+void ResourcesSerialization(Interpreter& i)
+{
+    class EntityManager
+    {
+        public:
+            EntityManager(Interpreter& interpreter) : _interpreter(interpreter)
+            {
+                this->_entities.insert(std::make_pair(1, this->_interpreter.MakeNumber(66.5)));
+                this->_entities.insert(std::make_pair(2, this->_interpreter.MakeString("hello")));
+                this->_entities.insert(std::make_pair(3, this->_interpreter.MakeTable()));
+                this->_entities.insert(std::make_pair(4, this->_interpreter.MakeBoolean(false)));
+            }
+            Ref GetEntity(Uint32 id) const
+            {
+                auto it = this->_entities.find(id);
+                if (it == this->_entities.end())
+                    throw std::runtime_error("Oops! This entity does not exist");
+                return it->second;
+            }
+        private:
+            Interpreter& _interpreter;
+            std::map<Uint32, Ref> _entities;
+    };
+
+    struct EntityPtr : Tools::Lua::AWeakResourceRef<EntityManager>
+    {
+        EntityPtr(Uint32 id) : id(id) {}
+        EntityPtr() : id(0) {}
+        virtual bool IsValid(EntityManager const&) const { return this->id; }
+        virtual void Invalidate(EntityManager const&) { this->id = 0; }
+        virtual Ref GetReference(EntityManager const& manager) const { return manager.GetEntity(id); }
+        bool operator <(EntityPtr const& rhs) const { return this->id < rhs.id; }
+        void TryToLoad(EntityManager const& manager) { Tools::log << "EntityPtr::TryToLoad() - " << this->id << std::endl; }
+        Uint32 id;
+    };
+
+    EntityManager entityManager(i);
+    WeakResourceRefManager<EntityPtr, EntityManager> weakResourceRefManager(i, entityManager, true /* use fake references */);
+
+    auto res = weakResourceRefManager.NewResource(EntityPtr(2));
+    i.Globals().Set("unloadedResource1", weakResourceRefManager.NewUnloadedResource(EntityPtr(2)));
+    i.Globals().Set("unloadedResource2", weakResourceRefManager.NewUnloadedResource(EntityPtr(5)));
+
+    i.DoString(STRINGIFY(
+                print("-------- Test Serialization Weak Ptr --------")
+                print(type(unloadedResource1:Lock()))
+                print(type(unloadedResource2:Lock()))
+                print(type(unloadedResource1:Lock()))
+                ));
+}
+
 int main(int, char**)
 {
     {
@@ -363,6 +414,9 @@ int main(int, char**)
 
         // Test ResourceManager
         Resources(i);
+
+        // Test serialization resource pointers
+        ResourcesSerialization(i);
     }
 
 
