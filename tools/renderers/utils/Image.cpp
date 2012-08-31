@@ -49,7 +49,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         };
         this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
         this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, VertexAttributeUsage::Position, 3); // position
-        this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, VertexAttributeUsage::TexCoord, 2); // texCoord
+        this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, VertexAttributeUsage::TexCoord0, 2); // texCoord
         this->_vertexBuffer->SetData(4*(3 + 2)*sizeof(*vertices), vertices, VertexBufferUsage::Static);
 
         if (!this->_indexBuffer)

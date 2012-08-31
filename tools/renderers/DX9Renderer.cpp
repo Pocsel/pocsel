@@ -310,8 +310,10 @@ namespace Tools { namespace Renderers {
             // Release...
             auto& rs = this->_states.back();
             delete rs.target;
-            for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
-                (*it)->GetEffect()->OnLostDevice();
+            //for (auto it = this->_allPrograms.begin(), ite = this->_allPrograms.end(); it != ite; ++it)
+            //    (*it)->GetEffect()->OnLostDevice();
+            for (auto& program: this->_allPrograms)
+                program->GetEffect()->OnLostDevice();
             for (auto it = this->_allRenderTargets.begin(), ite = this->_allRenderTargets.end(); it != ite; ++it)
                 (*it)->OnLostDevice();
         }

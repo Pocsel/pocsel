@@ -32,6 +32,7 @@ namespace Tools { namespace Renderers {
             CGparameter _mvpInverse;
             CGparameter _worldViewInverseTranspose;
             std::map<std::string, std::unique_ptr<IShaderParameter>> _parameters;
+            IShaderParameter* _shaderParameters[VertexAttributeUsage::Max];
 
             CGpass _pass;
 
@@ -47,6 +48,7 @@ namespace Tools { namespace Renderers {
             virtual void BeginPass();
             virtual bool EndPass();
 
+            void UpdateParameters();
             CGcontext GetContext() const { return this->_ctx; }
             CGeffect GetEffect() const { return this->_effect; }
         };

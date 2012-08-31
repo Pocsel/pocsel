@@ -21,6 +21,7 @@ namespace Tools { namespace Renderers {
     namespace OpenGL {
         class IndexBuffer;
         class ShaderProgram;
+        class VertexBuffer;
     }
 
     class GLRenderer : public ARenderer
@@ -29,10 +30,11 @@ namespace Tools { namespace Renderers {
         CGcontext _cgContext;
 
     public:
+        OpenGL::VertexBuffer* bindedVertexBuffer;
         OpenGL::IndexBuffer* bindedIndexBuffer;
 
     public:
-        GLRenderer(glm::uvec2 const& screenSize, bool fullscreen) : ARenderer(screenSize, fullscreen), _cgContext(0), bindedIndexBuffer(0) {}
+        GLRenderer(glm::uvec2 const& screenSize, bool fullscreen) : ARenderer(screenSize, fullscreen), _cgContext(0), bindedVertexBuffer(0), bindedIndexBuffer(0) {}
         virtual ~GLRenderer() { this->Shutdown(); }
 
         virtual std::string const& GetRendererName() const

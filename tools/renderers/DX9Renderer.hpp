@@ -95,6 +95,7 @@ namespace Tools { namespace Renderers {
         virtual void SetRasterizationMode(Renderers::RasterizationMode::Type rasterizationMode);
 
         void SetVertexBuffer(DX9::VertexBuffer& vb) { this->_vertexBuffer = &vb; }
+        DX9::VertexBuffer* GetVertexBuffer() const { return this->_vertexBuffer; }
         LPDIRECT3DDEVICE9 GetDevice() const { return this->_device; }
         LPD3DXEFFECTPOOL GetEffectPool() const { return this->_effectPool; }
         void Present();

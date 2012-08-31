@@ -108,12 +108,25 @@ namespace Tools {
                 Position = 0,
                 Color,
                 Normal,
-                TexCoord,
-                Custom1,
-                Custom2,
-                Custom3,
-                Custom4
+                TexCoord0,
+                TexCoord1,
+                TexCoord2,
+                TexCoord3,
+                TexCoord4,
+                // For arrays only
+                Max
             };
+            static char const* const typeToName[] =
+                {
+                    "position",
+                    "color",
+                    "normal",
+                    "texCoord0",
+                    "texCoord1",
+                    "texCoord2",
+                    "texCoord3",
+                    "texCoord4",
+                };
         }
 
         namespace CullMode

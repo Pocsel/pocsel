@@ -3,7 +3,8 @@
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
-    VertexBuffer::VertexBuffer()
+    VertexBuffer::VertexBuffer(GLRenderer& renderer) :
+        _renderer(renderer)
     {
         this->_stride = 0;
         this->_nbAttrib = 0;
@@ -42,24 +43,20 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     void VertexBuffer::Bind()
     {
+        this->_renderer.bindedVertexBuffer = this;
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, this->_id));
-
-        auto it = this->_attributes,
-            itEnd = this->_attributes + this->_nbAttrib;
-        int idx = 0;
-        for (; it != itEnd; ++it)
-        {
-            GLCHECK(glVertexAttribPointerARB(GetVertexAttributeIndex(it->location), it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
-            GLCHECK(glEnableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
-        }
+        //for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
+        //{
+        //    GLCHECK(glVertexAttribPointerARB(GetVertexAttributeIndex(it->location), it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
+        //    GLCHECK(glEnableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
+        //}
     }
 
     void VertexBuffer::Unbind()
     {
+        this->_renderer.bindedVertexBuffer = 0;
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0));
-        auto it = this->_attributes,
-            itEnd = this->_attributes + this->_nbAttrib;
-        for (; it != itEnd; ++it)
+        for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
             GLCHECK(glDisableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
         GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
     }

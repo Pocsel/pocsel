@@ -79,11 +79,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case VertexAttributeUsage::Position: return D3DDECLUSAGE_POSITION;
         case VertexAttributeUsage::Normal: return D3DDECLUSAGE_NORMAL;
         case VertexAttributeUsage::Color: return D3DDECLUSAGE_COLOR;
-        case VertexAttributeUsage::TexCoord:
-        case VertexAttributeUsage::Custom1:
-        case VertexAttributeUsage::Custom2:
-        case VertexAttributeUsage::Custom3:
-        case VertexAttributeUsage::Custom4:
+        case VertexAttributeUsage::TexCoord0:
+        case VertexAttributeUsage::TexCoord1:
+        case VertexAttributeUsage::TexCoord2:
+        case VertexAttributeUsage::TexCoord3:
+        case VertexAttributeUsage::TexCoord4:
             return D3DDECLUSAGE_TEXCOORD;
         }
         throw std::runtime_error("Bad VertexAttributeUsage ?!");
@@ -96,12 +96,12 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case VertexAttributeUsage::Position:
         case VertexAttributeUsage::Normal:
         case VertexAttributeUsage::Color:
-        case VertexAttributeUsage::TexCoord:
+        case VertexAttributeUsage::TexCoord0:
             return 0;
-        case VertexAttributeUsage::Custom1: return 1;
-        case VertexAttributeUsage::Custom2: return 2;
-        case VertexAttributeUsage::Custom3: return 3;
-        case VertexAttributeUsage::Custom4: return 4;
+        case VertexAttributeUsage::TexCoord1: return 1;
+        case VertexAttributeUsage::TexCoord2: return 2;
+        case VertexAttributeUsage::TexCoord3: return 3;
+        case VertexAttributeUsage::TexCoord4: return 4;
         }
         throw std::runtime_error("Bad VertexAttributeUsage ?!");
     }

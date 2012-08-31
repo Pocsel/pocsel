@@ -106,7 +106,7 @@ namespace Tools { namespace Renderers {
 
     std::unique_ptr<IVertexBuffer> GLRenderer::CreateVertexBuffer()
     {
-        return std::unique_ptr<IVertexBuffer>(new OpenGL::VertexBuffer());
+        return std::unique_ptr<IVertexBuffer>(new OpenGL::VertexBuffer(*this));
     }
 
     std::unique_ptr<IIndexBuffer> GLRenderer::CreateIndexBuffer()
