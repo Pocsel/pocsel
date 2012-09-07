@@ -1,0 +1,117 @@
+// voir http://hl2glsl.codeplex.com/wikipage?title=HLSL%20BNF
+
+identifier =
+	[_A-Za-z][_A-Za-z0-9]*
+;
+
+number =
+	"[0-9]" *"[0-9]" -('.' "[0-9]" *"[0-9]")
+;
+
+operator =
+	"+-*/%"
+;
+
+semantic =
+	':' identifier
+;
+
+callList =
+	expression *(',' expression)
+;
+
+argumentList =
+	globalVariableDeclaration *(',' globalVariableDeclaration)
+;
+
+functionCall =
+	identifier '(' callList ')'
+;
+
+expression =
+	identifier |
+	number |
+	'(' expression ')' |
+	functionCall |
+	expression operator expression *(operator expression)
+;
+
+deviceState =
+	identifier '=' identifier
+;
+
+samplerState =
+	'sampler_state'
+	'{'
+		*(';' | (deviceState ';'))
+	'}'
+;
+
+globalVariableDeclaration =
+	identifier //type
+	identifier //nom
+	-semantic
+	-('=' (samplerState | expression)
+;
+
+structureDeclaration =
+	'struct' identifier
+	'{'
+		*(';' | (globalVariableDeclaration ';'))
+	'}'
+;
+
+simpleVariableDeclaration =
+	identifier //type
+	identifier //nom
+	-('=' expression)
+;
+
+functionStatement =
+	';' |
+	simpleVariableDeclaration ';' |
+	expression ';'
+;
+
+functionDeclaration =
+	identifier //type
+	identifier //nom
+	'(' argumentList ')'
+	semantic
+	'{'
+		*functionStatement
+	'}'
+;
+
+compileDeclaration =
+	('VertexShader' | 'PixelShader')
+	'='
+	'compile'
+	('vs_3_0' | 'ps_3_0')
+	identifier '(' ')'
+;
+
+passDeclaration =
+	'pass' -identifier
+	'{'
+		*(
+			';' |
+			(deviceState ';') |
+			(compileDeclaration ';')
+		)
+	'}'
+
+techniqueDeclaration =
+	'technique' -identifier
+	'{'
+		*passDeclaration
+	'}'
+
+globalStatement =
+	(
+		';' |
+		globalVariableDeclaration ';' |
+		expression ';' |
+		functionDeclaration
+	)
+;
