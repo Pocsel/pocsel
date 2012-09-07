@@ -7,6 +7,7 @@
 #include "server/network/UdpPacket.hpp"
 
 #include "common/physics/BodyCluster.hpp"
+#include "common/physics/World.hpp"
 
 #include "bullet/bullet-all.hpp"
 
@@ -28,6 +29,31 @@ namespace Server { namespace Game { namespace Engine {
     PositionalEntity::~PositionalEntity()
     {
         Tools::Delete(this->_bodyCluster);
+    }
+
+    void PositionalEntity::SetPosition(Common::Position const& pos)
+    {
+        btRigidBody& btBody = this->_bodyCluster->GetBody();
+
+        btTransform wt;
+        wt.setOrigin(btVector3(pos.x,
+                    pos.y,
+                    pos.z));
+
+        this->_bodyCluster->GetWorld().GetBtWorld().removeRigidBody(&btBody);
+
+        btBody.setLinearVelocity(btVector3(0, 0, 0));
+        btBody.setAngularVelocity(btVector3(0, 0, 0));
+
+        btBody.clearForces();
+        btBody.getMotionState()->setWorldTransform(wt);
+        btBody.setCenterOfMassTransform(wt);
+
+        this->_bodyCluster->GetWorld().GetBtWorld().addRigidBody(&btBody);
+
+        this->UpdatePhysics();
+
+        this->_engine.GetDoodadManager().UpdatePhysicsFromDoodadOfEntity(this->_id);
     }
 
     void PositionalEntity::UpdatePhysics()

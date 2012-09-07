@@ -39,7 +39,7 @@ namespace Common { namespace Physics {
         btRigidBody& GetRootBtBody();
         btRigidBody const& GetRootBtBody() const;
 
-        void UpdatePosition(Common::Physics::Node const& position);
+        void UpdatePosition();
 
         void Dump() const;
 

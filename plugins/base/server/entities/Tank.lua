@@ -3,16 +3,25 @@ Server.Entity.RegisterPositional{
 
     Spawn = function(self)
         self.d = Server.Doodad.Spawn(self.id, "base:Tank", "base:Tank")
+        Server.Message.Later(5, self.id, "DoShit")
+    end,
+
+    DoShit = function(self)
+        print("DOSHIT")
+        tmpPos = Server.Entity.GetPos(self.id)
+        tmpPos.y = tmpPos.y + 10
+        --Server.Entity.SetPos(self.id, tmpPos)
+        Server.Entity.SetPos(self.id, Utils.Vector3(67108864, 16777216 + 10, 67108864))
+        Server.Message.Later(5, self.id, "DoShit")
     end,
 
     DoStuff = function(self)
         Server.Entity.SetPos(self.id, { X, Y, Z }) -- bouge tous les bodies
         Server.Entity.SetAngle(self.id, { A, B, C }) -- tourne tous les bodies
-        Server.Entity.SetScale(self.id, {1, 2, 1})
 
-        Server.Body.SetPos(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
-        Server.Body.SetAngle(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
-        Server.Body.SetScale(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
+        --Server.Body.SetPos(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
+        --Server.Body.SetAngle(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
+        --Server.Body.SetScale(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
 
         Server.Doodad.Set(self.d, "variable", "valeur")
         Server.Doodad.Call(self.d, "Function", "test")

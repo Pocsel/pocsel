@@ -139,7 +139,7 @@ namespace Common { namespace Physics {
         return this->_parent.GetBody();
     }
 
-    void Body::UpdatePosition(Common::Physics::Node const& position)
+    void Body::UpdatePosition()
     {
         for (auto rootsIt = this->_type.GetRoots().begin(),
                 rootsIte = this->_type.GetRoots().end();

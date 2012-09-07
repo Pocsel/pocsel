@@ -78,18 +78,6 @@ namespace Server { namespace Game { namespace Engine {
         this->_storage = ref;
     }
 
-    //void Doodad::AddPlayer(Uint32 playerId)
-    //{
-    //    this->_newPlayers.insert(playerId);
-    //    this->_engine.GetDoodadManager().DoodadIsDirty(this);
-    //}
-
-    //void Doodad::RemovePlayer(Uint32 playerId)
-    //{
-    //    this->_players.erase(playerId);
-    //    this->_newPlayers.erase(playerId);
-    //}
-
     void Doodad::_SpawnForNewPlayers()
     {
         if (!this->_isNew && this->_entity.GetNewPlayers().empty())
@@ -218,6 +206,12 @@ namespace Server { namespace Game { namespace Engine {
     {
         this->_positionDirty = true;
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
+    }
+
+    void Doodad::UpdatePhysics()
+    {
+        if (this->_body)
+            this->_body->UpdatePosition();
     }
 
 }}}
