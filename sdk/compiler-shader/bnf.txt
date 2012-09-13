@@ -5,11 +5,17 @@ identifier =
 ;
 
 number =
-	"[0-9]" *"[0-9]" -('.' "[0-9]" *"[0-9]")
+	"[0-9]" *"[0-9]" -('.' "[0-9]" *"[0-9]") -'f'
 ;
 
-operator =
-	"+-*/%"
+unaryOp =
+	"-"
+;
+binaryOp1 =
+	"+-"
+;
+binaryOp2 =
+	"*/%"
 ;
 
 semantic =
@@ -28,12 +34,18 @@ functionCall =
 	identifier '(' callList ')'
 ;
 
-expression =
+subExpression = 
 	identifier |
 	number |
-	'(' expression ')' |
+	unaryOp subExpression |
 	functionCall |
-	expression operator expression *(operator expression)
+	'(' expression ')'
+;
+expression2 = 
+	subExpression binaryOp2 expression
+;
+expression =
+	expression2 binaryOp1 expression2
 ;
 
 deviceState =
@@ -100,12 +112,14 @@ passDeclaration =
 			(compileDeclaration ';')
 		)
 	'}'
+;
 
 techniqueDeclaration =
 	'technique' -identifier
 	'{'
 		*passDeclaration
 	'}'
+;
 
 globalStatement =
 	(
@@ -114,4 +128,8 @@ globalStatement =
 		expression ';' |
 		functionDeclaration
 	)
+;
+
+hlslFile =
+	*globalStatement
 ;
