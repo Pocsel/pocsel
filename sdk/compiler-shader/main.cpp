@@ -252,7 +252,7 @@ namespace Hlsl {
         FunctionParser() : FunctionParser::base_type(start)
         {
             semanticParser %= (':' >> identifierParser.parser) | qi::eps[_val = val("")];
-           
+
             argumentParser = variableParser[push_back(_val, _1)] % ',';
             statementsParser = (statementParser[push_back(_val, _1)] % ';') >> *lit(';');
 
@@ -313,8 +313,8 @@ namespace Hlsl {
                 (
                     techniqueParser |
                     functionParser |
-                    (variableParser >> ';') |
-                    ';'
+                    (variableParser >> ';')
+                    //';'
                 )
             ;
             start =
