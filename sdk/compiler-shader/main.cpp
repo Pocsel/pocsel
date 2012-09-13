@@ -56,7 +56,8 @@ int main(int ac, char** av)
     tmp = "//comment\r\n" + tmp + "// test comment\r\n/* gdfhjgkdsfhkjgh \r\n sdfgjkfsn */\r\nfloat4 testComment : COMMENT = test des commentaires en fin de fichier;//test";
 
     File file;
-    if (ParseStream(std::stringstream(tmp), file))
+    std::stringstream ss(tmp);
+    if (ParseStream(ss, file))
     {
         std::cout << "file: " << std::endl;
         for (auto& s: file.statements)
