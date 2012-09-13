@@ -17,6 +17,7 @@ namespace Tools { namespace Lua {
         virtual void Invalidate(ManagerType const&) = 0;
         virtual Ref GetReference(ManagerType const&) const = 0;
         virtual std::string Serialize(ManagerType const&) const { return "return nil"; }
+        virtual void TryToLoad(ManagerType const&) {}
 
         bool IsLoaded() const { return this->_isLoaded; }
         void SetLoaded(bool isLoaded = true) { this->_isLoaded = isLoaded; }

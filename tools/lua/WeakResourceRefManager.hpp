@@ -154,6 +154,7 @@ namespace Tools { namespace Lua {
             WeakResourceRefType* weakRef = ref.To<WeakResourceRefType*>();
             if (!weakRef->IsLoaded())
             {
+                weakRef->TryToLoad();
                 auto it = this->_weakReferencesByResource->find(*weakRef);
                 if (it == this->_weakReferencesByResource->end())
                 {
