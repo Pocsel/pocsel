@@ -45,12 +45,13 @@ int main(int ac, char** av)
 
         technique tech
         {
-           pass p0
-           {
+            pass p0
+            {
+                titi = toto;
                 AlphaBlendEnable = false;
                 VertexShader = compile vs_2_0 vs();
                 PixelShader = compile ps_2_0 fs();
-           }
+            }
         }
     );
     tmp = "//comment\r\n" + tmp + "// test comment\r\n/* gdfhjgkdsfhkjgh \r\n sdfgjkfsn */\r\nfloat4 testComment : COMMENT = test des commentaires en fin de fichier;//test";
@@ -61,7 +62,7 @@ int main(int ac, char** av)
     {
         std::cout << "file: " << std::endl;
         for (auto& s: file.statements)
-            switch (s.which()) //<Hlsl::Variable, Hlsl::Function, Hlsl::Technique>;
+            switch (s.which()) //<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, std::string>
             {
             case 0:
                 printVariable(std::cout, boost::get<Variable>(s));
@@ -84,7 +85,17 @@ int main(int ac, char** av)
                     auto& tech = boost::get<Technique>(s);
                     std::cout << "Technique: " << tech.name << ":\n";
                     for (auto& pass: tech.passes)
+                    {
                         std::cout << "\tPass: " << pass.name << std::endl;
+                        for (auto& kvp: pass.statements)
+                            std::cout << "\t\t" << kvp.key << ": " << kvp.value << std::endl;
+                    }
+                }
+                break;
+            case 3:
+                {
+                    auto& str = boost::get<std::string>(s);
+                    std::cout << "Unknown: \"" << str << "\"\n";
                 }
                 break;
             }

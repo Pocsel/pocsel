@@ -63,7 +63,7 @@ namespace Hlsl
         std::list<Pass> passes;
     };
 
-    typedef boost::variant<Hlsl::Variable, Hlsl::Function, Hlsl::Technique> GlobalStatement;
+    typedef boost::variant<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, std::string> GlobalStatement;
 
     struct File
     {

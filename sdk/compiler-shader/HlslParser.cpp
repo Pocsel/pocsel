@@ -65,6 +65,7 @@ namespace Hlsl {
     using ascii::string;
     using namespace qi::labels;
     using boost::phoenix::val;
+    using boost::phoenix::construct;
     using boost::phoenix::at_c;
     using boost::phoenix::push_back;
 
@@ -74,6 +75,13 @@ namespace Hlsl {
         IdentifierParser()
         {
             parser %= char_("_A-Za-z") >> *char_("_A-Za-z0-9");
+            parser.name("identifier");
+
+            qi::on_error<qi::fail>
+                (
+                    parser,
+                    std::cout << val("Error! \"") << construct<std::string>(_3, _2) << val("\" is not an ") << _4 << std::endl
+                );
         }
 
         boost::spirit::qi::rule<T, std::string()> parser;
@@ -96,7 +104,7 @@ namespace Hlsl {
     {
         PassStatementParser() : PassStatementParser::base_type(start)
         {
-            start %= identifierParser.parser >> "=" >> *(char_ - ';') >> ';';
+            start %= identifierParser.parser >> "=" >> qi::no_skip[*(char_ - ';')] >> ';';
         }
 
         IdentifierParser<T> identifierParser;
@@ -164,6 +172,12 @@ namespace Hlsl {
                     >> statementsParser
                     >> '}'
                 ;
+
+            qi::on_error<qi::fail>
+                (
+                    start,
+                    std::cout << val("Error, expecting ") << _4 << val(" here: \"") << construct<std::string>(_3, _2) << val("\"") << std::endl
+                );
         }
 
         IdentifierParser<T> identifierParser;
@@ -206,21 +220,7 @@ namespace Hlsl {
     template<class T, class TSkipper>
     struct FileParser : boost::spirit::qi::grammar<T, File(), TSkipper>
     {
-        FileParser() : FileParser::base_type(start)
-        {
-            statement %=
-                (
-                    techniqueParser |
-                    functionParser |
-                    (variableParser >> ';')
-                    //';'
-                )
-            ;
-            start =
-                *(statement[push_back(at_c<0>(_val), _1)])
-                >> qi::eoi;
-            ;
-        }
+        FileParser();
 
         VariableParser<T, TSkipper> variableParser;
         FunctionParser<T, TSkipper> functionParser;
@@ -229,6 +229,26 @@ namespace Hlsl {
         qi::rule<T, Hlsl::GlobalStatement(), TSkipper> statement;
         qi::rule<T, File(), TSkipper> start;
     };
+
+    template<class T, class TSkipper>
+    FileParser<T, TSkipper>::FileParser() : FileParser::base_type(start)
+    {
+        statement =
+            techniqueParser[_val = _1] |
+            functionParser[_val = _1] |
+            (variableParser[_val = construct<Variable>(_1)] >> ';') |
+            lit(';')[_val = val("")]
+        ;
+        start =
+            *(statement[push_back(at_c<0>(_val), _1)])
+            >> qi::eoi;
+        ;
+        qi::on_error<qi::fail>
+                (
+                    start,
+                    std::cout << val("Error, expecting ") << _4 << val(" here: \"") << construct<std::string>(_3, _2) << val("\"") << std::endl
+                );
+    }
 
     bool ParseStream(std::istream& in, File& file, std::ostream& errors)
     {
