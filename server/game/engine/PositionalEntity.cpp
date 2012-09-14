@@ -33,6 +33,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void PositionalEntity::SetPosition(Common::Position const& pos)
     {
+        std::cout << "SetPos: " << pos.x << ", " << pos.y << ", " << pos.z << "\n";
         btRigidBody& btBody = this->_bodyCluster->GetBody();
 
         btTransform wt;
@@ -52,6 +53,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_bodyCluster->GetWorld().GetBtWorld().addRigidBody(&btBody);
 
         this->UpdatePhysics();
+        this->SetIsDirty(true);
 
         this->_engine.GetDoodadManager().UpdatePhysicsFromDoodadOfEntity(this->_id);
     }

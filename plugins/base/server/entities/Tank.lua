@@ -10,8 +10,8 @@ Server.Entity.RegisterPositional{
         print("DOSHIT")
         tmpPos = Server.Entity.GetPos(self.id)
         tmpPos.y = tmpPos.y + 10
-        --Server.Entity.SetPos(self.id, tmpPos)
-        Server.Entity.SetPos(self.id, Utils.Vector3(67108864, 16777216 + 10, 67108864))
+        Server.Entity.SetPos(self.id, tmpPos)
+        -- Server.Entity.SetPos(self.id, Utils.Vector3(67108864, 16777216 + 10, 67108864))
         Server.Message.Later(5, self.id, "DoShit")
     end,
 
