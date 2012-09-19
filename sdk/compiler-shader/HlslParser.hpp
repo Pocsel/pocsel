@@ -2,6 +2,8 @@
 
 namespace Hlsl
 {
+    struct Nil {};
+
     // mul(worldMatrix, float4(normal, 0.0))
     struct Statement
     {
@@ -63,7 +65,7 @@ namespace Hlsl
         std::list<Pass> passes;
     };
 
-    typedef boost::variant<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, std::string> GlobalStatement;
+    typedef boost::variant<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Nil> GlobalStatement;
 
     struct File
     {

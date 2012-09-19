@@ -69,192 +69,255 @@ namespace Hlsl {
     using boost::phoenix::at_c;
     using boost::phoenix::push_back;
 
-    template<class T>
-    struct IdentifierParser
+    struct ErrorHandler
     {
-        IdentifierParser()
+        template<class T1 = void, class T2 = void, class T3 = void, class T4 = void, class T5 = void>
+        struct result
         {
-            parser %= char_("_A-Za-z") >> *char_("_A-Za-z0-9");
-            parser.name("identifier");
+            typedef void type;
+        };
 
-            qi::on_error<qi::fail>
-                (
-                    parser,
-                    std::cout << val("Error! \"") << construct<std::string>(_3, _2) << val("\" is not an ") << _4 << std::endl
-                );
+        template<class T1, class T2, class T3, class T4>
+        void operator()(T1 const& it, T2 const& itEnd, T3 const& itError, T4 const& info)
+        {
+            std::cerr << " *** Expecting " << info << " near: " << std::string(it, itError) << std::endl;
         }
-
-        boost::spirit::qi::rule<T, std::string()> parser;
     };
+
+    template<class T>
+    struct BaseParser
+    {
+        qi::rule<T, std::string()> identifier;
+        qi::rule<T, void()> leftBracket;
+        qi::rule<T, void()> rightBracket;
+        qi::rule<T, void()> leftParenthesis;
+        qi::rule<T, void()> rightParenthesis;
+        qi::rule<T, void()> semicolon;
+        qi::rule<T, void()> colon;
+        qi::rule<T, void()> equal;
+        boost::phoenix::function<ErrorHandler> errorHandler;
+
+        BaseParser();
+    };
+
+    template<class T>
+    BaseParser<T>::BaseParser()
+    {
+        identifier %= char_("_A-Za-z") >> *char_("_A-Za-z0-9");
+        identifier.name("identifier");
+
+        leftBracket = lit('{');
+        leftBracket.name("{");
+
+        rightBracket = lit('}');
+        rightBracket.name("}");
+
+        leftParenthesis = lit('(');
+        leftParenthesis.name("(");
+
+        rightParenthesis = lit(')');
+        rightParenthesis.name(")");
+
+        semicolon = lit(';');
+        semicolon.name(";");
+
+        colon = lit(':');
+        colon.name(":");
+
+        equal = lit('=');
+        equal.name("=");
+    }
 
     template<class T, class TSkipper>
     struct DeviceStateParser : boost::spirit::qi::grammar<T, DeviceState(), TSkipper>
     {
+        BaseParser<T> base;
+        qi::rule<T, DeviceState(), TSkipper> start;
+
         DeviceStateParser() : DeviceStateParser::base_type(start)
         {
-            start %= identifierParser.parser >> "=" >> identifierParser.parser;
+            start %= base.identifier >> base.equal >> base.identifier;
         }
-
-        IdentifierParser<T> identifierParser;
-        qi::rule<T, DeviceState(), TSkipper> start;
     };
 
     template<class T, class TSkipper>
     struct PassStatementParser : boost::spirit::qi::grammar<T, PassStatement(), TSkipper>
     {
+        BaseParser<T> base;
+        qi::rule<T, PassStatement(), TSkipper> start;
+
         PassStatementParser() : PassStatementParser::base_type(start)
         {
-            start %= identifierParser.parser >> "=" >> qi::no_skip[*(char_ - ';')] >> ';';
+            start %= base.identifier >> base.equal >> qi::no_skip[*(char_ - ';')] >> base.semicolon;
         }
-
-        IdentifierParser<T> identifierParser;
-        qi::rule<T, PassStatement(), TSkipper> start;
     };
 
     template<class T, class TSkipper>
     struct StatementParser : boost::spirit::qi::grammar<T, Statement(), TSkipper>
     {
-        StatementParser() : StatementParser::base_type(start)
-        {
-            parser %= *(char_ - '{' - '}' - ';');
-
-            start = parser[at_c<0>(_val) += _1] >> -(char_('{')[at_c<0>(_val) += _1] >> *(parser[at_c<0>(_val) += _1] >> ';') >> char_('}')[at_c<0>(_val) += _1]);
-        }
-
+        BaseParser<T> base;
         qi::rule<T, std::string()> parser;
         qi::rule<T, Statement(), TSkipper> start;
+
+        StatementParser() : StatementParser::base_type(start)
+        {
+            parser %= +(char_ - '{' - '}' - ';');
+
+            start =
+                    parser[at_c<0>(_val) += _1]
+                    >> -(
+                            char_('{')[at_c<0>(_val) += _1]
+                            >> *(
+                                    parser[at_c<0>(_val) += _1]
+                                    >> char_(';')[at_c<0>(_val) += _1]
+                                )
+                            >> char_('}')[at_c<0>(_val) += _1]
+                        )
+                ;
+        }
     };
 
     template<class T, class TSkipper>
     struct VariableParser : boost::spirit::qi::grammar<T, Variable(), TSkipper>
     {
-        VariableParser() : VariableParser::base_type(start)
-        {
-            semanticParser %= (':' >> identifierParser.parser) | qi::eps[_val = val("")];
-
-            samplerStateParser %= lit("sampler_state") >> "{" >> *(deviceStateParser >> ';') >> "}";
-
-            valueParser = -('=' >> (samplerStateParser[_val = _1] | statementParser[_val = _1])) | qi::eps[_val = val(Statement())];
-
-            start %=
-                    identifierParser.parser // type
-                    >> identifierParser.parser // name
-                    >> semanticParser // semantic
-                    >> valueParser // value
-                ;
-        }
-
-        IdentifierParser<T> identifierParser;
+        BaseParser<T> base;
         DeviceStateParser<T, TSkipper> deviceStateParser;
         StatementParser<T, TSkipper> statementParser;
         boost::spirit::qi::rule<T, std::string(), TSkipper> semanticParser;
         boost::spirit::qi::rule<T, SamplerState(), TSkipper> samplerStateParser;
         boost::spirit::qi::rule<T, StatementOrSamplerState(), TSkipper> valueParser;
         boost::spirit::qi::rule<T, Variable(), TSkipper> start;
+
+        VariableParser() : VariableParser::base_type(start)
+        {
+            semanticParser %= (base.colon > base.identifier) | qi::eps[_val = val("")];
+
+            samplerStateParser %= lit("sampler_state") > base.leftBracket >> *(deviceStateParser >> base.semicolon) >> base.rightBracket;
+
+            valueParser = -(base.equal > (samplerStateParser[_val = _1] | statementParser[_val = _1])) | qi::eps[_val = val(Statement())];
+
+            start %=
+                    base.identifier // type
+                    >> base.identifier // name
+                    >> semanticParser // semantic
+                    >> valueParser // value
+                ;
+        }
     };
 
     template<class T, class TSkipper>
     struct FunctionParser : boost::spirit::qi::grammar<T, Function(), TSkipper>
     {
-        FunctionParser() : FunctionParser::base_type(start)
-        {
-            semanticParser %= (':' >> identifierParser.parser) | qi::eps[_val = val("")];
-
-            argumentParser = variableParser[push_back(_val, _1)] % ',';
-            statementsParser = (statementParser[push_back(_val, _1)] % ';') >> *lit(';');
-
-            start %=
-                    identifierParser.parser // type
-                    >> identifierParser.parser // name
-                    >> '(' >> argumentParser >> ')'
-                    >> semanticParser // semantic
-                    >> '{'
-                    >> statementsParser
-                    >> '}'
-                ;
-
-            qi::on_error<qi::fail>
-                (
-                    start,
-                    std::cout << val("Error, expecting ") << _4 << val(" here: \"") << construct<std::string>(_3, _2) << val("\"") << std::endl
-                );
-        }
-
-        IdentifierParser<T> identifierParser;
+        BaseParser<T> base;
         StatementParser<T, TSkipper> statementParser;
         VariableParser<T, TSkipper> variableParser;
         boost::spirit::qi::rule<T, std::list<Variable>(), TSkipper> argumentParser;
         boost::spirit::qi::rule<T, std::list<Statement>(), TSkipper> statementsParser;
         boost::spirit::qi::rule<T, std::string(), TSkipper> semanticParser;
         boost::spirit::qi::rule<T, Function(), TSkipper> start;
+
+        FunctionParser() : FunctionParser::base_type(start)
+        {
+            semanticParser %= (base.colon >> base.identifier) | qi::eps[_val = val("")];
+
+            argumentParser =
+                    base.leftParenthesis
+                    > -(variableParser[push_back(_val, _1)] % ',')
+                    > base.rightParenthesis
+                ;
+            qi::on_error<qi::fail>
+                (
+                    argumentParser,
+                    base.errorHandler
+                );
+
+            statementsParser =
+                    base.leftBracket
+                    > (-(statementParser[push_back(_val, _1)] > *(base.semicolon > statementParser[push_back(_val, _1)])) >> *base.semicolon)
+                    > base.rightBracket
+                ;
+
+            start %=
+                    base.identifier // type
+                    >> base.identifier // name
+                    >> argumentParser
+                    >> semanticParser // semantic
+                    >> statementsParser
+                ;
+        }
     };
 
     template<class T, class TSkipper>
     struct TechniqueParser : boost::spirit::qi::grammar<T, Technique(), TSkipper>
     {
+        BaseParser<T> base;
+        PassStatementParser<T, TSkipper> passStatementParser;
+        boost::spirit::qi::rule<T, Pass(), TSkipper> passParser;
+        boost::spirit::qi::rule<T, Technique(), TSkipper> start;
+
         TechniqueParser() : TechniqueParser::base_type(start)
         {
             passParser =
                     "pass"
-                    >> identifierParser.parser[at_c<0>(_val) = _1] // name
-                    >> "{"
-                    >> *(passStatementParser[push_back(at_c<1>(_val), _1)])
-                    >> "}"
+                    > base.identifier[at_c<0>(_val) = _1] // name
+                    > base.leftBracket
+                    > *(passStatementParser[push_back(at_c<1>(_val), _1)])
+                    > base.rightBracket
                 ;
+            passParser.name("pass");
 
             start =
                     "technique"
-                    >> identifierParser.parser[at_c<0>(_val) = _1] // name
-                    >> "{"
-                    >> *(passParser[push_back(at_c<1>(_val), _1)])
-                    >> "}"
+                    > base.identifier[at_c<0>(_val) = _1] // name
+                    > base.leftBracket
+                    > *(passParser[push_back(at_c<1>(_val), _1)])
+                    > base.rightBracket
                 ;
         }
-
-        IdentifierParser<T> identifierParser;
-        PassStatementParser<T, TSkipper> passStatementParser;
-        boost::spirit::qi::rule<T, Pass(), TSkipper> passParser;
-        boost::spirit::qi::rule<T, Technique(), TSkipper> start;
     };
 
     template<class T, class TSkipper>
     struct FileParser : boost::spirit::qi::grammar<T, File(), TSkipper>
     {
-        FileParser();
-
+        BaseParser<T> base;
         VariableParser<T, TSkipper> variableParser;
         FunctionParser<T, TSkipper> functionParser;
         TechniqueParser<T, TSkipper> techniqueParser;
 
         qi::rule<T, Hlsl::GlobalStatement(), TSkipper> statement;
+        qi::rule<T, Variable(), TSkipper> variable;
         qi::rule<T, File(), TSkipper> start;
+
+        FileParser();
     };
 
     template<class T, class TSkipper>
     FileParser<T, TSkipper>::FileParser() : FileParser::base_type(start)
     {
+        variable =
+            variableParser[_val = _1] > base.semicolon
+        ;
+
         statement =
             techniqueParser[_val = _1] |
             functionParser[_val = _1] |
-            (variableParser[_val = construct<Variable>(_1)] >> ';') |
-            lit(';')[_val = val("")]
+            variable[_val = _1] |
+            base.semicolon[_val = val(Nil())]
         ;
+
         start =
             *(statement[push_back(at_c<0>(_val), _1)])
             >> qi::eoi;
         ;
-        qi::on_error<qi::fail>
-                (
-                    start,
-                    std::cout << val("Error, expecting ") << _4 << val(" here: \"") << construct<std::string>(_3, _2) << val("\"") << std::endl
-                );
     }
 
     bool ParseStream(std::istream& in, File& file, std::ostream& errors)
     {
         typedef std::istreambuf_iterator<char> base_it;
-        auto it = boost::spirit::make_default_multi_pass(base_it(in));
-        auto itEnd = boost::spirit::make_default_multi_pass(base_it());
+        base_it tmpIt(in);
+        std::string tmp(tmpIt, base_it());
+        auto it = tmp.begin(); //boost::spirit::make_default_multi_pass(tmpIt);
+        auto itEnd = tmp.end(); //boost::spirit::make_default_multi_pass(base_it());
 
         auto skip =
             ascii::space |
@@ -263,6 +326,14 @@ namespace Hlsl {
         ;
 
         FileParser<decltype(it), decltype(skip)> fileParser;
-        return qi::phrase_parse(it, itEnd, fileParser, skip, file);
+        try
+        {
+            return qi::phrase_parse(it, itEnd, fileParser, skip, file);
+        }
+        catch (qi::expectation_failure<decltype(it)>& ex)
+        {
+            errors << "Expecting " << ex.what_ << " near:\n" << std::string(ex.first, ex.last) << std::endl;
+        }
+        return false;
     }
 }

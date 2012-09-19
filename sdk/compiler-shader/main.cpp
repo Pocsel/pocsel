@@ -32,12 +32,17 @@ int main(int ac, char** av)
         float4x4 toto : WorldViewProjection = mul(a, b);
         float4 position : POSITION;
         sampler2D) "/* test */" STRINGIFY(toto = sampler_state {};
+        int a;
+        
+        float4 simple()
+        {
+        }
 
         float4 toto(float4 bibi : POSITION, float4x4 toto : TEXCOORD1) : POSITION
         {
             toto;
             titi;
-            for) " /* test */" STRINGIFY((int i = 10; i < 10; i++)
+            for) " /* test\n */\t" STRINGIFY((int i = 10; i < 10; i++)
             {
                 test();
             }
@@ -54,15 +59,15 @@ int main(int ac, char** av)
             }
         }
     );
-    tmp = "//comment\r\n" + tmp + "// test comment\r\n/* gdfhjgkdsfhkjgh \r\n sdfgjkfsn */\r\nfloat4 testComment : COMMENT = test des commentaires en fin de fichier;//test";
+    tmp = "//comment\r\n" + tmp + "// test comment\r\n/* gdfhjgkdsfhkjgh \r\n sdfgjkfsn */\r\nfloat4 testComment : COMMENT = test des commentaires en fin de fichier;;;//test";
 
     File file;
     std::stringstream ss(tmp);
-    if (ParseStream(ss, file))
+    if (ParseStream(ss, file) || true)
     {
         std::cout << "file: " << std::endl;
         for (auto& s: file.statements)
-            switch (s.which()) //<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, std::string>
+            switch (s.which()) //<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Nil>
             {
             case 0:
                 printVariable(std::cout, boost::get<Variable>(s));
@@ -76,7 +81,7 @@ int main(int ac, char** av)
                     std::cout << ") : " << func.semantic << std::endl;
                     std::cout << "{" << std::endl;
                     for (auto& statement: func.statements)
-                        std::cout << "\t" << statement.statement << ";" << std::endl;
+                        std::cout << "\t" << statement.statement << ";\n";
                     std::cout << "}" << std::endl;
                 }
                 break;
@@ -93,10 +98,7 @@ int main(int ac, char** av)
                 }
                 break;
             case 3:
-                {
-                    auto& str = boost::get<std::string>(s);
-                    std::cout << "Unknown: \"" << str << "\"\n";
-                }
+                std::cout << "Empty\n";
                 break;
             }
     }
