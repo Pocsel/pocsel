@@ -10,6 +10,13 @@ namespace Hlsl
         std::string statement;
     };
 
+    struct CodeBlock;
+    typedef boost::variant<Statement, CodeBlock> StatementOrCodeBlock;
+    struct CodeBlock
+    {
+        std::list<StatementOrCodeBlock> statements;
+    };
+
     struct DeviceState
     {
         std::string key;
@@ -40,7 +47,7 @@ namespace Hlsl
         std::string name;
         std::list<Variable> arguments;
         std::string semantic;
-        std::list<Statement> statements;
+        CodeBlock code;
     };
 
     // VertexShader = vertexShader;

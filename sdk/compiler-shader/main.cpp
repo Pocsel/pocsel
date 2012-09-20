@@ -20,6 +20,19 @@ void printVariable(TOut& out, Hlsl::Variable const& var)
     }
 }
 
+template<class TOut>
+void printCodeBlock(TOut& out, Hlsl::CodeBlock const& codeBlock, std::string const& tab = "")
+{
+    out << tab << "{" << std::endl;
+    for (auto const& statement: codeBlock.statements)
+        switch (statement.which())
+        {
+            case 0: out << tab << "\t" << boost::get<Hlsl::Statement>(statement).statement << std::endl; break;
+            case 1: printCodeBlock(out, boost::get<Hlsl::CodeBlock>(statement), tab + "\t"); break;
+        }
+    out << tab << "}" << std::endl;
+}
+
 #define STRINGIFY(...) #__VA_ARGS__
 
 int main(int ac, char** av)
@@ -46,6 +59,9 @@ int main(int ac, char** av)
             {
                 test();
             }
+            do {
+            }while(x);
+            test;
         }
 
         technique tech
@@ -79,10 +95,7 @@ int main(int ac, char** av)
                     for (auto& var: func.arguments)
                         printVariable(std::cout << "\t", var);
                     std::cout << ") : " << func.semantic << std::endl;
-                    std::cout << "{" << std::endl;
-                    for (auto& statement: func.statements)
-                        std::cout << "\t" << statement.statement << ";\n";
-                    std::cout << "}" << std::endl;
+                    printCodeBlock(std::cout, func.code);
                 }
                 break;
             case 2:

@@ -13,6 +13,10 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string, statement)
 )
 BOOST_FUSION_ADAPT_STRUCT(
+    Hlsl::CodeBlock,
+    (std::list<Hlsl::StatementOrCodeBlock>, statements)
+)
+BOOST_FUSION_ADAPT_STRUCT(
     Hlsl::DeviceState,
     (std::string, key)
     (std::string, value)
@@ -34,7 +38,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string, name)
     (std::list<Hlsl::Variable>, arguments)
     (std::string, semantic)
-    (std::list<Hlsl::Statement>, statements)
+    (Hlsl::CodeBlock, code)
 )
 BOOST_FUSION_ADAPT_STRUCT(
     Hlsl::PassStatement,
@@ -148,7 +152,7 @@ namespace Hlsl {
 
         PassStatementParser() : PassStatementParser::base_type(start)
         {
-            start %= base.identifier >> base.equal >> qi::no_skip[*(char_ - ';')] >> base.semicolon;
+            start %= base.identifier > base.equal > qi::no_skip[*(char_ - ';')] > base.semicolon;
         }
     };
 
@@ -156,23 +160,34 @@ namespace Hlsl {
     struct StatementParser : boost::spirit::qi::grammar<T, Statement(), TSkipper>
     {
         BaseParser<T> base;
-        qi::rule<T, std::string()> parser;
         qi::rule<T, Statement(), TSkipper> start;
 
         StatementParser() : StatementParser::base_type(start)
         {
-            parser %= +(char_ - '{' - '}' - ';');
+            start = +(char_ - '{' - '}' - ';')[at_c<0>(_val) += _1];
+        }
+    };
+
+    template<class T, class TSkipper>
+    struct CodeBlockParser : boost::spirit::qi::grammar<T, CodeBlock(), TSkipper>
+    {
+        BaseParser<T> base;
+        StatementParser<T, TSkipper> statement;
+        qi::rule<T, Statement(), TSkipper> parser;
+        qi::rule<T, CodeBlock(), TSkipper> start;
+
+        CodeBlockParser() : CodeBlockParser::base_type(start)
+        {
+            parser = statement[_val = _1] > -base.semicolon;
 
             start =
-                    parser[at_c<0>(_val) += _1]
-                    >> -(
-                            char_('{')[at_c<0>(_val) += _1]
-                            >> *(
-                                    parser[at_c<0>(_val) += _1]
-                                    >> char_(';')[at_c<0>(_val) += _1]
-                                )
-                            >> char_('}')[at_c<0>(_val) += _1]
+                    base.leftBracket
+                    >> *(
+                            start[push_back(at_c<0>(_val), _1)]
+                            |
+                            parser[push_back(at_c<0>(_val), _1)]
                         )
+                    >> base.rightBracket
                 ;
         }
     };
@@ -192,9 +207,17 @@ namespace Hlsl {
         {
             semanticParser %= (base.colon > base.identifier) | qi::eps[_val = val("")];
 
-            samplerStateParser %= lit("sampler_state") > base.leftBracket >> *(deviceStateParser >> base.semicolon) >> base.rightBracket;
+            samplerStateParser %= lit("sampler_state") > base.leftBracket > *(deviceStateParser >> base.semicolon) > base.rightBracket;
+            qi::on_error<qi::rethrow>(samplerStateParser, base.errorHandler);
 
-            valueParser = -(base.equal > (samplerStateParser[_val = _1] | statementParser[_val = _1])) | qi::eps[_val = val(Statement())];
+            valueParser =
+                    -(
+                        base.equal
+                        > (samplerStateParser[_val = _1] | statementParser[_val = _1])
+                    )
+                    | qi::eps[_val = val(Statement())]
+                ;
+            qi::on_error<qi::rethrow>(valueParser, base.errorHandler);
 
             start %=
                     base.identifier // type
@@ -209,10 +232,9 @@ namespace Hlsl {
     struct FunctionParser : boost::spirit::qi::grammar<T, Function(), TSkipper>
     {
         BaseParser<T> base;
-        StatementParser<T, TSkipper> statementParser;
+        CodeBlockParser<T, TSkipper> codeBlockParser;
         VariableParser<T, TSkipper> variableParser;
         boost::spirit::qi::rule<T, std::list<Variable>(), TSkipper> argumentParser;
-        boost::spirit::qi::rule<T, std::list<Statement>(), TSkipper> statementsParser;
         boost::spirit::qi::rule<T, std::string(), TSkipper> semanticParser;
         boost::spirit::qi::rule<T, Function(), TSkipper> start;
 
@@ -225,24 +247,14 @@ namespace Hlsl {
                     > -(variableParser[push_back(_val, _1)] % ',')
                     > base.rightParenthesis
                 ;
-            qi::on_error<qi::fail>
-                (
-                    argumentParser,
-                    base.errorHandler
-                );
-
-            statementsParser =
-                    base.leftBracket
-                    > (-(statementParser[push_back(_val, _1)] > *(base.semicolon > statementParser[push_back(_val, _1)])) >> *base.semicolon)
-                    > base.rightBracket
-                ;
+            qi::on_error<qi::rethrow>(argumentParser, base.errorHandler);
 
             start %=
                     base.identifier // type
                     >> base.identifier // name
                     >> argumentParser
                     >> semanticParser // semantic
-                    >> statementsParser
+                    >> codeBlockParser
                 ;
         }
     };
