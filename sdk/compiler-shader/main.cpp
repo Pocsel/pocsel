@@ -180,8 +180,10 @@ int main(int ac, char** av)
         std::cout << "Error " << cgGetError() << ": " << cgGetErrorString(cgGetError()) << std::endl;
         std::cout << cgGetLastListing(ctx) << std::endl;
     }
-
     std::cout << cgGetProgramString(program, CG_COMPILED_PROGRAM) << std::endl;
+
+    cgDestroyProgram(program);
+    cgDestroyContext(ctx);
 
     std::cin.get();
     return 0;
