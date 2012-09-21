@@ -11,6 +11,8 @@ enable_pch(compiler-shader src)
 
 target_link_libraries(compiler-shader
     ${Boost_LIBRARIES}
+    ${CG_LIBRARY}
+    ${CGGL_LIBRARY}
 )
 
 SetProgramInfo(compiler-shader)

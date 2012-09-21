@@ -50,7 +50,6 @@ namespace Hlsl
         CodeBlock code;
     };
 
-    // VertexShader = vertexShader;
     // AlphaBlendEnable = false;
     struct PassStatement
     {
@@ -58,11 +57,24 @@ namespace Hlsl
         std::string value;
     };
 
+    // VertexShader = compile vs_2_1 vertexShader();
+    struct CompileStatement
+    {
+        enum ShaderType
+        {
+            VertexShader,
+            PixelShader
+        } type;
+        std::string entry;
+        std::string profile;
+    };
+
+    typedef boost::variant<PassStatement, CompileStatement> PassOrCompileStatement;
     // pass Toto { VertexShader = vertexShader; PixelShader = pixelShader; }
     struct Pass
     {
         std::string name;
-        std::list<PassStatement> statements;
+        std::list<PassOrCompileStatement> statements;
     };
 
     // technique Toto { pass { VertexShader = vertexShader; PixelShader = pixelShader; }}

@@ -46,9 +46,15 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string, value)
 )
 BOOST_FUSION_ADAPT_STRUCT(
+    Hlsl::CompileStatement,
+    (Hlsl::CompileStatement::ShaderType, type)
+    (std::string, entry)
+    (std::string, profile)
+)
+BOOST_FUSION_ADAPT_STRUCT(
     Hlsl::Pass,
     (std::string, name)
-    (std::list<Hlsl::PassStatement>, statements)
+    (std::list<Hlsl::PassOrCompileStatement>, statements)
 )
 BOOST_FUSION_ADAPT_STRUCT(
     Hlsl::Technique,
@@ -84,7 +90,7 @@ namespace Hlsl {
         template<class T1, class T2, class T3, class T4>
         void operator()(T1 const& it, T2 const& itEnd, T3 const& itError, T4 const& info)
         {
-            std::cerr << " *** Expecting " << info << " near: " << std::string(it, itError) << std::endl;
+            std::cerr << " *** FATAL *** Expecting " << info << " near: " << std::string(it, itError) << std::endl;
         }
     };
 
@@ -157,6 +163,34 @@ namespace Hlsl {
     };
 
     template<class T, class TSkipper>
+    struct CompileStatementParser : boost::spirit::qi::grammar<T, CompileStatement(), TSkipper>
+    {
+        BaseParser<T> base;
+        qi::rule<T, CompileStatement(), TSkipper> start;
+
+        CompileStatementParser() : CompileStatementParser::base_type(start)
+        {
+            start =
+                    (
+                        lit("VertexShader")[at_c<0>(_val) = val(CompileStatement::VertexShader)]
+                        |
+                        lit("PixelShader")[at_c<0>(_val) = val(CompileStatement::PixelShader)]
+                        |
+                        lit("FragmentShader")[at_c<0>(_val) = val(CompileStatement::PixelShader)]
+                    )
+                    > base.equal
+                    > "compile"
+                    > base.identifier[at_c<2>(_val) = _1]
+                    > base.identifier[at_c<1>(_val) = _1]
+                    > base.leftParenthesis
+                    > qi::lexeme[*(char_ - '(' - ')' - ';')]
+                    > base.rightParenthesis
+                    > base.semicolon
+                ;
+        }
+    };
+
+    template<class T, class TSkipper>
     struct StatementParser : boost::spirit::qi::grammar<T, Statement(), TSkipper>
     {
         BaseParser<T> base;
@@ -164,7 +198,7 @@ namespace Hlsl {
 
         StatementParser() : StatementParser::base_type(start)
         {
-            start = +(char_ - '{' - '}' - ';')[at_c<0>(_val) += _1];
+            start = qi::lexeme[+(char_ - '{' - '}' - ';')[at_c<0>(_val) += _1]];
         }
     };
 
@@ -178,7 +212,7 @@ namespace Hlsl {
 
         CodeBlockParser() : CodeBlockParser::base_type(start)
         {
-            parser = statement[_val = _1] > -base.semicolon;
+            parser = statement[_val = _1] > -(base.semicolon[at_c<0>(_val) += val(';')]);
 
             start =
                     base.leftBracket
@@ -264,16 +298,23 @@ namespace Hlsl {
     {
         BaseParser<T> base;
         PassStatementParser<T, TSkipper> passStatementParser;
+        CompileStatementParser<T, TSkipper> compileStatementParser;
         boost::spirit::qi::rule<T, Pass(), TSkipper> passParser;
         boost::spirit::qi::rule<T, Technique(), TSkipper> start;
 
         TechniqueParser() : TechniqueParser::base_type(start)
         {
+            auto statement =
+                    compileStatementParser[push_back(at_c<1>(_val), _1)]
+                    |
+                    passStatementParser[push_back(at_c<1>(_val), _1)]
+                ;
+
             passParser =
                     "pass"
                     > base.identifier[at_c<0>(_val) = _1] // name
                     > base.leftBracket
-                    > *(passStatementParser[push_back(at_c<1>(_val), _1)])
+                    > *statement
                     > base.rightBracket
                 ;
             passParser.name("pass");
@@ -319,7 +360,7 @@ namespace Hlsl {
 
         start =
             *(statement[push_back(at_c<0>(_val), _1)])
-            >> qi::eoi;
+            > qi::eoi;
         ;
     }
 
@@ -344,7 +385,7 @@ namespace Hlsl {
         }
         catch (qi::expectation_failure<decltype(it)>& ex)
         {
-            errors << "Expecting " << ex.what_ << " near:\n" << std::string(ex.first, ex.last) << std::endl;
+            errors << "ERROR: expecting " << ex.what_ << " near:\n" << std::string(ex.first, ex.last) << std::endl;
         }
         return false;
     }

@@ -30,4 +30,7 @@
 // boost
 #include <boost/variant.hpp>
 
+// Cg
+#include <Cg/cg.h>
+
 #endif
