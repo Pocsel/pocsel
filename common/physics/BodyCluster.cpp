@@ -55,17 +55,72 @@ namespace Common { namespace Physics {
     {
         assert(this->_constraints.count(body) == 0);
 
-        btTypedConstraint*& constraint = this->_constraints[body];
-        btTransform identity;
-        identity.setIdentity();
+        this->_constraints.insert(body);
     }
 
     void BodyCluster::RemoveConstraint(Body* body)
     {
         assert(this->_constraints.count(body) == 1);
 
-        btTypedConstraint* constraint = this->_constraints[body];
         this->_constraints.erase(body);
+    }
+
+    void BodyCluster::SetPhysics(Node const& physics)
+    {
+        for (auto& Body: this->_constraints)
+        {
+            Body->_RemoveFromWorld();
+        }
+
+        btRigidBody& btBody = *this->_body;
+
+        this->_world.GetBtWorld().removeRigidBody(&btBody);
+
+        btTransform wt;
+        wt.setOrigin(btVector3(
+                    physics.position.x,
+                    physics.position.y,
+                    physics.position.z
+                    ));
+        wt.setRotation(btQuaternion(
+                    physics.orientation.x,
+                    physics.orientation.y,
+                    physics.orientation.z,
+                    physics.orientation.w
+                    ));
+
+        btBody.setLinearVelocity(btVector3(
+                    physics.velocity.x,
+                    physics.velocity.y,
+                    physics.velocity.z
+                    ));
+        btBody.setAngularVelocity(btVector3(
+                    physics.angularVelocity.x,
+                    physics.angularVelocity.y,
+                    physics.angularVelocity.z
+                    ));
+
+        btBody.clearForces();
+        btBody.getMotionState()->setWorldTransform(wt);
+        btBody.setCenterOfMassTransform(wt);
+
+        for (auto& Body: this->_constraints)
+        {
+            Body->_UpdatePosition();
+        }
+
+        this->_world.GetBtWorld().addRigidBody(&btBody);
+
+        for (auto& Body: this->_constraints)
+        {
+            Body->_PutBackInWorld();
+        }
+    }
+
+    void BodyCluster::SetUserData(void* userData)
+    {
+        this->_userData = userData;
+        this->_body->setUserPointer(userData);
     }
 
     void BodyCluster::Dump() const
@@ -79,14 +134,8 @@ namespace Common { namespace Physics {
             tr.getOrigin().y() << ", " <<
             tr.getOrigin().z() << "\n";
 
-        for (auto it = this->_constraints.begin(), ite = this->_constraints.end(); it != ite; ++it)
-            it->first->Dump();
-    }
-
-    void BodyCluster::SetUserData(void* userData)
-    {
-        this->_userData = userData;
-        this->_body->setUserPointer(userData);
+        for (auto& body: this->_constraints)
+            body->Dump();
     }
 
 }}

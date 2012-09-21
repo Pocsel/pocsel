@@ -34,28 +34,19 @@ namespace Server { namespace Game { namespace Engine {
     void PositionalEntity::SetPosition(Common::Position const& pos)
     {
         std::cout << "SetPos: " << pos.x << ", " << pos.y << ", " << pos.z << "\n";
-        btRigidBody& btBody = this->_bodyCluster->GetBody();
 
-        btTransform wt;
-        wt.setOrigin(btVector3(pos.x,
-                    pos.y,
-                    pos.z));
+        Common::Physics::Node phys;
+        phys.position = pos;
+        phys.velocity = Common::Position(0, 0, 0);
+        phys.acceleration = Common::Position(0, 0, 0);
+        phys.orientation = glm::quat();
+        phys.angularVelocity = glm::vec3(0, 0, 0);
 
-        this->_bodyCluster->GetWorld().GetBtWorld().removeRigidBody(&btBody);
-
-        btBody.setLinearVelocity(btVector3(0, 0, 0));
-        btBody.setAngularVelocity(btVector3(0, 0, 0));
-
-        btBody.clearForces();
-        btBody.getMotionState()->setWorldTransform(wt);
-        btBody.setCenterOfMassTransform(wt);
-
-        this->_bodyCluster->GetWorld().GetBtWorld().addRigidBody(&btBody);
-
+        this->_bodyCluster->SetPhysics(phys);
         this->UpdatePhysics();
         this->SetIsDirty(true);
 
-        this->_engine.GetDoodadManager().UpdatePhysicsFromDoodadOfEntity(this->_id);
+        //this->_engine.GetDoodadManager().UpdatePhysicsFromDoodadOfEntity(this->_id);
     }
 
     void PositionalEntity::UpdatePhysics()

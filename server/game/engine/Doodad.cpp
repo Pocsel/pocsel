@@ -208,10 +208,10 @@ namespace Server { namespace Game { namespace Engine {
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
-    void Doodad::UpdatePhysics()
-    {
-        if (this->_body)
-            this->_body->UpdatePosition();
-    }
+    //void Doodad::UpdatePhysics()
+    //{
+    //    if (this->_body)
+    //        this->_body->UpdatePosition();
+    //}
 
 }}}

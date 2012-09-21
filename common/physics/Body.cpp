@@ -139,7 +139,29 @@ namespace Common { namespace Physics {
         return this->_parent.GetBody();
     }
 
-    void Body::UpdatePosition()
+    void Body::_RemoveFromWorld()
+    {
+        for (auto rootsIt = this->_type.GetRoots().begin(),
+                rootsIte = this->_type.GetRoots().end();
+                rootsIt != rootsIte; ++rootsIt)
+        {
+            this->_RemoveNodeFromWorld(*rootsIt);
+        }
+    }
+
+    void Body::_RemoveNodeFromWorld(Uint32 nodeId)
+    {
+        for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
+                childIte = this->_type.GetShapes()[nodeId].children.end();
+                childIt != childIte; ++childIt)
+            this->_RemoveNodeFromWorld(*childIt);
+
+        BodyNode& node = this->_nodes[nodeId];
+        this->_parent.GetWorld().GetBtWorld().removeConstraint(node.constraint);
+        this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
+    }
+
+    void Body::_UpdatePosition()
     {
         for (auto rootsIt = this->_type.GetRoots().begin(),
                 rootsIte = this->_type.GetRoots().end();
@@ -173,8 +195,6 @@ namespace Common { namespace Physics {
         btTransform tr;
         tr.mult(parentTr, thisTr);
 
-        this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
-
         node.body->setLinearVelocity(parent->getVelocityInLocalPoint(
                     tr.getOrigin()
                     -
@@ -185,8 +205,6 @@ namespace Common { namespace Physics {
         node.body->clearForces();
         node.body->getMotionState()->setWorldTransform(tr);
         node.body->setCenterOfMassTransform(tr);
-
-        this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
 
 
 
@@ -203,6 +221,27 @@ namespace Common { namespace Physics {
                 childIte = this->_type.GetShapes()[nodeId].children.end();
                 childIt != childIte; ++childIt)
             this->_UpdateNodePosition(*childIt);
+    }
+
+    void Body::_PutBackInWorld()
+    {
+        for (auto rootsIt = this->_type.GetRoots().begin(),
+                rootsIte = this->_type.GetRoots().end();
+                rootsIt != rootsIte; ++rootsIt)
+        {
+            this->_PutNodeBackInWorld(*rootsIt);
+        }
+    }
+
+    void Body::_PutNodeBackInWorld(Uint32 nodeId)
+    {
+        BodyNode& node = this->_nodes[nodeId];
+        this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
+        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint);
+        for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
+                childIte = this->_type.GetShapes()[nodeId].children.end();
+                childIt != childIte; ++childIt)
+            this->_PutNodeBackInWorld(*childIt);
     }
 
     void Body::Dump() const

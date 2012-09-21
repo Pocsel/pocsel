@@ -39,14 +39,22 @@ namespace Common { namespace Physics {
         btRigidBody& GetRootBtBody();
         btRigidBody const& GetRootBtBody() const;
 
-        void UpdatePosition();
 
         void Dump() const;
 
     private:
         void _BuildBodyNode(Uint32 nodeId);
         void _CleanBodyNode(Uint32 nodeId);
+
+    private:
+        void _RemoveFromWorld();
+        void _RemoveNodeFromWorld(Uint32 nodeId);
+        void _UpdatePosition();
         void _UpdateNodePosition(Uint32 nodeId);
+        void _PutBackInWorld();
+        void _PutNodeBackInWorld(Uint32 nodeId);
+
+        friend class BodyCluster;
     };
 
 }}

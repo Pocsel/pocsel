@@ -19,7 +19,7 @@ namespace Common { namespace Physics {
         Common::Physics::World& _world;
         btMotionState* _motionState;
         btRigidBody* _body;
-        std::map<Body*, btTypedConstraint*> _constraints;
+        std::set<Body*> _constraints;
 
         void* _userData;
 
@@ -34,10 +34,12 @@ namespace Common { namespace Physics {
         void AddConstraint(Body* body);
         void RemoveConstraint(Body* body);
 
-        void Dump() const;
+        void SetPhysics(Node const& physics);
 
         void SetUserData(void* userData);
         void* GetUserData() { return this->_userData; }
+
+        void Dump() const;
     };
 
 }}

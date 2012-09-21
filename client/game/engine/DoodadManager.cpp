@@ -334,13 +334,13 @@ namespace Client { namespace Game { namespace Engine {
     {
         entity.SetUpdateFlag(1.3);
         entity.UpdatePosition(node);
-        auto& doodadIds = entity.GetDoodads();
-        for (auto doodadIt = doodadIds.begin(), doodadIte = doodadIds.end(); doodadIt != doodadIte; ++doodadIt)
-        {
-            assert(this->_doodads.count(*doodadIt) && "un Doodad n'a pas été viré d'une Entity BOLOSS");
-            Doodad& doodad = *this->_doodads[*doodadIt];
-            doodad.UpdatePosition(node);
-        }
+        //auto& doodadIds = entity.GetDoodads();
+        //for (auto doodadIt = doodadIds.begin(), doodadIte = doodadIds.end(); doodadIt != doodadIte; ++doodadIt)
+        //{
+        //    assert(this->_doodads.count(*doodadIt) && "un Doodad n'a pas été viré d'une Entity BOLOSS");
+        //    Doodad& doodad = *this->_doodads[*doodadIt];
+        //    doodad.UpdatePosition(node);
+        //}
     }
 
 }}}

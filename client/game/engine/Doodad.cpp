@@ -31,10 +31,10 @@ namespace Client { namespace Game { namespace Engine {
         Tools::debug << "Doodad::~Doodad: Destroying doodad \"" << this->_type.GetName() << ")\n"; // \" (pos: " << this->_physics.position.x << " " << this->_physics.position.y << " " << this->_physics.position.z << ")" << std::endl;
     }
 
-    void Doodad::UpdatePosition(Common::Physics::Node const& node)
-    {
-        this->_body->UpdatePosition();
-    }
+    //void Doodad::UpdatePosition(Common::Physics::Node const& node)
+    //{
+    //    this->_body->UpdatePosition();
+    //}
 
     Common::Physics::Node const& Doodad::GetPhysics() const
     {

@@ -51,51 +51,7 @@ namespace Client { namespace Game { namespace Engine {
 
     void Entity::UpdatePosition(Common::Physics::Node const& position)
     {
-        btRigidBody& btBody = this->_bodyCluster->GetBody();
-
-        /*
-        {
-            btTransform curWt;
-            btBody.getMotionState()->getWorldTransform(curWt);
-            std::cout << "Entity::UpdatePosition: " << "\n" <<
-                std::setprecision(50) <<
-                "curX = " << curWt.getOrigin().x() << "\n" <<
-                "curY = " << curWt.getOrigin().y() << "\n" <<
-                "curZ = " << curWt.getOrigin().z() << "\n" <<
-                "newX = " << position.position.x << "\n" <<
-                "newY = " << position.position.y << "\n" <<
-                "newZ = " << position.position.z << "\n";
-        }
-        */
-
-
-        btTransform wt;
-        wt.setOrigin(btVector3(position.position.x,
-                    position.position.y,
-                    position.position.z));
-        wt.setRotation(btQuaternion(
-                    position.orientation.x,
-                    position.orientation.y,
-                    position.orientation.z,
-                    position.orientation.w));
-
-        this->_bodyCluster->GetWorld().GetBtWorld().removeRigidBody(&btBody);
-
-        btBody.setLinearVelocity(
-                btVector3(position.velocity.x,
-                    position.velocity.y,
-                    position.velocity.z));
-
-        btBody.setAngularVelocity(
-                btVector3(position.angularVelocity.x,
-                    position.angularVelocity.y,
-                    position.angularVelocity.z));
-
-        btBody.clearForces();
-        btBody.getMotionState()->setWorldTransform(wt);
-        btBody.setCenterOfMassTransform(wt);
-
-        this->_bodyCluster->GetWorld().GetBtWorld().addRigidBody(&btBody);
+        this->_bodyCluster->SetPhysics(position);
     }
 
 }}}

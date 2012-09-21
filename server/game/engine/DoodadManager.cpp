@@ -222,21 +222,21 @@ namespace Server { namespace Game { namespace Engine {
         this->_disabledDoodads.erase(listIt);
     }
 
-    void DoodadManager::UpdatePhysicsFromDoodadOfEntity(Uint32 entityId)
-    {
-        auto listIt = this->_doodadsByEntity.find(entityId);
-        if (listIt == this->_doodadsByEntity.end())
-            return;
-
-        auto it = listIt->second.begin();
-        auto ite = listIt->second.end();
-        for (; it != ite; ++it)
-        {
-            auto doodad = this->_doodads.find((*it)->GetId());
-            assert(doodad != this->_doodads.end() && doodad->second && "un doodad n'est pas dans la map générale des doodads");
-            doodad->second->UpdatePhysics();
-        }
-    }
+//    void DoodadManager::UpdatePhysicsFromDoodadOfEntity(Uint32 entityId)
+//    {
+//        auto listIt = this->_doodadsByEntity.find(entityId);
+//        if (listIt == this->_doodadsByEntity.end())
+//            return;
+//
+//        auto it = listIt->second.begin();
+//        auto ite = listIt->second.end();
+//        for (; it != ite; ++it)
+//        {
+//            auto doodad = this->_doodads.find((*it)->GetId());
+//            assert(doodad != this->_doodads.end() && doodad->second && "un doodad n'est pas dans la map générale des doodads");
+//            doodad->second->UpdatePhysics();
+//        }
+//    }
 
     bool DoodadManager::EntityHasDoodad(Uint32 entityId) const
     {

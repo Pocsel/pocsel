@@ -71,7 +71,7 @@ namespace Server { namespace Game { namespace Engine {
         void SetUdp(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value);
         void CallUdp(std::string const& name, Tools::Lua::Ref const& value);
         void PositionIsDirty();
-        void UpdatePhysics();
+        //void UpdatePhysics();
     private:
         void _SpawnForNewPlayers();
     };
