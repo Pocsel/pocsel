@@ -40,6 +40,12 @@ namespace Hlsl
         StatementOrSamplerState value;
     };
 
+    struct Structure
+    {
+        std::string name;
+        std::list<Variable> members;
+    };
+
     // void vertexShader(float4 position : POSITION, float2 texCoord : TEXCOORD) { ... }
     struct Function
     {
@@ -84,7 +90,7 @@ namespace Hlsl
         std::list<Pass> passes;
     };
 
-    typedef boost::variant<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Nil> GlobalStatement;
+    typedef boost::variant<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Structure, Hlsl::Nil> GlobalStatement;
 
     struct File
     {

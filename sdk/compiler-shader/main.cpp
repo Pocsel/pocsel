@@ -1,6 +1,6 @@
 #include "precompiled.hpp"
 
-#include "sdk/compiler-shader/HlslParser.hpp"
+#include "sdk/compiler-shader/CgCompiler.hpp"
 
 template<class TOut>
 void printVariable(TOut& out, Hlsl::Variable const& var)
@@ -64,6 +64,9 @@ int main(int ac, char** av)
 
     // TESTS parseur HLSL
     tmp = STRINGIFY(
+        float4x4 model : World;
+        float4x4 view : View;
+        float4x4 projection : Projection;
         float4x4 mvp : WorldViewProjection = mul(a, b);
         float4 position : POSITION;
         sampler2D) "/* test */" STRINGIFY(toto = sampler_state {};
@@ -93,14 +96,23 @@ int main(int ac, char** av)
             return simple();
         }
 
-        float4 vs(float4 pos : POSITION) : POSITION
+        struct vsOut
         {
-            return mul(mvp, pos);
+            float4 pos : POSITION;
+            float2 tex : TEXCOORD0;
+        };
+
+        vsOut vs(float4 pos : POSITION, float2 tex : TEXCOORD0) : POSITION
+        {
+            vsOut o;
+            o.pos = mul(model * view * projection, pos);
+            o.tex = tex;
+            return o;
         }
 
-        float4 fs() : COLOR
+        float4 fs(vsOut i) : COLOR
         {
-            return simple();
+            return float4(i.tex.x, i.tex.y, i.tex.x, 1);
         }
 
         technique tech
@@ -121,7 +133,7 @@ int main(int ac, char** av)
     {
         std::cout << "file: " << std::endl;
         for (auto& s: file.statements)
-            switch (s.which()) //<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Nil>
+            switch (s.which()) //<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Structure, Hlsl::Nil>
             {
             case 0:
                 printVariable(std::cout, boost::get<Variable>(s));
@@ -145,6 +157,14 @@ int main(int ac, char** av)
                 }
                 break;
             case 3:
+                {
+                    auto& struc = boost::get<Structure>(s);
+                    std::cout << "Structure: " << struc.name << ":\n";
+                    for (auto& var: struc.members)
+                        printVariable(std::cout << "\t", var);
+                }
+                break;
+            case 4:
                 std::cout << "Empty\n";
                 break;
             }
@@ -153,37 +173,8 @@ int main(int ac, char** av)
 
     std::cout << "\n\n------------ CG -----------\n";
 
-    auto getFirstPass = [](File const& file) -> Pass const&
-        {
-            for (auto const& s: file.statements)
-                if (s.which() == 2)
-                    for (auto const& pass: boost::get<Technique>(s).passes)
-                        return pass;
-            throw std::runtime_error("can't find any pass");
-        };
-    auto getFirstShader = [](Pass const& pass, CompileStatement::ShaderType type) -> CompileStatement
-        {
-            for (auto const& s: pass.statements)
-                if (s.which() == 1 && boost::get<CompileStatement>(s).type == type)
-                    return boost::get<CompileStatement>(s);
-            throw std::runtime_error(std::string("can't find ") + (type == CompileStatement::PixelShader ? "PixelShader" : "VertexShader") + " in pass " + pass.name);
-        };
-
-
-    auto pass = getFirstPass(file);
-    auto vertexShader = getFirstShader(pass, CompileStatement::VertexShader);
-    auto pixelShader = getFirstShader(pass, CompileStatement::PixelShader);
-    auto ctx = cgCreateContext();
-    auto program = cgCreateProgram(ctx, CG_SOURCE, tmp.c_str(), CG_PROFILE_HLSLV, vertexShader.entry.c_str(), 0);
-    if (program == 0)
-    {
-        std::cout << "Error " << cgGetError() << ": " << cgGetErrorString(cgGetError()) << std::endl;
-        std::cout << cgGetLastListing(ctx) << std::endl;
-    }
-    std::cout << cgGetProgramString(program, CG_COMPILED_PROGRAM) << std::endl;
-
-    cgDestroyProgram(program);
-    cgDestroyContext(ctx);
+    std::cout << HlslFileToGlsl(file, tmp) << std::endl;
+    std::cout << HlslFileToHlsl(file, tmp) << std::endl;
 
     std::cin.get();
     return 0;

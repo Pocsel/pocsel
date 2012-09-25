@@ -33,6 +33,11 @@ BOOST_FUSION_ADAPT_STRUCT(
     (Hlsl::StatementOrSamplerState, value)
 )
 BOOST_FUSION_ADAPT_STRUCT(
+    Hlsl::Structure,
+    (std::string, name)
+    (std::list<Hlsl::Variable>, members)
+)
+BOOST_FUSION_ADAPT_STRUCT(
     Hlsl::Function,
     (std::string, ret)
     (std::string, name)
@@ -263,6 +268,25 @@ namespace Hlsl {
     };
 
     template<class T, class TSkipper>
+    struct StructureParser : boost::spirit::qi::grammar<T, Structure(), TSkipper>
+    {
+        BaseParser<T> base;
+        VariableParser<T, TSkipper> variableParser;
+        boost::spirit::qi::rule<T, Structure(), TSkipper> start;
+
+        StructureParser() : StructureParser::base_type(start)
+        {
+            start %=
+                    "struct"
+                    > base.identifier // name
+                    > base.leftBracket
+                    > +(variableParser > ';')
+                    > base.rightBracket
+                ;
+        }
+    };
+
+    template<class T, class TSkipper>
     struct FunctionParser : boost::spirit::qi::grammar<T, Function(), TSkipper>
     {
         BaseParser<T> base;
@@ -334,6 +358,7 @@ namespace Hlsl {
     {
         BaseParser<T> base;
         VariableParser<T, TSkipper> variableParser;
+        StructureParser<T, TSkipper> structureParser;
         FunctionParser<T, TSkipper> functionParser;
         TechniqueParser<T, TSkipper> techniqueParser;
 
@@ -353,6 +378,7 @@ namespace Hlsl {
 
         statement =
             techniqueParser[_val = _1] |
+            structureParser[_val = _1] |
             functionParser[_val = _1] |
             variable[_val = _1] |
             base.semicolon[_val = val(Nil())]
