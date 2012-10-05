@@ -1,11 +1,3 @@
-// Boost
-#include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/lex.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
-
 #include "sdk/compiler-shader/HlslParser.hpp"
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -282,6 +274,7 @@ namespace Hlsl {
                     > base.leftBracket
                     > +(variableParser > ';')
                     > base.rightBracket
+                    > base.semicolon
                 ;
         }
     };

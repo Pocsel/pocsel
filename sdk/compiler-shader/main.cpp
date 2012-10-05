@@ -1,6 +1,7 @@
 #include "precompiled.hpp"
 
 #include "sdk/compiler-shader/CgCompiler.hpp"
+#include "sdk/compiler-shader/HlslGenerator.hpp"
 
 template<class TOut>
 void printVariable(TOut& out, Hlsl::Variable const& var)
@@ -55,6 +56,48 @@ void printPassStatement(TOut& out, Hlsl::Pass const& pass, std::string const& ta
         }
 }
 
+template<class TOut>
+void printFile(TOut& out, Hlsl::File const& file)
+{
+    using namespace Hlsl;
+    for (auto& s: file.statements)
+        switch (s.which()) //<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Structure, Hlsl::Nil>
+        {
+        case 0:
+            printVariable(out, boost::get<Variable>(s));
+            break;
+        case 1:
+            {
+                auto& func = boost::get<Function>(s);
+                out << "Function: " << func.ret << " " << func.name << "(" << std::endl;
+                for (auto& var: func.arguments)
+                    printVariable(out << "\t", var);
+                out << ") : " << func.semantic << std::endl;
+                printCodeBlock(out, func.code);
+            }
+            break;
+        case 2:
+            {
+                auto& tech = boost::get<Technique>(s);
+                out << "Technique: " << tech.name << ":\n";
+                for (auto& pass: tech.passes)
+                    printPassStatement(out, pass, "\t");
+            }
+            break;
+        case 3:
+            {
+                auto& struc = boost::get<Structure>(s);
+                out << "Structure: " << struc.name << ":\n";
+                for (auto& var: struc.members)
+                    printVariable(out << "\t", var);
+            }
+            break;
+        case 4:
+            out << "Empty\n";
+            break;
+        }
+}
+
 #define STRINGIFY(...) #__VA_ARGS__
 
 int main(int ac, char** av)
@@ -69,7 +112,8 @@ int main(int ac, char** av)
         float4x4 projection : Projection;
         float4x4 mvp : WorldViewProjection = mul(a, b);
         float4 position : POSITION;
-        sampler2D) "/* test */" STRINGIFY(toto = sampler_state {};
+        sampler2D) "/* test */" STRINGIFY(toto = sampler_state {     MinFilter = LinearMipMapLinear;
+    MagFilter = Nearest; };
         int a;
 
         float4 simple()
@@ -102,17 +146,18 @@ int main(int ac, char** av)
             float2 tex : TEXCOORD0;
         };
 
-        vsOut vs(float4 pos : POSITION, float2 tex : TEXCOORD0) : POSITION
+        vsOut vs(float4 pos : POSITION, float2 tex : TEXCOORD0, float4 testVar) : POSITION
         {
             vsOut o;
             o.pos = mul(model * view * projection, pos);
-            o.tex = tex;
+            o.tex = tex * testVar.xy;
             return o;
         }
 
         float4 fs(vsOut i) : COLOR
         {
-            return float4(i.tex.x, i.tex.y, i.tex.x, 1);
+            i.tex = mul((float2x2)mvp, i.tex);
+            return tex2D(toto, i.tex);
         }
 
         technique tech
@@ -132,50 +177,26 @@ int main(int ac, char** av)
     if (ParseStream(ss, file))
     {
         std::cout << "file: " << std::endl;
-        for (auto& s: file.statements)
-            switch (s.which()) //<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Structure, Hlsl::Nil>
-            {
-            case 0:
-                printVariable(std::cout, boost::get<Variable>(s));
-                break;
-            case 1:
-                {
-                    auto& func = boost::get<Function>(s);
-                    std::cout << "Function: " << func.ret << " " << func.name << "(" << std::endl;
-                    for (auto& var: func.arguments)
-                        printVariable(std::cout << "\t", var);
-                    std::cout << ") : " << func.semantic << std::endl;
-                    printCodeBlock(std::cout, func.code);
-                }
-                break;
-            case 2:
-                {
-                    auto& tech = boost::get<Technique>(s);
-                    std::cout << "Technique: " << tech.name << ":\n";
-                    for (auto& pass: tech.passes)
-                        printPassStatement(std::cout, pass, "\t");
-                }
-                break;
-            case 3:
-                {
-                    auto& struc = boost::get<Structure>(s);
-                    std::cout << "Structure: " << struc.name << ":\n";
-                    for (auto& var: struc.members)
-                        printVariable(std::cout << "\t", var);
-                }
-                break;
-            case 4:
-                std::cout << "Empty\n";
-                break;
-            }
+        //printFile(std::cout, file);
+        std::cout << GenerateHlsl(file);
     }
+    else
+        std::cout << "Parsing error" << std::endl;
 
 
-    std::cout << "\n\n------------ CG -----------\n";
+    std::cout << "\n\n------------ CG -----------\n *** OpenGL\n";
 
-    std::cout << HlslFileToGlsl(file, tmp) << std::endl;
-    std::cout << HlslFileToHlsl(file, tmp) << std::endl;
+    GeneratorOptions options;
+    options.removeSemanticAttributes = true;
+    tmp = GenerateHlsl(file, options);
 
+    auto pair = HlslFileToGlsl(file, tmp);
+    std::cout << pair.first << pair.second << std::endl << " *** DIRECTX\n";
+    pair = HlslFileToHlsl(file, tmp);
+    std::cout << pair.first << pair.second << std::endl;
+
+#ifdef _WINDOWS
     std::cin.get();
+#endif
     return 0;
 }

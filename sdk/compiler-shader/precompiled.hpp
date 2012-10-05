@@ -29,6 +29,13 @@
 
 // boost
 #include <boost/variant.hpp>
+// boost - spirit / phoenix
+//#include <boost/spirit/include/karma.hpp>
+//#include <boost/spirit/include/lex.hpp>
+//#include <boost/spirit/include/qi.hpp>
+//#include <boost/spirit/include/phoenix.hpp>
+//#include <boost/fusion/include/adapt_struct.hpp>
+//#include <boost/spirit/include/support_multi_pass.hpp>
 
 // Cg
 #include <Cg/cg.h>

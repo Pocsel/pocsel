@@ -4,7 +4,59 @@
 
 namespace Hlsl {
 
-    std::string HlslFileToGlsl(File const& file, std::string const& source);
-    std::string HlslFileToHlsl(File const& file, std::string const& source);
+    namespace Type {
+        enum Type
+        {
+            Sampler2D,
+            Boolean,
+            Float,
+            Float2,
+            Float3,
+            Float3x3,
+            Float4,
+            Float4x4,
+        };
+    }
+    namespace Profile {
+        enum Type
+        {
+            Hlsl,
+            Glsl,
+            Arb
+        };
+    }
+
+    struct Sampler
+    {
+        std::map<std::string, std::string> states;
+    };
+
+    struct BaseParameter
+    {
+        Type::Type type;
+        std::string semanticDirectX;
+        std::string semanticOpenGL;
+    };
+
+    struct UniformParameter : public BaseParameter
+    {
+        boost::variant<bool, Sampler, std::array<float, 16>> value;
+    };
+
+    struct Shader
+    {
+        std::map<std::string, UniformParameter> uniforms;
+        std::map<std::string, BaseParameter> attributes;
+        std::map<std::string, std::string> deviceStates;
+        std::string hlslVertex;
+        std::string hlslPixel;
+        std::string glslVertex;
+        std::string glslPixel;
+    };
+
+    std::pair<std::string, std::string> HlslFileToGlsl(File const& file, std::string const& source);
+    std::pair<std::string, std::string> HlslFileToHlsl(File const& file, std::string const& source);
+    Shader HlslFileToShader(File const& file, std::string const& source);
+    void SerializeShader(Shader const& shader, std::ostream& out);
 
 }
