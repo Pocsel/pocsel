@@ -127,18 +127,22 @@ namespace Tools { namespace Lua {
             return *it->second.front().first;
         }
 
-        void InvalidateAllFakeReferences()
+        // retourne true si il y avait des fake references a enlever
+        bool InvalidateAllFakeReferences()
         {
             if (!this->_fakeReferences)
-                return;
+                return false;
+            bool ret = false;
             auto it = this->_fakeReferences->begin();
             auto itEnd = this->_fakeReferences->end();
             for (; it != itEnd; ++it)
             {
+                ret = true;
                 Ref& ref = *it;
                 ref.To<FakeReference*>()->Invalidate();
             }
             this->_fakeReferences->clear();
+            return ret;
         }
 
     private:
