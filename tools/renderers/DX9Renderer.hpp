@@ -39,9 +39,6 @@ namespace Tools { namespace Renderers {
         std::list<DX9::ShaderProgram*> _allPrograms;
         std::list<DX9::RenderTarget*> _allRenderTargets;
 
-        std::list<RenderState> _states;
-        RenderState* _currentState;
-
         DX9::VertexBuffer* _vertexBuffer;
 
         glm::vec4 _clearColor;
