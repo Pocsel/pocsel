@@ -88,7 +88,13 @@ namespace Hlsl {
                             first = false;
                         else
                             out << ", ";
-                        _PrintVariable(out, var, !options.removeSemanticAttributes);
+                        if (var.in && var.out)
+                            out << "inout ";
+                        else if (var.in)
+                            out << "in ";
+                        else if (var.out)
+                            out << "out ";
+                        _PrintVariable(out, var, var.out && !options.removeSemanticAttributes);
                     }
                     out << ")";
                     if (func.semantic.length() > 0)

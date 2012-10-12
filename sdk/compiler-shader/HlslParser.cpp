@@ -23,6 +23,8 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string, name)
     (std::string, semantic)
     (Hlsl::StatementOrSamplerState, value)
+    (bool, in)
+    (bool, out)
 )
 BOOST_FUSION_ADAPT_STRUCT(
     Hlsl::Structure,
@@ -102,6 +104,7 @@ namespace Hlsl {
         qi::rule<T, void()> semicolon;
         qi::rule<T, void()> colon;
         qi::rule<T, void()> equal;
+        qi::rule<T, void()> comma;
         boost::phoenix::function<ErrorHandler> errorHandler;
 
         BaseParser();
@@ -133,6 +136,9 @@ namespace Hlsl {
 
         equal = lit('=');
         equal.name("=");
+
+        comma = lit(',');
+        comma.name(",");
     }
 
     template<class T, class TSkipper>
@@ -251,7 +257,7 @@ namespace Hlsl {
             qi::on_error<qi::rethrow>(valueParser, base.errorHandler);
 
             start %=
-                    base.identifier // type
+                    base.identifier[if_(_1 == "in" || _1 == "out" || _1 == "inout")[_pass = false]] // type
                     >> base.identifier // name
                     >> semanticParser // semantic
                     >> valueParser // value
@@ -285,6 +291,7 @@ namespace Hlsl {
         BaseParser<T> base;
         CodeBlockParser<T, TSkipper> codeBlockParser;
         VariableParser<T, TSkipper> variableParser;
+        boost::spirit::qi::rule<T, Variable(), TSkipper> oneArgParser;
         boost::spirit::qi::rule<T, std::list<Variable>(), TSkipper> argumentParser;
         boost::spirit::qi::rule<T, std::string(), TSkipper> semanticParser;
         boost::spirit::qi::rule<T, Function(), TSkipper> start;
@@ -293,11 +300,20 @@ namespace Hlsl {
         {
             semanticParser %= (base.colon >> base.identifier) | qi::eps[_val = val("")];
 
+            oneArgParser =
+                    (lit("in") >> variableParser[_val = _1])
+                    | (lit("out") >> variableParser[_val = _1, at_c<4>(_val) = val(false), at_c<5>(_val) = val(true)])
+                    | (lit("inout") >> variableParser[_val = _1, at_c<4>(_val) = val(true), at_c<5>(_val) = val(true)])
+                    | variableParser[_val = _1]
+                ;
+            oneArgParser.name("argument");
+
             argumentParser =
                     base.leftParenthesis
-                    > -(variableParser[push_back(_val, _1)] % ',')
+                    > -(oneArgParser[push_back(_val, _1)] % base.comma)
                     > base.rightParenthesis
                 ;
+            argumentParser.name("arguments");
             qi::on_error<qi::rethrow>(argumentParser, base.errorHandler);
 
             start %=

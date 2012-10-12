@@ -111,7 +111,6 @@ int main(int ac, char** av)
         float4x4 view : View;
         float4x4 projection : Projection;
         float4x4 mvp : WorldViewProjection = mul(a, b);
-        float4 position : POSITION;
         sampler2D) "/* test */" STRINGIFY(toto = sampler_state {     MinFilter = LinearMipMapLinear;
     MagFilter = Nearest; };
         int a;
@@ -144,20 +143,22 @@ int main(int ac, char** av)
         {
             float4 pos : POSITION;
             float2 tex : TEXCOORD0;
+            float3 test : TEXCOORD1;
         };
 
-        vsOut vs(float4 pos : POSITION, float2 tex : TEXCOORD0, float4 testVar) : POSITION
+        vsOut vs(in float4 pos : POSITION, out float2 tex : TEXCOORD0, inout float4 testVar) : POSITION
         {
             vsOut o;
             o.pos = mul(model * view * projection, pos);
             o.tex = tex * testVar.xy;
+            o.test = pos.xyz;
             return o;
         }
 
         float4 fs(vsOut i) : COLOR
         {
-            i.tex = mul((float2x2)mvp, i.tex);
-            return tex2D(toto, i.tex);
+            i.tex = mul((float2x2)mvp, i.tex * i.test.z);
+            return tex2D(toto, i.tex + i.test.xy);
         }
 
         technique tech

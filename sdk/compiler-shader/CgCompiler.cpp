@@ -145,7 +145,7 @@ namespace Hlsl {
         }
 
         // todo: shader.attributes
-        
+
 
         return shader;
     }

@@ -38,6 +38,14 @@ namespace Hlsl
         std::string name;
         std::string semantic;
         StatementOrSamplerState value;
+        bool in;
+        bool out;
+
+        Variable() :
+            in(true),
+            out(false)
+        {
+        }
     };
 
     struct Structure
