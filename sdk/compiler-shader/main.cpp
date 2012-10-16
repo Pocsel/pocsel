@@ -111,32 +111,14 @@ int main(int ac, char** av)
         float4x4 view : View;
         float4x4 projection : Projection;
         float4x4 mvp : WorldViewProjection = mul(a, b);
-        sampler2D) "/* test */" STRINGIFY(toto = sampler_state {     MinFilter = LinearMipMapLinear;
-    MagFilter = Nearest; };
-        int a;
+        sampler2D toto = sampler_state {
+            MinFilter = LinearMipMapLinear;
+            MagFilter = Nearest;
+        };
 
         float4 simple()
         {
             return float4(0, 0, 0, 0);
-        }
-
-        float4 dfsgjkh(float4 bibi : POSITION) : POSITION
-        {
-            simple();
-            simple();
-            for) " /* test\n */\t" STRINGIFY((int i = 10; i < 10; i++)
-            {
-                simple();
-                for (int i = 1; i > 10; i++)
-                    simple();
-                for (int i = 1; i > 10; i++)
-                {
-                    simple();
-                }
-            }
-            do {
-            }while(x);
-            return simple();
         }
 
         struct vsOut
@@ -146,7 +128,7 @@ int main(int ac, char** av)
             float3 test : TEXCOORD1;
         };
 
-        vsOut vs(in float4 pos : POSITION, out float2 tex : TEXCOORD0, inout float4 testVar) : POSITION
+        vsOut vs(float4 pos : POSITION, float2 tex : TEXCOORD0, float4 testVar)
         {
             vsOut o;
             o.pos = mul(model * view * projection, pos);
@@ -185,16 +167,15 @@ int main(int ac, char** av)
         std::cout << "Parsing error" << std::endl;
 
 
-    std::cout << "\n\n------------ CG -----------\n *** OpenGL\n";
-
     GeneratorOptions options;
     options.removeSemanticAttributes = true;
     tmp = GenerateHlsl(file, options);
 
-    auto pair = HlslFileToGlsl(file, tmp);
-    std::cout << pair.first << pair.second << std::endl << " *** DIRECTX\n";
-    pair = HlslFileToHlsl(file, tmp);
-    std::cout << pair.first << pair.second << std::endl;
+    auto shader = HlslFileToShader(file, tmp);
+
+    std::cout << "\n------------ CG -----------\n *** OpenGL\n";
+    std::cout << shader.glslVertex << shader.glslPixel << std::endl << " *** DIRECTX\n";
+    std::cout << shader.hlslVertex << shader.hlslPixel << std::endl;
 
 #ifdef _WINDOWS
     std::cin.get();

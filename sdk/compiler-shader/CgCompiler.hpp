@@ -34,8 +34,8 @@ namespace Hlsl {
     struct BaseParameter
     {
         Type::Type type;
-        std::string semanticDirectX;
-        std::string semanticOpenGL;
+        std::string directX;
+        std::string openGL;
     };
 
     struct UniformParameter : public BaseParameter
@@ -45,6 +45,7 @@ namespace Hlsl {
 
     struct Shader
     {
+        std::string source;
         std::map<std::string, UniformParameter> uniforms;
         std::map<std::string, BaseParameter> attributes;
         std::map<std::string, std::string> deviceStates;
