@@ -34,7 +34,8 @@ Server.Entity.Register{
 
     SpawnBlob = function(self)
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 10, 67108864), "base:Blob")
-        --Server.Message.Later(6, self.id, "SpawnBlob")
+        Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 23, 67108864), "base:Ball")
+        Server.Message.Later(6, self.id, "SpawnBlob")
     end,
 
     SpawnTank = function(self)

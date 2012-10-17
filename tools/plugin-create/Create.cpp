@@ -106,7 +106,7 @@ namespace Tools { namespace PluginCreate {
                 return;
             }
 
-            std::map<std::string /* extension */, std::string /* type en base */> allowedTypes;
+            std::map<std::string /* extension avec point */, std::string /* type en base */> allowedTypes;
             allowedTypes[".lua"] = "lua";
             allowedTypes[".png"] = "image";
             allowedTypes[".fx"] = "effect";
