@@ -40,7 +40,7 @@ namespace Hlsl {
 
     struct UniformParameter : public BaseParameter
     {
-        boost::variant<bool, Sampler, std::array<float, 16>> value;
+        boost::variant<bool, Sampler, std::array<float, 16>, Nil> value;
     };
 
     struct Shader

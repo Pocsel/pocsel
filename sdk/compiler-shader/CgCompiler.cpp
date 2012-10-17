@@ -109,6 +109,37 @@ namespace Hlsl {
                 return Type::Float4x4;
             throw std::runtime_error("Unknown type \"" + type + "\"");
         }
+
+        static std::string _GetValue(boost::variant<bool, Sampler, std::array<float, 16>, Nil> const& value)
+        {
+            struct : public boost::static_visitor<std::string>
+            {
+                std::string operator()(bool v) { return v ? "true" : "false"; }
+                std::string operator()(Sampler const& sampler)
+                {
+                    std::stringstream ss;
+                    ss << "{";
+                    for (auto const& s: sampler.states)
+                        ss << s.first << "=" << s.second << ";";
+                    ss << "}";
+                    return ss.str();
+                }
+                std::string operator()(std::array<float, 16> const& arr)
+                {
+                    std::stringstream ss;
+                    ss << "(";
+                    for (auto const& v: arr)
+                        ss << v << ";";
+                    ss << ")";
+                    return ss.str();
+                }
+                std::string operator()(Nil const&)
+                {
+                    return "-";
+                }
+            } visitor;
+            return boost::apply_visitor(visitor, value);
+        }
     }
 
     // Parsing
@@ -124,7 +155,7 @@ namespace Hlsl {
         using boost::phoenix::at_c;
         using boost::phoenix::push_back;
 
-        static std::list<std::pair<Variable const*, std::string>> _ParseGeneratedXlsl(std::string const& xlsl, Function const& func)
+        static std::list<std::pair<Variable const*, std::string>> _ParseGeneratedXlsl(std::string const& xlsl, File const& file, Function const& func)
         {
             auto it = xlsl.begin();
             auto ite = xlsl.end();
@@ -144,7 +175,7 @@ namespace Hlsl {
 
             fileParser =
                     *(
-                        parameterParser[if_(at_c<2>(_1) >= 0) [ push_back(_val, _1) ]]
+                        parameterParser[push_back(_val, _1)]
                         |
                         (-lit("//") >> +(char_ - '/'))
                     )
@@ -155,17 +186,33 @@ namespace Hlsl {
             qi::phrase_parse(it, ite, fileParser, ascii::space, tmp);
 
             std::list<std::pair<Variable const*, std::string>> result;
-            for (auto const& arg: func.arguments)
-                if (arg.in)
-                {
-                    auto findVarName = [&]() -> std::string {
-                            for (auto& var: tmp)
-                                if (var.identifier == arg.name)
-                                    return var.generatedIdentifier;
-                            throw std::runtime_error("can't find argument \"" + arg.name + "\" in function \"" + func.name + "\"");
+            for (auto& var: tmp)
+            {
+                if (var.identifier.find('.') != std::string::npos)
+                    continue;
+                std::function<Variable const*()> findVar;
+                if (var.index >= 0)
+                    findVar = [&]() -> Variable const* {
+                            for (auto const& arg: func.arguments)
+                                if (arg.in && arg.name == var.identifier)
+                                    return &arg;
+                            return nullptr;
                         };
-                    result.push_back(std::make_pair(&arg, findVarName()));
-                }
+                else
+                    findVar = [&]() -> Variable const* {
+                            for (auto const& stmt: file.statements)
+                                if (stmt.which() == 0)
+                                {
+                                    auto const& uniform = boost::get<Variable>(stmt);
+                                    if (uniform.name == var.identifier)
+                                        return &uniform;
+                                }
+                            return nullptr;
+                        };
+                if (var.generatedIdentifier != "")
+                    result.push_back(std::make_pair(findVar(), var.generatedIdentifier));
+            }
+            result.sort();
             return result;
         }
 
@@ -195,6 +242,8 @@ namespace Hlsl {
         auto const& pass = _GetFirstPass(file);
         auto const& vertexShader = _GetFirstShader(pass, CompileStatement::VertexShader);
         auto const& pixelShader = _GetFirstShader(pass, CompileStatement::PixelShader);
+        auto const& functionVertex = _GetFunction(file, vertexShader.entry);
+        auto const& functionPixel = _GetFunction(file, pixelShader.entry);
 
         auto const& hlsl = _Compile(vertexShader.entry, pixelShader.entry, source, Profile::Hlsl);
         auto const& glsl = _Compile(vertexShader.entry, pixelShader.entry, source, Profile::Glsl);
@@ -214,41 +263,103 @@ namespace Hlsl {
             }
         }
 
+        auto tmpGlslv = _ParseGeneratedXlsl(shader.glslVertex, file, functionVertex);
+        auto tmpHlslv = _ParseGeneratedXlsl(shader.hlslVertex, file, functionVertex);
+        tmpGlslv.merge(_ParseGeneratedXlsl(shader.glslPixel, file, functionPixel));
+        tmpHlslv.merge(_ParseGeneratedXlsl(shader.hlslPixel, file, functionPixel));
+
+        // shader.uniforms
         for (auto const& stmt: file.statements)
         {
             if (stmt.which() == 0)
             {
                 auto const& var = boost::get<Variable>(stmt);
                 UniformParameter param;
+                for (auto const& v: tmpGlslv)
+                    if (v.first == &var)
+                        param.openGL = v.second;
+                for (auto const& v: tmpHlslv)
+                    if (v.first == &var)
+                        param.directX = v.second;
                 param.type = _ParseType(var.type);
-                if (var.value.which() == 1)
+                param.value = Nil();
+                switch (var.value.which())
                 {
-                    Sampler sampler;
-                    for (auto const& state: boost::get<SamplerState>(var.value).states)
+                case 0:
                     {
-                        if (sampler.states.find(state.key) != sampler.states.end())
-                            throw std::runtime_error("multiple value for sampler_state near \"" + state.key + "\"");
-                        sampler.states.insert(std::make_pair(state.key, state.value));
+                        std::string stat = boost::get<Statement>(var.value).statement;
+                        if (stat == "")
+                            break;
+                        switch (param.type)
+                        {
+                        case Type::Boolean:
+                            {
+                                if (stat == "true")
+                                    param.value = true;
+                                else if (stat == "false")
+                                    param.value = false;
+                                else
+                                    throw std::runtime_error("the default value must be a constant (check \"" + var.name + "\")");
+                            }
+                            break;
+                        case Type::Float:
+                            {
+                                std::stringstream ss(stat);
+                                std::array<float, 16> f;
+                                ss >> f[0];
+                                param.value = f;
+                            }
+                            break;
+                        }
                     }
-                    // todo: directx & opengl
-                    param.value = sampler;
+                    break;
+                case 1:
+                    {
+                        Sampler sampler;
+                        for (auto const& state: boost::get<SamplerState>(var.value).states)
+                        {
+                            if (sampler.states.find(state.key) != sampler.states.end())
+                                throw std::runtime_error("multiple value for sampler_state near \"" + state.key + "\"");
+                            sampler.states.insert(std::make_pair(state.key, state.value));
+                        }
+                        param.value = sampler;
+                    }
+                    break;
                 }
+                shader.uniforms[var.name] = param;
             }
         }
 
         // shader.attributes
-        auto const& tmpGlsl = _ParseGeneratedXlsl(shader.glslVertex, _GetFunction(file, vertexShader.entry));
-        auto const& tmpHlsl = _ParseGeneratedXlsl(shader.hlslVertex, _GetFunction(file, vertexShader.entry));
-        for (auto const& v: tmpGlsl)
-            shader.attributes[v.first->name].openGL = v.second;
-        for (auto const& v: tmpHlsl)
-            shader.attributes[v.first->name].directX = v.second;
+        for (auto const& arg: functionVertex.arguments)
+        {
+            for (auto const& v: tmpGlslv)
+                if (v.first == &arg)
+                    shader.attributes[v.first->name].openGL = v.second;
+            for (auto const& v: tmpHlslv)
+                if (v.first == &arg)
+                    shader.attributes[v.first->name].directX = v.second;
+        }
 
         return shader;
     }
 
     void SerializeShader(Shader const& shader, std::ostream& out)
     {
+        out << "source " << shader.source.size() << "\n" << shader.source;
+        out << "glslv " << shader.glslVertex.size() << "\n" << shader.glslVertex;
+        out << "glslf " << shader.glslPixel.size() << "\n" << shader.glslPixel;
+        out << "hlslv " << shader.hlslVertex.size() << "\n" << shader.hlslVertex;
+        out << "hlslf " << shader.hlslPixel.size() << "\n" << shader.hlslPixel;
+        out << "attributes " << shader.attributes.size() << "\n";
+        for (auto const& attr: shader.attributes)
+            out << attr.first << " " << attr.second.openGL << " " << attr.second.directX << "\n";
+        out << "uniforms " << shader.uniforms.size() << "\n";
+        for (auto const& uniform: shader.uniforms)
+            out << uniform.first << " " << uniform.second.openGL << " " << uniform.second.directX << " " << _GetValue(uniform.second.value) << "\n";
+        out << "states " << shader.deviceStates.size() << "\n";
+        for (auto const& state: shader.deviceStates)
+            out << state.first << " " << state.second << "\n";
     }
 
 }

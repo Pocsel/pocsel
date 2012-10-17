@@ -157,25 +157,25 @@ int main(int ac, char** av)
 
     File file;
     std::stringstream ss(tmp);
-    if (ParseStream(ss, file))
-    {
-        std::cout << "file: " << std::endl;
-        //printFile(std::cout, file);
-        std::cout << GenerateHlsl(file);
-    }
-    else
+    if (!ParseStream(ss, file))
         std::cout << "Parsing error" << std::endl;
+    else
+    {
+        GeneratorOptions options;
+        options.removeSemanticAttributes = true;
+        tmp = GenerateHlsl(file, options);
 
+        auto const& shader = HlslFileToShader(file, tmp);
+        SerializeShader(shader, std::cout);
 
-    GeneratorOptions options;
-    options.removeSemanticAttributes = true;
-    tmp = GenerateHlsl(file, options);
-
-    auto shader = HlslFileToShader(file, tmp);
-
-    std::cout << "\n------------ CG -----------\n *** OpenGL\n";
-    std::cout << shader.glslVertex << shader.glslPixel << std::endl << " *** DIRECTX\n";
-    std::cout << shader.hlslVertex << shader.hlslPixel << std::endl;
+        //std::cout << "\n------------ CG -----------\n *** OpenGL\n";
+        //for (auto const& var: shader.attributes)
+        //    std::cout << var.first << " => " << var.second.openGL << std::endl;
+        //std::cout << shader.glslVertex << shader.glslPixel << std::endl << " *** DIRECTX\n";
+        //for (auto const& var: shader.attributes)
+        //    std::cout << var.first << " => " << var.second.directX << std::endl;
+        //std::cout << shader.hlslVertex << shader.hlslPixel << std::endl;
+    }
 
 #ifdef _WINDOWS
     std::cin.get();
