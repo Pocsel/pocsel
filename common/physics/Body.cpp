@@ -203,8 +203,8 @@ namespace Common { namespace Physics {
         node.body->setAngularVelocity(parent->getAngularVelocity());
 
         node.body->clearForces();
-        node.body->getMotionState()->setWorldTransform(tr);
         node.body->setCenterOfMassTransform(tr);
+        node.body->getMotionState()->setWorldTransform(tr);
 
 
 
@@ -237,7 +237,7 @@ namespace Common { namespace Physics {
     {
         BodyNode& node = this->_nodes[nodeId];
         this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
-        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint);
+        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint, true);
         for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
                 childIte = this->_type.GetShapes()[nodeId].children.end();
                 childIt != childIte; ++childIt)
