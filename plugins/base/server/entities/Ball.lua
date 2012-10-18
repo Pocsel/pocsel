@@ -20,7 +20,7 @@ Server.Body.Register{
     shapeTree = {
         {
             name = "Ball",
-            position = { 0, -1.5, 0 },
+            position = { 0, 0, 0 },
             orientation = { 0, 0, 0 },
             shape = {
                 shapeType = "sphere",
