@@ -7,7 +7,7 @@ namespace Tools { namespace Lua {
      * Struct simple contenant le minimum de données permettant de retrouver une resource.
      * DOIT être copiable.
      * La classe fille DOIT implémenter l'opérateur <.
-     * La classe fille DOIT implémenter un constructeur par défaut qui initialise la weak ref comme étant invalide.
+     * La classe fille DOIT implémenter un constructeur par défaut sans parametres qui initialise la weak ref comme étant invalide.
      */
     template<typename ManagerType> struct AWeakResourceRef
     {

@@ -73,7 +73,7 @@ float4 fs(in VSout v) : COLOR
     float4 maskColor = tex2D(mask, v.texCoord * 10);
 
     float4 color = tex2D(diffuse, v.texCoord);
-    color = color * 0.75 + color * maskColor * 0.25;
+    color = color; // * 0.75 + color * maskColor * 0.25;
     color.a = 1.0;
     return color;
 }

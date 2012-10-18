@@ -64,7 +64,7 @@ namespace Client { namespace Game {
                         *
                         glm::toMat4(orientation)
                         *
-                        glm::translate(glm::fvec3(0, 0, -1.5))
+                        glm::translate(glm::fvec3(0, 0, 0)) // XXX TODO pouvoir mettre orientation, pos, et scale dans RegisterModel
                     );
                     vertexBuffer->Bind();
                     indexBuffers[i]->Bind();
