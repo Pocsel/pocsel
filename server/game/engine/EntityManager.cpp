@@ -38,8 +38,6 @@ namespace Server { namespace Game { namespace Engine {
 
         namespaceTable.Set("GetEntityById", i.MakeFunction(std::bind(&EntityManager::_ApiGetEntityById, this, std::placeholders::_1)));
         namespaceTable.Set("Spawn", i.MakeFunction(std::bind(&EntityManager::_ApiSpawn, this, std::placeholders::_1)));
-        namespaceTable.Set("SetPos", i.MakeFunction(std::bind(&EntityManager::_ApiSetPos, this, std::placeholders::_1)));
-        namespaceTable.Set("GetPos", i.MakeFunction(std::bind(&EntityManager::_ApiGetPos, this, std::placeholders::_1)));
         namespaceTable.Set("Save", i.MakeFunction(std::bind(&EntityManager::_ApiSave, this, std::placeholders::_1)));
         namespaceTable.Set("Load", i.MakeFunction(std::bind(&EntityManager::_ApiLoad, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&EntityManager::_ApiKill, this, std::placeholders::_1)));
@@ -554,6 +552,24 @@ namespace Server { namespace Game { namespace Engine {
             throw std::runtime_error("EntityManager::GetEntity: Invalid argument type " + ref.GetTypeName() + " given");
     }
 
+    Uint32 EntityManager::RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
+    {
+        if (ref.IsTable())
+            return ref["id"].Check<Uint32>("EntityManager::RefToEntityId: Table argument has no id number field");
+        else if (ref.IsNumber())
+            return ref.To<Uint32>();
+        else if (ref.IsUserData())
+        {
+            WeakEntityRef* e = ref.Check<WeakEntityRef*>("EntityManager::RefToEntityId: Userdata argument is not of WeakEntityRef type");
+            if (e->IsValid(*this))
+                return e->entityId;
+            else
+                throw std::runtime_error("EntityManager::RefToEntityId: This reference was invalidated - you must not keep true references to entities, only weak references");
+        }
+        else
+            throw std::runtime_error("EntityManager::RefToEntityId: Invalid argument type " + ref.GetTypeName() + " given");
+    }
+
     PositionalEntity& EntityManager::GetPositionalEntity(Uint32 entityId) throw(std::runtime_error)
     {
         auto it = this->_positionalEntities.find(entityId);
@@ -858,7 +874,7 @@ namespace Server { namespace Game { namespace Engine {
             arg = helper.PopArg();
             if (helper.GetNbArgs())
             {
-                cbTargetId = helper.PopArg().Check<Uint32>("Server.Entity.Spawn: Argument \"cbTarget\" must be a number");
+                cbTargetId = this->RefToEntityId(helper.PopArg());
                 cbFunction = helper.PopArg("Server.Entity.Spawn: Missing argument \"cbFunction\"").CheckString("Server.Entity.Spawn: Argument \"cbFunction\" must be a string");
                 if (helper.GetNbArgs())
                     cbArg = helper.PopArg();
@@ -880,6 +896,10 @@ namespace Server { namespace Game { namespace Engine {
             return;
         }
         it->second->SaveToStorage();
+
+        // ca serai cool que ca marche ca
+        //Entity& e = this->GetEntity(helper.PopArg("Server.Entity.Save: Missing argument \"target\""));
+        //e.SaveToStorage();
     }
 
     void EntityManager::_ApiLoad(Tools::Lua::CallHelper& helper)
@@ -892,11 +912,15 @@ namespace Server { namespace Game { namespace Engine {
             return;
         }
         it->second->LoadFromStorage();
+
+        // ca serai cool que ca marche ca
+        //Entity& e = this->GetEntity(helper.PopArg("Server.Entity.Load: Missing argument \"target\""));
+        //e.LoadFromStorage();
     }
 
     void EntityManager::_ApiKill(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = helper.PopArg("Server.Entity.Kill: Missing argument \"target\"").Check<Uint32>("Server.Entity.Kill: Argument \"target\" must be a number");
+        Uint32 entityId = this->RefToEntityId(helper.PopArg("Server.Entity.Kill: Missing argument \"target\""));
         Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;

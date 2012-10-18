@@ -96,6 +96,7 @@ namespace Server { namespace Game { namespace Engine {
          */
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error);
         Entity const& GetEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
+        Uint32 RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
         PositionalEntity& GetPositionalEntity(Uint32 entityId) throw(std::runtime_error);
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error);
         PositionalEntity const& GetPositionalEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
