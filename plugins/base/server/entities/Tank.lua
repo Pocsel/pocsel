@@ -12,7 +12,7 @@ Server.Entity.RegisterPositional{
         tmpPos = Server.Entity.GetPos(self.id)
         if self.upupup then
             tmpPos.y = tmpPos.y + 10
-            self.upupup = false
+            -- self.upupup = false
         else
             tmpPos.y = tmpPos.y - 10
             self.upupup = true
