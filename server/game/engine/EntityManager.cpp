@@ -31,7 +31,7 @@ namespace Server { namespace Game { namespace Engine {
 
         this->_weakEntityRefManager = new Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>(
                 i, /* interpreter */
-                *this /* resource manager */,
+                *this, /* resource manager */
                 this->_engine.GetWorld().GetGame().GetServer().GetSettings().debug /* use fake references */);
 
         auto namespaceTable = i.Globals()["Server"].Set("Entity", i.MakeTable());

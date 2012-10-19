@@ -1,9 +1,12 @@
+#include "server/Server.hpp"
+#include "server/Settings.hpp"
 #include "server/game/engine/DoodadManager.hpp"
 #include "server/game/engine/BodyManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/Doodad.hpp"
 #include "server/game/engine/PositionalEntity.hpp"
 #include "server/game/World.hpp"
+#include "server/game/Game.hpp"
 #include "server/game/PluginManager.hpp"
 #include "server/game/map/Map.hpp"
 #include "common/FieldUtils.hpp"
@@ -18,7 +21,14 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::debug << "DoodadManager::DoodadManager()\n";
         auto& i = this->_engine.GetInterpreter();
+
+        this->_weakDoodadRefManager = new Tools::Lua::WeakResourceRefManager<WeakDoodadRef, DoodadManager>(
+                i, /* interpreter */
+                *this, /* resource manager */
+                this->_engine.GetWorld().GetGame().GetServer().GetSettings().debug /* use fake reference */);
+
         auto namespaceTable = i.Globals()["Server"].Set("Doodad", i.MakeTable());
+
         namespaceTable.Set("Spawn", i.MakeFunction(std::bind(&DoodadManager::_ApiSpawn, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&DoodadManager::_ApiKill, this, std::placeholders::_1)));
         namespaceTable.Set("Set", i.MakeFunction(std::bind(&DoodadManager::_ApiSet, this, std::placeholders::_1)));
@@ -45,6 +55,28 @@ namespace Server { namespace Game { namespace Engine {
             for (; it != itEnd; ++it)
                 Tools::Delete(*it);
         }
+        // resource manager
+        Tools::Delete(this->_weakDoodadRefManager);
+    }
+
+    Tools::Lua::Ref DoodadManager::WeakDoodadRef::GetReference(DoodadManager const& doodadManager) const
+    {
+        return doodadManager.GetLuaWrapperForDoodad(this->doodadId);
+    }
+
+    std::string DoodadManager::WeakDoodadRef::Serialize(DoodadManager const& doodadManager) const
+    {
+        return "return nil"; // TODO
+    }
+
+    bool DoodadManager::WeakDoodadRef::operator <(WeakDoodadRef const& rhs) const
+    {
+        if (this->disabled && !rhs.disabled)
+            return true;
+        else if (!this->disabled && rhs.disabled)
+            return false;
+        else
+            return this->doodadId < rhs.doodadId;
     }
 
     void DoodadManager::Save(Tools::Database::IConnection& conn)
@@ -238,6 +270,36 @@ namespace Server { namespace Game { namespace Engine {
     //        if ((*it))
     //            (*it)->PositionIsDirty();
     //}
+
+    Tools::Lua::Ref DoodadManager::GetLuaWrapperForDoodad(Uint32 doodadId) const throw(std::runtime_error)
+    {
+        //Doodad& d = this->_GetDoodad(doodadId);
+        return this->_engine.GetInterpreter().MakeNil();
+    }
+
+    Doodad& DoodadManager::_GetDoodad(Uint32 doodadId) throw(std::runtime_error)
+    {
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end() || !it->second)
+            throw std::runtime_error("DoodadManager::_GetDoodad: Doodad " + Tools::ToString(doodadId) + " not found.");
+        return *it->second;
+    }
+
+    Doodad& DoodadManager::_GetDoodad(Tools::Lua::Ref const& ref) throw(std::runtime_error)
+    {
+        if (ref.IsNumber())
+            return this->_GetDoodad(ref.To<Uint32>());
+        else if (ref.IsUserData())
+        {
+            WeakDoodadRef* d = ref.Check<WeakDoodadRef*>("DoodadManager::_GetDoodad: Userdata argument is not of WeakDoodadRef type");
+            if (d->IsValid(*this))
+                return this->_GetDoodad(d->doodadId);
+            else
+                throw std::runtime_error("DoodadManager::_GetDoodad: This reference was invalidated - you must not keep true references to doodads, only weak references");
+        }
+        else
+            throw std::runtime_error("DoodadManager::_GetDoodad: Invalid argument type " + ref.GetTypeName() + " given");
+    }
 
     Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity& entity, std::string const& bodyName)
     {
