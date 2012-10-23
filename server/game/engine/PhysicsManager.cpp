@@ -16,9 +16,10 @@ namespace Server { namespace Game { namespace Engine {
 
     struct _cb
     {
-        static void _TickCallback(btDynamicsWorld* world, btScalar timeStep)
+        static void _TickCallback(void* physicsManager)
         {
-            PhysicsManager* pm = (PhysicsManager*)world->getWorldUserInfo();
+            PhysicsManager* pm = (PhysicsManager*)physicsManager;
+            btDynamicsWorld* world = &pm->_world->GetBtWorld();
 
             int numManifolds = world->getDispatcher()->getNumManifolds();
             for (int i=0;i<numManifolds;i++)
@@ -87,7 +88,7 @@ namespace Server { namespace Game { namespace Engine {
         _world(0)
     {
         this->_world = new Common::Physics::World();
-        this->_world->GetBtWorld().setInternalTickCallback(_cb::_TickCallback, this);
+        this->_world->AddCallback(_cb::_TickCallback, this);
     }
 
     PhysicsManager::~PhysicsManager()

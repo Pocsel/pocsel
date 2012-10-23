@@ -15,6 +15,8 @@ namespace Common { namespace Physics {
 
     class World
     {
+    public:
+        typedef void (*TickCallback)(void*);
     private:
         btDynamicsWorld* _dynamicsWorld;
         btBroadphaseInterface* _broadphase;
@@ -24,12 +26,20 @@ namespace Common { namespace Physics {
 
         Uint64 _lastTime;
 
+        std::vector<std::pair<TickCallback, void*>> _callbacks;
+
     public:
         World();
         ~World();
         void Tick(Uint64 totalTime);
 
         btDynamicsWorld& GetBtWorld() { return *this->_dynamicsWorld; }
+
+        size_t AddCallback(TickCallback cb, void* userPtr);
+        void RemoveCallback(size_t idx);
+
+    private:
+        friend struct _cb;
     };
 
 }}

@@ -6,6 +6,18 @@
 
 namespace Common { namespace Physics {
 
+    struct _cb {
+        static void _TickCallBack(btDynamicsWorld* btWorld, btScalar timeStep)
+        {
+            World& world = *(World*)btWorld->getWorldUserInfo();
+            for (auto cb: world._callbacks)
+            {
+                if (cb.first)
+                    cb.first(cb.second);
+            }
+        }
+    };
+
     World::World() :
         _dynamicsWorld(0),
         _broadphase(0),
@@ -15,18 +27,20 @@ namespace Common { namespace Physics {
         _lastTime(0)
     {
         ///collision configuration contains default setup for memory, collision setup
-        _collisionConfiguration = new btDefaultCollisionConfiguration();
+        this->_collisionConfiguration = new btDefaultCollisionConfiguration();
         ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-        _dispatcher = new btCollisionDispatcher(_collisionConfiguration);
+        this->_dispatcher = new btCollisionDispatcher(_collisionConfiguration);
 
-        _broadphase = new btDbvtBroadphase();
+        this->_broadphase = new btDbvtBroadphase();
 
         ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
-        _solver = new btSequentialImpulseConstraintSolver();
+        this->_solver = new btSequentialImpulseConstraintSolver();
 
-        _dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
+        this->_dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
 
-        _dynamicsWorld->setGravity(btVector3(0.0,-9.81,0.0));
+        this->_dynamicsWorld->setGravity(btVector3(0.0,-9.81,0.0));
+
+        this->_dynamicsWorld->setInternalTickCallback(_cb::_TickCallBack, this);
     }
 
     World::~World()
@@ -42,6 +56,18 @@ namespace Common { namespace Physics {
     {
         double deltaTime = (totalTime - this->_lastTime) * 0.000001;
         this->_dynamicsWorld->stepSimulation(deltaTime, 4, 1.0 / 60.0);
+    }
+
+    size_t World::AddCallback(TickCallback cb, void* userPtr)
+    {
+        this->_callbacks.push_back(std::make_pair(cb, userPtr));
+        return this->_callbacks.size() - 1;
+    }
+
+    void World::RemoveCallback(size_t idx)
+    {
+        assert(this->_callbacks.size() > idx);
+        this->_callbacks[idx].first = 0;
     }
 
 }}
