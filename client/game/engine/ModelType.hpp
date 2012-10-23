@@ -1,7 +1,7 @@
 #ifndef __CLIENT_GAME_ENGINE_MODELTYPE_HPP__
 #define __CLIENT_GAME_ENGINE_MODELTYPE_HPP__
 
-namespace Tools { namespace Lua { 
+namespace Tools { namespace Lua {
     class Ref;
 }}
 
