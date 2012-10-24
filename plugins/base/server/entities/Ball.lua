@@ -4,6 +4,11 @@ Server.Entity.RegisterPositional{
 
     Spawn = function(self)
         self.doodad = Server.Doodad.Spawn(self.id, "base:Ball", "base:Ball")
+        toto = Server.Doodad.GetWeakPointer(self.doodad)
+        d = toto:Lock()
+        if d then
+            d:Set("caca", 12)
+        end
     end,
 
 }

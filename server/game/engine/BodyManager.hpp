@@ -31,7 +31,7 @@ namespace Server { namespace Game { namespace Engine {
         Body* CreateBody(Uint32 pluginId, std::string BodyName, Common::Physics::BodyCluster& parent) throw(std::runtime_error);
         // rcon requests
         //std::string RconGetBodies() const;
-        //void RconAddBodyTypes(Rcon::BodyManager& manager) const; // pas vraiment une requete, mais c'est bien spécifique à Rcon
+        //void RconAddBodyTypes(Rcon::BodyManager& manager) const;
 
         bool HasBodyType(Uint32 id) const { return id && id <= this->_bodyTypesVec.size(); }
         BodyType const& GetBodyType(Uint32 id) const { assert(this->HasBodyType(id)); return *this->_bodyTypesVec[id - 1]; }
