@@ -27,6 +27,7 @@ namespace Client { namespace Game { namespace Engine {
         std::vector<glm::mat4x4> _animatedBones;
         float _animTime;
         std::vector<std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> _materials;
+        Uint32 _weakReferenceId;
 
     public:
         Model(Resources::ResourceManager& resourceManager, Uint32 id, Uint32 doodadId, Doodad* doodad, ModelType* type);

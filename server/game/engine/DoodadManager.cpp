@@ -279,6 +279,9 @@ namespace Server { namespace Game { namespace Engine {
         auto object = i.MakeTable();
         object.Set("id", doodadId);
         object.Set("Set", i.MakeFunction(std::bind(&DoodadManager::_ApiSet, this, std::placeholders::_1)));
+        object.Set("Call", i.MakeFunction(std::bind(&DoodadManager::_ApiCall, this, std::placeholders::_1)));
+        object.Set("SetUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiSetUdp, this, std::placeholders::_1)));
+        object.Set("CallUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiCallUdp, this, std::placeholders::_1)));
         return object;
     }
 
@@ -374,7 +377,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 newId = this->_nextDoodadId++;
 
         Doodad* d = this->_CreateDoodad(newId, pluginId, doodadName, entityId, this->_engine.GetEntityManager().GetPositionalEntity(entityId), bodyName);
-        helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
+        helper.PushRet(this->_weakDoodadRefManager->GetWeakReference(d->GetWeakReferenceId()));
 
         // XXX test
         //auto const& players = this->_engine.GetMap().GetPlayers();
