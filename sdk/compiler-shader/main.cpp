@@ -98,83 +98,31 @@ void printFile(TOut& out, Hlsl::File const& file)
         }
 }
 
-#define STRINGIFY(...) #__VA_ARGS__
-
 int main(int ac, char** av)
 {
     using namespace Hlsl;
-    std::string tmp;
 
-    // TESTS parseur HLSL
-    tmp = STRINGIFY(
-        float4x4 model : World;
-        float4x4 view : View;
-        float4x4 projection : Projection;
-        float4x4 mvp : WorldViewProjection = mul(a, b);
-        sampler2D toto = sampler_state {
-            MinFilter = LinearMipMapLinear;
-            MagFilter = Nearest;
-        };
+    if (ac <= 2)
+    {
+        std::cerr << "Usage: compiler-shader <shader.fx> <output.fxc>" << std::endl;
+        return 1;
+    }
 
-        float4 simple()
-        {
-            return float4(0, 0, 0, 0);
-        }
-
-        struct vsOut
-        {
-            float4 pos : POSITION;
-            float2 tex : TEXCOORD0;
-            float3 test : TEXCOORD1;
-        };
-
-        vsOut vs(float4 pos : POSITION, float2 tex : TEXCOORD0, float4 testVar)
-        {
-            vsOut o;
-            o.pos = mul(model * view * projection, pos);
-            o.tex = tex * testVar.xy;
-            o.test = pos.xyz;
-            return o;
-        }
-
-        float4 fs(vsOut i) : COLOR
-        {
-            i.tex = mul((float2x2)mvp, i.tex * i.test.z);
-            return tex2D(toto, i.tex + i.test.xy);
-        }
-
-        technique tech
-        {
-            pass p0
-            {
-                AlphaBlendEnable = false;
-                VertexShader = compile vs_2_0 vs();
-                PixelShader = compile ps_2_0 fs();
-            }
-        }
-    );
-    //tmp = "//comment\r\n" + tmp + "// test comment\r\n/* gdfhjgkdsfhkjgh \r\n sdfgjkfsn */\r\nfloat4 testComment : COMMENT = test des commentaires en fin de fichier;;;//test\n";
+    std::ifstream in(av[1]);
 
     File file;
-    std::stringstream ss(tmp);
-    if (!ParseStream(ss, file))
+    if (!ParseStream(in, file))
         std::cout << "Parsing error" << std::endl;
     else
     {
         GeneratorOptions options;
         options.removeSemanticAttributes = true;
-        tmp = GenerateHlsl(file, options);
 
+        auto const& tmp = GenerateHlsl(file, options);
         auto const& shader = HlslFileToShader(file, tmp);
-        SerializeShader(shader, std::cout);
 
-        //std::cout << "\n------------ CG -----------\n *** OpenGL\n";
-        //for (auto const& var: shader.attributes)
-        //    std::cout << var.first << " => " << var.second.openGL << std::endl;
-        //std::cout << shader.glslVertex << shader.glslPixel << std::endl << " *** DIRECTX\n";
-        //for (auto const& var: shader.attributes)
-        //    std::cout << var.first << " => " << var.second.directX << std::endl;
-        //std::cout << shader.hlslVertex << shader.hlslPixel << std::endl;
+        std::ofstream out(av[2]);
+        SerializeShader(shader, out);
     }
 
 #ifdef _WINDOWS

@@ -6,6 +6,14 @@
 #include "common/constants.hpp"
 #include "tools/plugin-create/Create.hpp"
 
+namespace {
+    inline std::string _ToStdString(QString const& str)
+    {
+        auto const& asc = str.toAscii();
+        return std::string(asc.constData(), asc.length());
+    }
+}
+
 namespace Sdk { namespace PackagerQt { namespace Qt {
 
     MainWindow::MainWindow(Packager& packager) :
@@ -36,7 +44,9 @@ namespace Sdk { namespace PackagerQt { namespace Qt {
                 QMessageBox::question(this, "Replace", "The destination file already exists. Do you want to replace it?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
             return;
         this->_Log("--------------------------------\n");
-        Tools::PluginCreate::Create(boost::filesystem::path(this->pluginRootLineEdit->text().toStdString()), boost::filesystem::path(this->destFileLineEdit->text().toStdString()));
+        auto const& pluginRoot = _ToStdString(this->pluginRootLineEdit->text());
+        auto const& destFile = _ToStdString(this->destFileLineEdit->text());
+        Tools::PluginCreate::Create(boost::filesystem::path(pluginRoot), boost::filesystem::path(destFile));
     }
 
     void MainWindow::on_replaceCheckBox_stateChanged(int state)

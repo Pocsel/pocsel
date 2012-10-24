@@ -77,6 +77,7 @@ namespace Hlsl {
     using boost::phoenix::construct;
     using boost::phoenix::at_c;
     using boost::phoenix::push_back;
+    using boost::spirit::_1;
 
     struct ErrorHandler
     {

@@ -1,5 +1,7 @@
 #include "precompiled.hpp"
 
+#include "tools/ByteArray.hpp"
+
 #include "sdk/compiler-shader/CgCompiler.hpp"
 #include "sdk/compiler-shader/HlslGenerator.hpp"
 
@@ -27,6 +29,7 @@ namespace Hlsl {
             switch (profile)
             {
             case Profile::Hlsl: return type == CompileStatement::VertexShader ? CG_PROFILE_HLSLV : CG_PROFILE_HLSLF;
+            //case Profile::Hlsl: return type == CompileStatement::VertexShader ? CG_PROFILE_VS_3_0 : CG_PROFILE_PS_3_0;
             case Profile::Glsl: return type == CompileStatement::VertexShader ? CG_PROFILE_GLSLV : CG_PROFILE_GLSLF;
             case Profile::Arb: return type == CompileStatement::VertexShader ? CG_PROFILE_ARBVP1 : CG_PROFILE_ARBFP1;
             }
@@ -346,20 +349,46 @@ namespace Hlsl {
 
     void SerializeShader(Shader const& shader, std::ostream& out)
     {
-        out << "source " << shader.source.size() << "\n" << shader.source;
-        out << "glslv " << shader.glslVertex.size() << "\n" << shader.glslVertex;
-        out << "glslf " << shader.glslPixel.size() << "\n" << shader.glslPixel;
-        out << "hlslv " << shader.hlslVertex.size() << "\n" << shader.hlslVertex;
-        out << "hlslf " << shader.hlslPixel.size() << "\n" << shader.hlslPixel;
-        out << "attributes " << shader.attributes.size() << "\n";
+        Tools::ByteArray bin;
+        bin.Write32(0xB16B00B5); // BIGBOOBS magic code
+
+        // Shaders
+        auto writeLongString = [&](std::string const& str) { bin.Write32((Uint32)str.size()); bin.WriteRawData(str.c_str(), (Uint32)str.size()); };
+        writeLongString(shader.source);
+        writeLongString(shader.glslVertex);
+        writeLongString(shader.glslPixel);
+        writeLongString(shader.hlslVertex);
+        writeLongString(shader.hlslPixel);
+
+        // Attributes
+        bin.Write32((Uint32)shader.attributes.size());
         for (auto const& attr: shader.attributes)
-            out << attr.first << " " << attr.second.openGL << " " << attr.second.directX << "\n";
-        out << "uniforms " << shader.uniforms.size() << "\n";
+        {
+            bin.WriteString(attr.first); // original name
+            bin.WriteString(attr.second.openGL);
+            bin.WriteString(attr.second.directX);
+        }
+
+        // Uniforms
+        bin.Write32((Uint32)shader.uniforms.size());
         for (auto const& uniform: shader.uniforms)
-            out << uniform.first << " " << uniform.second.openGL << " " << uniform.second.directX << " " << _GetValue(uniform.second.value) << "\n";
-        out << "states " << shader.deviceStates.size() << "\n";
+        {
+            bin.WriteString(uniform.first); // original name
+            bin.WriteString(uniform.second.openGL);
+            bin.WriteString(uniform.second.directX);
+            bin.WriteString(_GetValue(uniform.second.value)); // Default value
+        }
+
+        // States
+        bin.Write32((Uint32)shader.deviceStates.size());
         for (auto const& state: shader.deviceStates)
-            out << state.first << " " << state.second << "\n";
+        {
+            bin.WriteString(state.first); // state name
+            bin.WriteString(state.second); // value
+        }
+
+        auto const& data = bin.GetData();
+        out.write(data, bin.GetSize());
     }
 
 }

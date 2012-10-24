@@ -1,8 +1,6 @@
 #pragma once
 
-#include "sdk/compiler-shader/HlslParser.hpp"
-
-namespace Hlsl {
+namespace Tools { namespace Renderers { namespace Effect {
 
     namespace Type {
         enum Type
@@ -54,11 +52,5 @@ namespace Hlsl {
         std::string glslVertex;
         std::string glslPixel;
     };
-
-    std::pair<std::string, std::string> HlslFileToGlsl(File const& file, std::string const& source);
-    std::pair<std::string, std::string> HlslFileToHlsl(File const& file, std::string const& source);
-    Shader HlslFileToShader(File const& file, std::string const& source);
-    void SerializeShader(Shader const& shader, std::ostream&& out);
-    void SerializeShader(Shader const& shader, std::ostream& out);
 
 }
