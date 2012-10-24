@@ -55,7 +55,7 @@ namespace Server { namespace Game { namespace Engine {
             WeakEntityRef(Uint32 entityId) : entityId(entityId), disabled(false) {}
             virtual bool IsValid(EntityManager const&) const { return this->entityId && !this->disabled; }
             virtual void Invalidate(EntityManager const&) { this->entityId = 0; this->disabled = true; }
-            virtual Tools::Lua::Ref GetReference(EntityManager const& entityManager) const;
+            virtual Tools::Lua::Ref GetReference(EntityManager& entityManager) const;
             virtual std::string Serialize(EntityManager const& entityManager) const;
             bool operator <(WeakEntityRef const& rhs) const;
             Uint32 entityId;
@@ -96,6 +96,7 @@ namespace Server { namespace Game { namespace Engine {
          */
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error);
         Entity const& GetEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
+        Uint32 RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
         PositionalEntity& GetPositionalEntity(Uint32 entityId) throw(std::runtime_error);
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error);
         PositionalEntity const& GetPositionalEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
