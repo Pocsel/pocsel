@@ -18,6 +18,12 @@ namespace Client { namespace Game { namespace Engine {
         _lastTickTime(0)
     {
         auto& i = this->_engine.GetInterpreter();
+
+        this->_weakModelRefManager = new Tools::Lua::WeakResourceRefManager<WeakModelRef, ModelManager>(
+                i, /* interpreter */
+                *this, /* resource manager */
+                false /* use fake references TODO recevoir ce bool depuis le reseau */);
+
         auto namespaceTable = i.Globals().GetTable("Client").GetTable("Model");
         namespaceTable.Set("Spawn", i.MakeFunction(std::bind(&ModelManager::_ApiSpawn, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&ModelManager::_ApiKill, this, std::placeholders::_1)));
@@ -37,7 +43,19 @@ namespace Client { namespace Game { namespace Engine {
         auto itTypeEnd = this->_modelTypes.end();
         for (; itType != itTypeEnd; ++itType)
             Tools::Delete(itType->second);
+        // renderer
         Tools::Delete(this->_modelRenderer);
+        // resource manager
+        Tools::Delete(this->_weakModelRefManager);
+    }
+
+    Tools::Lua::Ref ModelManager::WeakModelRef::GetReference(ModelManager& modelManager) const
+    {
+    }
+
+    bool ModelManager::WeakModelRef::operator <(WeakModelRef const& rhs) const
+    {
+        return this->modelId < rhs.modelId;
     }
 
     void ModelManager::Tick(Uint64 totalTime)
