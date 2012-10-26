@@ -273,7 +273,7 @@ namespace Server { namespace Game { namespace Engine {
     //            (*it)->PositionIsDirty();
     //}
 
-    Tools::Lua::Ref DoodadManager::GetLuaWrapperForDoodad(Uint32 doodadId) throw(std::runtime_error)
+    Tools::Lua::Ref DoodadManager::GetLuaWrapperForDoodad(Uint32 doodadId)
     {
         auto& i = this->_engine.GetInterpreter();
         auto object = i.MakeTable();
@@ -282,6 +282,7 @@ namespace Server { namespace Game { namespace Engine {
         object.Set("Call", i.MakeFunction(std::bind(&DoodadManager::_ApiCall, this, std::placeholders::_1)));
         object.Set("SetUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiSetUdp, this, std::placeholders::_1)));
         object.Set("CallUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiCallUdp, this, std::placeholders::_1)));
+        /* TODO Kill + enlever throw */
         return object;
     }
 
@@ -293,12 +294,12 @@ namespace Server { namespace Game { namespace Engine {
         return *it->second;
     }
 
-    Doodad& DoodadManager::_GetDoodad(Tools::Lua::Ref const& ref) throw(std::runtime_error)
+    Uint32 DoodadManager::_RefToDoodadId(Tools::Lua::Ref const& ref) throw(std::runtime_error)
     {
         if (ref.IsNumber()) /* id directement en nombre */
-            return this->_GetDoodad(ref.To<Uint32>());
+            return ref.To<Uint32>();
         else if (ref.IsTable()) /* type final doodad wrapper (weak pointer déréférencé) */
-            return this->_GetDoodad(ref["id"].Check<Uint32>("DoodadManager::_GetDoodad: Table argument has no id number field"));
+            return ref["id"].Check<Uint32>("DoodadManager::_RefToDoodadId: Table argument has no id number field");
         else if (ref.IsUserData())
         {
             if (this->_weakDoodadRefManager->UsingFakeReferences() && ref.Is<Tools::Lua::WeakResourceRefManager<WeakDoodadRef, DoodadManager>::FakeReference*>()) /* doodad wrapper en fake reference (weak pointer déréférencé) */
@@ -308,24 +309,24 @@ namespace Server { namespace Game { namespace Engine {
                 {
                     auto trueRef = fakeRef->GetReference();
                     if (trueRef.IsTable())
-                        return this->_GetDoodad(trueRef["id"].Check<Uint32>("DoodadManager::_GetDoodad: Table argument has no id number field"));
+                        return trueRef["id"].Check<Uint32>("DoodadManager::_RefToDoodadId: Table argument has no id number field");
                     else
-                        throw std::runtime_error("DoodadManager::_GetDoodad: This fake reference does not contain a table but a " + trueRef.GetTypeName() + ", is this really a doodad?");
+                        throw std::runtime_error("DoodadManager::_RefToDoodadId: This fake reference does not contain a table but a " + trueRef.GetTypeName() + ", is this really a doodad?");
                 }
                 else
-                    throw std::runtime_error("DoodadManager::_GetDoodad: This reference was invalidated - you must not keep true references to doodads, only weak references");
+                    throw std::runtime_error("DoodadManager::_RefToDoodadId: This reference was invalidated - you must not keep true references to doodads, only weak references");
             }
             else /* weak pointer (non déréférencé) */
             {
-                WeakDoodadRef* d = ref.Check<WeakDoodadRef*>("DoodadManager::_GetDoodad: Userdata argument is not of WeakDoodadRef type");
+                WeakDoodadRef* d = ref.Check<WeakDoodadRef*>("DoodadManager::_RefToDoodadId: Userdata argument is not of WeakDoodadRef type");
                 if (d->IsValid(*this))
-                    return this->_GetDoodad(d->doodadId);
+                    return d->doodadId;
                 else
-                    throw std::runtime_error("DoodadManager::_GetDoodad: This weak pointer was invalidated - the doodad does not exist anymore");
+                    throw std::runtime_error("DoodadManager::_RefToDoodadId: This weak pointer was invalidated - the doodad does not exist anymore");
             }
         }
         else
-            throw std::runtime_error("DoodadManager::_GetDoodad: Invalid argument type " + ref.GetTypeName() + " given");
+            throw std::runtime_error("DoodadManager::_RefToDoodadId: Invalid argument type " + ref.GetTypeName() + " given");
     }
 
     Doodad* DoodadManager::_CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity& entity, std::string const& bodyName)
@@ -412,7 +413,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiSet(Tools::Lua::CallHelper& helper)
     {
-        Doodad& d = this->_GetDoodad(helper.PopArg("Server.Doodad.Set: Missing argument \"doodad\""));
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.Set: Missing argument \"doodad\"")));
         Tools::Lua::Ref key = helper.PopArg("Server.Doodad.Set: Missing argument \"key\"");
         Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Set: Missing argument \"value\"");
         d.Set(key, value);
@@ -420,60 +421,40 @@ namespace Server { namespace Game { namespace Engine {
 
     void DoodadManager::_ApiCall(Tools::Lua::CallHelper& helper)
     {
-        Uint32 doodadId = helper.PopArg("Server.Doodad.Call: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.Call: Argument \"doodadId\" must be a number");
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.Call: Missing argument \"doodad\"")));
         std::string function = helper.PopArg("Server.Doodad.Call: Missing argument \"function\"").CheckString("Server.Doodad.Call: Argument \"function\" must be of type string");
         Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Call: Missing argument \"value\"");
-
-        auto it = this->_doodads.find(doodadId);
-        if (it == this->_doodads.end())
-        {
-            Tools::error << "DoodadManager::_ApiCall: No doodad with id " << doodadId << ", cannot set value." << std::endl;
-            return;
-        }
-        it->second->Call(function, value);
+        d.Call(function, value);
     }
 
     void DoodadManager::_ApiSetUdp(Tools::Lua::CallHelper& helper)
     {
-        Uint32 doodadId = helper.PopArg("Server.Doodad.SetUdp: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.SetUdp: Argument \"doodadId\" must be a number");
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetUdp: Missing argument \"doodad\"")));
         Tools::Lua::Ref key = helper.PopArg("Server.Doodad.SetUdp: Missing argument \"key\"");
         Tools::Lua::Ref value = helper.PopArg("Server.Doodad.SetUdp: Missing argument \"value\"");
-
-        auto it = this->_doodads.find(doodadId);
-        if (it == this->_doodads.end())
-        {
-            Tools::error << "DoodadManager::_ApiSetUdp: No doodad with id " << doodadId << ", cannot set value." << std::endl;
-            return;
-        }
-        it->second->Set(key, value);
+        d.SetUdp(key, value);
     }
 
     void DoodadManager::_ApiCallUdp(Tools::Lua::CallHelper& helper)
     {
-        Uint32 doodadId = helper.PopArg("Server.Doodad.CallUdp: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.CallUdp: Argument \"doodadId\" must be a number");
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.CallUdp: Missing argument \"doodad\"")));
         std::string function = helper.PopArg("Server.Doodad.CallUdp: Missing argument \"function\"").CheckString("Server.Doodad.CallUdp: Argument \"function\" must be of type string");
         Tools::Lua::Ref value = helper.PopArg("Server.Doodad.CallUdp: Missing argument \"value\"");
-
-        auto it = this->_doodads.find(doodadId);
-        if (it == this->_doodads.end())
-        {
-            Tools::error << "DoodadManager::_ApiCallUdp: No doodad with id " << doodadId << ", cannot set value." << std::endl;
-            return;
-        }
-        it->second->Call(function, value);
+        d.CallUdp(function, value);
     }
 
     void DoodadManager::_ApiGetDoodadById(Tools::Lua::CallHelper& helper)
     {
-        Uint32 doodadId = helper.PopArg("Server.Doodad.GetDoodadById: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.GetDoodadById: Argument \"doodadId\" must be a number");
-        auto it = this->_doodads.find(doodadId);
-        if (it == this->_doodads.end())
+        try
         {
-            Tools::error << "DoodadManager::_ApiGetDoodadById: Doodad " << doodadId << " not found, invalid resource returned." << std::endl;
-            helper.PushRet(this->_engine.GetInterpreter().MakeNil());
-            return;
+            Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.CallUdp: Missing argument \"doodad\"")));
+            helper.PushRet(this->_weakDoodadRefManager->GetWeakReference(d.GetWeakReferenceId()));
         }
-        helper.PushRet(this->_weakDoodadRefManager->GetWeakReference(it->second->GetWeakReferenceId()));
+        catch (std::exception& e)
+        {
+            Tools::error << "DoodadManager::_ApiGetDoodadById: Doodad not found (" << e.what() << "), invalid resource returned." << std::endl;
+            helper.PushRet(this->_engine.GetInterpreter().MakeNil());
+        }
     }
 
     void DoodadManager::_ApiGetWeakPointer(Tools::Lua::CallHelper& helper)
@@ -481,7 +462,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Ref doodadId = helper.PopArg("Server.Doodad.GetWeakPointer: Missing argument \"doodad\"");
         try
         {
-            Doodad const& d = this->_GetDoodad(doodadId);
+            Doodad const& d = this->_GetDoodad(this->_RefToDoodadId(doodadId));
             helper.PushRet(this->_weakDoodadRefManager->GetWeakReference(d.GetWeakReferenceId()));
         }
         catch (std::exception&)

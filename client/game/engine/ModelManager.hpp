@@ -54,7 +54,10 @@ namespace Client { namespace Game { namespace Engine {
         void Tick(Uint64 totalTime);
         void Render(Tools::Renderers::Utils::DeferredShading& deferredShading);
         void DeleteModelsOfDoodad(Uint32 doodadId);
+        Tools::Lua::Ref GetLuaWrapperForModel(Uint32 modelId);
     private:
+        Model const& _GetModel(Uint32 modelId) const throw(std::runtime_error);
+        Uint32 _RefToModelId(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);

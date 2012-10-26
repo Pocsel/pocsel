@@ -51,6 +51,7 @@ namespace Client { namespace Game { namespace Engine {
 
     Tools::Lua::Ref ModelManager::WeakModelRef::GetReference(ModelManager& modelManager) const
     {
+        return modelManager.GetLuaWrapperForModel(this->modelId);
     }
 
     bool ModelManager::WeakModelRef::operator <(WeakModelRef const& rhs) const
@@ -89,6 +90,58 @@ namespace Client { namespace Game { namespace Engine {
             Tools::Delete(*it);
         }
         this->_modelsByDoodad.erase(listIt);
+    }
+
+    Tools::Lua::Ref ModelManager::GetLuaWrapperForModel(Uint32 modelId)
+    {
+        auto& i = this->_engine.GetInterpreter();
+        auto object = i.MakeTable();
+        object.Set("id", modelId);
+        object.Set("Kill", i.MakeFunction(std::bind(&ModelManager::_ApiKill, this, std::placeholders::_1)));
+        return object;
+    }
+
+    Model const& ModelManager::_GetModel(Uint32 modelId) const throw(std::runtime_error)
+    {
+        auto it = this->_models.find(modelId);
+        if (it == this->_models.end())
+            throw std::runtime_error("ModelManager::_GetModel: Mode " + Tools::ToString(modelId) + " not found.");
+        return *it->second;
+    }
+
+    Uint32 ModelManager::_RefToModelId(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
+    {
+        if (ref.IsNumber()) /* id directement en nombre */
+            return ref.To<Uint32>();
+        else if (ref.IsTable()) /* type final model wrapper (weak pointer déréférencé) */
+            return ref["id"].Check<Uint32>("ModelManager::_RefToModelId: Table argument has no id number field");
+        else if (ref.IsUserData())
+        {
+            if (this->_weakModelRefManager->UsingFakeReferences() && ref.Is<Tools::Lua::WeakResourceRefManager<WeakModelRef, ModelManager>::FakeReference*>()) /* model wrapper en fake reference (weak pointer déréférencé) */
+            {
+                auto fakeRef = ref.To<Tools::Lua::WeakResourceRefManager<WeakModelRef, ModelManager>::FakeReference*>();
+                if (fakeRef->IsValid())
+                {
+                    auto trueRef = fakeRef->GetReference();
+                    if (trueRef.IsTable())
+                        return trueRef["id"].Check<Uint32>("ModelManager::_RefToModelId: Table argument has no id number field");
+                    else
+                        throw std::runtime_error("ModelManager::_RefToModelId: Fake reference does not contain a table but a " + trueRef.GetTypeName() + ", is this really a model?");
+                }
+                else
+                    throw std::runtime_error("ModelManager::_RefToModelId: This reference was invalidated - you must not keep true references to models, only weak references");
+            }
+            else /* weak pointer (non déréférencé) */
+            {
+                WeakModelRef* m = ref.Check<WeakModelRef*>("ModelManager::_RefToModelId: Userdata argument is not of WeakModelRef type");
+                if (m->IsValid(*this))
+                    return m->modelId;
+                else
+                    throw std::runtime_error("ModelManager::_RefToModelId: This weak pointer was invalidated - the model does not exist anymore");
+            }
+        }
+        else
+            throw std::runtime_error("ModelManager::_RefToModelId: Invalid argument type " + ref.GetTypeName() + " given");
     }
 
     void ModelManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
