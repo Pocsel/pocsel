@@ -3,7 +3,7 @@ Server.Entity.RegisterPositional{
 
     Spawn = function(self)
         self.d = Server.Doodad.Spawn(self.id, "base:Tank", "base:Tank")
-        Server.Message.Later(5, self.id, "DoShit")
+        -- Server.Message.Later(5, self.id, "DoShit")
         self.upupup = true
     end,
 

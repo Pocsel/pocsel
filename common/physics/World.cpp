@@ -1,5 +1,6 @@
 #include "common/physics/World.hpp"
 #include "common/physics/Body.hpp"
+#include "common/physics/BodyCluster.hpp"
 
 #include "bullet/bullet-all.hpp"
 
@@ -14,6 +15,11 @@ namespace Common { namespace Physics {
             {
                 if (cb.first)
                     cb.first(cb.second);
+            }
+
+            for (auto body: world._bodyClusters)
+            {
+                body->Tick();
             }
         }
     };
@@ -68,6 +74,24 @@ namespace Common { namespace Physics {
     {
         assert(this->_callbacks.size() > idx);
         this->_callbacks[idx].first = 0;
+    }
+
+    void World::AddBodyCluster(BodyCluster* body)
+    {
+        this->_bodyClusters.push_back(body);
+    }
+
+    void World::RemoveBodyCluster(BodyCluster* body)
+    {
+        for (auto it = this->_bodyClusters.begin(), ite = this->_bodyClusters.end(); it != ite; ++it)
+        {
+            if (*it == body)
+            {
+                this->_bodyClusters.erase(it);
+                return;
+            }
+        }
+        assert(true && "this cluster has not been found");
     }
 
 }}

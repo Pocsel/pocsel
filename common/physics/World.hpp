@@ -9,6 +9,7 @@ class btDefaultCollisionConfiguration;
 
 namespace Common { namespace Physics {
     class Body;
+    class BodyCluster;
 }}
 
 namespace Common { namespace Physics {
@@ -27,6 +28,7 @@ namespace Common { namespace Physics {
         Uint64 _lastTime;
 
         std::vector<std::pair<TickCallback, void*>> _callbacks;
+        std::vector<BodyCluster*> _bodyClusters;
 
     public:
         World();
@@ -37,6 +39,11 @@ namespace Common { namespace Physics {
 
         size_t AddCallback(TickCallback cb, void* userPtr);
         void RemoveCallback(size_t idx);
+
+        void AddBodyCluster(BodyCluster* body);
+        void RemoveBodyCluster(BodyCluster* body);
+
+
 
     private:
         friend struct _cb;

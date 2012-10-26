@@ -30,7 +30,7 @@ namespace Common { namespace Physics {
         // step 2 - créer les fils (avec eux-meme qui créent leur constraint)
         BodyNode& node = this->_nodes[nodeId];
         BodyType::ShapeNode const& shape = this->_type.GetShapes()[nodeId];
-        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBody() : this->_nodes[shape.parent].body;
+        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBtBody() : this->_nodes[shape.parent].body;
 
         btTransform parentTr;
         parent->getMotionState()->getWorldTransform(parentTr);
@@ -70,7 +70,7 @@ namespace Common { namespace Physics {
         for (int i = 0; i < 6; ++i)
         {
             //newConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.2, i);
-            newConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.04, i);
+            //newConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.04, i);
             //newConstraint->setParam(BT_CONSTRAINT_CFM, 0.1, i);
         }
 
@@ -131,12 +131,12 @@ namespace Common { namespace Physics {
 
     btRigidBody& Body::GetRootBtBody()
     {
-        return this->_parent.GetBody();
+        return this->_parent.GetBtBody();
     }
 
     btRigidBody const& Body::GetRootBtBody() const
     {
-        return this->_parent.GetBody();
+        return this->_parent.GetBtBody();
     }
 
     void Body::_RemoveFromWorld()
@@ -175,7 +175,7 @@ namespace Common { namespace Physics {
     {
         BodyNode& node = this->_nodes[nodeId];
         BodyType::ShapeNode const& shape = this->_type.GetShapes()[nodeId];
-        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBody() : this->_nodes[shape.parent].body;
+        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBtBody() : this->_nodes[shape.parent].body;
 
         btTransform parentTr;
         parent->getMotionState()->getWorldTransform(parentTr);

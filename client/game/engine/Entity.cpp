@@ -27,7 +27,7 @@ namespace Client { namespace Game { namespace Engine {
             Common::Physics::Node& physics = this->_physics;
 
             btTransform wt;
-            this->_bodyCluster->GetBody().getMotionState()->getWorldTransform(wt);
+            this->_bodyCluster->GetBtBody().getMotionState()->getWorldTransform(wt);
             btVector3 wpos = wt.getOrigin();
 
             physics.position.x = wpos.x();

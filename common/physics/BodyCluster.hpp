@@ -19,16 +19,20 @@ namespace Common { namespace Physics {
         Common::Physics::World& _world;
         btMotionState* _motionState;
         btRigidBody* _body;
-        std::set<Body*> _constraints;
+        std::vector<Body*> _constraints;
 
         void* _userData;
+
+        float _curMass;
 
     public:
         BodyCluster(World& world, Node const& pos);
         ~BodyCluster();
 
-        btRigidBody& GetBody() { return *this->_body; }
-        btRigidBody const& GetBody() const { return *this->_body; }
+        void Tick();
+
+        btRigidBody& GetBtBody() { return *this->_body; }
+        btRigidBody const& GetBtBody() const { return *this->_body; }
         World& GetWorld() { return this->_world; }
 
         void AddConstraint(Body* body);

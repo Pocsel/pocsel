@@ -51,7 +51,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void PositionalEntity::UpdatePhysics()
     {
-        btRigidBody const& btBody = this->_bodyCluster->GetBody();
+        btRigidBody const& btBody = this->_bodyCluster->GetBtBody();
         Common::Physics::Node& physics = this->_physics;
 
         btTransform wt;
