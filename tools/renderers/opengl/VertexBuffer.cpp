@@ -45,20 +45,19 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
         this->_renderer.bindedVertexBuffer = this;
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, this->_id));
-        //for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
-        //{
-        //    GLCHECK(glVertexAttribPointerARB(GetVertexAttributeIndex(it->location), it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
-        //    GLCHECK(glEnableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
-        //}
+        for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
+        {
+            GLCHECK(glVertexAttribPointerARB(GetVertexAttributeIndex(it->location), it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
+            GLCHECK(glEnableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
+        }
     }
 
     void VertexBuffer::Unbind()
     {
-        this->_renderer.bindedVertexBuffer = 0;
+        this->_renderer.bindedVertexBuffer = nullptr;
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0));
         for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
             GLCHECK(glDisableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
-        GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
     }
 
 }}}

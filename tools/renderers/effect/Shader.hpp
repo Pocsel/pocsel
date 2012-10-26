@@ -31,14 +31,14 @@ namespace Tools { namespace Renderers { namespace Effect {
 
     struct BaseParameter
     {
-        Type::Type type;
         std::string directX;
         std::string openGL;
     };
 
     struct UniformParameter : public BaseParameter
     {
-        boost::variant<bool, Sampler, std::array<float, 16>, Nil> value;
+        Type::Type type;
+        boost::variant<Sampler, std::string> value;
     };
 
     struct Shader
@@ -53,4 +53,4 @@ namespace Tools { namespace Renderers { namespace Effect {
         std::string glslPixel;
     };
 
-}
+}}}

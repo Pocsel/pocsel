@@ -359,7 +359,7 @@ void ResourcesSerialization(Interpreter& i)
     {
         EntityPtr(Uint32 id) : id(id) {}
         EntityPtr() : id(0) {}
-        virtual bool IsValid(EntityManager const&) const { return this->id; }
+        virtual bool IsValid(EntityManager const&) const { return this->id != 0; }
         virtual void Invalidate(EntityManager const&) { this->id = 0; }
         virtual Ref GetReference(EntityManager& manager) const { return manager.GetEntity(id); }
         bool operator <(EntityPtr const& rhs) const { return this->id < rhs.id; }

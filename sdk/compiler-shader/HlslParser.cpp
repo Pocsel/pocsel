@@ -1,3 +1,6 @@
+#include <boost/wave.hpp>
+#include <boost/wave/cpplexer/cpp_lex_iterator.hpp>
+
 #include "sdk/compiler-shader/HlslParser.hpp"
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -405,12 +408,23 @@ namespace Hlsl {
         typedef std::istreambuf_iterator<char> base_it;
         base_it tmpIt(in);
         std::string tmp(tmpIt, base_it());
+
+        typedef boost::wave::cpplexer::lex_iterator<boost::wave::cpplexer::lex_token<>> lex_iterator_type;
+        typedef boost::wave::context<std::string::iterator, lex_iterator_type> context_type;
+        context_type ctx(tmp.begin(), tmp.end(), "tmp.fx");
+        ctx.add_macro_definition("DIRECTX");
+        std::stringstream ss;
+        for (auto& it: ctx)
+            ss << it.get_value();
+        tmp = ss.str();
+
         auto it = tmp.begin(); //boost::spirit::make_default_multi_pass(tmpIt);
         auto itEnd = tmp.end(); //boost::spirit::make_default_multi_pass(base_it());
 
         auto skip =
             ascii::space |
             ("//" >> *(char_ - qi::eol - qi::eoi) >> -qi::eol) |
+            ("#line" >> *ascii::space >> +ascii::alnum >> *ascii::space >> '"' >> *(char_ - qi::eol)) | //#line 49 "D:\\Programmation\\C++\\pocsel\\build_x64_vs11\\sdk\\compiler-shader\\tmp.fx"
             ("/*" >> *(char_ - "*/") >> "*/")
         ;
 

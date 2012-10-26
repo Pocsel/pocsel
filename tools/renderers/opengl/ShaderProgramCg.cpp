@@ -47,8 +47,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
             this->_shaderParameters[t] = param.IsUseable() ? &param : 0;
         }
 
-        Tools::debug << "*** Vertex Shader:\n" << cgGetProgramString(cgGetPassProgram(cgGetFirstPass(this->_technique), CG_VERTEX_DOMAIN), CG_COMPILED_PROGRAM);
-        Tools::debug << "*** Pixel  Shader:\n" << cgGetProgramString(cgGetPassProgram(cgGetFirstPass(this->_technique), CG_FRAGMENT_DOMAIN), CG_COMPILED_PROGRAM);
+        //Tools::debug << "*** Vertex Shader:\n" << cgGetProgramString(cgGetPassProgram(cgGetFirstPass(this->_technique), CG_VERTEX_DOMAIN), CG_COMPILED_PROGRAM);
+        //Tools::debug << "*** Pixel  Shader:\n" << cgGetProgramString(cgGetPassProgram(cgGetFirstPass(this->_technique), CG_FRAGMENT_DOMAIN), CG_COMPILED_PROGRAM);
     }
 
     ShaderProgramCg::~ShaderProgramCg()

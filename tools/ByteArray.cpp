@@ -16,7 +16,7 @@ namespace Tools {
     }
 
     ByteArray::ByteArray(std::vector<char> const& vector) :
-        _size(vector.size()),
+        _size((Uint32)vector.size()),
         _allocSize(0),
         _offset(0)
     {
