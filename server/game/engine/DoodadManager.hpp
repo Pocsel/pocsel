@@ -23,14 +23,14 @@ namespace Server { namespace Game { namespace Engine {
     class DoodadManager :
         private boost::noncopyable
     {
-    private:
+    public:
         struct WeakDoodadRef : public Tools::Lua::AWeakResourceRef<DoodadManager>
         {
             WeakDoodadRef() : doodadId(0), disabled(true) {}
             WeakDoodadRef(Uint32 doodadId) : doodadId(doodadId), disabled(false) {}
             virtual bool IsValid(DoodadManager const&) const { return this->doodadId && !this->disabled; }
             virtual void Invalidate(DoodadManager const&) { this->doodadId = 0; this->disabled = true; }
-            virtual Tools::Lua::Ref GetReference(DoodadManager const& doodadManager) const;
+            virtual Tools::Lua::Ref GetReference(DoodadManager& doodadManager) const;
             virtual std::string Serialize(DoodadManager const& doodadManager) const;
             bool operator <(WeakDoodadRef const& rhs) const;
             Uint32 doodadId;
@@ -61,10 +61,11 @@ namespace Server { namespace Game { namespace Engine {
         //void EntityHasMoved(Uint32 entityId);
         void DoodadIsDirty(Doodad* doodad) { this->_dirtyDoodads.insert(doodad); }
         void DoodadIsClean(Doodad* doodad) { this->_dirtyDoodads.erase(doodad); }
-        Tools::Lua::Ref GetLuaWrapperForDoodad(Uint32 doodadId) const throw(std::runtime_error);
+        Tools::Lua::Ref GetLuaWrapperForDoodad(Uint32 doodadId);
+        Tools::Lua::WeakResourceRefManager<WeakDoodadRef, DoodadManager>& GetWeakDoodadRefManager() { return *this->_weakDoodadRefManager; }
     private:
         Doodad& _GetDoodad(Uint32 doodadId) throw(std::runtime_error);
-        Doodad& _GetDoodad(Tools::Lua::Ref const& ref) throw(std::runtime_error);
+        Uint32 _RefToDoodadId(Tools::Lua::Ref const& ref) throw(std::runtime_error);
         Doodad* _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity& entity, std::string const& bodyName);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
@@ -73,6 +74,8 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiCall(Tools::Lua::CallHelper& helper);
         void _ApiSetUdp(Tools::Lua::CallHelper& helper);
         void _ApiCallUdp(Tools::Lua::CallHelper& helper);
+        void _ApiGetDoodadById(Tools::Lua::CallHelper& helper);
+        void _ApiGetWeakPointer(Tools::Lua::CallHelper& helper);
     };
 
 }}}

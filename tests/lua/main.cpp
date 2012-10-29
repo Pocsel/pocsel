@@ -285,7 +285,7 @@ static void Resources(Interpreter& i)
         ResourceDeTest(int field1, std::string field2) : field1(field1), field2(field2) {}
         virtual bool IsValid(MitoResourceManager const&) const { return this->field1 && !this->field2.empty(); }
         virtual void Invalidate(MitoResourceManager const&) { this->field1 = 0; this->field2.clear(); }
-        virtual Ref GetReference(MitoResourceManager const& manager) const { return manager.coucou2; }
+        virtual Ref GetReference(MitoResourceManager& manager) const { return manager.coucou2; }
         bool operator <(ResourceDeTest const& rhs) const { return this->field1 < rhs.field1 && this->field2 < rhs.field2; }
         int field1;
         std::string field2;
@@ -361,7 +361,7 @@ void ResourcesSerialization(Interpreter& i)
         EntityPtr() : id(0) {}
         virtual bool IsValid(EntityManager const&) const { return this->id; }
         virtual void Invalidate(EntityManager const&) { this->id = 0; }
-        virtual Ref GetReference(EntityManager const& manager) const { return manager.GetEntity(id); }
+        virtual Ref GetReference(EntityManager& manager) const { return manager.GetEntity(id); }
         bool operator <(EntityPtr const& rhs) const { return this->id < rhs.id; }
         void TryToLoad(EntityManager const& manager) { Tools::log << "EntityPtr::TryToLoad() - " << this->id << std::endl; }
         Uint32 id;

@@ -41,6 +41,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
+        this->_weakReferenceId = this->_engine.GetDoodadManager().GetWeakDoodadRefManager().NewResource(DoodadManager::WeakDoodadRef(id)).first;
     }
 
     Doodad::~Doodad()

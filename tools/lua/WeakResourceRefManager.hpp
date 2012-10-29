@@ -8,7 +8,7 @@ namespace Tools { namespace Lua {
     template<typename WeakResourceRefType, typename ManagerType> class WeakResourceRefManager :
         private boost::noncopyable
     {
-    private:
+    public:
         struct FakeReference
         {
             FakeReference(Ref const& ref) : trueReference(ref) {}
@@ -58,6 +58,11 @@ namespace Tools { namespace Lua {
             Tools::Delete(this->_weakReferences);
             Tools::Delete(this->_weakReferencesByResource);
             Tools::Delete(this->_fakeReferences);
+        }
+
+        bool UsingFakeReferences() const
+        {
+            return this->_fakeReferences;
         }
 
         std::pair<Uint32, Ref> NewResource(WeakResourceRefType const& resource)

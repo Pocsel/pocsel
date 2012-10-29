@@ -47,6 +47,7 @@ namespace Server { namespace Game { namespace Engine {
         std::queue<Command> _commandsUdp;
         bool _positionDirty;
         bool _isNew;
+        Uint32 _weakReferenceId;
 
     public:
         Doodad(Engine& engine,
@@ -71,7 +72,7 @@ namespace Server { namespace Game { namespace Engine {
         void SetUdp(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value);
         void CallUdp(std::string const& name, Tools::Lua::Ref const& value);
         void PositionIsDirty();
-        //void UpdatePhysics();
+        Uint32 GetWeakReferenceId() const { return this->_weakReferenceId; }
     private:
         void _SpawnForNewPlayers();
     };
