@@ -110,6 +110,7 @@ namespace Tools { namespace PluginCreate {
             allowedTypes[".lua"] = "lua";
             allowedTypes[".png"] = "image";
             allowedTypes[".fx"] = "effect";
+            allowedTypes[".fxc"] = "effect";
             allowedTypes[".mqm"] = "model";
 
             std::list<boost::filesystem::path> files;

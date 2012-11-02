@@ -32,6 +32,14 @@ namespace Tools {
 
     public:
         ByteArray();
+        ByteArray(ByteArray&& byteArray) : // move cstor, inline for performance
+            _data(byteArray._data),
+            _size(byteArray._size),
+            _allocSize(byteArray._allocSize),
+            _offset(byteArray._offset)
+        {
+            byteArray._data = 0;
+        }
         explicit ByteArray(ByteArray const& ByteArray);
         explicit ByteArray(std::vector<char> const& vector);
         ByteArray(char const* data, Uint32 size);

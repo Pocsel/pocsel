@@ -105,5 +105,5 @@ namespace Hlsl
         std::list<GlobalStatement> statements;
     };
 
-    bool ParseStream(std::istream& in, File& file, std::ostream& errors = std::cerr);
+    bool ParseStream(std::istream& in, File& file, std::list<std::string> const& macros, std::ostream& errors = std::cerr);
 }

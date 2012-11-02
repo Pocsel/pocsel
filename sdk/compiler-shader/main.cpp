@@ -108,24 +108,52 @@ int main(int ac, char** av)
         return 1;
     }
 
-    std::ifstream in(av[1]);
+    // Macros - base
+    std::list<std::string> macros;
+    macros.push_front("POCSEL");
 
-    File file;
-    if (!ParseStream(in, file))
-        std::cout << "Parsing error" << std::endl;
-    else
+    // OpenGL only
+    auto macrosGL = macros;
+    macrosGL.push_front("OPENGL");
+
+    // DirectX only
+    auto macrosDX = macros;
+    macrosDX.push_front("DIRECTX");
+
+    File fileGL;
+    File fileDX;
+
     {
-        GeneratorOptions options;
-        options.removeSemanticAttributes = true;
-
-        auto const& tmp = GenerateHlsl(file, options);
-        auto const& shader = HlslFileToShader(file, tmp);
-
-        std::ofstream out(av[2]);
-        SerializeShader(shader, out);
+        std::ifstream in(av[1]);
+        if (!ParseStream(in, fileGL, macrosGL))
+        {
+            std::cout << "Error when parsing OpenGL version\n";
+            return 1;
+        }
+    }
+    {
+        std::ifstream in(av[1]);
+        if (!ParseStream(in, fileDX, macrosDX))
+        {
+            std::cout << "Error when parsing DirectX 9 version\n";
+            return 1;
+        }
     }
 
-#ifdef _WINDOWS
+    GeneratorOptions options;
+    options.removeSemanticAttributes = true;
+
+    auto const& srcGL = GenerateHlsl(fileGL, options);
+    auto const& srcDX = GenerateHlsl(fileDX, options);
+    auto const& shader = HlslFileToShader(fileGL, srcGL, fileDX, srcDX);
+
+    std::ofstream out(av[2], std::ios::binary | std::ios::out);
+    SerializeShader(shader, out);
+#ifdef DEBUG
+    std::cout << "Success\n";
+#endif
+
+#if defined(_WINDOWS) && defined(DEBUG)
     std::cin.get();
 #endif
     return 0;

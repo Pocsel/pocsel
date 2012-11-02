@@ -29,15 +29,10 @@ namespace Tools { namespace Renderers { namespace Effect {
         std::map<std::string, std::string> states;
     };
 
-    struct BaseParameter
-    {
-        std::string directX;
-        std::string openGL;
-    };
-
-    struct UniformParameter : public BaseParameter
+    struct UniformParameter
     {
         Type::Type type;
+        std::string name;
         boost::variant<Sampler, std::string> value;
     };
 
@@ -45,12 +40,16 @@ namespace Tools { namespace Renderers { namespace Effect {
     {
         std::string source;
         std::map<std::string, UniformParameter> uniforms;
-        std::map<std::string, BaseParameter> attributes;
+        std::map<std::string, std::string> attributes;
         std::map<std::string, std::string> deviceStates;
-        std::string hlslVertex;
-        std::string hlslPixel;
-        std::string glslVertex;
-        std::string glslPixel;
+        std::string vertex;
+        std::string pixel;
     };
 
+
+    struct CompleteShader
+    {
+        Shader openGL;
+        Shader directX;
+    };
 }}}

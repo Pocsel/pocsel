@@ -2,6 +2,10 @@
 
 #include "sdk/compiler-shader/HlslParser.hpp"
 
+namespace Tools {
+    class ByteArray;
+}
+
 namespace Hlsl {
 
     namespace Type {
@@ -34,8 +38,7 @@ namespace Hlsl {
     struct BaseParameter
     {
         Type::Type type;
-        std::string directX;
-        std::string openGL;
+        std::string name;
     };
 
     struct UniformParameter : public BaseParameter
@@ -49,16 +52,19 @@ namespace Hlsl {
         std::map<std::string, UniformParameter> uniforms;
         std::map<std::string, BaseParameter> attributes;
         std::map<std::string, std::string> deviceStates;
-        std::string hlslVertex;
-        std::string hlslPixel;
-        std::string glslVertex;
-        std::string glslPixel;
+        std::string vertex;
+        std::string pixel;
     };
 
-    std::pair<std::string, std::string> HlslFileToGlsl(File const& file, std::string const& source);
-    std::pair<std::string, std::string> HlslFileToHlsl(File const& file, std::string const& source);
-    Shader HlslFileToShader(File const& file, std::string const& source);
-    void SerializeShader(Shader const& shader, std::ostream&& out);
-    void SerializeShader(Shader const& shader, std::ostream& out);
+    struct CompleteShader
+    {
+        Shader glsl;
+        Shader hlsl;
+    };
+
+    Shader HlslFileToShader(File const& file, std::string const& source, Profile::Type profile);
+    CompleteShader HlslFileToShader(File const& fileGL, std::string const& sourceGL, File const& fileDX, std::string const& sourceDX);
+    void SerializeShader(Shader const& shader, Tools::ByteArray& bin);
+    void SerializeShader(CompleteShader const& shader, std::ostream& out);
 
 }

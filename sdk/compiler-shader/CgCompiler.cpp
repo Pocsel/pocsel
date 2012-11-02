@@ -221,23 +221,7 @@ namespace Hlsl {
 
     }
 
-    std::pair<std::string, std::string> HlslFileToGlsl(File const& file, std::string const& source)
-    {
-        auto pass = _GetFirstPass(file);
-        auto vertexShader = _GetFirstShader(pass, CompileStatement::VertexShader);
-        auto pixelShader = _GetFirstShader(pass, CompileStatement::PixelShader);
-        return _Compile(vertexShader.entry, pixelShader.entry, source, Profile::Glsl);
-    }
-
-    std::pair<std::string, std::string> HlslFileToHlsl(File const& file, std::string const& source)
-    {
-        auto pass = _GetFirstPass(file);
-        auto vertexShader = _GetFirstShader(pass, CompileStatement::VertexShader);
-        auto pixelShader = _GetFirstShader(pass, CompileStatement::PixelShader);
-        return _Compile(vertexShader.entry, pixelShader.entry, source, Profile::Hlsl);
-    }
-
-    Shader HlslFileToShader(File const& file, std::string const& source)
+    Shader HlslFileToShader(File const& file, std::string const& source, Profile::Type profile)
     {
         Shader shader;
         shader.source = source;
@@ -248,12 +232,9 @@ namespace Hlsl {
         auto const& functionVertex = _GetFunction(file, vertexShader.entry);
         auto const& functionPixel = _GetFunction(file, pixelShader.entry);
 
-        auto const& hlsl = _Compile(vertexShader.entry, pixelShader.entry, source, Profile::Hlsl);
-        auto const& glsl = _Compile(vertexShader.entry, pixelShader.entry, source, Profile::Glsl);
-        shader.hlslVertex = hlsl.first;
-        shader.hlslPixel = hlsl.second;
-        shader.glslVertex = glsl.first;
-        shader.glslPixel = glsl.second;
+        auto const& tmpCompiled = _Compile(vertexShader.entry, pixelShader.entry, source, profile);
+        shader.vertex = tmpCompiled.first;
+        shader.pixel = tmpCompiled.second;
 
         for (auto const& stmt: pass.statements)
         {
@@ -266,10 +247,8 @@ namespace Hlsl {
             }
         }
 
-        auto tmpGlslv = _ParseGeneratedXlsl(shader.glslVertex, file, functionVertex);
-        auto tmpHlslv = _ParseGeneratedXlsl(shader.hlslVertex, file, functionVertex);
-        tmpGlslv.merge(_ParseGeneratedXlsl(shader.glslPixel, file, functionPixel));
-        tmpHlslv.merge(_ParseGeneratedXlsl(shader.hlslPixel, file, functionPixel));
+        auto params = _ParseGeneratedXlsl(shader.vertex, file, functionVertex);
+        params.merge(_ParseGeneratedXlsl(shader.pixel, file, functionPixel));
 
         // shader.uniforms
         for (auto const& stmt: file.statements)
@@ -278,12 +257,9 @@ namespace Hlsl {
             {
                 auto const& var = boost::get<Variable>(stmt);
                 UniformParameter param;
-                for (auto const& v: tmpGlslv)
+                for (auto const& v: params)
                     if (v.first == &var)
-                        param.openGL = v.second;
-                for (auto const& v: tmpHlslv)
-                    if (v.first == &var)
-                        param.directX = v.second;
+                        param.name = v.second;
                 param.type = _ParseType(var.type);
                 param.value = Nil();
                 switch (var.value.which())
@@ -335,38 +311,35 @@ namespace Hlsl {
 
         // shader.attributes
         for (auto const& arg: functionVertex.arguments)
-        {
-            for (auto const& v: tmpGlslv)
+            for (auto const& v: params)
                 if (v.first == &arg)
-                    shader.attributes[v.first->name].openGL = v.second;
-            for (auto const& v: tmpHlslv)
-                if (v.first == &arg)
-                    shader.attributes[v.first->name].directX = v.second;
-        }
+                    shader.attributes[v.first->name].name = v.second;
 
         return shader;
     }
 
-    void SerializeShader(Shader const& shader, std::ostream& out)
+    CompleteShader HlslFileToShader(File const& fileGL, std::string const& sourceGL, File const& fileDX, std::string const& sourceDX)
     {
-        Tools::ByteArray bin;
-        bin.Write32(0xB16B00B5); // BIGBOOBS magic code
+        CompleteShader shader;
+        shader.glsl = HlslFileToShader(fileGL, sourceGL, Profile::Glsl);
+        shader.hlsl = HlslFileToShader(fileDX, sourceDX, Profile::Hlsl);
+        return shader;
+    }
 
+    void SerializeShader(Shader const& shader, Tools::ByteArray& bin)
+    {
         // Shaders
-        auto writeLongString = [&](std::string const& str) { bin.Write32((Uint32)str.size()); bin.WriteRawData(str.c_str(), (Uint32)str.size()); };
+        auto writeLongString = [&](std::string const& str) { bin.Write32((Uint32)str.size()); bin.WriteRawData(str.data(), (Uint32)str.size()); };
         writeLongString(shader.source);
-        writeLongString(shader.glslVertex);
-        writeLongString(shader.glslPixel);
-        writeLongString(shader.hlslVertex);
-        writeLongString(shader.hlslPixel);
+        writeLongString(shader.vertex);
+        writeLongString(shader.pixel);
 
         // Attributes
         bin.Write32((Uint32)shader.attributes.size());
         for (auto const& attr: shader.attributes)
         {
             bin.WriteString(attr.first); // original name
-            bin.WriteString(attr.second.openGL);
-            bin.WriteString(attr.second.directX);
+            bin.WriteString(attr.second.name);
         }
 
         // Uniforms
@@ -374,8 +347,8 @@ namespace Hlsl {
         for (auto const& uniform: shader.uniforms)
         {
             bin.WriteString(uniform.first); // original name
-            bin.WriteString(uniform.second.openGL);
-            bin.WriteString(uniform.second.directX);
+            bin.Write8((Uint8)uniform.second.type);
+            bin.WriteString(uniform.second.name);
             bin.WriteString(_GetValue(uniform.second.value)); // Default value
         }
 
@@ -386,9 +359,17 @@ namespace Hlsl {
             bin.WriteString(state.first); // state name
             bin.WriteString(state.second); // value
         }
+    }
 
-        auto const& data = bin.GetData();
-        out.write(data, bin.GetSize());
+    void SerializeShader(CompleteShader const& shader, std::ostream& out)
+    {
+        Tools::ByteArray bin;
+        bin.Write32(0xB16B00B5); // BIGBOOBS magic code
+
+        SerializeShader(shader.glsl, bin);
+        SerializeShader(shader.hlsl, bin);
+
+        out.write(bin.GetData(), bin.GetSize());
     }
 
 }

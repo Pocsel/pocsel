@@ -181,9 +181,11 @@ namespace Hlsl {
                     (
                         lit("VertexShader")[at_c<0>(_val) = val(CompileStatement::VertexShader)]
                         |
+                        lit("VertexProgram")[at_c<0>(_val) = val(CompileStatement::VertexShader)]
+                        |
                         lit("PixelShader")[at_c<0>(_val) = val(CompileStatement::PixelShader)]
                         |
-                        lit("FragmentShader")[at_c<0>(_val) = val(CompileStatement::PixelShader)]
+                        lit("FragmentProgram")[at_c<0>(_val) = val(CompileStatement::PixelShader)]
                     )
                     > base.equal
                     > "compile"
@@ -396,14 +398,16 @@ namespace Hlsl {
             variable[_val = _1] |
             base.semicolon[_val = val(Nil())]
         ;
+        statement.name("statement");
 
         start =
-            *(statement[push_back(at_c<0>(_val), _1)])
+            *statement[push_back(at_c<0>(_val), _1)]
             > qi::eoi;
         ;
+        start.name("file");
     }
 
-    bool ParseStream(std::istream& in, File& file, std::ostream& errors)
+    bool ParseStream(std::istream& in, File& file, std::list<std::string> const& macros, std::ostream& errors)
     {
         typedef std::istreambuf_iterator<char> base_it;
         base_it tmpIt(in);
@@ -412,7 +416,8 @@ namespace Hlsl {
         typedef boost::wave::cpplexer::lex_iterator<boost::wave::cpplexer::lex_token<>> lex_iterator_type;
         typedef boost::wave::context<std::string::iterator, lex_iterator_type> context_type;
         context_type ctx(tmp.begin(), tmp.end(), "tmp.fx");
-        ctx.add_macro_definition("DIRECTX");
+        for (auto const& macro: macros)
+            ctx.add_macro_definition(macro);
         std::stringstream ss;
         for (auto& it: ctx)
             ss << it.get_value();
@@ -424,7 +429,7 @@ namespace Hlsl {
         auto skip =
             ascii::space |
             ("//" >> *(char_ - qi::eol - qi::eoi) >> -qi::eol) |
-            ("#line" >> *ascii::space >> +ascii::alnum >> *ascii::space >> '"' >> *(char_ - qi::eol)) | //#line 49 "D:\\Programmation\\C++\\pocsel\\build_x64_vs11\\sdk\\compiler-shader\\tmp.fx"
+            ("#line" >> *ascii::space >> +ascii::alnum >> *ascii::space >> '"' >> *(char_ - '"') >> '"') | //#line 49 "D:\\Programmation\\C++\\pocsel\\build_x64_vs11\\sdk\\compiler-shader\\tmp.fx"
             ("/*" >> *(char_ - "*/") >> "*/")
         ;
 
@@ -438,5 +443,34 @@ namespace Hlsl {
             errors << "ERROR: expecting " << ex.what_ << " near:\n" << std::string(ex.first, ex.last) << std::endl;
         }
         return false;
+    }
+
+    std::ostream& operator <<(std::ostream& out, GlobalStatement const& stmt)
+    {
+        // typedef boost::variant<Hlsl::Variable, Hlsl::Function, Hlsl::Technique, Hlsl::Structure, Hlsl::Nil> GlobalStatement;
+        struct : public boost::static_visitor<std::string>
+        {
+            std::string operator()(Variable const& var)
+            {
+                return "variable<" + var.name + ">";
+            }
+            std::string operator()(Function const& func)
+            {
+                return "function<" + func.name + ">";
+            }
+            std::string operator()(Technique const& tech)
+            {
+                return "technique<" + tech.name + ">";
+            }
+            std::string operator()(Structure const& struc)
+            {
+                return "structure<" + struc.name + ">";
+            }
+            std::string operator()(Nil const&)
+            {
+                return "nil";
+            }
+        } visitor;
+        return out << boost::apply_visitor(visitor, stmt);
     }
 }

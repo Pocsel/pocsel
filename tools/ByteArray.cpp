@@ -18,18 +18,20 @@ namespace Tools {
     ByteArray::ByteArray(std::vector<char> const& vector) :
         _size((Uint32)vector.size()),
         _allocSize(0),
-        _offset(0)
+        _offset(0),
+        _data(nullptr)
     {
-        this->_Resize(this->_allocSize);
+        this->_Resize(this->_size);
         ::memcpy(this->_data, vector.data(), this->_size);
     }
 
     ByteArray::ByteArray(char const* data, Uint32 size) :
         _size(size),
         _allocSize(0),
-        _offset(0)
+        _offset(0),
+        _data(nullptr)
     {
-        this->_Resize(this->_allocSize);
+        this->_Resize(this->_size);
         ::memcpy(this->_data, data, this->_size);
     }
 
