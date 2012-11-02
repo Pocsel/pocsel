@@ -48,12 +48,12 @@ namespace Server { namespace Game { namespace Engine {
         namespaceTable.Set("RegisterPositional", i.MakeFunction(std::bind(&EntityManager::_ApiRegisterPositional, this, std::placeholders::_1)));
         namespaceTable.Set("SetPos", i.MakeFunction(std::bind(&EntityManager::_ApiSetPos, this, std::placeholders::_1)));
         namespaceTable.Set("GetPos", i.MakeFunction(std::bind(&EntityManager::_ApiGetPos, this, std::placeholders::_1)));
-        namespaceTable.Set("SetSpeed", i.MakeFunction(std::bind(&EntityManager::_ApiSetSpeed, this, std::placeholders::_1)));
-        namespaceTable.Set("GetSpeed", i.MakeFunction(std::bind(&EntityManager::_ApiGetSpeed, this, std::placeholders::_1)));
-        namespaceTable.Set("SetVel", i.MakeFunction(std::bind(&EntityManager::_ApiSetSpeed, this, std::placeholders::_1)));
-        namespaceTable.Set("GetVel", i.MakeFunction(std::bind(&EntityManager::_ApiGetSpeed, this, std::placeholders::_1)));
+        namespaceTable.Set("SetPosition", i.MakeFunction(std::bind(&EntityManager::_ApiSetPos, this, std::placeholders::_1)));
+        namespaceTable.Set("GetPosition", i.MakeFunction(std::bind(&EntityManager::_ApiGetPos, this, std::placeholders::_1)));
         namespaceTable.Set("SetAccel", i.MakeFunction(std::bind(&EntityManager::_ApiSetAccel, this, std::placeholders::_1)));
         namespaceTable.Set("GetAccel", i.MakeFunction(std::bind(&EntityManager::_ApiGetAccel, this, std::placeholders::_1)));
+        namespaceTable.Set("SetLocalAccel", i.MakeFunction(std::bind(&EntityManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
+        namespaceTable.Set("GetLocalAccel", i.MakeFunction(std::bind(&EntityManager::_ApiGetLocalAccel, this, std::placeholders::_1)));
     }
 
     EntityManager::~EntityManager()
@@ -1034,21 +1034,21 @@ namespace Server { namespace Game { namespace Engine {
         helper.PushRet(it->second->GetPosition());
     }
 
-    void EntityManager::_ApiSetSpeed(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
     {
-//        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-//        glm::dvec3 speed = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
-//        auto it = this->_positionalEntities.find(entityId);
-//        if (it == this->_positionalEntities.end() || !it->second)
-//        {
-//            Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
-//            return;
-//        }
-//        it->second->SetSpeed(speed);
-//        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
+        //Uint32 entityId = helper.PopArg("Server.Entity.SetAccel: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
+        //glm::dvec3 speed = helper.PopArg("Server.Entity.SetAccel: Missing argument \"position\"").Check<glm::dvec3>();
+        //auto it = this->_positionalEntities.find(entityId);
+        //if (it == this->_positionalEntities.end() || !it->second)
+        //{
+        //    Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
+        //    return;
+        //}
+        //it->second->SetSpeed(speed);
+        //this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
-    void EntityManager::_ApiGetSpeed(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiGetAccel(Tools::Lua::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
 //        auto it = this->_positionalEntities.find(entityId);
@@ -1060,7 +1060,7 @@ namespace Server { namespace Game { namespace Engine {
 //        helper.PushRet(it->second->GetSpeed());
     }
 
-    void EntityManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiSetLocalAccel(Tools::Lua::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
 //        glm::dvec3 accel = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
@@ -1074,7 +1074,7 @@ namespace Server { namespace Game { namespace Engine {
 //        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
-    void EntityManager::_ApiGetAccel(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiGetLocalAccel(Tools::Lua::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
 //        auto it = this->_positionalEntities.find(entityId);

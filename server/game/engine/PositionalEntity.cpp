@@ -38,7 +38,7 @@ namespace Server { namespace Game { namespace Engine {
         Common::Physics::Node phys;
         phys.position = pos;
         phys.velocity = Common::Position(0, 0, 0);
-        phys.acceleration = Common::Position(0, 0, 0);
+        //phys.acceleration = Common::Position(0, 0, 0);
         phys.orientation = glm::quat();
         phys.angularVelocity = glm::vec3(0, 0, 0);
 

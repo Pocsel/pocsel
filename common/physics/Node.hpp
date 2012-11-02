@@ -10,11 +10,14 @@ namespace Common { namespace Physics {
     {
         Common::Position position;
         Common::Position velocity;
-        Common::Position acceleration;
+        //Common::Position acceleration;
 
         glm::quat orientation;
         glm::vec3 angularVelocity;
         //glm::vec3 angularAcceleration;
+
+        bool accelerationIsLocal;
+        Common::Position acceleration;
 
         //glm::vec3 scale;
         //glm::vec3 scaleVelocity;

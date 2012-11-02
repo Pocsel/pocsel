@@ -64,17 +64,22 @@ namespace Common { namespace Physics {
         if (velocity.length() != 0)
         velocityQ = btQuaternion(velocity, 0);
         btQuaternion directionQ = this->_body->getCenterOfMassTransform().getRotation();
-        directionQ.normalize();
+        //directionQ.normalize();
         btVector3 direction = directionQ.getAxis();//(directionQ.x(), directionQ.y(), directionQ.z());
         direction = direction.normalize();
 
-        btScalar speed = velocity.dot(direction);
-        std::cout << "0speed= " << speed << " | ";
-        //btScalar speedQ = velocityQ.dot(directionQ);
-        //std::cout << "Qspeed= " << speedQ << "\n";
 
-        std::cout << "direction= " << direction.x() << " " << direction.y() << " " << direction.z() << " | " <<
-            "velocity= " << velocity.x() << " " << velocity.y() << " " << velocity.z() << "\n";
+        direction = quatRotate(directionQ, btVector3(1, 0, 0));
+
+        btScalar speed = velocity.dot(direction);
+        //std::cout << "0speed= " << speed << " | ";
+        ////btScalar speedQ = velocityQ.dot(directionQ);
+        ////std::cout << "Qspeed= " << speedQ << "\n";
+
+        //std::cout << "direction= " << direction.x() << " " << direction.y() << " " << direction.z() << " | " <<
+        //    "velocity= " << velocity.x() << " " << velocity.y() << " " << velocity.z() << "\n";
+
+        this->_body->setLinearVelocity(direction * 10);
 
         //if (speed > 3)
         //{
@@ -95,12 +100,12 @@ namespace Common { namespace Physics {
     {
         this->_constraints.push_back(body);
 
-        //{ // pecho la masse totale
-        //    for (auto const& shape: body->GetType().GetShapes())
-        //        this->_curMass += shape.mass;
+        { // pecho la masse totale
+            for (auto const& shape: body->GetType().GetShapes())
+                this->_curMass += shape.mass;
 
-        //    this->_body->setMassProps(this->_curMass, btVector3(1, 1, 1));
-        //}
+            this->_body->setMassProps(this->_curMass, btVector3(1, 1, 1));
+        }
     }
 
     void BodyCluster::RemoveConstraint(Body* body)
@@ -111,12 +116,12 @@ namespace Common { namespace Physics {
             {
                 this->_constraints.erase(it);
 
-                //{ // pecho la masse totale
-                //    for (auto const& shape: body->GetType().GetShapes())
-                //        this->_curMass -= shape.mass;
+                { // pecho la masse totale
+                    for (auto const& shape: body->GetType().GetShapes())
+                        this->_curMass -= shape.mass;
 
-                //    this->_body->setMassProps(this->_curMass, btVector3(1, 1, 1));
-                //}
+                    this->_body->setMassProps(this->_curMass, btVector3(1, 1, 1));
+                }
 
                 return;
             }

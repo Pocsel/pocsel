@@ -32,8 +32,8 @@ namespace Server { namespace Game { namespace Engine {
 
         Common::Position const& GetPosition() const { return this->_physics.position; }
         void SetPosition(Common::Position const& pos);// { this->_physics.position = pos; }
-        glm::dvec3 const& GetSpeed() const { return this->_physics.velocity; }
-        void SetSpeed(glm::dvec3 const& speed);// { this->_physics.velocity = speed; }
+        //glm::dvec3 const& GetSpeed() const { return this->_physics.velocity; }
+        //void SetSpeed(glm::dvec3 const& speed);// { this->_physics.velocity = speed; }
         //glm::dvec3 const& GetAccel() const { return this->_physics.acceleration; }
         //void SetAccel(glm::dvec3 const& accel) { this->_physics.acceleration = accel; }
 

@@ -15,11 +15,14 @@ namespace Tools {
         {
             p.Read(v.position);
             p.Read(v.velocity);
-            p.Read(v.acceleration);
+            //p.Read(v.acceleration);
 
             p.Read(v.orientation);
             p.Read(v.angularVelocity);
             //p.Read(v.angularAcceleration);
+
+            p.Read(v.accelerationIsLocal);
+            p.Read(v.acceleration);
 
             //p.Read(v.scale);
             //p.Read(v.scaleVelocity);
@@ -30,11 +33,14 @@ namespace Tools {
         {
             p.Write(v.position);
             p.Write(v.velocity);
-            p.Write(v.acceleration);
+            //p.Write(v.acceleration);
 
             p.Write(v.orientation);
             p.Write(v.angularVelocity);
             //p.Write(v.angularAcceleration);
+
+            p.Write(v.accelerationIsLocal);
+            p.Write(v.acceleration);
 
             //p.Write(v.scale);
             //p.Write(v.scaleVelocity);
@@ -47,11 +53,14 @@ namespace Tools {
 
             p.Read(v->position);
             p.Read(v->velocity);
-            p.Read(v->acceleration);
+            //p.Read(v->acceleration);
 
             p.Read(v->orientation);
             p.Read(v->angularVelocity);
             //p.Read(v->angularAcceleration);
+
+            p.Read(v->accelerationIsLocal);
+            p.Read(v->acceleration);
 
             //p.Read(v->scale);
             //p.Read(v->scaleVelocity);
