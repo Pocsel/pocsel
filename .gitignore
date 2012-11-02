@@ -23,6 +23,7 @@ bin
 *.o
 *.def
 *.so
+*.swo
 *~
 build
 build_*
