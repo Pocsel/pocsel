@@ -1,6 +1,7 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/lua/Interpreter.hpp"
+#include <luasel/Luasel.hpp>
+
 #include "tools/lua/utils/Utils.hpp"
 
 namespace Tools { namespace Lua { namespace Utils {
@@ -11,7 +12,7 @@ namespace Tools { namespace Lua { namespace Utils {
 
     namespace {
         template<class T>
-        Ref MakeRef(Ref metaTable, glm::detail::tvec2<T> const* value)
+        Luasel::Ref MakeRef(Luasel::Ref metaTable, glm::detail::tvec2<T> const* value)
         {
             auto table = metaTable.GetState().MakeTable();
             table.Set("x", value->x);
@@ -20,14 +21,14 @@ namespace Tools { namespace Lua { namespace Utils {
             return table;
         }
         template<class T>
-        void MakeNative(Ref const& ref, glm::detail::tvec2<T>* value)
+        void MakeNative(Luasel::Ref const& ref, glm::detail::tvec2<T>* value)
         {
             value->x = T(ref["x"].CheckNumber());
             value->y = T(ref["y"].CheckNumber());
         }
 
         template<class T>
-        Ref MakeRef(Ref metaTable, glm::detail::tvec3<T> const* value)
+        Luasel::Ref MakeRef(Luasel::Ref metaTable, glm::detail::tvec3<T> const* value)
         {
             auto table = metaTable.GetState().MakeTable();
             table.Set("x", value->x);
@@ -37,7 +38,7 @@ namespace Tools { namespace Lua { namespace Utils {
             return table;
         }
         template<class T>
-        void MakeNative(Ref const& ref, glm::detail::tvec3<T>* value)
+        void MakeNative(Luasel::Ref const& ref, glm::detail::tvec3<T>* value)
         {
             value->x = T(ref["x"].CheckNumber());
             value->y = T(ref["y"].CheckNumber());
@@ -45,7 +46,7 @@ namespace Tools { namespace Lua { namespace Utils {
         }
 
         template<class T>
-        Ref MakeRef(Ref metaTable, glm::detail::tvec4<T> const* value)
+        Luasel::Ref MakeRef(Luasel::Ref metaTable, glm::detail::tvec4<T> const* value)
         {
             auto table = metaTable.GetState().MakeTable();
             table.Set("x", value->x);
@@ -56,7 +57,7 @@ namespace Tools { namespace Lua { namespace Utils {
             return table;
         }
         template<class T>
-        void MakeNative(Ref const& ref, glm::detail::tvec4<T>* value)
+        void MakeNative(Luasel::Ref const& ref, glm::detail::tvec4<T>* value)
         {
             value->x = T(ref["x"].CheckNumber());
             value->y = T(ref["y"].CheckNumber());
@@ -65,7 +66,7 @@ namespace Tools { namespace Lua { namespace Utils {
         }
     }
 
-    void RegisterVector(Lua::Interpreter& interpreter)
+    void RegisterVector(Luasel::Interpreter& interpreter)
     {
         if (!interpreter.Globals().GetTable("Utils")["Vector2"].Exists())
         {
@@ -76,24 +77,24 @@ namespace Tools { namespace Lua { namespace Utils {
             auto vec4mt = module["vector4MetaTable"];
 
             // Int
-            MetaTable::Create(vec2mt, glm::ivec2(), [=](void const* ptr) { return MakeRef(vec2mt, (glm::ivec2 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::ivec2*)value); });
-            MetaTable::Create(vec3mt, glm::ivec3(), [=](void const* ptr) { return MakeRef(vec3mt, (glm::ivec3 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::ivec3*)value); });
-            MetaTable::Create(vec4mt, glm::ivec4(), [=](void const* ptr) { return MakeRef(vec4mt, (glm::ivec4 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::ivec4*)value); });
+            Luasel::MetaTable::Create(vec2mt, glm::ivec2(), [=](void const* ptr) { return MakeRef(vec2mt, (glm::ivec2 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::ivec2*)value); });
+            Luasel::MetaTable::Create(vec3mt, glm::ivec3(), [=](void const* ptr) { return MakeRef(vec3mt, (glm::ivec3 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::ivec3*)value); });
+            Luasel::MetaTable::Create(vec4mt, glm::ivec4(), [=](void const* ptr) { return MakeRef(vec4mt, (glm::ivec4 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::ivec4*)value); });
 
             // UInt
-            MetaTable::Create(vec2mt, glm::uvec2(), [=](void const* ptr) { return MakeRef(vec2mt, (glm::uvec2 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::uvec2*)value); });
-            MetaTable::Create(vec3mt, glm::uvec3(), [=](void const* ptr) { return MakeRef(vec3mt, (glm::uvec3 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::uvec3*)value); });
-            MetaTable::Create(vec4mt, glm::uvec4(), [=](void const* ptr) { return MakeRef(vec4mt, (glm::uvec4 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::uvec4*)value); });
+            Luasel::MetaTable::Create(vec2mt, glm::uvec2(), [=](void const* ptr) { return MakeRef(vec2mt, (glm::uvec2 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::uvec2*)value); });
+            Luasel::MetaTable::Create(vec3mt, glm::uvec3(), [=](void const* ptr) { return MakeRef(vec3mt, (glm::uvec3 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::uvec3*)value); });
+            Luasel::MetaTable::Create(vec4mt, glm::uvec4(), [=](void const* ptr) { return MakeRef(vec4mt, (glm::uvec4 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::uvec4*)value); });
 
             // Float
-            MetaTable::Create(vec2mt, glm::vec2(), [=](void const* ptr) { return MakeRef(vec2mt, (glm::vec2 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::vec2*)value); });
-            MetaTable::Create(vec3mt, glm::vec3(), [=](void const* ptr) { return MakeRef(vec3mt, (glm::vec3 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::vec3*)value); });
-            MetaTable::Create(vec4mt, glm::vec4(), [=](void const* ptr) { return MakeRef(vec4mt, (glm::vec4 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::vec4*)value); });
+            Luasel::MetaTable::Create(vec2mt, glm::vec2(), [=](void const* ptr) { return MakeRef(vec2mt, (glm::vec2 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::vec2*)value); });
+            Luasel::MetaTable::Create(vec3mt, glm::vec3(), [=](void const* ptr) { return MakeRef(vec3mt, (glm::vec3 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::vec3*)value); });
+            Luasel::MetaTable::Create(vec4mt, glm::vec4(), [=](void const* ptr) { return MakeRef(vec4mt, (glm::vec4 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::vec4*)value); });
 
             // Double
-            MetaTable::Create(vec2mt, glm::dvec2(), [=](void const* ptr) { return MakeRef(vec2mt, (glm::dvec2 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::dvec2*)value); });
-            MetaTable::Create(vec3mt, glm::dvec3(), [=](void const* ptr) { return MakeRef(vec3mt, (glm::dvec3 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::dvec3*)value); });
-            MetaTable::Create(vec4mt, glm::dvec4(), [=](void const* ptr) { return MakeRef(vec4mt, (glm::dvec4 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::dvec4*)value); });
+            Luasel::MetaTable::Create(vec2mt, glm::dvec2(), [=](void const* ptr) { return MakeRef(vec2mt, (glm::dvec2 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::dvec2*)value); });
+            Luasel::MetaTable::Create(vec3mt, glm::dvec3(), [=](void const* ptr) { return MakeRef(vec3mt, (glm::dvec3 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::dvec3*)value); });
+            Luasel::MetaTable::Create(vec4mt, glm::dvec4(), [=](void const* ptr) { return MakeRef(vec4mt, (glm::dvec4 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::dvec4*)value); });
         }
     }
 

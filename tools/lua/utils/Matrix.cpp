@@ -1,6 +1,7 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/lua/Interpreter.hpp"
+#include <luasel/Luasel.hpp>
+
 #include "tools/lua/utils/Utils.hpp"
 
 namespace Tools { namespace Lua { namespace Utils {
@@ -11,7 +12,7 @@ namespace Tools { namespace Lua { namespace Utils {
 
     namespace {
         template<class T>
-        Ref MakeRef(Ref metaTable, glm::detail::tmat4x4<T> const* value)
+        Luasel::Ref MakeRef(Luasel::Ref metaTable, glm::detail::tmat4x4<T> const* value)
         {
             auto const& m = *value;
             auto table = metaTable.GetState().MakeTable();
@@ -35,7 +36,7 @@ namespace Tools { namespace Lua { namespace Utils {
             return table;
         }
         template<class T>
-        void MakeNative(Ref const& ref, glm::detail::tmat4x4<T>* value)
+        void MakeNative(Luasel::Ref const& ref, glm::detail::tmat4x4<T>* value)
         {
             auto& m = *value;
             m[0][0] = T(ref["m00"].ToNumber());
@@ -57,7 +58,7 @@ namespace Tools { namespace Lua { namespace Utils {
         }
     }
 
-    void RegisterMatrix(Lua::Interpreter& interpreter)
+    void RegisterMatrix(Luasel::Interpreter& interpreter)
     {
         RegisterVector(interpreter);
         if (!interpreter.Globals().GetTable("Utils")["Matrix"].Exists())
@@ -66,8 +67,8 @@ namespace Tools { namespace Lua { namespace Utils {
 
             auto mat4mt = module["matrix4MetaTable"];
 
-            MetaTable::Create(mat4mt, glm::mat4(), [=](void const* ptr) { return MakeRef(mat4mt, (glm::mat4 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::mat4*)value); });
-            MetaTable::Create(mat4mt, glm::dmat4(), [=](void const* ptr) { return MakeRef(mat4mt, (glm::dmat4 const*)ptr); }, [=](Ref const& ref, void* value) { MakeNative(ref, (glm::dmat4*)value); });
+            Luasel::MetaTable::Create(mat4mt, glm::mat4(), [=](void const* ptr) { return MakeRef(mat4mt, (glm::mat4 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::mat4*)value); });
+            Luasel::MetaTable::Create(mat4mt, glm::dmat4(), [=](void const* ptr) { return MakeRef(mat4mt, (glm::dmat4 const*)ptr); }, [=](Luasel::Ref const& ref, void* value) { MakeNative(ref, (glm::dmat4*)value); });
         }
     }
 
