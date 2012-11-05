@@ -1,7 +1,7 @@
 #ifndef __CLIENT_GAME_ENGINE_DOODADTYPE_HPP__
 #define __CLIENT_GAME_ENGINE_DOODADTYPE_HPP__
 
-#include "tools/lua/Ref.hpp"
+#include <luasel/Luasel.hpp>
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -10,11 +10,11 @@ namespace Client { namespace Game { namespace Engine {
     {
     private:
         std::string _name;
-        Tools::Lua::Ref _prototype;
+        Luasel::Ref _prototype;
 
     public:
-        DoodadType(std::string const& name, Tools::Lua::Ref const& prototype);
-        Tools::Lua::Ref const& GetPrototype() const { return this->_prototype; }
+        DoodadType(std::string const& name, Luasel::Ref const& prototype);
+        Luasel::Ref const& GetPrototype() const { return this->_prototype; }
         std::string const& GetName() const { return this->_name; }
     };
 

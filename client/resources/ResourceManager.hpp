@@ -107,7 +107,7 @@ namespace Client { namespace Resources {
         void _InitErrorModel();
         void _InitErrorShader();
         void _InitErrorMaterial();
-        void _ApiRegisterMaterial(Tools::Lua::CallHelper& helper);
+        void _ApiRegisterMaterial(Luasel::CallHelper& helper);
     };
 
 }}

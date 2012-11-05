@@ -1,3 +1,5 @@
+#include <luasel/Luasel.hpp>
+
 #include "client/game/engine/DoodadManager.hpp"
 #include "client/game/engine/ModelManager.hpp"
 #include "client/game/engine/Doodad.hpp"
@@ -14,7 +16,6 @@
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 
-#include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/physics/World.hpp"
 #include "bullet/bullet-all.hpp"
@@ -292,12 +293,12 @@ namespace Client { namespace Game { namespace Engine {
         }
     }
 
-    void DoodadManager::_ApiRegister(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiRegister(Luasel::CallHelper& helper)
     {
         std::string const& pluginName = this->_engine.GetRunningPluginName();
         if (pluginName == "")
             throw std::runtime_error("Client.Doodad.Register: Could not determine currently running plugin, aborting registration");
-        Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref prototype(this->_engine.GetInterpreter().GetState());
         std::string doodadName;
         try
         {

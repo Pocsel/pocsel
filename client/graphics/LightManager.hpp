@@ -91,7 +91,7 @@ namespace Client { namespace Graphics {
     private:
         void _Unregister(DirectionnalLight& light);
         void _Unregister(PointLight& light);
-        void _RegisterLua(Tools::Lua::Interpreter& interpreter);
+        void _RegisterLua(Luasel::Interpreter& interpreter);
     };
 
 }}

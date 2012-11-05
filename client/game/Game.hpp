@@ -4,7 +4,6 @@
 #include "common/Position.hpp"
 
 #include "tools/Timer.hpp"
-//#include "tools/lua/Interpreter.hpp"
 #include "tools/stat/Timer.hpp"
 #include "tools/renderers/utils/DeferredShading.hpp"
 
@@ -93,7 +92,7 @@ namespace Client { namespace Game {
         CubeTypeManager& GetCubeTypeManager() { return *this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return *this->_resourceManager; }
         Map::Map& GetMap() { return *this->_map; }
-        Tools::Lua::Interpreter& GetInterpreter() { return this->_engine->GetInterpreter(); }
+        Luasel::Interpreter& GetInterpreter() { return this->_engine->GetInterpreter(); }
         Engine::Engine& GetEngine() { return *this->_engine; }
         float GetLoadingProgression() const { return (this->_cubeTypeManager->GetLoadingProgression() + this->_resourceManager->GetLoadingProgression()) / 2.0f; }
     private:

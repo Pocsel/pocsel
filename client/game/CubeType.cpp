@@ -1,6 +1,6 @@
 #include "client/precompiled.hpp"
 
-#include "tools/lua/Function.hpp"
+#include <luasel/Luasel.hpp>
 
 #include "client/game/CubeType.hpp"
 #include "client/resources/ResourceManager.hpp"
@@ -34,7 +34,7 @@ namespace Client { namespace Game {
         return *this;
     }
 
-    void CubeType::LoadMaterial(Resources::ResourceManager& resourceMgr, Tools::Lua::Ref const& prototype)
+    void CubeType::LoadMaterial(Resources::ResourceManager& resourceMgr, Luasel::Ref const& prototype)
     {
         auto effects = prototype["materials"];
         this->top.reset(new LuaMaterial(effects["top"]));

@@ -1,8 +1,9 @@
 #include "tools/precompiled.hpp"
 
+#include <luasel/Luasel.hpp>
+
 #include "common/Resource.hpp"
 #include "tools/logger/Logger.hpp"
-#include "tools/lua/Interpreter.hpp"
 #include "tools/renderers/utils/texture/AnimatedTexture.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils { namespace Texture {

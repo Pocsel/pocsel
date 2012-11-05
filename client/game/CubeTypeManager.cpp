@@ -1,5 +1,7 @@
 #include "client/precompiled.hpp"
 
+#include <luasel/Luasel.hpp>
+
 #include "client/Client.hpp"
 #include "client/game/CubeType.hpp"
 #include "client/game/CubeTypeManager.hpp"
@@ -7,7 +9,6 @@
 
 #include "common/Packet.hpp"
 #include "common/FieldUtils.hpp"
-#include "tools/lua/Interpreter.hpp"
 
 namespace Client { namespace Game {
 
@@ -56,13 +57,13 @@ namespace Client { namespace Game {
                     std::bind(&CubeTypeManager::_ApiRegister, this, std::placeholders::_1)));
     }
 
-    void CubeTypeManager::_ApiRegister(Tools::Lua::CallHelper& helper)
+    void CubeTypeManager::_ApiRegister(Luasel::CallHelper& helper)
     {
         auto const& pluginName = this->_client.GetGame().GetEngine().GetRunningPluginName();
         if (pluginName == "")
             throw std::runtime_error("Client.CubeMaterial.Register: Could not determine currently running plugin, aborting registration");
         std::string cubeMaterialName;
-        Tools::Lua::Ref prototype(helper.PopArg("Client.CubeMaterial.Register: Missing argument \"prototype\""));
+        Luasel::Ref prototype(helper.PopArg("Client.CubeMaterial.Register: Missing argument \"prototype\""));
         if (!prototype.IsTable())
             throw std::runtime_error("Client.CubeMaterial.Register: Argument \"prototype\" must be of type table (instead of " + prototype.GetTypeName() + ")");
         if (!prototype["cubeMaterialName"].IsString())
