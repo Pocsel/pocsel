@@ -2,7 +2,7 @@ Server.Entity.RegisterPositional{
     entityName = "Tank",
 
     Spawn = function(self)
-        self.d = Server.Doodad.Spawn(self.id, "base:Tank", "base:Tank")
+        self.doodadPtr = Server.Doodad.Spawn(self.id, "base:Tank", "base:Tank")
     end,
 
     DoStuff = function(self)
@@ -14,10 +14,13 @@ Server.Entity.RegisterPositional{
         Server.Body.SetAngle(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
         Server.Body.SetScale(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
 
-        Server.Doodad.Set(self.d, "variable", "valeur")
-        Server.Doodad.Call(self.d, "Function", "test")
-        Server.Doodad.SetUdp(self.d, "variable", "valeur")
-        Server.Doodad.CallUdp(self.d, "Function", "test")
+        d = self.doodadPtr:Lock()
+        if d ~= nil then
+            d:Set("variable", "valeur")
+            d:Call("Function", "test")
+            d:SetUdp( "variable", "valeur")
+            d:CallUdp("Function", "test")
+        end
     end,
 }
 

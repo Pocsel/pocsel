@@ -534,59 +534,6 @@ namespace Server { namespace Game { namespace Engine {
         return *it->second;
     }
 
-    Entity const& EntityManager::GetEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
-    {
-        if (ref.IsTable()) /* type final entity table (weak pointer déréférencé ou self) */
-            return this->GetEntity(ref["id"].Check<Uint32>("EntityManager::GetEntity: Table argument has no id number field"));
-        else if (ref.IsNumber()) /* id directement en nombre */
-            return this->GetEntity(ref.To<Uint32>());
-        else if (ref.IsUserData())
-        {
-            if (this->_weakEntityRefManager->UsingFakeReferences() && ref.Is<Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>::FakeReference*>()) /* entity table en fake reference (weak pointer déréférencé) */
-            {
-                auto fakeRef = ref.To<Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>::FakeReference*>();
-                if (fakeRef->IsValid())
-                {
-                    auto trueRef = fakeRef->GetReference();
-                    if (trueRef.IsTable())
-                        return this->GetEntity(trueRef["id"].Check<Uint32>("EntityManager::GetEntity: Table argument has no id number field"));
-                    else
-                        throw std::runtime_error("EntityManager::GetEntity: This fake reference does not contain a table but a " + trueRef.GetTypeName() + ", is this really an entity?");
-                }
-                else
-                    throw std::runtime_error("EntityManager::GetEntity: This reference was invalidated - you must not keep true references to entities, only weak references");
-            }
-            else /* weak pointer (non déréférencé) */
-            {
-                WeakEntityRef* e = ref.Check<WeakEntityRef*>("EntityManager::GetEntity: Userdata argument is not of WeakEntityRef type");
-                if (e->IsValid(*this))
-                    return this->GetEntity(e->entityId);
-                else
-                    throw std::runtime_error("EntityManager::GetEntity: This weak pointer was invalidated - the entity does not exist anymore");
-            }
-        }
-        else
-            throw std::runtime_error("EntityManager::GetEntity: Invalid argument type " + ref.GetTypeName() + " given");
-    }
-
-    Uint32 EntityManager::RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
-    {
-        if (ref.IsTable())
-            return ref["id"].Check<Uint32>("EntityManager::RefToEntityId: Table argument has no id number field");
-        else if (ref.IsNumber())
-            return ref.To<Uint32>();
-        else if (ref.IsUserData())
-        {
-            WeakEntityRef* e = ref.Check<WeakEntityRef*>("EntityManager::RefToEntityId: Userdata argument is not of WeakEntityRef type");
-            if (e->IsValid(*this))
-                return e->entityId;
-            else
-                throw std::runtime_error("EntityManager::RefToEntityId: This reference was invalidated - you must not keep true references to entities, only weak references");
-        }
-        else
-            throw std::runtime_error("EntityManager::RefToEntityId: Invalid argument type " + ref.GetTypeName() + " given");
-    }
-
     PositionalEntity& EntityManager::GetPositionalEntity(Uint32 entityId) throw(std::runtime_error)
     {
         auto it = this->_positionalEntities.find(entityId);
@@ -796,6 +743,41 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
+    Uint32 EntityManager::_RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
+    {
+        if (ref.IsTable()) /* type final entity table (weak pointer déréférencé ou self) */
+            return ref["id"].Check<Uint32>("EntityManager::_RefToEntityId: Table argument has no id number field");
+        else if (ref.IsNumber()) /* id directement en nombre */
+            return ref.To<Uint32>();
+        else if (ref.IsUserData())
+        {
+            if (this->_weakEntityRefManager->UsingFakeReferences() && ref.Is<Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>::FakeReference*>()) /* entity table en fake reference (weak pointer déréférencé) */
+            {
+                auto fakeRef = ref.To<Tools::Lua::WeakResourceRefManager<WeakEntityRef, EntityManager>::FakeReference*>();
+                if (fakeRef->IsValid())
+                {
+                    auto trueRef = fakeRef->GetReference();
+                    if (trueRef.IsTable())
+                        return trueRef["id"].Check<Uint32>("EntityManager::_RefToEntityId: Table argument has no id number field");
+                    else
+                        throw std::runtime_error("EntityManager::_RefToEntityId: This fake reference does not contain a table but a " + trueRef.GetTypeName() + ", is this really an entity?");
+                }
+                else
+                    throw std::runtime_error("EntityManager::_RefToEntityId: This reference was invalidated - you must not keep true references to entities, only weak references");
+            }
+            else /* weak pointer (non déréférencé) */
+            {
+                WeakEntityRef* e = ref.Check<WeakEntityRef*>("EntityManager::_RefToEntityId: Userdata argument is not of WeakEntityRef type");
+                if (e->IsValid(*this))
+                    return e->entityId;
+                else
+                    throw std::runtime_error("EntityManager::_RefToEntityId: This weak pointer was invalidated - the entity does not exist anymore");
+            }
+        }
+        else
+            throw std::runtime_error("EntityManager::_RefToEntityId: Invalid argument type " + ref.GetTypeName() + " given");
+    }
+
     Entity* EntityManager::_CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool hasPosition /* = false */, Common::Position const& pos /* = Common::Position() */) throw(std::runtime_error)
     {
         // check d'id
@@ -891,7 +873,7 @@ namespace Server { namespace Game { namespace Engine {
             arg = helper.PopArg();
             if (helper.GetNbArgs())
             {
-                cbTargetId = this->RefToEntityId(helper.PopArg());
+                cbTargetId = this->_RefToEntityId(helper.PopArg());
                 cbFunction = helper.PopArg("Server.Entity.Spawn: Missing argument \"cbFunction\"").CheckString("Server.Entity.Spawn: Argument \"cbFunction\" must be a string");
                 if (helper.GetNbArgs())
                     cbArg = helper.PopArg();
@@ -937,7 +919,7 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::_ApiKill(Tools::Lua::CallHelper& helper)
     {
-        Uint32 entityId = this->RefToEntityId(helper.PopArg("Server.Entity.Kill: Missing argument \"target\""));
+        Uint32 entityId = this->_RefToEntityId(helper.PopArg("Server.Entity.Kill: Missing argument \"target\""));
         Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;
@@ -1005,7 +987,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Lua::Ref entityId = helper.PopArg("Server.Entity.GetWeakPointer: Missing argument \"entity\"");
         try
         {
-            Entity const& e = this->GetEntity(entityId);
+            Entity const& e = this->GetEntity(this->_RefToEntityId(entityId));
             helper.PushRet(this->_weakEntityRefManager->GetWeakReference(e.GetWeakReferenceId()));
         }
         catch (std::exception&)

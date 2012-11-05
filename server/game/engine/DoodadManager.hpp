@@ -60,11 +60,11 @@ namespace Server { namespace Game { namespace Engine {
         //void EntityHasMoved(Uint32 entityId);
         void DoodadIsDirty(Doodad* doodad) { this->_dirtyDoodads.insert(doodad); }
         void DoodadIsClean(Doodad* doodad) { this->_dirtyDoodads.erase(doodad); }
-        Tools::Lua::Ref GetLuaWrapperForDoodad(Uint32 doodadId) throw(std::runtime_error);
+        Tools::Lua::Ref GetLuaWrapperForDoodad(Uint32 doodadId);
         Tools::Lua::WeakResourceRefManager<WeakDoodadRef, DoodadManager>& GetWeakDoodadRefManager() { return *this->_weakDoodadRefManager; }
     private:
         Doodad& _GetDoodad(Uint32 doodadId) throw(std::runtime_error);
-        Doodad& _GetDoodad(Tools::Lua::Ref const& ref) throw(std::runtime_error);
+        Uint32 _RefToDoodadId(Tools::Lua::Ref const& ref) throw(std::runtime_error);
         Doodad* _CreateDoodad(Uint32 doodadId, Uint32 pluginId, std::string const& name, Uint32 entityId, PositionalEntity& entity, std::string const& bodyName);
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);

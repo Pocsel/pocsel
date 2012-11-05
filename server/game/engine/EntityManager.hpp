@@ -95,8 +95,6 @@ namespace Server { namespace Game { namespace Engine {
          * Ne pas garder la reference/le pointeur, l'entité peut etre delete
          */
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error);
-        Entity const& GetEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
-        Uint32 RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
         PositionalEntity& GetPositionalEntity(Uint32 entityId) throw(std::runtime_error);
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error);
         PositionalEntity const& GetPositionalEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
@@ -118,6 +116,7 @@ namespace Server { namespace Game { namespace Engine {
         void RconAddEntityTypes(Rcon::EntityManager& manager) const;
 
     private:
+        Uint32 _RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
         Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool hasPosition = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
         void _ApiGetEntityById(Tools::Lua::CallHelper& helper);
