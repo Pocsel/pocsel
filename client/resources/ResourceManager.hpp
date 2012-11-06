@@ -4,6 +4,9 @@
 #include "client/resources/CacheDatabaseProxy.hpp"
 #include "client/resources/ResourceDownloader.hpp"
 
+namespace Luasel {
+    class CallHelper;
+}
 namespace Common {
     class Resource;
 }
@@ -22,9 +25,6 @@ namespace Tools {
                 class TextureAtlas;
             }
         }
-    }
-    namespace Lua {
-        class CallHelper;
     }
     namespace Models {
         class MqmModel;

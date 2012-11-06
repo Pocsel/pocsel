@@ -1,14 +1,14 @@
+#include <luasel/Luasel.hpp>
+
 #include "common/physics/ShapeDescBox.hpp"
 
-#include "tools/lua/Ref.hpp"
-#include "tools/lua/Function.hpp"
 #include "tools/ByteArray.hpp"
 
 namespace Common { namespace Physics {
 
-    ShapeDescBox::ShapeDescBox(Tools::Lua::Ref const& lua)
+    ShapeDescBox::ShapeDescBox(Luasel::Ref const& lua)
     {
-        Tools::Lua::Ref halfExtentsLua = lua["halfExtents"];
+        Luasel::Ref halfExtentsLua = lua["halfExtents"];
         if (!halfExtentsLua.IsTable())
             throw std::runtime_error("Field \"halfExtents\" must be of type table");
         _halfExtents.setX(halfExtentsLua[1].ToNumber());

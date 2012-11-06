@@ -3,11 +3,11 @@
 
 #include "tools/enum.hpp"
 
+namespace Luasel {
+    class Ref;
+}
 namespace Tools {
     class ByteArray;
-    namespace Lua {
-        class Ref;
-    }
 }
 
 class btCollisionShape;
@@ -25,7 +25,7 @@ namespace Common { namespace Physics {
             Box = 2
         };
     public:
-        static std::unique_ptr<IShapeDesc> BuildShapeDesc(Tools::Lua::Ref const& lua);
+        static std::unique_ptr<IShapeDesc> BuildShapeDesc(Luasel::Ref const& lua);
         static std::unique_ptr<IShapeDesc> DeSerialize(Tools::ByteArray const& byteArray);
 
     public:

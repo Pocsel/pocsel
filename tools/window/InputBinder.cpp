@@ -1,7 +1,7 @@
 #include <boost/algorithm/string.hpp>
+#include <luasel/Luasel.hpp>
 
 #include "tools/window/InputBinder.hpp"
-#include "tools/lua/Interpreter.hpp"
 
 namespace Tools { namespace Window {
 
@@ -91,7 +91,7 @@ namespace Tools { namespace Window {
     {
         try
         {
-            Tools::Lua::Interpreter i;
+            Luasel::Interpreter i;
             i.Globals().Set(std::string("bind"), i.MakeFunction(std::bind(&InputBinder::_BindFromLua, this, std::placeholders::_1)));
             i.DoFile(path);
         }
@@ -104,7 +104,7 @@ namespace Tools { namespace Window {
         return true;
     }
 
-    void InputBinder::_BindFromLua(Tools::Lua::CallHelper& callHelper)
+    void InputBinder::_BindFromLua(Luasel::CallHelper& callHelper)
     {
         std::string input = callHelper.PopArg().CheckString();
         std::string action = callHelper.PopArg().CheckString();

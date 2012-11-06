@@ -1,17 +1,17 @@
+#include <luasel/Luasel.hpp>
+
 #include "common/physics/IShapeDesc.hpp"
 #include "common/physics/ShapeDescBox.hpp"
 #include "common/physics/ShapeDescSphere.hpp"
 #include "common/physics/ShapeDescEmpty.hpp"
 
-#include "tools/lua/Ref.hpp"
-#include "tools/lua/Function.hpp"
 #include "tools/ByteArray.hpp"
 
 namespace Common { namespace Physics {
 
-    std::unique_ptr<IShapeDesc> IShapeDesc::BuildShapeDesc(Tools::Lua::Ref const& lua)
+    std::unique_ptr<IShapeDesc> IShapeDesc::BuildShapeDesc(Luasel::Ref const& lua)
     {
-        Tools::Lua::Ref shapeTypeLua = lua["shapeType"];
+        Luasel::Ref shapeTypeLua = lua["shapeType"];
         if (!shapeTypeLua.IsString())
             throw std::runtime_error("Field \"shapeType\" must be of type string");
         std::string shapeType = shapeTypeLua.ToString();

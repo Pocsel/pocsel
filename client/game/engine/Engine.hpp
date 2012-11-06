@@ -3,11 +3,11 @@
 
 #include "client/game/engine/DoodadManager.hpp"
 
-namespace Tools { namespace Lua {
+namespace Luasel {
     class Interpreter;
     class CallHelper;
     class Ref;
-}}
+}
 namespace Client { namespace Game {
     class Game;
 }}
