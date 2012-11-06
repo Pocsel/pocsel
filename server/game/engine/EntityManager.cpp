@@ -1036,15 +1036,23 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
     {
-        //Uint32 entityId = helper.PopArg("Server.Entity.SetAccel: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
-        //glm::dvec3 speed = helper.PopArg("Server.Entity.SetAccel: Missing argument \"position\"").Check<glm::dvec3>();
-        //auto it = this->_positionalEntities.find(entityId);
-        //if (it == this->_positionalEntities.end() || !it->second)
-        //{
-        //    Tools::error << "EntityManager::_ApiSetPos: Positional entity " << entityId << " not found." << std::endl;
-        //    return;
-        //}
-        //it->second->SetSpeed(speed);
+        Uint32 entityId = helper.PopArg("Server.Entity.SetAccel: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetAccel: Argument \"target\" must be a number");
+        glm::dvec3 accel = helper.PopArg("Server.Entity.SetAccel: Missing argument \"accel\"").Check<glm::dvec3>("Server.Entity.SetAccel: Argument \"accel\" must be a vector3");
+        double maxSpeed = 8451;
+
+        if (helper.GetNbArgs() > 0)
+        {
+            maxSpeed = helper.PopArg().Check<double>("Server.Entity.SetAccel: Argument \"maxSpeed\" must be a double");
+            if (maxSpeed <= 0)
+                maxSpeed = 0.01;
+        }
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiSetAccel: Positional entity " << entityId << " not found." << std::endl;
+            return;
+        }
+        it->second->SetAccel(accel, maxSpeed);
         //this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
@@ -1062,6 +1070,23 @@ namespace Server { namespace Game { namespace Engine {
 
     void EntityManager::_ApiSetLocalAccel(Tools::Lua::CallHelper& helper)
     {
+        Uint32 entityId = helper.PopArg("Server.Entity.SetLocalAccel: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetLocalAccel: Argument \"target\" must be a number");
+        glm::dvec3 accel = helper.PopArg("Server.Entity.SetLocalAccel: Missing argument \"accel\"").Check<glm::dvec3>("Server.Entity.SetLocalAccel: Argument \"accel\" must be a vector3");
+        double maxSpeed = 8451;
+
+        if (helper.GetNbArgs() > 0)
+        {
+            maxSpeed = helper.PopArg().Check<double>("Server.Entity.SetLocalAccel: Argument \"maxSpeed\" must be a double");
+            if (maxSpeed <= 0)
+                maxSpeed = 0.01;
+        }
+        auto it = this->_positionalEntities.find(entityId);
+        if (it == this->_positionalEntities.end() || !it->second)
+        {
+            Tools::error << "EntityManager::_ApiSetLocalAccel: Positional entity " << entityId << " not found." << std::endl;
+            return;
+        }
+        it->second->SetLocalAccel(accel, maxSpeed);
 //        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
 //        glm::dvec3 accel = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
 //        auto it = this->_positionalEntities.find(entityId);

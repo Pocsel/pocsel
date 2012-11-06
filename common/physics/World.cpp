@@ -30,7 +30,8 @@ namespace Common { namespace Physics {
         _dispatcher(0),
         _solver(0),
         _collisionConfiguration(0),
-        _lastTime(0)
+        _lastTime(0),
+        _gravity(0.0,-9.81,0.0)
     {
         ///collision configuration contains default setup for memory, collision setup
         this->_collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -44,7 +45,7 @@ namespace Common { namespace Physics {
 
         this->_dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
 
-        this->_dynamicsWorld->setGravity(btVector3(0.0,-9.81,0.0));
+        this->_dynamicsWorld->setGravity(this->_gravity);
 
         this->_dynamicsWorld->setInternalTickCallback(_cb::_TickCallBack, this);
     }

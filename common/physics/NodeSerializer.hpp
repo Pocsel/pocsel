@@ -23,6 +23,7 @@ namespace Tools {
 
             p.Read(v.accelerationIsLocal);
             p.Read(v.acceleration);
+            p.Read(v.maxSpeed);
 
             //p.Read(v.scale);
             //p.Read(v.scaleVelocity);
@@ -41,6 +42,7 @@ namespace Tools {
 
             p.Write(v.accelerationIsLocal);
             p.Write(v.acceleration);
+            p.Write(v.maxSpeed);
 
             //p.Write(v.scale);
             //p.Write(v.scaleVelocity);
@@ -61,6 +63,7 @@ namespace Tools {
 
             p.Read(v->accelerationIsLocal);
             p.Read(v->acceleration);
+            p.Read(v->maxSpeed);
 
             //p.Read(v->scale);
             //p.Read(v->scaleVelocity);

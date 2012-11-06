@@ -18,6 +18,7 @@ namespace Common { namespace Physics {
 
         bool accelerationIsLocal;
         Common::Position acceleration;
+        double maxSpeed;
 
         //glm::vec3 scale;
         //glm::vec3 scaleVelocity;
@@ -26,6 +27,8 @@ namespace Common { namespace Physics {
        // Vector<double> position;
        // Vector<float> yawPitchRoll;
        // Vector<float> scale;
+
+        Node() : accelerationIsLocal(false) {}
     };
 
 }}

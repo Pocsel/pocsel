@@ -52,6 +52,15 @@ namespace Client { namespace Game { namespace Engine {
     void Entity::UpdatePosition(Common::Physics::Node const& position)
     {
         this->_bodyCluster->SetPhysics(position);
+
+        if (position.accelerationIsLocal)
+            this->_bodyCluster->SetLocalAccel(
+                    btVector3(position.acceleration.x, position.acceleration.y, position.acceleration.z),
+                    position.maxSpeed);
+        else
+            this->_bodyCluster->SetAccel(
+                    btVector3(position.acceleration.x, position.acceleration.y, position.acceleration.z),
+                    position.maxSpeed);
     }
 
 }}}

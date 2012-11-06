@@ -33,8 +33,6 @@ namespace Server { namespace Game { namespace Engine {
 
     void PositionalEntity::SetPosition(Common::Position const& pos)
     {
-        std::cout << "SetPos: " << pos.x << ", " << pos.y << ", " << pos.z << "\n";
-
         Common::Physics::Node phys;
         phys.position = pos;
         phys.velocity = Common::Position(0, 0, 0);
@@ -47,6 +45,20 @@ namespace Server { namespace Game { namespace Engine {
         this->SetIsDirty(true);
 
         //this->_engine.GetDoodadManager().UpdatePhysicsFromDoodadOfEntity(this->_id);
+    }
+
+    void PositionalEntity::SetAccel(glm::dvec3 const& accel, double maxSpeed)
+    {
+        this->_bodyCluster->SetAccel(btVector3(accel.x, accel.y, accel.z), maxSpeed);
+        this->UpdatePhysics();
+        this->SetIsDirty(true);
+    }
+
+    void PositionalEntity::SetLocalAccel(glm::dvec3 const& accel, double maxSpeed)
+    {
+        this->_bodyCluster->SetLocalAccel(btVector3(accel.x, accel.y, accel.z), maxSpeed);
+        this->UpdatePhysics();
+        this->SetIsDirty(true);
     }
 
     void PositionalEntity::UpdatePhysics()
@@ -68,6 +80,14 @@ namespace Server { namespace Game { namespace Engine {
 
         btVector3 const& av = btBody.getAngularVelocity();
         physics.angularVelocity = glm::vec3(av.x(), av.y(), av.z());
+
+        btVector3 const& accel = this->_bodyCluster->GetAccel();
+        physics.acceleration = glm::dvec3(accel.x(), accel.y(), accel.z());
+        if (accel != btVector3(0, 0, 0))
+        {
+            physics.accelerationIsLocal = this->_bodyCluster->IsAccelLocal();
+            physics.maxSpeed = this->_bodyCluster->GetMaxSpeed();
+        }
 
         //std::cout << "positional entity: " <<
         //    wt.getOrigin().x() << ", " <<

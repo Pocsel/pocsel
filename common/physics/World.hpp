@@ -1,11 +1,13 @@
 #ifndef __COMMON_PHYSICS_WORLD_HPP__
 #define __COMMON_PHYSICS_WORLD_HPP__
 
-class btDynamicsWorld;
-class btBroadphaseInterface;
-class btCollisionDispatcher;
-class btConstraintSolver;
-class btDefaultCollisionConfiguration;
+#include "bullet/bullet-all.hpp"
+
+//class btDynamicsWorld;
+//class btBroadphaseInterface;
+//class btCollisionDispatcher;
+//class btConstraintSolver;
+//class btDefaultCollisionConfiguration;
 
 namespace Common { namespace Physics {
     class Body;
@@ -30,6 +32,8 @@ namespace Common { namespace Physics {
         std::vector<std::pair<TickCallback, void*>> _callbacks;
         std::vector<BodyCluster*> _bodyClusters;
 
+        btVector3 _gravity;
+
     public:
         World();
         ~World();
@@ -43,7 +47,7 @@ namespace Common { namespace Physics {
         void AddBodyCluster(BodyCluster* body);
         void RemoveBodyCluster(BodyCluster* body);
 
-
+        btVector3 const& GetGravity() const { return this->_gravity; }
 
     private:
         friend struct _cb;

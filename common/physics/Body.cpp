@@ -244,6 +244,21 @@ namespace Common { namespace Physics {
             this->_PutNodeBackInWorld(*childIt);
     }
 
+    void Body::_ApplyAccel(btVector3 const& accel)
+    {
+        for (Uint32 rootId: this->_type.GetRoots())
+            this->_ApplyAccelOnNode(accel, rootId);
+    }
+
+    void Body::_ApplyAccelOnNode(btVector3 const& accel, Uint32 nodeId)
+    {
+        BodyNode& node = this->_nodes[nodeId];
+        //node.body->applyCentralImpulse(accel);
+        node.body->setGravity(this->_parent.GetWorld().GetGravity() + accel);
+        for (Uint32 childId: this->_type.GetShapes()[nodeId].children)
+            this->_ApplyAccelOnNode(accel, childId);
+    }
+
     void Body::Dump() const
     {
         std::cout << "      Body::Dump()\n";

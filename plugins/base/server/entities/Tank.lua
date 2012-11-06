@@ -3,23 +3,26 @@ Server.Entity.RegisterPositional{
 
     Spawn = function(self)
         self.doodadPtr = Server.Doodad.Spawn(self.id, "base:Tank", "base:Tank")
-        -- Server.Message.Later(5, self.id, "DoShit")
+        Server.Message.Later(5, self.id, "DoShit")
         self.upupup = true
     end,
 
     DoShit = function(self)
-        print("DOSHIT")
         tmpPos = Server.Entity.GetPos(self.id)
         if self.upupup then
-            tmpPos.y = tmpPos.y + 10
-            -- self.upupup = false
+            print("LOCAL")
+            Server.Entity.SetLocalAccel(self.id, Utils.Vector3(10, 0, 0))
+            -- tmpPos.y = tmpPos.y + 10
+            self.upupup = false
         else
-            tmpPos.y = tmpPos.y - 10
+            print("NONLOCAL")
+            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 10, 0))
+            -- tmpPos.y = tmpPos.y - 10
             self.upupup = true
         end
         Server.Entity.SetPos(self.id, tmpPos)
         -- Server.Entity.SetPos(self.id, Utils.Vector3(67108864, 16777216 + 10, 67108864))
-        Server.Message.Later(3, self.id, "DoShit")
+        Server.Message.Later(10, self.id, "DoShit")
     end,
 
     DoStuff = function(self)

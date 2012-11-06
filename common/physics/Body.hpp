@@ -6,6 +6,7 @@
 class btRigidBody;
 class btTypedConstraint;
 struct btDefaultMotionState;
+class btVector3;
 
 namespace Common { namespace Physics {
 
@@ -39,14 +40,17 @@ namespace Common { namespace Physics {
         btRigidBody& GetRootBtBody();
         btRigidBody const& GetRootBtBody() const;
 
-
         void Dump() const;
 
     private:
         void _BuildBodyNode(Uint32 nodeId);
         void _CleanBodyNode(Uint32 nodeId);
 
+        // les trucs de BodyCluster
     private:
+        void _ApplyAccel(btVector3 const& accel);
+        void _ApplyAccelOnNode(btVector3 const& accel, Uint32 nodeId);
+
         void _RemoveFromWorld();
         void _RemoveNodeFromWorld(Uint32 nodeId);
         void _UpdatePosition();
