@@ -59,10 +59,10 @@ namespace Common { namespace Physics {
 
     void BodyCluster::Tick()
     {
-        std::cout << "tick\n";
+        //std::cout << "tick\n";
         if (this->_acceleration == btVector3(0, 0, 0))
-            return;
-        std::cout << "accel exists\n";
+            return this->_ClearTickAccel();
+        //std::cout << "accel exists\n";
 
         // limitation de la vitesse
         btVector3 velocity = this->_body->getLinearVelocity();
@@ -86,10 +86,10 @@ namespace Common { namespace Physics {
 
         btScalar speed = velocity.dot(targetDirection);
 
-        std::cout << "speed " << speed << " maxspeed " << this->_maxSpeed << "\n";
+        //std::cout << "speed " << speed << " maxspeed " << this->_maxSpeed << "\n";
         if (speed >= this->_maxSpeed)
-            return;
-        std::cout << "applying force and shit\n";
+            return this->_ClearTickAccel();
+        //std::cout << "applying force and shit\n";
 
 
         //this->_body->applyCentralImpulse(accel);
@@ -190,20 +190,20 @@ namespace Common { namespace Physics {
                     ));
 
         std::cout 
-                   <<  " BLA "  << physics.position.x
-                   <<  " BLA "  << physics.position.y
-                   <<  " BLA "  << physics.position.z
-                   <<  " BLA "  << physics.orientation.x
-                   <<  " BLA "  << physics.orientation.y
-                   <<  " BLA "  << physics.orientation.z
-                   <<  " BLA "  << physics.orientation.w
+                   <<  " POS "  << physics.position.x
+                   <<  " , "  << physics.position.y
+                   <<  " , "  << physics.position.z
+                   <<  " OR "  << physics.orientation.x
+                   <<  " , "  << physics.orientation.y
+                   <<  " , "  << physics.orientation.z
+                   <<  " , "  << physics.orientation.w
 
-                   <<  " BLA "  << physics.velocity.x
-                   <<  " BLA "  << physics.velocity.y
-                   <<  " BLA "  << physics.velocity.z
-                   <<  " BLA "  << physics.angularVelocity.x
-                   <<  " BLA "  << physics.angularVelocity.y
-                   <<  " BLA "  << physics.angularVelocity.z << "\n";
+                   <<  " VEL "  << physics.velocity.x
+                   <<  " , "  << physics.velocity.y
+                   <<  " , "  << physics.velocity.z
+                   <<  " AVEL "  << physics.angularVelocity.x
+                   <<  " , "  << physics.angularVelocity.y
+                   <<  " , "  << physics.angularVelocity.z << "\n";
 
 
         btBody.clearForces();
@@ -258,6 +258,13 @@ namespace Common { namespace Physics {
 
         for (auto& body: this->_constraints)
             body->Dump();
+    }
+
+    void BodyCluster::_ClearTickAccel()
+    {
+        this->_body->setGravity(this->_world.GetGravity());
+        for (auto body: _constraints)
+            body->_ApplyAccel(btVector3(0, 0, 0));
     }
 
 }}

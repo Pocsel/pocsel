@@ -1,6 +1,7 @@
 #ifndef __COMMON_PHYSICS_BODYCLUSTER_HPP__
 #define __COMMON_PHYSICS_BODYCLUSTER_HPP__
 
+#include "common/physics/Node.hpp"
 #include "common/Position.hpp"
 #include "bullet/bullet-all.hpp"
 
@@ -58,6 +59,10 @@ namespace Common { namespace Physics {
         void* GetUserData() { return this->_userData; }
 
         void Dump() const;
+
+
+    private:
+        void _ClearTickAccel();
     };
 
 }}

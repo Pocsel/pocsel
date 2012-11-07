@@ -192,6 +192,7 @@ namespace Client { namespace Game {
             const btVector3& pointOnB, const btVector3& normalOnB,
             btScalar distance, int lifeTime, const btVector3& color)
     {
+        return;
         if (distance < 0.001)
             return;
         btVector3 to = normalOnB.normalized() * (distance * 100.0) + pointOnB;

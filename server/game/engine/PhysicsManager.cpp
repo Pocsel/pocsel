@@ -44,13 +44,11 @@ namespace Server { namespace Game { namespace Engine {
                         //if (body1->getUserPointer())
                         //    pm->_newCollidingEntities.insert((PositionalEntity*)body1->getUserPointer());
 
-
                         if (body0->getUserPointer() && body1->getUserPointer() &&
                                 body0->getUserPointer() != body1->getUserPointer())
                         {
                             PositionalEntity* entity0 = (PositionalEntity*)body0->getUserPointer();
                             PositionalEntity* entity1 = (PositionalEntity*)body1->getUserPointer();
-
 
                             pm->_newCollidingEntities.insert(entity0);
                             pm->_newCollidingEntities.insert(entity1);
@@ -62,6 +60,16 @@ namespace Server { namespace Game { namespace Engine {
                             //Uint32 id1 = entity1->GetSelf()["id"].To<Uint32>();
                             //pm->_engine.GetDoodadManager().EntityHasMoved(id0);
                             //pm->_engine.GetDoodadManager().EntityHasMoved(id1);
+                        }
+                        else if (body0->getUserPointer() && !body1->getUserPointer())
+                        {
+                            PositionalEntity* entity0 = (PositionalEntity*)body0->getUserPointer();
+                            pm->_newCollidingEntities.insert(entity0);
+                        }
+                        else if (body1->getUserPointer() && !body0->getUserPointer())
+                        {
+                            PositionalEntity* entity1 = (PositionalEntity*)body1->getUserPointer();
+                            pm->_newCollidingEntities.insert(entity1);
                         }
 
                         break;
@@ -152,7 +160,7 @@ namespace Server { namespace Game { namespace Engine {
 
         this->_world->Tick(deltaTime);
 
-        //this->_UpdateCollidingEntities();
+        this->_UpdateCollidingEntities();
 
         for (auto it = this->_entities.begin(), ite = this->_entities.end(); it != ite; ++it)
         {
