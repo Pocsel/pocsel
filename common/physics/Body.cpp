@@ -161,67 +161,70 @@ namespace Common { namespace Physics {
         this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
     }
 
-    void Body::_UpdatePosition()
-    {
-        for (auto rootsIt = this->_type.GetRoots().begin(),
-                rootsIte = this->_type.GetRoots().end();
-                rootsIt != rootsIte; ++rootsIt)
-        {
-            this->_UpdateNodePosition(*rootsIt);
-        }
-    }
+    //void Body::_UpdatePosition(std::vector<Common::Physics::Node>::iterator& physicsIt)
+    //{
+    //    for (auto rootsIt = this->_type.GetRoots().begin(),
+    //            rootsIte = this->_type.GetRoots().end();
+    //            rootsIt != rootsIte; ++rootsIt)
+    //    {
+    //        this->_UpdateNodePosition(*rootsIt, physicsIt);
+    //    }
+    //}
 
-    void Body::_UpdateNodePosition(Uint32 nodeId)
-    {
-        BodyNode& node = this->_nodes[nodeId];
-        BodyType::ShapeNode const& shape = this->_type.GetShapes()[nodeId];
-        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBtBody() : this->_nodes[shape.parent].body;
+    //void Body::_UpdateNodePosition(Uint32 nodeId, std::vector<Common::Physics::Node>::iterator& physicsIt)
+    //{
+    //    //BodyNode& node = this->_nodes[nodeId];
+    //    //BodyType::ShapeNode const& shape = this->_type.GetShapes()[nodeId];
+    //    //btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBtBody() : this->_nodes[shape.parent].body;
 
-        btTransform parentTr;
-        parent->getMotionState()->getWorldTransform(parentTr);
+    //    //btTransform parentTr;
+    //    //parent->getMotionState()->getWorldTransform(parentTr);
 
-        btTransform thisTr;
-        thisTr.setIdentity();
-        thisTr.setOrigin(btVector3(
-                    shape.position.position.x,
-                    shape.position.position.y,
-                    shape.position.position.z));
-        thisTr.setRotation(btQuaternion(
-                    shape.position.orientation.x,
-                    shape.position.orientation.y,
-                    shape.position.orientation.z,
-                    shape.position.orientation.w));
+    //    //btTransform thisTr;
+    //    //thisTr.setIdentity();
+    //    //thisTr.setOrigin(btVector3(
+    //    //            shape.position.position.x,
+    //    //            shape.position.position.y,
+    //    //            shape.position.position.z));
+    //    //thisTr.setRotation(btQuaternion(
+    //    //            shape.position.orientation.x,
+    //    //            shape.position.orientation.y,
+    //    //            shape.position.orientation.z,
+    //    //            shape.position.orientation.w));
 
-        btTransform tr;
-        tr.mult(parentTr, thisTr);
+    //    //btTransform tr;
+    //    //tr.mult(parentTr, thisTr);
 
-        node.body->setLinearVelocity(parent->getVelocityInLocalPoint(
-                    tr.getOrigin()
-                    -
-                    parentTr.getOrigin()
-                    ));
-        node.body->setAngularVelocity(parent->getAngularVelocity());
+    //    //node.body->setLinearVelocity(parent->getVelocityInLocalPoint(
+    //    //            tr.getOrigin()
+    //    //            -
+    //    //            parentTr.getOrigin()
+    //    //            ));
+    //    //node.body->setAngularVelocity(parent->getAngularVelocity());
 
-        node.body->clearForces();
-        node.body->setCenterOfMassTransform(tr);
-        node.body->getMotionState()->setWorldTransform(tr);
-
-
-
-        //btVector3 vel = parent->getLinearVelocity();
-        //node.body->setLinearVelocity(vel);
-
-        //vel = parent->getAngularVelocity();
-        //btQuaternion velQ(
-        //node.body->setAngularVelocity(thisTr.inverse()(vel));
+    //    //node.body->clearForces();
+    //    //node.body->setCenterOfMassTransform(tr);
+    //    //node.body->getMotionState()->setWorldTransform(tr);
 
 
 
-        for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
-                childIte = this->_type.GetShapes()[nodeId].children.end();
-                childIt != childIte; ++childIt)
-            this->_UpdateNodePosition(*childIt);
-    }
+    //    //btVector3 vel = parent->getLinearVelocity();
+    //    //node.body->setLinearVelocity(vel);
+
+    //    //vel = parent->getAngularVelocity();
+    //    //btQuaternion velQ(
+    //    //node.body->setAngularVelocity(thisTr.inverse()(vel));
+
+
+    //    BodyNode& node = this->_nodes[nodeId];
+
+    //    // TODO
+
+    //    for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
+    //            childIte = this->_type.GetShapes()[nodeId].children.end();
+    //            childIt != childIte; ++childIt)
+    //        this->_UpdateNodePosition(*childIt, physicsIt);
+    //}
 
     void Body::_PutBackInWorld()
     {

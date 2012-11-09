@@ -40,7 +40,9 @@ namespace Server { namespace Game { namespace Engine {
         phys.orientation = glm::quat();
         phys.angularVelocity = glm::vec3(0, 0, 0);
 
-        this->_bodyCluster->SetPhysics(phys);
+        std::vector<Common::Physics::Node> physics;
+        physics.emplace_back(phys);
+        this->_bodyCluster->SetPhysics(physics);
         this->UpdatePhysics();
         this->SetIsDirty(true);
 
@@ -63,6 +65,10 @@ namespace Server { namespace Game { namespace Engine {
 
     void PositionalEntity::UpdatePhysics()
     {
+        this->_clusterPhysics = this->_bodyCluster->GetClusterPhysics();
+        this->_physics = this->_clusterPhysics[0];
+
+        /*
         btRigidBody const& btBody = this->_bodyCluster->GetBtBody();
         Common::Physics::Node& physics = this->_physics;
 
@@ -88,6 +94,7 @@ namespace Server { namespace Game { namespace Engine {
             physics.accelerationIsLocal = this->_bodyCluster->IsAccelLocal();
             physics.maxSpeed = this->_bodyCluster->GetMaxSpeed();
         }
+        */
 
         //std::cout << "positional entity: " <<
         //    wt.getOrigin().x() << ", " <<
@@ -117,7 +124,7 @@ namespace Server { namespace Game { namespace Engine {
         {
             this->_isDirty = false;
 
-            auto packet = Network::PacketCreator::EntityUpdate(this->_id, this->_physics);
+            auto packet = Network::PacketCreator::EntityUpdate(this->_id, this->_clusterPhysics);
             std::vector<Uint32> toDel;
             for (auto it = this->_players.begin(), ite = this->_players.end(); it != ite; ++it)
             {

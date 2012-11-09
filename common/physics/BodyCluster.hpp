@@ -47,9 +47,11 @@ namespace Common { namespace Physics {
         void AddConstraint(Body* body);
         void RemoveConstraint(Body* body);
 
-        void SetPhysics(Node const& physics);
+        void SetPhysics(std::vector<Node> const& physics);
         void SetAccel(btVector3 const& accel, btScalar maxSpeed);
         void SetLocalAccel(btVector3 const& accel, btScalar maxSpeed);
+
+        std::vector<Common::Physics::Node> GetClusterPhysics() const;
 
         btVector3 const& GetAccel() const { return this->_acceleration; }
         bool IsAccelLocal() const { return this->_accelerationIsLocal; }
@@ -59,7 +61,6 @@ namespace Common { namespace Physics {
         void* GetUserData() { return this->_userData; }
 
         void Dump() const;
-
 
     private:
         void _ClearTickAccel();

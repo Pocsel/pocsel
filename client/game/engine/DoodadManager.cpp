@@ -141,7 +141,9 @@ namespace Client { namespace Game { namespace Engine {
         }
         Entity& entity = *this->_entities[entityId];
 
-        this->_UpdateEntityPosition(entity, position);
+        std::vector<Common::Physics::Node> physics;
+        physics.emplace_back(position);
+        this->_UpdateEntityPosition(entity, physics);
         entity.AddDoodad(doodadId);
 
         this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(),
@@ -236,14 +238,14 @@ namespace Client { namespace Game { namespace Engine {
         }
     }
 
-    void DoodadManager::UpdateEntity(Uint32 entityId, Common::Physics::Node const& node)
+    void DoodadManager::UpdateEntity(Uint32 entityId, std::vector<Common::Physics::Node> const& physics)
     {
         auto it = this->_entities.find(entityId);
         if (it == this->_entities.end())
             return;
 
         Entity* entity = it->second;
-        this->_UpdateEntityPosition(*entity, node);
+        this->_UpdateEntityPosition(*entity, physics);
     }
 
     void DoodadManager::Render()
@@ -330,10 +332,10 @@ namespace Client { namespace Game { namespace Engine {
         Tools::debug << "Doodad \"" << doodadName << "\" registered." << std::endl;
     }
 
-    void DoodadManager::_UpdateEntityPosition(Entity& entity, Common::Physics::Node const& node)
+    void DoodadManager::_UpdateEntityPosition(Entity& entity, std::vector<Common::Physics::Node> const& physics)
     {
         entity.SetUpdateFlag(1.3);
-        entity.UpdatePosition(node);
+        entity.UpdatePhysics(physics);
         //auto& doodadIds = entity.GetDoodads();
         //for (auto doodadIt = doodadIds.begin(), doodadIte = doodadIds.end(); doodadIt != doodadIte; ++doodadIt)
         //{

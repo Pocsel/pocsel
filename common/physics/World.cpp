@@ -62,7 +62,7 @@ namespace Common { namespace Physics {
     void World::Tick(Uint64 totalTime)
     {
         double deltaTime = (totalTime - this->_lastTime) * 0.000001;
-        this->_dynamicsWorld->stepSimulation(deltaTime, 10, 1.0 / 90.0);
+        this->_dynamicsWorld->stepSimulation(deltaTime, 10, 1.0 / 60.0);
     }
 
     size_t World::AddCallback(TickCallback cb, void* userPtr)

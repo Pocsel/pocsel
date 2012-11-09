@@ -1,6 +1,7 @@
 #include "common/physics/BodyCluster.hpp"
 #include "common/physics/Body.hpp"
 #include "common/physics/BodyType.hpp"
+#include "common/physics/Utils.hpp"
 #include "common/physics/World.hpp"
 
 //#include "bullet/bullet-all.hpp"
@@ -154,7 +155,7 @@ namespace Common { namespace Physics {
         assert(true && "this body has not been found");
     }
 
-    void BodyCluster::SetPhysics(Node const& physics)
+    void BodyCluster::SetPhysics(std::vector<Node> const& physics)
     {
         for (auto& Body: this->_constraints)
         {
@@ -165,67 +166,96 @@ namespace Common { namespace Physics {
 
         this->_world.GetBtWorld().removeRigidBody(&btBody);
 
-        btTransform wt;
-        wt.setOrigin(btVector3(
-                    physics.position.x,
-                    physics.position.y,
-                    physics.position.z
-                    ));
-        wt.setRotation(btQuaternion(
-                    physics.orientation.x,
-                    physics.orientation.y,
-                    physics.orientation.z,
-                    physics.orientation.w
-                    ));
+        Utils::PhysicsNodeToBtBody(physics[0], btBody);
 
-        btBody.setLinearVelocity(btVector3(
-                    physics.velocity.x,
-                    physics.velocity.y,
-                    physics.velocity.z
-                    ));
-        btBody.setAngularVelocity(btVector3(
-                    physics.angularVelocity.x,
-                    physics.angularVelocity.y,
-                    physics.angularVelocity.z
-                    ));
+        if (physics[0].accelerationIsLocal)
+            this->SetLocalAccel(
+                    btVector3(physics[0].acceleration.x, physics[0].acceleration.y, physics[0].acceleration.z),
+                    physics[0].maxSpeed);
+        else
+            this->SetAccel(
+                    btVector3(physics[0].acceleration.x, physics[0].acceleration.y, physics[0].acceleration.z),
+                    physics[0].maxSpeed);
 
-        std::cout 
-                   <<  " POS "  << physics.position.x
-                   <<  " , "  << physics.position.y
-                   <<  " , "  << physics.position.z
-                   <<  " OR "  << physics.orientation.x
-                   <<  " , "  << physics.orientation.y
-                   <<  " , "  << physics.orientation.z
-                   <<  " , "  << physics.orientation.w
+        //btTransform wt;
+        //wt.setOrigin(btVector3(
+        //            physics.position.x,
+        //            physics.position.y,
+        //            physics.position.z
+        //            ));
+        //wt.setRotation(btQuaternion(
+        //            physics.orientation.x,
+        //            physics.orientation.y,
+        //            physics.orientation.z,
+        //            physics.orientation.w
+        //            ));
 
-                   <<  " VEL "  << physics.velocity.x
-                   <<  " , "  << physics.velocity.y
-                   <<  " , "  << physics.velocity.z
-                   <<  " AVEL "  << physics.angularVelocity.x
-                   <<  " , "  << physics.angularVelocity.y
-                   <<  " , "  << physics.angularVelocity.z << "\n";
+        //btBody.setLinearVelocity(btVector3(
+        //            physics.velocity.x,
+        //            physics.velocity.y,
+        //            physics.velocity.z
+        //            ));
+        //btBody.setAngularVelocity(btVector3(
+        //            physics.angularVelocity.x,
+        //            physics.angularVelocity.y,
+        //            physics.angularVelocity.z
+        //            ));
+
+        ////std::cout 
+        ////           <<  " POS "  << physics.position.x
+        ////           <<  " , "  << physics.position.y
+        ////           <<  " , "  << physics.position.z
+        ////           <<  " OR "  << physics.orientation.x
+        ////           <<  " , "  << physics.orientation.y
+        ////           <<  " , "  << physics.orientation.z
+        ////           <<  " , "  << physics.orientation.w
+
+        ////           <<  " VEL "  << physics.velocity.x
+        ////           <<  " , "  << physics.velocity.y
+        ////           <<  " , "  << physics.velocity.z
+        ////           <<  " AVEL "  << physics.angularVelocity.x
+        ////           <<  " , "  << physics.angularVelocity.y
+        ////           <<  " , "  << physics.angularVelocity.z << "\n";
 
 
-        btBody.clearForces();
-        btBody.getMotionState()->setWorldTransform(wt);
-        btBody.setCenterOfMassTransform(wt);
+        //btBody.clearForces();
+        //btBody.getMotionState()->setWorldTransform(wt);
+        //btBody.setCenterOfMassTransform(wt);
 
-        for (auto& Body: this->_constraints)
+        auto physicsIt = physics.begin();
+        auto physicsEnd = physics.end();
+
+        for (auto body: this->_constraints)
         {
-            Body->_UpdatePosition();
+            if (physicsIt == physicsEnd)
+            {
+                std::cout << "BLIP BLOP FAIL0\n";
+                break;
+            }
+            //body->_UpdatePosition();
+            for (auto& bodyNode: body->GetNodes())
+            {
+                ++physicsIt;
+                if (physicsIt == physicsEnd)
+                {
+                    std::cout << "BLIP BLOP FAIL1\n";
+                    break;
+                }
+                Utils::PhysicsNodeToBtBody(*physicsIt, *bodyNode.body);
+            }
         }
 
         this->_world.GetBtWorld().addRigidBody(&btBody);
 
-        for (auto& Body: this->_constraints)
+        for (auto body: this->_constraints)
         {
-            Body->_PutBackInWorld();
+            body->_PutBackInWorld();
         }
     }
 
     void BodyCluster::SetAccel(btVector3 const& accel, btScalar maxSpeed)
     {
-        std::cout << "accel: " << accel.x() << ", " << accel.y() << ", " << accel.z() << "\n";
+        //std::cout << "accel: " << accel.x() << ", " << accel.y() << ", " << accel.z() << "\n";
         this->_acceleration = accel;
         this->_maxSpeed = maxSpeed;
         this->_accelerationIsLocal = false;
@@ -233,10 +263,38 @@ namespace Common { namespace Physics {
 
     void BodyCluster::SetLocalAccel(btVector3 const& accel, btScalar maxSpeed)
     {
-        std::cout << "local accel: " << accel.x() << ", " << accel.y() << ", " << accel.z() << "\n";
+        //std::cout << "local accel: " << accel.x() << ", " << accel.y() << ", " << accel.z() << "\n";
         this->_acceleration = accel;
         this->_maxSpeed = maxSpeed;
         this->_accelerationIsLocal = true;
+    }
+
+    std::vector<Common::Physics::Node> BodyCluster::GetClusterPhysics() const
+    {
+        std::vector<Common::Physics::Node> physics;
+
+        // noeud maitre
+        {
+            physics.emplace_back(Utils::BtBodyToPhysicsNode(*this->_body));
+            Common::Physics::Node& node = physics.back();
+            btVector3 const& accel = this->_acceleration;
+            node.acceleration = glm::dvec3(accel.x(), accel.y(), accel.z());
+            if (accel != btVector3(0, 0, 0))
+            {
+                node.accelerationIsLocal = this->_accelerationIsLocal;
+                node.maxSpeed = this->_maxSpeed;
+            }
+        }
+
+        for (Body* body: this->_constraints)
+        {
+            for (auto& bodyNode: body->GetNodes())
+            {
+                physics.emplace_back(Utils::BtBodyToPhysicsNode(*bodyNode.body));
+            }
+        }
+
+        return physics;
     }
 
     void BodyCluster::SetUserData(void* userData)

@@ -129,10 +129,10 @@ namespace Client { namespace Network {
                     throw std::runtime_error("Bad state for entity update");
 
                 Uint32 entityId;
-                Common::Physics::Node node;
-                PacketExtractor::EntityUpdate(p, entityId, node);
+                std::vector<Common::Physics::Node> physics;
+                PacketExtractor::EntityUpdate(p, entityId, physics);
 
-                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateEntity(entityId, node);
+                this->_client.GetGame().GetEngine().GetDoodadManager().UpdateEntity(entityId, physics);
             };
     }
 

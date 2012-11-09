@@ -53,8 +53,8 @@ namespace Common { namespace Physics {
 
         void _RemoveFromWorld();
         void _RemoveNodeFromWorld(Uint32 nodeId);
-        void _UpdatePosition();
-        void _UpdateNodePosition(Uint32 nodeId);
+        //void _UpdatePosition(std::vector<Common::Physics::Node>::iterator& physicsIt);
+        //void _UpdateNodePosition(Uint32 nodeId, std::vector<Common::Physics::Node>::iterator& physicsIt);
         void _PutBackInWorld();
         void _PutNodeBackInWorld(Uint32 nodeId);
 

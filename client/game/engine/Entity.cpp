@@ -49,18 +49,19 @@ namespace Client { namespace Game { namespace Engine {
         this->_doodads.push_back(doodad);
     }
 
-    void Entity::UpdatePosition(Common::Physics::Node const& position)
+    void Entity::UpdatePhysics(std::vector<Common::Physics::Node> const& position)
     {
         this->_bodyCluster->SetPhysics(position);
 
-        if (position.accelerationIsLocal)
-            this->_bodyCluster->SetLocalAccel(
-                    btVector3(position.acceleration.x, position.acceleration.y, position.acceleration.z),
-                    position.maxSpeed);
-        else
-            this->_bodyCluster->SetAccel(
-                    btVector3(position.acceleration.x, position.acceleration.y, position.acceleration.z),
-                    position.maxSpeed);
+        // TODO
+        //if (position.accelerationIsLocal)
+        //    this->_bodyCluster->SetLocalAccel(
+        //            btVector3(position.acceleration.x, position.acceleration.y, position.acceleration.z),
+        //            position.maxSpeed);
+        //else
+        //    this->_bodyCluster->SetAccel(
+        //            btVector3(position.acceleration.x, position.acceleration.y, position.acceleration.z),
+        //            position.maxSpeed);
     }
 
 }}}

@@ -205,7 +205,7 @@ namespace Protocol {
 
         /**
          * Uint32 entityId
-         * PhysicsNode position
+         * Vector<PhysicsNode> position
          */
         EntityUpdate,
 

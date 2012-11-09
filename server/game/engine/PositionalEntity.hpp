@@ -17,6 +17,7 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Common::Physics::BodyCluster* _bodyCluster;
         Common::Physics::Node _physics;
+        std::vector<Common::Physics::Node> _clusterPhysics;
         std::set<Uint32> _players;
         std::set<Uint32> _newPlayers;
         bool _isDirty;

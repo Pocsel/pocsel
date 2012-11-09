@@ -11,12 +11,12 @@ Server.Entity.RegisterPositional{
         tmpPos = Server.Entity.GetPos(self.id)
         if self.upupup then
             print("LOCAL")
-            Server.Entity.SetLocalAccel(self.id, Utils.Vector3(10, 0, 0), 1)
+            Server.Entity.SetLocalAccel(self.id, Utils.Vector3(20, 0, 0), 10)
             -- tmpPos.y = tmpPos.y + 10
             self.upupup = false
         else
             print("NONLOCAL")
-            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 0, -10), 1)
+            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 20, -10), 10)
             -- tmpPos.y = tmpPos.y - 10
             self.upupup = true
         end
@@ -56,14 +56,14 @@ Server.Body.Register{
             position = { 0, 0, 0 }, -- par rapport au parent (entité positionnelle)
             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
             shape = {
-                        shapeType = "sphere",
-                        radius = 4
-                -- shapeType = "box", -- pour le moment y'a que box ou sphere
-                -- halfExtents = {4, 2, 4}
+                --        shapeType = "sphere",
+                --        radius = 4
+                 shapeType = "box", -- pour le moment y'a que box ou sphere
+                 halfExtents = {4, 2, 4}
             },
             mass = 1200,
 
-            --[[
+            ---[[--
             children = {
                 {
                     name = "Turret",
@@ -91,7 +91,7 @@ Server.Body.Register{
                     }
                 },
             },
-            ]]--
+            --]]--
         }
 --        {
 --            ... -- autre noeud a la racine
