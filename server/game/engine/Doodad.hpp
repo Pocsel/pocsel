@@ -73,6 +73,9 @@ namespace Server { namespace Game { namespace Engine {
         void CallUdp(std::string const& name, Tools::Lua::Ref const& value);
         void PositionIsDirty();
         Uint32 GetWeakReferenceId() const { return this->_weakReferenceId; }
+
+        void SetAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
+        void SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
     private:
         void _SpawnForNewPlayers();
     };

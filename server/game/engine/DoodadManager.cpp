@@ -37,6 +37,11 @@ namespace Server { namespace Game { namespace Engine {
         namespaceTable.Set("CallUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiCallUdp, this, std::placeholders::_1)));
         namespaceTable.Set("GetDoodadById", i.MakeFunction(std::bind(&DoodadManager::_ApiGetDoodadById, this, std::placeholders::_1)));
         namespaceTable.Set("GetWeakPointer", i.MakeFunction(std::bind(&DoodadManager::_ApiGetDoodadById, this, std::placeholders::_1)));
+
+        namespaceTable.Set("SetAccel", i.MakeFunction(std::bind(&DoodadManager::_ApiSetAccel, this, std::placeholders::_1)));
+        namespaceTable.Set("SetAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetAccel, this, std::placeholders::_1)));
+        namespaceTable.Set("SetLocalAccel", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
+        namespaceTable.Set("SetLocalAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
     }
 
     DoodadManager::~DoodadManager()
@@ -299,6 +304,11 @@ namespace Server { namespace Game { namespace Engine {
         object.Set("SetUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiSetUdp, this, std::placeholders::_1)));
         object.Set("CallUdp", i.MakeFunction(std::bind(&DoodadManager::_ApiCallUdp, this, std::placeholders::_1)));
         /* TODO Kill + enlever throw */
+
+        object.Set("SetAccel", i.MakeFunction(std::bind(&DoodadManager::_ApiSetAccel, this, std::placeholders::_1)));
+        object.Set("SetAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetAccel, this, std::placeholders::_1)));
+        object.Set("SetLocalAccel", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
+        object.Set("SetLocalAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
         return object;
     }
 
@@ -491,6 +501,42 @@ namespace Server { namespace Game { namespace Engine {
             else
                 throw std::runtime_error("Server.Doodad.GetWeakPointer: Doodad not found - if you want to create a weak pointer to a non/maybe-existing doodad, use a number, not a " + doodadId.GetTypeName());
         }
+    }
+
+    void DoodadManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
+    {
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetAccel: Missing argument \"doodad\"")));
+
+        std::string node = helper.PopArg("Server.Doodad.SetAccel: Missing argument \"node\"").Check<std::string>("Server.Doodad.SetAccel: Argument \"node\" must be a string");
+        glm::dvec3 accel = helper.PopArg("Server.Doodad.SetAccel: Missing argument \"accel\"").Check<glm::dvec3>("Server.Doodad.SetAccel: Argument \"accel\" must be a vector3");
+
+        double maxSpeed = 8451;
+        if (helper.GetNbArgs() > 0)
+        {
+            maxSpeed = helper.PopArg().Check<double>("Server.Doodad.SetAccel: Argument \"maxSpeed\" must be a double");
+            if (maxSpeed <= 0)
+                maxSpeed = 0.01;
+        }
+
+        d.SetAccel(node, accel, maxSpeed);
+    }
+
+    void DoodadManager::_ApiSetLocalAccel(Tools::Lua::CallHelper& helper)
+    {
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetLocalAccel: Missing argument \"doodad\"")));
+
+        std::string node = helper.PopArg("Server.Doodad.SetLocalAccel: Missing argument \"node\"").Check<std::string>("Server.Doodad.SetLocalAccel: Argument \"node\" must be a string");
+        glm::dvec3 accel = helper.PopArg("Server.Doodad.SetLocalAccel: Missing argument \"accel\"").Check<glm::dvec3>("Server.Doodad.SetLocalAccel: Argument \"accel\" must be a vector3");
+
+        double maxSpeed = 8451;
+        if (helper.GetNbArgs() > 0)
+        {
+            maxSpeed = helper.PopArg().Check<double>("Server.Doodad.SetLocalAccel: Argument \"maxSpeed\" must be a double");
+            if (maxSpeed <= 0)
+                maxSpeed = 0.01;
+        }
+
+        d.SetLocalAccel(node, accel, maxSpeed);
     }
 
 }}}

@@ -2,6 +2,7 @@
 #define __COMMON_PHYSICS_BODY_HPP__
 
 #include "common/physics/Node.hpp"
+#include "bullet/bullet-all.hpp"
 
 class btRigidBody;
 class btTypedConstraint;
@@ -19,12 +20,24 @@ namespace Common { namespace Physics {
     public:
         struct BodyNode
         {
-            BodyNode() : body(0), motionState(0), constraint(0), dirty(false) {}
+            BodyNode() :
+                body(0),
+                motionState(0),
+                constraint(0),
+                dirty(false),
+                acceleration(0, 0, 0),
+                accelerationIsLocal(false)
+            {}
+
             Common::Physics::Node node;
             btRigidBody* body;
             btDefaultMotionState* motionState;
             btTypedConstraint* constraint;
             bool dirty;
+
+            btVector3 acceleration;
+            btScalar maxSpeed;
+            bool accelerationIsLocal;
         };
     protected:
         BodyCluster& _parent;
@@ -39,6 +52,9 @@ namespace Common { namespace Physics {
 
         btRigidBody& GetRootBtBody();
         btRigidBody const& GetRootBtBody() const;
+
+        void SetAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
+        void SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
 
         void Dump() const;
 

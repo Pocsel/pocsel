@@ -215,4 +215,16 @@ namespace Server { namespace Game { namespace Engine {
     //        this->_body->UpdatePosition();
     //}
 
+    void Doodad::SetAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        if (this->_body)
+            this->_body->SetAccel(node, accel, maxSpeed);
+    }
+
+    void Doodad::SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        if (this->_body)
+            this->_body->SetLocalAccel(node, accel, maxSpeed);
+    }
+
 }}}

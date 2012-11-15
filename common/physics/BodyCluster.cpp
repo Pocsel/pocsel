@@ -13,7 +13,8 @@ namespace Common { namespace Physics {
         _motionState(0),
         _body(0),
         _userData(0),
-        _acceleration(0, 0, 0)
+        _acceleration(0, 0, 0),
+        _accelerationIsLocal(false)
         //_curMass(1)
     {
         btScalar mass(1);
@@ -242,6 +243,10 @@ namespace Common { namespace Physics {
                     break;
                 }
                 Utils::PhysicsNodeToBtBody(*physicsIt, *bodyNode.body);
+
+                const_cast<btVector3&>(bodyNode.acceleration) = btVector3(physicsIt->acceleration.x, physicsIt->acceleration.y, physicsIt->acceleration.z);
+                const_cast<double&>(bodyNode.maxSpeed) = physicsIt->maxSpeed;
+                const_cast<bool&>(bodyNode.accelerationIsLocal) = physicsIt->accelerationIsLocal;
             }
         }
 
@@ -291,6 +296,15 @@ namespace Common { namespace Physics {
             for (auto& bodyNode: body->GetNodes())
             {
                 physics.emplace_back(Utils::BtBodyToPhysicsNode(*bodyNode.body));
+
+                auto& node = physics.back();
+                btVector3 const& accel = bodyNode.acceleration;
+                node.acceleration = glm::dvec3(accel.x(), accel.y(), accel.z());
+                if (accel != btVector3(0, 0, 0))
+                {
+                    node.accelerationIsLocal = bodyNode.accelerationIsLocal;
+                    node.maxSpeed = bodyNode.maxSpeed;
+                }
             }
         }
 

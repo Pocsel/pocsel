@@ -139,6 +139,44 @@ namespace Common { namespace Physics {
         return this->_parent.GetBtBody();
     }
 
+    void Body::SetAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        unsigned int nodeIdx = 0;
+        for (auto& shapeNode: this->_type.GetShapes())
+        {
+            if (shapeNode.name == node)
+                break;
+            ++nodeIdx;
+        }
+        if (nodeIdx == this->_nodes.size())
+            throw std::runtime_error("this node does not exist");
+
+        auto& bodyNode = this->_nodes[nodeIdx];
+
+        bodyNode.acceleration = btVector3(accel.x, accel.y, accel.z);
+        bodyNode.maxSpeed = maxSpeed;
+        bodyNode.accelerationIsLocal = false;
+    }
+
+    void Body::SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        unsigned int nodeIdx = 0;
+        for (auto& shapeNode: this->_type.GetShapes())
+        {
+            if (shapeNode.name == node)
+                break;
+            ++nodeIdx;
+        }
+        if (nodeIdx == this->_nodes.size())
+            throw std::runtime_error("this node does not exist");
+
+        auto& bodyNode = this->_nodes[nodeIdx];
+
+        bodyNode.acceleration = btVector3(accel.x, accel.y, accel.z);
+        bodyNode.maxSpeed = maxSpeed;
+        bodyNode.accelerationIsLocal = true;
+    }
+
     void Body::_RemoveFromWorld()
     {
         for (auto rootsIt = this->_type.GetRoots().begin(),
@@ -257,7 +295,31 @@ namespace Common { namespace Physics {
     {
         BodyNode& node = this->_nodes[nodeId];
         //node.body->applyCentralImpulse(accel);
-        node.body->setGravity(this->_parent.GetWorld().GetGravity() + accel);
+
+        btVector3 realAccel = this->_parent.GetWorld().GetGravity() + accel;
+
+        if (node.acceleration != btVector3(0, 0, 0))
+        {
+            std::cout << "accel\n";
+            btVector3 velocity = node.body->getLinearVelocity();
+
+            btQuaternion directionQ = node.body->getCenterOfMassTransform().getRotation();
+            btVector3 nodeAccel = node.acceleration;
+            if (node.accelerationIsLocal)
+                nodeAccel = quatRotate(directionQ, nodeAccel);
+            btVector3 targetDirection = nodeAccel;
+            targetDirection.normalize();
+            btScalar speed = velocity.dot(targetDirection);
+
+            if (speed < node.maxSpeed)
+            {
+                std::cout << "realAccel\n";
+                realAccel += nodeAccel;
+            }
+        }
+
+        node.body->setGravity(realAccel);
+
         for (Uint32 childId: this->_type.GetShapes()[nodeId].children)
             this->_ApplyAccelOnNode(accel, childId);
     }

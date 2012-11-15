@@ -10,13 +10,25 @@ Server.Entity.RegisterPositional{
     DoShit = function(self)
         tmpPos = Server.Entity.GetPos(self.id)
         if self.upupup then
-            print("LOCAL")
-            Server.Entity.SetLocalAccel(self.id, Utils.Vector3(20, 0, 0), 10)
+            print("Gun")
+            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 0, 0), 10)
+
+            d = self.doodadPtr:Lock()
+            if d then
+                Server.Doodad.SetAccel(self.doodadPtr, "Hull", Utils.Vector3(0, 20, 0), 10)
+            end
+
             -- tmpPos.y = tmpPos.y + 10
             self.upupup = false
         else
-            print("NONLOCAL")
-            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 20, -10), 10)
+            print("errything")
+            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 20, 0), 10)
+
+            d = self.doodadPtr:Lock()
+            if d then
+                d:SetAccel("Hull", Utils.Vector3(0, 0, 0), 10)
+            end
+
             -- tmpPos.y = tmpPos.y - 10
             self.upupup = true
         end

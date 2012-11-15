@@ -76,6 +76,8 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiCallUdp(Tools::Lua::CallHelper& helper);
         void _ApiGetDoodadById(Tools::Lua::CallHelper& helper);
         void _ApiGetWeakPointer(Tools::Lua::CallHelper& helper);
+        void _ApiSetAccel(Tools::Lua::CallHelper& helper);
+        void _ApiSetLocalAccel(Tools::Lua::CallHelper& helper);
     };
 
 }}}
