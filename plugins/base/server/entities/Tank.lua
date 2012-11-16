@@ -14,8 +14,7 @@ Server.Entity.RegisterPositional{
             Server.Entity.SetAccel(self.id, Utils.Vector3(0, 0, 0), 10)
 
             d = self.doodadPtr:Lock()
-            if d then
-                Server.Doodad.SetAccel(self.doodadPtr, "Hull", Utils.Vector3(0, 20, 0), 10)
+            if d then Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(20, 0, 0), 10)
             end
 
             -- tmpPos.y = tmpPos.y + 10
@@ -65,13 +64,13 @@ Server.Body.Register{
     shapeTree = {
         {
             name = "Hull", -- nom unique de noeud
-            position = { 0, 0, 0 }, -- par rapport au parent (entité positionnelle)
+            position = { 0, 1, 0 }, -- par rapport au parent (entité positionnelle)
             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
             shape = {
                 --        shapeType = "sphere",
                 --        radius = 4
                  shapeType = "box", -- pour le moment y'a que box ou sphere
-                 halfExtents = {4, 2, 4}
+                 halfExtents = {5.51, 1.01, 4.01}
             },
             mass = 1200,
 
@@ -79,11 +78,11 @@ Server.Body.Register{
             children = {
                 {
                     name = "Turret",
-                    position = { 0, 4, 0 }, -- par rapport au parent (noeud Hull)
+                    position = { 0, 1.75, 0 }, -- par rapport au parent (noeud Hull)
                     orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                     shape = {
                         shapeType = "sphere",
-                        radius = 2
+                        radius = 2.01
                     },
                     mass = 300,
 
@@ -94,7 +93,7 @@ Server.Body.Register{
                             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                             shape = {
                                 shapeType = "box",
-                                halfExtents = {3, 0.2, 0.2}
+                                halfExtents = {3.01, 0.51, 0.51}
                             },
                             friction = 0.01,
                             restitution = 9.99,

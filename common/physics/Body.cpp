@@ -300,7 +300,7 @@ namespace Common { namespace Physics {
 
         if (node.acceleration != btVector3(0, 0, 0))
         {
-            std::cout << "accel\n";
+            //std::cout << "accel\n";
             btVector3 velocity = node.body->getLinearVelocity();
 
             btQuaternion directionQ = node.body->getCenterOfMassTransform().getRotation();
@@ -313,7 +313,7 @@ namespace Common { namespace Physics {
 
             if (speed < node.maxSpeed)
             {
-                std::cout << "realAccel\n";
+                //std::cout << "realAccel\n";
                 realAccel += nodeAccel;
             }
         }
