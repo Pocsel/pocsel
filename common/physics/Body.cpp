@@ -296,7 +296,7 @@ namespace Common { namespace Physics {
         BodyNode& node = this->_nodes[nodeId];
         //node.body->applyCentralImpulse(accel);
 
-        btVector3 realAccel = this->_parent.GetWorld().GetGravity() + accel;
+        btVector3 realAccel = /*this->_parent.GetWorld().GetGravity() +*/ accel;
 
         if (node.acceleration != btVector3(0, 0, 0))
         {
@@ -318,7 +318,10 @@ namespace Common { namespace Physics {
             }
         }
 
-        node.body->setGravity(realAccel);
+        //node.body->setGravity(realAccel + this->_parent.GetWorld().GetGravity());
+        //node.body->applyCentralForce(realAccel * 1000);
+        node.body->applyCentralForce(accel * (1.0 / node.body->getInvMass()));
+        //node.body->applyCentralImpulse(realAccel * 1000);
 
         for (Uint32 childId: this->_type.GetShapes()[nodeId].children)
             this->_ApplyAccelOnNode(accel, childId);

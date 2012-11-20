@@ -14,7 +14,7 @@ Server.Entity.RegisterPositional{
             Server.Entity.SetAccel(self.id, Utils.Vector3(0, 0, 0), 10)
 
             d = self.doodadPtr:Lock()
-            if d then Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(20, 0, 0), 10)
+            if d then Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(200, 0, 0), 10)
             end
 
             -- tmpPos.y = tmpPos.y + 10

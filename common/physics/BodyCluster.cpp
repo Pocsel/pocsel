@@ -95,7 +95,9 @@ namespace Common { namespace Physics {
 
 
         //this->_body->applyCentralImpulse(accel);
-        this->_body->setGravity(this->_world.GetGravity() + accel);
+        //this->_body->setGravity(this->_world.GetGravity() + accel);
+        this->_body->applyCentralForce(accel * (1.0 / this->_body->getInvMass()));
+        //this->_body->applyImpulse(accel, btVector3(0, 0, 0));
         for (auto body: _constraints)
             body->_ApplyAccel(accel);
 
@@ -334,9 +336,9 @@ namespace Common { namespace Physics {
 
     void BodyCluster::_ClearTickAccel()
     {
-        this->_body->setGravity(this->_world.GetGravity());
-        for (auto body: _constraints)
-            body->_ApplyAccel(btVector3(0, 0, 0));
+        //this->_body->setGravity(this->_world.GetGravity());
+        //for (auto body: _constraints)
+        //    body->_ApplyAccel(btVector3(0, 0, 0));
     }
 
 }}
