@@ -29,7 +29,7 @@ Server.Entity.RegisterPositional{
             if d then
                 d:SetAccel("Hull", Utils.Vector3(0, 0, 0), 10)
                 Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 1)
-                d:SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(1.5, 0, 0), 10)
+                d:SetInterAngleTarget("Turret", Utils.Vector3(1.5, 0, 0), 10)
             end
 
             -- tmpPos.y = tmpPos.y - 10
