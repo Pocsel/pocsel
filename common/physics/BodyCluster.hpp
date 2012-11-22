@@ -38,7 +38,8 @@ namespace Common { namespace Physics {
         BodyCluster(World& world, Node const& pos);
         ~BodyCluster();
 
-        void Tick();
+        void PreTick();
+        void PreBtTick(btScalar timeStep);
 
         btRigidBody& GetBtBody() { return *this->_body; }
         btRigidBody const& GetBtBody() const { return *this->_body; }

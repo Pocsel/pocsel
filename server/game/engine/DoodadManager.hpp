@@ -78,6 +78,8 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiGetWeakPointer(Tools::Lua::CallHelper& helper);
         void _ApiSetAccel(Tools::Lua::CallHelper& helper);
         void _ApiSetLocalAccel(Tools::Lua::CallHelper& helper);
+        void _ApiSetInterPositionTarget(Tools::Lua::CallHelper& helper);
+        void _ApiSetInterAngleTarget(Tools::Lua::CallHelper& helper);
     };
 
 }}}

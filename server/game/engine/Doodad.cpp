@@ -219,12 +219,32 @@ namespace Server { namespace Game { namespace Engine {
     {
         if (this->_body)
             this->_body->SetAccel(node, accel, maxSpeed);
+        else
+            throw std::runtime_error("Doodad.SetAccel: This doodad does not have a body");
     }
 
     void Doodad::SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
     {
         if (this->_body)
             this->_body->SetLocalAccel(node, accel, maxSpeed);
+        else
+            throw std::runtime_error("Doodad.SetLocalAccel: This doodad does not have a body");
+    }
+
+    void Doodad::SetInterPositionTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        if (this->_body)
+            this->_body->SetInterPositionTarget(node, accel, maxSpeed);
+        else
+            throw std::runtime_error("Doodad.SetInterPositionTarget: This doodad does not have a body");
+    }
+
+    void Doodad::SetInterAngleTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        if (this->_body)
+            this->_body->SetInterAngleTarget(node, accel, maxSpeed);
+        else
+            throw std::runtime_error("Doodad.SetInterAngleTarget: This doodad does not have a body");
     }
 
 }}}

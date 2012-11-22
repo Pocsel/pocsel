@@ -75,6 +75,26 @@ namespace Common { namespace Physics {
         }
 
         //if (false && parent == &this->_parent.GetBody())
+        //{
+        //    btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
+        //    newConstraint->getAngularLowerLimit(anglLimit);
+        //    std::cout << "ANGL LOW " << anglLimit.x() << ", " << anglLimit.y() << "," << anglLimit.z() << "\n";
+        //}
+        //{
+        //    btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
+        //    newConstraint->getAngularUpperLimit(anglLimit);
+        //    std::cout << "ANGL UPP " << anglLimit.x() << ", " << anglLimit.y() << "," << anglLimit.z() << "\n";
+        //}
+        //{
+        //    btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
+        //    newConstraint->getLinearLowerLimit(anglLimit);
+        //    std::cout << "LINE LOW " << anglLimit.x() << ", " << anglLimit.y() << "," << anglLimit.z() << "\n";
+        //}
+        //{
+        //    btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
+        //    newConstraint->getLinearUpperLimit(anglLimit);
+        //    std::cout << "LINE UPP " << anglLimit.x() << ", " << anglLimit.y() << "," << anglLimit.z() << "\n";
+        //}
         {
             btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
             newConstraint->setAngularLowerLimit(anglLimit);
@@ -141,16 +161,7 @@ namespace Common { namespace Physics {
 
     void Body::SetAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
     {
-        unsigned int nodeIdx = 0;
-        for (auto& shapeNode: this->_type.GetShapes())
-        {
-            if (shapeNode.name == node)
-                break;
-            ++nodeIdx;
-        }
-        if (nodeIdx == this->_nodes.size())
-            throw std::runtime_error("this node does not exist");
-
+        Uint32 nodeIdx = this->_GetNodeId(node);
         auto& bodyNode = this->_nodes[nodeIdx];
 
         bodyNode.acceleration = btVector3(accel.x, accel.y, accel.z);
@@ -160,21 +171,44 @@ namespace Common { namespace Physics {
 
     void Body::SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
     {
-        unsigned int nodeIdx = 0;
-        for (auto& shapeNode: this->_type.GetShapes())
-        {
-            if (shapeNode.name == node)
-                break;
-            ++nodeIdx;
-        }
-        if (nodeIdx == this->_nodes.size())
-            throw std::runtime_error("this node does not exist");
-
+        Uint32 nodeIdx = this->_GetNodeId(node);
         auto& bodyNode = this->_nodes[nodeIdx];
 
         bodyNode.acceleration = btVector3(accel.x, accel.y, accel.z);
         bodyNode.maxSpeed = maxSpeed;
         bodyNode.accelerationIsLocal = true;
+    }
+
+    void Body::SetInterPositionTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        Uint32 nodeIdx = this->_GetNodeId(node);
+        auto& bodyNode = this->_nodes[nodeIdx];
+
+        bodyNode.interPositionTarget = btVector3(accel.x, accel.y, accel.z);
+        bodyNode.interPositionTargetSpeed = maxSpeed;
+    }
+
+    void Body::SetInterAngleTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        Uint32 nodeIdx = this->_GetNodeId(node);
+        auto& bodyNode = this->_nodes[nodeIdx];
+
+        bodyNode.interAngleTarget = btVector3(accel.x, accel.y, accel.z);
+        bodyNode.interAngleTargetSpeed = maxSpeed;
+    }
+
+    Uint32 Body::_GetNodeId(std::string const& nodeName)
+    {
+        Uint32 nodeIdx = 0;
+        for (auto& shapeNode: this->_type.GetShapes())
+        {
+            if (shapeNode.name == nodeName)
+                break;
+            ++nodeIdx;
+        }
+        if (nodeIdx == this->_nodes.size())
+            throw std::runtime_error("this node does not exist");
+        return nodeIdx;
     }
 
     void Body::_RemoveFromWorld()
@@ -325,6 +359,67 @@ namespace Common { namespace Physics {
 
         for (Uint32 childId: this->_type.GetShapes()[nodeId].children)
             this->_ApplyAccelOnNode(accel, childId);
+    }
+
+    void Body::_PreBtTick(btScalar timeStep)
+    {
+        btVector3 curTarget;
+        btVector3 newTarget;
+        for (BodyNode& node: this->_nodes)
+        {
+            node.constraint->getLinearLowerLimit(curTarget);
+            if (node.interPositionTarget != curTarget)
+            {
+                //{
+                //    btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
+                //    node.constraint->getAngularLowerLimit(anglLimit);
+                //    std::cout << "ANGL LOW " << anglLimit.x() << ", " << anglLimit.y() << "," << anglLimit.z() << "\n";
+                //}
+                //{
+                //    btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
+                //    node.constraint->getAngularUpperLimit(anglLimit);
+                //    std::cout << "ANGL UPP " << anglLimit.x() << ", " << anglLimit.y() << "," << anglLimit.z() << "\n";
+                //}
+                //{
+                //    btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
+                //    node.constraint->getLinearLowerLimit(anglLimit);
+                //    std::cout << "LINE LOW " << anglLimit.x() << ", " << anglLimit.y() << "," << anglLimit.z() << "\n";
+                //}
+                //{
+                //    btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
+                //    node.constraint->getLinearUpperLimit(anglLimit);
+                //    std::cout << "LINE UPP " << anglLimit.x() << ", " << anglLimit.y() << "," << anglLimit.z() << "\n";
+                //}
+
+                if (curTarget.distance(node.interPositionTarget) <= node.interPositionTargetSpeed * timeStep)
+                {
+                    node.constraint->setLinearLowerLimit(node.interPositionTarget);
+                    node.constraint->setLinearUpperLimit(node.interPositionTarget);
+                }
+                else
+                {
+                    newTarget = curTarget + (node.interPositionTarget - curTarget).normalized() * node.interPositionTargetSpeed * timeStep;
+                    node.constraint->setLinearLowerLimit(newTarget);
+                    node.constraint->setLinearUpperLimit(newTarget);
+                }
+            }
+
+            node.constraint->getAngularLowerLimit(curTarget);
+            if (node.interAngleTarget != curTarget)
+            {
+                if (curTarget.distance(node.interAngleTarget) <= node.interAngleTargetSpeed * timeStep)
+                {
+                    node.constraint->setAngularLowerLimit(node.interAngleTarget);
+                    node.constraint->setAngularUpperLimit(node.interAngleTarget);
+                }
+                else
+                {
+                    newTarget = curTarget + (node.interAngleTarget - curTarget).normalized() * node.interAngleTargetSpeed * timeStep;
+                    node.constraint->setAngularLowerLimit(newTarget);
+                    node.constraint->setAngularUpperLimit(newTarget);
+                }
+            }
+        }
     }
 
     void Body::Dump() const

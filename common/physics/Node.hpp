@@ -11,24 +11,23 @@ namespace Common { namespace Physics {
     {
         Common::Position position;
         Common::Position velocity;
-        //Common::Position acceleration;
 
-        glm::quat orientation;
-        glm::vec3 angularVelocity;
-        //glm::vec3 angularAcceleration;
+        glm::dquat orientation;
+        glm::dvec3 angularVelocity;
 
         //Acceleration accel;
         bool accelerationIsLocal;
         Common::Position acceleration;
         double maxSpeed;
 
-        //glm::vec3 scale;
-        //glm::vec3 scaleVelocity;
-        //glm::vec3 scaleAcceleration;
+        //trucs inter-noeuds
+        glm::dvec3 interPosition;
+        glm::dvec3 interAngle;
+        glm::dvec3 interPositionTarget;
+        double interPositionTargetSpeed;
+        glm::dvec3 interAngleTarget;
+        double interAngleTargetSpeed;
 
-       // Vector<double> position;
-       // Vector<float> yawPitchRoll;
-       // Vector<float> scale;
         Node() : accelerationIsLocal(false), acceleration(0, 0, 0) {}
     };
 

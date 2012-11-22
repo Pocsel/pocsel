@@ -59,7 +59,7 @@ namespace Common { namespace Physics {
         Tools::Delete(_motionState);
     }
 
-    void BodyCluster::Tick()
+    void BodyCluster::PreTick()
     {
         //std::cout << "tick\n";
         if (this->_acceleration == btVector3(0, 0, 0))
@@ -123,6 +123,12 @@ namespace Common { namespace Physics {
         }
         */
         //this->_body->setAngularVelocity(btVector3(0, 360, 0));
+    }
+
+    void BodyCluster::PreBtTick(btScalar timeStep)
+    {
+        for (auto body: _constraints)
+            body->_PreBtTick(timeStep);
     }
 
     void BodyCluster::AddConstraint(Body* body)
@@ -249,6 +255,40 @@ namespace Common { namespace Physics {
                 const_cast<btVector3&>(bodyNode.acceleration) = btVector3(physicsIt->acceleration.x, physicsIt->acceleration.y, physicsIt->acceleration.z);
                 const_cast<double&>(bodyNode.maxSpeed) = physicsIt->maxSpeed;
                 const_cast<bool&>(bodyNode.accelerationIsLocal) = physicsIt->accelerationIsLocal;
+
+                const_cast<btVector3&>(bodyNode.interPositionTarget) =
+                    btVector3(
+                            physicsIt->interPositionTarget.x,
+                            physicsIt->interPositionTarget.y,
+                            physicsIt->interPositionTarget.z);
+                const_cast<double&>(bodyNode.interPositionTargetSpeed) = physicsIt->interPositionTargetSpeed;
+                const_cast<btVector3&>(bodyNode.interAngleTarget) =
+                    btVector3(
+                            physicsIt->interAngleTarget.x,
+                            physicsIt->interAngleTarget.y,
+                            physicsIt->interAngleTarget.z);
+                const_cast<double&>(bodyNode.interAngleTargetSpeed) = physicsIt->interAngleTargetSpeed;
+
+                bodyNode.constraint->setLinearLowerLimit(
+                    btVector3(
+                            physicsIt->interPosition.x,
+                            physicsIt->interPosition.y,
+                            physicsIt->interPosition.z));
+                bodyNode.constraint->setLinearUpperLimit(
+                    btVector3(
+                            physicsIt->interPosition.x,
+                            physicsIt->interPosition.y,
+                            physicsIt->interPosition.z));
+                bodyNode.constraint->setAngularLowerLimit(
+                    btVector3(
+                            physicsIt->interAngle.x,
+                            physicsIt->interAngle.y,
+                            physicsIt->interAngle.z));
+                bodyNode.constraint->setAngularUpperLimit(
+                    btVector3(
+                            physicsIt->interAngle.x,
+                            physicsIt->interAngle.y,
+                            physicsIt->interAngle.z));
             }
         }
 
@@ -306,6 +346,40 @@ namespace Common { namespace Physics {
                 {
                     node.accelerationIsLocal = bodyNode.accelerationIsLocal;
                     node.maxSpeed = bodyNode.maxSpeed;
+                }
+
+                // inter node shit
+                {
+                    btVector3 currentPos;
+                    bodyNode.constraint->getLinearLowerLimit(currentPos);
+                    node.interPosition =
+                        glm::dvec3(
+                                currentPos.x(),
+                                currentPos.y(),
+                                currentPos.z()
+                                );
+                    bodyNode.constraint->getAngularLowerLimit(currentPos);
+                    node.interAngle =
+                        glm::dvec3(
+                                currentPos.x(),
+                                currentPos.y(),
+                                currentPos.z()
+                                );
+
+                    node.interPositionTarget =
+                        glm::dvec3(
+                                bodyNode.interPositionTarget.x(),
+                                bodyNode.interPositionTarget.y(),
+                                bodyNode.interPositionTarget.z()
+                                );
+                    node.interPositionTargetSpeed = bodyNode.interPositionTargetSpeed;
+                    node.interAngleTarget = 
+                        glm::dvec3(
+                                bodyNode.interAngleTarget.x(),
+                                bodyNode.interAngleTarget.y(),
+                                bodyNode.interAngleTarget.z()
+                                );
+                    node.interAngleTargetSpeed = bodyNode.interAngleTargetSpeed;
                 }
             }
         }

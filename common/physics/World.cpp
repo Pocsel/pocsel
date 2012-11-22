@@ -33,7 +33,7 @@ namespace Common { namespace Physics {
 
             for (auto body: world._bodyClusters)
             {
-                body->Tick();
+                body->PreBtTick(timeStep);
             }
         }
     };
@@ -62,7 +62,7 @@ namespace Common { namespace Physics {
         this->_dynamicsWorld->setGravity(this->_gravity);
 
         this->_dynamicsWorld->setInternalTickCallback(_cb::_TickCallBack, this);
-        //this->_dynamicsWorld->setInternalTickCallback(_cb::_PreTickCallBack, this, true);
+        this->_dynamicsWorld->setInternalTickCallback(_cb::_PreTickCallBack, this, true);
     }
 
     World::~World()
@@ -79,7 +79,7 @@ namespace Common { namespace Physics {
         //std::cout << "TICK\n";
         for (auto body: this->_bodyClusters)
         {
-            body->Tick();
+            body->PreTick();
         }
         double deltaTime = (totalTime - this->_lastTime) * 0.000001;
         this->_dynamicsWorld->stepSimulation(deltaTime, 10, 1.0 / 60.0);

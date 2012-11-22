@@ -10,22 +10,26 @@ Server.Entity.RegisterPositional{
     DoShit = function(self)
         tmpPos = Server.Entity.GetPos(self.id)
         if self.upupup then
-            print("Gun")
+            print("Hull & move canon forward")
             Server.Entity.SetAccel(self.id, Utils.Vector3(0, 0, 0), 10)
 
             d = self.doodadPtr:Lock()
-            if d then Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(200, 0, 0), 10)
+            if d then
+                Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(500, 0, 0), 10)
+                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Gun", Utils.Vector3(10, 0, 0), 10)
             end
 
             -- tmpPos.y = tmpPos.y + 10
             self.upupup = false
         else
-            print("errything")
-            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 20, 0), 10)
+            print("errything & rotate le toit")
+            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 13, 0), 10)
 
             d = self.doodadPtr:Lock()
             if d then
                 d:SetAccel("Hull", Utils.Vector3(0, 0, 0), 10)
+                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 1)
+                d:SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(1.5, 0, 0), 10)
             end
 
             -- tmpPos.y = tmpPos.y - 10

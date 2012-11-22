@@ -18,7 +18,7 @@ namespace Common { namespace Physics {
             btVector3 wpos = wt.getOrigin();
             node.position = Common::Position(wpos.x(), wpos.y(), wpos.z());
             btQuaternion const& wrot = wt.getRotation();
-            node.orientation = glm::quat((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
+            node.orientation = glm::dquat((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
 
             btVector3 const& btVel = body.getLinearVelocity();
             node.velocity = glm::vec3(btVel.x(), btVel.y(), btVel.z());
