@@ -29,6 +29,50 @@ namespace Hlsl {
             Arb
         };
     }
+    namespace Semantic {
+        enum Type
+        {
+            // *** Uniforms
+            UniformFirst = 0x000,
+            // Matrices
+            World,
+            View,
+            Projection,
+            WorldView,
+            ViewProjection,
+            WorldViewProjection,
+            // Inverse
+            WorldInverse,
+            ViewInverse,
+            ProjectionInverse,
+            WorldViewInverse,
+            ViewProjectionInverse,
+            WorldViewProjectionInverse,
+            // Inverse transpose
+            WorldInverseTranspose,
+            ViewInverseTranspose,
+            ProjectionInverseTranspose,
+            WorldViewInverseTranspose,
+            ViewProjectionInverseTranspose,
+            WorldViewProjectionInverseTranspose,
+            UniformLast,
+
+            // *** Attributes
+            AttributeFirst = 0x100,
+            Position,
+            Normal,
+            Color,
+            TexCoord0,
+            TexCoord1,
+            TexCoord2,
+            TexCoord3,
+            TexCoord4,
+            AttributeLast,
+
+            // *** Others
+            NoSemantic = 0xFFF,
+        };
+    }
 
     struct Sampler
     {
@@ -37,6 +81,7 @@ namespace Hlsl {
 
     struct BaseParameter
     {
+        Semantic::Type semantic;
         Type::Type type;
         std::string name;
     };

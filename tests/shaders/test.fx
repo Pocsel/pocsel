@@ -1,6 +1,6 @@
 float4x4 worldViewProjection : WorldViewProjection;
 float4x4 world : World;
-float4x4 worldViewInverseTranspose;
+float4x4 worldViewInverseTranspose : WorldViewInverseTranspose;
 
 sampler2D diffuse = sampler_state
 {
@@ -10,13 +10,13 @@ sampler2D diffuse = sampler_state
 
 struct VSout
 {
-   float4 position : POSITION;
-   float2 texCoord : TEXCOORD0;
-   float3 normals : TEXCOORD1;
-   float4 pos : TEXCOORD2;
+   float4 position : Position;
+   float2 texCoord : TexCoord0;
+   float3 normals : TexCoord1;
+   float4 pos : TexCoord2;
 };
 
-VSout vs(in float4 position : POSITION, in float3 normals : NORMAL, in float2 texCoord : TEXCOORD0)
+VSout vs(in float4 position : Position, in float3 normals : Normal, in float2 texCoord : TexCoord0)
 {
     VSout vout;
     vout.position = mul(worldViewProjection, position);

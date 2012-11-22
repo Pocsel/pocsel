@@ -7,7 +7,11 @@ set(src
 )
 
 CreateGroups("${src}")
+
 add_executable(compiler-shader ${src})
+if (MSVC)
+    set_target_properties(compiler-shader PROPERTIES COMPILE_FLAGS "/bigobj")
+endif (MSVC)
 
 enable_pch(compiler-shader src)
 

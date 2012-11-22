@@ -27,8 +27,11 @@ namespace Tools {
                     auto count = p.Read32();
                     for (Uint32 i = 0; i < count; ++i)
                     {
+                        BaseParameter param;
+                        param.semantic = Semantic::Type(p.Read16());
                         auto name = p.ReadString();
-                        shader.attributes[name] = p.ReadString();
+                        param.name = p.ReadString();
+                        shader.attributes[name] = param;
                     }
 
                     // Uniforms
@@ -36,6 +39,7 @@ namespace Tools {
                     for (Uint32 i = 0; i < count; ++i)
                     {
                         UniformParameter param;
+                        param.semantic = Semantic::Type(p.Read16());
                         auto name = p.ReadString();
                         param.type = (Type::Type)p.Read8();
                         param.name = p.ReadString();

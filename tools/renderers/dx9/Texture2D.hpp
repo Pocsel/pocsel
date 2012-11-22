@@ -12,12 +12,10 @@ namespace Tools { namespace Renderers {
     class Texture2D : public ITexture2D
     {
     private:
-        struct _Release { void operator()(IUnknown* ptr) { ptr->Release(); } };
-
         DX9Renderer& _renderer;
         glm::uvec2 _size;
         bool _hasAlpha;
-        std::unique_ptr<IDirect3DTexture9, _Release> _texture;
+        ComPtr<IDirect3DTexture9> _texture;
         int _bindId;
 
     public:

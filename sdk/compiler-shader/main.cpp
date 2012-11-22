@@ -144,6 +144,7 @@ int main(int ac, char** av)
     options.removeSemanticAttributes = true;
 
     auto const& srcGL = GenerateHlsl(fileGL, options);
+    options.removeSemanticAttributes = false;
     auto const& srcDX = GenerateHlsl(fileDX, options);
     auto const& shader = HlslFileToShader(fileGL, srcGL, fileDX, srcDX);
 

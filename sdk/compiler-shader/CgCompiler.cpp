@@ -1,4 +1,5 @@
 #include "precompiled.hpp"
+#include <boost/algorithm/string.hpp>
 
 #include "tools/ByteArray.hpp"
 
@@ -92,7 +93,7 @@ namespace Hlsl {
             return result;
         }
 
-        static Type::Type _ParseType(std::string type)
+        static Type::Type _ParseType(std::string const& type)
         {
             if (type == "sampler2D")
                 return Type::Sampler2D;
@@ -111,6 +112,72 @@ namespace Hlsl {
             if (type == "float4x4")
                 return Type::Float4x4;
             throw std::runtime_error("Unknown type \"" + type + "\"");
+        }
+
+        static Semantic::Type _ParseSemantic(std::string const& str)
+        {
+            auto const& semantic = boost::to_lower_copy(str);
+            // *** Uniforms
+            // Matrices
+            if (semantic == "world")
+                return Semantic::World;
+            if (semantic == "view")
+                return Semantic::View;
+            if (semantic == "projection")
+                return Semantic::Projection;
+            if (semantic == "worldview")
+                return Semantic::WorldView;
+            if (semantic == "viewprojection")
+                return Semantic::ViewProjection;
+            if (semantic == "worldviewprojection")
+                return Semantic::WorldViewProjection;
+            // Inverse
+            if (semantic == "worldinverse")
+                return Semantic::WorldInverse;
+            if (semantic == "viewinverse")
+                return Semantic::ViewInverse;
+            if (semantic == "projectioninverse")
+                return Semantic::ProjectionInverse;
+            if (semantic == "worldviewinverse")
+                return Semantic::WorldViewInverse;
+            if (semantic == "viewprojectioninverse")
+                return Semantic::ViewProjectionInverse;
+            if (semantic == "worldviewprojectioninverse")
+                return Semantic::WorldViewProjectionInverse;
+            // Inverse transpose
+            if (semantic == "worldinversetranspose")
+                return Semantic::WorldInverseTranspose;
+            if (semantic == "viewinversetranspose")
+                return Semantic::ViewInverseTranspose;
+            if (semantic == "projectioninversetranspose")
+                return Semantic::ProjectionInverseTranspose;
+            if (semantic == "worldviewinversetranspose")
+                return Semantic::WorldViewInverseTranspose;
+            if (semantic == "viewprojectioninversetranspose")
+                return Semantic::ViewProjectionInverseTranspose;
+            if (semantic == "worldviewprojectioninversetranspose")
+                return Semantic::WorldViewProjectionInverseTranspose;
+
+            // *** Attributes
+            if (semantic == "position")
+                return Semantic::Position;
+            if (semantic == "normal")
+                return Semantic::Normal;
+            if (semantic == "color")
+                return Semantic::Color;
+            if (semantic == "texcoord0")
+                return Semantic::TexCoord0;
+            if (semantic == "texcoord1")
+                return Semantic::TexCoord1;
+            if (semantic == "texcoord2")
+                return Semantic::TexCoord2;
+            if (semantic == "texcoord3")
+                return Semantic::TexCoord3;
+            if (semantic == "texcoord4")
+                return Semantic::TexCoord4;
+            if (semantic == "")
+                return Semantic::NoSemantic;
+            throw std::runtime_error("Unknown semantic \"" + semantic + "\"");
         }
 
         static std::string _GetValue(boost::variant<bool, Sampler, std::array<float, 16>, Nil> const& value)
@@ -260,6 +327,9 @@ namespace Hlsl {
                 for (auto const& v: params)
                     if (v.first == &var)
                         param.name = v.second;
+                auto semantic = _ParseSemantic(var.semantic);
+                if ((Semantic::UniformFirst > semantic || semantic > Semantic::UniformLast) && semantic != Semantic::NoSemantic)
+                    throw std::runtime_error("Bad semantic for uniform variable \"" + var.name + "\"");
                 param.type = _ParseType(var.type);
                 param.value = Nil();
                 switch (var.value.which())
@@ -313,7 +383,14 @@ namespace Hlsl {
         for (auto const& arg: functionVertex.arguments)
             for (auto const& v: params)
                 if (v.first == &arg)
-                    shader.attributes[v.first->name].name = v.second;
+                {
+                    auto semantic = _ParseSemantic(v.first->semantic);
+                    if (Semantic::AttributeFirst > semantic || semantic > Semantic::AttributeLast)
+                        throw std::runtime_error("Bad semantic for attribute variable \"" + v.first->name + "\"");
+                    auto& att = shader.attributes[v.first->name];
+                    att.semantic = semantic;
+                    att.name = v.second;
+                }
 
         return shader;
     }
@@ -338,6 +415,7 @@ namespace Hlsl {
         bin.Write32((Uint32)shader.attributes.size());
         for (auto const& attr: shader.attributes)
         {
+            bin.Write16((Uint16)attr.second.semantic);
             bin.WriteString(attr.first); // original name
             bin.WriteString(attr.second.name);
         }
@@ -346,6 +424,7 @@ namespace Hlsl {
         bin.Write32((Uint32)shader.uniforms.size());
         for (auto const& uniform: shader.uniforms)
         {
+            bin.Write16((Uint16)uniform.second.semantic);
             bin.WriteString(uniform.first); // original name
             bin.Write8((Uint8)uniform.second.type);
             bin.WriteString(uniform.second.name);

@@ -15,6 +15,8 @@ namespace Tools { namespace Renderers {
         private:
             DX9Renderer& _renderer;
             ID3DXEffect* _effect;
+            ComPtr<IDirect3DVertexShader9> _vertexShader;
+            ComPtr<IDirect3DPixelShader9> _pixelShader;
             D3DXHANDLE _technique;
             int _nbTextures;
 
@@ -38,6 +40,7 @@ namespace Tools { namespace Renderers {
 
         public:
             ShaderProgram(DX9Renderer& renderer, std::string const& effect);
+            ShaderProgram(DX9Renderer& renderer, std::string const& vertexShader, std::string const& vsFunc, std::string const& pixelShader, std::string const& psFunc);
             virtual ~ShaderProgram();
 
             virtual IShaderParameter& GetParameter(std::string const& identifier);
