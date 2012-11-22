@@ -28,6 +28,8 @@ namespace Client { namespace Game { namespace Engine {
         namespaceTable.Set("Spawn", i.MakeFunction(std::bind(&ModelManager::_ApiSpawn, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&ModelManager::_ApiKill, this, std::placeholders::_1)));
         namespaceTable.Set("Register", i.MakeFunction(std::bind(&ModelManager::_ApiRegister, this, std::placeholders::_1)));
+        namespaceTable.Set("SolderToBody", i.MakeFunction(std::bind(&ModelManager::_ApiSolderToBody, this, std::placeholders::_1)));
+        namespaceTable.Set("SolderNodeToBodyNode", i.MakeFunction(std::bind(&ModelManager::_ApiSolderNodeToBodyNode, this, std::placeholders::_1)));
         this->_modelRenderer = new ModelRenderer(this->_engine.GetGame());
     }
 
@@ -98,6 +100,8 @@ namespace Client { namespace Game { namespace Engine {
         auto object = i.MakeTable();
         object.Set("id", modelId);
         object.Set("Kill", i.MakeFunction(std::bind(&ModelManager::_ApiKill, this, std::placeholders::_1)));
+        object.Set("SolderToBody", i.MakeFunction(std::bind(&ModelManager::_ApiSolderToBody, this, std::placeholders::_1)));
+        object.Set("SolderNodeToBodyNode", i.MakeFunction(std::bind(&ModelManager::_ApiSolderNodeToBodyNode, this, std::placeholders::_1)));
         return object;
     }
 
@@ -228,6 +232,38 @@ namespace Client { namespace Game { namespace Engine {
         }
         this->_modelTypes[modelName] = new ModelType(modelName, resourceId);
         Tools::debug << "Model \"" << modelName << "\" registered." << std::endl;
+    }
+
+    void ModelManager::_ApiSolderToBody(Tools::Lua::CallHelper& helper)
+    {
+        //TODO
+    }
+
+    void ModelManager::_ApiSolderNodeToBodyNode(Tools::Lua::CallHelper& helper)
+    {
+        // trouve le model
+        Uint32 modelId = helper.PopArg("Client.Model.SolderNodeToBodyNode: Missing argument \"modelId\"").Check<Uint32>("Client.Model.SolderNodeToBodyNode: Argument \"modelId\" must be a number");
+        std::string modelNode = helper.PopArg("Client.Model.SolderNodeToBodyNode: Missing argument \"modelNode\"").Check<std::string>("Client.Model.SolderNodeToBodyNode: Argument \"modelNode\" must be a number");
+        std::string bodyNode = helper.PopArg("Client.Model.SolderNodeToBodyNode: Missing argument \"bodyNode\"").Check<std::string>("Client.Model.SolderNodeToBodyNode: Argument \"bodyNode\" must be a number");
+        auto it = this->_models.find(modelId);
+        if (it == this->_models.end())
+        {
+            Tools::error << "ModelManager::_ApiSolderNodeToBodyNode: No model with id " << modelId << "\n";
+            return;
+        }
+
+        auto& model = *it->second;
+        auto& doodad = this->_engine.GetDoodadManager().GetDoodad(model.GetDoodadId());
+        Body const* body = doodad.GetBody();
+
+        if (body == 0)
+        {
+            Tools::error << "Client.Model.ApiSolderNodeToBodyNode: bodyless doodad\n";
+            return;
+        }
+
+        // TODO la suiitititiuuiuiuite
+
     }
 
 }}}

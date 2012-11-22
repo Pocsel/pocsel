@@ -12,6 +12,7 @@ namespace Client { namespace Game { namespace Engine {
 
     class ModelType;
     class Doodad;
+    class BodyType;
 
     class Model :
         private boost::noncopyable
