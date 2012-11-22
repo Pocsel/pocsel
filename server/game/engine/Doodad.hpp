@@ -43,8 +43,6 @@ namespace Server { namespace Game { namespace Engine {
         PositionalEntity& _entity;
         Tools::Lua::Ref _storage;
         std::unique_ptr<Body> _body;
-        //std::unordered_set<Uint32> _players;
-        //std::unordered_set<Uint32> _newPlayers;
         std::queue<Command> _commands;
         std::queue<Command> _commandsUdp;
         bool _positionDirty;
@@ -68,8 +66,6 @@ namespace Server { namespace Game { namespace Engine {
         void SetStorage(Tools::Lua::Ref const& ref); // il faut pas que ça soit autre chose qu'une table sinon ça va throw grave
         void Disable();
         void Enable();
-        //void AddPlayer(Uint32 playerId);
-        //void RemovePlayer(Uint32 playerId);
         void ExecuteCommands();
         void Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value);
         void Call(std::string const& name, Tools::Lua::Ref const& value);
@@ -77,6 +73,9 @@ namespace Server { namespace Game { namespace Engine {
         void CallUdp(std::string const& name, Tools::Lua::Ref const& value);
         void PositionIsDirty();
         Uint32 GetWeakReferenceId() const { return this->_weakReferenceId; }
+
+        void SetAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
+        void SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
     private:
         void _SpawnForNewPlayers();
     };

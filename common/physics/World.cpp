@@ -1,10 +1,28 @@
 #include "common/physics/World.hpp"
 #include "common/physics/Body.hpp"
+#include "common/physics/BodyCluster.hpp"
 
 #include "bullet/bullet-all.hpp"
 
 
 namespace Common { namespace Physics {
+
+    struct _cb {
+        static void _TickCallBack(btDynamicsWorld* btWorld, btScalar timeStep)
+        {
+            World& world = *(World*)btWorld->getWorldUserInfo();
+            for (auto cb: world._callbacks)
+            {
+                if (cb.first)
+                    cb.first(cb.second);
+            }
+
+            for (auto body: world._bodyClusters)
+            {
+                body->Tick();
+            }
+        }
+    };
 
     World::World() :
         _dynamicsWorld(0),
@@ -12,21 +30,24 @@ namespace Common { namespace Physics {
         _dispatcher(0),
         _solver(0),
         _collisionConfiguration(0),
-        _lastTime(0)
+        _lastTime(0),
+        _gravity(0.0,-9.81,0.0)
     {
         ///collision configuration contains default setup for memory, collision setup
-        _collisionConfiguration = new btDefaultCollisionConfiguration();
+        this->_collisionConfiguration = new btDefaultCollisionConfiguration();
         ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-        _dispatcher = new btCollisionDispatcher(_collisionConfiguration);
+        this->_dispatcher = new btCollisionDispatcher(_collisionConfiguration);
 
-        _broadphase = new btDbvtBroadphase();
+        this->_broadphase = new btDbvtBroadphase();
 
         ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
-        _solver = new btSequentialImpulseConstraintSolver();
+        this->_solver = new btSequentialImpulseConstraintSolver();
 
-        _dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
+        this->_dynamicsWorld = new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration);
 
-        _dynamicsWorld->setGravity(btVector3(0.0,-9.81,0.0));
+        this->_dynamicsWorld->setGravity(this->_gravity);
+
+        this->_dynamicsWorld->setInternalTickCallback(_cb::_TickCallBack, this);
     }
 
     World::~World()
@@ -41,7 +62,37 @@ namespace Common { namespace Physics {
     void World::Tick(Uint64 totalTime)
     {
         double deltaTime = (totalTime - this->_lastTime) * 0.000001;
-        this->_dynamicsWorld->stepSimulation(deltaTime, 4, 1.0 / 60.0);
+        this->_dynamicsWorld->stepSimulation(deltaTime, 10, 1.0 / 60.0);
+    }
+
+    size_t World::AddCallback(TickCallback cb, void* userPtr)
+    {
+        this->_callbacks.push_back(std::make_pair(cb, userPtr));
+        return this->_callbacks.size() - 1;
+    }
+
+    void World::RemoveCallback(size_t idx)
+    {
+        assert(this->_callbacks.size() > idx);
+        this->_callbacks[idx].first = 0;
+    }
+
+    void World::AddBodyCluster(BodyCluster* body)
+    {
+        this->_bodyClusters.push_back(body);
+    }
+
+    void World::RemoveBodyCluster(BodyCluster* body)
+    {
+        for (auto it = this->_bodyClusters.begin(), ite = this->_bodyClusters.end(); it != ite; ++it)
+        {
+            if (*it == body)
+            {
+                this->_bodyClusters.erase(it);
+                return;
+            }
+        }
+        assert(true && "this cluster has not been found");
     }
 
 }}

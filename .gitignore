@@ -33,3 +33,4 @@ build_*
 *.pch
 *.rule
 .clang_complete
+luasel

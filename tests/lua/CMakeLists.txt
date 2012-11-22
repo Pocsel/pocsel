@@ -18,6 +18,7 @@ target_link_libraries(test_lua
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}
+    luasel
 )
 
 SetProgramInfo(test_lua)

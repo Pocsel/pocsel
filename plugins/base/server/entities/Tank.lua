@@ -3,16 +3,47 @@ Server.Entity.RegisterPositional{
 
     Spawn = function(self)
         self.doodadPtr = Server.Doodad.Spawn(self.id, "base:Tank", "base:Tank")
+        Server.Message.Later(5, self.id, "DoShit")
+        self.upupup = true
+    end,
+
+    DoShit = function(self)
+        tmpPos = Server.Entity.GetPos(self.id)
+        if self.upupup then
+            print("Gun")
+            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 0, 0), 10)
+
+            d = self.doodadPtr:Lock()
+            if d then
+                Server.Doodad.SetAccel(self.doodadPtr, "Hull", Utils.Vector3(0, 20, 0), 10)
+            end
+
+            -- tmpPos.y = tmpPos.y + 10
+            self.upupup = false
+        else
+            print("errything")
+            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 20, 0), 10)
+
+            d = self.doodadPtr:Lock()
+            if d then
+                d:SetAccel("Hull", Utils.Vector3(0, 0, 0), 10)
+            end
+
+            -- tmpPos.y = tmpPos.y - 10
+            self.upupup = true
+        end
+        -- Server.Entity.SetPos(self.id, tmpPos)
+        -- Server.Entity.SetPos(self.id, Utils.Vector3(67108864, 16777216 + 10, 67108864))
+        Server.Message.Later(10, self.id, "DoShit")
     end,
 
     DoStuff = function(self)
         Server.Entity.SetPos(self.id, { X, Y, Z }) -- bouge tous les bodies
         Server.Entity.SetAngle(self.id, { A, B, C }) -- tourne tous les bodies
-        Server.Entity.SetScale(self.id, {1, 2, 1})
 
-        Server.Body.SetPos(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
-        Server.Body.SetAngle(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
-        Server.Body.SetScale(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
+        --Server.Body.SetPos(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
+        --Server.Body.SetAngle(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
+        --Server.Body.SetScale(self.d, "Cannon", { X, Y, Z }) -- bouge le cannon par rapport a l'origine de son noeud
 
         d = self.doodadPtr:Lock()
         if d ~= nil then
@@ -37,11 +68,14 @@ Server.Body.Register{
             position = { 0, 0, 0 }, -- par rapport au parent (entité positionnelle)
             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
             shape = {
-                shapeType = "box", -- pour le moment y'a que box ou sphere
-                halfExtents = {4, 2, 4}
+                --        shapeType = "sphere",
+                --        radius = 4
+                 shapeType = "box", -- pour le moment y'a que box ou sphere
+                 halfExtents = {4, 2, 4}
             },
             mass = 1200,
 
+            ---[[--
             children = {
                 {
                     name = "Turret",
@@ -69,6 +103,7 @@ Server.Body.Register{
                     }
                 },
             },
+            --]]--
         }
 --        {
 --            ... -- autre noeud a la racine

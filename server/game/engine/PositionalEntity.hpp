@@ -17,6 +17,7 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Common::Physics::BodyCluster* _bodyCluster;
         Common::Physics::Node _physics;
+        std::vector<Common::Physics::Node> _clusterPhysics;
         std::set<Uint32> _players;
         std::set<Uint32> _newPlayers;
         bool _isDirty;
@@ -31,17 +32,20 @@ namespace Server { namespace Game { namespace Engine {
         ~PositionalEntity();
 
         Common::Position const& GetPosition() const { return this->_physics.position; }
-        void SetPosition(Common::Position const& pos) { this->_physics.position = pos; }
-        glm::dvec3 const& GetSpeed() const { return this->_physics.velocity; }
-        void SetSpeed(glm::dvec3 const& speed) { this->_physics.velocity = speed; }
-        glm::dvec3 const& GetAccel() const { return this->_physics.acceleration; }
-        void SetAccel(glm::dvec3 const& accel) { this->_physics.acceleration = accel; }
+        void SetPosition(Common::Position const& pos);// { this->_physics.position = pos; }
+
+        void SetAccel(glm::dvec3 const& accel, double maxSpeed);
+        void SetLocalAccel(glm::dvec3 const& accel, double maxSpeed);
+
+        //glm::dvec3 const& GetSpeed() const { return this->_physics.velocity; }
+        //void SetSpeed(glm::dvec3 const& speed);// { this->_physics.velocity = speed; }
+        //glm::dvec3 const& GetAccel() const { return this->_physics.acceleration; }
+        //void SetAccel(glm::dvec3 const& accel) { this->_physics.acceleration = accel; }
+
+        //Common::Physics::Node const& GetPhysics() const;// { return this->_physics; }
+        //void SetPhysics(Common::Physics::Node const& p);// { this->_physics = p; }
 
         Common::Physics::Node const& GetPhysics() const { return this->_physics; }
-        void SetPhysics(Common::Physics::Node const& p) { this->_physics = p; }
-
-        Common::Physics::Node& GetPhysics() { return this->_physics; }
-
         Common::Physics::BodyCluster& GetBodyCluster() { return *this->_bodyCluster; }
 
         void UpdatePhysics();

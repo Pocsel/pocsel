@@ -5,7 +5,7 @@ Server.Entity.RegisterPositional{
     Spawn = function(self)
         self.doodadPtr = Server.Doodad.Spawn(self.id, "base:Ball", "base:Ball")
         d = self.doodadPtr:Lock()
-        if d ~= nil then
+        if d then
             d:Set("caca", 12)
         end
     end,

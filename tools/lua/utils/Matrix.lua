@@ -82,7 +82,7 @@ function module.matrix4MetaTable.__mul(m1, m2)
     local m1m31 = m1.m31
     local m1m32 = m1.m32
     local m1m33 = m1.m33
-        
+
     local m2m00 = m2.m00
     local m2m01 = m2.m01
     local m2m02 = m2.m02
@@ -99,7 +99,7 @@ function module.matrix4MetaTable.__mul(m1, m2)
     local m2m31 = m2.m31
     local m2m32 = m2.m32
     local m2m33 = m2.m33
-        
+
     r = {
         m00 = m1m00 * m2m00 + m1m01 * m2m10 + m1m02 * m2m20 + m1m03 * m2m30,
         m01 = m1m00 * m2m01 + m1m01 * m2m11 + m1m02 * m2m21 + m1m03 * m2m31,

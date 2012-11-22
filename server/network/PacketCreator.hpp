@@ -77,7 +77,7 @@ namespace Server { namespace Network {
                 Game::Engine::Body const* body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function */, std::string /* value */>> const& commands);
 
-        static std::unique_ptr<UdpPacket> EntityUpdate(Uint32 entityId, Common::Physics::Node const& position);
+        static std::unique_ptr<UdpPacket> EntityUpdate(Uint32 entityId, std::vector<Common::Physics::Node> const& position);
     };
 
 }}

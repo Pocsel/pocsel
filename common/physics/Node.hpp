@@ -1,7 +1,8 @@
 #ifndef __COMMON_PHYSICS_NODE_HPP__
 #define __COMMON_PHYSICS_NODE_HPP__
 
-#include "common/physics/Vector.hpp"
+//#include "common/physics/Vector.hpp"
+//#include "common/physics/Acceleration.hpp"
 #include "common/Position.hpp"
 
 namespace Common { namespace Physics {
@@ -10,11 +11,16 @@ namespace Common { namespace Physics {
     {
         Common::Position position;
         Common::Position velocity;
-        Common::Position acceleration;
+        //Common::Position acceleration;
 
         glm::quat orientation;
         glm::vec3 angularVelocity;
         //glm::vec3 angularAcceleration;
+
+        //Acceleration accel;
+        bool accelerationIsLocal;
+        Common::Position acceleration;
+        double maxSpeed;
 
         //glm::vec3 scale;
         //glm::vec3 scaleVelocity;
@@ -23,6 +29,7 @@ namespace Common { namespace Physics {
        // Vector<double> position;
        // Vector<float> yawPitchRoll;
        // Vector<float> scale;
+        Node() : accelerationIsLocal(false), acceleration(0, 0, 0) {}
     };
 
 }}

@@ -1,20 +1,25 @@
 #ifndef __COMMON_PHYSICS_WORLD_HPP__
 #define __COMMON_PHYSICS_WORLD_HPP__
 
-class btDynamicsWorld;
-class btBroadphaseInterface;
-class btCollisionDispatcher;
-class btConstraintSolver;
-class btDefaultCollisionConfiguration;
+#include "bullet/bullet-all.hpp"
+
+//class btDynamicsWorld;
+//class btBroadphaseInterface;
+//class btCollisionDispatcher;
+//class btConstraintSolver;
+//class btDefaultCollisionConfiguration;
 
 namespace Common { namespace Physics {
     class Body;
+    class BodyCluster;
 }}
 
 namespace Common { namespace Physics {
 
     class World
     {
+    public:
+        typedef void (*TickCallback)(void*);
     private:
         btDynamicsWorld* _dynamicsWorld;
         btBroadphaseInterface* _broadphase;
@@ -24,12 +29,28 @@ namespace Common { namespace Physics {
 
         Uint64 _lastTime;
 
+        std::vector<std::pair<TickCallback, void*>> _callbacks;
+        std::vector<BodyCluster*> _bodyClusters;
+
+        btVector3 _gravity;
+
     public:
         World();
         ~World();
         void Tick(Uint64 totalTime);
 
         btDynamicsWorld& GetBtWorld() { return *this->_dynamicsWorld; }
+
+        size_t AddCallback(TickCallback cb, void* userPtr);
+        void RemoveCallback(size_t idx);
+
+        void AddBodyCluster(BodyCluster* body);
+        void RemoveBodyCluster(BodyCluster* body);
+
+        btVector3 const& GetGravity() const { return this->_gravity; }
+
+    private:
+        friend struct _cb;
     };
 
 }}
