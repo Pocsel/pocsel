@@ -3,8 +3,7 @@
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
-    VertexBuffer::VertexBuffer(GLRenderer& renderer) :
-        _renderer(renderer)
+    VertexBuffer::VertexBuffer()
     {
         this->_stride = 0;
         this->_nbAttrib = 0;
@@ -43,21 +42,97 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
     void VertexBuffer::Bind()
     {
-        this->_renderer.bindedVertexBuffer = this;
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, this->_id));
-        for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
+
+        auto it = this->_attributes,
+            itEnd = this->_attributes + this->_nbAttrib;
+        for (; it != itEnd; ++it)
         {
-            GLCHECK(glVertexAttribPointerARB(GetVertexAttributeIndex(it->location), it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
-            GLCHECK(glEnableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
+            switch (it->location)
+            {
+            case VertexAttributeUsage::Position:
+                GLCHECK(glVertexPointer(it->nbElements, it->type, this->_stride, it->offset));
+                GLCHECK(glEnableClientState(GL_VERTEX_ARRAY));
+                break;
+
+            case VertexAttributeUsage::Normal:
+                GLCHECK(glNormalPointer(it->type, this->_stride, it->offset));
+                GLCHECK(glEnableClientState(GL_NORMAL_ARRAY));
+                break;
+
+            case VertexAttributeUsage::Color:
+                GLCHECK(glColorPointer(it->nbElements, it->type, this->_stride, it->offset));
+                GLCHECK(glEnableClientState(GL_COLOR_ARRAY));
+                break;
+
+            case VertexAttributeUsage::TexCoord:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
+                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
+                GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
+                break;
+
+            case VertexAttributeUsage::Custom1:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE1_ARB));
+                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
+                GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
+                break;
+
+            case VertexAttributeUsage::Custom2:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE2_ARB));
+                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
+                GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
+                break;
+
+            default:
+                GLCHECK(glVertexAttribPointerARB(it->location, it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
+                GLCHECK(glEnableVertexAttribArrayARB(it->location));
+                break;
+            }
         }
     }
 
     void VertexBuffer::Unbind()
     {
-        this->_renderer.bindedVertexBuffer = nullptr;
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0));
-        for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
-            GLCHECK(glDisableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
+        auto it = this->_attributes,
+            itEnd = this->_attributes + this->_nbAttrib;
+        for (; it != itEnd; ++it)
+        {
+            switch (it->location)
+            {
+            case VertexAttributeUsage::Position:
+                GLCHECK(glDisableClientState(GL_VERTEX_ARRAY));
+                break;
+
+            case VertexAttributeUsage::Normal:
+                GLCHECK(glDisableClientState(GL_NORMAL_ARRAY));
+                break;
+
+            case VertexAttributeUsage::Color:
+                GLCHECK(glDisableClientState(GL_COLOR_ARRAY));
+                break;
+
+            case VertexAttributeUsage::TexCoord:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
+                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
+                break;
+
+            case VertexAttributeUsage::Custom1:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE1_ARB));
+                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
+                break;
+
+            case VertexAttributeUsage::Custom2:
+                GLCHECK(glClientActiveTextureARB(GL_TEXTURE2_ARB));
+                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
+                break;
+
+            default:
+                GLCHECK(glDisableVertexAttribArrayARB(it->location));
+                break;
+            }
+        }
+        GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
     }
 
 }}}

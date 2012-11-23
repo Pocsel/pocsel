@@ -6,24 +6,10 @@
 
 namespace Tools { namespace Renderers { namespace Utils {
 
-    namespace {
-        unsigned int _NextPowerOf2(unsigned int n)
-        {
-            --n;
-            n = n | (n >> 1);
-            n = n | (n >> 2);
-            n = n | (n >> 4);
-            n = n | (n >> 8);
-            n = n | (n >> 16);
-            return ++n;
-        }
-    }
-
     GBuffer::GBuffer(IRenderer& renderer, glm::uvec2 const& size, IShaderProgram& combineShader) :
         _renderer(renderer),
         _combineShader(combineShader),
-        _quad(renderer),
-        _size(size)
+        _quad(renderer)
     {
         this->_gbufferRenderTarget = this->_renderer.CreateRenderTarget(size);
         this->_gbufferRenderTarget->PushRenderTarget(Tools::Renderers::PixelFormat::Rgba16f, Tools::Renderers::RenderTargetUsage::Color); // Colors
@@ -40,23 +26,25 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_lightTexture = &this->_combineShader.GetParameter("lighting");
         this->_specularTexture = &this->_combineShader.GetParameter("specular");
 
+        //glm::fvec2 sizef(size);
+        //this->_mvp = glm::ortho(0.0f, sizef.x, sizef.y, 0.0f)
+        //    * glm::scale(sizef.x, sizef.y, 1.0f)
+        //    * glm::translate(0.5f, 0.5f, 1.0f);
         this->_mvp = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
     }
 
     void GBuffer::Resize(glm::uvec2 const& size)
     {
-        this->_size = size;
         this->_gbufferRenderTarget->Resize(size);
         this->_lightRenderTarget->Resize(size);
         this->_finalRenderTarget->Resize(size);
 
-        //this->_mvp = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
+        this->_mvp = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
     }
 
     void GBuffer::Bind()
     {
         this->_renderer.BeginDraw(this->_gbufferRenderTarget.get());
-        this->_renderer.SetViewport(glm::uvec2(0), this->_size);
     }
 
     void GBuffer::Unbind()
@@ -67,7 +55,6 @@ namespace Tools { namespace Renderers { namespace Utils {
     void GBuffer::BeginLighting()
     {
         this->_renderer.BeginDraw(this->_lightRenderTarget.get());
-        this->_renderer.SetViewport(glm::uvec2(0), this->_size);
     }
 
     void GBuffer::EndLighting()
@@ -107,7 +94,7 @@ namespace Tools { namespace Renderers { namespace Utils {
         this->_renderer.EndDraw();
 
         this->_renderer.SetDepthTest(false);
-        //this->_renderer.SetCullMode(CullMode::None);
+        this->_renderer.SetCullMode(CullMode::None);
         // Post processing shaders
         finalImg.Bind();
         normalDepth.Bind();

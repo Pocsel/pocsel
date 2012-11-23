@@ -49,35 +49,6 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_worldViewInverseTranspose = this->_effect->GetParameterByName(0, "worldViewInverseTranspose");
     }
 
-    ShaderProgram::ShaderProgram(DX9Renderer& renderer, std::string const& vertexShader, std::string const& vsFunc, std::string const& pixelShader, std::string const& psFunc) :
-        _renderer(renderer),
-        _nbTextures(0),
-        _mvp(0),
-        _vp(0),
-        _mv(0),
-        _model(0),
-        _view(0),
-        _projection(0),
-        _pass(0)
-    {
-        // Compilation:
-        ID3DXBuffer* errors;
-        ID3DXBuffer* vsShader;
-        ID3DXBuffer* psShader;
-        if (FAILED(D3DXCompileShader(vertexShader.c_str(), vertexShader.size(), nullptr, nullptr, vsFunc.c_str(), "vs_3_0", D3DXSHADER_OPTIMIZATION_LEVEL3, &vsShader, &errors, nullptr)))
-            throw std::runtime_error(std::string("DX9::Shader errors: ") + (char const*)errors->GetBufferPointer());
-        if (FAILED(D3DXCompileShader(pixelShader.c_str(), pixelShader.size(), nullptr, nullptr, psFunc.c_str(), "ps_3_0", D3DXSHADER_OPTIMIZATION_LEVEL3, &psShader, &errors, nullptr)))
-            throw std::runtime_error(std::string("DX9::Shader errors: ") + (char const*)errors->GetBufferPointer());
-
-        IDirect3DVertexShader9* tmpVS;
-        DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexShader((DWORD*)vsShader->GetBufferPointer(), &tmpVS));
-        this->_vertexShader.reset(tmpVS);
-        IDirect3DPixelShader9* tmpPS;
-        DXCHECKERROR(this->_renderer.GetDevice()->CreatePixelShader((DWORD*)psShader->GetBufferPointer(), &tmpPS));
-        this->_pixelShader.reset(tmpPS);
-        
-    }
-
     ShaderProgram::~ShaderProgram()
     {
         this->_renderer.Unregister(*this);

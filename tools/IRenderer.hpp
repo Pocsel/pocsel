@@ -1,10 +1,6 @@
 #ifndef __TOOLS_IRENDERER_HPP__
 #define __TOOLS_IRENDERER_HPP__
 
-#ifdef _MSC_VER
-#include "tools/precompiled.hpp"
-#endif
-
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
@@ -12,10 +8,6 @@
 #ifdef None
 # undef None
 #endif
-
-namespace Tools {
-    class ByteArray;
-}
 
 namespace Tools {
 
@@ -108,25 +100,12 @@ namespace Tools {
                 Position = 0,
                 Color,
                 Normal,
-                TexCoord0,
-                TexCoord1,
-                TexCoord2,
-                TexCoord3,
-                TexCoord4,
-                // For arrays only
-                Max
+                TexCoord,
+                Custom1,
+                Custom2,
+                Custom3,
+                Custom4
             };
-            static char const* const typeToName[] =
-                {
-                    "position",
-                    "color",
-                    "normal",
-                    "texCoord0",
-                    "texCoord1",
-                    "texCoord2",
-                    "texCoord3",
-                    "texCoord4",
-                };
         }
 
         namespace CullMode
@@ -315,7 +294,6 @@ namespace Tools {
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath) = 0;
         virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect) = 0;
-        virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(ByteArray& stream) = 0;
 
         // Drawing
         virtual void Clear(int clearFlags) = 0;
@@ -335,7 +313,6 @@ namespace Tools {
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size) = 0;
-        virtual void SetViewport(glm::uvec2 const& offset, glm::uvec2 const& size) = 0;
         virtual void SetClearColor(glm::vec4 const& color) = 0;
         virtual void SetClearDepth(float value) = 0;
         virtual void SetClearStencil(int value) = 0;

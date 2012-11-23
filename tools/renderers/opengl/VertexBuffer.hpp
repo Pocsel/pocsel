@@ -1,13 +1,13 @@
 #ifndef __TOOLS_RENDERERS_OPENGL_VERTEXBUFFER_HPP__
 #define __TOOLS_RENDERERS_OPENGL_VERTEXBUFFER_HPP__
 
-#include "tools/renderers/GLRenderer.hpp"
+#include "tools/IRenderer.hpp"
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
     class VertexBuffer : public IVertexBuffer
     {
-    public:
+    private:
         enum
         {
             MaxAttributes = 8
@@ -15,14 +15,13 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
         struct VertexAttribute
         {
-            VertexAttributeUsage::Type location;
+            GLint location;
             GLint nbElements;
             GLint type;
             GLvoid* offset;
         };
 
     private:
-        GLRenderer& _renderer;
         GLuint _id;
         GLuint _stride;
 
@@ -30,7 +29,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         VertexAttribute _attributes[MaxAttributes];
 
     public:
-        VertexBuffer(GLRenderer& renderer);
+        VertexBuffer();
         virtual ~VertexBuffer();
 
         virtual void PushVertexAttribute(DataType::Type type, VertexAttributeUsage::Type usage, Uint32 nbElements);
@@ -39,9 +38,6 @@ namespace Tools { namespace Renderers { namespace OpenGL {
 
         virtual void Bind();
         virtual void Unbind();
-
-        int GetAttributesCount() const { return this->_nbAttrib; }
-        VertexAttribute const* GetAttributes() const { return this->_attributes; }
     };
 
 }}}

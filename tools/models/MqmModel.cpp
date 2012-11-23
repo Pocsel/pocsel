@@ -183,11 +183,11 @@ namespace Tools { namespace Models {
         this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
                 Tools::Renderers::VertexAttributeUsage::Normal, 3);
         this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
-                Tools::Renderers::VertexAttributeUsage::TexCoord0, 2);
+                Tools::Renderers::VertexAttributeUsage::TexCoord, 2);
         this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
-                Tools::Renderers::VertexAttributeUsage::TexCoord1, 4);
+                Tools::Renderers::VertexAttributeUsage::Custom1, 4);
         this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
-                Tools::Renderers::VertexAttributeUsage::TexCoord2, 4);
+                Tools::Renderers::VertexAttributeUsage::Custom2, 4);
         this->_vertexBuffer->SetData(sizeof(float) * vertexBuffer.size(), vertexBuffer.data(), Tools::Renderers::VertexBufferUsage::Static);
 
         //mesh.indexBuffer->SetData(Tools::Renderers::DataType::UnsignedInt, sizeof(GLuint) * mesh.indexes.size(), &(mesh.indexes[0]));

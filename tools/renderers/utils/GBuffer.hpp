@@ -29,7 +29,6 @@ namespace Tools { namespace Renderers { namespace Utils {
 
         Image _quad;
         glm::mat4x4 _mvp;
-        glm::uvec2 _size;
 
     public:
         GBuffer(IRenderer& renderer, glm::uvec2 const& size, IShaderProgram& combineShader);

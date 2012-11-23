@@ -10,11 +10,12 @@ namespace Tools { namespace Renderers { namespace DX9 {
     class RenderTarget : public IRenderTarget
     {
     private:
+        struct _Deleter { void operator()(IUnknown* ptr) { ptr->Release(); } };
         DX9Renderer& _renderer;
         glm::uvec2 _size;
         std::vector<std::unique_ptr<ITexture2D>> _textures;
-        std::vector<ComPtr<IDirect3DSurface9>> _surfaces;
-        ComPtr<IDirect3DSurface9> _depthBuffer;
+        std::vector<std::unique_ptr<IDirect3DSurface9, _Deleter>> _surfaces;
+        std::unique_ptr<IDirect3DSurface9, _Deleter> _depthBuffer;
 
         std::vector<std::pair<PixelFormat::Type, RenderTargetUsage::Type>> _targets;
 

@@ -5,42 +5,18 @@
 #endif
 
 #ifdef new
-# undef new
+#undef new
 #endif
 #include <d3dx9.h>
 
 #include "DxErr.h"
 #ifdef DEBUG_NEW
-# define new DEBUG_NEW
+#define new DEBUG_NEW
 #endif
 
 #include "tools/IRenderer.hpp"
 
 namespace Tools { namespace Renderers { namespace DX9 {
-
-    struct ComPtrDeleter { void operator()(IUnknown* ptr) { ptr->Release(); } };
-    template<class T>
-    struct ComPtr
-    {
-    private:
-        typedef std::unique_ptr<T, ComPtrDeleter> _base;
-        _base _ptr;
-    public:
-        ComPtr() {}
-        ComPtr(nullptr_t) {}
-        explicit ComPtr(T* ptr) : _ptr(ptr) {}
-        ComPtr(ComPtr&& ptr) : _ptr(std::move(ptr._ptr)) {}
-        ComPtr& operator =(ComPtr&& ptr) { _ptr = std::move(ptr._ptr); return *this; }
-        T* get() const { return _ptr.get(); }
-        T& operator *() const { return _ptr.operator *(); }
-        T* operator ->() const { return _ptr.operator ->(); }
-        void reset(T* ptr = nullptr) { _ptr.reset(ptr); }
-        bool operator ==(nullptr_t) { return _ptr == nullptr; }
-        bool operator !=(nullptr_t) { return _ptr != nullptr; }
-    private:
-        ComPtr(ComPtr const&);
-        ComPtr& operator =(ComPtr const&);
-    };
 
     inline D3DFORMAT GetIndexBufferFormat(DataType::Type type)
     {
@@ -103,11 +79,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case VertexAttributeUsage::Position: return D3DDECLUSAGE_POSITION;
         case VertexAttributeUsage::Normal: return D3DDECLUSAGE_NORMAL;
         case VertexAttributeUsage::Color: return D3DDECLUSAGE_COLOR;
-        case VertexAttributeUsage::TexCoord0:
-        case VertexAttributeUsage::TexCoord1:
-        case VertexAttributeUsage::TexCoord2:
-        case VertexAttributeUsage::TexCoord3:
-        case VertexAttributeUsage::TexCoord4:
+        case VertexAttributeUsage::TexCoord:
+        case VertexAttributeUsage::Custom1:
+        case VertexAttributeUsage::Custom2:
+        case VertexAttributeUsage::Custom3:
+        case VertexAttributeUsage::Custom4:
             return D3DDECLUSAGE_TEXCOORD;
         }
         throw std::runtime_error("Bad VertexAttributeUsage ?!");
@@ -120,12 +96,12 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case VertexAttributeUsage::Position:
         case VertexAttributeUsage::Normal:
         case VertexAttributeUsage::Color:
-        case VertexAttributeUsage::TexCoord0:
+        case VertexAttributeUsage::TexCoord:
             return 0;
-        case VertexAttributeUsage::TexCoord1: return 1;
-        case VertexAttributeUsage::TexCoord2: return 2;
-        case VertexAttributeUsage::TexCoord3: return 3;
-        case VertexAttributeUsage::TexCoord4: return 4;
+        case VertexAttributeUsage::Custom1: return 1;
+        case VertexAttributeUsage::Custom2: return 2;
+        case VertexAttributeUsage::Custom3: return 3;
+        case VertexAttributeUsage::Custom4: return 4;
         }
         throw std::runtime_error("Bad VertexAttributeUsage ?!");
     }

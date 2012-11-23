@@ -67,7 +67,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
             this->_renderer.GetDevice()->SetRenderTarget((DWORD)i, this->_surfaces[i].get());
         for (; i < DX9Renderer::MaxRenderTargets; ++i)
             this->_renderer.GetDevice()->SetRenderTarget((DWORD)i, 0);
-        if (this->_depthBuffer != nullptr)
+        if (this->_depthBuffer)
             this->_renderer.GetDevice()->SetDepthStencilSurface(this->_depthBuffer.get());
     }
 
