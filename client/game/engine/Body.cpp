@@ -11,7 +11,16 @@ namespace Client { namespace Game { namespace Engine {
 
     bool Body::BindNode(std::string const& nodeName, std::shared_ptr<glm::mat4x4> const& boundNode)
     {
-
+        unsigned int idx = 0;
+        for (auto& node: this->_type.GetShapes())
+        {
+            if (node.name == nodeName)
+            {
+                this->_boundNodes[idx] = boundNode;
+                return true;
+            }
+        }
+        return false;
     }
 
 }}}

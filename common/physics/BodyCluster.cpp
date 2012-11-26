@@ -125,6 +125,11 @@ namespace Common { namespace Physics {
         //this->_body->setAngularVelocity(btVector3(0, 360, 0));
     }
 
+    void BodyCluster::PostTick()
+    {
+        // TODO J'EN SUIS LA
+    }
+
     void BodyCluster::PreBtTick(btScalar timeStep)
     {
         for (auto body: _constraints)

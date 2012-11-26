@@ -81,8 +81,14 @@ namespace Common { namespace Physics {
         {
             body->PreTick();
         }
+
         double deltaTime = (totalTime - this->_lastTime) * 0.000001;
         this->_dynamicsWorld->stepSimulation(deltaTime, 10, 1.0 / 60.0);
+
+        for (auto body: this->_bodyClusters)
+        {
+            body->PostTick();
+        }
     }
 
     size_t World::AddCallback(TickCallback cb, void* userPtr)

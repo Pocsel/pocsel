@@ -39,6 +39,7 @@ namespace Common { namespace Physics {
         ~BodyCluster();
 
         void PreTick();
+        void PostTick();
         void PreBtTick(btScalar timeStep);
 
         btRigidBody& GetBtBody() { return *this->_body; }

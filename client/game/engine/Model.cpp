@@ -196,7 +196,17 @@ namespace Client { namespace Game { namespace Engine {
 
     bool Model::BindBone(std::string const& boneName, std::shared_ptr<glm::mat4x4> const& boundBone)
     {
-
+        unsigned int idx = 0;
+        for (auto& jointInfo: this->_model.GetJointInfos())
+        {
+            if (jointInfo.name == boneName)
+            {
+                this->_boundBones[idx] = boundBone;
+                return true;
+            }
+            ++idx;
+        }
+        return false;
     }
 
 }}}
