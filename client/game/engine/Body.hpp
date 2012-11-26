@@ -12,15 +12,19 @@ namespace Client { namespace Game { namespace Engine {
     class Body :
         public Common::Physics::Body
     {
+    private:
+        std::vector<std::shared_ptr<glm::mat4x4>> _boundNodes;
+
     public:
         Body(Common::Physics::BodyCluster& parent, BodyType const& bodyType);
         BodyType const& GetType() const
         {
             return reinterpret_cast< ::Client::Game::Engine::BodyType const&>(this->_type);
         }
+
+        bool BindNode(std::string const& nodeName, std::shared_ptr<glm::mat4x4> const& boundNode);
     };
 
 }}}
 
 #endif
-

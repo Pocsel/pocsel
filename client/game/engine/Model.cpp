@@ -29,6 +29,10 @@ namespace Client { namespace Game { namespace Engine {
         if (this->_model.GetJointInfos().size() == 0)
             this->_animatedBones.assign(1, glm::mat4x4(1));
 
+        this->_boundBones.resize(this->_model.GetJointInfos().size());
+        if (this->_model.GetJointInfos().size() == 0)
+            this->_boundBones.resize(1);
+
         std::vector<std::string> const& materials = this->_model.GetMaterials();
         for (auto it = materials.begin(), ite = materials.end(); it != ite; ++it)
             this->_materials.push_back(resourceManager.GetMaterial(*it));
@@ -90,19 +94,19 @@ namespace Client { namespace Game { namespace Engine {
                     animatedJoint1.size = parentJoint1.size * animatedJoint1.size;
                 }
 
-                if (
-                        joints[i].name == "pelvis"
-                        ||
-                        joints[i].name == "neck"
-                        ||
-                        joints[i].name == "head"
-                        ||
-                        joints[i].name == "spine"
-                   )
-                {
-                    animatedJoint0.orientation = glm::normalize(glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f) * animatedJoint0.orientation);
-                    animatedJoint1.orientation = glm::normalize(glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f) * animatedJoint1.orientation);
-                }
+                //if (
+                //        joints[i].name == "pelvis"
+                //        ||
+                //        joints[i].name == "neck"
+                //        ||
+                //        joints[i].name == "head"
+                //        ||
+                //        joints[i].name == "spine"
+                //   )
+                //{
+                //    animatedJoint0.orientation = glm::normalize(glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f) * animatedJoint0.orientation);
+                //    animatedJoint1.orientation = glm::normalize(glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f) * animatedJoint1.orientation);
+                //}
 
                 this->_animatedBones[i] =
                     (
@@ -121,6 +125,9 @@ namespace Client { namespace Game { namespace Engine {
                     *
                     this->_model.GetInverseBindPose()[i]
                     ;
+
+                    if (this->_boundBones[i])
+                        this->_animatedBones[i] *= *this->_boundBones[i];
             }
         }
         else
@@ -140,34 +147,34 @@ namespace Client { namespace Game { namespace Engine {
                     //animatedJoint.size = parentJoint.size * animatedJoint.size;
                 }
 
-                if (
-                        joints[i].name == "Bone"
-                   )
-                {
-                    animatedJoint.orientation =
-                        glm::normalize(
-                                glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f), 0.0f, 1.0f, 0.0f)
-                                *
-                                animatedJoint.orientation
-                                );
-                }
-                if (
-                        joints[i].name == "pelvis"
-                        ||
-                        joints[i].name == "neck"
-                        ||
-                        joints[i].name == "head"
-                        ||
-                        joints[i].name == "spine"
-                   )
-                {
-                    animatedJoint.orientation =
-                        glm::normalize(
-                                glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f)
-                                *
-                                animatedJoint.orientation
-                                );
-                }
+                //if (
+                //        joints[i].name == "Bone"
+                //   )
+                //{
+                //    animatedJoint.orientation =
+                //        glm::normalize(
+                //                glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f), 0.0f, 1.0f, 0.0f)
+                //                *
+                //                animatedJoint.orientation
+                //                );
+                //}
+                //if (
+                //        joints[i].name == "pelvis"
+                //        ||
+                //        joints[i].name == "neck"
+                //        ||
+                //        joints[i].name == "head"
+                //        ||
+                //        joints[i].name == "spine"
+                //   )
+                //{
+                //    animatedJoint.orientation =
+                //        glm::normalize(
+                //                glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f)
+                //                *
+                //                animatedJoint.orientation
+                //                );
+                //}
 
                 this->_animatedBones[i] =
                     (
@@ -180,8 +187,16 @@ namespace Client { namespace Game { namespace Engine {
                     *
                     this->_model.GetInverseBindPose()[i]
                     ;
+
+                if (this->_boundBones[i])
+                    this->_animatedBones[i] *= *this->_boundBones[i];
             }
         }
+    }
+
+    bool Model::BindBone(std::string const& boneName, std::shared_ptr<glm::mat4x4> const& boundBone)
+    {
+
     }
 
 }}}
