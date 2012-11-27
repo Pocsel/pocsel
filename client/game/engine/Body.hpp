@@ -13,7 +13,7 @@ namespace Client { namespace Game { namespace Engine {
         public Common::Physics::Body
     {
     private:
-        std::vector<std::shared_ptr<glm::mat4x4>> _boundNodes;
+        std::vector<std::shared_ptr<Common::Physics::Node>> _boundNodes;
 
     public:
         Body(Common::Physics::BodyCluster& parent, BodyType const& bodyType);
@@ -22,7 +22,10 @@ namespace Client { namespace Game { namespace Engine {
             return reinterpret_cast< ::Client::Game::Engine::BodyType const&>(this->_type);
         }
 
-        bool BindNode(std::string const& nodeName, std::shared_ptr<glm::mat4x4> const& boundNode);
+        std::shared_ptr<Common::Physics::Node> BindNode(std::string const& nodeName);
+
+    private:
+        virtual void _PostTick();
     };
 
 }}}

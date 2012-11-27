@@ -361,6 +361,10 @@ namespace Common { namespace Physics {
             this->_ApplyAccelOnNode(accel, childId);
     }
 
+    void Body::_PostTick()
+    {
+    }
+
     void Body::_PreBtTick(btScalar timeStep)
     {
         btVector3 curTarget;

@@ -11,28 +11,31 @@ Server.Entity.RegisterPositional{
         tmpPos = Server.Entity.GetPos(self.id)
         if self.upupup then
             print("Hull & move canon forward")
-            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 0, 0), 10)
+            --Server.Entity.SetAccel(self.id, Utils.Vector3(0, 0, 0), 10)
 
             d = self.doodadPtr:Lock()
             if d then
                 Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(500, 0, 0), 10)
                 --Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Gun", Utils.Vector3(10, 0, 0), 10)
-                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 10)
+                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(3, 10, 5), 10)
                 --d:SetInterAngleTarget("Turret", Utils.Vector3(0, 2.3, 0), 10) -- roll yaw pitch ??
-                d:SetInterAngleTarget("Turret", Utils.Vector3(0, 0, 0.8), 10) -- roll yaw pitch ??
+                d:SetInterAngleTarget("Gun", Utils.Vector3(0, 0, 0.8), 10) -- roll yaw pitch ??
             end
 
             -- tmpPos.y = tmpPos.y + 10
             self.upupup = false
         else
             print("errything & rotate le toit")
-            Server.Entity.SetAccel(self.id, Utils.Vector3(0, 13, 0), 10)
+            --Server.Entity.SetAccel(self.id, Utils.Vector3(0, 13, 0), 10)
 
             d = self.doodadPtr:Lock()
             if d then
                 d:SetAccel("Hull", Utils.Vector3(0, 0, 0), 10)
                 --Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 1)
                 --d:SetInterAngleTarget("Turret", Utils.Vector3(0, 0, 1.5), 10)
+                --Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Gun", Utils.Vector3(10, 0, 0), 10)
+                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(10, 4, 1), 5)
+                d:SetInterAngleTarget("Gun", Utils.Vector3(0.1, 0.2, 30), 1) -- roll yaw pitch ??
             end
 
             -- tmpPos.y = tmpPos.y - 10
@@ -96,11 +99,11 @@ Server.Body.Register{
                     children = {
                         {
                             name = "Gun",
-                            position = { 3, 0, 0 }, -- par rapport au parent (noeud Turret)
+                            position = { 2.66, 0, 0 }, -- par rapport au parent (noeud Turret)
                             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                             shape = {
                                 shapeType = "box",
-                                halfExtents = {3.01, 0.51, 0.51}
+                                halfExtents = {3.34, 0.51, 0.51}
                             },
                             friction = 0.01,
                             restitution = 9.99,

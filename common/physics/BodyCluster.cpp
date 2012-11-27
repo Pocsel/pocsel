@@ -127,7 +127,8 @@ namespace Common { namespace Physics {
 
     void BodyCluster::PostTick()
     {
-        // TODO J'EN SUIS LA
+        for (auto body: _constraints)
+            body->_PostTick();
     }
 
     void BodyCluster::PreBtTick(btScalar timeStep)

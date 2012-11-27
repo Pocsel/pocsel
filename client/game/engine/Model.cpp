@@ -8,6 +8,8 @@
 #include "client/resources/ResourceManager.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 
+#include "common/physics/Node.hpp"
+
 namespace Client { namespace Game { namespace Engine {
 
     Model::Model(Resources::ResourceManager& resourceManager, Uint32 id, Uint32 doodadId, Doodad* doodad, ModelType* type) :
@@ -126,8 +128,8 @@ namespace Client { namespace Game { namespace Engine {
                     this->_model.GetInverseBindPose()[i]
                     ;
 
-                    if (this->_boundBones[i])
-                        this->_animatedBones[i] *= *this->_boundBones[i];
+              //      if (this->_boundBones[i])
+              //          this->_animatedBones[i] *= *this->_boundBones[i];
             }
         }
         else
@@ -176,6 +178,28 @@ namespace Client { namespace Game { namespace Engine {
                 //                );
                 //}
 
+                if (this->_boundBones[i])
+                {
+                    glm::vec3 p(this->_boundBones[i]->position);
+                    glm::quat r(
+                            this->_boundBones[i]->orientation.w,
+                            this->_boundBones[i]->orientation.x,
+                            this->_boundBones[i]->orientation.y,
+                            this->_boundBones[i]->orientation.z
+                            );
+                    animatedJoint.position =
+                        animatedJoint.position + animatedJoint.orientation * p;
+                    animatedJoint.orientation =
+                        glm::normalize(
+                                animatedJoint.orientation
+                                *
+                                glm::normalize(r)
+                                );
+                    //animatedJoint.orientation = glm::normalize(
+                    //        this->_boundBones[i] * animatedJoint.orientation
+                    //        );
+                }
+
                 this->_animatedBones[i] =
                     (
                      //glm::scale(animatedJoint.size)
@@ -188,13 +212,13 @@ namespace Client { namespace Game { namespace Engine {
                     this->_model.GetInverseBindPose()[i]
                     ;
 
-                if (this->_boundBones[i])
-                    this->_animatedBones[i] *= *this->_boundBones[i];
+              //  if (this->_boundBones[i])
+              //      this->_animatedBones[i] *= *this->_boundBones[i];
             }
         }
     }
 
-    bool Model::BindBone(std::string const& boneName, std::shared_ptr<glm::mat4x4> const& boundBone)
+    bool Model::BindBone(std::string const& boneName, std::shared_ptr<Common::Physics::Node> const& boundBone)
     {
         unsigned int idx = 0;
         for (auto& jointInfo: this->_model.GetJointInfos())

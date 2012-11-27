@@ -265,20 +265,11 @@ namespace Client { namespace Game { namespace Engine {
 
         // TODO la suiitititiuuiuiuite
 
-        std::shared_ptr<glm::mat4x4> newBone(new glm::mat4x4());
-
-        if (model.BindBone(modelNode, newBone))
-        {
-            if (!body->BindNode(bodyNode, newBone))
-            {
-                Tools::error << "Client.Model.ApiBindBoneToBodyNode: no body node called " + bodyNode + "\n";
-            }
-        }
-        else
-        {
+        std::shared_ptr<Common::Physics::Node> newBone = body->BindNode(bodyNode);
+        if (!newBone)
+            Tools::error << "Client.Model.ApiBindBoneToBodyNode: no body node called " + bodyNode + "\n";
+        else if (!model.BindBone(modelNode, newBone))
             Tools::error << "Client.Model.ApiBindBoneToBodyNode: no model bone called " + modelNode + "\n";
-        }
-
     }
 
 }}}

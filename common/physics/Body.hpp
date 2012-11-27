@@ -79,6 +79,7 @@ namespace Common { namespace Physics {
         void _ApplyAccel(btVector3 const& accel);
         void _ApplyAccelOnNode(btVector3 const& accel, Uint32 nodeId);
 
+        virtual void _PostTick();
         void _PreBtTick(btScalar timeStep);
 
         void _RemoveFromWorld();
