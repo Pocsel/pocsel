@@ -35,7 +35,8 @@ Server.Entity.RegisterPositional{
                 --d:SetInterAngleTarget("Turret", Utils.Vector3(0, 0, 1.5), 10)
                 --Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Gun", Utils.Vector3(10, 0, 0), 10)
                 Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(10, 4, 1), 5)
-                d:SetInterAngleTarget("Gun", Utils.Vector3(0.1, 0.2, 30), 1) -- roll yaw pitch ??
+                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 2)
+                d:SetInterAngleTarget("Gun", Utils.Vector3(0.1, 0.2, 10), 10) -- roll yaw pitch ??
             end
 
             -- tmpPos.y = tmpPos.y - 10

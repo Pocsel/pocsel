@@ -9,7 +9,7 @@ Client.Doodad.Register{
         Client.Model.BindBoneToBodyNode(modelId, "bite", "Gun")
         Client.Model.BindBoneToBodyNode(modelId, "gun", "Gun")
         Client.Model.BindBoneToBodyNode(modelId, "turret", "Turret")
-        Client.Model.BindBoneToBodyNode(modelId, "hull", "Hull")
+        Client.Model.BindBoneToBodyNode(modelId, "origin", "Hull")
     end,
     Think = function(self)
     end,

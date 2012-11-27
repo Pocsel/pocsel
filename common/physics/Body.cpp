@@ -193,7 +193,11 @@ namespace Common { namespace Physics {
         Uint32 nodeIdx = this->_GetNodeId(node);
         auto& bodyNode = this->_nodes[nodeIdx];
 
-        bodyNode.interAngleTarget = btVector3(accel.x, accel.y, accel.z);
+        bodyNode.interAngleTarget = btVector3(
+                btNormalizeAngle(accel.x),
+                btNormalizeAngle(accel.y),
+                btNormalizeAngle(accel.z)
+                );
         bodyNode.interAngleTargetSpeed = maxSpeed;
     }
 
