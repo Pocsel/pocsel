@@ -56,14 +56,20 @@ namespace Client { namespace Game { namespace Engine {
 
             btTransform test = node.constraint->getFrameOffsetA();
 
-            pos = pos - test.getOrigin();
-            rot = rot * -test.getRotation();
+            test = bite.inverseTimes(test);
 
-            //pos = test.getOrigin();
-            //rot = test.getRotation();
+            //pos = pos - test.getOrigin();
+            //rot = rot * -test.getRotation();
 
-            boundNode->position = glm::dvec3(-pos.x(), pos.y(), -pos.z());
-            boundNode->orientation = glm::dquat(rot.w(), rot.z(), rot.y(), rot.x());
+            pos = test.getOrigin();
+            rot = test.getRotation();
+
+            //pos = thisTr.getOrigin();
+            //rot = thisTr.getRotation();
+
+            boundNode->position = glm::dvec3(pos.x(), -pos.y(), pos.z());
+            boundNode->orientation = glm::dquat(rot.w(), rot.x(), -rot.y(), rot.z());
+
 
             //std::cout << this->_type.GetShapes()[idx].name << " pos " << pos.x() << ", " << pos.y() << ", " << pos.z() << "\n";
             //std::cout << this->_type.GetShapes()[idx].name << " rot " << 

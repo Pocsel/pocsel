@@ -17,10 +17,10 @@ Server.Entity.RegisterPositional{
             if d then
                 --Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(500, 0, 0), 10)
                 --Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Gun", Utils.Vector3(10, 0, 0), 10)
-                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(3, 10, 5), 10)
-                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 2)
+                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(10, 10, 10), 10)
+                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 0, 0.3), 2)
                 --d:SetInterAngleTarget("Turret", Utils.Vector3(0, 2.3, 0), 10) -- roll yaw pitch ??
-                d:SetInterAngleTarget("Gun", Utils.Vector3(0, 0, 0.8), 10) -- roll yaw pitch ??
+                -- d:SetInterAngleTarget("Gun", Utils.Vector3(0, 0, 0.8), 10) -- roll yaw pitch ??
             end
 
             -- tmpPos.y = tmpPos.y + 10

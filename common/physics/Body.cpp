@@ -108,7 +108,7 @@ namespace Common { namespace Physics {
         node.constraint = newConstraint;
 
         this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
-        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint, true);
+        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint);// , true);
 
         for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
                 childIte = this->_type.GetShapes()[nodeId].children.end();
@@ -317,7 +317,7 @@ namespace Common { namespace Physics {
     {
         BodyNode& node = this->_nodes[nodeId];
         this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
-        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint, true);
+        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint);//, true);
         for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
                 childIte = this->_type.GetShapes()[nodeId].children.end();
                 childIt != childIte; ++childIt)
