@@ -396,7 +396,8 @@ namespace Common { namespace Physics {
     void BodyCluster::SetUserData(void* userData)
     {
         this->_userData = userData;
-        this->_body->setUserPointer(userData);
+        //////////////////////////////////////////////////
+        //this->_body->setUserPointer(userData);
     }
 
     void BodyCluster::Dump() const

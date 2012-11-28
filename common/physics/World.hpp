@@ -18,6 +18,18 @@ namespace Common { namespace Physics {
 
     class World
     {
+    private:
+        class CollisionFilter : public btCollisionDispatcher
+        {
+        private:
+            World& _world;
+        public:
+            CollisionFilter(World& world, btDefaultCollisionConfiguration* colCfg);
+        private:
+            virtual bool needsCollision(btCollisionObject* body0, btCollisionObject* body1);
+            virtual bool needsResponse(btCollisionObject* body0, btCollisionObject* body1);
+            virtual void dispatchAllCollisionPairs(btOverlappingPairCache* pairCache, const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher);
+        };
     public:
         typedef void (*TickCallback)(void*);
     private:
@@ -51,6 +63,7 @@ namespace Common { namespace Physics {
 
     private:
         friend struct _cb;
+        friend struct CollisionFilter;
     };
 
 }}

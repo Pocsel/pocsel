@@ -115,9 +115,11 @@ namespace Common { namespace Physics {
                 childIt != childIte; ++childIt)
             this->_BuildBodyNode(*childIt);
 
-        void* userData = this->_parent.GetUserData();
-        if (userData)
-            node.body->setUserPointer(userData);
+        /////////////////////////////////
+        //void* userData = this->_parent.GetUserData();
+        //if (userData)
+        //    node.body->setUserPointer(userData);
+        node.body->setUserPointer(&this->_parent);
     }
 
     Body::~Body()
@@ -198,6 +200,7 @@ namespace Common { namespace Physics {
                 btNormalizeAngle(accel.y),
                 btNormalizeAngle(accel.z)
                 );
+
         bodyNode.interAngleTargetSpeed = maxSpeed;
     }
 
@@ -293,8 +296,6 @@ namespace Common { namespace Physics {
 
 
     //    BodyNode& node = this->_nodes[nodeId];
-
-    //    // TODO
 
     //    for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
     //            childIte = this->_type.GetShapes()[nodeId].children.end();
@@ -415,6 +416,10 @@ namespace Common { namespace Physics {
             node.constraint->getAngularLowerLimit(curTarget);
             if (node.interAngleTarget != curTarget)
             {
+                std::cout << "XXX\n";
+                std::cout << "  target " << node.interAngleTarget.x() << ", cur " << curTarget.x() << "\n";
+                std::cout << "  target " << node.interAngleTarget.y() << ", cur " << curTarget.y() << "\n";
+                std::cout << "  target " << node.interAngleTarget.z() << ", cur " << curTarget.z() << "\n";
                 if (curTarget.distance(node.interAngleTarget) <= node.interAngleTargetSpeed * timeStep)
                 {
                     node.constraint->setAngularLowerLimit(node.interAngleTarget);

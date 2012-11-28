@@ -7,6 +7,34 @@
 
 namespace Common { namespace Physics {
 
+    World::CollisionFilter::CollisionFilter(World& world, btDefaultCollisionConfiguration* colCfg) :
+        btCollisionDispatcher(colCfg),
+        _world(world)
+    {
+    }
+
+    bool World::CollisionFilter::needsCollision(
+            btCollisionObject* body0,
+            btCollisionObject* body1)
+    {
+        if (body0->getUserPointer() == body1->getUserPointer())
+            return false;
+        return this->btCollisionDispatcher::needsCollision(body0, body1);
+    }
+    bool World::CollisionFilter::needsResponse(
+            btCollisionObject* body0,
+            btCollisionObject* body1)
+    {
+        return this->btCollisionDispatcher::needsResponse(body0, body1);
+    }
+    void World::CollisionFilter::dispatchAllCollisionPairs(
+            btOverlappingPairCache* pairCache,
+            const btDispatcherInfo& dispatchInfo,
+            btDispatcher* dispatcher)
+    {
+        return this->btCollisionDispatcher::dispatchAllCollisionPairs(pairCache, dispatchInfo, dispatcher);
+    }
+
     struct _cb {
         static void _TickCallBack(btDynamicsWorld* btWorld, btScalar timeStep)
         {
@@ -50,7 +78,7 @@ namespace Common { namespace Physics {
         ///collision configuration contains default setup for memory, collision setup
         this->_collisionConfiguration = new btDefaultCollisionConfiguration();
         ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-        this->_dispatcher = new btCollisionDispatcher(_collisionConfiguration);
+        this->_dispatcher = new CollisionFilter(*this, this->_collisionConfiguration);
 
         this->_broadphase = new btDbvtBroadphase();
 
