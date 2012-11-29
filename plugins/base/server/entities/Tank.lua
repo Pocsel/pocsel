@@ -17,8 +17,8 @@ Server.Entity.RegisterPositional{
             if d then
                 --Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(500, 0, 0), 10)
                 --Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Gun", Utils.Vector3(10, 0, 0), 10)
-                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(10, 10, 10), 10)
-                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 0, 0.3), 2)
+                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 10)
+                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 0, 1.4), 0.1)
                 --d:SetInterAngleTarget("Turret", Utils.Vector3(0, 2.3, 0), 10) -- roll yaw pitch ??
                 -- d:SetInterAngleTarget("Gun", Utils.Vector3(0, 0, 0.8), 10) -- roll yaw pitch ??
             end
@@ -90,7 +90,7 @@ Server.Body.Register{
             children = {
                 {
                     name = "Turret",
-                    position = { 0, 1.75, 0 }, -- par rapport au parent (noeud Hull)
+                    position = { 0, 1, 0 }, -- par rapport au parent (noeud Hull)
                     orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                     shape = {
                         shapeType = "sphere",
@@ -101,7 +101,7 @@ Server.Body.Register{
                     children = {
                         {
                             name = "Gun",
-                            position = { 2.66, 0, 0 }, -- par rapport au parent (noeud Turret)
+                            position = { 2.66, 0.75, 0 }, -- par rapport au parent (noeud Turret)
                             orientation = { 0, 0, 0 }, -- idem, yawpitchroll
                             shape = {
                                 shapeType = "box",
