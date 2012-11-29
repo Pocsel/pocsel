@@ -1,17 +1,8 @@
 #ifndef __COMMON_PHYSICS_BODYCLUSTER_HPP__
 #define __COMMON_PHYSICS_BODYCLUSTER_HPP__
 
-#include "common/physics/Node.hpp"
-#include "common/Position.hpp"
 #include "bullet/bullet-all.hpp"
 
-//class btMotionState;
-//class btRigidBody;
-//class btTypedConstraint;
-//class btVector3;
-//
-//typedef double btScalar;
-//
 namespace Common { namespace Physics {
 
     class World;
@@ -27,8 +18,6 @@ namespace Common { namespace Physics {
         std::vector<Body*> _constraints;
 
         void* _userData;
-
-        //float _curMass;
 
         btVector3 _acceleration;
         btScalar _maxSpeed;
@@ -63,9 +52,6 @@ namespace Common { namespace Physics {
         void* GetUserData() { return this->_userData; }
 
         void Dump() const;
-
-    private:
-        void _ClearTickAccel();
     };
 
 }}

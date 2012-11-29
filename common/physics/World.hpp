@@ -3,12 +3,6 @@
 
 #include "bullet/bullet-all.hpp"
 
-//class btDynamicsWorld;
-//class btBroadphaseInterface;
-//class btCollisionDispatcher;
-//class btConstraintSolver;
-//class btDefaultCollisionConfiguration;
-
 namespace Common { namespace Physics {
     class Body;
     class BodyCluster;

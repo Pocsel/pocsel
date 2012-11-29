@@ -43,42 +43,12 @@ namespace Client { namespace Game { namespace Engine {
             btTransform thisTr;
             node.motionState->getWorldTransform(thisTr);
 
+            btTransform finalTr = node.constraint->getFrameOffsetA().inverseTimes(parentTr.inverseTimes(thisTr));
+            btVector3 finalPos = finalTr.getOrigin();
+            btQuaternion finalRot = finalTr.getRotation();
 
-            btTransform bite = parentTr.inverseTimes(thisTr);
-
-            //btVector3 pos = thisTr.getOrigin() - parentTr.getOrigin();
-            //btQuaternion rot = thisTr.getRotation() - parentTr.getRotation();
-
-            btVector3 pos = bite.getOrigin();
-            btQuaternion rot = bite.getRotation();
-            //btVector3 rotAxis = rot.getAxis();
-            //btScalar angle = rot.getAngle();
-
-            btTransform test = node.constraint->getFrameOffsetA();
-
-            test = test.inverseTimes(bite);
-
-            //pos = pos - test.getOrigin();
-            //rot = rot * -test.getRotation();
-
-            pos = test.getOrigin();
-            rot = test.getRotation();
-
-            //pos = thisTr.getOrigin();
-            //rot = thisTr.getRotation();
-
-            boundNode->position = glm::dvec3(-pos.x(), pos.y(), -pos.z());
-            boundNode->orientation = glm::dquat(-rot.w(), rot.x(), -rot.y(), rot.z());
-
-
-            //std::cout << this->_type.GetShapes()[idx].name << " pos " << pos.x() << ", " << pos.y() << ", " << pos.z() << "\n";
-            //std::cout << this->_type.GetShapes()[idx].name << " rot " << 
-            //    rot.w() << ", " << 
-            //    rot.x() << ", " << 
-            //    rot.y() << ", " << 
-            //    rot.z() << "\n";
-
-        //    boundNode->
+            boundNode->position = glm::dvec3(-finalPos.x(), finalPos.y(), -finalPos.z());
+            boundNode->orientation = glm::dquat(-finalRot.w(), finalRot.x(), -finalRot.y(), finalRot.z());
         }
     }
 

@@ -15,12 +15,12 @@ namespace Common { namespace Physics {
             {
                 std::vector<Body::BodyNode> const& nodes = b.GetNodes();
                 p.Write8(nodes.size());
-                for (auto it = nodes.begin(), ite = nodes.end(); it != ite; ++it)
+                for (auto& node: nodes)
                 {
-                    if (it->dirty == true)
+                    if (node.dirty == true)
                     {
                         p.Write(true);
-                        p.Write(it->node);
+                        p.Write(node.node);
                     }
                     else
                     {

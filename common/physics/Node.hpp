@@ -1,8 +1,6 @@
 #ifndef __COMMON_PHYSICS_NODE_HPP__
 #define __COMMON_PHYSICS_NODE_HPP__
 
-//#include "common/physics/Vector.hpp"
-//#include "common/physics/Acceleration.hpp"
 #include "common/Position.hpp"
 
 namespace Common { namespace Physics {
@@ -28,7 +26,7 @@ namespace Common { namespace Physics {
         glm::dvec3 interAngleTarget;
         double interAngleTargetSpeed;
 
-        Node() : accelerationIsLocal(false), acceleration(0, 0, 0) {}
+        Node() : accelerationIsLocal(false) {}
     };
 
 }}

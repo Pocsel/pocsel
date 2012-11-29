@@ -22,8 +22,8 @@ namespace Common { namespace Physics {
     {
         if (this->_shape)
         {
-            *_chunkCounter -= 1;
-            *_boxCounter -= this->_shape->getNumChildShapes();
+            *Chunk::_chunkCounter -= 1;
+            *Chunk::_boxCounter -= this->_shape->getNumChildShapes();
         }
         if (this->_body)
         {
@@ -182,11 +182,11 @@ namespace Common { namespace Physics {
 //        Tools::debug << "physics cubes in this chunk: " << this->_shape->getNumChildShapes() << "\n";
         if (!_boxCounter)
         {
-            _chunkCounter.reset(new Tools::Stat::Counter("Chunks"));
-            _boxCounter.reset(new Tools::Stat::Counter("Chunk physics boxes"));
+            Chunk::_chunkCounter.reset(new Tools::Stat::Counter("Chunks"));
+            Chunk::_boxCounter.reset(new Tools::Stat::Counter("Chunk physics boxes"));
         }
-        *_chunkCounter += 1;
-        *_boxCounter += this->_shape->getNumChildShapes();
+        *Chunk::_chunkCounter += 1;
+        *Chunk::_boxCounter += this->_shape->getNumChildShapes();
     }
 
 }}

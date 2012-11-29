@@ -44,20 +44,10 @@ namespace Common { namespace Physics {
                 if (cb.first)
                     cb.first(cb.second);
             }
-
-            //for (auto body: world._bodyClusters)
-            //{
-            //    body->Tick();
-            //}
         }
         static void _PreTickCallBack(btDynamicsWorld* btWorld, btScalar timeStep)
         {
             World& world = *(World*)btWorld->getWorldUserInfo();
-            //for (auto cb: world._callbacks)
-            //{
-            //    if (cb.first)
-            //        cb.first(cb.second);
-            //}
 
             for (auto body: world._bodyClusters)
             {
@@ -77,7 +67,6 @@ namespace Common { namespace Physics {
     {
         ///collision configuration contains default setup for memory, collision setup
         this->_collisionConfiguration = new btDefaultCollisionConfiguration();
-        ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
         this->_dispatcher = new CollisionFilter(*this, this->_collisionConfiguration);
 
         this->_broadphase = new btDbvtBroadphase();

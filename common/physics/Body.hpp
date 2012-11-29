@@ -4,11 +4,6 @@
 #include "common/physics/Node.hpp"
 #include "bullet/bullet-all.hpp"
 
-//class btRigidBody;
-//class btTypedConstraint;
-//struct btDefaultMotionState;
-//class btVector3;
-
 namespace Common { namespace Physics {
 
     class BodyType;
@@ -70,7 +65,7 @@ namespace Common { namespace Physics {
         void Dump() const;
 
     private:
-        Uint32 _GetNodeId(std::string const& nodeName);
+        BodyNode& _GetNode(std::string const& nodeName);
         void _BuildBodyNode(Uint32 nodeId);
         void _CleanBodyNode(Uint32 nodeId);
 
@@ -84,8 +79,6 @@ namespace Common { namespace Physics {
 
         void _RemoveFromWorld();
         void _RemoveNodeFromWorld(Uint32 nodeId);
-        //void _UpdatePosition(std::vector<Common::Physics::Node>::iterator& physicsIt);
-        //void _UpdateNodePosition(Uint32 nodeId, std::vector<Common::Physics::Node>::iterator& physicsIt);
         void _PutBackInWorld();
         void _PutNodeBackInWorld(Uint32 nodeId);
 
