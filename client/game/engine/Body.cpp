@@ -43,7 +43,8 @@ namespace Client { namespace Game { namespace Engine {
             btTransform thisTr;
             node.motionState->getWorldTransform(thisTr);
 
-            btTransform finalTr = node.constraint->getFrameOffsetA().inverseTimes(parentTr.inverseTimes(thisTr));
+            btTransform finalTr = node.interBaseTransform.inverseTimes(parentTr.inverseTimes(thisTr));
+                //node.constraint->getFrameOffsetA().inverseTimes(parentTr.inverseTimes(thisTr));
             btVector3 finalPos = finalTr.getOrigin();
             btQuaternion finalRot = finalTr.getRotation();
 

@@ -295,7 +295,7 @@ namespace Common { namespace Physics {
                 btTransform tr;
                 tr.setIdentity();
                 tr.setOrigin(node.interPositionCurrent);
-                tr.setRotation(btQuaternion(node.interAngleTarget.x(), node.interAngleTarget.y(), node.interAngleTarget.z()));
+                tr.setRotation(btQuaternion(node.interAngleCurrent.x(), node.interAngleCurrent.y(), node.interAngleCurrent.z()));
 
                 node.constraint->setFrames(node.interBaseTransform * tr, btTransform::getIdentity());
             }
