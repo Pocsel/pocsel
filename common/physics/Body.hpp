@@ -23,7 +23,9 @@ namespace Common { namespace Physics {
                 acceleration(0, 0, 0),
                 accelerationIsLocal(false),
                 interPositionTarget(0, 0, 0),
-                interAngleTarget(0, 0, 0)
+                interAngleTarget(0, 0, 0),
+                interPositionCurrent(0, 0, 0),
+                interAngleCurrent(0, 0, 0)
             {}
 
             Common::Physics::Node node;
@@ -42,6 +44,10 @@ namespace Common { namespace Physics {
             btScalar interPositionTargetSpeed;
             btVector3 interAngleTarget;
             btScalar interAngleTargetSpeed;
+            btVector3 interPositionCurrent;
+            btVector3 interAngleCurrent;
+
+            btTransform interBaseTransform;
         };
     protected:
         BodyCluster& _parent;

@@ -173,26 +173,37 @@ namespace Common { namespace Physics {
                             physicsIt->interAngleTarget.z);
                 const_cast<double&>(bodyNode.interAngleTargetSpeed) = physicsIt->interAngleTargetSpeed;
 
-                bodyNode.constraint->setLinearLowerLimit(
+                const_cast<btVector3&>(bodyNode.interPositionCurrent) =
                     btVector3(
                             physicsIt->interPosition.x,
                             physicsIt->interPosition.y,
-                            physicsIt->interPosition.z));
-                bodyNode.constraint->setLinearUpperLimit(
-                    btVector3(
-                            physicsIt->interPosition.x,
-                            physicsIt->interPosition.y,
-                            physicsIt->interPosition.z));
-                bodyNode.constraint->setAngularLowerLimit(
+                            physicsIt->interPosition.z);
+                const_cast<btVector3&>(bodyNode.interAngleCurrent) =
                     btVector3(
                             physicsIt->interAngle.x,
                             physicsIt->interAngle.y,
-                            physicsIt->interAngle.z));
-                bodyNode.constraint->setAngularUpperLimit(
-                    btVector3(
-                            physicsIt->interAngle.x,
-                            physicsIt->interAngle.y,
-                            physicsIt->interAngle.z));
+                            physicsIt->interAngle.z);
+
+                //bodyNode.constraint->setLinearLowerLimit(
+                //    btVector3(
+                //            physicsIt->interPosition.x,
+                //            physicsIt->interPosition.y,
+                //            physicsIt->interPosition.z));
+                //bodyNode.constraint->setLinearUpperLimit(
+                //    btVector3(
+                //            physicsIt->interPosition.x,
+                //            physicsIt->interPosition.y,
+                //            physicsIt->interPosition.z));
+                //bodyNode.constraint->setAngularLowerLimit(
+                //    btVector3(
+                //            physicsIt->interAngle.x,
+                //            physicsIt->interAngle.y,
+                //            physicsIt->interAngle.z));
+                //bodyNode.constraint->setAngularUpperLimit(
+                //    btVector3(
+                //            physicsIt->interAngle.x,
+                //            physicsIt->interAngle.y,
+                //            physicsIt->interAngle.z));
             }
         }
 
@@ -252,15 +263,16 @@ namespace Common { namespace Physics {
 
                 // inter node shit
                 {
-                    btVector3 currentPos;
-                    bodyNode.constraint->getLinearLowerLimit(currentPos);
+                    btVector3 currentPos = bodyNode.interPositionCurrent;
+                    //bodyNode.constraint->getLinearLowerLimit(currentPos);
                     node.interPosition =
                         glm::dvec3(
                                 currentPos.x(),
                                 currentPos.y(),
                                 currentPos.z()
                                 );
-                    bodyNode.constraint->getAngularLowerLimit(currentPos);
+                    currentPos = bodyNode.interAngleCurrent;
+                    //bodyNode.constraint->getAngularLowerLimit(currentPos);
                     node.interAngle =
                         glm::dvec3(
                                 currentPos.x(),

@@ -63,6 +63,8 @@ namespace Common { namespace Physics {
         node.body->setLinearFactor(btVector3(1,1,1));
         node.body->setAngularFactor(btVector3(1,1,1));
 
+        node.interBaseTransform = thisTr;
+
         btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform::getIdentity(), false);
 
         for (int i = 0; i < 6; ++i)
@@ -252,47 +254,94 @@ namespace Common { namespace Physics {
 
     void Body::_PreBtTick(btScalar timeStep)
     {
-        btVector3 curTarget;
-        btVector3 newTarget;
+        bool change;
+        btVector3 tmpTarget;
         for (BodyNode& node: this->_nodes)
         {
-            node.constraint->getLinearLowerLimit(curTarget);
-            if (node.interPositionTarget != curTarget)
+            change = false;
+
+            if (node.interPositionTarget != node.interPositionCurrent)
             {
-                if (curTarget.distance(node.interPositionTarget) <= node.interPositionTargetSpeed * timeStep)
+                change = true;
+
+                if (node.interPositionCurrent.distance(node.interPositionTarget) <= node.interPositionTargetSpeed * timeStep)
                 {
-                    node.constraint->setLinearLowerLimit(node.interPositionTarget);
-                    node.constraint->setLinearUpperLimit(node.interPositionTarget);
+                    node.interPositionCurrent = node.interPositionTarget;
                 }
                 else
                 {
-                    newTarget = curTarget + (node.interPositionTarget - curTarget).normalized() * node.interPositionTargetSpeed * timeStep;
-                    node.constraint->setLinearLowerLimit(newTarget);
-                    node.constraint->setLinearUpperLimit(newTarget);
+                    tmpTarget = node.interPositionCurrent + (node.interPositionTarget - node.interPositionCurrent).normalized() * node.interPositionTargetSpeed * timeStep;
+                    node.interPositionCurrent = tmpTarget;
                 }
             }
 
-            node.constraint->getAngularLowerLimit(curTarget);
-            if (node.interAngleTarget != curTarget)
+            if (node.interAngleTarget != node.interAngleCurrent)
             {
-                //std::cout << "XXX\n";
-                //std::cout << "  target " << node.interAngleTarget.x() << ", cur " << curTarget.x() << "\n";
-                //std::cout << "  target " << node.interAngleTarget.y() << ", cur " << curTarget.y() << "\n";
-                //std::cout << "  target " << node.interAngleTarget.z() << ", cur " << curTarget.z() << "\n";
-                // TODO regler le bug qui fait que y'a grave de la merde
-                if (curTarget.distance(node.interAngleTarget) <= node.interAngleTargetSpeed * timeStep)
+                change = true;
+
+                if (node.interAngleCurrent.distance(node.interAngleTarget) <= node.interAngleTargetSpeed * timeStep)
                 {
-                    node.constraint->setAngularLowerLimit(node.interAngleTarget);
-                    node.constraint->setAngularUpperLimit(node.interAngleTarget);
+                    node.interAngleCurrent = node.interAngleTarget;
                 }
                 else
                 {
-                    newTarget = curTarget + (node.interAngleTarget - curTarget).normalized() * node.interAngleTargetSpeed * timeStep;
-                    node.constraint->setAngularLowerLimit(newTarget);
-                    node.constraint->setAngularUpperLimit(newTarget);
+                    tmpTarget = node.interAngleCurrent + (node.interAngleTarget - node.interAngleCurrent).normalized() * node.interAngleTargetSpeed * timeStep;
+                    node.interAngleCurrent = tmpTarget;
                 }
             }
+
+            if (change)
+            {
+                btTransform tr;
+                tr.setIdentity();
+                tr.setOrigin(node.interPositionCurrent);
+                tr.setRotation(btQuaternion(node.interAngleTarget.x(), node.interAngleTarget.y(), node.interAngleTarget.z()));
+
+                node.constraint->setFrames(node.interBaseTransform * tr, btTransform::getIdentity());
+            }
+
         }
+        //btVector3 curTarget;
+        //btVector3 newTarget;
+        //for (BodyNode& node: this->_nodes)
+        //{
+        //    node.constraint->getLinearLowerLimit(curTarget);
+        //    if (node.interPositionTarget != curTarget)
+        //    {
+        //        if (curTarget.distance(node.interPositionTarget) <= node.interPositionTargetSpeed * timeStep)
+        //        {
+        //            node.constraint->setLinearLowerLimit(node.interPositionTarget);
+        //            node.constraint->setLinearUpperLimit(node.interPositionTarget);
+        //        }
+        //        else
+        //        {
+        //            newTarget = curTarget + (node.interPositionTarget - curTarget).normalized() * node.interPositionTargetSpeed * timeStep;
+        //            node.constraint->setLinearLowerLimit(newTarget);
+        //            node.constraint->setLinearUpperLimit(newTarget);
+        //        }
+        //    }
+
+        //    node.constraint->getAngularLowerLimit(curTarget);
+        //    if (node.interAngleTarget != curTarget)
+        //    {
+        //        //std::cout << "XXX\n";
+        //        //std::cout << "  target " << node.interAngleTarget.x() << ", cur " << curTarget.x() << "\n";
+        //        //std::cout << "  target " << node.interAngleTarget.y() << ", cur " << curTarget.y() << "\n";
+        //        //std::cout << "  target " << node.interAngleTarget.z() << ", cur " << curTarget.z() << "\n";
+        //        // TODO regler le bug qui fait que y'a grave de la merde
+        //        if (curTarget.distance(node.interAngleTarget) <= node.interAngleTargetSpeed * timeStep)
+        //        {
+        //            node.constraint->setAngularLowerLimit(node.interAngleTarget);
+        //            node.constraint->setAngularUpperLimit(node.interAngleTarget);
+        //        }
+        //        else
+        //        {
+        //            newTarget = curTarget + (node.interAngleTarget - curTarget).normalized() * node.interAngleTargetSpeed * timeStep;
+        //            node.constraint->setAngularLowerLimit(newTarget);
+        //            node.constraint->setAngularUpperLimit(newTarget);
+        //        }
+        //    }
+        //}
     }
 
     void Body::Dump() const
