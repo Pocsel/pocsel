@@ -279,6 +279,15 @@ namespace Common { namespace Physics {
             {
                 change = true;
 
+                btVector3 tmpAngleBullshit = node.interAngleTarget - node.interAngleCurrent;
+                for (unsigned int i = 0; i < 3; ++i)
+                {
+                //    if (distance > SIMD_PI)
+                //        distance = -SIMD_2_PI + distance;
+                //    else if (distance < -SIMD_PI)
+                //        distance = SIMD_2_PI - distance;
+                }
+
                 if (node.interAngleCurrent.distance(node.interAngleTarget) <= node.interAngleTargetSpeed * timeStep)
                 {
                     node.interAngleCurrent = node.interAngleTarget;
