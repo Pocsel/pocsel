@@ -255,7 +255,6 @@ namespace Common { namespace Physics {
     void Body::_PreBtTick(btScalar timeStep)
     {
         bool change;
-        btVector3 tmpTarget;
         for (BodyNode& node: this->_nodes)
         {
             change = false;
@@ -270,8 +269,7 @@ namespace Common { namespace Physics {
                 }
                 else
                 {
-                    tmpTarget = node.interPositionCurrent + (node.interPositionTarget - node.interPositionCurrent).normalized() * node.interPositionTargetSpeed * timeStep;
-                    node.interPositionCurrent = tmpTarget;
+                    node.interPositionCurrent = node.interPositionCurrent + (node.interPositionTarget - node.interPositionCurrent).normalized() * node.interPositionTargetSpeed * timeStep;
                 }
             }
 
@@ -279,23 +277,24 @@ namespace Common { namespace Physics {
             {
                 change = true;
 
-                btVector3 tmpAngleBullshit = node.interAngleTarget - node.interAngleCurrent;
+                btVector3 difference = node.interAngleTarget - node.interAngleCurrent;
                 for (unsigned int i = 0; i < 3; ++i)
                 {
-                //    if (distance > SIMD_PI)
-                //        distance = -SIMD_2_PI + distance;
-                //    else if (distance < -SIMD_PI)
-                //        distance = SIMD_2_PI - distance;
+                    if (difference[i] > SIMD_PI)
+                        difference[i] -= SIMD_2_PI;
+                    else if (difference[i] < -SIMD_PI)
+                        difference[i] += SIMD_2_PI;
                 }
 
-                if (node.interAngleCurrent.distance(node.interAngleTarget) <= node.interAngleTargetSpeed * timeStep)
+                if (difference.length() <= node.interAngleTargetSpeed * timeStep)
                 {
                     node.interAngleCurrent = node.interAngleTarget;
                 }
                 else
                 {
-                    tmpTarget = node.interAngleCurrent + (node.interAngleTarget - node.interAngleCurrent).normalized() * node.interAngleTargetSpeed * timeStep;
-                    node.interAngleCurrent = tmpTarget;
+                    node.interAngleCurrent = node.interAngleCurrent + difference.normalized() * node.interAngleTargetSpeed * timeStep;
+                    for (unsigned int i = 0; i < 3; ++i)
+                        btNormalizeAngle(node.interAngleCurrent[i]);
                 }
             }
 
