@@ -334,7 +334,7 @@ namespace Client { namespace Game { namespace Engine {
 
     void DoodadManager::_UpdateEntityPosition(Entity& entity, std::vector<Common::Physics::Node> const& physics)
     {
-        entity.SetUpdateFlag(1.3);
+        entity.SetUpdateFlag(1.3f);
         entity.UpdatePhysics(physics);
         //auto& doodadIds = entity.GetDoodads();
         //for (auto doodadIt = doodadIds.begin(), doodadIte = doodadIds.end(); doodadIt != doodadIte; ++doodadIt)

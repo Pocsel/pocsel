@@ -21,6 +21,13 @@ namespace Tools { namespace Lua {
         *this = ref;
     }
 
+    Ref::Ref(Ref&& ref) throw() :
+        _state(ref._state),
+        _ref(ref._ref)
+    {
+        ref._ref = LUA_NOREF;
+    }
+
     Ref::~Ref() throw()
     {
         this->Unref();
@@ -32,6 +39,16 @@ namespace Tools { namespace Lua {
         {
             ref.ToStack();
             this->FromStack();
+        }
+        return *this;
+    }
+
+    Ref& Ref::operator =(Ref&& ref) throw()
+    {
+        if (this != &ref)
+        {
+            this->_ref = ref._ref;
+            ref._ref = LUA_NOREF;
         }
         return *this;
     }

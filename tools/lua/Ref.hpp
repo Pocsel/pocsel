@@ -17,8 +17,10 @@ namespace Tools { namespace Lua {
     public:
         Ref(State& state) throw();
         Ref(Ref const& ref) throw();
+        Ref(Ref&& ref) throw();
         ~Ref() throw(); // Possible d'appeler Unref() pour détruire la ref après l'interpreter sans segfault !
         Ref& operator =(Ref const& ref) throw();
+        Ref& operator =(Ref&& ref) throw();
         bool operator ==(Ref const& ref) const throw(); // ceci n'est pas une comparaison de reference mais de valeurs, utilise lua_rawequal
         bool operator !=(Ref const& ref) const throw(); // idem
         template <typename T>

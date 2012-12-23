@@ -31,7 +31,7 @@ namespace Client { namespace Game { namespace Engine {
         {
             WeakModelRef() : modelId(0) {}
             WeakModelRef(Uint32 modelId) : modelId(modelId) {}
-            virtual bool IsValid(ModelManager const&) const { return this->modelId; }
+            virtual bool IsValid(ModelManager const&) const { return this->modelId != 0; }
             virtual void Invalidate(ModelManager const&) { this->modelId = 0; }
             virtual Tools::Lua::Ref GetReference(ModelManager& modelManager) const;
             bool operator <(WeakModelRef const& rhs) const;
