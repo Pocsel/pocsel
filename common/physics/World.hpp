@@ -57,7 +57,7 @@ namespace Common { namespace Physics {
 
     private:
         friend struct _cb;
-        friend struct CollisionFilter;
+        friend class CollisionFilter;
     };
 
 }}

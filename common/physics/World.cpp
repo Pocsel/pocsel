@@ -35,7 +35,8 @@ namespace Common { namespace Physics {
         return this->btCollisionDispatcher::dispatchAllCollisionPairs(pairCache, dispatchInfo, dispatcher);
     }
 
-    struct _cb {
+    struct _cb
+    {
         static void _TickCallBack(btDynamicsWorld* btWorld, btScalar timeStep)
         {
             World& world = *(World*)btWorld->getWorldUserInfo();
