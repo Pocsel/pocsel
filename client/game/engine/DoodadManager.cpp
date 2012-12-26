@@ -71,6 +71,14 @@ namespace Client { namespace Game { namespace Engine {
         return *it->second;
     }
 
+    Doodad& DoodadManager::GetDoodad(Uint32 doodadId) throw(std::runtime_error)
+    {
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end() || !it->second)
+            throw std::runtime_error("DoodadManager::GetDoodad: Doodad not found.");
+        return *it->second;
+    }
+
     void DoodadManager::Tick(Uint64 totalTime)
     {
         //this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);

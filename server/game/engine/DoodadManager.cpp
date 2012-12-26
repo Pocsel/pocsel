@@ -42,6 +42,8 @@ namespace Server { namespace Game { namespace Engine {
         namespaceTable.Set("SetAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetAccel, this, std::placeholders::_1)));
         namespaceTable.Set("SetLocalAccel", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
         namespaceTable.Set("SetLocalAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
+        namespaceTable.Set("SetInterPositionTarget", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterPositionTarget, this, std::placeholders::_1)));
+        namespaceTable.Set("SetInterAngleTarget", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterAngleTarget, this, std::placeholders::_1)));
     }
 
     DoodadManager::~DoodadManager()
@@ -309,6 +311,8 @@ namespace Server { namespace Game { namespace Engine {
         object.Set("SetAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetAccel, this, std::placeholders::_1)));
         object.Set("SetLocalAccel", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
         object.Set("SetLocalAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
+        object.Set("SetInterPositionTarget", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterPositionTarget, this, std::placeholders::_1)));
+        object.Set("SetInterAngleTarget", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterAngleTarget, this, std::placeholders::_1)));
         return object;
     }
 
@@ -537,6 +541,42 @@ namespace Server { namespace Game { namespace Engine {
         }
 
         d.SetLocalAccel(node, accel, maxSpeed);
+    }
+
+    void DoodadManager::_ApiSetInterPositionTarget(Tools::Lua::CallHelper& helper)
+    {
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetInterPositionTarget: Missing argument \"doodad\"")));
+
+        std::string node = helper.PopArg("Server.Doodad.SetInterPositionTarget: Missing argument \"node\"").Check<std::string>("Server.Doodad.SetInterPositionTarget: Argument \"node\" must be a string");
+        glm::dvec3 target = helper.PopArg("Server.Doodad.SetInterPositionTarget: Missing argument \"target\"").Check<glm::dvec3>("Server.Doodad.SetInterPositionTarget: Argument \"target\" must be a vector3");
+
+        double speed = 10;
+        if (helper.GetNbArgs() > 0)
+        {
+            speed = helper.PopArg().Check<double>("Server.Doodad.SetInterPositionTarget: Argument \"speed\" must be a double");
+            if (speed <= 0)
+                speed = 0.01;
+        }
+
+        d.SetInterPositionTarget(node, target, speed);
+    }
+
+    void DoodadManager::_ApiSetInterAngleTarget(Tools::Lua::CallHelper& helper)
+    {
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetInterAngleTarget: Missing argument \"doodad\"")));
+
+        std::string node = helper.PopArg("Server.Doodad.SetInterAngleTarget: Missing argument \"node\"").Check<std::string>("Server.Doodad.SetInterAngleTarget: Argument \"node\" must be a string");
+        glm::dvec3 target = helper.PopArg("Server.Doodad.SetInterAngleTarget: Missing argument \"target\"").Check<glm::dvec3>("Server.Doodad.SetInterAngleTarget: Argument \"target\" must be a vector3");
+
+        double speed = 10;
+        if (helper.GetNbArgs() > 0)
+        {
+            speed = helper.PopArg().Check<double>("Server.Doodad.SetInterAngleTarget: Argument \"speed\" must be a double");
+            if (speed <= 0)
+                speed = 0.01;
+        }
+
+        d.SetInterAngleTarget(node, target, speed);
     }
 
 }}}

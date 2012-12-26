@@ -47,8 +47,14 @@ namespace Server { namespace Game { namespace Engine {
                         if (body0->getUserPointer() && body1->getUserPointer() &&
                                 body0->getUserPointer() != body1->getUserPointer())
                         {
-                            PositionalEntity* entity0 = (PositionalEntity*)body0->getUserPointer();
-                            PositionalEntity* entity1 = (PositionalEntity*)body1->getUserPointer();
+                            Common::Physics::BodyCluster* pBody0 = (Common::Physics::BodyCluster*)body0->getUserPointer();
+                            Common::Physics::BodyCluster* pBody1 = (Common::Physics::BodyCluster*)body1->getUserPointer();
+
+                            PositionalEntity* entity0 = (PositionalEntity*)pBody0->GetUserData();
+                            PositionalEntity* entity1 = (PositionalEntity*)pBody1->GetUserData();
+                            //////////////////////////////////////////////////////////////////////////
+                            //PositionalEntity* entity0 = (PositionalEntity*)body0->getUserPointer();
+                            //PositionalEntity* entity1 = (PositionalEntity*)body1->getUserPointer();
 
                             pm->_newCollidingEntities.insert(entity0);
                             pm->_newCollidingEntities.insert(entity1);
@@ -63,12 +69,20 @@ namespace Server { namespace Game { namespace Engine {
                         }
                         else if (body0->getUserPointer() && !body1->getUserPointer())
                         {
-                            PositionalEntity* entity0 = (PositionalEntity*)body0->getUserPointer();
+                            Common::Physics::BodyCluster* pBody0 = (Common::Physics::BodyCluster*)body0->getUserPointer();
+
+                            PositionalEntity* entity0 = (PositionalEntity*)pBody0->GetUserData();
+                            //////////////////////////////////////////////////////////////////////////
+                            //PositionalEntity* entity0 = (PositionalEntity*)body0->getUserPointer();
                             pm->_newCollidingEntities.insert(entity0);
                         }
                         else if (body1->getUserPointer() && !body0->getUserPointer())
                         {
-                            PositionalEntity* entity1 = (PositionalEntity*)body1->getUserPointer();
+                            Common::Physics::BodyCluster* pBody1 = (Common::Physics::BodyCluster*)body1->getUserPointer();
+
+                            PositionalEntity* entity1 = (PositionalEntity*)pBody1->GetUserData();
+                            //////////////////////////////////////////////////////////////////////////
+                            //PositionalEntity* entity1 = (PositionalEntity*)body1->getUserPointer();
                             pm->_newCollidingEntities.insert(entity1);
                         }
 

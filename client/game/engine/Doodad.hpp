@@ -38,6 +38,7 @@ namespace Client { namespace Game { namespace Engine {
         Tools::Lua::Ref const& GetSelf() const { return this->_self; }
 
         Body const* GetBody() const { return this->_body.get(); }
+        Body* GetBody() { return this->_body.get(); }
 
         //void UpdatePosition(Common::Physics::Node const& node);
         Common::Physics::Node const& GetPhysics() const;

@@ -40,6 +40,7 @@ namespace Common { namespace Physics {
         std::vector<ShapeNode> const& GetShapes() const { return this->_shapes; }
         std::vector<Uint32> const& GetRoots() const { return this->_roots; }
         std::map<std::string, unsigned int> const& GetShapesMap() const { return this->_shapesMap; }
+        Int32 GetNodeIndex(std::string const& nodeName) const;
 
         void CreateBtShapes();
 

@@ -54,7 +54,11 @@ namespace Client { namespace Game {
                 [&, i, vertexBuffer]()
                 {
                     glm::quat orientation =
-                        pos.orientation
+                        glm::quat(
+                            pos.orientation.w,
+                            pos.orientation.x,
+                            pos.orientation.y,
+                            pos.orientation.z)
                         *
                         glm::quat(glm::vec3(-Tools::Math::PiFloat / 2.0f, 0.0f, 0.0f))
                         ;

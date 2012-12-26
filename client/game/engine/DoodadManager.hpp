@@ -40,6 +40,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 GetRunningDoodadId() const { return this->_runningDoodadId; }
         Doodad* GetRunningDoodad() const { return this->_runningDoodad; }
         Doodad const& GetDoodad(Uint32 doodadId) const throw(std::runtime_error); // ne pas garder la référence, le doodad peut etre delete à tout moment
+        Doodad& GetDoodad(Uint32 doodadId) throw(std::runtime_error); // ne pas garder la référence, le doodad peut etre delete à tout moment
         std::map<Uint32, Doodad*> const& GetDoodads() const { return this->_doodads; }
         void Tick(Uint64 totalTime);
         void SpawnDoodad(Uint32 doodadId,

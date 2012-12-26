@@ -7,6 +7,34 @@
 
 namespace Common { namespace Physics {
 
+    World::CollisionFilter::CollisionFilter(World& world, btDefaultCollisionConfiguration* colCfg) :
+        btCollisionDispatcher(colCfg),
+        _world(world)
+    {
+    }
+
+    bool World::CollisionFilter::needsCollision(
+            btCollisionObject* body0,
+            btCollisionObject* body1)
+    {
+        if (body0->getUserPointer() == body1->getUserPointer())
+            return false;
+        return this->btCollisionDispatcher::needsCollision(body0, body1);
+    }
+    bool World::CollisionFilter::needsResponse(
+            btCollisionObject* body0,
+            btCollisionObject* body1)
+    {
+        return this->btCollisionDispatcher::needsResponse(body0, body1);
+    }
+    void World::CollisionFilter::dispatchAllCollisionPairs(
+            btOverlappingPairCache* pairCache,
+            const btDispatcherInfo& dispatchInfo,
+            btDispatcher* dispatcher)
+    {
+        return this->btCollisionDispatcher::dispatchAllCollisionPairs(pairCache, dispatchInfo, dispatcher);
+    }
+
     struct _cb {
         static void _TickCallBack(btDynamicsWorld* btWorld, btScalar timeStep)
         {
@@ -16,10 +44,14 @@ namespace Common { namespace Physics {
                 if (cb.first)
                     cb.first(cb.second);
             }
+        }
+        static void _PreTickCallBack(btDynamicsWorld* btWorld, btScalar timeStep)
+        {
+            World& world = *(World*)btWorld->getWorldUserInfo();
 
             for (auto body: world._bodyClusters)
             {
-                body->Tick();
+                body->PreBtTick(timeStep);
             }
         }
     };
@@ -35,8 +67,7 @@ namespace Common { namespace Physics {
     {
         ///collision configuration contains default setup for memory, collision setup
         this->_collisionConfiguration = new btDefaultCollisionConfiguration();
-        ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
-        this->_dispatcher = new btCollisionDispatcher(_collisionConfiguration);
+        this->_dispatcher = new CollisionFilter(*this, this->_collisionConfiguration);
 
         this->_broadphase = new btDbvtBroadphase();
 
@@ -48,6 +79,7 @@ namespace Common { namespace Physics {
         this->_dynamicsWorld->setGravity(this->_gravity);
 
         this->_dynamicsWorld->setInternalTickCallback(_cb::_TickCallBack, this);
+        this->_dynamicsWorld->setInternalTickCallback(_cb::_PreTickCallBack, this, true);
     }
 
     World::~World()
@@ -61,8 +93,19 @@ namespace Common { namespace Physics {
 
     void World::Tick(Uint64 totalTime)
     {
+        //std::cout << "TICK\n";
+        for (auto body: this->_bodyClusters)
+        {
+            body->PreTick();
+        }
+
         double deltaTime = (totalTime - this->_lastTime) * 0.000001;
         this->_dynamicsWorld->stepSimulation(deltaTime, 10, 1.0 / 60.0);
+
+        for (auto body: this->_bodyClusters)
+        {
+            body->PostTick();
+        }
     }
 
     size_t World::AddCallback(TickCallback cb, void* userPtr)

@@ -61,6 +61,8 @@ namespace Client { namespace Game { namespace Engine {
         void _ApiSpawn(Tools::Lua::CallHelper& helper);
         void _ApiKill(Tools::Lua::CallHelper& helper);
         void _ApiRegister(Tools::Lua::CallHelper& helper);
+        void _ApiBindToBody(Tools::Lua::CallHelper& helper);
+        void _ApiBindBoneToBodyNode(Tools::Lua::CallHelper& helper);
     };
 
 }}}

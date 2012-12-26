@@ -35,7 +35,7 @@ namespace Client { namespace Game { namespace Engine {
             physics.position.z = wpos.z();
 
             btQuaternion wrot = wt.getRotation();
-            glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
+            glm::dquat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
             physics.orientation = //glm::eulerAngles(glmRot);
                 glmRot;
 

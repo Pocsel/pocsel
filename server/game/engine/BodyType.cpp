@@ -124,11 +124,11 @@ namespace Server { namespace Game { namespace Engine {
                 Tools::Lua::Ref orientation = it.GetValue();
                 if (!orientation.IsTable())
                     throw std::runtime_error("Client.Body.Register: Field \"orientation\" must be of type table");
-                glm::vec3 pitchyawroll;
+                glm::dvec3 pitchyawroll;
                 pitchyawroll.x = orientation[2].ToNumber();
                 pitchyawroll.y = orientation[1].ToNumber();
                 pitchyawroll.z = orientation[3].ToNumber();
-                node.position.orientation = glm::quat(pitchyawroll); // pitch, yaw, roll
+                node.position.orientation = glm::dquat(pitchyawroll); // pitch, yaw, roll
             }
             else if (key == "mass")
             {

@@ -39,4 +39,3 @@ namespace Common { namespace Physics {
 }}
 
 #endif
-
