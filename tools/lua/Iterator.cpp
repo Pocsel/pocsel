@@ -10,23 +10,6 @@ namespace Tools { namespace Lua {
             ++(*this);
     }
 
-    Iterator::Iterator(Iterator const& iterator) throw() :
-        _table(iterator.GetTable()), _key(iterator.GetKey()), _value(iterator.GetValue()), _end(iterator.IsEnd())
-    {
-    }
-
-    Iterator& Iterator::operator =(Iterator const& iterator) throw()
-    {
-        if (this != &iterator)
-        {
-            this->_table = iterator.GetTable();
-            this->_key = iterator.GetKey();
-            this->_value = iterator.GetValue();
-            this->_end = iterator.IsEnd();
-        }
-        return *this;
-    }
-
     bool Iterator::operator ==(Iterator const& iterator) const throw()
     {
         if (this->_end && iterator.IsEnd())

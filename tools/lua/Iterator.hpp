@@ -15,8 +15,6 @@ namespace Tools { namespace Lua {
 
     public:
         Iterator(Ref const& table, bool end) throw(std::runtime_error);
-        Iterator(Iterator const& iterator) throw();
-        Iterator& operator =(Iterator const& iterator) throw();
         bool operator ==(Iterator const& iterator) const throw(); // un Iterator n'est égal à un autre uniquement si les 2 sont des Iterator de fin
         bool operator !=(Iterator const& iterator) const throw();
         Iterator& operator ++() throw(std::runtime_error);
