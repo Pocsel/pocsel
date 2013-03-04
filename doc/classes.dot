@@ -1,0 +1,239 @@
+digraph G {
+    fontname="Monaco";
+    fontsize=8;
+    //nodesep=1.2;
+    node [fontname="Monaco", fontsize=8, shape=record];
+    edge [fontname="Monaco", fontsize=8];
+
+    subgraph cluster_Client {
+        label="Client";
+        Client_Client [label="{Client}"];
+        Client_Settings [label="{Settings}"];
+
+        subgraph cluster_Client_Resources {
+            label="Resources";
+            Client_Resources_ResourceManager [label="{ResourceManager}"];
+            Client_Resources_LocalResourceManager [label="{LocalResourceManager}"];
+            Client_Resources_CacheDatabaseProxy [label="{CacheDatabaseProxy}"];
+            Client_Resources_ResourceDownloader [label="{ResourceDownloader}"];
+        }
+
+        subgraph cluster_Client_Graphics {
+            label="Graphics";
+            Client_Graphics_LightManager [label="{LightManager}"];
+        }
+
+        subgraph cluster_Client_Network {
+            label="Network";
+            Client_Network_Network [label="{Network}"];
+            Client_Network_PacketCreator [label="{PacketCreator}"];
+            Client_Network_PacketDispatcher [label="{PacketDispatcher}"];
+            Client_Network_PacketExtractor [label="{PacketExtractor}"];
+            Client_Network_UdpPacket [label="{UdpPacket}"];
+        }
+
+        subgraph cluster_Client_Map {
+            label="Map";
+            Client_Map_Chunk [label="{Chunk}"];
+            Client_Map_ChunkManager [label="{ChunkManager}"];
+            Client_Map_ChunkMesh [label="{ChunkMesh}"];
+            Client_Map_ChunkRenderer [label="{ChunkRenderer}"];
+            Client_Map_Map [label="{Map}"];
+        }
+
+        subgraph cluster_Client_Menu {
+            label="Menu";
+            Client_Menu_DisconnectedScreen [label="{DisconnectedScreen}"];
+            Client_Menu_DisconnectedScreen [label="{DisconnectedScreen}"];
+            Client_Menu_LoadingScreen [label="{LoadingScreen}"];
+            Client_Menu_LoadingScreen [label="{LoadingScreen}"];
+            Client_Menu_MainMenu [label="{MainMenu}"];
+            Client_Menu_MainMenu [label="{MainMenu}"];
+            Client_Menu_Menu [label="{Menu}"];
+            Client_Menu_Menu [label="{Menu}"];
+
+            subgraph cluster_Client_Menu_Widget {
+                label="Widget";
+                Client_Menu_Widget_Button [label="{Button}"];
+                Client_Menu_Widget_DebugPanel [label="{DebugPanel}"];
+            }
+        }
+
+        subgraph cluster_Client_Game {
+            label="Game";
+            Client_Game_BulletDebugDrawer [label="{BulletDebugDrawer}"];
+            Client_Game_CubeType [label="{CubeType}"];
+            Client_Game_CubeTypeManager [label="{CubeTypeManager}"];
+            Client_Game_Game [label="{Game}"];
+            Client_Game_ModelRenderer [label="{ModelRenderer}"];
+            Client_Game_Player [label="{Player}"];
+            Client_Game_ShapeRenderer [label="{ShapeRenderer}"];
+            Client_Game_TargetedCubeRenderer [label="{TargetedCubeRenderer}"];
+
+            subgraph cluster_Client_Game_Engine {
+                label="Engine";
+                Client_Game_Engine_Body [label="{Body}"];
+                Client_Game_Engine_BodyManager [label="{BodyManager}"];
+                Client_Game_Engine_BodyType [label="{BodyType}"];
+                Client_Game_Engine_Doodad [label="{Doodad}"];
+                Client_Game_Engine_DoodadManager [label="{DoodadManager}"];
+                Client_Game_Engine_DoodadType [label="{DoodadType}"];
+                Client_Game_Engine_Engine [label="{Engine}"];
+                Client_Game_Engine_Entity [label="{Entity}"];
+                Client_Game_Engine_Model [label="{Model}"];
+                Client_Game_Engine_ModelManager [label="{ModelManager}"];
+                Client_Game_Engine_ModelType [label="{ModelType}"];
+                Client_Game_Engine_PhysicsManager [label="{PhysicsManager}"];
+            }
+        }
+    }
+
+    subgraph cluster_Server {
+        label="Server";
+    }
+
+    subgraph cluster_Tools {
+        label="Tools";
+        Tools_AbstractCollider [label="{AbstractCollider}"];
+        Tools_AlignedBox [label="{AlignedBox}"];
+        Tools_AlignedCube [label="{AlignedCube}"];
+        Tools_ByteArray [label="{ByteArray}"];
+        Tools_Frustum [label="{Frustum}"];
+        Tools_IRenderer [label="{IRenderer}"];
+        Tools_Octree [label="{Octree}"];
+        Tools_Plane [label="{Plane}"];
+        Tools_Ray [label="{Ray}"];
+        Tools_Rectangle [label="{Rectangle}"];
+        Tools_SimpleMessageQueue [label="{SimpleMessageQueue}"];
+        Tools_Timer [label="{Timer}"];
+        Tools_Vector2 [label="{Vector2}"];
+        Tools_Vector3 [label="{Vector3}"];
+
+        subgraph cluster_Tools_Database {
+            label="Database";
+            Tools_Database_IConnection [label="{IConnection}"];
+            Tools_Database_IQuery [label="{IQuery}"];
+            Tools_Database_IRow [label="{IRow}"];
+
+            subgraph cluster_Tools_Database_Sqlite {
+                label="Sqlite";
+                Tools_Database_Sqlite_Connection [label="{Connection}"]
+                Tools_Database_Sqlite_Query [label="{Query}"]
+                Tools_Database_Sqlite_Row [label="{Row}"]
+            }
+        }
+    }
+
+    subgraph cluster_Common {
+        label="Common";
+        Common_BaseChunk [label="{BaseChunk}"];
+        Common_Camera [label="{Camera}"];
+        Common_CubeType [label="{CubeType}"];
+        Common_MovingOrientedPosition [label="{MovingOrientedPosition}"];
+        Common_NChunk [label="{NChunk}"];
+        Common_NChunkContainer [label="{NChunkContainer}"];
+        Common_OrientedPosition [label="{OrientedPosition}"];
+        Common_Packet [label="{Packet}"];
+        Common_RayCast [label="{RayCast}"];
+        Common_Resource [label="{Resource}"];
+        Common_Position [label="{Position}"];
+
+        subgraph cluster_Common_Physics {
+            label="Physics";
+            Common_Physics_Body [label="{Body}"];
+            Common_Physics_BodyCluster [label="{BodyCluster}"];
+            Common_Physics_BodyType [label="{BodyType}"];
+            Common_Physics_Chunk [label="{Chunk}"];
+            Common_Physics_IShapeDesc [label="{IShapeDesc}"];
+            Common_Physics_Node [label="{Node}"];
+            Common_Physics_ShapeDescBox [label="{ShapeDescBox}"];
+            Common_Physics_ShapeDescEmpty [label="{ShapeDescEmpty}"];
+            Common_Physics_ShapeDescSphere [label="{ShapeDescSphere}"];
+            Common_Physics_World [label="{World}"];
+        }
+    }
+
+    /*
+       Tools::Database::Sqlite
+    */
+    Tools_Database_Sqlite_Connection -> Tools_Database_IConnection;
+    Tools_Database_Sqlite_Query -> Tools_Database_IQuery;
+    Tools_Database_Sqlite_Row -> Tools_Database_IRow;
+
+    /*
+       Tools::Database
+    */
+    Tools_Database_IConnection -> Client_Resources_CacheDatabaseProxy [arrowhead=odiamond];
+
+    /*
+       Tools
+    */
+    Tools_IRenderer -> Client_Resources_ResourceManager [arrowhead=odiamond];
+    Tools_IRenderer -> Client_Resources_LocalResourceManager [arrowhead=odiamond];
+    Tools_IRenderer -> Client_Graphics_LightManager [arrowhead=odiamond];
+    Tools_IRenderer -> Client_Map_ChunkRenderer [arrowhead=odiamond];
+
+    /*
+       Client::Resources
+    */
+    Client_Resources_CacheDatabaseProxy -> Client_Resources_ResourceDownloader [arrowhead=odiamond];
+    Client_Resources_CacheDatabaseProxy -> Client_Resources_ResourceManager [arrowhead=diamond];
+    Client_Resources_ResourceDownloader -> Client_Resources_ResourceManager [arrowhead=diamond];
+
+    /*
+       Client::Game
+    */
+    Client_Game_Game -> Client_Resources_ResourceManager [arrowhead=odiamond];
+    Client_Game_Game -> Client_Graphics_LightManager [arrowhead=odiamond];
+    Client_Game_Game -> Client_Map_Map [arrowhead=odiamond];
+    Client_Game_Game -> Client_Map_ChunkRenderer [arrowhead=odiamond];
+    Client_Game_Game -> Client_Map_ChunkManager [arrowhead=odiamond];
+
+    /*
+       Client::Network
+    */
+    Client_Network_Network -> Client_Resources_ResourceDownloader [arrowhead=odiamond];
+    Client_Network_UdpPacket -> Common_Packet;
+
+    /*
+       Client::Map
+    */
+    Client_Map_ChunkManager -> Client_Map_Map [arrowhead=diamond];
+    Client_Map_Chunk -> Client_Map_ChunkMesh [arrowhead=odiamond];
+    Client_Map_ChunkMesh -> Client_Map_Chunk [arrowhead=odiamond];
+    Client_Map_ChunkRenderer -> Client_Map_ChunkManager [arrowhead=diamond];
+
+    /*
+       Client
+    */
+    Client_Client -> Client_Resources_LocalResourceManager [arrowhead=odiamond];
+    Client_Client -> Client_Network_PacketDispatcher [arrowhead=odiamond];
+
+    /*
+       Common
+    */
+    Common_Position -> Common_Physics_Node [arrowhead=diamond];
+    Common_Position -> Common_OrientedPosition [arrowhead=diamond];
+    Common_OrientedPosition -> Common_MovingOrientedPosition [arrowhead=diamond];
+    Common_BaseChunk -> Common_NChunk;
+    Common_NChunkContainer -> Common_NChunk;
+    Common_Camera -> Common_OrientedPosition;
+    Common_Packet -> Tools_ByteArray;
+    Common_Packet -> Client_Network_Network [arrowhead=odiamond];
+
+    /*
+       Common::Physics
+    */
+    Common_Physics_Chunk -> Client_Map_Chunk [arrowhead=odiamond];
+    Common_Physics_ShapeDescBox -> Common_Physics_IShapeDesc;
+    Common_Physics_ShapeDescEmpty -> Common_Physics_IShapeDesc;
+    Common_Physics_ShapeDescSphere -> Common_Physics_IShapeDesc;
+    Common_Physics_World -> Common_Physics_Chunk [arrowhead=odiamond];
+    Common_Physics_Node -> Common_Physics_BodyType [arrowhead=diamond];
+    Common_Physics_World -> Common_Physics_BodyCluster [arrowhead=odiamond];
+    Common_Physics_BodyCluster -> Common_Physics_Body [arrowhead=odiamond];
+    Common_Physics_BodyType -> Common_Physics_Body [arrowhead=odiamond];
+    Common_Physics_Node -> Common_Physics_Body [arrowhead=diamond];
+    Common_Physics_Body -> Common_Physics_BodyCluster [arrowhead=odiamond];
+
+}
