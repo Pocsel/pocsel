@@ -65,7 +65,7 @@ height_value = 0
 
 cubes = {
 
-    ---[[--
+    --[[--
     ["base:Rock"] = {
         {
             priority = 9,
@@ -79,7 +79,7 @@ cubes = {
         }
     }
     --]]--
-    --[[--
+    ---[[--
     Void = {
         {
             priority = 0,
