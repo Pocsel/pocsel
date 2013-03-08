@@ -4,6 +4,7 @@
 #include "tools/renderers/opengl/opengl.hpp"
 #include "tools/renderers/opengl/ShaderProgramCg.hpp"
 #include "tools/renderers/opengl/ShaderParameterCg.hpp"
+#include "tools/renderers/opengl/VertexBuffer.hpp"
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
@@ -40,6 +41,14 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         this->_viewProjectionInverse = cgGetEffectParameterBySemantic(this->_effect, "ViewProjectionInverse");
         this->_mvpInverse = cgGetEffectParameterBySemantic(this->_effect, "WorldViewProjectionInverse");
         this->_worldViewInverseTranspose = cgGetNamedEffectParameter(this->_effect, "worldViewInverseTranspose");
+        for (int t = 0; t < (int)VertexAttributeUsage::Max; ++t)
+        {
+            auto& param = this->GetParameter(VertexAttributeUsage::typeToName[(VertexAttributeUsage::Type)t]);
+            this->_shaderParameters[t] = param.IsUseable() ? &param : 0;
+        }
+
+        //Tools::debug << "*** Vertex Shader:\n" << cgGetProgramString(cgGetPassProgram(cgGetFirstPass(this->_technique), CG_VERTEX_DOMAIN), CG_COMPILED_PROGRAM);
+        //Tools::debug << "*** Pixel  Shader:\n" << cgGetProgramString(cgGetPassProgram(cgGetFirstPass(this->_technique), CG_FRAGMENT_DOMAIN), CG_COMPILED_PROGRAM);
     }
 
     ShaderProgramCg::~ShaderProgramCg()
@@ -208,6 +217,7 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     {
         if (this->_pass != 0)
             cgUpdatePassParameters(this->_pass);
+        this->UpdateParameters();
     }
 
     void ShaderProgramCg::BeginPass()
@@ -224,6 +234,17 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         cgResetPassState(this->_pass);
         this->_pass = cgGetNextPass(this->_pass);
         return this->_pass != 0;
+    }
+
+    void ShaderProgramCg::UpdateParameters()
+    {
+        assert(this->_renderer.bindedVertexBuffer != 0 && "Il faut binder un vertex buffer");
+        auto attrib = this->_renderer.bindedVertexBuffer->GetAttributes();
+        auto cnt = this->_renderer.bindedVertexBuffer->GetAttributesCount();
+        for (int i = 0; i < cnt; ++i)
+        {
+            //TODO attrib[i].location
+        }
     }
 
 }}}

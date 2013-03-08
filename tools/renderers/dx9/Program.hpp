@@ -10,11 +10,13 @@ namespace Tools { namespace Renderers {
 
     namespace DX9 {
 
-        class ShaderProgram : public IShaderProgram
+        class Program : public IProgram
         {
         private:
             DX9Renderer& _renderer;
             ID3DXEffect* _effect;
+            ComPtr<IDirect3DVertexShader9> _vertexShader;
+            ComPtr<IDirect3DPixelShader9> _pixelShader;
             D3DXHANDLE _technique;
             int _nbTextures;
 
@@ -37,8 +39,9 @@ namespace Tools { namespace Renderers {
             UINT _passCount;
 
         public:
-            ShaderProgram(DX9Renderer& renderer, std::string const& effect);
-            virtual ~ShaderProgram();
+            Program(DX9Renderer& renderer, std::string const& effect);
+            Program(DX9Renderer& renderer, std::string const& vertexShader, std::string const& vsFunc, std::string const& pixelShader, std::string const& psFunc);
+            virtual ~Program();
 
             virtual IShaderParameter& GetParameter(std::string const& identifier);
             virtual IShaderParameter& GetParameterFromSemantic(std::string const& semantic);

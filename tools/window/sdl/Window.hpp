@@ -5,9 +5,9 @@
 #include "tools/window/Window.hpp"
 #include "tools/Vector2.hpp"
 
-namespace Tools {
+namespace Tools { namespace Gfx {
     class IRenderer;
-}
+}}
 
 namespace Tools { namespace Window { namespace Sdl {
 
@@ -15,7 +15,7 @@ namespace Tools { namespace Window { namespace Sdl {
         public ::Tools::Window::Window
     {
     private:
-        Tools::IRenderer* _renderer;
+        Tools::Gfx::IRenderer* _renderer;
         SDL_Surface* _screen;
         glm::uvec2 _size;
         glm::uvec2 _targetSize;
@@ -31,7 +31,7 @@ namespace Tools { namespace Window { namespace Sdl {
             bool fullscreen = false);
         ~Window();
         virtual void Render();
-        virtual Tools::IRenderer& GetRenderer() { return *this->_renderer; }
+        virtual Tools::Gfx::IRenderer& GetRenderer() { return *this->_renderer; }
         virtual glm::uvec2 const& GetSize() const { return this->_size; }
         virtual void Resize(glm::uvec2 const& size);
         virtual void Resize(unsigned int w, unsigned int h);

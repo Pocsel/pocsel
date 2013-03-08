@@ -1,0 +1,135 @@
+// voir http://hl2glsl.codeplex.com/wikipage?title=HLSL%20BNF
+
+identifier =
+	[_A-Za-z][_A-Za-z0-9]*
+;
+
+number =
+	"[0-9]" *"[0-9]" -('.' "[0-9]" *"[0-9]") -'f'
+;
+
+unaryOp =
+	"-"
+;
+binaryOp1 =
+	"+-"
+;
+binaryOp2 =
+	"*/%"
+;
+
+semantic =
+	':' identifier
+;
+
+callList =
+	expression *(',' expression)
+;
+
+argumentList =
+	globalVariableDeclaration *(',' globalVariableDeclaration)
+;
+
+functionCall =
+	identifier '(' callList ')'
+;
+
+subExpression = 
+	identifier |
+	number |
+	unaryOp subExpression |
+	functionCall |
+	'(' expression ')'
+;
+expression2 = 
+	subExpression binaryOp2 expression
+;
+expression =
+	expression2 binaryOp1 expression2
+;
+
+deviceState =
+	identifier '=' identifier
+;
+
+samplerState =
+	'sampler_state'
+	'{'
+		*(';' | (deviceState ';'))
+	'}'
+;
+
+globalVariableDeclaration =
+	identifier //type
+	identifier //nom
+	-semantic
+	-('=' (samplerState | expression)
+;
+
+structureDeclaration =
+	'struct' identifier
+	'{'
+		*(';' | (globalVariableDeclaration ';'))
+	'}'
+;
+
+simpleVariableDeclaration =
+	identifier //type
+	identifier //nom
+	-('=' expression)
+;
+
+functionStatement =
+	';' |
+	simpleVariableDeclaration ';' |
+	expression ';'
+;
+
+functionDeclaration =
+	identifier //type
+	identifier //nom
+	'(' argumentList ')'
+	semantic
+	'{'
+		*functionStatement
+	'}'
+;
+
+compileDeclaration =
+	('VertexShader' | 'PixelShader')
+	'='
+	'compile'
+	('vs_3_0' | 'ps_3_0')
+	identifier '(' ')'
+;
+
+passDeclaration =
+	'pass' -identifier
+	'{'
+		*(
+			';' |
+			(deviceState ';') |
+			(compileDeclaration ';')
+		)
+	'}'
+;
+
+techniqueDeclaration =
+	'technique' -identifier
+	'{'
+		*passDeclaration
+	'}'
+;
+
+globalStatement =
+	(
+		';' |
+		globalVariableDeclaration ';' |
+		expression ';' |
+		functionDeclaration
+	)
+;
+
+hlslFile =
+	*globalStatement
+;

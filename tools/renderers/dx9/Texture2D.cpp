@@ -143,7 +143,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
     void Texture2D::Bind()
     {
         this->_bindId = nbBindedTexture++;
-        //this->_renderer.GetDevice()->SetTexture(this->_bindId, this->_texture);
+        //this->_renderer.GetDevice()->SetTexture(this->_bindId, this->_texture.get());
     }
 
     void Texture2D::Unbind()

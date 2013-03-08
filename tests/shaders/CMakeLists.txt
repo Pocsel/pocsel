@@ -6,7 +6,7 @@ set(src
     ${tools_base_src}
     ${tools_logger_src}
     ${tools_lua_src}
-    ${tools_renderers_src}
+    ${tools_gfx_src}
     ${tools_window_src}
 )
 
@@ -27,8 +27,6 @@ target_link_libraries(test_shaders
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${SDL_LIBRARY}
-    ${CG_LIBRARY}
-    ${CGGL_LIBRARY}
     ${DirectX_ERROR_LIBRARY}
     ${DirectX_D3D9_LIBRARY}
     ${DirectX_D3DX9_LIBRARY}

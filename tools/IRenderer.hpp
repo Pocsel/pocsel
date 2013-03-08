@@ -1,6 +1,10 @@
 #ifndef __TOOLS_IRENDERER_HPP__
 #define __TOOLS_IRENDERER_HPP__
 
+#ifdef _MSC_VER
+#include "tools/precompiled.hpp"
+#endif
+
 #include "tools/Rectangle.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
@@ -8,6 +12,10 @@
 #ifdef None
 # undef None
 #endif
+
+namespace Tools {
+    class ByteArray;
+}
 
 namespace Tools {
 
@@ -100,12 +108,25 @@ namespace Tools {
                 Position = 0,
                 Color,
                 Normal,
-                TexCoord,
-                Custom1,
-                Custom2,
-                Custom3,
-                Custom4
+                TexCoord0,
+                TexCoord1,
+                TexCoord2,
+                TexCoord3,
+                TexCoord4,
+                // For arrays only
+                Max
             };
+            static char const* const typeToName[] =
+                {
+                    "position",
+                    "color",
+                    "normal",
+                    "texCoord0",
+                    "texCoord1",
+                    "texCoord2",
+                    "texCoord3",
+                    "texCoord4",
+                };
         }
 
         namespace CullMode
@@ -234,7 +255,7 @@ namespace Tools {
         public:
             virtual ~IShaderParameter() {}
 
-            virtual void Set(bool value) = 0;
+            //virtual void Set(bool value) = 0; // Trop de problèmes de cast
             virtual void Set(int value) = 0;
             virtual void Set(float value) = 0;
             virtual void Set(glm::vec2 const& vector) = 0;
@@ -253,24 +274,82 @@ namespace Tools {
             IShaderParameter& operator =(IShaderParameter const&);
         };
 
-        class IShaderProgram
+        class IBaseProgram
         {
         public:
-            virtual ~IShaderProgram() {}
+            virtual ~IBaseProgram() {}
 
             virtual IShaderParameter& GetParameter(std::string const& identifier) = 0;
-            virtual IShaderParameter& GetParameterFromSemantic(std::string const& semantic) = 0;
-            virtual void SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage) = 0;
             virtual void UpdateParameter(ShaderParameterUsage::Type usage) = 0;
-            virtual void UpdateCurrentPass() = 0;
-            virtual void BeginPass() = 0;
-            virtual bool EndPass() = 0; // Retourne true s'il n'y a plus de pass a faire sinon false.
+            // Update all values
+            virtual void Update() = 0;
 
         protected:
-            IShaderProgram() {}
+            IBaseProgram() {}
         private:
-            IShaderProgram(IShaderProgram const&);
-            IShaderProgram& operator =(IShaderProgram const&);
+            IBaseProgram(IBaseProgram const&);
+            IBaseProgram& operator =(IBaseProgram const&);
+        };
+
+        //class IShaderProgram : public IBaseProgram
+        //{
+        //public:
+        //    virtual ~IShaderProgram() {}
+
+        //    virtual IShaderParameter& GetParameterFromSemantic(std::string const& semantic) = 0;
+        //    virtual void UpdateCurrentPass() = 0;
+        //    virtual void BeginPass() = 0;
+        //    virtual bool EndPass() = 0; // Retourne true s'il n'y a plus de pass a faire sinon false.
+
+        //    virtual void Update() { this->UpdateCurrentPass(); }
+
+        //protected:
+        //    IShaderProgram() {}
+        //private:
+        //    IShaderProgram(IShaderProgram const&);
+        //    IShaderProgram& operator =(IShaderProgram const&);
+        //};
+
+        class IProgram : public IBaseProgram
+        {
+        public:
+            virtual ~IProgram() {}
+
+            virtual void SetAttributeUsage(std::string const& identifier, VertexAttributeUsage::Type usage) = 0;
+            virtual void Begin() = 0;
+            virtual void End() = 0;
+
+            virtual void Update() {}
+
+        protected:
+            IProgram() {}
+        private:
+            IProgram(IProgram const&);
+            IProgram& operator =(IProgram const&);
+        };
+
+        class IVertexProgram
+        {
+        public:
+            virtual ~IVertexProgram() {}
+
+        protected:
+            IVertexProgram() {}
+        private:
+            IVertexProgram(IVertexProgram const&);
+            IVertexProgram& operator =(IVertexProgram const&);
+        };
+
+        class IFragmentProgram
+        {
+        public:
+            virtual ~IFragmentProgram() {}
+
+        protected:
+            IFragmentProgram() {}
+        private:
+            IFragmentProgram(IFragmentProgram const&);
+            IFragmentProgram& operator =(IFragmentProgram const&);
         };
     }
 
@@ -293,7 +372,7 @@ namespace Tools {
         virtual std::unique_ptr<Renderers::IRenderTarget> CreateRenderTarget(glm::uvec2 const& imgSize = glm::uvec2(0)) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(Renderers::PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0) = 0;
         virtual std::unique_ptr<Renderers::ITexture2D> CreateTexture2D(std::string const& imagePath) = 0;
-        virtual std::unique_ptr<Renderers::IShaderProgram> CreateProgram(std::string const& effect) = 0;
+        virtual std::unique_ptr<Renderers::IProgram> CreateProgram(std::string const& vertexCode, std::string const& fragmentCode) = 0;
 
         // Drawing
         virtual void Clear(int clearFlags) = 0;
@@ -313,6 +392,7 @@ namespace Tools {
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size) = 0;
+        virtual void SetViewport(glm::uvec2 const& offset, glm::uvec2 const& size) = 0;
         virtual void SetClearColor(glm::vec4 const& color) = 0;
         virtual void SetClearDepth(float value) = 0;
         virtual void SetClearStencil(int value) = 0;

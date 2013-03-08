@@ -1,9 +1,11 @@
 #include "tools/renderers/opengl/opengl.hpp"
+#include "tools/renderers/opengl/Program.hpp"
 #include "tools/renderers/opengl/VertexBuffer.hpp"
 
 namespace Tools { namespace Renderers { namespace OpenGL {
 
-    VertexBuffer::VertexBuffer()
+    VertexBuffer::VertexBuffer(GLRenderer& renderer) :
+        _renderer(renderer)
     {
         this->_stride = 0;
         this->_nbAttrib = 0;
@@ -22,7 +24,8 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         this->_attributes[this->_nbAttrib].offset = reinterpret_cast<GLvoid*>(this->_stride);
         this->_attributes[this->_nbAttrib].nbElements = nbElements;
         this->_attributes[this->_nbAttrib].type = GetTypeFromDataType(type);
-        this->_stride += this->_attributes[this->_nbAttrib].nbElements * static_cast<GLuint>(DataType::GetSize(type));
+        this->_attributes[this->_nbAttrib].size = this->_attributes[this->_nbAttrib].nbElements * static_cast<GLuint>(DataType::GetSize(type));
+        this->_stride += this->_attributes[this->_nbAttrib].size;
         this->_nbAttrib++;
     }
 
@@ -43,96 +46,43 @@ namespace Tools { namespace Renderers { namespace OpenGL {
     void VertexBuffer::Bind()
     {
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, this->_id));
+        this->_renderer.bindedVertexBuffer = this;
 
-        auto it = this->_attributes,
-            itEnd = this->_attributes + this->_nbAttrib;
-        for (; it != itEnd; ++it)
+        auto program = dynamic_cast<Program*>(&this->_renderer.GetCurrentProgram());
+        if (program == nullptr)
         {
-            switch (it->location)
+            for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
             {
-            case VertexAttributeUsage::Position:
-                GLCHECK(glVertexPointer(it->nbElements, it->type, this->_stride, it->offset));
-                GLCHECK(glEnableClientState(GL_VERTEX_ARRAY));
-                break;
-
-            case VertexAttributeUsage::Normal:
-                GLCHECK(glNormalPointer(it->type, this->_stride, it->offset));
-                GLCHECK(glEnableClientState(GL_NORMAL_ARRAY));
-                break;
-
-            case VertexAttributeUsage::Color:
-                GLCHECK(glColorPointer(it->nbElements, it->type, this->_stride, it->offset));
-                GLCHECK(glEnableClientState(GL_COLOR_ARRAY));
-                break;
-
-            case VertexAttributeUsage::TexCoord:
-                GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
-                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-                GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
-                break;
-
-            case VertexAttributeUsage::Custom1:
-                GLCHECK(glClientActiveTextureARB(GL_TEXTURE1_ARB));
-                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-                GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
-                break;
-
-            case VertexAttributeUsage::Custom2:
-                GLCHECK(glClientActiveTextureARB(GL_TEXTURE2_ARB));
-                GLCHECK(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-                GLCHECK(glTexCoordPointer(it->nbElements, it->type, this->_stride, it->offset));
-                break;
-
-            default:
-                GLCHECK(glVertexAttribPointerARB(it->location, it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
-                GLCHECK(glEnableVertexAttribArrayARB(it->location));
-                break;
+                GLCHECK(glVertexAttribPointerARB(GetVertexAttributeIndex(it->location), it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
+                GLCHECK(glEnableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
+            }
+        }
+        else
+        {
+            for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
+            {
+                GLCHECK(glVertexAttribPointer(program->GetAttributeIndex(it->location), it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
+                GLCHECK(glEnableVertexAttribArray(program->GetAttributeIndex(it->location)));
             }
         }
     }
 
     void VertexBuffer::Unbind()
     {
+        this->_renderer.bindedVertexBuffer = nullptr;
         GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0));
-        auto it = this->_attributes,
-            itEnd = this->_attributes + this->_nbAttrib;
-        for (; it != itEnd; ++it)
+
+        auto program = dynamic_cast<Program*>(&this->_renderer.GetCurrentProgram());
+        if (program == nullptr)
         {
-            switch (it->location)
-            {
-            case VertexAttributeUsage::Position:
-                GLCHECK(glDisableClientState(GL_VERTEX_ARRAY));
-                break;
-
-            case VertexAttributeUsage::Normal:
-                GLCHECK(glDisableClientState(GL_NORMAL_ARRAY));
-                break;
-
-            case VertexAttributeUsage::Color:
-                GLCHECK(glDisableClientState(GL_COLOR_ARRAY));
-                break;
-
-            case VertexAttributeUsage::TexCoord:
-                GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
-                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
-                break;
-
-            case VertexAttributeUsage::Custom1:
-                GLCHECK(glClientActiveTextureARB(GL_TEXTURE1_ARB));
-                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
-                break;
-
-            case VertexAttributeUsage::Custom2:
-                GLCHECK(glClientActiveTextureARB(GL_TEXTURE2_ARB));
-                GLCHECK(glDisableClientState(GL_TEXTURE_COORD_ARRAY));
-                break;
-
-            default:
-                GLCHECK(glDisableVertexAttribArrayARB(it->location));
-                break;
-            }
+            for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
+                GLCHECK(glDisableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
         }
-        GLCHECK(glClientActiveTextureARB(GL_TEXTURE0_ARB));
+        else
+        {
+            for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
+                GLCHECK(glDisableVertexAttribArray(program->GetAttributeIndex(it->location)));
+        }
     }
 
 }}}

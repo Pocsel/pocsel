@@ -5,12 +5,12 @@
 
 #include "tools/renderers/DX9Renderer.hpp"
 #include "tools/renderers/dx9/directx.hpp"
-#include "tools/renderers/dx9/ShaderProgram.hpp"
+#include "tools/renderers/dx9/Program.hpp"
 #include "tools/renderers/dx9/ShaderParameter.hpp"
 
 namespace Tools { namespace Renderers { namespace DX9 {
 
-    ShaderProgram::ShaderProgram(DX9Renderer& renderer, std::string const& effect) :
+    Program::Program(DX9Renderer& renderer, std::string const& effect) :
         _renderer(renderer),
         _nbTextures(0),
         _mvp(0),
@@ -34,6 +34,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         }
 
         DXCHECKERROR(this->_effect->FindNextValidTechnique(0, &this->_technique));
+        DXCHECKERROR(this->_effect->SetTechnique(this->_technique));
         
         this->_mvp = this->_effect->GetParameterBySemantic(0, "WorldViewProjection");
         this->_vp = this->_effect->GetParameterBySemantic(0, "ViewProjection");
@@ -49,13 +50,42 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_worldViewInverseTranspose = this->_effect->GetParameterByName(0, "worldViewInverseTranspose");
     }
 
-    ShaderProgram::~ShaderProgram()
+    Program::Program(DX9Renderer& renderer, std::string const& vertexShader, std::string const& vsFunc, std::string const& pixelShader, std::string const& psFunc) :
+        _renderer(renderer),
+        _nbTextures(0),
+        _mvp(0),
+        _vp(0),
+        _mv(0),
+        _model(0),
+        _view(0),
+        _projection(0),
+        _pass(0)
+    {
+        // Compilation:
+        ID3DXBuffer* errors;
+        ID3DXBuffer* vsShader;
+        ID3DXBuffer* psShader;
+        if (FAILED(D3DXCompileShader(vertexShader.c_str(), (UINT)vertexShader.size(), nullptr, nullptr, vsFunc.c_str(), "vs_3_0", D3DXSHADER_OPTIMIZATION_LEVEL3, &vsShader, &errors, nullptr)))
+            throw std::runtime_error(std::string("DX9::Shader errors: ") + (char const*)errors->GetBufferPointer());
+        if (FAILED(D3DXCompileShader(pixelShader.c_str(), (UINT)pixelShader.size(), nullptr, nullptr, psFunc.c_str(), "ps_3_0", D3DXSHADER_OPTIMIZATION_LEVEL3, &psShader, &errors, nullptr)))
+            throw std::runtime_error(std::string("DX9::Shader errors: ") + (char const*)errors->GetBufferPointer());
+
+        IDirect3DVertexShader9* tmpVS;
+        DXCHECKERROR(this->_renderer.GetDevice()->CreateVertexShader((DWORD*)vsShader->GetBufferPointer(), &tmpVS));
+        this->_vertexShader.reset(tmpVS);
+        IDirect3DPixelShader9* tmpPS;
+        DXCHECKERROR(this->_renderer.GetDevice()->CreatePixelShader((DWORD*)psShader->GetBufferPointer(), &tmpPS));
+        this->_pixelShader.reset(tmpPS);
+        
+    }
+
+    Program::~Program()
     {
         this->_renderer.Unregister(*this);
         this->_effect->Release();
     }
 
-    IShaderParameter& ShaderProgram::GetParameter(std::string const& identifier)
+    IShaderParameter& Program::GetParameter(std::string const& identifier)
     {
         auto it = this->_parameters.find(identifier);
         if (it == this->_parameters.end())
@@ -67,7 +97,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         return *it->second;
     }
 
-    IShaderParameter& ShaderProgram::GetParameterFromSemantic(std::string const& semantic)
+    IShaderParameter& Program::GetParameterFromSemantic(std::string const& semantic)
     {
         auto it = this->_parameters.find(semantic + "__semantic__");
         if (it == this->_parameters.end())
@@ -79,7 +109,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         return *it->second;
     }
 
-    void ShaderProgram::SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage)
+    void Program::SetParameterUsage(std::string const& identifier, ShaderParameterUsage::Type usage)
     {
         switch (usage)
         {
@@ -108,11 +138,11 @@ namespace Tools { namespace Renderers { namespace DX9 {
             break;
 
         default:
-            throw std::invalid_argument("ShaderProgram::SetParameterUsage");
+            throw std::invalid_argument("Program::SetParameterUsage");
         }
     }
 
-    void ShaderProgram::UpdateParameter(ShaderParameterUsage::Type usage)
+    void Program::UpdateParameter(ShaderParameterUsage::Type usage)
     {
         switch (usage)
         {
@@ -183,16 +213,16 @@ namespace Tools { namespace Renderers { namespace DX9 {
             break;
 
         default:
-            throw std::invalid_argument("ShaderProgram::UpdateParameter");
+            throw std::invalid_argument("Program::UpdateParameter");
         }
     }
 
-    void ShaderProgram::UpdateCurrentPass()
+    void Program::UpdateCurrentPass()
     {
         DXCHECKERROR(this->_effect->CommitChanges());
     }
 
-    void ShaderProgram::BeginPass()
+    void Program::BeginPass()
     {
         this->_renderer.SetCurrentProgram(*this);
         if (this->_pass == 0)
@@ -201,7 +231,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         this->_nbTextures = 0;
     }
 
-    bool ShaderProgram::EndPass()
+    bool Program::EndPass()
     {
         DXCHECKERROR(this->_effect->EndPass());
         this->_pass = (this->_pass + 1) % this->_passCount;

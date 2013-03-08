@@ -24,7 +24,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         IRenderer& _renderer;
         struct
         {
-            IShaderProgram* shader;
+            IProgram* shader;
             IShaderParameter* normalDepth;
             IShaderParameter* ambientColor;
             IShaderParameter* direction;
@@ -41,7 +41,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         } _directionnal;
         struct
         {
-            IShaderProgram* shader;
+            IProgram* shader;
             IShaderParameter* normalDepth;
             IShaderParameter* position;
             IShaderParameter* range;
@@ -55,7 +55,7 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Light {
         } _point;
 
     public:
-        LightRenderer(IRenderer& renderer, IShaderProgram& directionnalShader, IShaderProgram& pointShader);
+        LightRenderer(IRenderer& renderer, IProgram& directionnalShader, IProgram& pointShader);
 
         DirectionnalLight CreateDirectionnalLight();
         PointLight CreatePointLight();

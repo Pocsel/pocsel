@@ -3,9 +3,9 @@
 
 #include "tools/Vector2.hpp"
 
-namespace Tools {
+namespace Tools { namespace Gfx {
     class IRenderer;
-}
+}}
 
 namespace Tools { namespace Window {
 
@@ -23,7 +23,7 @@ namespace Tools { namespace Window {
         Window(InputManager* inputManager);
         virtual ~Window();
         virtual void Render() = 0;
-        virtual Tools::IRenderer& GetRenderer() = 0;
+        virtual Tools::Gfx::IRenderer& GetRenderer() = 0;
         InputManager& GetInputManager() { return *this->_inputManager; }
         virtual glm::uvec2 const& GetSize() const = 0;
         virtual void Resize(glm::uvec2 const& size) = 0;

@@ -133,6 +133,38 @@ namespace Tools { namespace Renderers { namespace OpenGL {
         throw std::runtime_error("Bad TextureFilter ?!");
     }
 
+    inline GLint GetVertexAttributeIndex(VertexAttributeUsage::Type type)
+    {
+        switch (type)
+        {
+            case VertexAttributeUsage::Position: return 0;
+            case VertexAttributeUsage::Normal: return 2;
+            case VertexAttributeUsage::Color: return 3;
+            case VertexAttributeUsage::TexCoord0: return 8;
+            case VertexAttributeUsage::TexCoord1: return 9;
+            case VertexAttributeUsage::TexCoord2: return 10;
+            case VertexAttributeUsage::TexCoord3: return 11;
+            case VertexAttributeUsage::TexCoord4: return 12;
+        }
+        throw std::runtime_error("Bad VertexAttributeUsage ?!");
+    }
+
+    inline char const* GetVertexAttributeSemantic(VertexAttributeUsage::Type type)
+    {
+        switch (type)
+        {
+            case VertexAttributeUsage::Position: return "POSITION";
+            case VertexAttributeUsage::Normal: return "NORMAL";
+            case VertexAttributeUsage::Color: return "COLOR";
+            case VertexAttributeUsage::TexCoord0: return "TEXCOORD0";
+            case VertexAttributeUsage::TexCoord1: return "TEXCOORD1";
+            case VertexAttributeUsage::TexCoord2: return "TEXCOORD2";
+            case VertexAttributeUsage::TexCoord3: return "TEXCOORD3";
+            case VertexAttributeUsage::TexCoord4: return "TEXCOORD4";
+        }
+        throw std::runtime_error("Bad VertexAttributeUsage ?!");
+    }
+
     void GLCheckError(std::string const& file, unsigned int line, char const* function);
     void CGCheckError(CGcontext ctx, std::string const& file, unsigned int line, char const* function);
 

@@ -79,6 +79,7 @@ namespace Tools { namespace Renderers { namespace DX9 {
         Texture2D& tex = reinterpret_cast<Texture2D&>(texture);
         //assert(tex.GetBindID() >= 0 && "Faut bind la texture avant.");
         DXCHECKERROR(this->_effect->SetTexture(this->_param, tex.GetTexture()));
+        //DXCHECKERROR(this->_effect->SetValue(this->_param, tex.GetTexture(), sizeof(void*)));
     }
 
 }}}

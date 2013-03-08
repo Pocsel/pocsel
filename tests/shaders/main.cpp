@@ -1,50 +1,31 @@
 #include "tests/shaders/precompiled.hpp"
 
-#include "tools/renderers/utils/GBuffer.hpp"
-#include "tools/renderers/utils/Image.hpp"
-#include "tools/renderers/utils/LightRenderer.hpp"
-#include "tools/renderers/utils/Rectangle.hpp"
+#include "common/ConfDir.hpp"
+
+#include "tools/gfx/effect/EffectManager.hpp"
+#include "tools/gfx/utils/Font.hpp"
+#include "tools/gfx/utils/Image.hpp"
+#include "tools/gfx/IRenderer.hpp"
 #include "tools/window/InputManager.hpp"
 #include "tools/window/sdl/Window.hpp"
-#include "tools/IRenderer.hpp"
+#include "tools/Frustum.hpp"
 #include "tools/Timer.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"
 
-using namespace Tools;
-using namespace Tools::Renderers;
+using namespace Tools::Gfx;
+using namespace Tools::Gfx::Utils;
 using namespace Tools::Window;
 
 #undef main
 
 static std::string testShaderPath = "test.fx";
-static std::string directionnalLightShaderPath = "DirectionnalLight.fx";
-static std::string pointLightShaderPath = "DirectionnalLight.fx";//"PointLight.fx";
-static std::string combineShaderPath = "combine.fx";
-static std::string texturePath = "test.png";
+//static std::string directionnalLightShaderPath = "DirectionnalLight.fx";
+//static std::string pointLightShaderPath = "DirectionnalLight.fx";//"PointLight.fx";
+//static std::string combineShaderPath = "combine.fx";
+//static std::string texturePath = "test.png";
 
 static std::string codeTestShader;
-static std::string codeDirectionnalLightShader;
-static std::string codePointLightShader;
-static std::string codeCombineShader;
-
-static std::unique_ptr<Utils::GBuffer> gbuffer;
-static std::unique_ptr<IShaderProgram> testShader;
-static std::unique_ptr<IShaderParameter> diffuse;
-static std::unique_ptr<IShaderProgram> combineShader;
-static std::unique_ptr<IShaderParameter> colors;
-static std::unique_ptr<IShaderParameter> normals;
-static std::unique_ptr<IShaderParameter> depth;
-static std::unique_ptr<IShaderParameter> quadWorldViewProjection;
-static std::unique_ptr<Utils::LightRenderer> lightRenderer;
-static std::unique_ptr<IShaderProgram> lightDirecShader;
-static std::unique_ptr<IShaderProgram> lightPointShader;
-
-static std::unique_ptr<ITexture2D> texture;
-static std::unique_ptr<IVertexBuffer> vertexBuffer;
-static std::unique_ptr<IIndexBuffer> indexBuffer;
-static std::unique_ptr<Utils::Image> screenQuad;
-static std::list<Utils::DirectionnalLight> directionnalLights;
 
 struct RAII
 {
@@ -53,193 +34,114 @@ struct RAII
     ~RAII() { destroy(); }
 };
 
-static void CreateCube(IVertexBuffer& vertexBuffer, IIndexBuffer& indexBuffer)
+struct Vertex
 {
-    struct Vertex
-    {
-        glm::fvec3 position;
-        glm::fvec3 normal;
-        glm::fvec2 texture;
-        Vertex() {}
-        Vertex(glm::fvec3 const& position, glm::fvec3 const& normal, glm::fvec2 const& texture) : position(position), normal(normal), texture(texture) {}
-    };
+    glm::fvec3 position;
+    glm::fvec3 normal;
+    glm::fvec2 texture;
+    Vertex() {}
+    Vertex(glm::fvec3 const& position, glm::fvec3 const& normal, glm::fvec2 const& texture) : position(position), normal(normal), texture(texture) {}
+    Vertex(float px, float py, float pz, float nx, float ny, float nz, float tx, float ty) : position(px, py, pz), normal(nx, ny, nz), texture(tx, ty) {}
+};
 
-    static glm::fvec3 const positions[] = {
-        glm::fvec3(0, 1, 1), // frontTopLeft = 0;
-        glm::fvec3(1, 1, 1), // frontTopRight = 1;
-        glm::fvec3(1, 1, 0), // backTopRight = 2;
-        glm::fvec3(0, 1, 0), // backTopLeft = 3;
-        glm::fvec3(0, 0, 0), // backBottomLeft = 4;
-        glm::fvec3(1, 0, 0), // backBottomRight = 5;
-        glm::fvec3(1, 0, 1), // frontBottomRight = 6;
-        glm::fvec3(0, 0, 1), // frontBottomLeft = 7;
-    };
-    static glm::fvec3 const normals[] = {
-        glm::fvec3(0, 0, 1), // front = 0;
-        glm::fvec3(0, 1, 0), // top = 1;
-        glm::fvec3(1, 0, 0), // right = 2;
-        glm::fvec3(0, -1, 0), // bottom = 3;
-        glm::fvec3(-1, 0, 0), // left = 4;
-        glm::fvec3(0, 0, -1), // back = 5;
-    };
-    glm::fvec2 const textures[] = {
-        glm::fvec2(1, 0),
-        glm::fvec2(0, 0),
-        glm::fvec2(0, 1),
-        glm::fvec2(1, 1),
-    };
-    static unsigned short positionIndices[][4] = {
-        {6, 1, 0, 7}, // front = 0;
-        {0, 1, 2, 3}, // top = 1;
-        {5, 2, 1, 6}, // right = 2;
-        {4, 5, 6, 7}, // bottom = 3;
-        {7, 0, 3, 4}, // left = 4;
-        {4, 3, 2, 5}, // back = 5;
-    };
+struct Cube
+{
+    IRenderer& renderer;
+    std::unique_ptr<IVertexBuffer> vertexBuffer;
+    std::unique_ptr<IIndexBuffer> indexBuffer;
 
-    std::vector<Vertex> vertices(6*4); // nb faces * nb vertices
-    size_t offset = 0;
-    for (int idx = 0; idx < 6; ++idx)
+    Cube(IRenderer& renderer) :
+        renderer(renderer)
     {
-        unsigned short *pos = positionIndices[idx];
-        vertices[offset++] = Vertex(positions[*(pos++)] - 0.5f, normals[idx], textures[0]);
-        vertices[offset++] = Vertex(positions[*(pos++)] - 0.5f, normals[idx], textures[3]);
-        vertices[offset++] = Vertex(positions[*(pos++)] - 0.5f, normals[idx], textures[2]);
-        vertices[offset++] = Vertex(positions[*(pos++)] - 0.5f, normals[idx], textures[1]);
+        vertexBuffer = renderer.CreateVertexBuffer();
+        indexBuffer = renderer.CreateIndexBuffer();
+
+        static Vertex vertices[] = {
+            Vertex( 0.5f, -0.5f,  0.5f,    0,  0,  1,   0, 0), Vertex( 0.5f,  0.5f,  0.5f,    0,  0,  1,   0, 1),
+            Vertex(-0.5f,  0.5f,  0.5f,    0,  0,  1,   1, 1), Vertex(-0.5f, -0.5f,  0.5f,    0,  0,  1,   1, 0),
+
+            Vertex(-0.5f,  0.5f,  0.5f,    0,  1,  0,   0, 0), Vertex( 0.5f,  0.5f,  0.5f,    0,  1,  0,   0, 1),
+            Vertex( 0.5f,  0.5f, -0.5f,    0,  1,  0,   1, 1), Vertex(-0.5f,  0.5f, -0.5f,    0,  1,  0,   1, 0),
+
+            Vertex( 0.5f, -0.5f, -0.5f,    1,  0,  0,   0, 0), Vertex( 0.5f,  0.5f, -0.5f,    1,  0,  0,   0, 1),
+            Vertex( 0.5f,  0.5f,  0.5f,    1,  0,  0,   1, 1), Vertex( 0.5f, -0.5f,  0.5f,    1,  0,  0,   1, 0),
+
+            Vertex(-0.5f, -0.5f, -0.5f,    0, -1,  0,   0, 0), Vertex( 0.5f, -0.5f, -0.5f,    0, -1,  0,   0, 1),
+            Vertex( 0.5f, -0.5f,  0.5f,    0, -1,  0,   1, 1), Vertex(-0.5f, -0.5f,  0.5f,    0, -1,  0,   1, 0),
+
+            Vertex(-0.5f, -0.5f,  0.5f,   -1,  0,  0,   0, 0), Vertex(-0.5f,  0.5f,  0.5f,   -1,  0,  0,   0, 1),
+            Vertex(-0.5f,  0.5f, -0.5f,   -1,  0,  0,   1, 1), Vertex(-0.5f, -0.5f, -0.5f,   -1,  0,  0,   1, 0),
+
+            Vertex(-0.5f, -0.5f, -0.5f,    0,  0, -1,   0, 0), Vertex(-0.5f,  0.5f, -0.5f,    0,  0, -1,   0, 1),
+            Vertex( 0.5f,  0.5f, -0.5f,    0,  0, -1,   1, 1), Vertex( 0.5f, -0.5f, -0.5f,    0,  0, -1,   1, 0),
+        };
+
+        static unsigned short indices[] = {
+             0,  1,  2,   0,  2,  3,     4,  5,  6,   4,  6,  7,
+             8,  9, 10,   8, 10, 11,    12, 13, 14,  12, 14, 15,
+            16, 17, 18,  16, 18, 19,    20, 21, 22,  20, 22, 23,
+        };
+
+        vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3);
+        vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Normal, 3);
+        vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::TexCoord0, 2);
+        vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
+
+        indexBuffer->SetData(DataType::UnsignedShort, sizeof(indices), indices);
     }
 
-    vertexBuffer.PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3);
-    vertexBuffer.PushVertexAttribute(DataType::Float, VertexAttributeUsage::Normal, 3);
-    vertexBuffer.PushVertexAttribute(DataType::Float, VertexAttributeUsage::TexCoord, 2);
-    vertexBuffer.SetData(offset * sizeof(Vertex), vertices.data(), VertexBufferUsage::Static);
-
-    static unsigned short indices[] = {
-         0,  1,  2,   0,  2,  3,
-         4,  5,  6,   4,  6,  7,
-         8,  9, 10,   8, 10, 11,
-        12, 13, 14,  12, 14, 15,
-        16, 17, 18,  16, 18, 19,
-        20, 21, 22,  20, 22, 23
-    };
-    indexBuffer.SetData(DataType::UnsignedShort, sizeof(indices), indices);
-}
-
-static void LoadShaders(Sdl::Window& window)
-{
-    IRenderer& renderer = window.GetRenderer();
-    try
+    void Render()
     {
-        std::ifstream fileTest(testShaderPath);
-        auto tmpTest = std::string((std::istreambuf_iterator<char>(fileTest)), std::istreambuf_iterator<char>());
-        std::ifstream fileDirectionnal(directionnalLightShaderPath);
-        auto tmpDirectionnal = std::string((std::istreambuf_iterator<char>(fileDirectionnal)), std::istreambuf_iterator<char>());
-        std::ifstream filePoint(pointLightShaderPath);
-        auto tmpPoint = std::string((std::istreambuf_iterator<char>(filePoint)), std::istreambuf_iterator<char>());
-        std::ifstream fileCombine(combineShaderPath);
-        auto tmpCombine = std::string((std::istreambuf_iterator<char>(fileCombine)), std::istreambuf_iterator<char>());
+        vertexBuffer->Bind();
+        indexBuffer->Bind();
 
-        testShader = renderer.CreateProgram(tmpTest);
-        combineShader = renderer.CreateProgram(tmpCombine);
-        lightDirecShader = renderer.CreateProgram(tmpDirectionnal);
-        lightPointShader = renderer.CreateProgram(tmpPoint);
-        lightRenderer = std::unique_ptr<Utils::LightRenderer>(new Utils::LightRenderer(renderer, *lightDirecShader, *lightPointShader));
-
-        diffuse = testShader->GetParameter("diffuse");
-
-        gbuffer = std::unique_ptr<Utils::GBuffer>(new Utils::GBuffer(renderer, window.GetSize(), *combineShader));
-
-        codeTestShader = std::move(tmpTest);
-        codeDirectionnalLightShader = std::move(tmpDirectionnal);
-        codePointLightShader = std::move(tmpPoint);
-        codeCombineShader = std::move(tmpCombine);
-    }
-    catch (std::exception& ex)
-    {
-        Tools::error << ex.what() << std::endl;
-        testShader = renderer.CreateProgram(codeTestShader);
-        combineShader = renderer.CreateProgram(codeCombineShader);
-        lightDirecShader = renderer.CreateProgram(codeDirectionnalLightShader);
-        lightPointShader = renderer.CreateProgram(codePointLightShader);
-        lightRenderer = std::unique_ptr<Utils::LightRenderer>(new Utils::LightRenderer(renderer, *lightDirecShader, *lightPointShader));
-
-        diffuse = testShader->GetParameter("diffuse");
-
-        gbuffer = std::unique_ptr<Utils::GBuffer>(new Utils::GBuffer(renderer, window.GetSize(), *combineShader));
-    }
-
-    // Lights
-    directionnalLights.push_back(lightRenderer->CreateDirectionnalLight());
-    directionnalLights.back().direction = glm::normalize(glm::vec3(1, 0, 0));
-    directionnalLights.back().diffuseColor = glm::vec3(0.0f, 0.0f, 1.0f);
-    directionnalLights.back().specularColor = glm::vec3(0.0f, 0.0f, 1.0f);
-
-    directionnalLights.push_back(lightRenderer->CreateDirectionnalLight());
-    directionnalLights.back().direction = glm::normalize(glm::vec3(0, 0, 1));
-    directionnalLights.back().diffuseColor = glm::vec3(1.0f, 0.0f, 0.0f);
-    directionnalLights.back().specularColor = glm::vec3(1.0f, 0.0f, 0.0f);
-
-    directionnalLights.push_back(lightRenderer->CreateDirectionnalLight());
-    directionnalLights.back().direction = glm::normalize(glm::vec3(0, 1, 0));
-    directionnalLights.back().diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
-    directionnalLights.back().specularColor = glm::vec3(0.0f, 1.0f, 0.0f);
-}
-
-static void UnloadShaders()
-{
-    gbuffer = 0;
-    quadWorldViewProjection = 0;
-    diffuse = 0;
-    colors = 0;
-    normals = 0;
-    depth = 0;
-    combineShader = 0;
-    testShader = 0;
-
-    lightRenderer = 0;
-    lightDirecShader = 0;
-    lightPointShader = 0;
-    directionnalLights.clear();
-}
-
-static void RenderCube(IRenderer& renderer, ITexture2D& cubeTexture)
-{
-    vertexBuffer->Bind();
-    indexBuffer->Bind();
-    cubeTexture.Bind();
-
-    diffuse->Set(cubeTexture);
-
-    do
-    {
-        testShader->BeginPass();
         renderer.DrawElements(6*3*2, DataType::UnsignedShort);
-    } while (testShader->EndPass());
 
-    cubeTexture.Unbind();
-    indexBuffer->Unbind();
-    vertexBuffer->Unbind();
-}
+        indexBuffer->Unbind();
+        vertexBuffer->Unbind();
+    }
+};
+
+//static std::string ReadFile(std::string const& filename)
+//{
+//    std::ifstream file(filename);
+//    return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+//}
+//
+//static std::unique_ptr<IShaderProgram> LoadShader(IRenderer& renderer, std::string const& oldShader, std::string& shaderCode)
+//{
+//    try
+//    {
+//        return renderer.CreateProgram(shaderCode);
+//    }
+//    catch (std::exception& ex)
+//    {
+//        Tools::error << ex.what() << std::endl;
+//        shaderCode = oldShader;
+//        return renderer.CreateProgram(shaderCode);
+//    }
+//}
 
 int main(int ac, char *av[])
 {
     if (ac > 1)
         testShaderPath = av[1];
-    if (ac > 2)
-        directionnalLightShaderPath = av[2];
-    if (ac > 3)
-        combineShaderPath = av[3];
-    if (ac > 4)
-        texturePath = av[4];
+    //if (ac > 2)
+    //    directionnalLightShaderPath = av[2];
+    //if (ac > 3)
+    //    combineShaderPath = av[3];
+    //if (ac > 4)
+    //    texturePath = av[4];
 
     Tools::log << "Current directory " << boost::filesystem::current_path() << std::endl;
-    Tools::log << "Loading \"" << testShaderPath + "\", \"" << combineShaderPath << "\", \"" << texturePath << "\"\n";
+    //Tools::log << "Loading \"" << testShaderPath + "\", \"" << combineShaderPath << "\", \"" << texturePath << "\"\n";
 
     std::map<std::string, Tools::Window::BindAction::BindAction> actions;
     actions["quit"] = BindAction::Quit;
     actions["reloadshaders"] = BindAction::ReloadShaders;
     actions["togglecullface"] = BindAction::ToggleCullface;
 
-    Sdl::Window window(actions, true);
+    Sdl::Window window(actions, false, glm::uvec2(1024));
     IRenderer& renderer = window.GetRenderer();
     bool run = true;
     bool reload = true;
@@ -252,20 +154,56 @@ int main(int ac, char *av[])
     window.GetInputManager().GetInputBinder().Bind("r", "reloadshaders");
     window.GetInputManager().GetInputBinder().Bind("escape", "quit");
     window.GetInputManager().GetInputBinder().Bind("f", "togglecullface");
-    window.RegisterCallback([](glm::uvec2 const& size) { if (gbuffer) gbuffer->Resize(size); });
+    //window.RegisterCallback([](glm::uvec2 const& size) { if (gbuffer) gbuffer->Resize(size); });
 
     {
-        Timer timer;
+        using Tools::Gfx::Effect::EffectManager;
 
-        texture = renderer.CreateTexture2D(texturePath);
-        vertexBuffer = renderer.CreateVertexBuffer();
-        indexBuffer = renderer.CreateIndexBuffer();
-        screenQuad = std::unique_ptr<Utils::Image>(new Utils::Image(renderer));
-        RAII _shaders([&]() { UnloadShaders(); texture = 0; vertexBuffer = 0; indexBuffer = 0; screenQuad = 0; });
+        EffectManager effectMgr(renderer);
 
-        CreateCube(*vertexBuffer, *indexBuffer);
-        Utils::Sphere sphere(renderer);
+        Tools::Timer timer;
+        Cube cube(renderer);
 
+        auto texture = renderer.CreateTexture2D("test.png");
+        //auto simpleShader = LoadShader(renderer, "", ReadFile("BaseShaderTexture.fx"));
+        //auto& simpleBaseTex = simpleShader->GetParameter("baseTex");
+
+        //std::string shaderCode = ReadFile(testShaderPath);
+        //auto shader = LoadShader(renderer, "", shaderCode);
+
+        //auto& shaderDiffuse = shader->GetParameter("diffuse");
+        //shaderDiffuse.Set(*texture);
+
+        //Tools::debug << "Useable baseTex, diffuse ? " << simpleBaseTex.IsUseable() << ", " << shaderDiffuse.IsUseable() << std::endl;
+
+        auto simpleEffect = effectMgr.CreateEffect("BaseShaderTexture.fxc");
+        auto& simpleBaseTex = simpleEffect->GetParameter("baseTex");
+
+        auto simpleTest = effectMgr.CreateEffect("test.fxc");
+        auto& testTex = simpleTest->GetParameter("diffuse");
+
+        Font font(renderer, (Common::ConfDir::Client() / "fonts" / "DejaVuSerif-Italic.ttf").string(), 32);
+
+        Utils::Image img(renderer);
+
+        glm::mat4 projection = glm::perspective(90.0f, (float)window.GetSize().x / (float)window.GetSize().y, 0.01f, 5.0f);
+        glm::mat4 view = glm::lookAt(glm::vec3(0.001f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0));
+        Tools::Frustum camera(glm::highp_mat4(projection * view));
+
+        renderer.SetClearColor(glm::vec4(0, 0, 0.5f, 1));
+        renderer.SetCullMode(CullMode::Clockwise);
+
+        auto renderTarget = renderer.CreateRenderTarget(glm::uvec2(1024));
+        renderTarget->PushRenderTarget(PixelFormat::Rgba8, RenderTargetUsage::Color);
+
+        auto renderTarget2 = renderer.CreateRenderTarget(glm::uvec2(1024));
+        renderTarget2->PushRenderTarget(PixelFormat::Rgba8, RenderTargetUsage::Color);
+        //renderTarget2->PushRenderTarget(PixelFormat::Depth24Stencil8, RenderTargetUsage::DepthStencil);
+
+        auto frontRt = renderTarget.get();
+        auto backRt = renderTarget2.get();
+
+        int i = 0;
         while (run)
         {
             window.GetInputManager().ShowMouse();
@@ -274,50 +212,94 @@ int main(int ac, char *av[])
 
             if (reload)
             {
-                UnloadShaders();
-                LoadShaders(window);
                 reload = false;
                 Tools::log << "Reloading shaders...\n";
             }
 
-            renderer.SetProjectionMatrix(glm::perspective(90.0f, (float)window.GetSize().x / (float)window.GetSize().y, 0.01f, 5.0f));
-            renderer.SetViewMatrix(glm::lookAt(glm::vec3(0.001f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0, 1, 0)));
-            renderer.SetModelMatrix(
-                glm::translate(glm::vec3(2.0f, 0.0f, 0.0f))
-                * glm::yawPitchRoll(
-                    timer.GetElapsedTime() * 0.0001f,
-                    timer.GetElapsedTime() * 0.00001f,
-                    timer.GetElapsedTime() * 0.0002f));
+            std::swap(frontRt, backRt);
 
-            renderer.BeginDraw();
 
-            gbuffer->Bind();
-            renderer.SetClearColor(Color4f(1.0f, 0.0f, 0.0f, 0.5f));
-            renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
-
-            renderer.SetCullFace(cullface);
-
-            do
+            renderer.BeginDraw(frontRt);
             {
-                testShader->BeginPass();
-                sphere.Render();
-            } while (testShader->EndPass());
+                renderer.BeginDraw2D();
+                {
+                    renderer.SetClearColor(glm::vec4(0, 0, 0.5f, 1));
+                    renderer.Clear(ClearFlags::Color/* | ClearFlags::Depth | ClearFlags::Stencil*/);
 
-            //RenderCube(renderer, *texture);
-            gbuffer->Unbind();
+                    renderer.SetModelMatrix(
+                        glm::scale(glm::vec3(frontRt->GetSize().x, frontRt->GetSize().y, 1))
+                        * glm::translate(glm::vec3(0.5f, 0.5f, 0)));
 
-            renderer.SetClearColor(Color4f(0.0f, 0.0f, 0.5f, 1.0f));
-            renderer.Clear(ClearFlags::Color | ClearFlags::Depth);
-            //RenderCube(renderer, gbuffer->GetColors());
+                    do
+                    {
+                        simpleEffect->BeginPass();
+                        img.Render(simpleBaseTex, *texture);
 
-            lightRenderer->Render(*gbuffer, directionnalLights, std::list<Utils::PointLight>());
-            gbuffer->Render();
+                        renderer.SetModelMatrix(glm::translate(glm::vec3(10, 10, -1)) * glm::scale(glm::vec3(1.0f)));
+                        font.Render(simpleBaseTex, Tools::ToString(i++));
+                    } while (simpleEffect->EndPass());
+                }
+                renderer.EndDraw2D();
 
+                renderer.SetDepthTest(true);
+                renderer.SetDepthWrite(true);
+                renderer.SetProjectionMatrix(projection);
+                renderer.SetViewMatrix(view);
+                renderer.SetCullMode(CullMode::CounterClockwise);
+
+                texture->Bind();
+                backRt->GetTexture(0).Bind();
+                do
+                {
+                    simpleTest->BeginPass();
+
+                    testTex.Set(backRt->GetTexture(0));
+                    renderer.SetModelMatrix(
+                        glm::translate(glm::vec3(1.5f, 0.0050f, 0.0f))
+                        * glm::yawPitchRoll(
+                            timer.GetElapsedTime() * 0.001f,
+                            timer.GetElapsedTime() * 0.0001f,
+                            timer.GetElapsedTime() * 0.002f));
+                    cube.Render();
+
+                    //testTex.Set(*texture);
+                    //renderer.SetModelMatrix(
+                    //    glm::translate(glm::vec3(3.0f, -0.50f, 0.0f))
+                    //    * glm::yawPitchRoll(
+                    //        timer.GetElapsedTime() * 0.0001f,
+                    //        timer.GetElapsedTime() * 0.00001f,
+                    //        timer.GetElapsedTime() * 0.0002f));
+                    //cube.Render();
+
+                    //font.Render(testTex, "coucou", true);
+                } while (simpleTest->EndPass());
+                backRt->GetTexture(0).Unbind();
+                texture->Unbind();
+            }
             renderer.EndDraw();
+
+            renderer.BeginDraw2D();
+            {
+                renderer.SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
+                renderer.Clear(ClearFlags::Color | ClearFlags::Depth | ClearFlags::Stencil);
+                renderer.SetModelMatrix(
+                    glm::translate(glm::vec3(window.GetSize().x / 2, window.GetSize().y / 2, 0))
+                    * glm::scale(glm::vec3(1024, 1024, 1))
+                );
+
+                do
+                {
+                    simpleEffect->BeginPass();
+                    img.Render(simpleBaseTex, frontRt->GetTexture(0));
+
+                } while (simpleEffect->EndPass());
+            }
+            renderer.EndDraw2D();
 
             window.Render();
         }
     }
 
+    //std::cin.get();
     return 0;
 }

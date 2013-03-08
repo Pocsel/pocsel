@@ -6,7 +6,7 @@ namespace Tools { namespace Renderers { namespace Utils {
     Image::Image(IRenderer& renderer)
         : _renderer(renderer)
     {
-        Image::_InitBuffers(renderer);
+        this->SetTextureCoords(glm::vec2(0.0f), glm::vec2(1.0f));
     }
 
     Image::~Image()
@@ -15,58 +15,49 @@ namespace Tools { namespace Renderers { namespace Utils {
 
     void Image::Render(IShaderParameter& textureParameter, ITexture2D& texture)
     {
-        Image::_vertexBuffer->Bind();
-        Image::_indexBuffer->Bind();
+        this->_vertexBuffer->Bind();
+        this->_indexBuffer->Bind();
         texture.Bind();
         textureParameter.Set(texture);
 
         this->_renderer.DrawElements(6, DataType::UnsignedShort);
 
         texture.Unbind();
-        Image::_indexBuffer->Unbind();
-        Image::_vertexBuffer->Unbind();
+        this->_indexBuffer->Unbind();
+        this->_vertexBuffer->Unbind();
     }
 
     void Image::Render()
     {
-        Image::_vertexBuffer->Bind();
-        Image::_indexBuffer->Bind();
+        this->_vertexBuffer->Bind();
+        this->_indexBuffer->Bind();
 
         this->_renderer.DrawElements(6, DataType::UnsignedShort);
 
-        Image::_indexBuffer->Unbind();
-        Image::_vertexBuffer->Unbind();
+        this->_indexBuffer->Unbind();
+        this->_vertexBuffer->Unbind();
     }
 
-    IVertexBuffer* Image::_vertexBuffer = 0;
-    IIndexBuffer* Image::_indexBuffer = 0;
-
-    void Image::_InitBuffers(IRenderer& renderer)
+    void Image::SetTextureCoords(glm::vec2 tl, glm::vec2 br)
     {
-        if (Image::_vertexBuffer != 0)
-            return;
-
-        static const float vertices[] =
+        float vertices[] =
         {
-            -0.5f,  0.5f, 0,  0, 1, // left - top
-             0.5f,  0.5f, 0,  1, 1, // right - top
-             0.5f, -0.5f, 0,  1, 0, // right - bottom
-            -0.5f, -0.5f, 0,  0, 0, // left - bottom
+            -0.5f,  0.5f, 0,  tl.x, br.y, // left - top
+             0.5f,  0.5f, 0,  br.x, br.y, // right - top
+             0.5f, -0.5f, 0,  br.x, tl.y, // right - bottom
+            -0.5f, -0.5f, 0,  tl.x, tl.y, // left - bottom
         };
-        Image::_vertexBuffer = renderer.CreateVertexBuffer().release();
-        Image::_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::Position, 3); // position
-        Image::_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, Renderers::VertexAttributeUsage::TexCoord, 2); // texCoord
-        Image::_vertexBuffer->SetData(4*(3 + 2)*sizeof(*vertices), vertices, Renderers::VertexBufferUsage::Static);
+        this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
+        this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, VertexAttributeUsage::Position, 3); // position
+        this->_vertexBuffer->PushVertexAttribute(Renderers::DataType::Float, VertexAttributeUsage::TexCoord0, 2); // texCoord
+        this->_vertexBuffer->SetData(4*(3 + 2)*sizeof(*vertices), vertices, VertexBufferUsage::Static);
 
-        static const unsigned short indices[] = { 0, 1, 3, 1, 2, 3 };
-        Image::_indexBuffer = renderer.CreateIndexBuffer().release();
-        Image::_indexBuffer->SetData(DataType::UnsignedShort, 6*sizeof(*indices), indices);
-
-        renderer.RegisterShutdownCallback([]()
-            {
-                Tools::Delete(Image::_vertexBuffer);
-                Tools::Delete(Image::_indexBuffer);
-            });
+        if (!this->_indexBuffer)
+        {
+            static const unsigned short indices[] = { 0, 1, 3, 1, 2, 3 };
+            this->_indexBuffer = this->_renderer.CreateIndexBuffer();
+            this->_indexBuffer->SetData(DataType::UnsignedShort, 6*sizeof(*indices), indices);
+        }
     }
 
 }}}
