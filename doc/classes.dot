@@ -1,13 +1,12 @@
 digraph G {
     fontname="Monaco";
-    fontsize=8;
+    fontsize=12;
     //nodesep=1.2;
-    splines=polyline;
-    arrowsize=1.8;
-    ranksep=1.5;
+    splines=ortho;
+    ranksep=2;
     outputorder=edgesfirst;
-    node [fontname="Monaco", fontsize=8, shape=record, height=1, color=chocolate];
-    edge [fontname="Monaco", fontsize=8, color="#c900bd70"];
+    node [fontname="Monaco", fontsize=8, shape=record, width=1.5, height=1, color=chocolate];
+    edge [fontname="Monaco", fontsize=8, color="#c900bdc2", arrowsize=1.5];
 
     subgraph cluster_Client {
         label="Client";
@@ -127,12 +126,14 @@ digraph G {
                 subgraph cluster_Server_Game_Map_Gen {
                     label="Gen";
                     Server_Game_Map_Gen_ChunkGenerator [label="{ChunkGenerator}"];
+                    /*
                     Server_Game_Map_Gen_CubeSpawnInfo [label="{CubeSpawnInfo}"];
                     Server_Game_Map_Gen_IEquation [label="{IEquation}"];
                     Server_Game_Map_Gen_IRand [label="{IRand}"];
                     Server_Game_Map_Gen_IValidator [label="{IValidator}"];
                     Server_Game_Map_Gen_Perlin [label="{Perlin}"];
                     Server_Game_Map_Gen_RandMersenneTwister [label="{RandMersenneTwister}"];
+                    */
                 }
             }
 
@@ -174,20 +175,26 @@ digraph G {
 
     subgraph cluster_Tools {
         label="Tools";
+        /*
         Tools_AbstractCollider [label="{AbstractCollider}"];
         Tools_AlignedBox [label="{AlignedBox}"];
         Tools_AlignedCube [label="{AlignedCube}"];
-        Tools_ByteArray [label="{ByteArray}"];
         Tools_Frustum [label="{Frustum}"];
-        Tools_IRenderer [label="{IRenderer}"];
         Tools_Octree [label="{Octree}"];
         Tools_Plane [label="{Plane}"];
         Tools_Ray [label="{Ray}"];
         Tools_Rectangle [label="{Rectangle}"];
-        Tools_SimpleMessageQueue [label="{SimpleMessageQueue}"];
-        Tools_Timer [label="{Timer}"];
         Tools_Vector2 [label="{Vector2}"];
         Tools_Vector3 [label="{Vector3}"];
+        */
+        Tools_ByteArray [label="{ByteArray}"];
+        Tools_SimpleMessageQueue [label="{SimpleMessageQueue}"];
+        Tools_Timer [label="{Timer}"];
+
+        subgraph cluster_Tools_Gfx {
+            label="Gfx";
+            Tools_Gfx_IRenderer [label="{IRenderer}"];
+        }
 
         subgraph cluster_Tools_Database {
             label="Database";
@@ -269,16 +276,19 @@ digraph G {
     /*
        Tools::Database::Sqlite
     */
+    Tools_Database_Sqlite_Connection -> Tools_Database_Sqlite_Row [arrowhead=odiamond];
+    Tools_Database_Sqlite_Connection -> Tools_Database_Sqlite_Query [arrowhead=odiamond];
     Tools_Database_Sqlite_Connection -> Tools_Database_IConnection;
     Tools_Database_Sqlite_Query -> Tools_Database_IQuery;
     Tools_Database_Sqlite_Row -> Tools_Database_IRow;
 
     /*
        Tools::Database
+       #ff6d0080 - IConnection
     */
-    Tools_Database_IConnection -> Client_Resources_CacheDatabaseProxy [arrowhead=odiamond];
-    Tools_Database_IConnection -> Server_Database_ResourceManager [arrowhead=odiamond];
-    Tools_Database_IConnection -> Server_Database_WorldLoader2 [arrowhead=odiamond];
+    Tools_Database_IConnection -> Client_Resources_CacheDatabaseProxy [arrowhead=odiamond, color="#ff6d0080"];
+    Tools_Database_IConnection -> Server_Database_ResourceManager [arrowhead=odiamond, color="#ff6d0080"];
+    Tools_Database_IConnection -> Server_Database_WorldLoader2 [arrowhead=odiamond, color="#ff6d0080"];
 
     /*
        Tools::Window::Sdl
@@ -289,11 +299,16 @@ digraph G {
 
     /*
        Tools::Window
+       #804cffcf - Window, ActionBinder
     */
-    Tools_Window_Window -> Client_Client [arrowhead=odiamond];
-    Tools_Window_ActionBinder -> Client_Menu_MainMenu [arrowhead=odiamond];
-    Tools_Window_ActionBinder -> Client_Menu_DisconnectedScreen [arrowhead=odiamond];
-    Tools_Window_ActionBinder -> Client_Game_Player [arrowhead=diamond];
+    Tools_Window_InputManager -> Tools_Window_Window [arrowhead=odiamond];
+    Tools_Window_Window -> Tools_Window_InputManager [arrowhead=odiamond];
+    Tools_Window_InputBinder -> Tools_Window_InputManager [arrowhead=odiamond];
+    Tools_Window_Sdl_InputBinder -> Tools_Window_Sdl_InputManager [arrowhead=odiamond];
+    Tools_Window_Window -> Client_Client [arrowhead=odiamond, color="#804cffcf"];
+    Tools_Window_ActionBinder -> Client_Menu_MainMenu [arrowhead=odiamond, color="#804cffcf"];
+    Tools_Window_ActionBinder -> Client_Menu_DisconnectedScreen [arrowhead=odiamond, color="#804cffcf"];
+    Tools_Window_ActionBinder -> Client_Game_Player [arrowhead=diamond, color="#804cffcf"];
 
     /*
        Tools::Models
@@ -302,7 +317,9 @@ digraph G {
 
     /*
        Tools::Lua
-       chartreuse - Ref
+       #00750090 - Ref
+       #89B600cf - Interpreter
+       #285700cb - WeakResourceRefManager
     */
     Tools_Lua_Interpreter -> Tools_Lua_MetaTable [arrowhead=odiamond];
     Tools_Lua_Interpreter -> Tools_Lua_Serializer [arrowhead=odiamond];
@@ -318,43 +335,50 @@ digraph G {
     Tools_Lua_State -> Tools_Lua_Ref [arrowhead=odiamond];
     Tools_Lua_State -> Tools_Lua_WeakRef [arrowhead=odiamond];
     Tools_Lua_State -> Tools_Lua_Interpreter [arrowhead=odiamond];
-    Tools_Lua_Interpreter -> Client_Game_Engine_Engine [arrowhead=odiamond];
-    Tools_Lua_Interpreter -> Server_Database_WorldLoader2 [arrowhead=odiamond];
-    Tools_Lua_Interpreter -> Server_Game_Engine_Engine [arrowhead=odiamond];
-    Tools_Lua_Ref -> Client_Game_Engine_Engine [arrowhead=diamond, color=chartreuse];
-    Tools_Lua_Ref -> Client_Game_Engine_DoodadType [arrowhead=diamond, color=chartreuse];
-    Tools_Lua_Ref -> Client_Game_Engine_Doodad [arrowhead=diamond, color=chartreuse];
-    Tools_Lua_Ref -> Client_Game_CubeTypeManager [arrowhead=diamond, color=chartreuse];
-    Tools_Lua_Ref -> Server_Database_WorldLoader2 [arrowhead=diamond, color=chartreuse];
-    Tools_Lua_Ref -> Server_Game_Engine_Entity [arrowhead=diamond, color=chartreuse];
-    Tools_Lua_Ref -> Server_Game_Engine_EntityType [arrowhead=diamond, color=chartreuse];
-    Tools_Lua_Ref -> Server_Game_Engine_Doodad [arrowhead=diamond, color=chartreuse];
-    Tools_Lua_WeakResourceRefManager -> Server_Game_Engine_EntityManager [arrowhead=odiamond];
-    Tools_Lua_WeakResourceRefManager -> Server_Game_Engine_DoodadManager [arrowhead=odiamond];
+    Tools_Lua_Interpreter -> Client_Game_Engine_Engine [arrowhead=odiamond, color="#89B600cf"];
+    Tools_Lua_Interpreter -> Server_Database_WorldLoader2 [arrowhead=odiamond, color="#89B600cf"];
+    Tools_Lua_Interpreter -> Server_Game_Engine_Engine [arrowhead=odiamond, color="#89B600cf"];
+    Tools_Lua_Ref -> Client_Game_Engine_Engine [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Client_Game_Engine_DoodadType [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Client_Game_Engine_Doodad [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Client_Game_CubeTypeManager [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Server_Database_WorldLoader2 [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Server_Game_Engine_Entity [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Server_Game_Engine_EntityType [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Server_Game_Engine_Doodad [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_WeakResourceRefManager -> Server_Game_Engine_EntityManager [arrowhead=odiamond, color="#285700cb"];
+    Tools_Lua_WeakResourceRefManager -> Server_Game_Engine_DoodadManager [arrowhead=odiamond, color="#285700cb"];
 
     /*
        Tools
-       #12121230 - IRenderer
-       darkturquoise - Timer
+       #6968ff99 - Timer
+       #001bffcb - SimpleMessageQueue
     */
-    Tools_IRenderer -> Client_Resources_ResourceManager [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Resources_LocalResourceManager [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Graphics_LightManager [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Map_ChunkRenderer [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Game_Game [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Menu_MainMenu [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Menu_LoadingScreen [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Menu_DisconnectedScreen [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Game_BulletDebugDrawer [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Game_ModelRenderer [arrowhead=odiamond, color="#12121230"];
-    Tools_IRenderer -> Client_Game_ShapeRenderer [arrowhead=odiamond, color="#12121230"];
-    Tools_Timer -> Client_Game_Game [arrowhead=diamond, color=darkturquoise];
-    Tools_Timer -> Client_Game_BulletDebugDrawer [arrowhead=diamond, color=darkturquoise];
-    Tools_SimpleMessageQueue -> Server_Server [arrowhead=odiamond];
-    Tools_SimpleMessageQueue -> Server_ClientManagement_ClientManager [arrowhead=odiamond];
-    Tools_SimpleMessageQueue -> Server_Game_Game [arrowhead=odiamond];
-    Tools_SimpleMessageQueue -> Server_Game_World [arrowhead=odiamond];
-    Tools_SimpleMessageQueue -> Server_Game_Map_Map [arrowhead=odiamond];
+    Tools_Timer -> Client_Game_Game [arrowhead=diamond, color="#6968ff99"];
+    Tools_Timer -> Client_Game_BulletDebugDrawer [arrowhead=diamond, color="#6968ff99"];
+    Tools_SimpleMessageQueue -> Server_Server [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_ClientManagement_ClientManager [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_Game_Game [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_Game_World [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_Game_Map_Map [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_Game_Map_Gen_ChunkGenerator [arrowhead=odiamond, color="#001bffcb"];
+
+    /*
+       Tools::Gfx
+       #12121260 - IRenderer
+    */
+    Tools_Gfx_IRenderer -> Tools_Window_Sdl_Window [arrowhead=diamond];
+    Tools_Gfx_IRenderer -> Client_Resources_ResourceManager [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Resources_LocalResourceManager [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Graphics_LightManager [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Map_ChunkRenderer [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Game_Game [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Menu_MainMenu [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Menu_LoadingScreen [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Menu_DisconnectedScreen [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Game_BulletDebugDrawer [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Game_ModelRenderer [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Game_ShapeRenderer [arrowhead=odiamond, color="#12121260"];
 
     /*
        Client::Resources
@@ -460,20 +484,21 @@ digraph G {
 
     /*
        Common
+       #a4000aee - Packet, Position, MovingOrientedPosition, Camera, Resource
     */
     Common_Position -> Common_Physics_Node [arrowhead=diamond];
     Common_Position -> Common_OrientedPosition [arrowhead=diamond];
-    Common_Position -> Server_Game_Map_Map [arrowhead=diamond];
+    Common_Camera -> Common_OrientedPosition;
     Common_OrientedPosition -> Common_MovingOrientedPosition [arrowhead=diamond];
-    Common_MovingOrientedPosition -> Server_Game_Player [arrowhead=diamond];
     Common_BaseChunk -> Common_NChunk;
     Common_NChunkContainer -> Common_NChunk;
-    Common_Camera -> Common_OrientedPosition;
-    Common_Camera -> Client_Game_Player [arrowhead=odiamond];
     Common_Packet -> Tools_ByteArray;
-    Common_Packet -> Client_Network_Network [arrowhead=odiamond];
-    Common_Packet -> Server_Network_ClientConnection [arrowhead=odiamond];
-    Common_Resource -> Server_Database_ResourceManager [arrowhead=odiamond];
+    Common_Camera -> Client_Game_Player [arrowhead=odiamond, color="#a4000aee"];
+    Common_MovingOrientedPosition -> Server_Game_Player [arrowhead=diamond, color="#a4000aee"];
+    Common_Position -> Server_Game_Map_Map [arrowhead=diamond, color="#a4000aee"];
+    Common_Packet -> Client_Network_Network [arrowhead=odiamond, color="#a4000aee"];
+    Common_Packet -> Server_Network_ClientConnection [arrowhead=odiamond, color="#a4000aee"];
+    Common_Resource -> Server_Database_ResourceManager [arrowhead=odiamond, color="#a4000aee"];
 
     /*
        Common::Physics
