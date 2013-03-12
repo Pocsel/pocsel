@@ -48,9 +48,11 @@ namespace Tools { namespace Gfx { namespace OpenGL {
             case 3: return GL_RGBA;
             case 8: return GL_RG;
             case 9: return GL_RED;
+            default:
+                throw std::runtime_error("Bad PixelFormat ?!");
             }
+            break;
         }
-        throw std::runtime_error("Bad PixelFormat ?!");
     }
 
     inline GLint GetTypeFromPixelFormat(PixelFormat::Type format)
@@ -71,9 +73,11 @@ namespace Tools { namespace Gfx { namespace OpenGL {
             case 3: return GL_FLOAT;
             case 4: return GL_UNSIGNED_SHORT_4_4_4_4;
             case 5: return GL_UNSIGNED_BYTE;
+            default:
+                throw std::runtime_error("Bad PixelFormat ?!");
             }
+            break;
         }
-        throw std::runtime_error("Bad PixelFormat ?!");
     }
 
     inline GLint GetTypeFromDataType(DataType::Type type)
@@ -87,8 +91,9 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         case DataType::Int: return GL_INT;
         case DataType::UnsignedInt: return GL_UNSIGNED_INT;
         case DataType::Float: return GL_FLOAT;
+        default:
+            throw std::runtime_error("Bad DataType ?!");
         }
-        throw std::runtime_error("Bad DataType ?!");
     }
 
     inline GLint GetVertexBufferUsage(VertexBufferUsage::Type type)
@@ -98,8 +103,9 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         case VertexBufferUsage::Stream: return GL_STREAM_DRAW;
         case VertexBufferUsage::Static: return GL_STATIC_DRAW;
         case VertexBufferUsage::Dynamic: return GL_DYNAMIC_DRAW;
+        default:
+            throw std::runtime_error("Bad VertexBufferUsage ?!");
         }
-        throw std::runtime_error("Bad VertexBufferUsage ?!");
     }
 
     inline GLint GetDrawingMode(DrawingMode::Type type)
@@ -111,8 +117,9 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         case DrawingMode::Triangles: return GL_TRIANGLES;
         case DrawingMode::TrianglesStrip: return GL_TRIANGLE_STRIP;
         case DrawingMode::TrianglesFan: return GL_TRIANGLE_FAN;
+        default:
+            throw std::runtime_error("Bad DrawingMode ?!");
         }
-        throw std::runtime_error("Bad DrawingMode ?!");
     }
 
     inline GLint GetTextureFilter(TextureFilter::Type type)
@@ -125,8 +132,9 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         case TextureFilter::LinearMipmapNearest: return GL_LINEAR_MIPMAP_NEAREST;
         case TextureFilter::NearestMipmapNearest: return GL_NEAREST_MIPMAP_NEAREST;
         case TextureFilter::NearestMipmapLinear: return GL_NEAREST_MIPMAP_LINEAR;
+        default:
+            throw std::runtime_error("Bad TextureFilter ?!");
         }
-        throw std::runtime_error("Bad TextureFilter ?!");
     }
 
     inline GLint GetVertexAttributeIndex(VertexAttributeUsage::Type type)
@@ -141,8 +149,9 @@ namespace Tools { namespace Gfx { namespace OpenGL {
             case VertexAttributeUsage::TexCoord2: return 10;
             case VertexAttributeUsage::TexCoord3: return 11;
             case VertexAttributeUsage::TexCoord4: return 12;
+            default:
+                throw std::runtime_error("Bad VertexAttributeUsage ?!");
         }
-        throw std::runtime_error("Bad VertexAttributeUsage ?!");
     }
 
     inline char const* GetVertexAttributeSemantic(VertexAttributeUsage::Type type)
@@ -157,8 +166,9 @@ namespace Tools { namespace Gfx { namespace OpenGL {
             case VertexAttributeUsage::TexCoord2: return "TEXCOORD2";
             case VertexAttributeUsage::TexCoord3: return "TEXCOORD3";
             case VertexAttributeUsage::TexCoord4: return "TEXCOORD4";
+            default:
+                throw std::runtime_error("Bad VertexAttributeUsage ?!");
         }
-        throw std::runtime_error("Bad VertexAttributeUsage ?!");
     }
 
     void GLCheckError(std::string const& file, unsigned int line, char const* function);

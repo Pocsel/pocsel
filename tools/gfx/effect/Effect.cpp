@@ -18,8 +18,9 @@ namespace Tools { namespace Gfx { namespace Effect {
             case Semantic::TexCoord2: return VertexAttributeUsage::TexCoord2;
             case Semantic::TexCoord3: return VertexAttributeUsage::TexCoord3;
             case Semantic::TexCoord4: return VertexAttributeUsage::TexCoord4;
+            default:
+                throw std::invalid_argument("it's not an attribute");
             }
-            throw std::invalid_argument("it's not an attribute");
         }
 
         ShaderParameterUsage::Type GetShaderParameterUsage(Semantic::Type semantic)
@@ -32,8 +33,9 @@ namespace Tools { namespace Gfx { namespace Effect {
             case Semantic::WorldView: return ShaderParameterUsage::ModelViewMatrix;
             case Semantic::WorldViewProjection: return ShaderParameterUsage::ModelViewProjectionMatrix;
             case Semantic::ViewProjection: return ShaderParameterUsage::ViewProjectionMatrix;
+            default:
+                return ShaderParameterUsage::None;
             }
-            return ShaderParameterUsage::None;
         }
     }
 

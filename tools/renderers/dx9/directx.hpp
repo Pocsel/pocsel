@@ -68,6 +68,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
             switch (nbElements)
             {
             case 4: return D3DDECLTYPE_UBYTE4;
+            default:
+                throw std::runtime_error("Bad DataType ?!");
             }
             break;
         case DataType::Short:
@@ -75,6 +77,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
             {
             case 2: return D3DDECLTYPE_SHORT2;
             case 4: return D3DDECLTYPE_SHORT4;
+            default:
+                throw std::runtime_error("Bad DataType ?!");
             }
             break;
         case DataType::Float:
@@ -84,6 +88,8 @@ namespace Tools { namespace Renderers { namespace DX9 {
             case 2: return D3DDECLTYPE_FLOAT2;
             case 3: return D3DDECLTYPE_FLOAT3;
             case 4: return D3DDECLTYPE_FLOAT4;
+            default:
+                throw std::runtime_error("Bad DataType ?!");
             }
             break;
 
@@ -91,9 +97,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case DataType::UnsignedShort:
         case DataType::Int:
         case DataType::UnsignedInt:
-            break;
+        default:
+            throw std::runtime_error("Bad DataType ?!");
         }
-        throw std::runtime_error("Bad DataType ?!");
     }
 
     inline BYTE GetVertexAttributeUsage(VertexAttributeUsage::Type type)
@@ -107,10 +113,10 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case VertexAttributeUsage::TexCoord1:
         case VertexAttributeUsage::TexCoord2:
         case VertexAttributeUsage::TexCoord3:
-        case VertexAttributeUsage::TexCoord4:
-            return D3DDECLUSAGE_TEXCOORD;
+        case VertexAttributeUsage::TexCoord4: return D3DDECLUSAGE_TEXCOORD;
+        default:
+            throw std::runtime_error("Bad VertexAttributeUsage ?!");
         }
-        throw std::runtime_error("Bad VertexAttributeUsage ?!");
     }
 
     inline BYTE GetVertexAttributeUsageIndex(VertexAttributeUsage::Type type)
@@ -120,14 +126,14 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case VertexAttributeUsage::Position:
         case VertexAttributeUsage::Normal:
         case VertexAttributeUsage::Color:
-        case VertexAttributeUsage::TexCoord0:
-            return 0;
+        case VertexAttributeUsage::TexCoord0: return 0;
         case VertexAttributeUsage::TexCoord1: return 1;
         case VertexAttributeUsage::TexCoord2: return 2;
         case VertexAttributeUsage::TexCoord3: return 3;
         case VertexAttributeUsage::TexCoord4: return 4;
+        default:
+            throw std::runtime_error("Bad VertexAttributeUsage ?!");
         }
-        throw std::runtime_error("Bad VertexAttributeUsage ?!");
     }
 
     inline D3DPRIMITIVETYPE GetDrawingMode(DrawingMode::Type type)
@@ -139,8 +145,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case DrawingMode::Triangles: return D3DPT_TRIANGLELIST;
         case DrawingMode::TrianglesStrip: return D3DPT_TRIANGLESTRIP;
         case DrawingMode::TrianglesFan: return D3DPT_TRIANGLEFAN;
+        default:
+            throw std::runtime_error("Bad DrawingMode ?!");
         }
-        throw std::runtime_error("Bad DrawingMode ?!");
     }
 
     inline UINT GetPrimitiveCount(DrawingMode::Type type, UINT vertices)
@@ -152,8 +159,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case DrawingMode::Triangles: return vertices / 3;
         case DrawingMode::TrianglesStrip: return vertices - 2;
         case DrawingMode::TrianglesFan: return vertices - 2;
+        default:
+            throw std::runtime_error("Bad DrawingMode ?!");
         }
-        throw std::runtime_error("Bad DrawingMode ?!");
     }
 
 #define DXCHECKERROR(result) Tools::Renderers::DX9::CheckError(result, #result)
@@ -182,8 +190,9 @@ namespace Tools { namespace Renderers { namespace DX9 {
         case PixelFormat::Rgba8: return D3DFMT_A8R8G8B8;
         case PixelFormat::Depth24Stencil8: return D3DFMT_D24S8;
         case PixelFormat::Depth32: return D3DFMT_D32;
+        default:
+            throw std::runtime_error("Bad PixelFormat ?!");
         }
-        throw std::runtime_error("Bad PixelFormat ?!");
     }
 
 }}}

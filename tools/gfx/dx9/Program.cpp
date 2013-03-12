@@ -59,6 +59,7 @@ namespace Tools { namespace Gfx { namespace DX9 {
         case ShaderParameterUsage::ProjectionMatrix: it->second->Set(this->_renderer.GetProjectionMatrix()); break;
         case ShaderParameterUsage::ViewMatrix: it->second->Set(this->_renderer.GetViewMatrix()); break;
         case ShaderParameterUsage::ViewProjectionMatrix: it->second->Set(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix()); break;
+        case ShaderParameterUsage::None: break;
         }
     }
 

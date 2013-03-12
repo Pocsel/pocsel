@@ -8,7 +8,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
     FragmentProgram::FragmentProgram(std::string const& code)
     {
         char const* src[] = { code.c_str() };
-        GLint len = code.length();
+        GLint len = (GLint)code.length();
         if (glCreateShader != nullptr)
         {
             GLCHECK(this->_shader = glCreateShader(GL_FRAGMENT_SHADER));
