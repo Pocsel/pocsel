@@ -40,7 +40,7 @@ namespace Tools { namespace Gfx { namespace Effect {
     Effect::Effect(IRenderer& renderer, CompleteShader const& complShader) :
         _renderer(renderer)
     {
-        this->_shader = renderer.GetRendererName() == "DirectX" ? complShader.directX : complShader.openGL;
+        this->_shader = renderer.GetRendererName().find("DirectX") != -1 ? complShader.directX : complShader.openGL;
         this->_program = renderer.CreateProgram(this->_shader.vertex, this->_shader.pixel);
         for(auto const& pair: this->_shader.attributes)
             this->_program->SetAttributeUsage(pair.second.name, GetAttributeUsage(pair.second.semantic));

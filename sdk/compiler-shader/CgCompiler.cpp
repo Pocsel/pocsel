@@ -260,16 +260,16 @@ namespace Hlsl {
             {
                 if (var.identifier.find('.') != std::string::npos)
                     continue;
-                std::function<Variable const*()> findVar;
+                Variable const* findedVar = nullptr;
                 if (var.index >= 0)
-                    findVar = [&]() -> Variable const* {
+                    findedVar = [&]() -> Variable const* {
                             for (auto const& arg: func.arguments)
                                 if (arg.in && arg.name == var.identifier)
                                     return &arg;
                             return nullptr;
-                        };
+                        }();
                 else
-                    findVar = [&]() -> Variable const* {
+                    findedVar = [&]() -> Variable const* {
                             for (auto const& stmt: file.statements)
                                 if (stmt.which() == 0)
                                 {
@@ -278,11 +278,13 @@ namespace Hlsl {
                                         return &uniform;
                                 }
                             return nullptr;
-                        };
-                if (var.generatedIdentifier != "")
-                    result.push_back(std::make_pair(findVar(), var.generatedIdentifier));
+                        }();
+                if (findedVar != nullptr && var.generatedIdentifier != "")
+                    result.push_back(std::make_pair(findedVar, var.generatedIdentifier));
             }
             result.sort();
+            for (auto& pair: result)
+                std::cout << pair.first->name << " => " << pair.second << std::endl;
             return result;
         }
 
@@ -324,9 +326,17 @@ namespace Hlsl {
             {
                 auto const& var = boost::get<Variable>(stmt);
                 UniformParameter param;
+                bool finded = false;
                 for (auto const& v: params)
+                {
                     if (v.first == &var)
+                    {
                         param.name = v.second;
+                        finded = true;
+                    }
+                }
+                if (!finded)
+                    continue;
                 param.semantic = _ParseSemantic(var.semantic);
                 if ((Semantic::UniformFirst > param.semantic || param.semantic > Semantic::UniformLast) && param.semantic != Semantic::NoSemantic)
                     throw std::runtime_error("Bad semantic for uniform variable \"" + var.name + "\"");

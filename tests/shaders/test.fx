@@ -8,6 +8,8 @@ sampler2D diffuse = sampler_state
    magFilter = Linear;
 };
 
+float4 test;
+
 struct VSout
 {
    float4 position : POSITION;
@@ -22,14 +24,14 @@ VSout vs(in float4 position : POSITION, in float3 normals : NORMAL, in float2 te
     vout.position = mul(worldViewProjection, position);
     vout.texCoord = texCoord;
     vout.normals = normals;//normalize(mul((float3x3)worldViewInverseTranspose, position.xyz));
-    vout.pos = vout.position;
+    vout.pos = vout.position * test;
     return vout;
 }
 
 float4 fs(in VSout v) : COLOR0
 {
     //return tex2D(diffuse, v.texCoord);
-    return tex2D(diffuse, v.texCoord);
+    return tex2D(diffuse, v.texCoord) * test;
 }
 
 #ifndef DIRECTX

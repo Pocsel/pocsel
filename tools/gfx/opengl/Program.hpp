@@ -12,8 +12,6 @@ namespace Tools { namespace Gfx { namespace OpenGL {
     private:
         GLRenderer& _renderer;
 
-        int _nbTextures;
-
         std::map<std::string, std::unique_ptr<IShaderParameter>> _parameters;
         std::map<ShaderParameterUsage::Type, IShaderParameter*> _defaultParameters;
         GLint _attributes[VertexAttributeUsage::Max];

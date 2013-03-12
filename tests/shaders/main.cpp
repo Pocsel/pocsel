@@ -203,6 +203,10 @@ int main(int ac, char *av[])
         auto frontRt = renderTarget.get();
         auto backRt = renderTarget2.get();
 
+
+        auto& test = simpleTest->GetParameter("test");
+
+
         int i = 0;
         while (run)
         {
@@ -226,13 +230,11 @@ int main(int ac, char *av[])
                     renderer.SetClearColor(glm::vec4(0, 0, 0.5f, 1));
                     renderer.Clear(ClearFlags::Color/* | ClearFlags::Depth | ClearFlags::Stencil*/);
 
-                    renderer.SetModelMatrix(
-                        glm::scale(glm::vec3(frontRt->GetSize().x, frontRt->GetSize().y, 1))
-                        * glm::translate(glm::vec3(0.5f, 0.5f, 0)));
-
                     do
                     {
                         simpleEffect->BeginPass();
+
+                        renderer.SetModelMatrix(glm::scale(glm::vec3(frontRt->GetSize().x, frontRt->GetSize().y, 1)) * glm::translate(glm::vec3(0.5f, 0.5f, 0)));
                         img.Render(simpleBaseTex, *texture);
 
                         renderer.SetModelMatrix(glm::translate(glm::vec3(10, 10, -1)) * glm::scale(glm::vec3(1.0f)));
@@ -245,7 +247,7 @@ int main(int ac, char *av[])
                 renderer.SetDepthWrite(true);
                 renderer.SetProjectionMatrix(projection);
                 renderer.SetViewMatrix(view);
-                renderer.SetCullMode(CullMode::CounterClockwise);
+                renderer.SetCullMode(CullMode::Clockwise);
 
                 texture->Bind();
                 backRt->GetTexture(0).Bind();
@@ -253,6 +255,7 @@ int main(int ac, char *av[])
                 {
                     simpleTest->BeginPass();
 
+                    test.Set(glm::vec4(2.0f, 1.0f, 1.0f, 1.0f));
                     testTex.Set(backRt->GetTexture(0));
                     renderer.SetModelMatrix(
                         glm::translate(glm::vec3(1.5f, 0.0050f, 0.0f))

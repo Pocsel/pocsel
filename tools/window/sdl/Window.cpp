@@ -3,7 +3,7 @@
 #include "tools/window/sdl/Window.hpp"
 #include "tools/window/sdl/InputManager.hpp"
 #include "tools/window/sdl/InputBinder.hpp"
-//#include "tools/gfx/DX9Renderer.hpp"
+#include "tools/gfx/DX9Renderer.hpp"
 #include "tools/gfx/GLRenderer.hpp"
 #include "ProgramInfo.hpp"
 
@@ -40,10 +40,10 @@ namespace Tools { namespace Window { namespace Sdl {
         SDL_WM_SetCaption(PROJECT_NAME, 0);
         SDL_EnableUNICODE(SDL_ENABLE);
 #ifdef _WIN32
-        //if (directX)
-        //    this->_renderer = new Tools::Renderers::DX9Renderer(this->_size, fullscreen);
-        //else
-        this->_renderer = new GLRenderer(this->_size, fullscreen);
+        if (directX)
+            this->_renderer = new DX9Renderer(this->_size, fullscreen);
+        else
+            this->_renderer = new GLRenderer(this->_size, fullscreen);
 #else
         (void)directX;
         this->_renderer = new GLRenderer(this->_size, fullscreen);
@@ -62,9 +62,9 @@ namespace Tools { namespace Window { namespace Sdl {
     void Window::Render()
     {
 #ifdef _WIN32
-        //if (this->_directX)
-        //    ((DX9Renderer*)this->_renderer)->Present();
-        //else
+        if (this->_directX)
+            ((DX9Renderer*)this->_renderer)->Present();
+        else
             SDL_GL_SwapBuffers();
 #else
         SDL_GL_SwapBuffers();

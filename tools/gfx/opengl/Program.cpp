@@ -10,7 +10,6 @@ namespace Tools { namespace Gfx { namespace OpenGL {
 
     Program::Program(GLRenderer& renderer, VertexProgram&& vertex, FragmentProgram&& fragment) :
         _renderer(renderer),
-        _nbTextures(0),
         _vertexProgram(std::move(vertex)),
         _fragmentProgram(std::move(fragment))
     {

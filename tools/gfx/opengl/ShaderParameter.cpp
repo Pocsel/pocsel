@@ -67,7 +67,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
     void ShaderParameter::Set(std::vector<glm::mat4x4> const& matrices)
     {
         //GLCHECK(glUniformMatrix4fv(this->_uniform, (GLuint)matrices.size(), false, (float const*)matrices.data()));
-        GLCHECK(glUniform4fv(this->_uniform, 4 * matrices.size(), (float const*)matrices.data()));
+        GLCHECK(glUniform4fv(this->_uniform, (GLsizei)(4 * matrices.size()), (float const*)matrices.data()));
     }
 
     void ShaderParameter::Set(ITexture2D& texture)

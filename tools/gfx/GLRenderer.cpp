@@ -44,7 +44,6 @@ namespace Tools { namespace Gfx {
     {
         RenderState rs;
         rs.state = RenderState::None;
-        rs.matrixMode = -1;
         rs.target = 0;
         rs.renderToTexture = false;
         this->_PushState(rs);
@@ -65,7 +64,7 @@ namespace Tools { namespace Gfx {
 
         InitDevIL();
 
-        GLCHECK(glCullFace(GL_FRONT));
+        GLCHECK(glCullFace(GL_BACK));
     }
 
     void GLRenderer::Shutdown()
