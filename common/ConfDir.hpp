@@ -1,6 +1,7 @@
 #ifndef __COMMON_CONFDIR_HPP__
 #define __COMMON_CONFDIR_HPP__
 
+#include "ProgramInfo.hpp"
 #include "common/DevConfDir.hpp"
 
 namespace Common { namespace ConfDir {

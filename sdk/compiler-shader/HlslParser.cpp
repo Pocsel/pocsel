@@ -1,6 +1,3 @@
-#include <boost/wave.hpp>
-#include <boost/wave/cpplexer/cpp_lex_iterator.hpp>
-
 #include "sdk/compiler-shader/HlslParser.hpp"
 
 BOOST_FUSION_ADAPT_STRUCT(

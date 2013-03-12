@@ -216,6 +216,7 @@ namespace Hlsl {
     namespace {
         namespace ascii = boost::spirit::ascii;
         namespace qi = boost::spirit::qi;
+        using boost::spirit::_1;
         using qi::char_;
         using qi::lit;
         using ascii::string;
@@ -235,7 +236,7 @@ namespace Hlsl {
             qi::rule<decltype(it), _TupleStringStringInt(), ascii::space_type> parameterParser;
             qi::rule<decltype(it), std::list<_TupleStringStringInt>(), ascii::space_type> fileParser;
 
-            parameterParser = 
+            parameterParser =
                     "//var" >> identifierParser >> identifierParser[at_c<0>(_val) = _1] >> ':' // type identifier
                     >> *(char_ - ':') >> ':' // semantic
                     >> identifierParser[at_c<1>(_val) = _1] >> -('[' >> *char_("0-9-") >> ']') >> -(',' >> *char_("0-9-")) >> ':' // generated name

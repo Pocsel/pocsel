@@ -13,7 +13,8 @@ namespace Tools { namespace Gfx { namespace Effect {
 
     std::unique_ptr<Effect> EffectManager::CreateEffect(std::vector<char> const& effect)
     {
-        auto shader = CompleteShader(ByteArray(effect));
+        ByteArray toto(effect);
+        auto shader = CompleteShader(toto);
         return std::unique_ptr<Effect>(new Effect(this->_renderer, shader));
     }
 

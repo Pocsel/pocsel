@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef None
+# undef None
+#endif
+
 #include "tools/gfx/IRenderer.hpp"
 #include "tools/Vector2.hpp"
 #include "tools/Vector3.hpp"

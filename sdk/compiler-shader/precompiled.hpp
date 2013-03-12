@@ -2,6 +2,8 @@
 #define __COMPILER_SHADER_PRECOMPILED_HPP__
 
 // boost
+#include <boost/wave.hpp>
+#include <boost/wave/cpplexer/cpp_lex_iterator.hpp>
 #include <boost/variant.hpp>
 #include <boost/tuple/tuple.hpp>
 // boost - spirit / phoenix
