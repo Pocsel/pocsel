@@ -12,8 +12,6 @@
 #include "server/game/Game.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/MetaTable.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 #include "server/game/map/Map.hpp"
 #include "common/FieldUtils.hpp"
@@ -93,7 +91,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Delete(this->_weakEntityRefManager);
     }
 
-    Tools::Lua::Ref EntityManager::WeakEntityRef::GetReference(EntityManager& entityManager) const
+    Luasel::Ref EntityManager::WeakEntityRef::GetReference(EntityManager& entityManager) const
     {
         return entityManager.GetEntity(this->entityId).GetSelf();
     }
@@ -113,7 +111,7 @@ namespace Server { namespace Game { namespace Engine {
             return this->entityId < rhs.entityId;
     }
 
-    CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */)
+    CallbackManager::Result EntityManager::CallEntityFunction(Uint32 entityId, std::string const& function, Luasel::Ref const& arg, Luasel::Ref const& bonusArg, Luasel::Ref* ret /* = 0 */)
     {
         auto it = this->_entities.find(entityId);
         if (it == this->_entities.end() || !it->second)
@@ -150,12 +148,12 @@ namespace Server { namespace Game { namespace Engine {
         return CallbackManager::Ok;
     }
 
-    void EntityManager::AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition /* = false */, Common::Position const& pos /* = Common::Position() */)
+    void EntityManager::AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Luasel::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition /* = false */, Common::Position const& pos /* = Common::Position() */)
     {
         this->_spawnEvents.push_back(new SpawnEvent(pluginId, entityName, arg, notificationCallbackId, hasPosition, pos));
     }
 
-    void EntityManager::AddKillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId)
+    void EntityManager::AddKillEvent(Uint32 entityId, Luasel::Ref const& arg, Uint32 notificationCallbackId)
     {
         this->_killEvents.push_back(new KillEvent(entityId, arg, notificationCallbackId));
     }
@@ -164,7 +162,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         // buffer pour les callbacks de notification de spawn
         // evite de niquer le parcours de _spawnEvents quand un spawn est demandé dans une callback de notification
-        std::queue<std::pair<Uint32 /* notificationCallbackId */, Tools::Lua::Ref /* resultTable */>> notifications;
+        std::queue<std::pair<Uint32 /* notificationCallbackId */, Luasel::Ref /* resultTable */>> notifications;
 
         auto it = this->_spawnEvents.begin();
         auto itEnd = this->_spawnEvents.end();
@@ -181,7 +179,7 @@ namespace Server { namespace Game { namespace Engine {
                 Uint32 newId = this->_nextEntityId++;
 
                 // XXX Spawn() hook
-                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                Luasel::Ref ret(this->_engine.GetInterpreter().GetState());
                 this->_CreateEntity(newId, e->pluginId, e->entityName, e->hasPosition, e->pos);
                 if (this->CallEntityFunction(newId, "Spawn", e->arg, this->_engine.GetInterpreter().MakeNil() /* bonus */, &ret) == CallbackManager::Ok)
                     resultTable.Set("ret", this->_engine.GetInterpreter().GetSerializer().MakeSerializableCopy(ret, true));
@@ -212,7 +210,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         // buffer pour les callbacks de notification de kill
         // evite de niquer le parcours de _killEvents quand un kill est demandé dans une callback de notification
-        std::queue<std::pair<Uint32 /* notificationCallbackId */, Tools::Lua::Ref /* resultTable */>> notifications;
+        std::queue<std::pair<Uint32 /* notificationCallbackId */, Luasel::Ref /* resultTable */>> notifications;
 
         auto it = this->_killEvents.begin();
         auto itEnd = this->_killEvents.end();
@@ -224,7 +222,7 @@ namespace Server { namespace Game { namespace Engine {
             resultTable.Set("entityId", this->_engine.GetInterpreter().MakeNumber(e->entityId));
             if (it != this->_entities.end() && it->second)
             {
-                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                Luasel::Ref ret(this->_engine.GetInterpreter().GetState());
 
                 // XXX Die() hook
                 if (this->CallEntityFunction(e->entityId, "Die", e->arg, this->_engine.GetInterpreter().MakeNil() /* bonus */, &ret) == CallbackManager::Ok)
@@ -273,7 +271,7 @@ namespace Server { namespace Game { namespace Engine {
                         if (!type.IsPositional()) // saute les entités positionnelles, elles sont gérées differement après
                             try
                             {
-                                Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                                Luasel::Ref ret(this->_engine.GetInterpreter().GetState());
 
                                 // XXX Save() database hook
                                 CallbackManager::Result callRet = this->CallEntityFunction(id, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
@@ -314,7 +312,7 @@ namespace Server { namespace Game { namespace Engine {
                         auto const& type = entity->GetType();
                         try
                         {
-                            Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                            Luasel::Ref ret(this->_engine.GetInterpreter().GetState());
 
                             // XXX Save() database hook
                             CallbackManager::Result callRet = this->CallEntityFunction(id, "Save", this->_engine.GetInterpreter().MakeBoolean(false) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
@@ -434,7 +432,7 @@ namespace Server { namespace Game { namespace Engine {
                 try
                 {
                     Tools::debug << "<< Load << " << table << " << " << (disabled ? "Disabled" : "Enabled") << " Entity (id: " << entityId << ", pluginId: " << pluginId << ", entityName: \"" << entityName << "\", storage: <lua>, x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
-                    Tools::Lua::Ref storage = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(4));
+                    Luasel::Ref storage = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(4));
                     Entity* e = this->_CreateEntity(entityId, pluginId, entityName, true, pos);
                     e->SetStorage(storage);
 
@@ -480,7 +478,7 @@ namespace Server { namespace Game { namespace Engine {
                 try
                 {
                     Tools::debug << "<< Load << " << table << " << Spawn Event (pluginId: " << pluginId << ", entityName: \"" << entityName << "\", notificationCallbackId: " << notificationCallbackId << ", hasPosition: " << (hasPosition ? "yes" : "no") << ", x: " << pos.x << ", y: " << pos.y << ", z: " << pos.z << ")" << std::endl;
-                    Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(2));
+                    Luasel::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(2));
                     this->AddSpawnEvent(pluginId, entityName, arg, notificationCallbackId, hasPosition, pos);
                 }
                 catch (std::exception& e) // erreur de deserialization
@@ -501,7 +499,7 @@ namespace Server { namespace Game { namespace Engine {
                 try
                 {
                     Tools::debug << "<< Load << " << table << " << Kill Event (entityId: " << entityId << ", arg: <lua>, notificationCallbackId: " << notificationCallbackId << ")" << std::endl;
-                    Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(1));
+                    Luasel::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(1));
                     this->AddKillEvent(entityId, arg, notificationCallbackId);
                 }
                 catch (std::exception& e) // erreur de deserialization
@@ -550,7 +548,7 @@ namespace Server { namespace Game { namespace Engine {
         return *it->second;
     }
 
-    PositionalEntity const& EntityManager::GetPositionalEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
+    PositionalEntity const& EntityManager::GetPositionalEntity(Luasel::Ref const& ref) const throw(std::runtime_error)
     {
         if (ref.IsTable())
             return this->GetPositionalEntity(ref["id"].Check<Uint32>("EntityManager::GetPositionalEntity: Table argument has no id number field"));
@@ -600,7 +598,7 @@ namespace Server { namespace Game { namespace Engine {
 
         if (chunkUnloaded)
         {
-            Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+            Luasel::Ref ret(this->_engine.GetInterpreter().GetState());
 
             // XXX Save() deactivation hook
             CallbackManager::Result callRet = this->CallEntityFunction(entityId, "Save", this->_engine.GetInterpreter().MakeBoolean(true) /* chunkUnloaded */, this->_engine.GetInterpreter().MakeNil(), &ret);
@@ -743,7 +741,7 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    Uint32 EntityManager::_RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
+    Uint32 EntityManager::_RefToEntityId(Luasel::Ref const& ref) const throw(std::runtime_error)
     {
         if (ref.IsTable()) /* type final entity table (weak pointer déréférencé ou self) */
             return ref["id"].Check<Uint32>("EntityManager::_RefToEntityId: Table argument has no id number field");
@@ -838,7 +836,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Delete(entity);
     }
 
-    void EntityManager::_ApiGetEntityById(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiGetEntityById(Luasel::CallHelper& helper)
     {
         Uint32 entityId = helper.PopArg("Server.Entity.GetEntityById: Missing argument \"entityId\"").Check<Uint32>("Server.Entity.GetEntityById: Argument \"entityId\" must be a number");
         auto it = this->_entities.find(entityId);
@@ -851,7 +849,7 @@ namespace Server { namespace Game { namespace Engine {
         helper.PushRet(this->_weakEntityRefManager->GetWeakReference(it->second->GetWeakReferenceId()));
     }
 
-    void EntityManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiSpawn(Luasel::CallHelper& helper)
     {
         bool hasPosition = false;
         Common::Position pos;
@@ -864,10 +862,10 @@ namespace Server { namespace Game { namespace Engine {
         std::string pluginName = Common::FieldUtils::GetPluginNameFromResource(resourceName);
         std::string entityName = Common::FieldUtils::GetResourceNameFromResource(resourceName);
         Uint32 pluginId = this->_engine.GetWorld().GetPluginManager().GetPluginId(pluginName);
-        Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;
-        Tools::Lua::Ref cbArg(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref cbArg(this->_engine.GetInterpreter().GetState());
         if (helper.GetNbArgs())
         {
             arg = helper.PopArg();
@@ -885,7 +883,7 @@ namespace Server { namespace Game { namespace Engine {
         this->AddSpawnEvent(pluginId, entityName, arg, callbackId, hasPosition, pos);
     }
 
-    void EntityManager::_ApiSave(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiSave(Luasel::CallHelper& helper)
     {
         Uint32 entityId = helper.PopArg("Server.Entity.Save: Missing argument \"target\"").To<Uint32>();
         auto it = this->_entities.find(entityId);
@@ -901,7 +899,7 @@ namespace Server { namespace Game { namespace Engine {
         //e.SaveToStorage();
     }
 
-    void EntityManager::_ApiLoad(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiLoad(Luasel::CallHelper& helper)
     {
         Uint32 entityId = helper.PopArg("Server.Entity.Load: Missing argument \"target\"").To<Uint32>();
         auto it = this->_entities.find(entityId);
@@ -917,13 +915,13 @@ namespace Server { namespace Game { namespace Engine {
         //e.LoadFromStorage();
     }
 
-    void EntityManager::_ApiKill(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiKill(Luasel::CallHelper& helper)
     {
         Uint32 entityId = this->_RefToEntityId(helper.PopArg("Server.Entity.Kill: Missing argument \"target\""));
-        Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;
-        Tools::Lua::Ref cbArg(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref cbArg(this->_engine.GetInterpreter().GetState());
         if (helper.GetNbArgs())
         {
             arg = helper.PopArg();
@@ -941,13 +939,13 @@ namespace Server { namespace Game { namespace Engine {
         this->AddKillEvent(entityId, arg, callbackId);
     }
 
-    void EntityManager::_ApiRegister(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiRegister(Luasel::CallHelper& helper)
     {
         Uint32 pluginId = this->_engine.GetCurrentPluginRegistering();
         if (!pluginId)
             throw std::runtime_error("Server.Entity.Register[Positional]: Could not determine currently running plugin, aborting registration.");
         std::string pluginName = this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(pluginId);
-        Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref prototype(this->_engine.GetInterpreter().GetState());
         std::string entityName;
         bool positional = false;
         try
@@ -982,9 +980,9 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    void EntityManager::_ApiGetWeakPointer(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiGetWeakPointer(Luasel::CallHelper& helper)
     {
-        Tools::Lua::Ref entityId = helper.PopArg("Server.Entity.GetWeakPointer: Missing argument \"entity\"");
+        Luasel::Ref entityId = helper.PopArg("Server.Entity.GetWeakPointer: Missing argument \"entity\"");
         try
         {
             Entity const& e = this->GetEntity(this->_RefToEntityId(entityId));
@@ -1002,13 +1000,13 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    void EntityManager::_ApiRegisterPositional(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiRegisterPositional(Luasel::CallHelper& helper)
     {
         helper.GetArgList().push_back(this->_engine.GetInterpreter().MakeBoolean(true));
         this->_ApiRegister(helper);
     }
 
-    void EntityManager::_ApiSetPos(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiSetPos(Luasel::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
 //        Common::Position pos = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<Common::Position>();
@@ -1022,7 +1020,7 @@ namespace Server { namespace Game { namespace Engine {
 //        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
-    void EntityManager::_ApiGetPos(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiGetPos(Luasel::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
 //        auto it = this->_positionalEntities.find(entityId);
@@ -1034,7 +1032,7 @@ namespace Server { namespace Game { namespace Engine {
 //        helper.PushRet(it->second->GetPosition());
     }
 
-    void EntityManager::_ApiSetSpeed(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiSetSpeed(Luasel::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
 //        glm::dvec3 speed = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
@@ -1048,7 +1046,7 @@ namespace Server { namespace Game { namespace Engine {
 //        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
-    void EntityManager::_ApiGetSpeed(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiGetSpeed(Luasel::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
 //        auto it = this->_positionalEntities.find(entityId);
@@ -1060,7 +1058,7 @@ namespace Server { namespace Game { namespace Engine {
 //        helper.PushRet(it->second->GetSpeed());
     }
 
-    void EntityManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiSetAccel(Luasel::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.SetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.SetPos: Argument \"target\" must be a number");
 //        glm::dvec3 accel = helper.PopArg("Server.Entity.SetPos: Missing argument \"position\"").Check<glm::dvec3>();
@@ -1074,7 +1072,7 @@ namespace Server { namespace Game { namespace Engine {
 //        this->_engine.GetDoodadManager().EntityHasMoved(entityId);
     }
 
-    void EntityManager::_ApiGetAccel(Tools::Lua::CallHelper& helper)
+    void EntityManager::_ApiGetAccel(Luasel::CallHelper& helper)
     {
 //        Uint32 entityId = helper.PopArg("Server.Entity.GetPos: Missing argument \"target\"").Check<Uint32>("Server.Entity.GetPos: Argument \"target\" must be a number");
 //        auto it = this->_positionalEntities.find(entityId);

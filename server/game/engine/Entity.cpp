@@ -1,7 +1,7 @@
+#include <luasel/Luasel.hpp>
+
 #include "server/game/engine/Entity.hpp"
 #include "server/game/engine/EntityType.hpp"
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/Iterator.hpp"
 #include "server/game/engine/Engine.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -19,13 +19,13 @@ namespace Server { namespace Game { namespace Engine {
         this->_engine.GetEntityManager().GetWeakEntityRefManager().InvalidateResource(this->_weakReferenceId);
     }
 
-    Tools::Lua::Ref Entity::GetStorage() const
+    Luasel::Ref Entity::GetStorage() const
     {
         assert(this->_self.IsTable());
         return this->_self["storage"];
     }
 
-    void Entity::SetStorage(Tools::Lua::Ref const& storage)
+    void Entity::SetStorage(Luasel::Ref const& storage)
     {
         assert(this->_self.IsTable());
         this->_self.Set("storage", storage);
@@ -34,7 +34,7 @@ namespace Server { namespace Game { namespace Engine {
     void Entity::Disable()
     {
         assert(this->_self.IsTable());
-        Tools::Lua::Ref storage = this->_self["storage"];
+        Luasel::Ref storage = this->_self["storage"];
         this->_self = this->_engine.GetInterpreter().MakeTable(); // perte de toutes les references lua
         this->_self.Set("storage", storage); // garde uniquement le storage
         this->_engine.GetEntityManager().GetWeakEntityRefManager().GetResource(this->_weakReferenceId).disabled = true;
@@ -44,7 +44,7 @@ namespace Server { namespace Game { namespace Engine {
     {
         assert(this->_self.IsTable());
         this->_self.Set("id", this->_id);
-        Tools::Lua::Ref metatable(this->_engine.GetInterpreter().MakeTable());
+        Luasel::Ref metatable(this->_engine.GetInterpreter().MakeTable());
         this->_self.SetMetaTable(metatable);
         this->_self.Set("prototype", this->_type.GetPrototype());
         metatable.Set("__index", this->_type.GetPrototype());
@@ -56,7 +56,7 @@ namespace Server { namespace Game { namespace Engine {
         assert(this->_self.IsTable());
         if (!this->_self["storage"].IsTable())
             this->_self.Set("storage", this->_self.GetState().MakeTable());
-        Tools::Lua::Ref storage = this->_self["storage"];
+        Luasel::Ref storage = this->_self["storage"];
         auto it = this->_self.Begin();
         auto itEnd = this->_self.End();
         for (; it != itEnd; ++it)

@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_ENGINE_MESSAGEMANAGER_HPP__
 #define __SERVER_GAME_ENGINE_MESSAGEMANAGER_HPP__
 
-#include "tools/lua/Ref.hpp"
+#include <luasel/Luasel.hpp>
 
 namespace Tools { namespace Database {
     class IConnection;
@@ -40,8 +40,8 @@ namespace Server { namespace Game { namespace Engine {
         std::string RconGetMessages() const;
 
     private:
-        void _ApiLater(Tools::Lua::CallHelper& helper);
-        void _ApiNow(Tools::Lua::CallHelper& helper);
+        void _ApiLater(Luasel::CallHelper& helper);
+        void _ApiNow(Luasel::CallHelper& helper);
     };
 
 }}}

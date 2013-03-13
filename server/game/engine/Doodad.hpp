@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_ENGINE_DOODAD_HPP__
 #define __SERVER_GAME_ENGINE_DOODAD_HPP__
 
-#include "tools/lua/Ref.hpp"
+#include <luasel/Luasel.hpp>
 
 namespace Common { namespace Physics {
     class World;
@@ -19,18 +19,18 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct Command
         {
-            Command(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value) :
+            Command(Luasel::Ref const& key, Luasel::Ref const& value) :
                 functionCall(false), key(key), value(value)
             {
             }
-            Command(std::string const& function, Tools::Lua::Ref const& value) :
+            Command(std::string const& function, Luasel::Ref const& value) :
                 functionCall(true), function(function), key(value.GetState()) /* nil */, value(value)
             {
             }
             bool functionCall;
             std::string function;
-            Tools::Lua::Ref key;
-            Tools::Lua::Ref value;
+            Luasel::Ref key;
+            Luasel::Ref value;
         };
 
     private:
@@ -41,7 +41,7 @@ namespace Server { namespace Game { namespace Engine {
         std::string _name;
         Uint32 _entityId;
         PositionalEntity& _entity;
-        Tools::Lua::Ref _storage;
+        Luasel::Ref _storage;
         std::unique_ptr<Body> _body;
         //std::unordered_set<Uint32> _players;
         //std::unordered_set<Uint32> _newPlayers;
@@ -64,17 +64,17 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 GetPluginId() const { return this->_pluginId; }
         std::string const& GetName() const { return this->_name; }
         Uint32 GetEntityId() const { return this->_entityId; }
-        Tools::Lua::Ref const& GetStorage() const { return this->_storage; }
-        void SetStorage(Tools::Lua::Ref const& ref); // il faut pas que ça soit autre chose qu'une table sinon ça va throw grave
+        Luasel::Ref const& GetStorage() const { return this->_storage; }
+        void SetStorage(Luasel::Ref const& ref); // il faut pas que ça soit autre chose qu'une table sinon ça va throw grave
         void Disable();
         void Enable();
         //void AddPlayer(Uint32 playerId);
         //void RemovePlayer(Uint32 playerId);
         void ExecuteCommands();
-        void Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value);
-        void Call(std::string const& name, Tools::Lua::Ref const& value);
-        void SetUdp(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value);
-        void CallUdp(std::string const& name, Tools::Lua::Ref const& value);
+        void Set(Luasel::Ref const& key, Luasel::Ref const& value);
+        void Call(std::string const& name, Luasel::Ref const& value);
+        void SetUdp(Luasel::Ref const& key, Luasel::Ref const& value);
+        void CallUdp(std::string const& name, Luasel::Ref const& value);
         void PositionIsDirty();
         Uint32 GetWeakReferenceId() const { return this->_weakReferenceId; }
     private:

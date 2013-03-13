@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_ENGINE_ENTITY_HPP__
 #define __SERVER_GAME_ENGINE_ENTITY_HPP__
 
-#include "tools/lua/Ref.hpp"
+#include <luasel/Luasel.hpp>
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -15,17 +15,17 @@ namespace Server { namespace Game { namespace Engine {
         Engine& _engine;
         Uint32 _id;
         EntityType const& _type;
-        Tools::Lua::Ref _self;
+        Luasel::Ref _self;
         Uint32 _weakReferenceId;
 
     public:
         Entity(Engine& interpreter, Uint32 id, EntityType const& type);
         virtual ~Entity();
         EntityType const& GetType() const { return this->_type; }
-        Tools::Lua::Ref const& GetSelf() const { return this->_self; }
+        Luasel::Ref const& GetSelf() const { return this->_self; }
         Uint32 GetId() const { return this->_id; }
-        Tools::Lua::Ref GetStorage() const;
-        void SetStorage(Tools::Lua::Ref const& storage);
+        Luasel::Ref GetStorage() const;
+        void SetStorage(Luasel::Ref const& storage);
         void Disable();
         void Enable();
         void SaveToStorage();

@@ -3,8 +3,6 @@
 #include "server/game/engine/MessageManager.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/engine/Engine.hpp"
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/Ref.hpp"
 #include "server/rcon/ToJsonStr.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
@@ -61,7 +59,7 @@ namespace Server { namespace Game { namespace Engine {
                 }
                 if (entityId)
                 {
-                    Tools::Lua::Ref ret(this->_engine.GetInterpreter().GetState());
+                    Luasel::Ref ret(this->_engine.GetInterpreter().GetState());
                     CallbackManager::Result res = this->_engine.GetCallbackManager().TriggerCallback((*itMessage)->callbackId, &ret);
                     if ((*itMessage)->notificationCallbackId)
                     {
@@ -85,17 +83,17 @@ namespace Server { namespace Game { namespace Engine {
         this->_messages.erase(this->_messages.begin(), it);
     }
 
-    void MessageManager::_ApiLater(Tools::Lua::CallHelper& helper)
+    void MessageManager::_ApiLater(Luasel::CallHelper& helper)
     {
         double seconds = helper.PopArg().CheckNumber("Server.Message.Later: Argument \"seconds\" must be a number");
         if (seconds < 0)
             seconds = 0;
         Uint32 entityId = helper.PopArg("Server.Message.[Later/Now]: Missing argument \"target\"").Check<Uint32>("Server.Message.[Later/Now]: Argument \"target\" must be a number");
         std::string function = helper.PopArg("Server.Message.[Later/Now]: Missing argument \"function\"").CheckString("Server.Message.[Later/Now]: Argument \"function\" must be a string");
-        Tools::Lua::Ref arg(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref arg(this->_engine.GetInterpreter().GetState());
         Uint32 cbTargetId = 0;
         std::string cbFunction;
-        Tools::Lua::Ref cbArg(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref cbArg(this->_engine.GetInterpreter().GetState());
         if (helper.GetNbArgs())
         {
             arg = helper.PopArg();
@@ -114,7 +112,7 @@ namespace Server { namespace Game { namespace Engine {
         this->_messages[this->_engine.GetCurrentTime() + static_cast<Uint64>(seconds * 1000000.0)].push_back(new Message(callbackId, notificationCallbackId));
     }
 
-    void MessageManager::_ApiNow(Tools::Lua::CallHelper& helper)
+    void MessageManager::_ApiNow(Luasel::CallHelper& helper)
     {
         helper.GetArgList().push_front(this->_engine.GetInterpreter().MakeNumber(0));
         this->_ApiLater(helper);
@@ -168,7 +166,7 @@ namespace Server { namespace Game { namespace Engine {
             return ss.str();
         }
 
-        std::string _GetSerializedStringPlusError(Engine& engine, Tools::Lua::Ref const& ref)
+        std::string _GetSerializedStringPlusError(Engine& engine, Luasel::Ref const& ref)
         {
             try
             {

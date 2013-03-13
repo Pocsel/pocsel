@@ -94,7 +94,7 @@ file(GLOB           tools_base_src              "tools/*.[ch]pp" "tools/meta/*.[
 file(GLOB_RECURSE   tools_database_src          "tools/database/*.[ch]pp")
 file(GLOB_RECURSE   tools_gui_src               "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE   tools_logger_src            "tools/logger/*.[ch]pp")
-file(GLOB_RECURSE   tools_lua_src               "tools/lua/*.[ch]pp")
+file(GLOB_RECURSE   tools_lua_utils_src         "tools/lua/utils/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_install_src    "tools/plugin-install/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_create_src     "tools/plugin-create/*.[ch]pp")
 file(GLOB_RECURSE   tools_renderers_src         "tools/renderers/*.[ch]pp")

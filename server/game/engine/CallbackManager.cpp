@@ -1,9 +1,10 @@
+#include <luasel/Luasel.hpp>
+
 #include "server/game/engine/CallbackManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/EntityManager.hpp"
 #include "server/game/map/Map.hpp"
 #include "tools/database/IConnection.hpp"
-#include "tools/lua/Interpreter.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -21,7 +22,7 @@ namespace Server { namespace Game { namespace Engine {
             Tools::Delete(it->second);
     }
 
-    Uint32 CallbackManager::MakeCallback(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, bool serialize /* = true */)
+    Uint32 CallbackManager::MakeCallback(Uint32 entityId, std::string const& function, Luasel::Ref const& arg, bool serialize /* = true */)
     {
         while (!this->_nextCallbackId // 0 est la valeur spéciale "pas de callback", on la saute
                 || this->_callbacks.count(this->_nextCallbackId))
@@ -31,12 +32,12 @@ namespace Server { namespace Game { namespace Engine {
         return this->_nextCallbackId++;
     }
 
-    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref* ret /* = 0 */, bool keepCallback /* = false */)
+    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Luasel::Ref* ret /* = 0 */, bool keepCallback /* = false */)
     {
         return this->TriggerCallback(callbackId, this->_engine.GetInterpreter().MakeNil(), ret, keepCallback);
     }
 
-    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret /* = 0 */, bool keepCallback /* = false */)
+    CallbackManager::Result CallbackManager::TriggerCallback(Uint32 callbackId, Luasel::Ref const& bonusArg, Luasel::Ref* ret /* = 0 */, bool keepCallback /* = false */)
     {
         if (!callbackId)
             return Ok;
@@ -109,7 +110,7 @@ namespace Server { namespace Game { namespace Engine {
             std::string function = row->GetString(2);
             try
             {
-                Tools::Lua::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(3));
+                Luasel::Ref arg = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(3));
                 Tools::debug << "<< Load << " << table << " << Callback (id: " << id << ", entityId: " << entityId << ", function: \"" << function << "\", arg: <lua>)" << std::endl;
                 this->_callbacks[id] = new Callback(entityId, function, arg);
             }

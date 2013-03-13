@@ -1,3 +1,5 @@
+#include <luasel/Luasel.hpp>
+
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/MessageManager.hpp"
 #include "server/game/engine/EntityManager.hpp"
@@ -11,7 +13,6 @@
 #include "server/game/map/Map.hpp"
 #include "server/game/PluginManager.hpp"
 #include "server/rcon/ToJsonStr.hpp"
-#include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/database/IConnection.hpp"
 #include "common/FieldUtils.hpp"
@@ -22,12 +23,12 @@ namespace Server { namespace Game { namespace Engine {
         _map(map), _world(world), _currentTime(0), _currentPluginRegistering(0)
     {
         Tools::debug << "Engine::Engine()\n";
-        this->_interpreter = new Tools::Lua::Interpreter();
-        this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Base);
+        this->_interpreter = new Luasel::Interpreter();
+        this->_interpreter->RegisterLib(Luasel::Interpreter::Base);
         this->_interpreter->Globals().Set("print", this->_interpreter->MakeFunction(std::bind(&Engine::_ApiPrint, this, std::placeholders::_1)));
-        this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
-        this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
-        this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
+        this->_interpreter->RegisterLib(Luasel::Interpreter::Math);
+        this->_interpreter->RegisterLib(Luasel::Interpreter::Table);
+        this->_interpreter->RegisterLib(Luasel::Interpreter::String);
         Tools::Lua::Utils::RegisterVector(*this->_interpreter);
         auto namespaceTable = this->_interpreter->Globals().Set("Server", this->_interpreter->MakeTable());
         this->_callbackManager = new CallbackManager(*this);
@@ -116,7 +117,7 @@ namespace Server { namespace Game { namespace Engine {
     }
 
     // uniquement en debug (pour pouvoir require() pour faire du hot-swap lua)
-    void Engine::SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> const& modules)
+    void Engine::SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Luasel::Ref /* module */>>> const& modules)
     {
         auto itPlugin = modules.begin();
         auto itPluginEnd = modules.end();
@@ -136,7 +137,7 @@ namespace Server { namespace Game { namespace Engine {
     }
 
     // uniquement en debug (pour pouvoir require() pour faire du hot-swap lua)
-    void Engine::_ApiRequire(Tools::Lua::CallHelper& helper)
+    void Engine::_ApiRequire(Luasel::CallHelper& helper)
     {
         std::string name = helper.PopArg("require: Missing argument \"name\"").CheckString("require: Argument \"name\" must be a string");
         Uint32 pluginId = this->_world.GetPluginManager().GetPluginId(Common::FieldUtils::GetPluginNameFromResource(name));
@@ -151,7 +152,7 @@ namespace Server { namespace Game { namespace Engine {
         throw std::runtime_error("require: Server file \"" + fileName + "\" in plugin " + Tools::ToString(pluginId) + " not found");
     }
 
-    void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)
+    void Engine::_ApiPrint(Luasel::CallHelper& helper)
     {
         std::string str = "[" + this->_map.GetName() + "] ";
         auto it = helper.GetArgList().begin();

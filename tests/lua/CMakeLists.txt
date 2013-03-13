@@ -4,7 +4,7 @@ set(src
     ${test_lua_src}
     ${common_src}
     ${tools_base_src}
-    ${tools_lua_src}
+    ${tools_lua_utils_src}
     ${tools_logger_src}
 )
 

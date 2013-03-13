@@ -1,5 +1,7 @@
 #include "server/precompiled.hpp"
 
+#include <luasel/Luasel.hpp>
+
 #include "server/game/PluginManager.hpp"
 #include "server/game/World.hpp"
 #include "server/game/engine/Doodad.hpp"
@@ -14,9 +16,6 @@
 #include "server/network/UdpPacket.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/Packet.hpp"
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/Iterator.hpp"
-#include "tools/lua/Serializer.hpp"
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -74,7 +73,7 @@ namespace Server { namespace Game { namespace Engine {
         // TODO
     }
 
-    void Doodad::SetStorage(Tools::Lua::Ref const& ref)
+    void Doodad::SetStorage(Luasel::Ref const& ref)
     {
         this->_storage = ref;
     }
@@ -97,7 +96,7 @@ namespace Server { namespace Game { namespace Engine {
             return;
 
         // create packet
-        Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
+        Luasel::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         std::list<std::pair<std::string /* key */, std::string /* value */>> values;
         auto itTable = this->_storage.Begin();
         auto itTableEnd = this->_storage.End();
@@ -144,7 +143,7 @@ namespace Server { namespace Game { namespace Engine {
             return;
 
         // create packet
-        Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
+        Luasel::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> commands;
         bool tcp = false;
         while (!this->_commands.empty())
@@ -187,30 +186,30 @@ namespace Server { namespace Game { namespace Engine {
             }
     }
 
-    void Doodad::Set(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value)
+    void Doodad::Set(Luasel::Ref const& key, Luasel::Ref const& value)
     {
-        Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
+        Luasel::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         this->_commands.push(Command(serializer.MakeSerializableCopy(key, true /* nilOnError */), serializer.MakeSerializableCopy(value, true /* nilOnError */)));
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
-    void Doodad::Call(std::string const& name, Tools::Lua::Ref const& value)
+    void Doodad::Call(std::string const& name, Luasel::Ref const& value)
     {
-        Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
+        Luasel::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         this->_commands.push(Command(name, serializer.MakeSerializableCopy(value, true /* nilOnError */)));
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
-    void Doodad::SetUdp(Tools::Lua::Ref const& key, Tools::Lua::Ref const& value)
+    void Doodad::SetUdp(Luasel::Ref const& key, Luasel::Ref const& value)
     {
-        Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
+        Luasel::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         this->_commandsUdp.push(Command(serializer.MakeSerializableCopy(key, true /* nilOnError */), serializer.MakeSerializableCopy(value, true /* nilOnError */)));
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }
 
-    void Doodad::CallUdp(std::string const& name, Tools::Lua::Ref const& value)
+    void Doodad::CallUdp(std::string const& name, Luasel::Ref const& value)
     {
-        Tools::Lua::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
+        Luasel::Serializer const& serializer = this->_engine.GetInterpreter().GetSerializer();
         this->_commandsUdp.push(Command(name, serializer.MakeSerializableCopy(value, true /* nilOnError */)));
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
     }

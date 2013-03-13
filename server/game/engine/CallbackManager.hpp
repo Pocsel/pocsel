@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_ENGINE_CALLBACKMANAGER_HPP__
 #define __SERVER_GAME_ENGINE_CALLBACKMANAGER_HPP__
 
-#include "tools/lua/Ref.hpp"
+#include <luasel/Luasel.hpp>
 
 namespace Tools { namespace Database {
     class IConnection;
@@ -17,13 +17,13 @@ namespace Server { namespace Game { namespace Engine {
     public:
         struct Callback
         {
-            Callback(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg) :
+            Callback(Uint32 entityId, std::string const& function, Luasel::Ref const& arg) :
                 entityId(entityId), function(function), arg(arg)
             {
             }
             Uint32 entityId;
             std::string function;
-            Tools::Lua::Ref arg;
+            Luasel::Ref arg;
         };
         enum Result
         {
@@ -42,9 +42,9 @@ namespace Server { namespace Game { namespace Engine {
     public:
         CallbackManager(Engine& engine);
         ~CallbackManager();
-        Uint32 MakeCallback(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, bool serialize = true);
-        Result TriggerCallback(Uint32 callbackId, Tools::Lua::Ref* ret = 0, bool keepCallback = false);
-        Result TriggerCallback(Uint32 callbackId, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0, bool keepCallback = false);
+        Uint32 MakeCallback(Uint32 entityId, std::string const& function, Luasel::Ref const& arg, bool serialize = true);
+        Result TriggerCallback(Uint32 callbackId, Luasel::Ref* ret = 0, bool keepCallback = false);
+        Result TriggerCallback(Uint32 callbackId, Luasel::Ref const& bonusArg, Luasel::Ref* ret = 0, bool keepCallback = false);
         bool CancelCallback(Uint32 callbackId); // retourne true si callbackId est effectivement associé a une callback (annulation réussie)
         Callback const& GetCallback(Uint32 callbackId) const throw(std::runtime_error); // ne pas garder de reference, la callback peut etre delete à tout moment
         void Save(Tools::Database::IConnection& conn);
