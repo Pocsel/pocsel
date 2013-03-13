@@ -33,6 +33,12 @@ namespace Tools { namespace PluginCreate {
 
     namespace {
 
+        template<class T>
+        std::unique_ptr<T> MakeUnique(T* ptr)
+        {
+            return std::unique_ptr<T>(ptr);
+        }
+
         // cf. http://stackoverflow.com/questions/10167382/boostfilesystem-get-relative-path
         // Return path when appended to a_From will resolve to same as a_To
         boost::filesystem::path MakeRelative( boost::filesystem::path a_From, boost::filesystem::path a_To )
@@ -83,6 +89,12 @@ namespace Tools { namespace PluginCreate {
             return std::vector<char>((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
         }
 
+        std::vector<char> ReadFile(std::string const& file)
+        {
+            std::ifstream tmp(file, std::ios::binary | std::ios::in);
+            return std::vector<char>((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
+        }
+
         std::string HashFile(std::vector<char> const& data)
         {
             boost::crc_32_type result;
@@ -97,7 +109,7 @@ namespace Tools { namespace PluginCreate {
                 Bind(boost::uuids::to_string(buildHashGenerator())).Bind(fullname).Bind(identifier).Bind(Common::PluginFormatVersion).ExecuteNonSelect();
         }
 
-        void FillTableResource(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn)
+        void FillTableResource(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn, std::map<std::string, std::unique_ptr<FileConverter>> const& fileConverters)
         {
             boost::filesystem::path clientRoot(pluginRoot / "client");
             if (!boost::filesystem::is_directory(clientRoot))
@@ -106,35 +118,35 @@ namespace Tools { namespace PluginCreate {
                 return;
             }
 
-            std::map<std::string /* extension avec point */, std::string /* type en base */> allowedTypes;
-            allowedTypes[".lua"] = "lua";
-            allowedTypes[".png"] = "image";
-            allowedTypes[".fx"] = "effect";
-            allowedTypes[".mqm"] = "model";
+            //std::map<std::string /* extension avec point */, std::string /* type en base */> allowedTypes;
+            //allowedTypes[".lua"] = "lua";
+            //allowedTypes[".png"] = "image";
+            //allowedTypes[".fxc"] = "effect";
+            //allowedTypes[".mqm"] = "model";
 
             std::list<boost::filesystem::path> files;
             RecursiveFileList(clientRoot, files);
             auto it = files.begin();
             auto itEnd = files.end();
+            auto query = conn.CreateQuery("INSERT INTO resource (name, type, data_hash, data) VALUES (?, ?, ?, ?);");
             for (; it != itEnd; ++it)
             {
-                auto itType = allowedTypes.find(it->extension().string());
-                if (itType == allowedTypes.end())
+                auto itType = fileConverters.find(it->extension().string());
+                if (itType == fileConverters.end())
                 {
                     Tools::log << "Client file " << *it << " ignored (unknown extension " << it->extension() << ")." << std::endl;
                     continue;
                 }
-                auto data = ReadFile(*it);
-                std::string name = MakeRelative(clientRoot, *it).generic_string();
-                std::string type = itType->second;
-                std::string hash = HashFile(data);
+                auto const& data = itType->second->Convert(it->generic_string());
+                std::string const& name = MakeRelative(clientRoot, *it).generic_string();
+                std::string const& type = itType->second->type;
+                std::string const& hash = HashFile(data);
                 //if (itType->second == "lua")
                 //{
                 //    Tools::log << "Processing client Lua file \"" << name << "\":" << std::endl;
                 //    interpreter.DoString(std::string(data.begin(), data.end()));
                 //}
-                conn.CreateQuery("INSERT INTO resource (name, type, data_hash, data) VALUES (?, ?, ?, ?);")->
-                    Bind(name).Bind(type).Bind(hash).Bind(data.data(), data.size()).ExecuteNonSelect();
+                query->Bind(name).Bind(type).Bind(hash).Bind(data.data(), data.size()).ExecuteNonSelect().Reset();
                 Tools::log << "Added client file \"" << name << "\" (size: " << data.size() << " bytes, hash: \"" << hash << "\", type: \"" << type << "\")." << std::endl;
             }
         }
@@ -152,6 +164,7 @@ namespace Tools { namespace PluginCreate {
             RecursiveFileList(serverRoot, files);
             auto it = files.begin();
             auto itEnd = files.end();
+            auto query = conn.CreateQuery("INSERT INTO server_file (name, lua) VALUES (?, ?);");
             for (; it != itEnd; ++it)
             {
                 if (it->extension().string() != ".lua")
@@ -161,8 +174,7 @@ namespace Tools { namespace PluginCreate {
                 }
                 auto data = ReadFile(*it);
                 std::string name = MakeRelative(serverRoot, *it).generic_string();
-                conn.CreateQuery("INSERT INTO server_file (name, lua) VALUES (?, ?);")->
-                    Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect();
+                query->Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect().Reset();
                 Tools::log << "Added server file \"" << name << "\" (size: " << data.size() << " bytes)." << std::endl;
             }
         }
@@ -180,6 +192,7 @@ namespace Tools { namespace PluginCreate {
             NonRecursiveFileList(mapsRoot, files);
             auto it = files.begin();
             auto itEnd = files.end();
+            auto query = conn.CreateQuery("INSERT INTO map (name, lua) VALUES (?, ?);");
             for (; it != itEnd; ++it)
             {
                 if (it->extension().string() != ".lua")
@@ -194,8 +207,7 @@ namespace Tools { namespace PluginCreate {
                     continue;
                 }
                 auto data = ReadFile(*it);
-                conn.CreateQuery("INSERT INTO map (name, lua) VALUES (?, ?);")->
-                    Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect();
+                query->Bind(name).Bind(std::string(data.begin(), data.end())).ExecuteNonSelect().Reset();
                 Tools::log << "Added map \"" << name << "\" (size: " << data.size() << " bytes)." << std::endl;
             }
         }
@@ -250,7 +262,7 @@ namespace Tools { namespace PluginCreate {
 
     }
 
-    bool Create(boost::filesystem::path const& pluginRoot, boost::filesystem::path const& destFile)
+    bool Create(boost::filesystem::path const& pluginRoot, boost::filesystem::path const& destFile, std::map<std::string, std::unique_ptr<FileConverter>> const& fileConverters)
     {
         // check de base des chemins
         if (!boost::filesystem::is_directory(pluginRoot))
@@ -304,7 +316,7 @@ namespace Tools { namespace PluginCreate {
 
             // remplissage
             FillTablePlugin(identifier, fullname, *conn);
-            FillTableResource(pluginRoot, *conn);
+            FillTableResource(pluginRoot, *conn, fileConverters);
             FillTableServerFile(pluginRoot, *conn);
             FillTableMap(pluginRoot, *conn);
 
@@ -324,4 +336,19 @@ namespace Tools { namespace PluginCreate {
         return true;
     }
 
+    std::map<std::string, std::unique_ptr<FileConverter>> GetDefaultConverter()
+    {
+        class Dummy : public FileConverter
+        {
+        public:
+            Dummy(std::string const& type) : FileConverter(type) {}
+            virtual std::vector<char> Convert(std::string const& file) const { return ReadFile(file); }
+        };
+        std::map<std::string, std::unique_ptr<FileConverter>> converters;
+        converters[".lua"] = MakeUnique(new Dummy("lua"));
+        converters[".png"] = MakeUnique(new Dummy("image"));
+        converters[".fxc"] = MakeUnique(new Dummy("effect"));
+        converters[".mqm"] = MakeUnique(new Dummy("model"));
+        return converters;
+    }
 }}

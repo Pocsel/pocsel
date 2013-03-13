@@ -29,6 +29,7 @@ find_package(Lua51 REQUIRED)
 find_package(Sqlite3 REQUIRED)
 find_package(ZLIB REQUIRED)
 
+# configuration
 if (UNIX)
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         add_definitions(-std=c++11)
@@ -65,7 +66,21 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_CUSTOM_FLAGS_DEB
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_CXX_CUSTOM_FLAGS_RELEASE}")
 
 set(CPACK_SOURCE_IGNORE_FILES "/\\\\..*$;~$;.swp$;${CPACK_SOURCE_IGNORE_FILES}")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
+set(ADD_FLAGS_ONCE true)
+option(PLM_CONFIG_CLANG_COMPLETE "generate .clang_complete" OFF)
+
+macro(SetProgramInfo target)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    set(program_name "${target}")
+    configure_file("${CMAKE_SOURCE_DIR}/ProgramInfo.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/ProgramInfo.hpp")
+endmacro()
+
+set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
+configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
+
+# fichiers
 include_directories(. ${CMAKE_CURRENT_BINARY_DIR})
 
 set(ALL_INCLUDES
@@ -113,48 +128,6 @@ file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
 # lua resources
 file(GLOB_RECURSE   tools_lua_res         "tools/lua/utils/*.lua")
-
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
-
-set(ADD_FLAGS_ONCE true)
-option (PLM_CONFIG_CLANG_COMPLETE "generate .clang_complete" OFF)
-
-macro(enable_pch target target_src)
-    list(REMOVE_ITEM ${target_src} precompiled.cpp)
-    set(GCC_PCH_TARGET ${target}_gccPCH_fc)
-    precompiled_header(${target_src} ALL_INCLUDES ${GCC_PCH_TARGET} precompiled ${target})
-
-    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        if (ADD_FLAGS_ONCE)
-            set(CMAKE_CXX_FLAGS "-I ${CMAKE_CURRENT_SOURCE_DIR} -include precompiled.hpp ${CMAKE_CXX_FLAGS}")
-            configure_file(${CMAKE_CURRENT_SOURCE_DIR}/precompiled.hpp ${CMAKE_CURRENT_BINARY_DIR}/precompiled.hpp)
-            include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-        endif()
-    endif()
-    if(PLM_CONFIG_CLANG_COMPLETE)
-        if(ADD_FLAGS_ONCE)
-            get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-            set (file_clang_complete "${CMAKE_CURRENT_SOURCE_DIR}/.clang_complete")
-            set (inc_args " -std=c++11\n")
-            foreach (arg ${inc_dirs})
-                set (inc_args "${inc_args} -I${arg}\n")
-            endforeach ()
-            set (inc_args "${inc_args} -include precompiled.cpp\n")
-            file (WRITE "${file_clang_complete}" "${inc_args}")
-            message (STATUS "Generated ${file_clang_complete}")
-        endif()
-    endif(PLM_CONFIG_CLANG_COMPLETE)
-    set(ADD_FLAGS_ONCE false)
-endmacro()
-
-macro(SetProgramInfo target)
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
-    set(program_name "${target}")
-    configure_file("${CMAKE_SOURCE_DIR}/ProgramInfo.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/ProgramInfo.hpp")
-endmacro()
-
-set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
-configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
 # resources
 CreateResourceProject(tools_lua_res tools_lua_src
