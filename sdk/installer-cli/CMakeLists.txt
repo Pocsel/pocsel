@@ -6,7 +6,6 @@ set(src
     ${tools_base_src}
     ${tools_database_src}
     ${tools_logger_src}
-    ${tools_lua_src}
     ${tools_plugin_install_src}
 )
 
@@ -17,6 +16,7 @@ add_dependencies(installer-cli tools_lua_res)
 enable_pch(installer-cli src)
 
 target_link_libraries(installer-cli
+    luasel
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}

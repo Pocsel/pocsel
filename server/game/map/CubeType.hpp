@@ -1,9 +1,9 @@
 #ifndef __SERVER_CUBETYPE_HPP__
 #define __SERVER_CUBETYPE_HPP__
 
-#include "common/CubeType.hpp"
+#include <luasel/Luasel.hpp>
 
-#include "tools/lua/Ref.hpp"
+#include "common/CubeType.hpp"
 
 namespace Server { namespace Game { namespace Map {
 

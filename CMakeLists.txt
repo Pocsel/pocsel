@@ -105,7 +105,7 @@ file(GLOB_RECURSE   tools_thread_src            "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
 # lua resources
-file(GLOB_RECURSE   tools_lua_res         "tools/lua/utils/*.lua")
+file(GLOB_RECURSE   tools_lua_res               "tools/lua/utils/*.lua")
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
@@ -150,8 +150,7 @@ set(dev_conf_dir "${CMAKE_SOURCE_DIR}/confdir")
 configure_file("common/DevConfDir.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/common/DevConfDir.hpp")
 
 # resources
-CreateResourceProject(tools_lua_res tools_lua_src
-    "${tools_lua_res}")
+CreateResourceProject(tools_lua_res tools_lua_src "${tools_lua_res}")
 
 add_subdirectory(luasel)
 add_subdirectory(buildutils)

@@ -2,9 +2,9 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/crc.hpp>
+#include <luasel/Luasel.hpp>
 
 #include "tools/plugin-create/Create.hpp"
-#include "tools/lua/Interpreter.hpp"
 #include "tools/database/sqlite/Connection.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/constants.hpp"
@@ -209,33 +209,11 @@ namespace Tools { namespace PluginCreate {
             conn.CreateQuery("CREATE TABLE server_file (name TEXT, lua TEXT);")->ExecuteNonSelect();
         }
 
-        //namespace Lua {
-
-        //    void RegisterScript(Tools::Lua::CallHelper& helper, std::string const& type, Tools::Database::IConnection& conn)
-        //    {
-        //    }
-
-        //    void DoNothing(Tools::Lua::CallHelper&)
-        //    {
-        //    }
-
-        //}
-
-        //void PrepareInterpreter(Tools::Lua::Interpreter& interpreter, Tools::Database::IConnection& conn)
-        //{
-        //    interpreter.RegisterLib(Tools::Lua::Interpreter::Base);
-        //    interpreter.RegisterLib(Tools::Lua::Interpreter::Math);
-        //    interpreter.RegisterLib(Tools::Lua::Interpreter::Table);
-        //    interpreter.RegisterLib(Tools::Lua::Interpreter::String);
-        //    interpreter.Globals().GetTable("Client").GetTable("Doodad").Set("Register",
-        //            interpreter.MakeFunction(std::bind(&Lua::RegisterScript, std::placeholders::_1, "doodad", std::ref(conn))));
-        //}
-
         void ReadPluginConfiguration(boost::filesystem::path const& conf, std::string& identifier, std::string& fullname)
         {
-            Tools::Lua::Interpreter interpreter;
+            Luasel::Interpreter interpreter;
             interpreter.DoFile(conf.string());
-            Tools::Lua::Ref ref(interpreter.GetState());
+            Luasel::Ref ref(interpreter.GetState());
             ref = interpreter.Globals()["identifier"];
             if (ref.Exists())
                 identifier = ref.CheckString("identifier must be a string");
@@ -297,8 +275,6 @@ namespace Tools { namespace PluginCreate {
         try
         {
             conn = new Tools::Database::Sqlite::Connection(destFile.string());
-            //Tools::Lua::Interpreter interpreter;
-            //PrepareInterpreter(interpreter, *conn);
             CreatePluginTables(*conn);
             conn->BeginTransaction();
 
