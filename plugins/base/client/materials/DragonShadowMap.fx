@@ -1,5 +1,5 @@
 #ifndef MAX_BONES
-#define MAX_BONES 58
+# define MAX_BONES 58
 #endif
 
 float4x4 worldViewProjection : WorldViewProjection;
@@ -32,33 +32,10 @@ VSout vs(
     return v;
 }
 
-float4 fs(in VSout v)
+float4 fs(in VSout v) : COLOR
 {
     return float4(v.pos.z / v.pos.w, 0, 0, 1);
 }
-
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
 
 technique tech
 {
@@ -69,5 +46,3 @@ technique tech
         PixelShader = compile ps_3_0 fs();
     }
 }
-
-#endif

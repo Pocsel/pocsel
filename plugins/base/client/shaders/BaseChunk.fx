@@ -1,26 +1,12 @@
 float4x4 worldViewProjection : WorldViewProjection;
 float4x4 worldViewInverseTranspose;
 
-#ifdef DIRECTX
-texture cubeTexture;
-
-sampler sCubeTexture = sampler_state
+sampler2D cubeTexture = sampler_state
 {
-    Texture = <cubeTexture>;
     MinFilter = Linear;
     MagFilter = Point;
     MipFilter = Linear;
 };
-
-#define cubeTexture sCubeTexture
-
-#else
-sampler2D cubeTexture = sampler_state
-{
-    MinFilter = LinearMipMapLinear;
-    MagFilter = Nearest;
-};
-#endif
 
 struct VSout
 {
@@ -36,7 +22,9 @@ struct FSout
     float4 normalDepth  : COLOR1;
 };
 
-VSout vs(in float4 position : POSITION, in float normalTexCoord : TEXCOORD0)
+VSout vs(
+	in float4 position : POSITION,
+	in float normalTexCoord : TEXCOORD0)
 {
     normalTexCoord /= 256.0;
     float3 normal = floor(frac(float3(normalTexCoord * 4, normalTexCoord * 16, normalTexCoord * 64)) * 4);
@@ -75,29 +63,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
    pass p0
@@ -107,5 +72,3 @@ technique tech
         PixelShader = compile ps_2_0 fs();
    }
 }
-
-#endif

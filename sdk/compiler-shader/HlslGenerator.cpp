@@ -8,6 +8,8 @@ namespace Hlsl {
     inline void _PrintVariable(TOut& out, Hlsl::Variable const& var, bool showSemantic = true)
     {
         out << var.type << " " << var.name;
+        if (var.arraySize.length() > 0)
+            out << '[' << var.arraySize << ']';
         if (showSemantic && var.semantic.length() > 0)
             out << ": " << var.semantic;
         switch (var.value.which())

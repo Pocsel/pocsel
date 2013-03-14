@@ -108,51 +108,60 @@ int main(int ac, char** av)
         return 1;
     }
 
-    // Macros - base
-    std::list<std::string> macros;
-    macros.push_front("POCSEL");
-
-    // OpenGL only
-    auto macrosGL = macros;
-    macrosGL.push_front("OPENGL");
-
-    // DirectX only
-    auto macrosDX = macros;
-    macrosDX.push_front("DIRECTX");
-
-    File fileGL;
-    File fileDX;
-
+    try
     {
-        std::ifstream in(av[1]);
-        if (!ParseStream(in, fileGL, macrosGL))
+        // Macros - base
+        std::list<std::string> macros;
+        macros.push_front("POCSEL");
+
+        // OpenGL only
+        auto macrosGL = macros;
+        macrosGL.push_front("OPENGL");
+
+        // DirectX only
+        auto macrosDX = macros;
+        macrosDX.push_front("DIRECTX");
+
+        File fileGL;
+        File fileDX;
+
         {
-            std::cout << "Error when parsing OpenGL version\n";
-            return 1;
+            std::ifstream in(av[1]);
+            if (!ParseStream(in, fileGL, macrosGL))
+            {
+                std::cout << "Error when parsing OpenGL version\n";
+                return 1;
+            }
         }
-    }
-    {
-        std::ifstream in(av[1]);
-        if (!ParseStream(in, fileDX, macrosDX))
         {
-            std::cout << "Error when parsing DirectX 9 version\n";
-            return 1;
+            std::ifstream in(av[1]);
+            if (!ParseStream(in, fileDX, macrosDX))
+            {
+                std::cout << "Error when parsing DirectX 9 version\n";
+                return 1;
+            }
         }
-    }
 
-    GeneratorOptions options;
-    options.removeSemanticAttributes = true;
+        GeneratorOptions options;
+        options.removeSemanticAttributes = true;
 
-    auto const& srcGL = GenerateHlsl(fileGL, options);
-    options.removeSemanticAttributes = false;
-    auto const& srcDX = GenerateHlsl(fileDX, options);
-    auto const& shader = HlslFileToShader(fileGL, srcGL, fileDX, srcDX);
+        auto const& srcGL = GenerateHlsl(fileGL, options);
+        options.removeSemanticAttributes = false;
+        auto const& srcDX = GenerateHlsl(fileDX, options);
+        auto const& shader = HlslFileToShader(fileGL, srcGL, fileDX, srcDX);
 
-    std::ofstream out(av[2], std::ios::binary | std::ios::out);
-    SerializeShader(shader, out);
+        std::ofstream out(av[2], std::ios::binary | std::ios::out);
+        SerializeShader(shader, out);
+
 #ifdef DEBUG
-    std::cout << "Success\n";
+        std::cout << "Success\n";
 #endif
+    }
+    catch (std::exception& ex)
+    {
+        std::cout << ex.what() << std::endl;
+        return 1;
+    }
 
 #if defined(_WINDOWS) && defined(DEBUG)
     std::cin.get();

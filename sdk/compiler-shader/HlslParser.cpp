@@ -21,6 +21,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     Hlsl::Variable,
     (std::string, type)
     (std::string, name)
+    (std::string, arraySize)
     (std::string, semantic)
     (Hlsl::StatementOrSamplerState, value)
     (bool, in)
@@ -239,6 +240,7 @@ namespace Hlsl {
         DeviceStateParser<T, TSkipper> deviceStateParser;
         StatementParser<T, TSkipper> statementParser;
         boost::spirit::qi::rule<T, std::string(), TSkipper> semanticParser;
+        boost::spirit::qi::rule<T, std::string(), TSkipper> arraySizeParser;
         boost::spirit::qi::rule<T, SamplerState(), TSkipper> samplerStateParser;
         boost::spirit::qi::rule<T, StatementOrSamplerState(), TSkipper> valueParser;
         boost::spirit::qi::rule<T, Variable(), TSkipper> start;
@@ -246,6 +248,15 @@ namespace Hlsl {
         VariableParser() : VariableParser::base_type(start)
         {
             semanticParser %= (base.colon > base.identifier) | qi::eps[_val = val("")];
+
+            arraySizeParser %=
+                    (
+                        lit('[')
+                        >  *char_("0-9")
+                        > lit(']')
+                    )
+                    | qi::eps[_val = val("")]
+                ;
 
             samplerStateParser %= lit("sampler_state") > base.leftBracket > *(deviceStateParser >> base.semicolon) > base.rightBracket;
             qi::on_error<qi::rethrow>(samplerStateParser, base.errorHandler);
@@ -262,6 +273,7 @@ namespace Hlsl {
             start %=
                     base.identifier[if_(_1 == "in" || _1 == "out" || _1 == "inout")[_pass = false]] // type
                     >> base.identifier // name
+                    >> arraySizeParser // arraySize
                     >> semanticParser // semantic
                     >> valueParser // value
                 ;
@@ -305,8 +317,8 @@ namespace Hlsl {
 
             oneArgParser =
                     (lit("in") >> variableParser[_val = _1])
-                    | (lit("out") >> variableParser[_val = _1, at_c<4>(_val) = val(false), at_c<5>(_val) = val(true)])
-                    | (lit("inout") >> variableParser[_val = _1, at_c<4>(_val) = val(true), at_c<5>(_val) = val(true)])
+                    | (lit("out") >> variableParser[_val = _1, at_c<5>(_val) = val(false), at_c<6>(_val) = val(true)])
+                    | (lit("inout") >> variableParser[_val = _1, at_c<5>(_val) = val(true), at_c<6>(_val) = val(true)])
                     | variableParser[_val = _1]
                 ;
             oneArgParser.name("argument");

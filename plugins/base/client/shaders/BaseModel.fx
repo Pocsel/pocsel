@@ -1,29 +1,15 @@
 #ifndef MAX_BONES
-#define MAX_BONES 58
+# define MAX_BONES 58
 #endif
 
 float4x4 worldViewProjection : WorldViewProjection;
 float4x4 worldViewInverseTranspose;
 
-#ifdef DIRECTX
-texture diffuseTexture;
-
-sampler sDiffuseTexture = sampler_state
-{
-    Texture = <diffuseTexture>;
-    minFilter = Linear;
-    magFilter = Linear;
-};
-
-#define diffuseTexture sDiffuseTexture
-
-#else
 sampler2D diffuseTexture = sampler_state
 {
     minFilter = Linear;
     magFilter = Linear;
 };
-#endif
 
 float4x4 boneMatrices[MAX_BONES];
 float updateFlag = 0.0;
@@ -43,11 +29,11 @@ struct FSout
 };
 
 VSout vs(
-        in float4   position    : POSITION,
-        in float3   normal      : NORMAL,
-        in float2   texCoord    : TEXCOORD0,
-        in float4   weight      : TEXCOORD1,
-        in float4   matrixIndex : TEXCOORD2)
+	in float4 position    : POSITION,
+	in float3 normal      : NORMAL,
+	in float2 texCoord    : TEXCOORD0,
+	in float4 weight      : TEXCOORD1,
+	in float4 matrixIndex : TEXCOORD2)
 {
     float4x4 matTransform = boneMatrices[matrixIndex.x] * weight.x;
     matTransform += boneMatrices[matrixIndex.y] * weight.y;
@@ -86,29 +72,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
     pass p0
@@ -118,5 +81,3 @@ technique tech
         PixelShader = compile ps_3_0 fs();
     }
 }
-
-#endif

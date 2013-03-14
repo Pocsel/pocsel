@@ -36,6 +36,7 @@ namespace Hlsl
     {
         std::string type;
         std::string name;
+        std::string arraySize;
         std::string semantic;
         StatementOrSamplerState value;
         bool in;

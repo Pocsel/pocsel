@@ -1,4 +1,5 @@
 #include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/crc.hpp>
@@ -109,7 +110,7 @@ namespace Tools { namespace PluginCreate {
                 Bind(boost::uuids::to_string(buildHashGenerator())).Bind(fullname).Bind(identifier).Bind(Common::PluginFormatVersion).ExecuteNonSelect();
         }
 
-        void FillTableResource(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn, std::map<std::string, std::unique_ptr<FileConverter>> const& fileConverters)
+        void FillTableResource(boost::filesystem::path const& pluginRoot, Tools::Database::IConnection& conn, std::list<Resource> const& resources)
         {
             boost::filesystem::path clientRoot(pluginRoot / "client");
             if (!boost::filesystem::is_directory(clientRoot))
@@ -118,34 +119,14 @@ namespace Tools { namespace PluginCreate {
                 return;
             }
 
-            //std::map<std::string /* extension avec point */, std::string /* type en base */> allowedTypes;
-            //allowedTypes[".lua"] = "lua";
-            //allowedTypes[".png"] = "image";
-            //allowedTypes[".fxc"] = "effect";
-            //allowedTypes[".mqm"] = "model";
-
-            std::list<boost::filesystem::path> files;
-            RecursiveFileList(clientRoot, files);
-            auto it = files.begin();
-            auto itEnd = files.end();
             auto query = conn.CreateQuery("INSERT INTO resource (name, type, data_hash, data) VALUES (?, ?, ?, ?);");
-            for (; it != itEnd; ++it)
+            for (auto const& res: resources)
             {
-                auto itType = fileConverters.find(it->extension().string());
-                if (itType == fileConverters.end())
-                {
-                    Tools::log << "Client file " << *it << " ignored (unknown extension " << it->extension() << ")." << std::endl;
-                    continue;
-                }
-                auto const& data = itType->second->Convert(it->generic_string());
-                std::string const& name = MakeRelative(clientRoot, *it).generic_string();
-                std::string const& type = itType->second->type;
+                auto const& data = ReadFile(res.dstFile);
+                std::string const& name = MakeRelative(clientRoot, res.srcFile).generic_string();
+                std::string const& type = res.type;
                 std::string const& hash = HashFile(data);
-                //if (itType->second == "lua")
-                //{
-                //    Tools::log << "Processing client Lua file \"" << name << "\":" << std::endl;
-                //    interpreter.DoString(std::string(data.begin(), data.end()));
-                //}
+
                 query->Bind(name).Bind(type).Bind(hash).Bind(data.data(), data.size()).ExecuteNonSelect().Reset();
                 Tools::log << "Added client file \"" << name << "\" (size: " << data.size() << " bytes, hash: \"" << hash << "\", type: \"" << type << "\")." << std::endl;
             }
@@ -262,7 +243,77 @@ namespace Tools { namespace PluginCreate {
 
     }
 
-    bool Create(boost::filesystem::path const& pluginRoot, boost::filesystem::path const& destFile, std::map<std::string, std::unique_ptr<FileConverter>> const& fileConverters)
+    Resource::Resource(Resource&& rhs) :
+        type(std::move(rhs.type)),
+        srcFile(std::move(rhs.srcFile)),
+        dstFile(std::move(rhs.dstFile)),
+        isTemporaryFile(rhs.isTemporaryFile)
+    {
+        rhs.isTemporaryFile = false;
+    }
+
+    Resource::Resource(std::string type, boost::filesystem::path srcFile, boost::filesystem::path dstFile, bool temp) :
+        type(std::move(type)),
+        srcFile(std::move(srcFile)),
+        dstFile(std::move(dstFile)),
+        isTemporaryFile(temp)
+    {
+    }
+
+    Resource::~Resource()
+    {
+        if (this->isTemporaryFile)
+            boost::filesystem::remove(this->dstFile);
+    }
+
+    std::map<std::string, std::function<Resource(boost::filesystem::path const&)>> GetDefaultConverter()
+    {
+        auto func = [](std::string type) -> std::function<Resource(boost::filesystem::path const&)>
+        {
+            return [=](boost::filesystem::path const& file)
+            {
+                return Resource(type, file, file, false);
+            };
+        };
+        std::map<std::string, std::function<Resource(boost::filesystem::path const&)>> converters;
+        converters[".lua"] = func("lua");
+        converters[".png"] = func("image");
+        converters[".fxc"] = func("effect");
+        converters[".mqm"] = func("model");
+        return converters;
+    }
+
+    Resource Convert(boost::filesystem::path const& file, std::map<std::string, std::function<Resource(boost::filesystem::path const&)>> const& fileConverters)
+    {
+
+        auto itType = fileConverters.find(file.extension().string());
+        if (itType == fileConverters.end())
+            throw std::runtime_error("unknown extension " + file.extension().generic_string());
+
+        return itType->second(file.generic_string());
+    }
+
+    std::list<Resource> ConvertAllFiles(boost::filesystem::path const& directory, std::map<std::string, std::function<Resource(boost::filesystem::path const&)>> const& fileConverters)
+    {
+        std::list<boost::filesystem::path> files;
+        RecursiveFileList(directory, files);
+
+        std::list<Resource> resources;
+        for (auto const& file: files)
+        {
+            try
+            {
+                resources.push_back(Convert(file, fileConverters));
+            }
+            catch (std::exception& ex)
+            {
+                Tools::log << "Client file " << file << " ignored (" << ex.what() << ")." << std::endl;
+            }
+        }
+        return resources;
+    }
+
+    bool Create(boost::filesystem::path const& pluginRoot, boost::filesystem::path const& destFile, std::list<Resource> const& resources)
     {
         // check de base des chemins
         if (!boost::filesystem::is_directory(pluginRoot))
@@ -316,7 +367,7 @@ namespace Tools { namespace PluginCreate {
 
             // remplissage
             FillTablePlugin(identifier, fullname, *conn);
-            FillTableResource(pluginRoot, *conn, fileConverters);
+            FillTableResource(pluginRoot, *conn, resources);
             FillTableServerFile(pluginRoot, *conn);
             FillTableMap(pluginRoot, *conn);
 
@@ -336,19 +387,4 @@ namespace Tools { namespace PluginCreate {
         return true;
     }
 
-    std::map<std::string, std::unique_ptr<FileConverter>> GetDefaultConverter()
-    {
-        class Dummy : public FileConverter
-        {
-        public:
-            Dummy(std::string const& type) : FileConverter(type) {}
-            virtual std::vector<char> Convert(std::string const& file) const { return ReadFile(file); }
-        };
-        std::map<std::string, std::unique_ptr<FileConverter>> converters;
-        converters[".lua"] = MakeUnique(new Dummy("lua"));
-        converters[".png"] = MakeUnique(new Dummy("image"));
-        converters[".fxc"] = MakeUnique(new Dummy("effect"));
-        converters[".mqm"] = MakeUnique(new Dummy("model"));
-        return converters;
-    }
 }}
