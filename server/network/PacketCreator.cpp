@@ -235,7 +235,7 @@ namespace Server { namespace Network {
         return std::unique_ptr<UdpPacket>(ptr);
     }
 
-    std::unique_ptr<UdpPacket> PacketCreator::EntityUpdate(Uint32 entityId, Common::Physics::Node const& position)
+    std::unique_ptr<UdpPacket> PacketCreator::EntityUpdate(Uint32 entityId, std::vector<Common::Physics::Node> const& position)
     {
         UdpPacket* ptr(new UdpPacket());
         ptr->Write(Protocol::ServerToClient::EntityUpdate);

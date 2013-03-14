@@ -57,6 +57,7 @@ namespace Server { namespace Game { namespace Engine {
         void DeleteDoodadsOfEntity(Uint32 entityId);
         void DisableDoodadsOfEntity(Uint32 entityId);
         void EnableDoodadsOfEntity(Uint32 entityId);
+        //void UpdatePhysicsFromDoodadOfEntity(Uint32 entityId);
         bool EntityHasDoodad(Uint32 entityId) const;
         //void EntityHasMoved(Uint32 entityId);
         void DoodadIsDirty(Doodad* doodad) { this->_dirtyDoodads.insert(doodad); }
@@ -76,6 +77,10 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiCallUdp(Luasel::CallHelper& helper);
         void _ApiGetDoodadById(Luasel::CallHelper& helper);
         void _ApiGetWeakPointer(Luasel::CallHelper& helper);
+        void _ApiSetAccel(Luasel::CallHelper& helper);
+        void _ApiSetLocalAccel(Luasel::CallHelper& helper);
+        void _ApiSetInterPositionTarget(Luasel::CallHelper& helper);
+        void _ApiSetInterAngleTarget(Luasel::CallHelper& helper);
     };
 
 }}}

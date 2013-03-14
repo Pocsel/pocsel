@@ -40,6 +40,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 GetRunningDoodadId() const { return this->_runningDoodadId; }
         Doodad* GetRunningDoodad() const { return this->_runningDoodad; }
         Doodad const& GetDoodad(Uint32 doodadId) const throw(std::runtime_error); // ne pas garder la référence, le doodad peut etre delete à tout moment
+        Doodad& GetDoodad(Uint32 doodadId) throw(std::runtime_error); // ne pas garder la référence, le doodad peut etre delete à tout moment
         std::map<Uint32, Doodad*> const& GetDoodads() const { return this->_doodads; }
         void Tick(Uint64 totalTime);
         void SpawnDoodad(Uint32 doodadId,
@@ -52,10 +53,13 @@ namespace Client { namespace Game { namespace Engine {
         void UpdateDoodad(Uint32 doodadId,
                 std::vector<std::pair<bool, Common::Physics::Node>> const* body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>> const& commands);
+        void UpdateEntity(Uint32 entityId, std::vector<Common::Physics::Node> const& physics);
         void Render();
+
     private:
         void _CallDoodadFunction(Uint32 doodadId, std::string const& function);
         void _ApiRegister(Luasel::CallHelper& helper);
+        void _UpdateEntityPosition(Entity& entity, std::vector<Common::Physics::Node> const& node);
     };
 
 }}}

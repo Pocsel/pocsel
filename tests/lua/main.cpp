@@ -1,4 +1,4 @@
-#include "tools/precompiled.hpp"
+#include "precompiled.hpp"
 
 #include <luasel/Luasel.hpp>
 
@@ -241,6 +241,27 @@ static void Benchmark(Luasel::Interpreter& i)
         }
     }
     Tools::log << "End (time: " << timer.GetPreciseElapsedTime() << " us)\n";
+
+    Tools::log << "Ref copy vs move\n";
+    auto ref = i.Make(0);
+    auto ref2 = i.Make(0);
+
+    timer.Reset();
+    for (int _ = 0; _ < 100000; ++_)
+    {
+        std::swap(ref, ref2);
+        ref = ref2;
+    }
+    Tools::log << "copy: " << timer.GetPreciseElapsedTime() << " us\n";
+
+    ref = i.Make(0);
+    timer.Reset();
+    for (int _ = 0; _ < 100000; ++_)
+    {
+        std::swap(ref, ref2);
+        ref = std::move(ref2);
+    }
+    Tools::log << "move: " << timer.GetPreciseElapsedTime() << " us\n";
 }
 
 static void RegisteredTypes(Luasel::Interpreter& i)

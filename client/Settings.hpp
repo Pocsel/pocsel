@@ -20,7 +20,6 @@ namespace Client {
         unsigned int fps;
         glm::uvec2 res;
         bool fullscreen;
-        bool useShaders;
         bool useDirect3D9;
         unsigned int chunkViewDistance;
         unsigned int chunkCacheArea;

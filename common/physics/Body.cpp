@@ -13,11 +13,9 @@ namespace Common { namespace Physics {
         _type(bodyType),
         _nodes(bodyType.GetShapes().size())
     {
-        for (auto rootsIt = this->_type.GetRoots().begin(),
-                rootsIte = this->_type.GetRoots().end();
-                rootsIt != rootsIte; ++rootsIt)
+        for (auto root: this->_type.GetRoots())
         {
-            this->_BuildBodyNode(*rootsIt);
+            this->_BuildBodyNode(root);
         }
         this->_parent.AddConstraint(this);
 
@@ -30,7 +28,7 @@ namespace Common { namespace Physics {
         // step 2 - créer les fils (avec eux-meme qui créent leur constraint)
         BodyNode& node = this->_nodes[nodeId];
         BodyType::ShapeNode const& shape = this->_type.GetShapes()[nodeId];
-        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBody() : this->_nodes[shape.parent].body;
+        btRigidBody* parent = shape.parent == -1 ? &this->_parent.GetBtBody() : this->_nodes[shape.parent].body;
 
         btTransform parentTr;
         parent->getMotionState()->getWorldTransform(parentTr);
@@ -62,53 +60,54 @@ namespace Common { namespace Physics {
         node.body = new btRigidBody(rbInfo);
         node.body->setActivationState(DISABLE_DEACTIVATION);
 
+        node.body->setLinearFactor(btVector3(1,1,1));
+        node.body->setAngularFactor(btVector3(1,1,1));
+
+        node.interBaseTransform = thisTr;
+
         btGeneric6DofConstraint* newConstraint = new btGeneric6DofConstraint(*parent, *node.body, thisTr, btTransform::getIdentity(), false);
 
-        //if (false && parent == &this->_parent.GetBody())
+        for (int i = 0; i < 6; ++i)
         {
-            btVector3 anglLimit(0, 0, 0);//-0.01, -0.01, -0.01);//-SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10, -SIMD_PI * 9 / 10);
+            //newConstraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.2, i);
+            //newConstraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.04, i);
+            //newConstraint->setParam(BT_CONSTRAINT_CFM, 0.1, i);
+        }
+
+        {
+            btVector3 anglLimit(0, 0, 0);
             newConstraint->setAngularLowerLimit(anglLimit);
         }
         {
-            btVector3 anglLimit(0, 0, 0);//0.01, 0.01, 0.01);//SIMD_PI * 9 / 10, SIMD_PI * 9 / 10, SIMD_PI * 9 / 10);
+            btVector3 anglLimit(0, 0, 0);
             newConstraint->setAngularUpperLimit(anglLimit);
         }
+
 
         node.constraint = newConstraint;
 
         this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
-        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint, true);
+        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint);// , true);
 
-        for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
-                childIte = this->_type.GetShapes()[nodeId].children.end();
-                childIt != childIte; ++childIt)
-            this->_BuildBodyNode(*childIt);
+        for (auto child: this->_type.GetShapes()[nodeId].children)
+            this->_BuildBodyNode(child);
 
-        void* userData = this->_parent.GetUserData();
-        if (userData)
-            node.body->setUserPointer(userData);
+        node.body->setUserPointer(&this->_parent);
     }
 
     Body::~Body()
     {
         this->_parent.RemoveConstraint(this);
-        for (auto rootsIt = this->_type.GetRoots().begin(),
-                rootsIte = this->_type.GetRoots().end();
-                rootsIt != rootsIte; ++rootsIt)
+        for (auto root: this->_type.GetRoots())
         {
-            this->_CleanBodyNode(*rootsIt);
+            this->_CleanBodyNode(root);
         }
-        //this->_parent.GetWorld().GetBtWorld().removeRigidBody(this->_rootBody);
-        //Tools::Delete(this->_rootBody);
-        //Tools::Delete(this->_rootMotionState);
     }
 
     void Body::_CleanBodyNode(Uint32 nodeId)
     {
-        for (auto childIt = this->_type.GetShapes()[nodeId].children.begin(),
-                childIte = this->_type.GetShapes()[nodeId].children.end();
-                childIt != childIte; ++childIt)
-            this->_CleanBodyNode(*childIt);
+        for (auto child: this->_type.GetShapes()[nodeId].children)
+            this->_CleanBodyNode(child);
 
         BodyNode& node = this->_nodes[nodeId];
         this->_parent.GetWorld().GetBtWorld().removeConstraint(node.constraint);
@@ -120,26 +119,242 @@ namespace Common { namespace Physics {
 
     btRigidBody& Body::GetRootBtBody()
     {
-        return this->_parent.GetBody();
+        return this->_parent.GetBtBody();
     }
 
     btRigidBody const& Body::GetRootBtBody() const
     {
-        return this->_parent.GetBody();
+        return this->_parent.GetBtBody();
+    }
+
+    void Body::SetAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        auto& bodyNode = this->_GetNode(node);
+
+        bodyNode.acceleration = btVector3(accel.x, accel.y, accel.z);
+        bodyNode.maxSpeed = maxSpeed;
+        bodyNode.accelerationIsLocal = false;
+    }
+
+    void Body::SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        auto& bodyNode = this->_GetNode(node);
+
+        bodyNode.acceleration = btVector3(accel.x, accel.y, accel.z);
+        bodyNode.maxSpeed = maxSpeed;
+        bodyNode.accelerationIsLocal = true;
+    }
+
+    void Body::SetInterPositionTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        auto& bodyNode = this->_GetNode(node);
+
+        bodyNode.interPositionTarget = btVector3(accel.x, accel.y, accel.z);
+        bodyNode.interPositionTargetSpeed = maxSpeed;
+    }
+
+    void Body::SetInterAngleTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed)
+    {
+        auto& bodyNode = this->_GetNode(node);
+
+        bodyNode.interAngleTarget = btVector3(
+                btNormalizeAngle(accel.x),
+                btNormalizeAngle(accel.y),
+                btNormalizeAngle(accel.z)
+                );
+
+        bodyNode.interAngleTargetSpeed = maxSpeed;
+    }
+
+    Body::BodyNode& Body::_GetNode(std::string const& nodeName)
+    {
+        Int32 nodeIdx = this->_type.GetNodeIndex(nodeName);
+        if (nodeIdx == -1)
+            throw std::runtime_error("Node \"" + nodeName + "\" does not exist");
+        return this->_nodes[nodeIdx];
+    }
+
+    void Body::_RemoveFromWorld()
+    {
+        for (auto root: this->_type.GetRoots())
+        {
+            this->_RemoveNodeFromWorld(root);
+        }
+    }
+
+    void Body::_RemoveNodeFromWorld(Uint32 nodeId)
+    {
+        for (auto child: this->_type.GetShapes()[nodeId].children)
+            this->_RemoveNodeFromWorld(child);
+
+        BodyNode& node = this->_nodes[nodeId];
+        this->_parent.GetWorld().GetBtWorld().removeConstraint(node.constraint);
+        this->_parent.GetWorld().GetBtWorld().removeRigidBody(node.body);
+    }
+
+    void Body::_PutBackInWorld()
+    {
+        for (auto root: this->_type.GetRoots())
+        {
+            this->_PutNodeBackInWorld(root);
+        }
+    }
+
+    void Body::_PutNodeBackInWorld(Uint32 nodeId)
+    {
+        BodyNode& node = this->_nodes[nodeId];
+        this->_parent.GetWorld().GetBtWorld().addRigidBody(node.body);
+        this->_parent.GetWorld().GetBtWorld().addConstraint(node.constraint);//, true);
+        for (auto child: this->_type.GetShapes()[nodeId].children)
+            this->_PutNodeBackInWorld(child);
+    }
+
+    void Body::_ApplyAccel(btVector3 const& accel)
+    {
+        for (Uint32 rootId: this->_type.GetRoots())
+            this->_ApplyAccelOnNode(accel, rootId);
+    }
+
+    void Body::_ApplyAccelOnNode(btVector3 const& accel, Uint32 nodeId)
+    {
+        BodyNode& node = this->_nodes[nodeId];
+
+        btVector3 realAccel = accel;
+
+        if (node.acceleration != btVector3(0, 0, 0))
+        {
+            btVector3 velocity = node.body->getLinearVelocity();
+
+            btQuaternion directionQ = node.body->getCenterOfMassTransform().getRotation();
+            btVector3 nodeAccel = node.acceleration;
+            if (node.accelerationIsLocal)
+                nodeAccel = quatRotate(directionQ, nodeAccel);
+            btVector3 targetDirection = nodeAccel;
+            targetDirection.normalize();
+            btScalar speed = velocity.dot(targetDirection);
+
+            if (speed < node.maxSpeed)
+            {
+                realAccel += nodeAccel;
+            }
+        }
+
+        if (node.body->getInvMass() != 0)
+            node.body->applyCentralForce(accel * (1.0 / node.body->getInvMass()));
+        else
+            node.body->applyCentralForce(accel);
+
+        for (Uint32 childId: this->_type.GetShapes()[nodeId].children)
+            this->_ApplyAccelOnNode(accel, childId);
+    }
+
+    void Body::_PostTick()
+    {
+    }
+
+    void Body::_PreBtTick(btScalar timeStep)
+    {
+        bool change;
+        for (BodyNode& node: this->_nodes)
+        {
+            change = false;
+
+            if (node.interPositionTarget != node.interPositionCurrent)
+            {
+                change = true;
+
+                if (node.interPositionCurrent.distance(node.interPositionTarget) <= node.interPositionTargetSpeed * timeStep)
+                {
+                    node.interPositionCurrent = node.interPositionTarget;
+                }
+                else
+                {
+                    node.interPositionCurrent = node.interPositionCurrent + (node.interPositionTarget - node.interPositionCurrent).normalized() * node.interPositionTargetSpeed * timeStep;
+                }
+            }
+
+            if (node.interAngleTarget != node.interAngleCurrent)
+            {
+                change = true;
+
+                btVector3 difference = node.interAngleTarget - node.interAngleCurrent;
+                for (unsigned int i = 0; i < 3; ++i)
+                {
+                    if (difference[i] > SIMD_PI)
+                        difference[i] -= SIMD_2_PI;
+                    else if (difference[i] < -SIMD_PI)
+                        difference[i] += SIMD_2_PI;
+                }
+
+                if (difference.length() <= node.interAngleTargetSpeed * timeStep)
+                {
+                    node.interAngleCurrent = node.interAngleTarget;
+                }
+                else
+                {
+                    node.interAngleCurrent = node.interAngleCurrent + difference.normalized() * node.interAngleTargetSpeed * timeStep;
+                    for (unsigned int i = 0; i < 3; ++i)
+                        btNormalizeAngle(node.interAngleCurrent[i]);
+                }
+            }
+
+            if (change)
+            {
+                btTransform tr;
+                tr.setIdentity();
+                tr.setOrigin(node.interPositionCurrent);
+                tr.setRotation(btQuaternion(node.interAngleCurrent.x(), node.interAngleCurrent.y(), node.interAngleCurrent.z()));
+
+                node.constraint->setFrames(node.interBaseTransform * tr, btTransform::getIdentity());
+            }
+
+        }
+        //btVector3 curTarget;
+        //btVector3 newTarget;
+        //for (BodyNode& node: this->_nodes)
+        //{
+        //    node.constraint->getLinearLowerLimit(curTarget);
+        //    if (node.interPositionTarget != curTarget)
+        //    {
+        //        if (curTarget.distance(node.interPositionTarget) <= node.interPositionTargetSpeed * timeStep)
+        //        {
+        //            node.constraint->setLinearLowerLimit(node.interPositionTarget);
+        //            node.constraint->setLinearUpperLimit(node.interPositionTarget);
+        //        }
+        //        else
+        //        {
+        //            newTarget = curTarget + (node.interPositionTarget - curTarget).normalized() * node.interPositionTargetSpeed * timeStep;
+        //            node.constraint->setLinearLowerLimit(newTarget);
+        //            node.constraint->setLinearUpperLimit(newTarget);
+        //        }
+        //    }
+
+        //    node.constraint->getAngularLowerLimit(curTarget);
+        //    if (node.interAngleTarget != curTarget)
+        //    {
+        //        //std::cout << "XXX\n";
+        //        //std::cout << "  target " << node.interAngleTarget.x() << ", cur " << curTarget.x() << "\n";
+        //        //std::cout << "  target " << node.interAngleTarget.y() << ", cur " << curTarget.y() << "\n";
+        //        //std::cout << "  target " << node.interAngleTarget.z() << ", cur " << curTarget.z() << "\n";
+        //        // TODO regler le bug qui fait que y'a grave de la merde
+        //        if (curTarget.distance(node.interAngleTarget) <= node.interAngleTargetSpeed * timeStep)
+        //        {
+        //            node.constraint->setAngularLowerLimit(node.interAngleTarget);
+        //            node.constraint->setAngularUpperLimit(node.interAngleTarget);
+        //        }
+        //        else
+        //        {
+        //            newTarget = curTarget + (node.interAngleTarget - curTarget).normalized() * node.interAngleTargetSpeed * timeStep;
+        //            node.constraint->setAngularLowerLimit(newTarget);
+        //            node.constraint->setAngularUpperLimit(newTarget);
+        //        }
+        //    }
+        //}
     }
 
     void Body::Dump() const
     {
         std::cout << "      Body::Dump()\n";
-
-        //{
-        //    btTransform tr;
-        //    this->_rootMotionState->getWorldTransform(tr);
-        //    std::cout << "         " <<
-        //        tr.getOrigin().x() << ", " <<
-        //        tr.getOrigin().y() << ", " <<
-        //        tr.getOrigin().z() << "\n";
-        //}
 
         for (auto it = this->_nodes.begin(), ite = this->_nodes.end(); it != ite; ++it)
         {

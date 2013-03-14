@@ -27,6 +27,7 @@ namespace Client { namespace Network {
     class PacketExtractor
     {
     public:
+        // LoggedIn en fait
         static void Login(Tools::ByteArray const& p,
                 bool& status,
                 Protocol::Version& major,
@@ -68,8 +69,8 @@ namespace Client { namespace Network {
                 std::unique_ptr<std::vector<std::pair<bool, Common::Physics::Node>>>& body,
                 std::list<std::tuple<bool /* functionCall */, std::string /* function || key */, std::string /* value */>>& commands);
         static void EntityUpdate(Tools::ByteArray const& p,
-                Uint32 entityId,
-                Common::Physics::Node& node);
+                Uint32& entityId,
+                std::vector<Common::Physics::Node>& node);
     };
 
 }}

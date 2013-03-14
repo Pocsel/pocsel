@@ -65,6 +65,21 @@ height_value = 0
 
 cubes = {
 
+    --[[--
+    ["base:Rock"] = {
+        {
+            priority = 9,
+            validators = {
+                {
+                    equation = "none",
+                    validator = "y_inferior_to",
+                    value = height_value
+                }
+            }
+        }
+    }
+    --]]--
+    ---[[--
     Void = {
         {
             priority = 0,
@@ -177,5 +192,6 @@ cubes = {
             }
         }
     }
+    --]]--
 }
 

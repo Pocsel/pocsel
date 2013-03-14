@@ -18,19 +18,27 @@ namespace Common { namespace Physics {
 
     BodyType::~BodyType()
     {
-        for (auto it = this->_shapes.begin(), ite = this->_shapes.end(); it != ite; ++it)
+        for (auto& bodyShape: this->_shapes)
         {
-            Tools::Delete(it->shape);
-            Tools::Delete(it->shapeDesc);
+            Tools::Delete(bodyShape.shape);
+            Tools::Delete(bodyShape.shapeDesc);
         }
     }
 
     void BodyType::CreateBtShapes()
     {
-        for (auto it = this->_shapes.begin(), ite = this->_shapes.end(); it != ite; ++it)
+        for (auto& bodyShape: this->_shapes)
         {
-            it->shape = it->shapeDesc->CreateShape().release();
+            bodyShape.shape = bodyShape.shapeDesc->CreateShape().release();
         }
+    }
+
+    Int32 BodyType::GetNodeIndex(std::string const& nodeName) const
+    {
+        auto it = this->_shapesMap.find(nodeName);
+        if (it == this->_shapesMap.end())
+            return -1;
+        return it->second;
     }
 
 }}

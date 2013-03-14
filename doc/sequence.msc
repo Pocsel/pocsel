@@ -1,0 +1,24 @@
+msc {
+    arcgradient=30, wordwraparcs=1;
+
+    c [label="Client"], s [label="Server"];
+
+    |||;
+    c note c [label="State: Connecting"];
+    c => s [label="[Login]\nInt32 versionMajor\nInt32 versionMinor\nString login (\"yalap_a\")"];
+    c note c [label="State: LoggingIn"];
+    s >> s [label="Login OK"];
+    s => c [label="[LoggedIn]\nbool status (true)\nInt32 versionMajor\nInt32 versionMinor\nUint32 clientId\nString worldIdentifier\nString worldName\nUint32 worldVersion\nUint16 nbCubeTypes\nUint32 nbBodyTypes\nString worldBuildHash"];
+    c note c [label="State: LoadingResources"];
+    c => s [label="[GetNeededResourceIds]\nUint32 cacheVersion"];
+    s => c [label="[NeededResourceIds]\nUint32 totalIds\nUint32 resourceId1\n(~15000 more)"];
+    s => c [label="[NeededResourceIds]\nUint32 totalIds\nUint32 resourceIdN\n"];
+    --- [label="Beginning of resource"];
+    --- [label="Arbitrary range of resource"];
+    ---;
+    c note c [label="State: WaitingPosition"];
+    c note c [label="State: LoadingChunks"];
+    c note c [label="State: Running"];
+    c note c [label="State: Disconnected"];
+}
+

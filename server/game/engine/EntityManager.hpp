@@ -132,10 +132,10 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiRegisterPositional(Luasel::CallHelper& helper);
         void _ApiSetPos(Luasel::CallHelper& helper);
         void _ApiGetPos(Luasel::CallHelper& helper);
-        void _ApiSetSpeed(Luasel::CallHelper& helper);
-        void _ApiGetSpeed(Luasel::CallHelper& helper);
         void _ApiSetAccel(Luasel::CallHelper& helper);
         void _ApiGetAccel(Luasel::CallHelper& helper);
+        void _ApiSetLocalAccel(Luasel::CallHelper& helper);
+        void _ApiGetLocalAccel(Luasel::CallHelper& helper);
     };
 
 }}}

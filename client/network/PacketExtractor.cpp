@@ -139,8 +139,8 @@ namespace Client { namespace Network {
     }
 
     void PacketExtractor::EntityUpdate(Tools::ByteArray const& p,
-            Uint32 entityId,
-            Common::Physics::Node& node)
+            Uint32& entityId,
+            std::vector<Common::Physics::Node>& node)
     {
         p.Read(entityId);
         p.Read(node);

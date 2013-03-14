@@ -32,7 +32,7 @@ namespace Client { namespace Game { namespace Engine {
         {
             WeakModelRef() : modelId(0) {}
             WeakModelRef(Uint32 modelId) : modelId(modelId) {}
-            virtual bool IsValid(ModelManager const&) const { return this->modelId; }
+            virtual bool IsValid(ModelManager const&) const { return this->modelId != 0; }
             virtual void Invalidate(ModelManager const&) { this->modelId = 0; }
             virtual Luasel::Ref GetReference(ModelManager& modelManager) const;
             bool operator <(WeakModelRef const& rhs) const;
@@ -62,6 +62,8 @@ namespace Client { namespace Game { namespace Engine {
         void _ApiSpawn(Luasel::CallHelper& helper);
         void _ApiKill(Luasel::CallHelper& helper);
         void _ApiRegister(Luasel::CallHelper& helper);
+        void _ApiBindToBody(Luasel::CallHelper& helper);
+        void _ApiBindBoneToBodyNode(Luasel::CallHelper& helper);
     };
 
 }}}

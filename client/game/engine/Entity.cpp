@@ -1,6 +1,7 @@
 #include "client/game/engine/Entity.hpp"
 
 #include "common/physics/BodyCluster.hpp"
+#include "common/physics/World.hpp"
 
 #include "bullet/bullet-all.hpp"
 
@@ -26,7 +27,7 @@ namespace Client { namespace Game { namespace Engine {
             Common::Physics::Node& physics = this->_physics;
 
             btTransform wt;
-            this->_bodyCluster->GetBody().getMotionState()->getWorldTransform(wt);
+            this->_bodyCluster->GetBtBody().getMotionState()->getWorldTransform(wt);
             btVector3 wpos = wt.getOrigin();
 
             physics.position.x = wpos.x();
@@ -34,7 +35,7 @@ namespace Client { namespace Game { namespace Engine {
             physics.position.z = wpos.z();
 
             btQuaternion wrot = wt.getRotation();
-            glm::quat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
+            glm::dquat glmRot((float)wrot.w(), (float)wrot.x(), (float)wrot.y(), (float)wrot.z());
             physics.orientation = //glm::eulerAngles(glmRot);
                 glmRot;
 
@@ -48,9 +49,19 @@ namespace Client { namespace Game { namespace Engine {
         this->_doodads.push_back(doodad);
     }
 
-    void Entity::SetPosition(Common::Physics::Node const& position)
+    void Entity::UpdatePhysics(std::vector<Common::Physics::Node> const& position)
     {
+        this->_bodyCluster->SetPhysics(position);
 
+        // TODO
+        //if (position.accelerationIsLocal)
+        //    this->_bodyCluster->SetLocalAccel(
+        //            btVector3(position.acceleration.x, position.acceleration.y, position.acceleration.z),
+        //            position.maxSpeed);
+        //else
+        //    this->_bodyCluster->SetAccel(
+        //            btVector3(position.acceleration.x, position.acceleration.y, position.acceleration.z),
+        //            position.maxSpeed);
     }
 
 }}}

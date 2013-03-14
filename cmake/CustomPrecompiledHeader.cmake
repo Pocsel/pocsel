@@ -28,7 +28,7 @@ macro(precompiled_header sources includes target_name header_name project_name)
     # GCC precompiled headers cmake code
     # We don't do this on Macs since GCC there goes haywire
     # when you try to generate a PCH with two "-arch" flags
-    elseif(CMAKE_COMPILER_IS_GNUCXX AND NOT APPLE)
+    elseif(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         #message("GCC PCH hook")
         # Get the compiler flags for this build type
         string(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" flags_for_build_name)
@@ -53,7 +53,11 @@ macro(precompiled_header sources includes target_name header_name project_name)
             list(APPEND all_define_flags "-D${item}")
         endforeach()
 
-        list(APPEND compile_flags ${CMAKE_CXX_FLAGS} -std=c++0x ${all_define_flags})
+        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            list(APPEND compile_flags ${CMAKE_CXX_FLAGS} -std=c++11 ${all_define_flags})
+        else()
+            list(APPEND compile_flags ${CMAKE_CXX_FLAGS} -std=c++0x ${all_define_flags})
+        endif()
 
         # Prepare the compile flags var for passing to GCC
         separate_arguments(compile_flags)

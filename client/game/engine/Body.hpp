@@ -12,15 +12,22 @@ namespace Client { namespace Game { namespace Engine {
     class Body :
         public Common::Physics::Body
     {
+    private:
+        std::vector<std::shared_ptr<Common::Physics::Node>> _boundNodes;
+
     public:
         Body(Common::Physics::BodyCluster& parent, BodyType const& bodyType);
         BodyType const& GetType() const
         {
             return reinterpret_cast< ::Client::Game::Engine::BodyType const&>(this->_type);
         }
+
+        std::shared_ptr<Common::Physics::Node> BindNode(std::string const& nodeName);
+
+    private:
+        virtual void _PostTick();
     };
 
 }}}
 
 #endif
-

@@ -4,6 +4,10 @@
 #include "tools/models/MqmModel.hpp"
 #include "tools/renderers/utils/material/LuaMaterial.hpp"
 
+namespace Common { namespace Physics {
+    struct Node;
+}}
+
 namespace Client { namespace Resources {
     class ResourceManager;
 }}
@@ -12,6 +16,7 @@ namespace Client { namespace Game { namespace Engine {
 
     class ModelType;
     class Doodad;
+    class BodyType;
 
     class Model :
         private boost::noncopyable
@@ -25,6 +30,7 @@ namespace Client { namespace Game { namespace Engine {
         Tools::Models::MqmModel::AnimInfo const* _curAnimation;
         std::map<std::string, Tools::Models::MqmModel::AnimInfo> _animations;
         std::vector<glm::mat4x4> _animatedBones;
+        std::vector<std::shared_ptr<Common::Physics::Node>> _boundBones;
         float _animTime;
         std::vector<std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> _materials;
         Uint32 _weakReferenceId;
@@ -47,6 +53,8 @@ namespace Client { namespace Game { namespace Engine {
         std::vector<std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> const& GetMaterials() const { return this->_materials; }
         Tools::Renderers::IVertexBuffer* GetVertexBuffer() const { return this->_model.GetVertexBuffer(); }
         std::vector<Tools::Renderers::IIndexBuffer*> const& GetIndexBuffers() const { return this->_model.GetIndexBuffers(); }
+
+        bool BindBone(std::string const& boneName, std::shared_ptr<Common::Physics::Node> const& boundBone);
     };
 
 }}}

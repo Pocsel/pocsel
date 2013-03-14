@@ -19,9 +19,10 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Engine& _engine;
         std::map<Uint32, PositionalEntity*> const& _entities;
-//        std::set<Uint32> _bodiesInWorld;
-//        std::set<btRigidBody const*> _entityBodies;
         Common::Physics::World* _world;
+
+        std::set<PositionalEntity*> _collidingEntities;
+        std::set<PositionalEntity*> _newCollidingEntities;
 
     public:
         PhysicsManager(Engine& engine, std::map<Uint32, PositionalEntity*> const& entities);
@@ -29,6 +30,9 @@ namespace Server { namespace Game { namespace Engine {
         void Tick(Uint64 deltaTime);
         Common::Physics::World& GetWorld() { return *this->_world; }
         Common::Physics::World const& GetWorld() const { return *this->_world; }
+
+    private:
+        void _UpdateCollidingEntities();
 
         friend struct _cb;
     };

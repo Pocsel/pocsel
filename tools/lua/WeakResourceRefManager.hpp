@@ -62,7 +62,7 @@ namespace Tools { namespace Lua {
 
         bool UsingFakeReferences() const
         {
-            return this->_fakeReferences;
+            return this->_fakeReferences != nullptr;
         }
 
         std::pair<Uint32, Luasel::Ref> NewResource(WeakResourceRefType const& resource)

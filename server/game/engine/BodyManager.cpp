@@ -82,7 +82,7 @@ namespace Server { namespace Game { namespace Engine {
             Tools::Delete(this->_bodyTypes[pluginId][bodyName]);
             Tools::log << "BodyManager::_ApiRegister: Replacing Body type \"" << bodyName << "\" with a newer type from \"" << pluginName << "\" (plugin " << pluginId << ").\n";
         }
-        this->_bodyTypesVec.push_back(new BodyType(bodyName, pluginId, this->_bodyTypesVec.size() + 1, prototype));
+        this->_bodyTypesVec.push_back(new BodyType(bodyName, pluginId, (Uint32)this->_bodyTypesVec.size() + 1, prototype));
         this->_bodyTypes[pluginId][bodyName] = this->_bodyTypesVec.back();
         Tools::debug << "BodyManager::_ApiRegister: New Body type \"" << bodyName << "\" registered from \"" << pluginName << "\" (plugin " << pluginId << ").\n";
     }

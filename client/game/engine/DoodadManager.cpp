@@ -72,6 +72,14 @@ namespace Client { namespace Game { namespace Engine {
         return *it->second;
     }
 
+    Doodad& DoodadManager::GetDoodad(Uint32 doodadId) throw(std::runtime_error)
+    {
+        auto it = this->_doodads.find(doodadId);
+        if (it == this->_doodads.end() || !it->second)
+            throw std::runtime_error("DoodadManager::GetDoodad: Doodad not found.");
+        return *it->second;
+    }
+
     void DoodadManager::Tick(Uint64 totalTime)
     {
         //this->_world->Tick(totalTime - this->_lastTime);//stepSimulation(deltaTime);
@@ -142,8 +150,10 @@ namespace Client { namespace Game { namespace Engine {
         }
         Entity& entity = *this->_entities[entityId];
 
+        std::vector<Common::Physics::Node> physics;
+        physics.emplace_back(position);
+        this->_UpdateEntityPosition(entity, physics);
         entity.AddDoodad(doodadId);
-        entity.SetPosition(position);
 
         this->_doodads[doodadId] = new Doodad(this->_engine.GetInterpreter(),
                 doodadId,
@@ -189,7 +199,6 @@ namespace Client { namespace Game { namespace Engine {
         {
             // TODO faire ce qu'il faut pour le body
 
-            // TODO faire ce qu'il faut pour le updateEntity
             /*it->second->SetPhysics(*position);
 
             btRigidBody& btBody = it->second->GetBtBody();
@@ -236,6 +245,16 @@ namespace Client { namespace Game { namespace Engine {
                 // TODO
             }
         }
+    }
+
+    void DoodadManager::UpdateEntity(Uint32 entityId, std::vector<Common::Physics::Node> const& physics)
+    {
+        auto it = this->_entities.find(entityId);
+        if (it == this->_entities.end())
+            return;
+
+        Entity* entity = it->second;
+        this->_UpdateEntityPosition(*entity, physics);
     }
 
     void DoodadManager::Render()
@@ -320,6 +339,19 @@ namespace Client { namespace Game { namespace Engine {
         }
         this->_doodadTypes[doodadName] = new DoodadType(doodadName, prototype);
         Tools::debug << "Doodad \"" << doodadName << "\" registered." << std::endl;
+    }
+
+    void DoodadManager::_UpdateEntityPosition(Entity& entity, std::vector<Common::Physics::Node> const& physics)
+    {
+        entity.SetUpdateFlag(1.3f);
+        entity.UpdatePhysics(physics);
+        //auto& doodadIds = entity.GetDoodads();
+        //for (auto doodadIt = doodadIds.begin(), doodadIte = doodadIds.end(); doodadIt != doodadIte; ++doodadIt)
+        //{
+        //    assert(this->_doodads.count(*doodadIt) && "un Doodad n'a pas été viré d'une Entity BOLOSS");
+        //    Doodad& doodad = *this->_doodads[*doodadIt];
+        //    doodad.UpdatePosition(node);
+        //}
     }
 
 }}}
