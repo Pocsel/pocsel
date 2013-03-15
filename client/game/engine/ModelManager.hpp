@@ -9,7 +9,7 @@ namespace Tools {
     namespace Lua {
         class CallHelper;
     }
-    namespace Renderers { namespace Utils {
+    namespace Gfx { namespace Utils {
         class DeferredShading;
     }}
 }
@@ -52,7 +52,7 @@ namespace Client { namespace Game { namespace Engine {
         ModelManager(Engine& engine);
         ~ModelManager();
         void Tick(Uint64 totalTime);
-        void Render(Tools::Renderers::Utils::DeferredShading& deferredShading);
+        void Render(Tools::Gfx::Utils::DeferredShading& deferredShading);
         void DeleteModelsOfDoodad(Uint32 doodadId);
         Tools::Lua::Ref GetLuaWrapperForModel(Uint32 modelId);
     private:

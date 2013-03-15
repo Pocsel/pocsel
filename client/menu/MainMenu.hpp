@@ -2,13 +2,15 @@
 #define __CLIENT_MENU_MAINMENU_HPP__
 
 namespace Tools {
-    namespace Renderers { namespace Utils {
-        class Rectangle;
-    }}
+    namespace Gfx {
+        class IRenderer;
+        namespace Utils {
+            class Rectangle;
+        }
+    }
     namespace Window {
         class ActionBinder;
     }
-    class IRenderer;
 }
 namespace Client {
     class Client;
@@ -27,9 +29,9 @@ namespace Client { namespace Menu {
     private:
         Client& _client;
         Menu& _menu;
-        Tools::IRenderer& _renderer;
+        Tools::Gfx::IRenderer& _renderer;
         glm::detail::tmat4x4<float> _backRectMatrix;
-        Tools::Renderers::Utils::Rectangle* _backRect;
+        Tools::Gfx::Utils::Rectangle* _backRect;
         int _callbackId;
         bool _visible;
         Tools::Window::ActionBinder* _actionBinder;

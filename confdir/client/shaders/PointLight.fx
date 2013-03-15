@@ -11,24 +11,11 @@ float3 lightSpecularColor = float3(0.9, 1.0, 0.8);
 // TODO:
 float   materialShininess = 5.0;
 
-#ifdef DIRECTX
-texture normalDepth;
-
-sampler sNormalDepth = sampler_state
-{
-    Texture = <normalDepth>;
-    minFilter = Linear;
-    magFilter = Linear;
-};
-
-#define normalDepth sNormalDepth
-#else
 sampler2D normalDepth = sampler_state
 {
     minFilter = Point;
     magFilter = Point;
 };
-#endif
 
 struct VSout
 {
@@ -63,11 +50,7 @@ float3 decodePosition(float4 enc, float2 coords)
 {
     float z = 1-enc.z;
     float x = coords.x * 2 - 1;
-#ifdef DIRECTX
     float y = (1 - coords.y) * 2 - 1;
-#else
-    float y = coords.y * 2 - 1;
-#endif
     float4 projPos = float4(x, y, z, 1.0);
     float4 pos = mul(projectionInverse, projPos);
     return pos.xyz / pos.w;
@@ -76,9 +59,6 @@ float3 decodePosition(float4 enc, float2 coords)
 FSout fs(in VSout v)
 {
     float2 coords = (v.screenPosition.xy / v.screenPosition.w) * float2(0.5, -0.5) + 0.5;
-#ifndef DIRECTX
-    coords.y = 1-coords.y;
-#endif
     float4 encNormalDepth = tex2D(normalDepth, coords);
     float3 viewNormal = decodeNormals(encNormalDepth);// * 2 - 1;
     float3 viewPosition = decodePosition(encNormalDepth, coords);
@@ -105,31 +85,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = true;
-        ZWriteEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = true;
-        ZWriteEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
    pass p0
@@ -148,5 +103,3 @@ technique tech
         PixelShader = compile ps_3_0 fs();
    }
 }
-
-#endif

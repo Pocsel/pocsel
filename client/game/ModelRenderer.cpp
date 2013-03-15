@@ -1,11 +1,11 @@
 #include "client/precompiled.hpp"
 
 #include "tools/Math.hpp"
-#include "tools/renderers/utils/DeferredShading.hpp"
-#include "tools/renderers/utils/material/LuaMaterial.hpp"
-#include "tools/renderers/utils/material/Material.hpp"
-#include "tools/renderers/utils/texture/ITexture.hpp"
-#include "tools/IRenderer.hpp"
+#include "tools/gfx/IRenderer.hpp"
+#include "tools/gfx/utils/DeferredShading.hpp"
+#include "tools/gfx/utils/material/LuaMaterial.hpp"
+#include "tools/gfx/utils/material/Material.hpp"
+#include "tools/gfx/utils/texture/ITexture.hpp"
 #include "tools/window/Window.hpp"
 #include "tools/models/MqmModel.hpp"
 
@@ -30,7 +30,7 @@ namespace Client { namespace Game {
     }
 
     void ModelRenderer::Render(
-            Tools::Renderers::Utils::DeferredShading& deferredShading,
+            Tools::Gfx::Utils::DeferredShading& deferredShading,
             Engine::Model const& model,
             Common::Physics::Node const& pos,
             float updateFlag)

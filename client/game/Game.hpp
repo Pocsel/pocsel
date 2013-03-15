@@ -6,7 +6,7 @@
 #include "tools/Timer.hpp"
 //#include "tools/lua/Interpreter.hpp"
 #include "tools/stat/Timer.hpp"
-#include "tools/renderers/utils/DeferredShading.hpp"
+#include "tools/gfx/utils/DeferredShading.hpp"
 
 #include "client/game/CubeTypeManager.hpp"
 #include "client/resources/ResourceManager.hpp"
@@ -22,11 +22,14 @@ namespace Client {
     }
 }
 namespace Tools {
-    class IRenderer;
-    namespace Renderers {
+    namespace Gfx {
+        class IRenderer;
         class IRenderTarget;
-        class IShaderProgram;
         class IShaderParameter;
+        namespace Effect {
+            class Effect;
+            class EffectManager;
+        }
         namespace Utils {
             class GBuffer;
             class Image;
@@ -47,7 +50,8 @@ namespace Client { namespace Game {
     {
     private:
         Client& _client;
-        Tools::IRenderer& _renderer;
+        Tools::Gfx::IRenderer& _renderer;
+        Tools::Gfx::Effect::EffectManager& _effectManager;
         CubeTypeManager* _cubeTypeManager;
         Resources::ResourceManager* _resourceManager;
         Map::Map* _map;
@@ -59,14 +63,14 @@ namespace Client { namespace Game {
         Tools::Stat::Timer _statUpdateTime;
         Tools::Stat::Timer _statRenderTime;
         // XXX
-        std::unique_ptr<Tools::Renderers::Utils::GBuffer> _gBuffer;
-        std::unique_ptr<Tools::Renderers::Utils::Light::LightRenderer> _lightRenderer;
-        std::list<Tools::Renderers::Utils::Light::DirectionnalLight> _directionnalLights;
-        std::list<Tools::Renderers::Utils::Light::PointLight> _pointLights;
+        std::unique_ptr<Tools::Gfx::Utils::GBuffer> _gBuffer;
+        std::unique_ptr<Tools::Gfx::Utils::Light::LightRenderer> _lightRenderer;
+        std::list<Tools::Gfx::Utils::Light::DirectionnalLight> _directionnalLights;
+        std::list<Tools::Gfx::Utils::Light::PointLight> _pointLights;
 
-        Tools::Renderers::Utils::DeferredShading _deferredShading;
+        Tools::Gfx::Utils::DeferredShading _deferredShading;
 
-        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> _postProcessSepia;
+        std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial> _postProcessSepia;
         //std::unique_ptr<Tools::Renderers::Utils::Image> _testImage;
         //Tools::Renderers::IShaderProgram* _testShader;
         //std::unique_ptr<Tools::Renderers::IShaderParameter> _testTexture;
@@ -88,7 +92,8 @@ namespace Client { namespace Game {
         void Render();
 
         Client& GetClient() { return this->_client; }
-        Tools::IRenderer& GetRenderer() { return this->_renderer; }
+        Tools::Gfx::IRenderer& GetRenderer() { return this->_renderer; }
+        Tools::Gfx::Effect::EffectManager& GetEffectManager() { return this->_effectManager; }
         Player& GetPlayer() { return *this->_player; }
         CubeTypeManager& GetCubeTypeManager() { return *this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return *this->_resourceManager; }

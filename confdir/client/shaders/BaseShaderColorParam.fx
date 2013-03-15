@@ -33,29 +33,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
     pass p0
@@ -65,6 +42,3 @@ technique tech
         PixelShader = compile ps_2_0 fs();
     }
 }
-
-#endif
-

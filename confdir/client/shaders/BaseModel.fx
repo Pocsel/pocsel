@@ -1,29 +1,15 @@
 #ifndef MAX_BONES
-#define MAX_BONES 58
+# define MAX_BONES 58
 #endif
 
 float4x4 worldViewProjection : WorldViewProjection;
 float4x4 worldViewInverseTranspose;
 
-#ifdef DIRECTX
-texture diffuseTexture;
-
-sampler sDiffuseTexture = sampler_state
-{
-    Texture = <diffuseTexture>;
-    minFilter = Linear;
-    magFilter = Linear;
-};
-
-#define diffuseTexture sDiffuseTexture
-
-#else
 sampler2D diffuseTexture = sampler_state
 {
     minFilter = Linear;
     magFilter = Linear;
 };
-#endif
 
 float4x4 boneMatrix[MAX_BONES];
 
@@ -80,29 +66,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
     pass p0
@@ -112,5 +75,3 @@ technique tech
         PixelShader = compile ps_3_0 fs();
     }
 }
-
-#endif

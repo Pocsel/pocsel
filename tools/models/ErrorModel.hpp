@@ -5,7 +5,7 @@
 
 namespace Tools { namespace Models {
 
-    std::unique_ptr<MqmModel> ErrorModel(/*MqmModel::TextureCallback textureCallback, */Tools::IRenderer& renderer);
+    std::unique_ptr<MqmModel> ErrorModel(/*MqmModel::TextureCallback textureCallback, */Tools::Gfx::IRenderer& renderer);
 
 }}
 

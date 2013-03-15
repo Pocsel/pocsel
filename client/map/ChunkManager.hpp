@@ -60,7 +60,7 @@ namespace Client { namespace Map {
         void AddChunk(std::unique_ptr<Chunk>&& chunk);
         void UpdateLoading();
         void Update(Uint64 totalTime, Common::Position const& playerPosition);
-        void Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Common::Position const& position, glm::dmat4 const& viewProjection)
+        void Render(Tools::Gfx::Utils::DeferredShading& deferredShading, Common::Position const& position, glm::dmat4 const& viewProjection)
         {
             this->_chunkRenderer.Render(deferredShading, position, viewProjection);
         }

@@ -243,6 +243,8 @@ int main(int ac, char *av[])
                 }
                 renderer.EndDraw2D();
 
+
+
                 renderer.SetDepthTest(true);
                 renderer.SetDepthWrite(true);
                 renderer.SetProjectionMatrix(projection);

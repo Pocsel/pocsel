@@ -4,8 +4,8 @@
 #include "tools/models/Mqm.hpp"
 
 namespace Tools {
-    class IRenderer;
-    namespace Renderers {
+    namespace Gfx {
+        class IRenderer;
         class ITexture2D;
         class IVertexBuffer;
         class IIndexBuffer;
@@ -52,8 +52,8 @@ namespace Tools { namespace Models {
         unsigned int _numVerts;
         std::vector<glm::mat4x4> _baseFrame, _inverseBaseFrame;
         std::vector<std::string> _materials;
-        Tools::Renderers::IVertexBuffer* _vertexBuffer;
-        std::vector<Tools::Renderers::IIndexBuffer*> _indexBuffers;
+        Tools::Gfx::IVertexBuffer* _vertexBuffer;
+        std::vector<Tools::Gfx::IIndexBuffer*> _indexBuffers;
         std::vector<Mqm::Mesh> _meshes;
         std::vector<Mqm::Joint> _joints;
         std::vector<JointInfo> _jointInfos;
@@ -67,7 +67,7 @@ namespace Tools { namespace Models {
 
     public:
         explicit MqmModel(std::vector<char> const& data,
-                Tools::IRenderer& renderer);
+                Tools::Gfx::IRenderer& renderer);
         ~MqmModel();
 
         std::vector<Tools::Models::Iqm::Mesh> const& GetMeshes() const { return this->_meshes; }
@@ -75,8 +75,8 @@ namespace Tools { namespace Models {
         std::vector<glm::mat4x4> const& GetBindPose() const { return this->_baseFrame; }
 
         std::vector<std::string> const& GetMaterials() const { return this->_materials; }
-        Tools::Renderers::IVertexBuffer* GetVertexBuffer() const { return this->_vertexBuffer; }
-        std::vector<Tools::Renderers::IIndexBuffer*> const& GetIndexBuffers() const { return this->_indexBuffers; }
+        Tools::Gfx::IVertexBuffer* GetVertexBuffer() const { return this->_vertexBuffer; }
+        std::vector<Tools::Gfx::IIndexBuffer*> const& GetIndexBuffers() const { return this->_indexBuffers; }
 
         std::vector<std::vector<FrameJoint>> const& GetFrames() const { return this->_frames; }
         std::vector<AnimInfo> const& GetAnimInfos() const { return this->_animInfos; }
@@ -84,7 +84,7 @@ namespace Tools { namespace Models {
     protected:
         void _LoadMeshes(Tools::Models::Iqm::Header const& header,
                 std::vector<char> const& data,
-                Tools::IRenderer& renderer);
+                Tools::Gfx::IRenderer& renderer);
         void _LoadAnimations(Tools::Models::Iqm::Header const& header, std::vector<char> const& data);
 
         // Build the bind-pose and the inverse bind-pose matrix array for the model.
@@ -99,7 +99,7 @@ namespace Tools { namespace Models {
             float const* intexcoord,
             Uint8 const* inblendindex,
             Uint8 const* inblendweight,
-            Tools::IRenderer& renderer);
+            Tools::Gfx::IRenderer& renderer);
     };
 
 }}

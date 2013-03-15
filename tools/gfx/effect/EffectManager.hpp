@@ -18,6 +18,7 @@ namespace Tools { namespace Gfx { namespace Effect {
 
         std::unique_ptr<Effect> CreateEffect(std::string const& path);
         std::unique_ptr<Effect> CreateEffect(std::vector<char> const& effect);
+        std::unique_ptr<Effect> CreateEffect(ByteArray& effect);
     };
 
 }}}

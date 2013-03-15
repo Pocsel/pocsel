@@ -2,7 +2,7 @@
 #define __CLIENT_GAME_CUBETYPE_HPP__
 
 #include "common/CubeType.hpp"
-#include "tools/renderers/utils/material/LuaMaterial.hpp"
+#include "tools/gfx/utils/material/LuaMaterial.hpp"
 
 namespace Tools { namespace Lua {
     class Interpreter;
@@ -21,12 +21,12 @@ namespace Client { namespace Game {
     class CubeType : public Common::CubeType
     {
     public:
-        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> top;
-        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> bottom;
-        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> right;
-        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> left;
-        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> front;
-        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> back;
+        std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial> top;
+        std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial> bottom;
+        std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial> right;
+        std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial> left;
+        std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial> front;
+        std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial> back;
 
         explicit CubeType(Common::CubeType const& cubeType);
 

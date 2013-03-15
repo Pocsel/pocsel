@@ -1,7 +1,7 @@
 #include "tools/precompiled.hpp"
 
 #include "tools/lua/Interpreter.hpp"
-#include "tools/renderers/utils/light/LightRenderer.hpp"
+#include "tools/gfx/utils/light/LightRenderer.hpp"
 
 #include "common/Camera.hpp"
 #include "common/Position.hpp"
@@ -11,7 +11,7 @@
 #include "client/game/Game.hpp"
 #include "client/graphics/LightManager.hpp"
 
-using Tools::Renderers::Utils::Light::LightRenderer;
+using Tools::Gfx::Utils::Light::LightRenderer;
 
 namespace Client { namespace Graphics {
 
@@ -38,13 +38,13 @@ namespace Client { namespace Graphics {
         this->_RegisterLua(game.GetInterpreter());
     }
 
-    void LightManager::Render(Common::Camera const& camera, Tools::Renderers::Utils::GBuffer& gbuffer)
+    void LightManager::Render(Common::Camera const& camera, Tools::Gfx::Utils::GBuffer& gbuffer)
     {
-        std::list<Tools::Renderers::Utils::Light::DirectionnalLight*> directionnals;
+        std::list<Tools::Gfx::Utils::Light::DirectionnalLight*> directionnals;
         for (auto it = this->_directionnals.begin(), ite = this->_directionnals.end(); it != ite; ++it)
             if ((*it)->visible)
                 directionnals.push_back(&(*it)->GetInternal());
-        std::list<Tools::Renderers::Utils::Light::PointLight*> points;
+        std::list<Tools::Gfx::Utils::Light::PointLight*> points;
         for (auto it = this->_points.begin(), ite = this->_points.end(); it != ite; ++it)
             if ((*it)->visible)
             {

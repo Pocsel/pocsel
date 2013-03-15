@@ -19,29 +19,6 @@ float4 fs(in VSout v) : COLOR
     return float4(v.screenPosition.z / v.screenPosition.w, 0, 0, 0);
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
    pass p0
@@ -51,5 +28,3 @@ technique tech
        PixelShader = compile ps_3_0 fs();
    }
 }
-
-#endif

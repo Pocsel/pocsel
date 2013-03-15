@@ -10,10 +10,8 @@ namespace Common {
     }
 }
 namespace Tools {
-    class IRenderer;
-    namespace Renderers {
+    namespace Gfx {
         class IShaderParameter;
-        class IShaderProgram;
         class IVertexBuffer;
         namespace Utils {
             class DeferredShading;
@@ -35,12 +33,12 @@ namespace Client { namespace Game {
     {
     private:
         Game& _game;
-        Tools::IRenderer& _renderer;
+        Tools::Gfx::IRenderer& _renderer;
 
     public:
         ModelRenderer(Game& game);
         void Render(
-                Tools::Renderers::Utils::DeferredShading& deferredShading,
+                Tools::Gfx::Utils::DeferredShading& deferredShading,
                 Engine::Model const& model,
                 Common::Physics::Node const& pos,
                 float updateFlag);

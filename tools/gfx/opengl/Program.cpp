@@ -83,6 +83,8 @@ namespace Tools { namespace Gfx { namespace OpenGL {
 
     void Program::Update()
     {
+        for (auto& param: this->_parameters)
+            param.second->Update();
     }
 
     IShaderParameter& Program::GetParameter(std::string const& identifier)
@@ -91,7 +93,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         if (it == this->_parameters.end())
         {
             auto ptr = new ShaderParameter(*this, identifier);
-            auto const& pair = this->_parameters.insert(std::make_pair(identifier, std::unique_ptr<IShaderParameter>(ptr)));
+            auto const& pair = this->_parameters.insert(std::make_pair(identifier, std::unique_ptr<ShaderParameter>(ptr)));
             return *pair.first->second;
         }
         return *it->second;
@@ -99,8 +101,8 @@ namespace Tools { namespace Gfx { namespace OpenGL {
 
     void Program::Begin()
     {
-        this->_renderer.SetCurrentProgram(*this);
         GLCHECK(glUseProgram(this->_program));
+        this->_renderer.SetCurrentProgram(*this);
     }
 
     void Program::End()

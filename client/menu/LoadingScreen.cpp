@@ -1,5 +1,5 @@
-#include "tools/renderers/utils/Rectangle.hpp"
-#include "tools/renderers/utils/Font.hpp"
+#include "tools/gfx/utils/Rectangle.hpp"
+#include "tools/gfx/utils/Font.hpp"
 #include "tools/window/Window.hpp"
 
 #include "client/menu/LoadingScreen.hpp"
@@ -13,13 +13,13 @@ namespace Client { namespace Menu {
         _menu(menu),
         _renderer(client.GetWindow().GetRenderer())
     {
-        this->_backRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
+        this->_backRect = new Tools::Gfx::Utils::Rectangle(this->_renderer);
         this->_backRect->SetColor(
                 glm::vec4(0.25f, 0.25f, 0.25f, 1),
                 glm::vec4(0.25f, 0.25f, 0.25f, 1),
                 glm::vec4(0.1f, 0.1f, 0.1f, 1),
                 glm::vec4(0.1f, 0.1f, 0.1f, 1));
-        this->_barRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
+        this->_barRect = new Tools::Gfx::Utils::Rectangle(this->_renderer);
         this->_barRect->SetColor(
                 glm::vec4(0.93f, 0.1f, 0.1f, 1),
                 glm::vec4(0.93f, 0.1f, 0.1f, 1),

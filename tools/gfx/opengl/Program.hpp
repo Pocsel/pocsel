@@ -3,6 +3,7 @@
 #include "tools/gfx/opengl/opengl.hpp"
 #include "tools/gfx/GLRenderer.hpp"
 #include "tools/gfx/opengl/FragmentProgram.hpp"
+#include "tools/gfx/opengl/ShaderParameter.hpp"
 #include "tools/gfx/opengl/VertexProgram.hpp"
 
 namespace Tools { namespace Gfx { namespace OpenGL {
@@ -12,7 +13,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
     private:
         GLRenderer& _renderer;
 
-        std::map<std::string, std::unique_ptr<IShaderParameter>> _parameters;
+        std::map<std::string, std::unique_ptr<ShaderParameter>> _parameters;
         std::map<ShaderParameterUsage::Type, IShaderParameter*> _defaultParameters;
         GLint _attributes[VertexAttributeUsage::Max];
         IShaderParameter* _shaderParameters[VertexAttributeUsage::Max];

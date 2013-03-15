@@ -6,9 +6,9 @@ sampler2D baseTex = sampler_state
    magFilter = Point;
 };
 
-float4 clearColor = float(0, 0, 0, 1);
-float4 clearNormal = float(0, 1, 0, 0);
-float4 clearPosition = float(0, 0, 0, 0);
+float4 clearColor = float4(0, 0, 0, 1);
+float4 clearNormal = float4(0, 1, 0, 0);
+float4 clearPosition = float4(0, 0, 0, 0);
 
 struct VSout
 {
@@ -38,27 +38,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
    pass p0
@@ -67,5 +46,3 @@ technique tech
        PixelShader = compile ps_2_0 fs();
    }
 }
-
-#endif

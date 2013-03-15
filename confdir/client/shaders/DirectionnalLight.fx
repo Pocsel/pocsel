@@ -16,27 +16,6 @@ float4x4 lightViewProjection;
 // TODO:
 float   materialShininess = 5.0;
 
-#ifdef DIRECTX
-texture lightShadowMap;
-texture normalDepth;
-
-sampler sLightShadowMap = sampler_state
-{
-    Texture = <lightShadowMap>;
-    minFilter = Point;
-    magFilter = Point;
-};
-
-sampler sNormalDepth = sampler_state
-{
-    Texture = <normalDepth>;
-    minFilter = Point;
-    magFilter = Point;
-};
-
-#define normalDepth sNormalDepth
-#define lightShadowMap sLightShadowMap
-#else
 sampler2D normalDepth = sampler_state
 {
     minFilter = Point;
@@ -48,7 +27,6 @@ sampler2D lightShadowMap = sampler_state
     minFilter = Point;
     magFilter = Point;
 };
-#endif
 
 struct VSout
 {
@@ -66,11 +44,7 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
     vout.position = mul(screenWorldViewProjection, position);
-#ifdef DIRECTX
     vout.texCoord = texCoord;
-#else
-    vout.texCoord = float2(texCoord.x, 1-texCoord.y);
-#endif
     return vout;
 }
 
@@ -87,11 +61,7 @@ float3 decodePosition(float4 enc, float2 coords)
 {
     float z = 1-enc.z;
     float x = coords.x * 2 - 1;
-#ifdef DIRECTX
     float y = (1 - coords.y) * 2 - 1;
-#else
-    float y = coords.y * 2 - 1;
-#endif
     float4 projPos = float4(x, y, z, 1.0);
     float4 pos = mul(projectionInverse, projPos);
     return pos.xyz / pos.w;
@@ -108,7 +78,11 @@ float doAmbientOcclusion(in float2 tcoord, in float2 uv, in float3 p, in float3 
 float screenSpaceAmbientOcclusion(float2 texCoord, float3 viewPosition, float3 viewNormal)
 {
     // SSAO
-    const float2 vec[4] = {float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
+    float2 vec[4];// = {float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
+	vec[0] = float2(1, 0);
+	vec[1] = float2(-1, 0);
+	vec[2] = float2(0, 1);
+	vec[3] = float2(0, -1);
 
     float ao = 0.0f;
     float rad = 1.5f / viewPosition.z;
@@ -170,39 +144,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        AlphaRef = 0;
-        SrcBlend = 1;
-        DestBlend = 1;
-        ZEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        AlphaRef = 0;
-        SrcBlend = 1;
-        DestBlend = 1;
-        ZEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
    pass p0
@@ -217,5 +158,3 @@ technique tech
         PixelShader = compile ps_3_0 fs();
    }
 }
-
-#endif

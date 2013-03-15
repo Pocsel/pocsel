@@ -2,8 +2,8 @@
 
 #include "client/precompiled.hpp"
 
-#include "tools/IRenderer.hpp"
-#include "tools/renderers/utils/Font.hpp"
+#include "tools/gfx/IRenderer.hpp"
+#include "tools/gfx/utils/Font.hpp"
 #include "tools/window/Window.hpp"
 #include "tools/models/MqmModel.hpp"
 #include "tools/models/ErrorModel.hpp"
@@ -19,7 +19,8 @@ namespace Client { namespace Resources {
 
     LocalResourceManager::LocalResourceManager(Client& client)
         : _client(client),
-        _renderer(client.GetWindow().GetRenderer())
+        _renderer(client.GetWindow().GetRenderer()),
+        _effectManager(client.GetEffectManager())
     {
         this->_InitErrorTexture();
         this->_InitErrorModel();
@@ -37,7 +38,7 @@ namespace Client { namespace Resources {
             Tools::Delete(it->second);
     }
 
-    Tools::Renderers::Utils::Font& LocalResourceManager::GetFont(std::string const& path, Uint32 size)
+    Tools::Gfx::Utils::Font& LocalResourceManager::GetFont(std::string const& path, Uint32 size)
     {
         std::string fontId =  path + Tools::ToString(size);
         auto it = this->_fonts.find(fontId);
@@ -46,7 +47,7 @@ namespace Client { namespace Resources {
             try
             {
                 auto fontPath = (this->_client.GetSettings().confDir / "fonts" / path).string();
-                auto font = new Tools::Renderers::Utils::Font(this->_renderer, fontPath, size);
+                auto font = new Tools::Gfx::Utils::Font(this->_renderer, fontPath, size);
                 this->_fonts[fontId] = font;
                 return *font;
             }
@@ -60,12 +61,12 @@ namespace Client { namespace Resources {
             return *it->second;
     }
 
-    Tools::Renderers::ITexture2D& LocalResourceManager::GetTexture2D(std::string const& path)
+    Tools::Gfx::ITexture2D& LocalResourceManager::GetTexture2D(std::string const& path)
     {
         auto it = this->_textures.find(path);
         if (it == this->_textures.end())
         {
-            Tools::Renderers::ITexture2D* texture = 0;
+            Tools::Gfx::ITexture2D* texture = 0;
             try
             {
                 texture = this->_renderer.CreateTexture2D((this->_client.GetSettings().confDir / "textures" / path).string()).release();
@@ -86,16 +87,14 @@ namespace Client { namespace Resources {
         return *this->_textures["__error__"];
     }
 
-    Tools::Renderers::IShaderProgram& LocalResourceManager::GetShader(std::string const& path)
+    Tools::Gfx::Effect::Effect& LocalResourceManager::GetShader(std::string const& path)
     {
         auto it = this->_shaders.find(path);
         if (it == this->_shaders.end())
         {
             try
             {
-                std::ifstream tmp((this->_client.GetSettings().confDir / "shaders" / path).string());
-                std::string shaderString((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
-                auto shader = this->_renderer.CreateProgram(shaderString).release();
+                auto shader = this->_effectManager.CreateEffect((this->_client.GetSettings().confDir / "shaders" / path).string()).release();
                 this->_shaders[path] = shader;
                 return *shader;
             }
@@ -163,10 +162,10 @@ namespace Client { namespace Resources {
             255, 0, 255, 255,
             0, 0, 0, 255
         };
-        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Renderers::PixelFormat::Rgba8, 16, toto, glm::uvec2(2, 2)).release();
+        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Gfx::PixelFormat::Rgba8, 16, toto, glm::uvec2(2, 2)).release();
     }
 
-    Tools::Renderers::ITexture2D& LocalResourceManager::_GetTexture2D(std::string const& path0, std::string const& path)
+    Tools::Gfx::ITexture2D& LocalResourceManager::_GetTexture2D(std::string const& path0, std::string const& path)
     {
         boost::filesystem::path texturePath(path);
         boost::filesystem::path texturePath0(path0);

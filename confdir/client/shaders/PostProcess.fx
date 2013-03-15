@@ -8,35 +8,6 @@ float3 lightPos = float3(0, 0, 0);
 float3 lightDiffuse = float3(1.0, 1.0, 1.0);
 float3 lightSpecular = float3(0.9, 1.0, 0.8);
 
-#ifdef DIRECTX
-texture lighting;
-texture specular;
-texture diffuse;
-
-sampler sLighting = sampler_state
-{
-    Texture = <lighting>;
-    minFilter = Point;
-    magFilter = Point;
-};
-sampler sSpecular = sampler_state
-{
-    Texture = <specular>;
-    minFilter = Point;
-    magFilter = Point;
-};
-sampler sDiffuse = sampler_state
-{
-    Texture = <diffuse>;
-    minFilter = Point;
-    magFilter = Point;
-};
-
-#define lighting sLighting
-#define specular sSpecular
-#define diffuse sDiffuse
-
-#else
 sampler2D lighting = sampler_state
 {
     minFilter = Point;
@@ -52,7 +23,6 @@ sampler2D diffuse = sampler_state
     minFilter = Point;
     magFilter = Point;
 };
-#endif
 
 struct VSout
 {
@@ -70,19 +40,17 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 
 float4 fs(in VSout v) : COLOR
 {
-    //if (v.texCoord.y < 0.25)
-    //{
-    //    float2 coord = v.texCoord * 4;
-    //    if (coord.x < 1)
-    //        return float4(tex2D(lighting, coord).rgb, 1);
-    //    if (coord.x < 2)
-    //        return float4(tex2D(specular, coord + float2(-1, 0)).rgb, 1);
-    //    if (coord.x < 3)
-    //        return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
-    //}
-#ifndef DIRECTX
-    v.texCoord = float2(v.texCoord.x, 1-v.texCoord.y);
-#endif
+    if (v.texCoord.y < 0.25)
+    {
+        float2 coord = v.texCoord * 4;
+        if (coord.x < 1)
+            return float4(tex2D(lighting, coord).rgb, 1);
+        if (coord.x < 2)
+            return float4(tex2D(specular, coord + float2(-1, 0)).rgb, 1);
+        if (coord.x < 3)
+            return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
+    }
+
     float4 diff = tex2D(diffuse, v.texCoord);
     float4 spec = tex2D(specular, v.texCoord) * diff.a;
     float3 light = tex2D(lighting, v.texCoord).rgb * diff.a;
@@ -93,31 +61,8 @@ float4 fs(in VSout v) : COLOR
     if (light.r < 0.1 && diff.r == 0)
         color = float3(0.9, 0.9, 0.3);
 
-    return float4(color, diff.a);
+    return 0.8 * float4(color, diff.a) + 0.2 * diff;
 }
-
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = false;
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
 
 technique tech
 {
@@ -128,5 +73,3 @@ technique tech
        PixelShader = compile ps_3_0 fs();
    }
 }
-
-#endif

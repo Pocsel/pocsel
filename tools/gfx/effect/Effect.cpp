@@ -6,6 +6,7 @@
 namespace Tools { namespace Gfx { namespace Effect {
 
     namespace {
+
         VertexAttributeUsage::Type GetAttributeUsage(Semantic::Type semantic)
         {
             switch (semantic)
@@ -58,7 +59,12 @@ namespace Tools { namespace Gfx { namespace Effect {
     {
         auto const& it = this->_shader.uniforms.find(identifier);
         if (it == this->_shader.uniforms.end())
-            throw std::invalid_argument(identifier + " not found");
+        {
+            auto& dummy = this->_parameters[identifier];
+            if (dummy.get() == nullptr)
+                dummy.reset(new DummyShaderParameter());
+            return *dummy;
+        }
         return this->_program->GetParameter(it->second.name);
     }
 

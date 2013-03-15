@@ -5,21 +5,20 @@
 #include "client/Client.hpp"
 #include "client/resources/LocalResourceManager.hpp"
 
-#include "tools/IRenderer.hpp"
-
-#include "tools/renderers/utils/Line.hpp"
-#include "tools/renderers/utils/Cube.hpp"
-#include "tools/renderers/utils/Sphere.hpp"
+#include "tools/gfx/IRenderer.hpp"
+#include "tools/gfx/utils/Line.hpp"
+#include "tools/gfx/utils/Cube.hpp"
+#include "tools/gfx/utils/Sphere.hpp"
 
 namespace Client { namespace Game {
 
-    BulletDebugDrawer::BulletDebugDrawer(Game& game, Tools::IRenderer& renderer) :
+    BulletDebugDrawer::BulletDebugDrawer(Game& game, Tools::Gfx::IRenderer& renderer) :
         _debugMode(0),
         _game(game),
         _renderer(renderer),
         _timer("Bullet drawer")
     {
-        this->_shader = &game.GetClient().GetLocalResourceManager().GetShader("BaseShaderColorParam.fx");
+        this->_shader = &game.GetClient().GetLocalResourceManager().GetShader("BaseShaderColorParam.fxc");
         this->_shaderColor = &this->_shader->GetParameter("colorParam");
     }
 
@@ -37,8 +36,8 @@ namespace Client { namespace Game {
                 camera.position.z);
 
         this->_shader->BeginPass();
-        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Line);
-        this->_renderer.SetCullMode(Tools::Renderers::CullMode::None);
+        this->_renderer.SetRasterizationMode(Tools::Gfx::RasterizationMode::Line);
+        this->_renderer.SetCullMode(Tools::Gfx::CullMode::None);
 
         this->_ClearContactPoints();
     }
@@ -47,8 +46,8 @@ namespace Client { namespace Game {
     {
         this->_DrawContactPoints();
 
-        this->_renderer.SetCullMode(Tools::Renderers::CullMode::Clockwise);
-        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
+        this->_renderer.SetCullMode(Tools::Gfx::CullMode::Clockwise);
+        this->_renderer.SetRasterizationMode(Tools::Gfx::RasterizationMode::Fill);
         this->_shader->EndPass();
         this->_timer.End();
     }
@@ -66,7 +65,7 @@ namespace Client { namespace Game {
             const btVector3& color)
     {
         if (this->_line.get() == 0)
-            this->_line.reset(new Tools::Renderers::Utils::Line(this->_renderer));
+            this->_line.reset(new Tools::Gfx::Utils::Line(this->_renderer));
 
         btVector3 f = from - this->_cameraPos;
         btVector3 tf = to - from;
@@ -86,7 +85,7 @@ namespace Client { namespace Game {
     void BulletDebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color)
     {
         if (this->_sphere.get() == 0)
-            this->_sphere.reset(new Tools::Renderers::Utils::Sphere(this->_renderer));
+            this->_sphere.reset(new Tools::Gfx::Utils::Sphere(this->_renderer));
 
         btVector3 position = transform.getOrigin() - this->_cameraPos;
         btQuaternion rotation = transform.getRotation();
@@ -122,7 +121,7 @@ namespace Client { namespace Game {
             const btTransform& trans, const btVector3& color)
     {
         if (this->_cube.get() == 0)
-            this->_cube.reset(new Tools::Renderers::Utils::Cube(this->_renderer));
+            this->_cube.reset(new Tools::Gfx::Utils::Cube(this->_renderer));
         btVector3 extents = bbMax - bbMin;
 
         btVector3 position = trans.getOrigin() - this->_cameraPos;
@@ -149,7 +148,7 @@ namespace Client { namespace Game {
     void BulletDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, const btVector3& color)
     {
         if (this->_cube.get() == 0)
-            this->_cube.reset(new Tools::Renderers::Utils::Cube(this->_renderer));
+            this->_cube.reset(new Tools::Gfx::Utils::Cube(this->_renderer));
 
         btVector3 extents = boxMax - boxMin;
 

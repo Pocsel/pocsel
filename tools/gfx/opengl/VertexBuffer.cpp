@@ -9,12 +9,12 @@ namespace Tools { namespace Gfx { namespace OpenGL {
     {
         this->_stride = 0;
         this->_nbAttrib = 0;
-        GLCHECK(glGenBuffersARB(1, &this->_id));
+        GLCHECK(glGenBuffers(1, &this->_id));
     }
 
     VertexBuffer::~VertexBuffer()
     {
-        GLCHECK(glDeleteBuffersARB(1, &this->_id));
+        GLCHECK(glDeleteBuffers(1, &this->_id));
     }
 
     void VertexBuffer::PushVertexAttribute(DataType::Type type, VertexAttributeUsage::Type usage, Uint32 nbElements)
@@ -31,66 +31,49 @@ namespace Tools { namespace Gfx { namespace OpenGL {
 
     void VertexBuffer::SetData(std::size_t size, void const* data, VertexBufferUsage::Type usage)
     {
-        this->Bind();
-        GLCHECK(glBufferDataARB(GL_ARRAY_BUFFER_ARB, size, data, GetVertexBufferUsage(usage)));
-        this->Unbind();
+        GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, this->_id));
+        GLCHECK(glBufferData(GL_ARRAY_BUFFER, size, data, GetVertexBufferUsage(usage)));
+        GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
     }
 
     void VertexBuffer::SetSubData(std::size_t offset, std::size_t size, void const* data)
     {
-        GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, this->_id));
-        GLCHECK(glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, offset, size, data));
-        GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0));
+        GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, this->_id));
+        GLCHECK(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
+        GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
     }
 
     void VertexBuffer::Bind()
     {
-        GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, this->_id));
+        GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, this->_id));
         this->_renderer.bindedVertexBuffer = this;
 
-        auto program = dynamic_cast<Program*>(&this->_renderer.GetCurrentProgram());
-        if (program == nullptr)
+        auto program = (Program*)this->_renderer.GetCurrentProgram();
+        assert(program != nullptr && "il faut un shader pour bind");
+        for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
         {
-            for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
+            auto idx = program->GetAttributeIndex(it->location);
+            if (idx >= 0)
             {
-                GLCHECK(glVertexAttribPointerARB(GetVertexAttributeIndex(it->location), it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
-                GLCHECK(glEnableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
-            }
-        }
-        else
-        {
-            for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
-            {
-                auto idx = program->GetAttributeIndex(it->location);
-                if (idx >= 0)
-                {
-                    GLCHECK(glVertexAttribPointer(idx, it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
-                    GLCHECK(glEnableVertexAttribArray(idx));
-                }
+                GLCHECK(glVertexAttribPointer(idx, it->nbElements, it->type, GL_FALSE, this->_stride, it->offset));
+                GLCHECK(glEnableVertexAttribArray(idx));
             }
         }
     }
 
     void VertexBuffer::Unbind()
     {
-        this->_renderer.bindedVertexBuffer = nullptr;
-        GLCHECK(glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0));
+        auto program = (Program*)this->_renderer.GetCurrentProgram();
+        assert(program != nullptr && "il faut un shader pour bind");
+        for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
+        {
+            auto idx = program->GetAttributeIndex(it->location);
+            if (idx >= 0)
+                GLCHECK(glDisableVertexAttribArray(idx));
+        }
 
-        auto program = dynamic_cast<Program*>(&this->_renderer.GetCurrentProgram());
-        if (program == nullptr)
-        {
-            for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
-                GLCHECK(glDisableVertexAttribArrayARB(GetVertexAttributeIndex(it->location)));
-        }
-        else
-        {
-            for (auto it = this->_attributes, itEnd = this->_attributes + this->_nbAttrib; it != itEnd; ++it)
-            {
-                auto idx = program->GetAttributeIndex(it->location);
-                if (idx >= 0)
-                    GLCHECK(glDisableVertexAttribArray(program->GetAttributeIndex(it->location)));
-            }
-        }
+        this->_renderer.bindedVertexBuffer = nullptr;
+        GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
     }
 
 }}}

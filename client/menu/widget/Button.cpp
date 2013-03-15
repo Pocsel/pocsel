@@ -1,5 +1,6 @@
-#include "tools/renderers/utils/Rectangle.hpp"
-#include "tools/renderers/utils/Font.hpp"
+#include "tools/gfx/effect/Effect.hpp"
+#include "tools/gfx/utils/Rectangle.hpp"
+#include "tools/gfx/utils/Font.hpp"
 #include "tools/window/ActionBinder.hpp"
 #include "tools/window/InputManager.hpp"
 
@@ -10,7 +11,7 @@ namespace Client { namespace Menu { namespace Widget {
 
     Button::Button(Tools::Window::InputManager const& inputManager,
             Menu& menu,
-            Tools::IRenderer& renderer,
+            Tools::Gfx::IRenderer& renderer,
             Tools::Window::ActionBinder& actionBinder,
             std::function<void(void)>& callback,
             std::string const& text /* = "" */,
@@ -27,7 +28,7 @@ namespace Client { namespace Menu { namespace Widget {
     {
         actionBinder.Bind(Tools::Window::BindAction::Fire, Tools::Window::BindAction::Pressed, std::bind(&Button::_PressedBind, this));
         actionBinder.Bind(Tools::Window::BindAction::Fire, Tools::Window::BindAction::Released, std::bind(&Button::_ReleasedBind, this));
-        this->_rect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
+        this->_rect = new Tools::Gfx::Utils::Rectangle(this->_renderer);
         this->_Update();
     }
 

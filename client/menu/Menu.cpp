@@ -1,5 +1,5 @@
 #include "tools/window/Window.hpp"
-#include "tools/IRenderer.hpp"
+#include "tools/gfx/IRenderer.hpp"
 
 #include "client/menu/Menu.hpp"
 #include "client/Client.hpp"
@@ -14,10 +14,10 @@ namespace Client { namespace Menu {
         _client(client)
     {
         this->_font = &client.GetLocalResourceManager().GetFont("Acme_7_Wide.ttf", 20);
-        this->_fontShader = &client.GetLocalResourceManager().GetShader("Fonts.fx");
+        this->_fontShader = &client.GetLocalResourceManager().GetShader("Fonts.fxc");
         this->_fontColor = &this->_fontShader->GetParameter("color");
         this->_fontTexture = &this->_fontShader->GetParameter("fontTex");
-        this->_rectShader = &client.GetLocalResourceManager().GetShader("BaseShaderColor.fx");
+        this->_rectShader = &client.GetLocalResourceManager().GetShader("BaseShaderColor.fxc");
         this->_loadingScreen = new LoadingScreen(client, *this);
         this->_disconnectedScreen = new DisconnectedScreen(client, *this);
         this->_mainMenu = new MainMenu(client, *this);

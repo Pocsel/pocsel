@@ -1,24 +1,11 @@
 float4x4 mvp : WorldViewProjection;
 float4x4 worldViewInverseTranspose;
 
-#ifdef DIRECTX
-texture diffuse;
-
-sampler sDiffuse = sampler_state
-{
-    Texture = <diffuse>;
-    MinFilter = Linear;
-    MagFilter = Linear;
-};
-
-#define diffuse sDiffuse
-#else
 sampler2D diffuse = sampler_state
 {
     MinFilter = Linear;
     MagFilter = Linear;
 };
-#endif
 
 struct VSout
 {
@@ -38,7 +25,7 @@ VSout vs(in float4 position : POSITION)
 {
     VSout v;
     v.position = mul(mvp, position);
-    v.normal = normalize(mul((float3x3)worldViewInverseTranspose, position.xyz));;
+    v.normal = normalize(mul((float3x3)worldViewInverseTranspose, position.xyz));
     v.pos = v.position;
     v.texCoord = position.xy * 4;
     return v;
@@ -61,33 +48,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
     pass p0
@@ -97,5 +57,3 @@ technique tech
         PixelShader = compile ps_2_0 fs();
     }
 }
-
-#endif

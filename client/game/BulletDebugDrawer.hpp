@@ -5,10 +5,12 @@
 #include "tools/stat/Timer.hpp"
 
 namespace Tools {
-    class IRenderer;
-    namespace Renderers {
-        class IShaderProgram;
+    namespace Gfx {
+        class IRenderer;
         class IShaderParameter;
+        namespace Effect {
+            class Effect;
+        }
         namespace Utils {
             class Sphere;
             class Cube;
@@ -39,13 +41,13 @@ namespace Client { namespace Game {
         btVector3 _cameraPos;
 
         Game& _game;
-        Tools::IRenderer& _renderer;
-        Tools::Renderers::IShaderProgram* _shader;
-        Tools::Renderers::IShaderParameter* _shaderColor;
+        Tools::Gfx::IRenderer& _renderer;
+        Tools::Gfx::Effect::Effect* _shader;
+        Tools::Gfx::IShaderParameter* _shaderColor;
 
-        std::unique_ptr<Tools::Renderers::Utils::Sphere> _sphere;
-        std::unique_ptr<Tools::Renderers::Utils::Cube> _cube;
-        std::unique_ptr<Tools::Renderers::Utils::Line> _line;
+        std::unique_ptr<Tools::Gfx::Utils::Sphere> _sphere;
+        std::unique_ptr<Tools::Gfx::Utils::Cube> _cube;
+        std::unique_ptr<Tools::Gfx::Utils::Line> _line;
 
         Tools::Stat::Timer _timer;
 
@@ -54,7 +56,7 @@ namespace Client { namespace Game {
         std::list<ContactPoint> _contactPoints;
 
     public:
-        BulletDebugDrawer(Game& game, Tools::IRenderer& renderer);
+        BulletDebugDrawer(Game& game, Tools::Gfx::IRenderer& renderer);
         ~BulletDebugDrawer();
 
         void BeginDraw();

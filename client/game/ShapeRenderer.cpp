@@ -1,8 +1,8 @@
 #include "client/game/ShapeRenderer.hpp"
 
-#include "tools/IRenderer.hpp"
-#include "tools/renderers/utils/Cube.hpp"
-#include "tools/renderers/utils/Sphere.hpp"
+#include "tools/gfx/IRenderer.hpp"
+#include "tools/gfx/utils/Cube.hpp"
+#include "tools/gfx/utils/Sphere.hpp"
 #include "tools/window/Window.hpp"
 
 #include "common/physics/Node.hpp"
@@ -23,7 +23,7 @@ namespace Client { namespace Game {
         _sphere(0),
         _cube(0)
     {
-        this->_shader = &game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fx");
+        this->_shader = &game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fxc");
     }
 
     ShapeRenderer::~ShapeRenderer()
@@ -39,7 +39,7 @@ namespace Client { namespace Game {
 
         this->_shader->BeginPass();
 
-        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Line);
+        this->_renderer.SetRasterizationMode(Tools::Gfx::RasterizationMode::Line);
 
         for (auto it = body.GetNodes().begin(), ite = body.GetNodes().end(); it != ite; ++it)
         {
@@ -63,7 +63,7 @@ namespace Client { namespace Game {
             else if ((boxShape = dynamic_cast<const btBoxShape*>(colShape)) != 0)
                 this->_RenderBox(boxShape, orientation, relPos);
         }
-        this->_renderer.SetRasterizationMode(Tools::Renderers::RasterizationMode::Fill);
+        this->_renderer.SetRasterizationMode(Tools::Gfx::RasterizationMode::Fill);
 
 
         this->_shader->EndPass();
@@ -93,7 +93,7 @@ namespace Client { namespace Game {
                 );
 
         if (!this->_cube)
-            this->_cube = new Tools::Renderers::Utils::Cube(this->_renderer);
+            this->_cube = new Tools::Gfx::Utils::Cube(this->_renderer);
         this->_cube->Render();
     }
 
@@ -121,7 +121,7 @@ namespace Client { namespace Game {
                 );
 
         if (!this->_sphere)
-            this->_sphere = new Tools::Renderers::Utils::Sphere(this->_renderer);
+            this->_sphere = new Tools::Gfx::Utils::Sphere(this->_renderer);
         this->_sphere->Render();
     }
 }}

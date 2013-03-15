@@ -4,14 +4,16 @@
 #include "tools/Vector2.hpp"
 
 namespace Tools {
-    namespace Renderers { namespace Utils {
-        class Rectangle;
-    }}
+    namespace Gfx {
+        class IRenderer;
+        namespace Utils {
+            class Rectangle;
+        }
+    }
     namespace Window {
         class ActionBinder;
         class InputManager;
     }
-    class IRenderer;
 }
 namespace Client {
     namespace Menu {
@@ -27,20 +29,20 @@ namespace Client { namespace Menu { namespace Widget {
     private:
         Tools::Window::InputManager const& _inputManager;
         Menu& _menu;
-        Tools::IRenderer& _renderer;
+        Tools::Gfx::IRenderer& _renderer;
         std::function<void(void)> _callback;
         std::string _text;
         glm::fvec2 _size;
         glm::fvec2 _pos;
         bool _pressed;
-        Tools::Renderers::Utils::Rectangle* _rect;
+        Tools::Gfx::Utils::Rectangle* _rect;
         glm::detail::tmat4x4<float> _rectMatrix;
         glm::detail::tmat4x4<float> _textMatrix;
 
     public:
         Button(Tools::Window::InputManager const& inputManager,
                 Menu& menu,
-                Tools::IRenderer& renderer,
+                Tools::Gfx::IRenderer& renderer,
                 Tools::Window::ActionBinder& actionBinder,
                 std::function<void(void)>& callback,
                 std::string const& text = "",

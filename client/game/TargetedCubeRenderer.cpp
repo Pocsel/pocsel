@@ -1,13 +1,12 @@
-#include "client/game/TargetedCubeRenderer.hpp"
-
 #include "client/precompiled.hpp"
 
 #include "tools/window/Window.hpp"
-#include "tools/IRenderer.hpp"
+#include "tools/gfx/IRenderer.hpp"
 
 #include "common/CubePosition.hpp"
 #include "common/Position.hpp"
 
+#include "client/game/TargetedCubeRenderer.hpp"
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
 
@@ -22,7 +21,7 @@ namespace Client { namespace Game {
         _renderer(game.GetClient().GetWindow().GetRenderer()),
         _elapsedTime(0)
     {
-        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fx");
+        this->_shader = &this->_game.GetClient().GetLocalResourceManager().GetShader("CubeTarget.fxc");
         this->_shaderTexture = &this->_shader->GetParameter("baseTex");
         this->_shaderTime = &this->_shader->GetParameter("time");
 
@@ -122,9 +121,9 @@ namespace Client { namespace Game {
         };
 
         this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord0, 2); // texCoord
-        this->_vertexBuffer->SetData(6*6*3*sizeof(float) + 6*6*2*sizeof(float), vertices, Tools::Renderers::VertexBufferUsage::Static);
+        this->_vertexBuffer->PushVertexAttribute(Tools::Gfx::DataType::Float, Tools::Gfx::VertexAttributeUsage::Position, 3); // position
+        this->_vertexBuffer->PushVertexAttribute(Tools::Gfx::DataType::Float, Tools::Gfx::VertexAttributeUsage::TexCoord0, 2); // texCoord
+        this->_vertexBuffer->SetData(6*6*3*sizeof(float) + 6*6*2*sizeof(float), vertices, Tools::Gfx::VertexBufferUsage::Static);
     }
 
 }}

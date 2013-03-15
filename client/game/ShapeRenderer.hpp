@@ -2,12 +2,14 @@
 #define __CLIENT_GAME_SHAPERENDERER_HPP__
 
 namespace Tools {
-    class IRenderer;
-    namespace Renderers {
-        class IShaderProgram;
+    namespace Gfx {
+        class IRenderer;
         class IShaderParameter;
         class IVertexBuffer;
         class ITexture2D;
+        namespace Effect {
+            class Effect;
+        }
         namespace Utils {
             class Cube;
             class Sphere;
@@ -35,11 +37,11 @@ namespace Client { namespace Game {
     {
     private:
         Game& _game;
-        Tools::IRenderer& _renderer;
-        Tools::Renderers::IShaderProgram* _shader;
+        Tools::Gfx::IRenderer& _renderer;
+        Tools::Gfx::Effect::Effect* _shader;
 
-        Tools::Renderers::Utils::Sphere* _sphere;
-        Tools::Renderers::Utils::Cube* _cube;
+        Tools::Gfx::Utils::Sphere* _sphere;
+        Tools::Gfx::Utils::Cube* _cube;
 
     public:
         ShapeRenderer(Game& game);

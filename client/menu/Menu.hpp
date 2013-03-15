@@ -4,9 +4,11 @@
 namespace Client {
     class Client;
 }
-namespace Tools { namespace Renderers {
-    class IShaderProgram;
+namespace Tools { namespace Gfx {
     class IShaderParameter;
+    namespace Effect {
+        class Effect;
+    }
     namespace Utils {
         class Font;
     }
@@ -22,11 +24,11 @@ namespace Client { namespace Menu {
     {
     private:
         Client& _client;
-        Tools::Renderers::Utils::Font* _font;
-        Tools::Renderers::IShaderProgram* _fontShader;
-        Tools::Renderers::IShaderParameter* _fontColor;
-        Tools::Renderers::IShaderParameter* _fontTexture;
-        Tools::Renderers::IShaderProgram* _rectShader;
+        Tools::Gfx::Utils::Font* _font;
+        Tools::Gfx::Effect::Effect* _fontShader;
+        Tools::Gfx::IShaderParameter* _fontColor;
+        Tools::Gfx::IShaderParameter* _fontTexture;
+        Tools::Gfx::Effect::Effect* _rectShader;
         LoadingScreen* _loadingScreen;
         DisconnectedScreen* _disconnectedScreen;
         MainMenu* _mainMenu;
@@ -39,11 +41,11 @@ namespace Client { namespace Menu {
         LoadingScreen& GetLoadingScreen() { return *this->_loadingScreen; }
         DisconnectedScreen& GetDisconnectedScreen() { return *this->_disconnectedScreen; }
         MainMenu& GetMainMenu() { return *this->_mainMenu; }
-        Tools::Renderers::Utils::Font& GetFont() { return *this->_font; }
-        Tools::Renderers::IShaderProgram& GetFontShader() { return *this->_fontShader; }
-        Tools::Renderers::IShaderParameter& GetFontColor() { return *this->_fontColor; }
-        Tools::Renderers::IShaderParameter& GetFontTexture() { return *this->_fontTexture; }
-        Tools::Renderers::IShaderProgram& GetRectShader() { return *this->_rectShader; }
+        Tools::Gfx::Utils::Font& GetFont() { return *this->_font; }
+        Tools::Gfx::Effect::Effect& GetFontShader() { return *this->_fontShader; }
+        Tools::Gfx::IShaderParameter& GetFontColor() { return *this->_fontColor; }
+        Tools::Gfx::IShaderParameter& GetFontTexture() { return *this->_fontTexture; }
+        Tools::Gfx::Effect::Effect& GetRectShader() { return *this->_rectShader; }
     };
 
 }}

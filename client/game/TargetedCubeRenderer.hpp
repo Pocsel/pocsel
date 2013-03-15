@@ -3,15 +3,15 @@
 
 #include "common/CubePosition.hpp"
 
-namespace Tools {
-    class IRenderer;
-    namespace Renderers {
+namespace Tools { namespace Gfx {
+        class IRenderer;
         class IShaderParameter;
-        class IShaderProgram;
         class IVertexBuffer;
         class ITexture2D;
-    }
-}
+        namespace Effect {
+            class Effect;
+        }
+}}
 
 namespace Client { namespace Game {
     class Game;
@@ -23,12 +23,12 @@ namespace Client { namespace Game {
     {
     private:
         Game& _game;
-        Tools::IRenderer& _renderer;
-        Tools::Renderers::IShaderProgram* _shader;
-        Tools::Renderers::IShaderParameter* _shaderTexture;
-        Tools::Renderers::IShaderParameter* _shaderTime;
-        std::unique_ptr<Tools::Renderers::IVertexBuffer> _vertexBuffer;
-        Tools::Renderers::ITexture2D* _texture;
+        Tools::Gfx::IRenderer& _renderer;
+        Tools::Gfx::Effect::Effect* _shader;
+        Tools::Gfx::IShaderParameter* _shaderTexture;
+        Tools::Gfx::IShaderParameter* _shaderTime;
+        std::unique_ptr<Tools::Gfx::IVertexBuffer> _vertexBuffer;
+        Tools::Gfx::ITexture2D* _texture;
         Uint64 _elapsedTime;
 
     public:

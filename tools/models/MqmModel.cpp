@@ -4,7 +4,7 @@
 
 #include "tools/Math.hpp"
 
-#include "tools/IRenderer.hpp"
+#include "tools/gfx/IRenderer.hpp"
 
 namespace Tools { namespace Models {
 
@@ -17,7 +17,7 @@ namespace Tools { namespace Models {
 
     MqmModel::MqmModel(std::vector<char> const& data,
             //TextureCallback textureCallback,
-            Tools::IRenderer& renderer)
+            Tools::Gfx::IRenderer& renderer)
     {
         Tools::debug << "MqmModel()\n";
 
@@ -47,7 +47,7 @@ namespace Tools { namespace Models {
     void MqmModel::_LoadMeshes(Tools::Models::Iqm::Header const& header,
             std::vector<char> const& data,
             //TextureCallback textureCallback,
-            Tools::IRenderer& renderer)
+            Tools::Gfx::IRenderer& renderer)
     {
         // lilswap((uint *)&buf[header.ofs_vertexarrays], header.num_vertexarrays*sizeof(iqmvertexarray)/sizeof(uint));
         // lilswap((uint *)&buf[header.ofs_triangles], header.num_triangles*sizeof(iqmtriangle)/sizeof(uint));
@@ -130,7 +130,7 @@ namespace Tools { namespace Models {
 
             this->_indexBuffers.push_back(renderer.CreateIndexBuffer().release());
             this->_indexBuffers.back()->SetData(
-                    Tools::Renderers::DataType::UnsignedInt,
+                    Tools::Gfx::DataType::UnsignedInt,
                     mesh.num_triangles * sizeof(Tools::Models::Iqm::Triangle), &tris[mesh.first_triangle]);
         }
 
@@ -151,7 +151,7 @@ namespace Tools { namespace Models {
             float const* intexcoord,
             Uint8 const* inblendindex,
             Uint8 const* inblendweight,
-            Tools::IRenderer& renderer)
+            Tools::Gfx::IRenderer& renderer)
     {
         this->_vertexBuffer = renderer.CreateVertexBuffer().release();
 
@@ -178,19 +178,19 @@ namespace Tools { namespace Models {
             vertexBuffer.push_back((float)inblendindex[i*4+3]);
         }
 
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
-                Tools::Renderers::VertexAttributeUsage::Position, 3);
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
-                Tools::Renderers::VertexAttributeUsage::Normal, 3);
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
-                Tools::Renderers::VertexAttributeUsage::TexCoord0, 2);
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
-                Tools::Renderers::VertexAttributeUsage::TexCoord1, 4);
-        this->_vertexBuffer->PushVertexAttribute(Tools::Renderers::DataType::Float,
-                Tools::Renderers::VertexAttributeUsage::TexCoord2, 4);
-        this->_vertexBuffer->SetData(sizeof(float) * vertexBuffer.size(), vertexBuffer.data(), Tools::Renderers::VertexBufferUsage::Static);
+        this->_vertexBuffer->PushVertexAttribute(Tools::Gfx::DataType::Float,
+                Tools::Gfx::VertexAttributeUsage::Position, 3);
+        this->_vertexBuffer->PushVertexAttribute(Tools::Gfx::DataType::Float,
+                Tools::Gfx::VertexAttributeUsage::Normal, 3);
+        this->_vertexBuffer->PushVertexAttribute(Tools::Gfx::DataType::Float,
+                Tools::Gfx::VertexAttributeUsage::TexCoord0, 2);
+        this->_vertexBuffer->PushVertexAttribute(Tools::Gfx::DataType::Float,
+                Tools::Gfx::VertexAttributeUsage::TexCoord1, 4);
+        this->_vertexBuffer->PushVertexAttribute(Tools::Gfx::DataType::Float,
+                Tools::Gfx::VertexAttributeUsage::TexCoord2, 4);
+        this->_vertexBuffer->SetData(sizeof(float) * vertexBuffer.size(), vertexBuffer.data(), Tools::Gfx::VertexBufferUsage::Static);
 
-        //mesh.indexBuffer->SetData(Tools::Renderers::DataType::UnsignedInt, sizeof(GLuint) * mesh.indexes.size(), &(mesh.indexes[0]));
+        //mesh.indexBuffer->SetData(Tools::Gfx::DataType::UnsignedInt, sizeof(GLuint) * mesh.indexes.size(), &(mesh.indexes[0]));
 
         return true;
     }

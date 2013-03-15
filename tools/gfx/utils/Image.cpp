@@ -50,13 +50,13 @@ namespace Tools { namespace Gfx { namespace Utils {
         this->_vertexBuffer = this->_renderer.CreateVertexBuffer();
         this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3); // position
         this->_vertexBuffer->PushVertexAttribute(DataType::Float, VertexAttributeUsage::TexCoord0, 2); // texCoord
-        this->_vertexBuffer->SetData(4*(3 + 2)*sizeof(*vertices), vertices, VertexBufferUsage::Static);
+        this->_vertexBuffer->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
 
         if (!this->_indexBuffer)
         {
             static const unsigned short indices[] = { 0, 1, 3, 1, 2, 3 };
             this->_indexBuffer = this->_renderer.CreateIndexBuffer();
-            this->_indexBuffer->SetData(DataType::UnsignedShort, 6*sizeof(*indices), indices);
+            this->_indexBuffer->SetData(DataType::UnsignedShort, sizeof(indices), indices);
         }
     }
 

@@ -1,7 +1,8 @@
 #include "client/precompiled.hpp"
 
-#include "tools/renderers/utils/Rectangle.hpp"
-#include "tools/renderers/utils/Font.hpp"
+#include "tools/gfx/effect/Effect.hpp"
+#include "tools/gfx/utils/Rectangle.hpp"
+#include "tools/gfx/utils/Font.hpp"
 #include "tools/stat/StatManager.hpp"
 
 #include "client/menu/widget/DebugPanel.hpp"
@@ -9,7 +10,7 @@
 
 namespace Client { namespace Menu { namespace Widget {
 
-    DebugPanel::DebugPanel(Menu& menu, Tools::IRenderer& renderer, Uint32 maxAverageValues) :
+    DebugPanel::DebugPanel(Menu& menu, Tools::Gfx::IRenderer& renderer, Uint32 maxAverageValues) :
         _menu(menu),
         _renderer(renderer),
         _rect(renderer),

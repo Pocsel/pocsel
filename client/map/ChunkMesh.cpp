@@ -1,6 +1,6 @@
 #include "client/precompiled.hpp"
 
-#include "tools/renderers/utils/material/LuaMaterial.hpp"
+#include "tools/gfx/utils/material/LuaMaterial.hpp"
 #include "tools/window/Window.hpp"
 
 #include "client/Client.hpp"
@@ -12,8 +12,8 @@
 #include "client/map/ChunkRenderer.hpp"
 #include "client/map/Map.hpp"
 
-using Tools::Renderers::Utils::Material::LuaMaterial;
-using Tools::Renderers::Utils::Material::Material;
+using Tools::Gfx::Utils::Material::LuaMaterial;
+using Tools::Gfx::Utils::Material::Material;
 
 namespace Client { namespace Map {
 
@@ -280,7 +280,7 @@ namespace Client { namespace Map {
         return true;
     }
 
-    bool ChunkMesh::RefreshGraphics(Tools::IRenderer& renderer)
+    bool ChunkMesh::RefreshGraphics(Tools::Gfx::IRenderer& renderer)
     {
         if (!this->_refreshMutex.try_lock())
             return false;
@@ -295,16 +295,16 @@ namespace Client { namespace Map {
             return true;
 
         this->_vertices = renderer.CreateVertexBuffer().release();
-        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::Position, 3); // position
-        this->_vertices->PushVertexAttribute(Tools::Renderers::DataType::Float, Tools::Renderers::VertexAttributeUsage::TexCoord0, 1); // Normales + Textures
-        this->_vertices->SetData(this->_tmpNbVertices * (3+3+2) * sizeof(*this->_tmpVertices), this->_tmpVertices, Tools::Renderers::VertexBufferUsage::Static);
+        this->_vertices->PushVertexAttribute(Tools::Gfx::DataType::Float, Tools::Gfx::VertexAttributeUsage::Position, 3); // position
+        this->_vertices->PushVertexAttribute(Tools::Gfx::DataType::Float, Tools::Gfx::VertexAttributeUsage::TexCoord0, 1); // Normales + Textures
+        this->_vertices->SetData(this->_tmpNbVertices * (3+3+2) * sizeof(*this->_tmpVertices), this->_tmpVertices, Tools::Gfx::VertexBufferUsage::Static);
         for (auto it = this->_tmpIndices.begin(), ite = this->_tmpIndices.end(); it !=ite; ++it)
         {
             if (it->second.size() == 0)
                 continue;
             Mesh m;
             m.indices = renderer.CreateIndexBuffer().release();
-            m.indices->SetData(Tools::Renderers::DataType::UnsignedInt, sizeof(unsigned int) * it->second.size(), it->second.data());
+            m.indices->SetData(Tools::Gfx::DataType::UnsignedInt, sizeof(unsigned int) * it->second.size(), it->second.data());
             m.nbIndices = (Uint32)it->second.size();
             this->_triangleCount += m.nbIndices / 3;
             this->_meshes[it->first] = std::move(m);
@@ -316,7 +316,7 @@ namespace Client { namespace Map {
         return true;
     }
 
-    void ChunkMesh::Render(Tools::IRenderer& renderer, Tools::Renderers::Utils::DeferredShading& deferredShading, glm::mat4 const& world, Uint32 squaredDistance)
+    void ChunkMesh::Render(Tools::Gfx::IRenderer& renderer, Tools::Gfx::Utils::DeferredShading& deferredShading, glm::mat4 const& world, Uint32 squaredDistance)
     {
         if (this->_triangleCount == 0)
             return;

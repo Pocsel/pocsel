@@ -1,25 +1,11 @@
 float4x4 mvp : WorldViewProjection;
 float time;
 
-#ifdef DIRECTX
-texture baseTex;
-
-sampler sBaseTex = sampler_state
-{
-    Texture = <baseTex>;
-    minFilter = Linear;
-    magFilter = Linear;
-};
-
-#define baseTex sBaseTex
-
-#else
 sampler2D baseTex = sampler_state
 {
     minFilter = Linear;
     magFilter = Linear;
 };
-#endif
 
 struct VSout
 {
@@ -63,33 +49,6 @@ FSout fs(in VSout v)
     return f;
 }
 
-#ifndef DIRECTX
-
-technique tech_glsl
-{
-    pass p0
-    {
-        AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
-        VertexProgram = compile glslv vs();
-        FragmentProgram = compile glslf fs();
-    }
-}
-technique tech
-{
-    pass p0
-    {
-        AlphaBlendEnable = true;
-        AlphaTestEnable = true;
-        BlendFunc = int2(SrcAlpha, InvSrcAlpha);
-        VertexProgram = compile arbvp1 vs();
-        FragmentProgram = compile arbfp1 fs();
-    }
-}
-
-#else
-
 technique tech
 {
    pass p0
@@ -99,5 +58,3 @@ technique tech
        PixelShader = compile ps_2_0 fs();
    }
 }
-
-#endif

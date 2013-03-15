@@ -1,7 +1,7 @@
 #include "client/precompiled.hpp"
 
-#include "tools/renderers/utils/Rectangle.hpp"
-#include "tools/renderers/utils/Font.hpp"
+#include "tools/gfx/utils/Rectangle.hpp"
+#include "tools/gfx/utils/Font.hpp"
 #include "tools/window/ActionBinder.hpp"
 #include "tools/window/InputManager.hpp"
 #include "tools/window/Window.hpp"
@@ -27,7 +27,7 @@ namespace Client { namespace Menu {
                 f,
                 "Retry",
                 glm::fvec2(100, 20));
-        this->_backRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
+        this->_backRect = new Tools::Gfx::Utils::Rectangle(this->_renderer);
         this->_backRect->SetColor(
                 glm::vec4(0.31f, 0.03f, 0.03f, 1),
                 glm::vec4(0.31f, 0.03f, 0.03f, 1),

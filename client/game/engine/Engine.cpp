@@ -9,8 +9,8 @@
 #include "client/game/engine/PhysicsManager.hpp"
 #include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
-#include "tools/renderers/utils/material/LuaMaterial.hpp"
-#include "tools/renderers/utils/material/Material.hpp"
+#include "tools/gfx/utils/material/LuaMaterial.hpp"
+#include "tools/gfx/utils/material/Material.hpp"
 #include "common/FieldUtils.hpp"
 #include "common/Resource.hpp"
 
@@ -28,9 +28,9 @@ namespace Client { namespace Game { namespace Engine {
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
         this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
-        Tools::Renderers::Utils::Material::Material::LoadLuaTypes(*this->_interpreter,
-            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetTexture), &game.GetResourceManager(), std::placeholders::_1),
-            std::bind(static_cast<std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetMaterial), &game.GetResourceManager(), std::placeholders::_1));
+        Tools::Gfx::Utils::Material::Material::LoadLuaTypes(*this->_interpreter,
+            std::bind(static_cast<std::unique_ptr<Tools::Gfx::Utils::Texture::ITexture>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetTexture), &game.GetResourceManager(), std::placeholders::_1),
+            std::bind(static_cast<std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetMaterial), &game.GetResourceManager(), std::placeholders::_1));
         Tools::Lua::Utils::RegisterVector(*this->_interpreter);
         Tools::Lua::Utils::RegisterMatrix(*this->_interpreter);
 

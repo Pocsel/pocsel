@@ -40,6 +40,7 @@ namespace Client {
         actions["toggle-draw-physics"] = Tools::Window::BindAction::ToggleDrawPhysics;
 
         this->_window = new Tools::Window::Sdl::Window(actions, this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen);
+        this->_effectManager = new Tools::Gfx::Effect::EffectManager(this->_window->GetRenderer());
         this->_threadPool = new Tools::Thread::ThreadPool(2);
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
@@ -58,6 +59,7 @@ namespace Client {
         Tools::Delete(this->_packetDispatcher);
         Tools::Delete(this->_resourceManager);
         Tools::Delete(this->_threadPool);
+        Tools::Delete(this->_effectManager);
         Tools::Delete(this->_window);
     }
 

@@ -5,7 +5,7 @@
 #include "client/game/CubeType.hpp"
 #include "client/resources/ResourceManager.hpp"
 
-using Tools::Renderers::Utils::Material::LuaMaterial;
+using Tools::Gfx::Utils::Material::LuaMaterial;
 
 namespace Client { namespace Game {
 

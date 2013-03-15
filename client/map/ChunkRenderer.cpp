@@ -30,7 +30,7 @@ namespace Client { namespace Map {
         return chunk.GetMesh()->RefreshGraphics(this->_renderer);
     }
 
-    void ChunkRenderer::Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Common::Position const& position, glm::dmat4 const& viewProj)
+    void ChunkRenderer::Render(Tools::Gfx::Utils::DeferredShading& deferredShading, Common::Position const& position, glm::dmat4 const& viewProj)
     {
         this->_game.GetMap().GetChunkManager().ForeachIn(Tools::Frustum(viewProj),
             [&](Chunk& chunk)

@@ -47,7 +47,7 @@ namespace Tools { namespace Gfx {
         RenderState* _currentState;
         bool _isRenderToTexture;
 
-        IBaseProgram* _currentProgram;
+        IProgram* _currentProgram;
 
         glm::vec4 _clearColor;
         float _clearDepth;
@@ -103,8 +103,8 @@ namespace Tools { namespace Gfx {
         glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_currentState->view; }
         glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_currentState->projection; }
 
-        IBaseProgram& GetCurrentProgram() { return *this->_currentProgram; }
-        void SetCurrentProgram(IBaseProgram& program) { this->_currentProgram = &program; }
+        IProgram* GetCurrentProgram() { return this->_currentProgram; }
+        void SetCurrentProgram(IProgram& program) { this->_currentProgram = &program; }
 
     protected:
         void _GenericPushState(RenderState const& state, glm::mat4 const& projection = glm::mat4(1.0f))

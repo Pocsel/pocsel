@@ -1,6 +1,6 @@
 #include "client/precompiled.hpp"
 
-#include "tools/renderers/utils/Rectangle.hpp"
+#include "tools/gfx/utils/Rectangle.hpp"
 #include "tools/window/Window.hpp"
 #include "tools/window/ActionBinder.hpp"
 #include "tools/window/InputManager.hpp"
@@ -19,7 +19,7 @@ namespace Client { namespace Menu {
         _renderer(client.GetWindow().GetRenderer()),
         _visible(false)
     {
-        this->_backRect = new Tools::Renderers::Utils::Rectangle(this->_renderer);
+        this->_backRect = new Tools::Gfx::Utils::Rectangle(this->_renderer);
         this->_backRect->SetColor(
                 glm::vec4(0.25f, 0.25f, 0.25f, 0.7f),
                 glm::vec4(0.25f, 0.25f, 0.25f, 0.7f),

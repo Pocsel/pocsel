@@ -7,6 +7,9 @@
 #include "tools/thread/ThreadPool.hpp"
 
 namespace Tools {
+    namespace Gfx { namespace Effect {
+        class EffectManager;
+    }}
     namespace Window {
         class Window;
     }
@@ -50,6 +53,7 @@ namespace Client {
         Settings& _settings;
         Network::Network _network;
         Tools::Window::Window* _window;
+        Tools::Gfx::Effect::EffectManager* _effectManager;
         Resources::LocalResourceManager* _resourceManager;
         Network::PacketDispatcher* _packetDispatcher;
         State _state;
@@ -77,6 +81,7 @@ namespace Client {
         Settings& GetSettings() { return this->_settings; }
         Network::Network& GetNetwork() { return this->_network; }
         Tools::Window::Window& GetWindow() { return *this->_window; }
+        Tools::Gfx::Effect::EffectManager& GetEffectManager() { return *this->_effectManager; }
         Resources::LocalResourceManager& GetLocalResourceManager() { return *this->_resourceManager; }
         Game::Game& GetGame() { return *this->_game; }
         Menu::Menu& GetMenu() { return *this->_menu; }

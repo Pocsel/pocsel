@@ -1,11 +1,11 @@
 #ifndef __CLIENT_MAP_CHUNKMESH_HPP__
 #define __CLIENT_MAP_CHUNKMESH_HPP__
 
-#include "tools/IRenderer.hpp"
+#include "tools/gfx/IRenderer.hpp"
 
 #include "common/BaseChunk.hpp"
 
-namespace Tools { namespace Renderers { namespace Utils {
+namespace Tools { namespace Gfx { namespace Utils {
     class DeferredShading;
     namespace Material {
         class Material;
@@ -31,7 +31,7 @@ namespace Client { namespace Map {
     private:
         struct Mesh : private boost::noncopyable
         {
-            Tools::Renderers::IIndexBuffer* indices;
+            Tools::Gfx::IIndexBuffer* indices;
             Uint32 nbIndices;
 
             Mesh() : indices(0), nbIndices(0) {}
@@ -41,15 +41,15 @@ namespace Client { namespace Map {
             Mesh& operator =(Mesh&& m);
         };
         Chunk& _chunk;
-        Tools::Renderers::IVertexBuffer* _vertices;
-        std::map<Tools::Renderers::Utils::Material::Material*, Mesh> _meshes;
+        Tools::Gfx::IVertexBuffer* _vertices;
+        std::map<Tools::Gfx::Utils::Material::Material*, Mesh> _meshes;
         Uint32 _triangleCount;
         bool _hasTransparentCube;
         bool _isComputed;
         boost::mutex _refreshMutex;
         unsigned int _tmpNbVertices;
         float* _tmpVertices;
-        std::map<Tools::Renderers::Utils::Material::Material*, std::vector<unsigned int>> _tmpIndices;
+        std::map<Tools::Gfx::Utils::Material::Material*, std::vector<unsigned int>> _tmpIndices;
 
     public:
         ChunkMesh(Chunk& chunk);
@@ -60,8 +60,8 @@ namespace Client { namespace Map {
                      std::shared_ptr<Common::BaseChunk::CubeArray> cubes,
                      std::vector<std::shared_ptr<Common::BaseChunk::CubeArray>> neighbors);
 
-        bool RefreshGraphics(Tools::IRenderer& renderer);
-        void Render(Tools::IRenderer& renderer, Tools::Renderers::Utils::DeferredShading& deferredShading, glm::mat4 const& world, Uint32 squaredDistance);
+        bool RefreshGraphics(Tools::Gfx::IRenderer& renderer);
+        void Render(Tools::Gfx::IRenderer& renderer, Tools::Gfx::Utils::DeferredShading& deferredShading, glm::mat4 const& world, Uint32 squaredDistance);
         Uint32 GetTriangleCount() const { return this->_triangleCount; }
         bool HasTransparentCube() const { return this->_hasTransparentCube; }
     };

@@ -3,26 +3,14 @@
 
 #include "client/resources/CacheDatabaseProxy.hpp"
 #include "client/resources/ResourceDownloader.hpp"
+#include "tools/gfx/effect/EffectManager.hpp"
+#include "tools/gfx/utils/material/LuaMaterial.hpp"
+#include "tools/gfx/utils/texture/ITexture.hpp"
 
 namespace Common {
     class Resource;
 }
 namespace Tools {
-    class IRenderer;
-    namespace Renderers {
-        class IShaderProgram;
-        class ITexture2D;
-        namespace Utils {
-            namespace Material {
-                class LuaMaterial;
-                class Material;
-            }
-            namespace Texture {
-                class ITexture;
-                class TextureAtlas;
-            }
-        }
-    }
     namespace Lua {
         class CallHelper;
     }
@@ -47,23 +35,24 @@ namespace Client { namespace Resources {
         Game::Game& _game;
         CacheDatabaseProxy _database;
         ResourceDownloader _downloader;
-        Tools::IRenderer& _renderer;
+        Tools::Gfx::IRenderer& _renderer;
+        Tools::Gfx::Effect::EffectManager& _effectManager;
 
         // plugin Id => resource name => resource Id
         std::map<std::string, Uint32> _resourceIds;
 
         // Resources (resource id => specific resource)
-        std::map<Uint32, Tools::Renderers::Utils::Texture::ITexture*> _textures;
+        std::map<Uint32, Tools::Gfx::Utils::Texture::ITexture*> _textures;
         std::map<Uint32, Tools::Models::MqmModel*> _models;
-        std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
+        std::map<Uint32, Tools::Gfx::Effect::Effect*> _shaders;
         std::map<Uint32, std::string> _scripts;
 
         // effect c'est pas une resource mais un registrabrle
-        std::map<std::string, std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> _materials;
+        std::map<std::string, std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial>> _materials;
 
         // Texture data (resource Id => renderer Texture)
-        std::map<Uint32, Tools::Renderers::ITexture2D*> _rawTextures;
-        std::map<Uint32, std::vector<Tools::Renderers::ITexture2D*>> _animatedTextureFrames;
+        std::map<Uint32, Tools::Gfx::ITexture2D*> _rawTextures;
+        std::map<Uint32, std::vector<Tools::Gfx::ITexture2D*>> _animatedTextureFrames;
 
     public:
         ResourceManager(Game::Game& game,
@@ -74,20 +63,20 @@ namespace Client { namespace Resources {
                         std::string const& worldBuildHash);
         ~ResourceManager();
 
-        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 id);
+        std::unique_ptr<Tools::Gfx::Utils::Texture::ITexture> GetTexture(Uint32 id);
         Tools::Models::MqmModel const& GetMqmModel(Uint32 id);
-        Tools::Renderers::IShaderProgram& GetShader(Uint32 id);
+        Tools::Gfx::Effect::Effect& GetShader(Uint32 id);
         std::string GetScript(Uint32 id);
         std::unique_ptr<Common::Resource> GetResource(Uint32 id);
 
         Tools::Models::MqmModel const& GetMqmModel(std::string const& name);
-        Tools::Renderers::IShaderProgram& GetShader(std::string const& name);
+        Tools::Gfx::Effect::Effect& GetShader(std::string const& name);
         std::string GetScript(std::string const& name);
         std::unique_ptr<Common::Resource> GetResource(std::string const& name);
 
         // Les registrables
-        std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(std::string const& name);
-        std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial> GetMaterial(std::string const& name);
+        std::unique_ptr<Tools::Gfx::Utils::Texture::ITexture> GetTexture(std::string const& name);
+        std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial> GetMaterial(std::string const& name);
 
         CacheDatabaseProxy& GetDatabase() { return this->_database; }
         ResourceDownloader& GetDownloader() { return this->_downloader; }

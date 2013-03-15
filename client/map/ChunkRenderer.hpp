@@ -2,10 +2,10 @@
 #define __CLIENT_MAP_CHUNKRENDERER_HPP__
 
 #include "common/BaseChunk.hpp"
-#include "tools/IRenderer.hpp"
-#include "tools/renderers/utils/DeferredShading.hpp"
-#include "tools/renderers/utils/material/LuaMaterial.hpp"
-#include "tools/renderers/utils/texture/ITexture.hpp"
+#include "tools/gfx/IRenderer.hpp"
+#include "tools/gfx/utils/DeferredShading.hpp"
+#include "tools/gfx/utils/material/LuaMaterial.hpp"
+#include "tools/gfx/utils/texture/ITexture.hpp"
 
 namespace Client {
     namespace Game {
@@ -26,15 +26,15 @@ namespace Client { namespace Map {
     {
     private:
         Game::Game& _game;
-        Tools::IRenderer& _renderer;
-        std::map<Tools::Renderers::Utils::Material::Material*, std::multimap<double, Chunk*>> _transparentChunks;
+        Tools::Gfx::IRenderer& _renderer;
+        std::map<Tools::Gfx::Utils::Material::Material*, std::multimap<double, Chunk*>> _transparentChunks;
 
     public:
         ChunkRenderer(Game::Game& game);
         ~ChunkRenderer();
 
         bool RefreshGraphics(Chunk& chunk);
-        void Render(Tools::Renderers::Utils::DeferredShading& deferredShading, Common::Position const& position, glm::dmat4 const& viewProj);
+        void Render(Tools::Gfx::Utils::DeferredShading& deferredShading, Common::Position const& position, glm::dmat4 const& viewProj);
     };
 
 }}

@@ -72,7 +72,7 @@ namespace Client { namespace Game { namespace Engine {
         this->_lastTickTime = totalTime;
     }
 
-    void ModelManager::Render(Tools::Renderers::Utils::DeferredShading& deferredShading)
+    void ModelManager::Render(Tools::Gfx::Utils::DeferredShading& deferredShading)
     {
         auto itModel = this->_models.begin();
         auto itModelEnd = this->_models.end();

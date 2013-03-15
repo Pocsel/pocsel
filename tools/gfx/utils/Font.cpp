@@ -273,7 +273,7 @@ namespace Tools { namespace Gfx { namespace Utils {
             offsetX += info.advance.x + info.offset.x;
         }
 
-        this->_vertexBuffer->SetData(text.length() * 5 * 4 * sizeof(float), vertices, VertexBufferUsage::Stream);
+        this->_vertexBuffer->SetData(text.length() * 4 * 5 * sizeof(float), vertices, VertexBufferUsage::Stream);
         this->_texture->Bind();
         this->_vertexBuffer->Bind();
 

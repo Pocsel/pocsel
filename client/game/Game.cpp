@@ -1,10 +1,11 @@
 #include "client/precompiled.hpp"
 
-#include "tools/IRenderer.hpp"
 #include "tools/lua/utils/Utils.hpp"
-#include "tools/renderers/utils/GBuffer.hpp"
-#include "tools/renderers/utils/Image.hpp"
-#include "tools/renderers/utils/light/LightRenderer.hpp"
+#include "tools/gfx/IRenderer.hpp"
+#include "tools/gfx/effect/EffectManager.hpp"
+#include "tools/gfx/utils/GBuffer.hpp"
+#include "tools/gfx/utils/Image.hpp"
+#include "tools/gfx/utils/light/LightRenderer.hpp"
 #include "tools/stat/StatManager.hpp"
 #include "tools/window/Window.hpp"
 
@@ -27,6 +28,7 @@ namespace Client { namespace Game {
             std::string const& worldBuildHash) :
         _client(client),
         _renderer(client.GetWindow().GetRenderer()),
+        _effectManager(client.GetEffectManager()),
         _map(0),
         _statUpdateTime("Game update"),
         _statRenderTime("Game render"),
@@ -46,16 +48,16 @@ namespace Client { namespace Game {
         auto const& size = this->_client.GetWindow().GetSize();
         this->GetPlayer().GetCamera().projection = glm::perspective<float>(90, size.x / float(size.y), 0.05f, 300.0f);
         // XXX
-        this->_gBuffer = std::unique_ptr<Tools::Renderers::Utils::GBuffer>(
-            new Tools::Renderers::Utils::GBuffer(
+        this->_gBuffer = std::unique_ptr<Tools::Gfx::Utils::GBuffer>(
+            new Tools::Gfx::Utils::GBuffer(
                 this->_renderer,
                 size,
-                this->_client.GetLocalResourceManager().GetShader("PostProcess.fx")));
+                this->_client.GetLocalResourceManager().GetShader("PostProcess.fxc")));
         this->_lightRenderer.reset(
-            new Tools::Renderers::Utils::Light::LightRenderer(
+            new Tools::Gfx::Utils::Light::LightRenderer(
                 this->_renderer,
-                this->_client.GetLocalResourceManager().GetShader("DirectionnalLight.fx"),
-                this->_client.GetLocalResourceManager().GetShader("PointLight.fx")));
+                this->_client.GetLocalResourceManager().GetShader("DirectionnalLight.fxc"),
+                this->_client.GetLocalResourceManager().GetShader("PointLight.fxc")));
         this->_directionnalLights.push_back(this->_lightRenderer->CreateDirectionnalLight());
         this->_directionnalLights.back().direction = glm::normalize(glm::vec3(0.5, -1, 0.5));
         this->_directionnalLights.back().ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);
@@ -68,7 +70,7 @@ namespace Client { namespace Game {
         this->_pointLights.back().diffuseColor =  glm::vec3(0.8f, 0.75f, 0.4f);
         this->_pointLights.back().specularColor = glm::vec3(.0f, .0f, .0f);
 
-        //this->_testImage.reset(new Tools::Renderers::Utils::Image(this->_renderer));
+        //this->_testImage.reset(new Tools::Gfx::Utils::Image(this->_renderer));
         //this->_testShader = &this->_client.GetLocalResourceManager().GetShader("BaseShaderTexture.fx");
         //this->_testTexture = this->_testShader->GetParameter("baseTex");
         // XXX
@@ -130,7 +132,7 @@ namespace Client { namespace Game {
         //this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
 
         this->_gBuffer->Bind();
-        this->_renderer.Clear(Tools::ClearFlags::Color | Tools::ClearFlags::Depth | Tools::ClearFlags::Stencil);
+        this->_renderer.Clear(Tools::Gfx::ClearFlags::Color | Tools::Gfx::ClearFlags::Depth | Tools::Gfx::ClearFlags::Stencil);
 
         //this->_RenderScene(absoluteViewProjection);
         this->_map->GetChunkManager().Render(this->_deferredShading, this->GetPlayer().GetCamera().position, absoluteViewProjection);
@@ -158,10 +160,10 @@ namespace Client { namespace Game {
             this->_pointLights);
         // XXX
 
-        std::list<Tools::Renderers::Utils::Material::LuaMaterial*> postProcess;
-        if (this->_postProcessSepia == 0)
-            this->_postProcessSepia = this->_resourceManager->GetMaterial("base:PostProcessSepia");
-        postProcess.push_back(this->_postProcessSepia.get());
+        std::list<Tools::Gfx::Utils::Material::LuaMaterial*> postProcess;
+        //if (this->_postProcessSepia == 0)
+        //    this->_postProcessSepia = this->_resourceManager->GetMaterial("base:PostProcessSepia");
+        //postProcess.push_back(this->_postProcessSepia.get());
         this->_gBuffer->Render(totalTime, postProcess);
 
         this->_renderer.EndDraw();
