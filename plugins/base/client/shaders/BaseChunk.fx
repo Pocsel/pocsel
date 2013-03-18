@@ -1,6 +1,6 @@
 float4x4 worldViewProjection : WorldViewProjection;
-//float4x4 worldViewInverseTranspose;
-float4x4 world : World;
+float4x4 worldViewInverseTranspose : WorldViewInverseTranspose;
+//float4x4 world : World;
 
 sampler2D cubeTexture = sampler_state
 {
@@ -37,7 +37,7 @@ VSout vs(
 
     v.texCoord = texCoord;
     v.position = mul(worldViewProjection, position);
-    v.normal = normalize(mul((float3x3)world, normal));
+    v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
     v.pos = v.position;
 
     return v;

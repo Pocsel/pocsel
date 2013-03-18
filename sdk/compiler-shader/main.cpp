@@ -117,11 +117,11 @@ int main(int ac, char** av)
         // OpenGL only
         auto macrosGL = macros;
         macrosGL.push_front("OPENGL");
-        macrosGL.push_front("tex2D(tex, coord)=tex2D(tex, float2(0, 1) + float2(1, -1)*(coord))");
 
         // DirectX only
         auto macrosDX = macros;
         macrosDX.push_front("DIRECTX");
+        macrosDX.push_front("tex2D(tex, coord)=tex2D(tex, float2((coord).x, 1 - (coord).y))");
 
         File fileGL;
         File fileDX;

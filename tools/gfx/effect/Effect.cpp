@@ -31,9 +31,25 @@ namespace Tools { namespace Gfx { namespace Effect {
             case Semantic::Projection: return ShaderParameterUsage::ProjectionMatrix;
             case Semantic::View: return ShaderParameterUsage::ViewMatrix;
             case Semantic::World: return ShaderParameterUsage::ModelMatrix;
+
             case Semantic::WorldView: return ShaderParameterUsage::ModelViewMatrix;
             case Semantic::WorldViewProjection: return ShaderParameterUsage::ModelViewProjectionMatrix;
             case Semantic::ViewProjection: return ShaderParameterUsage::ViewProjectionMatrix;
+
+            case Semantic::WorldInverse: return ShaderParameterUsage::WorldInverse;
+            case Semantic::ViewInverse: return ShaderParameterUsage::ViewInverse;
+            case Semantic::ProjectionInverse: return ShaderParameterUsage::ProjectionInverse;
+            case Semantic::WorldViewInverse: return ShaderParameterUsage::WorldViewInverse;
+            case Semantic::ViewProjectionInverse: return ShaderParameterUsage::ViewProjectionInverse;
+            case Semantic::WorldViewProjectionInverse: return ShaderParameterUsage::WorldViewProjectionInverse;
+
+            case Semantic::WorldInverseTranspose: return ShaderParameterUsage::WorldInverseTranspose;
+            case Semantic::ViewInverseTranspose: return ShaderParameterUsage::ViewInverseTranspose;
+            case Semantic::ProjectionInverseTranspose: return ShaderParameterUsage::ProjectionInverseTranspose;
+            case Semantic::WorldViewInverseTranspose: return ShaderParameterUsage::WorldViewInverseTranspose;
+            case Semantic::ViewProjectionInverseTranspose: return ShaderParameterUsage::ViewProjectionInverseTranspose;
+            case Semantic::WorldViewProjectionInverseTranspose: return ShaderParameterUsage::WorldViewProjectionInverseTranspose;
+
             default:
                 return ShaderParameterUsage::None;
             }

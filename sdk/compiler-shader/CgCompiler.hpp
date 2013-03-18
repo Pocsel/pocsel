@@ -19,6 +19,7 @@ namespace Hlsl {
             Float3x3,
             Float4,
             Float4x4,
+            Float4x4Array,
         };
     }
     namespace Profile {

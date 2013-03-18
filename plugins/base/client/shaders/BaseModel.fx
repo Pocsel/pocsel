@@ -3,7 +3,7 @@
 #endif
 
 float4x4 worldViewProjection : WorldViewProjection;
-float4x4 worldViewInverseTranspose;
+float4x4 worldViewInverseTranspose : WorldViewInverseTranspose;
 
 sampler2D diffuseTexture = sampler_state
 {
@@ -43,6 +43,7 @@ VSout vs(
 
     VSout v;
     v.position = mul(worldViewProjection, mul(matTransform, position));
+	//v.position = mul(worldViewProjection, position);
     v.texCoord = texCoord;
     normal = mul((float3x3)matTransform, normal);
     v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
@@ -61,7 +62,7 @@ FSout fs(in VSout v)
 {
     float4 diffuse = tex2D(diffuseTexture, v.texCoord);
     float specularPower = diffuse.r * 0.299 + diffuse.g * 0.587 + diffuse.b * 0.114;
-    specularPower = specularPower*specularPower;
+    specularPower = 1.0;//specularPower*specularPower;
 
     FSout f;
 

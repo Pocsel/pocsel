@@ -95,13 +95,19 @@ namespace Tools { namespace Gfx { namespace OpenGL {
 
     void ShaderParameter::Set(std::vector<glm::mat4x4> const& matrices)
     {
-        GLsizei size = (GLsizei)(4 * matrices.size());
-        this->_type = Float4x4array;
-        this->_value.reset(new char[sizeof(GLsizei) + size]);
+        GLsizei size = (GLsizei)(sizeof(glm::mat4x4) * matrices.size());
         GLsizei* ptr = (GLsizei*)this->_value.get();
+        if (ptr == nullptr || *ptr < size)
+        {
+            this->_type = Float4x4array;
+            this->_value.reset(new char[sizeof(GLsizei) + size]);
+            ptr = (GLsizei*)this->_value.get();
+        }
         *ptr = size;
         ptr++;
-        std::memcpy((void*)ptr, matrices.data(), size);
+        glm::mat4x4* mat = (glm::mat4x4*)ptr;
+        for (auto const& m: matrices)
+            *(mat++) = glm::transpose(m);
     }
 
     void ShaderParameter::Set(ITexture2D& texture)
@@ -131,7 +137,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
                 GLsizei* ptr = (GLsizei*)this->_value.get();
                 GLsizei size = *ptr;
                 ptr++;
-                GLCHECK(glUniform4fv(this->_uniform, size, (float const*)ptr));
+                GLCHECK(glUniform4fv(this->_uniform, size / 16, (float const*)ptr));
             }
             break;
         case Texture:

@@ -237,7 +237,7 @@ namespace Hlsl {
             qi::rule<decltype(it), std::list<_TupleStringStringInt>(), ascii::space_type> fileParser;
 
             parameterParser =
-                    "//var" >> identifierParser >> identifierParser[at_c<0>(_val) = _1] >> ':' // type identifier
+                    "//var" >> identifierParser >> identifierParser[at_c<0>(_val) = _1] >> -lit("[0]") >> ':' // type identifier
                     >> *(char_ - ':') >> ':' // semantic
                     >> identifierParser[at_c<1>(_val) = _1] >> -('[' >> *char_("0-9-") >> ']') >> -(',' >> *char_("0-9-")) >> ':' // generated name
                     >> qi::int_[at_c<2>(_val) = _1] >> ':' // index
@@ -284,8 +284,6 @@ namespace Hlsl {
                     result.push_back(std::make_pair(findedVar, var.generatedIdentifier));
             }
             result.sort();
-            for (auto& pair: result)
-                std::cout << pair.first->name << " => " << pair.second << std::endl;
             return result;
         }
 
@@ -342,6 +340,8 @@ namespace Hlsl {
                 if ((Semantic::UniformFirst > param.semantic || param.semantic > Semantic::UniformLast) && param.semantic != Semantic::NoSemantic)
                     throw std::runtime_error("Bad semantic for uniform variable \"" + var.name + "\"");
                 param.type = _ParseType(var.type);
+                if (param.type == Type::Float4x4 && var.arraySize.length() > 0)
+                    param.type = Type::Float4x4Array;
                 param.value = Nil();
                 switch (var.value.which())
                 {

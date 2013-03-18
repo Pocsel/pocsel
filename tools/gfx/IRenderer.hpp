@@ -153,12 +153,31 @@ namespace Tools { namespace Gfx {
         enum Type
         {
             None = 0,
+
+            // Base
+            ModelMatrix,
+            ViewMatrix,
+            ProjectionMatrix,
+            // Composed
             ModelViewProjectionMatrix,
             ViewProjectionMatrix,
             ModelViewMatrix,
-            ModelMatrix,
-            ViewMatrix,
-            ProjectionMatrix
+
+            // Inverse
+            WorldInverse,
+            ViewInverse,
+            ProjectionInverse,
+            WorldViewInverse,
+            ViewProjectionInverse,
+            WorldViewProjectionInverse,
+
+            // Inverse transpose
+            WorldInverseTranspose,
+            ViewInverseTranspose,
+            ProjectionInverseTranspose,
+            WorldViewInverseTranspose,
+            ViewProjectionInverseTranspose,
+            WorldViewProjectionInverseTranspose,
         };
     }
 

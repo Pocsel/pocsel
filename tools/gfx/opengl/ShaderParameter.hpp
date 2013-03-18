@@ -28,7 +28,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         ShaderParameter(Program& program, std::string const& identifier);
         virtual ~ShaderParameter();
 
-        virtual bool IsUseable() const { return this->_uniform != 0; }
+        virtual bool IsUseable() const { return true; }
 
         virtual void Set(int value);
         virtual void Set(float value);

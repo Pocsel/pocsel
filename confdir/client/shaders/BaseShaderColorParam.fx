@@ -28,8 +28,8 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 FSout fs(in VSout v)
 {
     FSout f;
-    f.color = float4(colorParam.rgb, 0);
-    f.normalDepth = float4(0, 0, 0, 0);
+    f.color = float4(colorParam.rgb, 1);
+    f.normalDepth = float4(0, 0, 0, 1);
     return f;
 }
 

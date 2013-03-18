@@ -73,16 +73,33 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         switch (usage)
         {
         case ShaderParameterUsage::ModelMatrix: it->second->Set(this->_renderer.GetModelMatrix()); break;
-        case ShaderParameterUsage::ModelViewMatrix: it->second->Set(this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix()); break;
-        case ShaderParameterUsage::ModelViewProjectionMatrix: it->second->Set(this->_renderer.GetModelViewProjectionMatrix()); break;
         case ShaderParameterUsage::ProjectionMatrix: it->second->Set(this->_renderer.GetProjectionMatrix()); break;
         case ShaderParameterUsage::ViewMatrix: it->second->Set(this->_renderer.GetViewMatrix()); break;
+
+        case ShaderParameterUsage::ModelViewMatrix: it->second->Set(this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix()); break;
+        case ShaderParameterUsage::ModelViewProjectionMatrix: it->second->Set(this->_renderer.GetModelViewProjectionMatrix()); break;
         case ShaderParameterUsage::ViewProjectionMatrix: it->second->Set(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix()); break;
+
+        case ShaderParameterUsage::WorldInverse: it->second->Set(glm::inverse(this->_renderer.GetModelMatrix())); break;
+        case ShaderParameterUsage::ViewInverse: it->second->Set(glm::inverse(this->_renderer.GetViewMatrix())); break;
+        case ShaderParameterUsage::ProjectionInverse: it->second->Set(glm::inverse(this->_renderer.GetProjectionMatrix())); break;
+        case ShaderParameterUsage::WorldViewInverse: it->second->Set(glm::inverse(this->_renderer.GetProjectionMatrix() * this->_renderer.GetModelMatrix())); break;
+        case ShaderParameterUsage::ViewProjectionInverse: it->second->Set(glm::inverse(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix())); break;
+        case ShaderParameterUsage::WorldViewProjectionInverse: it->second->Set(glm::inverse(this->_renderer.GetModelViewProjectionMatrix())); break;
+
+        case ShaderParameterUsage::WorldInverseTranspose: it->second->Set(glm::transpose(glm::inverse(this->_renderer.GetModelMatrix()))); break;
+        case ShaderParameterUsage::ViewInverseTranspose: it->second->Set(glm::transpose(glm::inverse(this->_renderer.GetViewMatrix()))); break;
+        case ShaderParameterUsage::ProjectionInverseTranspose: it->second->Set(glm::transpose(glm::inverse(this->_renderer.GetProjectionMatrix()))); break;
+        case ShaderParameterUsage::WorldViewInverseTranspose: it->second->Set(glm::transpose(glm::inverse(this->_renderer.GetViewMatrix() * this->_renderer.GetModelMatrix()))); break;
+        case ShaderParameterUsage::ViewProjectionInverseTranspose: it->second->Set(glm::transpose(glm::inverse(this->_renderer.GetProjectionMatrix() * this->_renderer.GetViewMatrix()))); break;
+        case ShaderParameterUsage::WorldViewProjectionInverseTranspose: it->second->Set(glm::transpose(glm::inverse(this->_renderer.GetModelViewProjectionMatrix()))); break;
         }
     }
 
     void Program::Update()
     {
+        for (auto& pair: this->_defaultParameters)
+            this->UpdateParameter(pair.first);
         for (auto& param: this->_parameters)
             param.second->Update();
     }

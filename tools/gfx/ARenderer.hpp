@@ -69,17 +69,17 @@ namespace Tools { namespace Gfx {
         virtual void UpdateCurrentParameters()
         {
             assert(this->_currentProgram != nullptr && "Il faut obligatoirement un shader !");
-            if (this->IsYTexCoordInverted())
-                this->SetProjectionMatrix(glm::scale(glm::vec3(1.0f, -1.0f, 1.0f)) * this->_currentState->projection);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewProjectionMatrix);
-            this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
+            //if (this->IsYTexCoordInverted())
+            //    this->SetProjectionMatrix(glm::scale(glm::vec3(1.0f, -1.0f, 1.0f)) * this->_currentState->projection);
+            //this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelMatrix);
+            //this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewMatrix);
+            //this->_currentProgram->UpdateParameter(ShaderParameterUsage::ProjectionMatrix);
+            //this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewMatrix);
+            //this->_currentProgram->UpdateParameter(ShaderParameterUsage::ViewProjectionMatrix);
+            //this->_currentProgram->UpdateParameter(ShaderParameterUsage::ModelViewProjectionMatrix);
             this->_currentProgram->Update();
-            if (this->IsYTexCoordInverted())
-                this->SetProjectionMatrix(glm::scale(glm::vec3(1.0f, -1.0f, 1.0f)) * this->_currentState->projection);
+            //if (this->IsYTexCoordInverted())
+            //    this->SetProjectionMatrix(glm::scale(glm::vec3(1.0f, -1.0f, 1.0f)) * this->_currentState->projection);
         }
 
         // Matrices
