@@ -22,7 +22,7 @@ namespace Tools { namespace Gfx { namespace Utils {
         Effect::Effect& _combineShader;
         IShaderParameter* _quadModelViewProj;
         IShaderParameter* _diffuseTexture;
-        //IShaderParameter* _normalsDepthTexture;
+        IShaderParameter* _normalsDepthTexture;
         IShaderParameter* _lightTexture;
         IShaderParameter* _specularTexture;
         //IShaderParameter* _materialTexture; // TODO

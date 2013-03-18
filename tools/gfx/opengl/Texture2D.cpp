@@ -32,7 +32,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         else
         {
             this->_size = imgSize;
-            this->_FinishLoading(GetInternalFormatFromPixelFormat(format), GetFormatFromPixelFormat(format), size, data, (format >> 24) & 0xFF, mipmapData);
+            this->_FinishLoading(GetInternalFormatFromPixelFormat(format), GetFormatFromPixelFormat(format), size, data, (format >> 24) & 0xFF, mipmapData, true);
         }
     }
 
@@ -75,29 +75,52 @@ namespace Tools { namespace Gfx { namespace OpenGL {
 
         unsigned int size = this->_size.x * this->_size.y;
         auto pixmap = new glm::u8vec4[size];
-        iluFlipImage();
+        //iluFlipImage();
         ilCopyPixels(0, 0, 0, this->_size.x, this->_size.y, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap);
 
         ilBindImage(0);
         ilDeleteImage(ilID);
 
-        this->_FinishLoading(4, GL_RGBA, size, pixmap, 4, 0);
+        this->_FinishLoading(4, GL_RGBA, size, pixmap, 4, 0, false);
         delete [] pixmap;
     }
 
-    void Texture2D::_FinishLoading(GLint internalFormat, GLenum format, Uint32 size, GLvoid const* data, int pixelSize, void const* mipmapData)
+    void Texture2D::_FinishLoading(GLint internalFormat, GLenum format, Uint32 size, GLvoid const* data, int pixelSize, void const* mipmapData, bool flip)
     {
         GLCHECK(glGenTextures(1, &this->_id));
         GLCHECK(glBindTexture(GL_TEXTURE_2D, this->_id));
-        GLCHECK(glTexImage2D(GL_TEXTURE_2D,
-                0,
-                internalFormat,
-                this->_size.x,
-                this->_size.y,
-                0,
-                format,
-                GL_UNSIGNED_BYTE,
-                data));
+        if (flip)
+        {
+            char const* src = (char const*)data;
+            char* arr = new char[this->_size.x * this->_size.y * pixelSize];
+            for (int y = 0; y < this->_size.y; ++y)
+            {
+                std::memcpy(
+                    arr + (this->_size.y - y - 1) * this->_size.x * pixelSize,
+                    src + (y * this->_size.x * pixelSize),
+                    this->_size.x * pixelSize);
+            }
+            GLCHECK(glTexImage2D(GL_TEXTURE_2D,
+                    0,
+                    internalFormat,
+                    this->_size.x,
+                    this->_size.y,
+                    0,
+                    format,
+                    GL_UNSIGNED_BYTE,
+                    arr));
+            delete [] arr;
+        }
+        else
+            GLCHECK(glTexImage2D(GL_TEXTURE_2D,
+                    0,
+                    internalFormat,
+                    this->_size.x,
+                    this->_size.y,
+                    0,
+                    format,
+                    GL_UNSIGNED_BYTE,
+                    data));
 
         glm::u8vec4 const* pixmap = reinterpret_cast<glm::u8vec4 const*>(data);
         for (unsigned int i = 0; i < size; ++i)

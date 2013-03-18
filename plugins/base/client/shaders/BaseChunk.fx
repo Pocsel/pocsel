@@ -1,5 +1,6 @@
 float4x4 worldViewProjection : WorldViewProjection;
-float4x4 worldViewInverseTranspose;
+//float4x4 worldViewInverseTranspose;
+float4x4 world : World;
 
 sampler2D cubeTexture = sampler_state
 {
@@ -36,7 +37,7 @@ VSout vs(
 
     v.texCoord = texCoord;
     v.position = mul(worldViewProjection, position);
-    v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
+    v.normal = normalize(mul((float3x3)world, normal));
     v.pos = v.position;
 
     return v;
@@ -58,7 +59,7 @@ FSout fs(in VSout v)
     FSout f;
 
     f.diffuse = float4(diffuse.rgb, 1);
-    f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, specularPower);
+    f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, 1);
 
     return f;
 }

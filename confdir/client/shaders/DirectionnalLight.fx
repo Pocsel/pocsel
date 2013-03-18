@@ -123,7 +123,7 @@ FSout fs(in VSout v)
     float4 encNormalDepth = tex2D(normalDepth, v.texCoord);
     float3 viewNormal = decodeNormals(encNormalDepth);// * 2 - 1;
     float3 viewPosition = decodePosition(encNormalDepth, v.texCoord);
-    float specularPower = encNormalDepth.w;
+    float specularPower = 0.0; //encNormalDepth.w;
 
     float NdL = max(0, dot(viewNormal, viewLightDirection));
 

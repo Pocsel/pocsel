@@ -1,6 +1,7 @@
 #ifdef _WIN32
 #include "tools/precompiled.hpp"
 #include <IL/il.h>
+#include <IL/ilu.h>
 
 #include "tools/gfx/DX9Renderer.hpp"
 #include "tools/gfx/dx9/directx.hpp"
@@ -26,6 +27,7 @@ namespace Tools { namespace Gfx { namespace DX9 {
                 ilDeleteImage(ilID);
                 throw std::runtime_error("Texture2D::ctor: Can't load data.");
             }
+            iluFlipImage();
             this->_FinishLoading(ilID);
         }
         else if (format == PixelFormat::Rgba8)
@@ -53,6 +55,7 @@ namespace Tools { namespace Gfx { namespace DX9 {
                 ilDeleteImage(ilID);
                 throw std::runtime_error("Texture2D::ctor: Can't load image file: " + imagePath);
             }
+            iluFlipImage();
             this->_FinishLoading(ilID);
     }
 

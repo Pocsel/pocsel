@@ -1,4 +1,5 @@
 #include "tools/precompiled.hpp"
+
 #include "tools/gfx/utils/GBuffer.hpp"
 #include "tools/gfx/utils/material/LuaMaterial.hpp"
 #include "tools/gfx/utils/texture/ITexture.hpp"
@@ -37,6 +38,7 @@ namespace Tools { namespace Gfx { namespace Utils {
 
         this->_quadModelViewProj = &this->_combineShader.GetParameter("quadWorldViewProjection");
         this->_diffuseTexture = &this->_combineShader.GetParameter("diffuse");
+        this->_normalsDepthTexture = &this->_combineShader.GetParameter("normalsDepth");
         this->_lightTexture = &this->_combineShader.GetParameter("lighting");
         this->_specularTexture = &this->_combineShader.GetParameter("specular");
 
@@ -57,6 +59,8 @@ namespace Tools { namespace Gfx { namespace Utils {
     {
         this->_renderer.BeginDraw(this->_gbufferRenderTarget.get());
         this->_renderer.SetViewport(glm::uvec2(0), this->_size);
+        this->_renderer.SetCullMode(CullMode::None);
+        this->_renderer.SetDepthTest(true);
     }
 
     void GBuffer::Unbind()
@@ -89,9 +93,11 @@ namespace Tools { namespace Gfx { namespace Utils {
         this->_renderer.SetDepthTest(false);
         this->_renderer.SetCullMode(Tools::Gfx::CullMode::None);
         colors.Bind();
+        this->GetNormalsDepth().Bind();
         lighting.Bind();
         specular.Bind();
         this->_diffuseTexture->Set(colors);
+        this->_normalsDepthTexture->Set(this->GetNormalsDepth());
         this->_lightTexture->Set(this->GetLighting());
         this->_specularTexture->Set(this->GetSpecular());
         this->_quadModelViewProj->Set(this->_mvp, true);
@@ -101,6 +107,7 @@ namespace Tools { namespace Gfx { namespace Utils {
             this->_quad.Render();
         } while (this->_combineShader.EndPass());
         colors.Unbind();
+        this->GetNormalsDepth().Unbind();
         lighting.Unbind();
         specular.Unbind();
 

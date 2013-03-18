@@ -141,7 +141,7 @@ int main(int ac, char *av[])
     actions["reloadshaders"] = BindAction::ReloadShaders;
     actions["togglecullface"] = BindAction::ToggleCullface;
 
-    Sdl::Window window(actions, false, glm::uvec2(1024));
+    Sdl::Window window(actions, !false, glm::uvec2(1024));
     IRenderer& renderer = window.GetRenderer();
     bool run = true;
     bool reload = true;
@@ -195,10 +195,11 @@ int main(int ac, char *av[])
 
         auto renderTarget = renderer.CreateRenderTarget(glm::uvec2(1024));
         renderTarget->PushRenderTarget(PixelFormat::Rgba8, RenderTargetUsage::Color);
+        renderTarget->PushRenderTarget(PixelFormat::Depth24Stencil8, RenderTargetUsage::DepthStencil);
 
         auto renderTarget2 = renderer.CreateRenderTarget(glm::uvec2(1024));
         renderTarget2->PushRenderTarget(PixelFormat::Rgba8, RenderTargetUsage::Color);
-        //renderTarget2->PushRenderTarget(PixelFormat::Depth24Stencil8, RenderTargetUsage::DepthStencil);
+        renderTarget2->PushRenderTarget(PixelFormat::Depth24Stencil8, RenderTargetUsage::DepthStencil);
 
         auto frontRt = renderTarget.get();
         auto backRt = renderTarget2.get();
@@ -225,6 +226,7 @@ int main(int ac, char *av[])
 
             renderer.BeginDraw(frontRt);
             {
+                renderer.Clear(ClearFlags::Color | ClearFlags::Depth | ClearFlags::Stencil);
                 renderer.BeginDraw2D();
                 {
                     renderer.SetClearColor(glm::vec4(0, 0, 0.5f, 1));
@@ -249,7 +251,7 @@ int main(int ac, char *av[])
                 renderer.SetDepthWrite(true);
                 renderer.SetProjectionMatrix(projection);
                 renderer.SetViewMatrix(view);
-                renderer.SetCullMode(CullMode::Clockwise);
+                renderer.SetCullMode(CullMode::None);
 
                 texture->Bind();
                 backRt->GetTexture(0).Bind();
@@ -263,8 +265,8 @@ int main(int ac, char *av[])
                         glm::translate(glm::vec3(1.5f, 0.0050f, 0.0f))
                         * glm::yawPitchRoll(
                             timer.GetElapsedTime() * 0.001f,
-                            timer.GetElapsedTime() * 0.0001f,
-                            timer.GetElapsedTime() * 0.002f));
+                            timer.GetElapsedTime() * 0.000001f,
+                            timer.GetElapsedTime() * 0.00002f));
                     cube.Render();
 
                     //testTex.Set(*texture);

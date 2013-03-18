@@ -23,6 +23,11 @@ sampler2D diffuse = sampler_state
     minFilter = Point;
     magFilter = Point;
 };
+sampler2D normalsDepth = sampler_state
+{
+	minFilter = Point;
+	magFilter = Point;
+};
 
 struct VSout
 {
@@ -40,15 +45,17 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
 
 float4 fs(in VSout v) : COLOR
 {
-    if (v.texCoord.y < 0.25)
+    if (v.texCoord.y < 1.0/5.0)
     {
-        float2 coord = v.texCoord * 4;
+        float2 coord = v.texCoord * 5;
         if (coord.x < 1)
             return float4(tex2D(lighting, coord).rgb, 1);
         if (coord.x < 2)
             return float4(tex2D(specular, coord + float2(-1, 0)).rgb, 1);
         if (coord.x < 3)
             return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
+		if (coord.x < 4)
+			return float4(tex2D(normalsDepth, coord + float2(-3, 0)).rgb, 1);
     }
 
     float4 diff = tex2D(diffuse, v.texCoord);

@@ -35,7 +35,7 @@ namespace Tools { namespace Gfx {
 
     private:
         void _FinishLoading(unsigned int ilID);
-        void _FinishLoading(GLint internalFormat, GLenum format, Uint32 size, GLvoid const* data, int pixelSize, void const* mipmapData);
+        void _FinishLoading(GLint internalFormat, GLenum format, Uint32 size, GLvoid const* data, int pixelSize, void const* mipmapData, bool flip);
     };
 
 }}}

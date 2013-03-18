@@ -68,7 +68,7 @@ namespace Tools { namespace Gfx {
         void SetMatrixMode(unsigned int mode);
 
         // Misc
-        virtual bool IsYTexCoordInverted() const { return this->_currentState->renderToTexture; }
+        virtual bool IsYTexCoordInverted() const { return false; } //this->_currentState->renderToTexture; }
 
     private:
         void _PushState(ARenderer::RenderState const& state);

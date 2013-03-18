@@ -94,22 +94,22 @@ namespace Client { namespace Resources {
         Tools::Gfx::ITexture2D* errTex = nullptr;
         if (this->_rawTextures.find(0) != this->_rawTextures.end())
             errTex = this->_rawTextures[0];
-        for (auto it = this->_rawTextures.begin(), ite = this->_rawTextures.end(); it != ite; ++it)
-            if (it->second != errTex)
-                Tools::Delete(it->second);
-        for (auto it = this->_animatedTextureFrames.begin(), ite = this->_animatedTextureFrames.end(); it != ite; ++it)
-            for (unsigned int i = 0; i < it->second.size(); ++i)
-                if (it->second[i] != errTex)
-                    Tools::Delete(it->second[i]);
+        for (auto& it: this->_rawTextures)
+            if (it.second != errTex)
+                Tools::Delete(it.second);
+        for (auto& it: this->_animatedTextureFrames)
+            for (unsigned int i = 0; i < it.second.size(); ++i)
+                if (it.second[i] != errTex)
+                    Tools::Delete(it.second[i]);
         Tools::Delete(errTex);
 
         // Models
         Tools::Models::MqmModel* errModel = 0;
         if (this->_models.count(0))
             errModel = this->_models[0];
-        for (auto it = this->_models.begin(), ite = this->_models.end(); it != ite; ++it)
-            if (it->second != errModel)
-                Tools::Delete(it->second);
+        for (auto it: this->_models)
+            if (it.second != errModel)
+                Tools::Delete(it.second);
         Tools::Delete(errModel);
 
         // Shaders

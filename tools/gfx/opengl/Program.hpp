@@ -34,6 +34,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         virtual void Begin();
         virtual void End();
 
+        GLRenderer& GetRenderer() { return this->_renderer; }
         GLuint GetProgram() const { return this->_program; }
         void UpdateParameters();
         GLint GetAttributeIndex(VertexAttributeUsage::Type usage) const { return this->_attributes[usage]; }

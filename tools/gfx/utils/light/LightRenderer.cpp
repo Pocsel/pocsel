@@ -264,6 +264,8 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
         this->_renderer.SetModelMatrix(glm::mat4());
         //this->_directionnal.normalDepth->Set(gbuffer.GetSpecular());
         this->_directionnal.screenModelViewProjection->Set(this->_directionnal.modelViewProjection, true);
+        this->_renderer.SetDepthTest(false);
+        this->_renderer.SetCullMode(Tools::Gfx::CullMode::None);
         do
         {
             this->_directionnal.shader->BeginPass();
