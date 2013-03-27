@@ -16,6 +16,7 @@
 #include "client/menu/LoadingScreen.hpp"
 #include "client/menu/DisconnectedScreen.hpp"
 #include "client/menu/MainMenu.hpp"
+#include "client/sound/SoundSystem.hpp"
 
 namespace Client {
 
@@ -41,6 +42,7 @@ namespace Client {
 
         this->_window = new Tools::Window::Sdl::Window(actions, this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen);
         this->_threadPool = new Tools::Thread::ThreadPool(2);
+        this->_soundSystem = new Sound::SoundSystem();
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
         this->_menu = new Menu::Menu(*this);
@@ -55,6 +57,7 @@ namespace Client {
     {
         Tools::Delete(this->_game);
         Tools::Delete(this->_menu);
+        Tools::Delete(this->_soundSystem);
         Tools::Delete(this->_packetDispatcher);
         Tools::Delete(this->_resourceManager);
         Tools::Delete(this->_threadPool);

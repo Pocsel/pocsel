@@ -22,7 +22,7 @@ namespace Client { namespace Menu {
         std::function<void(void)> f = std::bind(&DisconnectedScreen::_RetryButton, this);
         this->_button = new Widget::Button(this->_client.GetWindow().GetInputManager(),
                 this->_menu,
-                this->_renderer,
+                this->_client.GetLocalResourceManager(),
                 *this->_actionBinder,
                 f,
                 "Retry",

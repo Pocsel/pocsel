@@ -34,6 +34,8 @@ msc {
     c => s [label="[TeleportOk]"];
     --- [label="Player movement"];
     c => s [label="[Move] (UDP)\nMovingOrientedPosition pos"];
+    --- [label="New doodad"];
+    s => c [label="[DoodadSpawn]\nUint32 doodadId\nUint32 entityId\nString doodadName\nNode position\nUint32 bodyId\nString serializedLuaKey\nString serializedLuaValue\n(more key-value pairs)"];
     --- [label="Player action"];
     c => s [label="[Action] (UDP)\nOrientedPosition pos\nCubePosition target\nUint32 actionId"];
     --- [label="Getting new chunks"];

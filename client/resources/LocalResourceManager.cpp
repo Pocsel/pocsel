@@ -8,18 +8,20 @@
 #include "tools/models/MqmModel.hpp"
 #include "tools/models/ErrorModel.hpp"
 
-
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
 #include "client/resources/LocalResourceManager.hpp"
+#include "client/sound/SoundSystem.hpp"
+#include "client/sound/Sound.hpp"
 
 namespace Client { namespace Resources {
 
-    LocalResourceManager::LocalResourceManager(Client& client)
-        : _client(client),
-        _renderer(client.GetWindow().GetRenderer())
+    LocalResourceManager::LocalResourceManager(Client& client) :
+        _client(client),
+        _renderer(client.GetWindow().GetRenderer()),
+        _soundSystem(client.GetSoundSystem())
     {
         this->_InitErrorTexture();
         this->_InitErrorModel();
@@ -34,6 +36,8 @@ namespace Client { namespace Resources {
         for (auto it = this->_fonts.begin(), ite = this->_fonts.end(); it != ite; ++it)
             Tools::Delete(it->second);
         for (auto it = this->_models.begin(), ite = this->_models.end(); it != ite; ++it)
+            Tools::Delete(it->second);
+        for (auto it = this->_sounds.begin(), ite = this->_sounds.end(); it != ite; ++it)
             Tools::Delete(it->second);
     }
 
@@ -145,6 +149,20 @@ namespace Client { namespace Resources {
         else if (it->second != 0)
             return *it->second;
         return *this->_models["__error__"];
+    }
+
+    Sound::Sound const& LocalResourceManager::GetSound(std::string const& path)
+    {
+        auto it = this->_sounds.find(path);
+        if (it == this->_sounds.end())
+        {
+            auto soundPath = (this->_client.GetSettings().confDir / "sounds" / path).string();
+            Sound::Sound* sound = new Sound::Sound(this->_soundSystem, soundPath);
+            this->_sounds[path] = sound;
+            return *sound;
+        }
+        else
+            return *it->second;
     }
 
     void LocalResourceManager::_InitErrorModel()

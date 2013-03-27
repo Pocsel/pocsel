@@ -1,8 +1,11 @@
+find_package(FMODEx REQUIRED)
+
 file(GLOB_RECURSE client_src "*.[ch]pp")
 file(GLOB_RECURSE resources_lua_src "*.lua")
 file(GLOB_RECURSE resources_fx_src "*.fx")
 
 include_directories(${BULLET_DIR})
+include_directories(${FMODEX_INCLUDE_DIR})
 
 set(src
     ${client_src}
@@ -52,6 +55,7 @@ target_link_libraries(client
     ${DirectX_ERROR_LIBRARY}
     ${DirectX_D3D9_LIBRARY}
     ${DirectX_D3DX9_LIBRARY}
+    ${FMODEX_LIBRARY}
 )
 
 SetProgramInfo(client)

@@ -5,12 +5,14 @@
 
 #include "client/menu/widget/Button.hpp"
 #include "client/menu/Menu.hpp"
+#include "client/resources/LocalResourceManager.hpp"
+#include "client/sound/SoundSystem.hpp"
 
 namespace Client { namespace Menu { namespace Widget {
 
     Button::Button(Tools::Window::InputManager const& inputManager,
             Menu& menu,
-            Tools::IRenderer& renderer,
+            Resources::LocalResourceManager& localResourceManager,
             Tools::Window::ActionBinder& actionBinder,
             std::function<void(void)>& callback,
             std::string const& text /* = "" */,
@@ -18,7 +20,9 @@ namespace Client { namespace Menu { namespace Widget {
             glm::fvec2 const& pos /* = glm::fvec2(0) */) :
         _inputManager(inputManager),
         _menu(menu),
-        _renderer(renderer),
+        _localResourceManager(localResourceManager),
+        _renderer(localResourceManager.GetRenderer()),
+        _soundSystem(localResourceManager.GetSoundSystem()),
         _callback(callback),
         _text(text),
         _size(size),
@@ -86,6 +90,7 @@ namespace Client { namespace Menu { namespace Widget {
         if (this->_MouseIsHovering())
         {
             this->_pressed = true;
+            this->_soundSystem.Play(this->_localResourceManager.GetSound("button_click_pressed.wav"));
             this->_Update();
         }
     }
@@ -95,7 +100,10 @@ namespace Client { namespace Menu { namespace Widget {
         this->_pressed = false;
         this->_Update();
         if (this->_MouseIsHovering())
+        {
+            this->_soundSystem.Play(this->_localResourceManager.GetSound("button_click_released.aif"));
             this->_callback();
+        }
     }
 
     void Button::SetText(std::string const& text)
