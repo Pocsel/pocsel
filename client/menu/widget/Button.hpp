@@ -20,9 +20,6 @@ namespace Client {
     namespace Resources {
         class LocalResourceManager;
     }
-    namespace Sound {
-        class SoundSystem;
-    }
 }
 
 namespace Client { namespace Menu { namespace Widget {
@@ -35,7 +32,6 @@ namespace Client { namespace Menu { namespace Widget {
         Menu& _menu;
         Resources::LocalResourceManager& _localResourceManager;
         Tools::IRenderer& _renderer;
-        Sound::SoundSystem const& _soundSystem;
         std::function<void(void)> _callback;
         std::string _text;
         glm::fvec2 _size;

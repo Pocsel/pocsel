@@ -1,6 +1,8 @@
 #ifndef __CLIENT_RESOURCES_LOCALRESOURCEMANAGER_HPP__
 #define __CLIENT_RESOURCES_LOCALRESOURCEMANAGER_HPP__
 
+#include "tools/sound/fmod/SoundSystem.hpp"
+
 namespace Tools {
     class IRenderer;
     namespace Renderers {
@@ -13,13 +15,16 @@ namespace Tools {
     namespace Models {
         class MqmModel;
     }
+    namespace Sound {
+        class ISoundSystem;
+        class ISound;
+        namespace Fmod {
+            class SoundSystem;
+        }
+    }
 }
 namespace Client {
     class Client;
-    namespace Sound {
-        class SoundSystem;
-        class Sound;
-    }
 }
 
 namespace Client { namespace Resources {
@@ -30,12 +35,12 @@ namespace Client { namespace Resources {
         private:
             Client& _client;
             Tools::IRenderer& _renderer;
-            Sound::SoundSystem const& _soundSystem;
+            Tools::Sound::Fmod::SoundSystem const& _soundSystem;
             std::map<std::string, Tools::Renderers::Utils::Font*> _fonts;
             std::map<std::string, Tools::Renderers::IShaderProgram*> _shaders;
             std::map<std::string, Tools::Renderers::ITexture2D*> _textures;
             std::map<std::string, Tools::Models::MqmModel*> _models;
-            std::map<std::string, Sound::Sound*> _sounds;
+            std::map<std::string, Tools::Sound::ISound*> _sounds;
 
         public:
             LocalResourceManager(Client& client);
@@ -45,10 +50,10 @@ namespace Client { namespace Resources {
             Tools::Renderers::ITexture2D& GetTexture2D(std::string const& path);
             Tools::Renderers::IShaderProgram& GetShader(std::string const& path);
             Tools::Models::MqmModel const& GetMqmModel(std::string const& path);
-            Sound::Sound const& GetSound(std::string const& path);
+            Tools::Sound::ISound const& GetSound(std::string const& path);
 
             Tools::IRenderer& GetRenderer() { return this->_renderer; }
-            Sound::SoundSystem const& GetSoundSystem() { return this->_soundSystem; }
+            Tools::Sound::ISoundSystem const& GetSoundSystem() { return this->_soundSystem; }
 
         private:
             void _InitErrorModel();

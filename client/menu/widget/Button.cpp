@@ -2,11 +2,11 @@
 #include "tools/renderers/utils/Font.hpp"
 #include "tools/window/ActionBinder.hpp"
 #include "tools/window/InputManager.hpp"
+#include "tools/sound/ISound.hpp"
 
 #include "client/menu/widget/Button.hpp"
 #include "client/menu/Menu.hpp"
 #include "client/resources/LocalResourceManager.hpp"
-#include "client/sound/SoundSystem.hpp"
 
 namespace Client { namespace Menu { namespace Widget {
 
@@ -22,7 +22,6 @@ namespace Client { namespace Menu { namespace Widget {
         _menu(menu),
         _localResourceManager(localResourceManager),
         _renderer(localResourceManager.GetRenderer()),
-        _soundSystem(localResourceManager.GetSoundSystem()),
         _callback(callback),
         _text(text),
         _size(size),
@@ -90,7 +89,7 @@ namespace Client { namespace Menu { namespace Widget {
         if (this->_MouseIsHovering())
         {
             this->_pressed = true;
-            this->_soundSystem.Play(this->_localResourceManager.GetSound("button_click_pressed.wav"));
+            this->_localResourceManager.GetSound("button_click_pressed.wav").Play();
             this->_Update();
         }
     }
@@ -101,7 +100,7 @@ namespace Client { namespace Menu { namespace Widget {
         this->_Update();
         if (this->_MouseIsHovering())
         {
-            this->_soundSystem.Play(this->_localResourceManager.GetSound("button_click_released.aif"));
+            this->_localResourceManager.GetSound("button_click_released.aif").Play();
             this->_callback();
         }
     }

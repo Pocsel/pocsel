@@ -4,6 +4,7 @@
 #include "tools/stat/StatManager.hpp"
 #include "tools/window/sdl/Window.hpp"
 #include "tools/window/InputManager.hpp"
+#include "tools/sound/fmod/SoundSystem.hpp"
 
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
@@ -16,7 +17,6 @@
 #include "client/menu/LoadingScreen.hpp"
 #include "client/menu/DisconnectedScreen.hpp"
 #include "client/menu/MainMenu.hpp"
-#include "client/sound/SoundSystem.hpp"
 
 namespace Client {
 
@@ -42,7 +42,7 @@ namespace Client {
 
         this->_window = new Tools::Window::Sdl::Window(actions, this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen);
         this->_threadPool = new Tools::Thread::ThreadPool(2);
-        this->_soundSystem = new Sound::SoundSystem();
+        this->_soundSystem = new Tools::Sound::Fmod::SoundSystem();
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
         this->_menu = new Menu::Menu(*this);
@@ -159,6 +159,7 @@ namespace Client {
                 frameTimer.Sleep(timeLeft);
 
             Tools::Stat::statManager.Update();
+            this->_soundSystem->Update();
         }
 
         if (this->_network.IsRunning())

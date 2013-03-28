@@ -1,11 +1,8 @@
-find_package(FMODEx REQUIRED)
-
 file(GLOB_RECURSE client_src "*.[ch]pp")
 file(GLOB_RECURSE resources_lua_src "*.lua")
 file(GLOB_RECURSE resources_fx_src "*.fx")
 
 include_directories(${BULLET_DIR})
-include_directories(${FMODEX_INCLUDE_DIR})
 
 set(src
     ${client_src}
@@ -20,6 +17,7 @@ set(src
     ${tools_stat_src}
     ${tools_thread_src}
     ${tools_window_src}
+    ${tools_sound_src}
 )
 set(res_src
     ${resources_lua_src}

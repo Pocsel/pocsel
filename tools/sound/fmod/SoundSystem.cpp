@@ -1,9 +1,9 @@
 #include <fmodex/fmod_errors.h>
 
-#include "client/sound/SoundSystem.hpp"
-#include "client/sound/Sound.hpp"
+#include "tools/sound/fmod/SoundSystem.hpp"
+#include "tools/sound/fmod/Sound.hpp"
 
-namespace Client { namespace Sound {
+namespace Tools { namespace Sound { namespace Fmod {
 
     SoundSystem::SoundSystem()
     {
@@ -34,9 +34,9 @@ namespace Client { namespace Sound {
             Tools::log << "FMOD sound system successfully released." << std::endl;
     }
 
-    void SoundSystem::Play(Sound const& sound) const
+    void SoundSystem::Update() const
     {
-        this->_system->playSound(FMOD_CHANNEL_FREE /* channel id */, sound._sound, false /* paused */, nullptr /* channel ptr */);
+        this->_system->update();
     }
 
-}}
+}}}

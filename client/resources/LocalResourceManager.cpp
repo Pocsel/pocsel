@@ -7,14 +7,15 @@
 #include "tools/window/Window.hpp"
 #include "tools/models/MqmModel.hpp"
 #include "tools/models/ErrorModel.hpp"
+#include "tools/sound/ISoundSystem.hpp"
+#include "tools/sound/ISound.hpp"
+#include "tools/sound/fmod/Sound.hpp"
 
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
 #include "client/network/Network.hpp"
 #include "client/network/PacketCreator.hpp"
 #include "client/resources/LocalResourceManager.hpp"
-#include "client/sound/SoundSystem.hpp"
-#include "client/sound/Sound.hpp"
 
 namespace Client { namespace Resources {
 
@@ -151,13 +152,13 @@ namespace Client { namespace Resources {
         return *this->_models["__error__"];
     }
 
-    Sound::Sound const& LocalResourceManager::GetSound(std::string const& path)
+    Tools::Sound::ISound const& LocalResourceManager::GetSound(std::string const& path)
     {
         auto it = this->_sounds.find(path);
         if (it == this->_sounds.end())
         {
             auto soundPath = (this->_client.GetSettings().confDir / "sounds" / path).string();
-            Sound::Sound* sound = new Sound::Sound(this->_soundSystem, soundPath);
+            Tools::Sound::ISound* sound = new Tools::Sound::Fmod::Sound(this->_soundSystem, soundPath);
             this->_sounds[path] = sound;
             return *sound;
         }

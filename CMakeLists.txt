@@ -28,6 +28,7 @@ find_package(Cg REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(Sqlite3 REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(FMODEx REQUIRED)
 
 if (UNIX)
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -85,6 +86,7 @@ set(ALL_INCLUDES
     ${SQLITE3_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
+    ${FMODEX_INCLUDE_DIR}
     "${CMAKE_CURRENT_SOURCE_DIR}/luasel/include"
 )
 include_directories(
@@ -110,6 +112,7 @@ file(GLOB_RECURSE   tools_stat_src              "tools/stat/*.[ch]pp")
 file(GLOB_RECURSE   tools_thread_src            "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
+file(GLOB_RECURSE   tools_sound_src             "tools/sound/*.[ch]pp")
 # lua resources
 file(GLOB_RECURSE   tools_lua_res               "tools/lua/utils/*.lua")
 
