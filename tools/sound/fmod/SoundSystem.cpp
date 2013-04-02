@@ -34,9 +34,59 @@ namespace Tools { namespace Sound { namespace Fmod {
             Tools::log << "FMOD sound system successfully released." << std::endl;
     }
 
-    void SoundSystem::Update() const
+    void SoundSystem::Update()
     {
         this->_system->update();
+    }
+
+    void SoundSystem::SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel, glm::fvec3 const& forward, glm::fvec3 const& up)
+    {
+        this->_earsPos.x = pos.x;
+        this->_earsPos.y = pos.y;
+        this->_earsPos.z = pos.z;
+        this->_earsVel.x = vel.x;
+        this->_earsVel.y = vel.y;
+        this->_earsVel.z = vel.z;
+        this->_earsForward.x = forward.x;
+        this->_earsForward.y = forward.y;
+        this->_earsForward.z = forward.z;
+        this->_earsUp.x = up.x;
+        this->_earsUp.y = up.y;
+        this->_earsUp.z = up.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, &this->_earsVel, &this->_earsForward, &this->_earsUp);
+    }
+
+    void SoundSystem::SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel, glm::fvec3 const& forward)
+    {
+        this->_earsPos.x = pos.x;
+        this->_earsPos.y = pos.y;
+        this->_earsPos.z = pos.z;
+        this->_earsVel.x = vel.x;
+        this->_earsVel.y = vel.y;
+        this->_earsVel.z = vel.z;
+        this->_earsForward.x = forward.x;
+        this->_earsForward.y = forward.y;
+        this->_earsForward.z = forward.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, &this->_earsVel, &this->_earsForward, nullptr);
+    }
+
+    void SoundSystem::SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel)
+    {
+        this->_earsPos.x = pos.x;
+        this->_earsPos.y = pos.y;
+        this->_earsPos.z = pos.z;
+        this->_earsVel.x = vel.x;
+        this->_earsVel.y = vel.y;
+        this->_earsVel.z = vel.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, &this->_earsVel, nullptr, nullptr);
+    }
+
+    void SoundSystem::SetEars(glm::fvec3 const& pos)
+    {
+        this->_earsPos.x = pos.x;
+        this->_earsPos.y = pos.y;
+        this->_earsPos.z = pos.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, nullptr, nullptr, nullptr);
     }
 
 }}}

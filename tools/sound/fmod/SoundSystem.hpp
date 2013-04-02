@@ -16,11 +16,19 @@ namespace Tools { namespace Sound { namespace Fmod {
 
     private:
         FMOD::System* _system;
+        FMOD_VECTOR _earsPos;
+        FMOD_VECTOR _earsVel;
+        FMOD_VECTOR _earsForward;
+        FMOD_VECTOR _earsUp;
 
     public:
         SoundSystem();
         ~SoundSystem();
-        virtual void Update() const;
+        virtual void Update();
+        virtual void SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel, glm::fvec3 const& forward, glm::fvec3 const& up);
+        virtual void SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel, glm::fvec3 const& forward);
+        virtual void SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel);
+        virtual void SetEars(glm::fvec3 const& pos);
     };
 
 }}}
