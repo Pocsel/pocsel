@@ -9,6 +9,7 @@
 #include "tools/gfx/dx9/IndexBuffer.hpp"
 #include "tools/gfx/dx9/RenderTarget.hpp"
 #include "tools/gfx/dx9/Program.hpp"
+#include "tools/gfx/dx9/SamplerState.hpp"
 #include "tools/gfx/dx9/Texture2D.hpp"
 #include "tools/gfx/dx9/VertexBuffer.hpp"
 #include "tools/gfx/dx9/VertexProgram.hpp"
@@ -122,6 +123,11 @@ namespace Tools { namespace Gfx {
         auto rt = new DX9::RenderTarget(*this, imgSize);
         this->_allRenderTargets.push_back(rt);
         return std::unique_ptr<IRenderTarget>(rt);
+    }
+
+    std::unique_ptr<ISamplerState> DX9Renderer::CreateSamplerState()
+    {
+        return std::unique_ptr<ISamplerState>(new DX9::SamplerState(*this));
     }
 
     std::unique_ptr<ITexture2D> DX9Renderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize, void const* mipmapData)

@@ -41,6 +41,7 @@ namespace Tools { namespace Gfx {
         virtual std::unique_ptr<IVertexBuffer> CreateVertexBuffer();
         virtual std::unique_ptr<IIndexBuffer> CreateIndexBuffer();
         virtual std::unique_ptr<IRenderTarget> CreateRenderTarget(glm::uvec2 const& imgSize);
+        virtual std::unique_ptr<ISamplerState> CreateSamplerState();
         virtual std::unique_ptr<ITexture2D> CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize, void const* mipmapData);
         virtual std::unique_ptr<ITexture2D> CreateTexture2D(std::string const& imagePath);
         virtual std::unique_ptr<IProgram> CreateProgram(std::string const& vertex, std::string const& fragment);

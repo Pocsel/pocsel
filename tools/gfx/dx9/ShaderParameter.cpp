@@ -115,6 +115,14 @@ namespace Tools { namespace Gfx { namespace DX9 {
         DXCHECKERROR(this->_device->SetTexture(this->_desc.RegisterIndex, tex.GetTexture()));
     }
 
+    void ShaderParameter::Set(ITexture2D& texture, ISamplerState& sampler)
+    {
+        assert(this->_fragmentParam != 0 && "Ce n'est pas une texture");
+        Texture2D& tex = reinterpret_cast<Texture2D&>(texture);
+        sampler.Bind(this->_desc.RegisterIndex);
+        DXCHECKERROR(this->_device->SetTexture(this->_desc.RegisterIndex, tex.GetTexture()));
+    }
+
 }}}
 
 #endif

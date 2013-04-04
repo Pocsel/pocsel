@@ -115,9 +115,21 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         if (this->_value.get() == nullptr)
         {
             this->_type = Texture;
-            this->_value.reset(new char[sizeof(Texture2D*)]);
+            this->_value.reset(new char[sizeof(Texture2D*) + sizeof(ISamplerState*)]);
         }
-        (*(ITexture2D**)this->_value.get()) = &texture;
+        ((ITexture2D**)this->_value.get())[0] = &texture;
+        ((ISamplerState**)this->_value.get())[1] = nullptr;
+    }
+
+    void ShaderParameter::Set(ITexture2D& texture, ISamplerState& sampler)
+    {
+        if (this->_value.get() == nullptr)
+        {
+            this->_type = Texture;
+            this->_value.reset(new char[sizeof(Texture2D*) + sizeof(ISamplerState*)]);
+        }
+        ((ITexture2D**)this->_value.get())[0] = &texture;
+        ((ISamplerState**)this->_value.get())[1] = &sampler;
     }
 
     void ShaderParameter::Update()
@@ -142,8 +154,11 @@ namespace Tools { namespace Gfx { namespace OpenGL {
             break;
         case Texture:
             {
-                Texture2D* tex = *(Texture2D**)this->_value.get();
+                Texture2D* tex = ((Texture2D**)this->_value.get())[0];
+                ISamplerState* sampler = ((ISamplerState**)this->_value.get())[1];
                 assert(tex->GetBindID() >= 0 && "Faut bind la texture avant.");
+                if (sampler != nullptr)
+                    sampler->Bind(tex->GetBindID());
                 GLCHECK(glUniform1i(this->_uniform, tex->GetBindID()));
             }
             break;

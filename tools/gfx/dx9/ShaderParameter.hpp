@@ -29,6 +29,7 @@ namespace Tools { namespace Gfx { namespace DX9 {
         virtual void Set(glm::detail::tmat4x4<float> const& matrix, bool isProjection = false);
         virtual void Set(std::vector<glm::mat4x4> const& matrices);
         virtual void Set(ITexture2D& texture);
+        virtual void Set(ITexture2D& texture, ISamplerState& sampler);
     };
 
 }}}

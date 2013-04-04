@@ -54,6 +54,69 @@ namespace Tools { namespace Gfx { namespace Effect {
                 return ShaderParameterUsage::None;
             }
         }
+
+        std::unique_ptr<ISamplerState> _CreateSamplerState(IRenderer& renderer, UniformParameter const& param)
+        {
+            auto sampler = renderer.CreateSamplerState();
+            if (param.value.which() == 0)
+            {
+                auto const& states = boost::get<Sampler>(param.value).states;
+                for (auto const& pair: states)
+                {
+                    std::cout << pair.first << " => " << pair.second << std::endl;
+                }
+            }
+            else
+            {
+                auto const& str = boost::get<std::string>(param.value);
+                int pos = 1;
+                while (str[pos] != '}')
+                {
+                    auto readIdentifier = [&]() {
+                        int startPos = pos;
+                        while (str[pos] != '=' && str[pos] != ';')
+                            ++pos;
+                        return str.substr(startPos, pos - startPos);
+                    };
+                    auto parseValue = [](std::string const& value) {
+                        if (value == "nearest")
+                            return TextureFilter::Nearest;
+                        if (value == "linear")
+                            return TextureFilter::Linear;
+                        return TextureFilter::Linear;
+                    };
+
+                    std::string key = readIdentifier();
+                    pos++;
+                    std::string value = readIdentifier();
+                    pos++;
+
+                    if (boost::algorithm::to_lower_copy(key) == "minfilter")
+                        sampler->SetMinFilter(parseValue(boost::algorithm::to_lower_copy(value)));
+                    if (boost::algorithm::to_lower_copy(key) == "magfilter")
+                        sampler->SetMagFilter(parseValue(boost::algorithm::to_lower_copy(value)));
+
+                    std::cout << key << " => " << value << std::endl;
+                }
+            }
+            return sampler;
+        }
+    }
+
+    TextureShaderParameter::TextureShaderParameter(IShaderParameter& param, std::unique_ptr<ISamplerState>&& sampler) :
+        _parameter(param),
+        _sampler(std::move(sampler))
+    {
+    }
+
+    void TextureShaderParameter::Set(ITexture2D& tex)
+    {
+        this->_parameter.Set(tex, *this->_sampler);
+    }
+
+    void TextureShaderParameter::Set(ITexture2D& tex, ISamplerState& sampler)
+    {
+        this->_parameter.Set(tex, sampler);
     }
 
     Effect::Effect(IRenderer& renderer, CompleteShader const& complShader) :
@@ -76,10 +139,21 @@ namespace Tools { namespace Gfx { namespace Effect {
         auto const& it = this->_shader.uniforms.find(identifier);
         if (it == this->_shader.uniforms.end())
         {
-            auto& dummy = this->_parameters[identifier];
+            auto& dummy = this->_dummyParameters[identifier];
             if (dummy.get() == nullptr)
                 dummy.reset(new DummyShaderParameter());
             return *dummy;
+        }
+        if (it->second.type == Type::Sampler2D)
+        {
+            auto& texIt = this->_textureParameters.find(identifier);
+            if (texIt == this->_textureParameters.end())
+            {
+                auto tsp = new TextureShaderParameter(this->_program->GetParameter(it->second.name), _CreateSamplerState(this->_renderer, it->second));
+                this->_textureParameters[identifier].reset(tsp);
+                return *tsp;
+            }
+            return *texIt->second;
         }
         return this->_program->GetParameter(it->second.name);
     }

@@ -207,6 +207,17 @@ namespace Tools { namespace Gfx {
         };
     }
 
+    class ISamplerState
+    {
+    public:
+        virtual ~ISamplerState() {}
+        virtual TextureFilter::Type GetMinFilter() const = 0;
+        virtual TextureFilter::Type GetMagFilter() const = 0;
+        virtual void SetMinFilter(TextureFilter::Type filter) = 0;
+        virtual void SetMagFilter(TextureFilter::Type filter) = 0;
+        virtual void Bind(Uint32 unit) = 0;
+    };
+
     class ITexture2D
     {
     public:
@@ -281,6 +292,7 @@ namespace Tools { namespace Gfx {
         virtual void Set(glm::mat4 const& matrix, bool isProjection = false) = 0;
         virtual void Set(std::vector<glm::mat4x4> const& matrices) = 0;
         virtual void Set(ITexture2D& texture) = 0;
+        virtual void Set(ITexture2D& texture, ISamplerState& sampler) = 0;
 
         virtual bool IsUseable() const = 0;
 
@@ -385,6 +397,7 @@ namespace Tools { namespace Gfx {
         virtual std::unique_ptr<IIndexBuffer> CreateIndexBuffer() = 0;
         virtual std::unique_ptr<IVertexBuffer> CreateVertexBuffer() = 0;
         virtual std::unique_ptr<IRenderTarget> CreateRenderTarget(glm::uvec2 const& imgSize = glm::uvec2(0)) = 0;
+        virtual std::unique_ptr<ISamplerState> CreateSamplerState() = 0;
         virtual std::unique_ptr<ITexture2D> CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize = glm::uvec2(0), void const* mipmapData = 0) = 0;
         virtual std::unique_ptr<ITexture2D> CreateTexture2D(std::string const& imagePath) = 0;
         virtual std::unique_ptr<IProgram> CreateProgram(std::string const& vertexCode, std::string const& fragmentCode) = 0;

@@ -149,8 +149,6 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         else
             gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, this->_size.x, this->_size.y, format, GL_UNSIGNED_BYTE, data);
 
-        //GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-        //GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
         GLCHECK(glBindTexture(GL_TEXTURE_2D, 0));
     }
 

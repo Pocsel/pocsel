@@ -61,6 +61,7 @@
 #include <boost/ref.hpp>
 #include <boost/thread.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/algorithm/string.hpp> 
 #include "tools/filesystem.hpp"
 
 // Others

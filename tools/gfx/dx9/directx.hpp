@@ -196,4 +196,17 @@ namespace Tools { namespace Gfx { namespace DX9 {
         }
     }
 
+    inline DWORD GetTextureFilter(TextureFilter::Type filter)
+    {
+        switch (filter)
+        {
+        case TextureFilter::Nearest: return D3DTEXF_POINT;
+        case TextureFilter::Linear: return D3DTEXF_LINEAR;
+        case TextureFilter::NearestMipmapNearest: return D3DTEXF_POINT;
+        case TextureFilter::LinearMipmapLinear: return D3DTEXF_LINEAR;
+        default:
+            throw std::runtime_error("Bad TextureFilter");
+        };
+    }
+
 }}}

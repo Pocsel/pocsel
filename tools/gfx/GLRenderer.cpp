@@ -5,6 +5,7 @@
 #include "tools/gfx/opengl/opengl.hpp"
 #include "tools/gfx/opengl/IndexBuffer.hpp"
 #include "tools/gfx/opengl/RenderTarget.hpp"
+#include "tools/gfx/opengl/SamplerState.hpp"
 #include "tools/gfx/opengl/Program.hpp"
 #include "tools/gfx/opengl/Texture2D.hpp"
 #include "tools/gfx/opengl/VertexBuffer.hpp"
@@ -86,6 +87,11 @@ namespace Tools { namespace Gfx {
     std::unique_ptr<IRenderTarget> GLRenderer::CreateRenderTarget(glm::uvec2 const& imgSize)
     {
         return std::unique_ptr<IRenderTarget>(new OpenGL::RenderTarget(*this, imgSize));
+    }
+
+    std::unique_ptr<ISamplerState> GLRenderer::CreateSamplerState()
+    {
+        return std::unique_ptr<ISamplerState>(new OpenGL::SamplerState(*this));
     }
 
     std::unique_ptr<ITexture2D> GLRenderer::CreateTexture2D(PixelFormat::Type format, Uint32 size, void const* data, glm::uvec2 const& imgSize, void const* mipmapData)
