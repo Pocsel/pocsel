@@ -23,7 +23,7 @@ namespace Tools { namespace Gfx { namespace Utils {
     GBuffer::GBuffer(IRenderer& renderer, glm::uvec2 const& size, Effect::Effect& combineShader) :
         _renderer(renderer),
         _combineShader(combineShader),
-        _quad(renderer),
+        _quad(renderer.CreateVertexBuffer()),
         _size(size)
     {
         this->_gbufferRenderTarget = this->_renderer.CreateRenderTarget(size);
@@ -42,7 +42,19 @@ namespace Tools { namespace Gfx { namespace Utils {
         this->_lightTexture = &this->_combineShader.GetParameter("lighting");
         this->_specularTexture = &this->_combineShader.GetParameter("specular");
 
-        this->_mvp = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
+        this->_mvp = glm::ortho(0.0f, 0.5f, 0.5f, 0.0f) * glm::translate(0.0f, 0.0f, 1.0f);
+
+        glm::vec2 delta(0.0f);
+        if (this->_renderer.GetRendererName() == "DirectX 9 Renderer")
+            delta = -1.0f / glm::vec2(this->_size);
+        float vertices[] = {
+            0, 0, 0,  delta.x + 0, delta.y + 0,
+            0, 1, 0,  delta.x + 0, delta.y + 2,
+            1, 0, 0,  delta.x + 2, delta.y + 0,
+        };
+        this->_quad->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
+        this->_quad->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3);
+        this->_quad->PushVertexAttribute(DataType::Float, VertexAttributeUsage::TexCoord0, 2);
     }
 
     void GBuffer::Resize(glm::uvec2 const& size)
@@ -104,7 +116,9 @@ namespace Tools { namespace Gfx { namespace Utils {
         do
         {
             this->_combineShader.BeginPass();
-            this->_quad.Render();
+            this->_quad->Bind();
+            this->_renderer.DrawVertexBuffer(0, 3);
+            this->_quad->Unbind();
         } while (this->_combineShader.EndPass());
         colors.Unbind();
         this->GetNormalsDepth().Unbind();
@@ -132,7 +146,9 @@ namespace Tools { namespace Gfx { namespace Utils {
             do
             {
                 shader.BeginPass();
-                this->_quad.Render();
+                this->_quad->Bind();
+                this->_renderer.DrawVertexBuffer(0, 3);
+                this->_quad->Unbind();
             } while (shader.EndPass());
         }
         finalImg.Unbind();

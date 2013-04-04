@@ -27,7 +27,7 @@ namespace Tools { namespace Gfx { namespace Utils {
         IShaderParameter* _specularTexture;
         //IShaderParameter* _materialTexture; // TODO
 
-        Image _quad;
+        std::unique_ptr<IVertexBuffer> _quad;
         glm::mat4x4 _mvp;
         glm::uvec2 _size;
 
