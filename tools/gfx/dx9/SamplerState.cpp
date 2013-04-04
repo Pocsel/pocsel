@@ -7,7 +7,8 @@
 namespace Tools { namespace Gfx { namespace DX9 {
 
     SamplerState::SamplerState(DX9Renderer& renderer) :
-        _renderer(renderer)
+        _renderer(renderer),
+        _mipFilter(TextureFilter::None)
     {
     }
 
@@ -25,11 +26,16 @@ namespace Tools { namespace Gfx { namespace DX9 {
         this->_magFilter = filter;
     }
 
+    void SamplerState::SetMipFilter(TextureFilter::Type filter)
+    {
+        this->_mipFilter = filter;
+    }
+
     void SamplerState::Bind(Uint32 unit)
     {
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MINFILTER, GetTextureFilter(this->_minFilter));
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MAGFILTER, GetTextureFilter(this->_magFilter));
-        this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MIPFILTER, GetTextureFilter(this->_minFilter));
+        this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MIPFILTER, GetTextureFilter(this->_mipFilter));
     }
 
 }}}

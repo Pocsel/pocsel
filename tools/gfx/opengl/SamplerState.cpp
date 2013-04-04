@@ -6,7 +6,8 @@
 namespace Tools { namespace Gfx { namespace OpenGL {
 
     SamplerState::SamplerState(GLRenderer& renderer) :
-        _renderer(renderer)
+        _renderer(renderer),
+        _mipFilter(TextureFilter::None)
     {
         GLCHECK(glGenSamplers(1, &this->_id));
     }
@@ -19,13 +20,19 @@ namespace Tools { namespace Gfx { namespace OpenGL {
     void SamplerState::SetMinFilter(TextureFilter::Type filter)
     {
         this->_minFilter = filter;
-        GLCHECK(glSamplerParameteri(this->_id, GL_TEXTURE_MIN_FILTER, GetTextureFilter(filter)));
+        GLCHECK(glSamplerParameteri(this->_id, GL_TEXTURE_MIN_FILTER, GetTextureFilter(this->_minFilter, this->_mipFilter)));
     }
 
     void SamplerState::SetMagFilter(TextureFilter::Type filter)
     {
         this->_magFilter = filter;
         GLCHECK(glSamplerParameteri(this->_id, GL_TEXTURE_MAG_FILTER, GetTextureFilter(filter)));
+    }
+
+    void SamplerState::SetMipFilter(TextureFilter::Type filter)
+    {
+        this->_mipFilter = filter;
+        GLCHECK(glSamplerParameteri(this->_id, GL_TEXTURE_MIN_FILTER, GetTextureFilter(this->_minFilter, this->_mipFilter)));
     }
 
     void SamplerState::Bind(Uint32 unit)

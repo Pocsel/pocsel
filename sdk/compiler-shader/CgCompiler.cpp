@@ -237,9 +237,9 @@ namespace Hlsl {
             qi::rule<decltype(it), std::list<_TupleStringStringInt>(), ascii::space_type> fileParser;
 
             parameterParser =
-                    "//var" >> identifierParser >> identifierParser[at_c<0>(_val) = _1] >> -lit("[0]") >> ':' // type identifier
+                    "//var" >> identifierParser >> identifierParser[at_c<0>(_val) = _1] >> *lit("[0]") >> ':' // type identifier
                     >> *(char_ - ':') >> ':' // semantic
-                    >> identifierParser[at_c<1>(_val) = _1] >> -('[' >> *char_("0-9-") >> ']') >> -(',' >> *char_("0-9-")) >> ':' // generated name
+                    >> identifierParser[at_c<1>(_val) = _1] >> *('[' >> *char_("0-9-") >> ']') >> -(',' >> *char_("0-9-")) >> ':' // generated name
                     >> qi::int_[at_c<2>(_val) = _1] >> ':' // index
                     >> *char_("0-9-") // ?
                 ;

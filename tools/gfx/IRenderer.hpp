@@ -183,17 +183,11 @@ namespace Tools { namespace Gfx {
 
     namespace TextureFilter
     {
-        /**
-            * 0x<usable in far (min)><usable in near (mag)><id>
-            */
         enum Type
         {
-            Nearest = 0x1100,
-            Linear = 0x1101,
-            NearestMipmapNearest = 0x0102,
-            NearestMipmapLinear = 0x0103,
-            LinearMipmapLinear = 0x0104,
-            LinearMipmapNearest = 0x0105,
+            None,
+            Point,
+            Linear,
         };
     }
 
@@ -213,8 +207,10 @@ namespace Tools { namespace Gfx {
         virtual ~ISamplerState() {}
         virtual TextureFilter::Type GetMinFilter() const = 0;
         virtual TextureFilter::Type GetMagFilter() const = 0;
+        virtual TextureFilter::Type GetMipFilter() const = 0;
         virtual void SetMinFilter(TextureFilter::Type filter) = 0;
         virtual void SetMagFilter(TextureFilter::Type filter) = 0;
+        virtual void SetMipFilter(TextureFilter::Type filter) = 0;
         virtual void Bind(Uint32 unit) = 0;
     };
 

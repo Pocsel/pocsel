@@ -79,8 +79,10 @@ namespace Tools { namespace Gfx { namespace Effect {
                         return str.substr(startPos, pos - startPos);
                     };
                     auto parseValue = [](std::string const& value) {
-                        if (value == "nearest")
-                            return TextureFilter::Nearest;
+                        if (value == "none")
+                            return TextureFilter::None;
+                        if (value == "nearest" || value == "point")
+                            return TextureFilter::Point;
                         if (value == "linear")
                             return TextureFilter::Linear;
                         return TextureFilter::Linear;
@@ -93,8 +95,10 @@ namespace Tools { namespace Gfx { namespace Effect {
 
                     if (boost::algorithm::to_lower_copy(key) == "minfilter")
                         sampler->SetMinFilter(parseValue(boost::algorithm::to_lower_copy(value)));
-                    if (boost::algorithm::to_lower_copy(key) == "magfilter")
+                    else if (boost::algorithm::to_lower_copy(key) == "magfilter")
                         sampler->SetMagFilter(parseValue(boost::algorithm::to_lower_copy(value)));
+                    else if (boost::algorithm::to_lower_copy(key) == "mipfilter")
+                        sampler->SetMipFilter(parseValue(boost::algorithm::to_lower_copy(value)));
 
                     std::cout << key << " => " << value << std::endl;
                 }

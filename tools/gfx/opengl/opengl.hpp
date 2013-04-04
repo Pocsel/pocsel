@@ -126,12 +126,34 @@ namespace Tools { namespace Gfx { namespace OpenGL {
     {
         switch (type)
         {
-        case TextureFilter::Nearest: return GL_NEAREST;
+        case TextureFilter::None: return GL_NEAREST;
+        case TextureFilter::Point: return GL_NEAREST;
         case TextureFilter::Linear: return GL_LINEAR;
-        case TextureFilter::LinearMipmapLinear: return GL_LINEAR_MIPMAP_LINEAR;
-        case TextureFilter::LinearMipmapNearest: return GL_LINEAR_MIPMAP_NEAREST;
-        case TextureFilter::NearestMipmapNearest: return GL_NEAREST_MIPMAP_NEAREST;
-        case TextureFilter::NearestMipmapLinear: return GL_NEAREST_MIPMAP_LINEAR;
+        default:
+            throw std::runtime_error("Bad TextureFilter ?!");
+        }
+    }
+
+    inline GLint GetTextureFilter(TextureFilter::Type min, TextureFilter::Type mip)
+    {
+        switch (min)
+        {
+        case TextureFilter::Point:
+            switch (mip)
+            {
+            case TextureFilter::None: return GL_NEAREST;
+            case TextureFilter::Point: return GL_NEAREST_MIPMAP_NEAREST;
+            case TextureFilter::Linear: return GL_NEAREST_MIPMAP_LINEAR;
+            default: throw std::runtime_error("Bad TextureFilter ?!");
+            }
+        case TextureFilter::Linear:
+            switch (mip)
+            {
+            case TextureFilter::None: return GL_LINEAR;
+            case TextureFilter::Point: return GL_LINEAR_MIPMAP_NEAREST;
+            case TextureFilter::Linear: return GL_LINEAR_MIPMAP_LINEAR;
+            default: throw std::runtime_error("Bad TextureFilter ?!");
+            }
         default:
             throw std::runtime_error("Bad TextureFilter ?!");
         }
