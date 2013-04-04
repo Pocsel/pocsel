@@ -29,7 +29,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
             this->_value = value;
         }
 
-        virtual Lua::Ref GetLuaValue(Lua::Interpreter& interpreter) const
+        virtual Luasel::Ref GetLuaValue(Luasel::Interpreter& interpreter) const
         {
             return interpreter.Make(this->_value);
         }
@@ -69,7 +69,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
             this->_material.SetTextures(*this, texture);
         }
 
-        virtual Lua::Ref GetLuaValue(Lua::Interpreter& interpreter) const
+        virtual Luasel::Ref GetLuaValue(Luasel::Interpreter& interpreter) const
         {
             return interpreter.Make(this->_texture);
         }

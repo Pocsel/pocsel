@@ -5,7 +5,6 @@ set(src
     ${common_src}
     ${tools_base_src}
     ${tools_logger_src}
-    ${tools_lua_src}
     ${tools_gfx_src}
     ${tools_window_src}
 )
@@ -18,6 +17,7 @@ add_executable(test_shaders ${src})
 enable_pch(test_shaders src)
 
 target_link_libraries(test_shaders
+    luasel
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}

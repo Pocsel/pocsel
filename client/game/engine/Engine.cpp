@@ -1,5 +1,7 @@
 #include "client/precompiled.hpp"
 
+#include <luasel/Luasel.hpp>
+
 #include "client/resources/ResourceManager.hpp"
 #include "client/game/engine/Engine.hpp"
 #include "client/game/Game.hpp"
@@ -7,7 +9,6 @@
 #include "client/game/engine/ModelManager.hpp"
 #include "client/game/engine/BodyManager.hpp"
 #include "client/game/engine/PhysicsManager.hpp"
-#include "tools/lua/Interpreter.hpp"
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/gfx/utils/material/LuaMaterial.hpp"
 #include "tools/gfx/utils/material/Material.hpp"
@@ -20,14 +21,14 @@ namespace Client { namespace Game { namespace Engine {
         _game(game),
         _overriddenDoodadId(0)
     {
-        this->_interpreter = new Tools::Lua::Interpreter();
+        this->_interpreter = new Luasel::Interpreter();
 
         // enregistrement des fonctions de base
-        this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Base);
+        this->_interpreter->RegisterLib(Luasel::Interpreter::Base);
         this->_interpreter->Globals().Set("print", this->_interpreter->MakeFunction(std::bind(&Engine::_ApiPrint, this, std::placeholders::_1)));
-        this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Math);
-        this->_interpreter->RegisterLib(Tools::Lua::Interpreter::Table);
-        this->_interpreter->RegisterLib(Tools::Lua::Interpreter::String);
+        this->_interpreter->RegisterLib(Luasel::Interpreter::Math);
+        this->_interpreter->RegisterLib(Luasel::Interpreter::Table);
+        this->_interpreter->RegisterLib(Luasel::Interpreter::String);
         Tools::Gfx::Utils::Material::Material::LoadLuaTypes(*this->_interpreter,
             std::bind(static_cast<std::unique_ptr<Tools::Gfx::Utils::Texture::ITexture>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetTexture), &game.GetResourceManager(), std::placeholders::_1),
             std::bind(static_cast<std::unique_ptr<Tools::Gfx::Utils::Material::LuaMaterial>(Resources::ResourceManager::*)(std::string const&)>(&Resources::ResourceManager::GetMaterial), &game.GetResourceManager(), std::placeholders::_1));
@@ -81,7 +82,7 @@ namespace Client { namespace Game { namespace Engine {
         this->_modules.clear(); // ne garde pas de references inutiles vers les modules
     }
 
-    Tools::Lua::Ref Engine::_LoadLuaScript(std::string const& name)
+    Luasel::Ref Engine::_LoadLuaScript(std::string const& name)
     {
         // check si le fichier a déjà été chargé
         auto itModule = this->_modules.find(name);
@@ -97,8 +98,8 @@ namespace Client { namespace Game { namespace Engine {
         std::string previousRunningPluginName = this->_runningPluginName;
         this->_SetRunningResource(name);
         auto it = this->_modules.insert(std::make_pair(name, std::make_pair(true /* loading in progress */, this->_interpreter->MakeNil())));
-        Tools::Lua::Ref f = this->_interpreter->MakeNil();
-        Tools::Lua::Ref module = this->_interpreter->MakeNil();
+        Luasel::Ref f = this->_interpreter->MakeNil();
+        Luasel::Ref module = this->_interpreter->MakeNil();
         try
         {
             f = this->_interpreter->LoadString(this->_game.GetResourceManager().GetScript(name));
@@ -118,13 +119,13 @@ namespace Client { namespace Game { namespace Engine {
         }
     }
 
-    void Engine::_ApiRequire(Tools::Lua::CallHelper& helper)
+    void Engine::_ApiRequire(Luasel::CallHelper& helper)
     {
         std::string name = helper.PopArg("require: Missing argument \"name\"").CheckString("require: Argument \"name\" must be a string");
         helper.PushRet(this->_LoadLuaScript(name));
     }
 
-    void Engine::_ApiPrint(Tools::Lua::CallHelper& helper)
+    void Engine::_ApiPrint(Luasel::CallHelper& helper)
     {
         std::string str = "[";
         if (this->GetRunningPluginName() != "")

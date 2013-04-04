@@ -19,6 +19,9 @@ namespace Client {
     namespace Menu {
         class Menu;
     }
+    namespace Resources {
+        class LocalResourceManager;
+    }
 }
 
 namespace Client { namespace Menu { namespace Widget {
@@ -29,9 +32,9 @@ namespace Client { namespace Menu { namespace Widget {
     private:
         Tools::Window::InputManager const& _inputManager;
         Menu& _menu;
+        Resources::LocalResourceManager& _localResourceManager;
         Tools::Gfx::IRenderer& _renderer;
-        std::function<void(void)> _callback;
-        std::string _text;
+        std::function<void(void)> _callback;        std::string _text;
         glm::fvec2 _size;
         glm::fvec2 _pos;
         bool _pressed;
@@ -42,7 +45,7 @@ namespace Client { namespace Menu { namespace Widget {
     public:
         Button(Tools::Window::InputManager const& inputManager,
                 Menu& menu,
-                Tools::Gfx::IRenderer& renderer,
+                Resources::LocalResourceManager& localResourceManager,
                 Tools::Window::ActionBinder& actionBinder,
                 std::function<void(void)>& callback,
                 std::string const& text = "",

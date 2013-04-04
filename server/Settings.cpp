@@ -1,12 +1,11 @@
 #include <boost/program_options.hpp>
 #include <boost/cstdlib.hpp>
+#include <luasel/Luasel.hpp>
 
 #include "server/Settings.hpp"
 #include "ProgramInfo.hpp"
 #include "common/ConfDir.hpp"
 #include "common/constants.hpp"
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/Iterator.hpp"
 
 namespace Server {
 
@@ -96,7 +95,7 @@ namespace Server {
     {
         try
         {
-            Tools::Lua::Interpreter i;
+            Luasel::Interpreter i;
             i.DoFile(this->settingsFile.string());
 
             // debug
@@ -122,7 +121,7 @@ namespace Server {
     {
         try
         {
-            Tools::Lua::Interpreter i;
+            Luasel::Interpreter i;
             i.DoFile(this->rconSettingsFile.string());
 
             // rconUsers

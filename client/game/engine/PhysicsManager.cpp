@@ -1,3 +1,5 @@
+#include <luasel/Luasel.hpp>
+
 #include "client/game/engine/PhysicsManager.hpp"
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/Engine.hpp"
@@ -11,8 +13,6 @@
 #include "common/physics/World.hpp"
 
 #include "bullet/bullet-all.hpp"
-
-#include "tools/lua/Function.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 

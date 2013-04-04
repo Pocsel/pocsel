@@ -1,8 +1,6 @@
 #include "server/database/WorldLoader2.hpp"
 #include "server/database/ResourceManager.hpp"
 #include "tools/database/IConnection.hpp"
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/Iterator.hpp"
 #include "common/FieldUtils.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
@@ -110,7 +108,7 @@ namespace Server { namespace Database {
 
     void WorldLoader2::_ParseMapConf(std::string const& name, std::string const& lua, Game::Map::Conf& conf)
     {
-        auto interpreter = new Tools::Lua::Interpreter();
+        auto interpreter = new Luasel::Interpreter();
         Log::load << "Load lua code:\n'''\n" << lua << "\n'''\n";
         interpreter->DoString(lua);
 
@@ -184,7 +182,7 @@ namespace Server { namespace Database {
             this->_world._maps.begin()->second->GetEngine().GetEntityManager().RconAddEntityTypes(this->_world.GetGame().GetServer().GetRcon().GetEntityManager());
     }
 
-    Tools::Lua::Ref WorldLoader2::_LoadServerFile(Uint32 pluginId, std::string const& name)
+    Luasel::Ref WorldLoader2::_LoadServerFile(Uint32 pluginId, std::string const& name)
     {
         // check si le fichier a déjà été chargé
         auto itPlugin = this->_modules.find(pluginId);
@@ -215,8 +213,8 @@ namespace Server { namespace Database {
             this->_currentMap->GetEngine().SetCurrentPluginRegistering(pluginId);
 
             // chargement du lua
-            Tools::Lua::Ref f = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
-            Tools::Lua::Ref module = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
+            Luasel::Ref f = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
+            Luasel::Ref module = this->_currentMap->GetEngine().GetInterpreter().MakeNil();
             try
             {
                 f = this->_currentMap->GetEngine().GetInterpreter().LoadString(row->GetString(0));
@@ -243,7 +241,7 @@ namespace Server { namespace Database {
         throw std::runtime_error("WorldLoader2::_LoadServerFile: Server file \"" + name + "\" in plugin " + Tools::ToString(pluginId) + " not found in map \"" + this->_currentMap->GetName() + "\"");
     }
 
-    void WorldLoader2::_ApiRequire(Tools::Lua::CallHelper& helper)
+    void WorldLoader2::_ApiRequire(Luasel::CallHelper& helper)
     {
         std::string name = helper.PopArg("require: Missing argument \"name\"").CheckString("require: Argument \"name\" must be a string");
         Uint32 pluginId = this->_world.GetPluginManager().GetPluginId(Common::FieldUtils::GetPluginNameFromResource(name));
@@ -251,9 +249,9 @@ namespace Server { namespace Database {
         helper.PushRet(this->_LoadServerFile(pluginId, fileName));
     }
 
-    void WorldLoader2::_ApiRegisterCube(Tools::Lua::CallHelper& helper)
+    void WorldLoader2::_ApiRegisterCube(Luasel::CallHelper& helper)
     {
-        Tools::Lua::Ref prototype = helper.PopArg();
+        Luasel::Ref prototype = helper.PopArg();
         std::string name = prototype["cubeName"].Check<std::string>("Server.Cube.Register: Field \"cubeName\" must exist and be a string");
         auto id = this->_GetCubeTypeIdByName(this->_currentMap->GetEngine().GetCurrentPluginRegistering(), name);
 

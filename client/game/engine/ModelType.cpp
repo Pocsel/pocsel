@@ -1,7 +1,6 @@
-#include "client/game/engine/ModelType.hpp"
+#include <luasel/Luasel.hpp>
 
-#include "tools/lua/Ref.hpp"
-#include "tools/lua/Function.hpp"
+#include "client/game/engine/ModelType.hpp"
 
 #include "client/resources/ResourceManager.hpp"
 

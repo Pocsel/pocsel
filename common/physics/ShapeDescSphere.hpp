@@ -15,7 +15,7 @@ namespace Common { namespace Physics {
         mutable std::unique_ptr<std::string> _string;
 
     public:
-        ShapeDescSphere(Tools::Lua::Ref const& lua);
+        ShapeDescSphere(Luasel::Ref const& lua);
         ShapeDescSphere(Tools::ByteArray const& byteArray);
         virtual ~ShapeDescSphere();
 

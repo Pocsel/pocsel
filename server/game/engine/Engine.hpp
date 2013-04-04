@@ -38,7 +38,7 @@ namespace Server { namespace Game { namespace Engine {
     private:
         Map::Map& _map;
         World& _world;
-        Tools::Lua::Interpreter* _interpreter;
+        Luasel::Interpreter* _interpreter;
         MessageManager* _messageManager;
         EntityManager* _entityManager;
         CallbackManager* _callbackManager;
@@ -46,7 +46,7 @@ namespace Server { namespace Game { namespace Engine {
         PhysicsManager* _physicsManager;
         BodyManager* _bodyManager;
         Uint64 _currentTime;
-        std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, Tools::Lua::Ref /* module */>> _modules; // uniquement en debug
+        std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, Luasel::Ref /* module */>> _modules; // uniquement en debug
         Uint32 _currentPluginRegistering;
 
     public:
@@ -67,8 +67,8 @@ namespace Server { namespace Game { namespace Engine {
         BodyManager const& GetBodyManager() const { return *this->_bodyManager; }
         PhysicsManager& GetPhysicsManager() { return *this->_physicsManager; }
         PhysicsManager const& GetPhysicsManager() const { return *this->_physicsManager; }
-        Tools::Lua::Interpreter& GetInterpreter() { return *this->_interpreter; }
-        Tools::Lua::Interpreter const& GetInterpreter() const { return *this->_interpreter; }
+        Luasel::Interpreter& GetInterpreter() { return *this->_interpreter; }
+        Luasel::Interpreter const& GetInterpreter() const { return *this->_interpreter; }
         Uint64 GetCurrentTime() const { return this->_currentTime; }
         Map::Map& GetMap() { return this->_map; }
         World& GetWorld() { return this->_world; }
@@ -79,15 +79,15 @@ namespace Server { namespace Game { namespace Engine {
         void SendUdpPacket(Uint32 playerId, std::unique_ptr<Network::UdpPacket>& packet);
 
         // appelés uniquement en debug
-        void SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Tools::Lua::Ref /* module */>>> const& modules);
+        void SetModules(std::map<Uint32 /* pluginId */, std::map<std::string /* server_file name */, std::pair<bool /* loading in progress */, Luasel::Ref /* module */>>> const& modules);
         void RegisterRequire();
 
         // rcon requests
         std::string RconExecute(std::string const& lua);
 
     private:
-        void _ApiRequire(Tools::Lua::CallHelper& helper);
-        void _ApiPrint(Tools::Lua::CallHelper& helper);
+        void _ApiRequire(Luasel::CallHelper& helper);
+        void _ApiPrint(Luasel::CallHelper& helper);
     };
 
 }}}

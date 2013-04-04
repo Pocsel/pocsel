@@ -103,4 +103,10 @@ namespace detail {
 #define CPP11_DELETE = delete
 #endif
 
+#ifdef _MSC_VER
+// dirty hack for MS Compiler
+# define _ALLOW_KEYWORD_MACROS
+# define noexcept throw()
+#endif
+
 #endif

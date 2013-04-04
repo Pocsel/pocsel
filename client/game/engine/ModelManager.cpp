@@ -1,3 +1,5 @@
+#include <luasel/Luasel.hpp>
+
 #include "client/game/engine/ModelManager.hpp"
 #include "client/game/engine/Model.hpp"
 #include "client/game/engine/Doodad.hpp"
@@ -6,8 +8,6 @@
 #include "client/game/Game.hpp"
 #include "client/game/ModelRenderer.hpp"
 #include "tools/Math.hpp"
-#include "tools/lua/Ref.hpp"
-#include "tools/lua/Interpreter.hpp"
 #include "common/FieldUtils.hpp"
 #include "client/game/engine/Body.hpp"
 
@@ -52,7 +52,7 @@ namespace Client { namespace Game { namespace Engine {
         Tools::Delete(this->_weakModelRefManager);
     }
 
-    Tools::Lua::Ref ModelManager::WeakModelRef::GetReference(ModelManager& modelManager) const
+    Luasel::Ref ModelManager::WeakModelRef::GetReference(ModelManager& modelManager) const
     {
         return modelManager.GetLuaWrapperForModel(this->modelId);
     }
@@ -95,7 +95,7 @@ namespace Client { namespace Game { namespace Engine {
         this->_modelsByDoodad.erase(listIt);
     }
 
-    Tools::Lua::Ref ModelManager::GetLuaWrapperForModel(Uint32 modelId)
+    Luasel::Ref ModelManager::GetLuaWrapperForModel(Uint32 modelId)
     {
         auto& i = this->_engine.GetInterpreter();
         auto object = i.MakeTable();
@@ -114,7 +114,7 @@ namespace Client { namespace Game { namespace Engine {
         return *it->second;
     }
 
-    Uint32 ModelManager::_RefToModelId(Tools::Lua::Ref const& ref) const throw(std::runtime_error)
+    Uint32 ModelManager::_RefToModelId(Luasel::Ref const& ref) const throw(std::runtime_error)
     {
         if (ref.IsNumber()) /* id directement en nombre */
             return ref.To<Uint32>();
@@ -149,7 +149,7 @@ namespace Client { namespace Game { namespace Engine {
             throw std::runtime_error("ModelManager::_RefToModelId: Invalid argument type " + ref.GetTypeName() + " given");
     }
 
-    void ModelManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
+    void ModelManager::_ApiSpawn(Luasel::CallHelper& helper)
     {
         Uint32 doodadId = this->_engine.GetRunningDoodadId();
         if (helper.GetNbArgs() >= 2)
@@ -179,7 +179,7 @@ namespace Client { namespace Game { namespace Engine {
         helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
     }
 
-    void ModelManager::_ApiKill(Tools::Lua::CallHelper& helper)
+    void ModelManager::_ApiKill(Luasel::CallHelper& helper)
     {
         // trouve le model
         Uint32 modelId = helper.PopArg("Client.Model.Kill: Missing argument \"modelId\"").Check<Uint32>("Client.Model.Kill: Argument \"modelId\" must be a number");
@@ -202,12 +202,12 @@ namespace Client { namespace Game { namespace Engine {
         this->_models.erase(it);
     }
 
-    void ModelManager::_ApiRegister(Tools::Lua::CallHelper& helper)
+    void ModelManager::_ApiRegister(Luasel::CallHelper& helper)
     {
         auto const& pluginName = this->_engine.GetRunningPluginName();
         if (pluginName == "")
             throw std::runtime_error("Client.Model.Register: Could not determine currently running plugin, aborting registration");
-        Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref prototype(this->_engine.GetInterpreter().GetState());
         std::string modelName;
         Uint32 resourceId;
         try
@@ -235,12 +235,12 @@ namespace Client { namespace Game { namespace Engine {
         Tools::debug << "Model \"" << modelName << "\" registered." << std::endl;
     }
 
-    void ModelManager::_ApiBindToBody(Tools::Lua::CallHelper& helper)
+    void ModelManager::_ApiBindToBody(Luasel::CallHelper& helper)
     {
         //TODO
     }
 
-    void ModelManager::_ApiBindBoneToBodyNode(Tools::Lua::CallHelper& helper)
+    void ModelManager::_ApiBindBoneToBodyNode(Luasel::CallHelper& helper)
     {
         // trouve le model
         Uint32 modelId = helper.PopArg("Client.Model.BindBoneToBodyNode: Missing argument \"modelId\"").Check<Uint32>("Client.Model.BindBoneToBodyNode: Argument \"modelId\" must be a number");

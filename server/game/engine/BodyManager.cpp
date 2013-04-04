@@ -1,11 +1,11 @@
+#include <luasel/Luasel.hpp>
+
 #include "server/game/engine/BodyManager.hpp"
 #include "server/game/engine/Engine.hpp"
 #include "server/game/engine/Body.hpp"
 #include "server/game/engine/BodyType.hpp"
 #include "server/game/World.hpp"
 #include "server/game/PluginManager.hpp"
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/MetaTable.hpp"
 #include "common/FieldUtils.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -54,13 +54,13 @@ namespace Server { namespace Game { namespace Engine {
         return body;
     }
 
-    void BodyManager::_ApiRegister(Tools::Lua::CallHelper& helper)
+    void BodyManager::_ApiRegister(Luasel::CallHelper& helper)
     {
         Uint32 pluginId = this->_engine.GetCurrentPluginRegistering();
         if (!pluginId)
             throw std::runtime_error("Server.Body.Register: Could not determine currently running plugin, aborting registration.");
         std::string pluginName = this->_engine.GetWorld().GetPluginManager().GetPluginIdentifier(pluginId);
-        Tools::Lua::Ref prototype(this->_engine.GetInterpreter().GetState());
+        Luasel::Ref prototype(this->_engine.GetInterpreter().GetState());
         std::string bodyName;
         try
         {

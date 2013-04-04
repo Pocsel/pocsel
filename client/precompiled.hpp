@@ -24,6 +24,7 @@
 # undef new
 #endif
 #include "tools/precompiled.hpp"
+#include <luasel/Luasel.hpp> // pour éviter les problèmes avec DEBUG_NEW
 #ifdef DEBUG_NEW
 # define new DEBUG_NEW
 #endif

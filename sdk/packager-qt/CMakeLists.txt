@@ -13,7 +13,6 @@ set(src
     ${tools_base_src}
     ${tools_database_src}
     ${tools_logger_src}
-    ${tools_lua_src}
     ${tools_plugin_create_src}
 )
 
@@ -30,6 +29,7 @@ add_dependencies(packager-qt tools_lua_res)
 enable_pch(packager-qt src)
 
 target_link_libraries(packager-qt
+    luasel
     ${QT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}

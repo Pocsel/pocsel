@@ -33,7 +33,7 @@ namespace Client { namespace Menu {
         std::function<void(void)> f = std::bind(&MainMenu::_QuitButton, this);
         this->_quitButton = new Widget::Button(this->_client.GetWindow().GetInputManager(),
                 this->_menu,
-                this->_renderer,
+                this->_client.GetLocalResourceManager(),
                 *this->_actionBinder,
                 f,
                 "Quit",
@@ -41,7 +41,7 @@ namespace Client { namespace Menu {
         f = std::bind(&MainMenu::_BackButton, this);
         this->_backButton = new Widget::Button(this->_client.GetWindow().GetInputManager(),
                 this->_menu,
-                this->_renderer,
+                this->_client.GetLocalResourceManager(),
                 *this->_actionBinder,
                 f,
                 "Back to game",

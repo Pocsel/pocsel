@@ -1,7 +1,7 @@
 #ifndef __TOOLS_LUA_WEAKRESOURCEREFMANAGER_HPP__
 #define __TOOLS_LUA_WEAKRESOURCEREFMANAGER_HPP__
 
-#include "tools/lua/Interpreter.hpp"
+#include <luasel/Luasel.hpp>
 
 namespace Tools { namespace Lua {
 
@@ -11,45 +11,45 @@ namespace Tools { namespace Lua {
     public:
         struct FakeReference
         {
-            FakeReference(Ref const& ref) : trueReference(ref) {}
+            FakeReference(Luasel::Ref const& ref) : trueReference(ref) {}
             bool IsValid() const { return this->trueReference.IsValid(); }
             void Invalidate() { this->trueReference.Unref(); }
-            Ref GetReference() const { return this->trueReference; }
-            Tools::Lua::Ref trueReference;
+            Luasel::Ref GetReference() const { return this->trueReference; }
+            Luasel::Ref trueReference;
         };
 
     private:
-        Interpreter& _interpreter;
+        Luasel::Interpreter& _interpreter;
         ManagerType& _resourceManager;
         Uint32 _nextReferenceId;
-        std::unordered_map<Uint32 /* ref id */, std::list<std::pair<WeakResourceRefType* /* pointer to Lua resource */, Ref /* corresponding UserData */>>>* _weakReferences;
-        std::map<WeakResourceRefType, std::pair<Uint32 /* ref id */, std::list<std::pair<WeakResourceRefType* /* pointer to Lua resource */, Ref /* corresponding UserData */>>*>>* _weakReferencesByResource;
-        MetaTable* _weakReferenceMetaTable;
-        std::list<Ref /* fake ref UserData */>* _fakeReferences;
-        MetaTable* _fakeReferenceMetaTable;
-        Ref* _invalidRef;
+        std::unordered_map<Uint32 /* ref id */, std::list<std::pair<WeakResourceRefType* /* pointer to Lua resource */, Luasel::Ref /* corresponding UserData */>>>* _weakReferences;
+        std::map<WeakResourceRefType, std::pair<Uint32 /* ref id */, std::list<std::pair<WeakResourceRefType* /* pointer to Lua resource */, Luasel::Ref /* corresponding UserData */>>*>>* _weakReferencesByResource;
+        Luasel::MetaTable* _weakReferenceMetaTable;
+        std::list<Luasel::Ref /* fake ref UserData */>* _fakeReferences;
+        Luasel::MetaTable* _fakeReferenceMetaTable;
+        Luasel::Ref* _invalidRef;
 
     public:
-        WeakResourceRefManager(Interpreter& interpreter, ManagerType& resourceManager, bool useFakeReferences = false) :
+        WeakResourceRefManager(Luasel::Interpreter& interpreter, ManagerType& resourceManager, bool useFakeReferences = false) :
             _interpreter(interpreter),
             _resourceManager(resourceManager),
             _nextReferenceId(1),
             _fakeReferences(0),
             _fakeReferenceMetaTable(0)
         {
-            this->_weakReferences = new std::unordered_map<Uint32, std::list<std::pair<WeakResourceRefType*, Ref>>>();
-            this->_weakReferencesByResource = new std::map<WeakResourceRefType, std::pair<Uint32, std::list<std::pair<WeakResourceRefType*, Ref>>*>>();
-            this->_weakReferenceMetaTable = &MetaTable::Create(interpreter, WeakResourceRefType());
+            this->_weakReferences = new std::unordered_map<Uint32, std::list<std::pair<WeakResourceRefType*, Luasel::Ref>>>();
+            this->_weakReferencesByResource = new std::map<WeakResourceRefType, std::pair<Uint32, std::list<std::pair<WeakResourceRefType*, Luasel::Ref>>*>>();
+            this->_weakReferenceMetaTable = &Luasel::MetaTable::Create(interpreter, WeakResourceRefType());
             this->_weakReferenceMetaTable->SetMethod("Lock", std::bind(&WeakResourceRefManager::_WeakReferenceLock, this, std::placeholders::_1));
-            this->_weakReferenceMetaTable->SetMetaMethod(MetaTable::Serialize, std::bind(&WeakResourceRefManager::_WeakReferenceSerialize, this, std::placeholders::_1));
+            this->_weakReferenceMetaTable->SetMetaMethod(Luasel::MetaTable::Serialize, std::bind(&WeakResourceRefManager::_WeakReferenceSerialize, this, std::placeholders::_1));
             if (useFakeReferences)
             {
-                this->_fakeReferences = new std::list<Ref>();
-                this->_fakeReferenceMetaTable = &MetaTable::Create(interpreter, FakeReference(this->_interpreter.MakeNil()));
-                this->_fakeReferenceMetaTable->SetMetaMethod(MetaTable::Index, std::bind(&WeakResourceRefManager::_FakeReferenceIndex, this, std::placeholders::_1));
-                this->_fakeReferenceMetaTable->SetMetaMethod(MetaTable::NewIndex, std::bind(&WeakResourceRefManager::_FakeReferenceNewIndex, this, std::placeholders::_1));
+                this->_fakeReferences = new std::list<Luasel::Ref>();
+                this->_fakeReferenceMetaTable = &Luasel::MetaTable::Create(interpreter, FakeReference(this->_interpreter.MakeNil()));
+                this->_fakeReferenceMetaTable->SetMetaMethod(Luasel::MetaTable::Index, std::bind(&WeakResourceRefManager::_FakeReferenceIndex, this, std::placeholders::_1));
+                this->_fakeReferenceMetaTable->SetMetaMethod(Luasel::MetaTable::NewIndex, std::bind(&WeakResourceRefManager::_FakeReferenceNewIndex, this, std::placeholders::_1));
             }
-            this->_invalidRef = new Tools::Lua::Ref(this->_interpreter.Make(WeakResourceRefType()));
+            this->_invalidRef = new Luasel::Ref(this->_interpreter.Make(WeakResourceRefType()));
         }
 
         ~WeakResourceRefManager()
@@ -65,7 +65,7 @@ namespace Tools { namespace Lua {
             return this->_fakeReferences != nullptr;
         }
 
-        std::pair<Uint32, Ref> NewResource(WeakResourceRefType const& resource)
+        std::pair<Uint32, Luasel::Ref> NewResource(WeakResourceRefType const& resource)
         {
             auto it = this->_weakReferencesByResource->find(resource);
             if (it == this->_weakReferencesByResource->end())
@@ -74,7 +74,7 @@ namespace Tools { namespace Lua {
                         || this->_weakReferences->count(this->_nextReferenceId))
                     ++this->_nextReferenceId;
                 Uint32 newId = this->_nextReferenceId++;
-                Ref userData = this->_interpreter.Make(resource);
+                Luasel::Ref userData = this->_interpreter.Make(resource);
                 auto& refList = this->_weakReferences->operator[](newId);
                 refList.push_back(std::make_pair(userData.To<WeakResourceRefType*>(), userData));
                 this->_weakReferencesByResource->insert(std::make_pair(resource, std::make_pair(newId, &refList)));
@@ -87,7 +87,7 @@ namespace Tools { namespace Lua {
             }
         }
 
-        Ref NewUnloadedResource(WeakResourceRefType const& resource)
+        Luasel::Ref NewUnloadedResource(WeakResourceRefType const& resource)
         {
             WeakResourceRefType unloadedResource = resource;
             unloadedResource.SetLoaded(false);
@@ -108,12 +108,12 @@ namespace Tools { namespace Lua {
             this->_weakReferences->erase(it);
         }
 
-        Ref GetInvalidWeakReference() const
+        Luasel::Ref GetInvalidWeakReference() const
         {
             return *this->_invalidRef;
         }
 
-        Ref GetWeakReference(Uint32 refId) const throw(std::runtime_error)
+        Luasel::Ref GetWeakReference(Uint32 refId) const throw(std::runtime_error)
         {
             auto it = this->_weakReferences->find(refId);
             if (it == this->_weakReferences->end())
@@ -143,7 +143,7 @@ namespace Tools { namespace Lua {
             for (; it != itEnd; ++it)
             {
                 ret = true;
-                Ref& ref = *it;
+                Luasel::Ref& ref = *it;
                 ref.To<FakeReference*>()->Invalidate();
             }
             this->_fakeReferences->clear();
@@ -151,15 +151,15 @@ namespace Tools { namespace Lua {
         }
 
     private:
-        void _WeakReferenceSerialize(CallHelper& helper)
+        void _WeakReferenceSerialize(Luasel::CallHelper& helper)
         {
             WeakResourceRefType* weakRef = helper.PopArg("WeakResourceRefManager::_WeakReferenceSerialize: Missing argument for __serialize metamethod").To<WeakResourceRefType*>();
             helper.PushRet(this->_interpreter.MakeString(weakRef->Serialize(this->_resourceManager)));
         }
 
-        void _WeakReferenceLock(CallHelper& helper)
+        void _WeakReferenceLock(Luasel::CallHelper& helper)
         {
-            Ref ref = helper.PopArg("WeakResourceRefManager::_WeakReferenceLock: Missing self argument for __index metamethod");
+            Luasel::Ref ref = helper.PopArg("WeakResourceRefManager::_WeakReferenceLock: Missing self argument for __index metamethod");
             WeakResourceRefType* weakRef = ref.To<WeakResourceRefType*>();
             if (!weakRef->IsLoaded())
             {
@@ -177,7 +177,7 @@ namespace Tools { namespace Lua {
             {
                 if (this->_fakeReferences)
                 {
-                    Ref fakeRef = this->_interpreter.Make(FakeReference(weakRef->GetReference(this->_resourceManager)));
+                    Luasel::Ref fakeRef = this->_interpreter.Make(FakeReference(weakRef->GetReference(this->_resourceManager)));
                     this->_fakeReferences->push_back(fakeRef);
                     helper.PushRet(fakeRef);
                 }
@@ -188,16 +188,16 @@ namespace Tools { namespace Lua {
                 helper.PushRet(helper.GetInterpreter().MakeNil());
         }
 
-        void _FakeReferenceIndex(CallHelper& helper)
+        void _FakeReferenceIndex(Luasel::CallHelper& helper)
         {
             FakeReference* ref = helper.PopArg("WeakResourceRefManager::_FakeReferenceIndex: Missing self argument for __index metamethod").To<FakeReference*>();
-            Ref key = helper.PopArg("WeakResourceRefManager::_FakeReferenceIndex: Missing key argument for __index metamethod");
+            Luasel::Ref key = helper.PopArg("WeakResourceRefManager::_FakeReferenceIndex: Missing key argument for __index metamethod");
             if (!ref->IsValid())
                 throw std::runtime_error("WeakResourceRefManager::_FakeReferenceIndex: This reference was invalidated - you must not keep true references to resources, only weak references");
-            Ref trueRef = ref->GetReference();
+            Luasel::Ref trueRef = ref->GetReference();
             if (trueRef.IsTable())
             {
-                Ref value = trueRef[key];
+                Luasel::Ref value = trueRef[key];
                 if (value.Exists())
                 {
                     helper.PushRet(value); // action normale (table avec champ existant)
@@ -207,10 +207,10 @@ namespace Tools { namespace Lua {
             else if (!trueRef.IsUserData()) // methode __index sur un objet qui n'est pas une table, ni un userdata
                 throw std::runtime_error("WeakResourceRefManager::_FakeReferenceIndex: __index metamethod called on a reference of type " + trueRef.GetTypeName());
             // reproduction du comportement du lua pour __index
-            Ref metaTable = trueRef.GetMetaTable();
+            Luasel::Ref metaTable = trueRef.GetMetaTable();
             if (metaTable.IsTable())
             {
-                Ref index = metaTable["__index"];
+                Luasel::Ref index = metaTable["__index"];
                 if (index.IsFunction())
                 {
                     helper.GetArgList().clear();
@@ -233,14 +233,14 @@ namespace Tools { namespace Lua {
                 throw std::runtime_error("WeakResourceRefManager::_FakeReferenceIndex: No metatable set for this UserData for call to __index");
         }
 
-        void _FakeReferenceNewIndex(CallHelper& helper)
+        void _FakeReferenceNewIndex(Luasel::CallHelper& helper)
         {
             FakeReference* ref = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing self argument for __newindex metamethod").To<FakeReference*>();
-            Ref key = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing key argument for __newindex metamethod");
-            Ref value = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing value argument for __newindex metamethod");
+            Luasel::Ref key = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing key argument for __newindex metamethod");
+            Luasel::Ref value = helper.PopArg("WeakResourceRefManager::_FakeReferenceNewIndex: Missing value argument for __newindex metamethod");
             if (!ref->IsValid())
                 throw std::runtime_error("WeakResourceRefManager::_FakeReferenceNewIndex: This reference was invalidated - you must not keep true references to resources, only weak references");
-            Ref trueRef = ref->GetReference();
+            Luasel::Ref trueRef = ref->GetReference();
             if (trueRef.IsTable())
             {
                 if (trueRef[key].Exists())
@@ -252,10 +252,10 @@ namespace Tools { namespace Lua {
             else if (!trueRef.IsUserData()) // method __newindex sur un objet qui n'est pas une table, ni un userdata
                 throw std::runtime_error("WeakResourceRefManager::_FakeReferenceNewIndex: __newindex metamethod called on a reference of type " + trueRef.GetTypeName());
             // reproduction du comportement du lua pour __newindex
-            Ref metaTable = trueRef.GetMetaTable();
+            Luasel::Ref metaTable = trueRef.GetMetaTable();
             if (metaTable.IsTable())
             {
-                Ref newIndex = metaTable["__newindex"];
+                Luasel::Ref newIndex = metaTable["__newindex"];
                 if (newIndex.IsFunction())
                 {
                     newIndex(trueRef, key, value);

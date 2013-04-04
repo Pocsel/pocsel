@@ -1,0 +1,628 @@
+digraph G {
+    fontname="Monaco";
+    fontsize=12;
+    //nodesep=1.2;
+    splines=ortho;
+    ranksep=2;
+    outputorder=edgesfirst;
+    node [fontname="Monaco", fontsize=8, shape=record, width=1.5, height=1, color=chocolate];
+    edge [fontname="Monaco", fontsize=8, color="#c900bdc2", arrowsize=1.5];
+
+    subgraph cluster_Client {
+        label="Client";
+        Client_Client [label="{Client}"];
+        Client_Settings [label="{Settings}"];
+
+        subgraph cluster_Client_Resources {
+            label="Resources";
+            Client_Resources_ResourceManager [label="{ResourceManager}"];
+            Client_Resources_LocalResourceManager [label="{LocalResourceManager}"];
+            Client_Resources_CacheDatabaseProxy [label="{CacheDatabaseProxy}"];
+            Client_Resources_ResourceDownloader [label="{ResourceDownloader}"];
+        }
+
+        subgraph cluster_Client_Graphics {
+            label="Graphics";
+            Client_Graphics_LightManager [label="{LightManager}"];
+        }
+
+        subgraph cluster_Client_Network {
+            label="Network";
+            Client_Network_Network [label="{Network}"];
+            Client_Network_PacketCreator [label="{PacketCreator}"];
+            Client_Network_PacketDispatcher [label="{PacketDispatcher}"];
+            Client_Network_PacketExtractor [label="{PacketExtractor}"];
+            Client_Network_UdpPacket [label="{UdpPacket}"];
+        }
+
+        subgraph cluster_Client_Map {
+            label="Map";
+            Client_Map_Chunk [label="{Chunk}"];
+            Client_Map_ChunkManager [label="{ChunkManager}"];
+            Client_Map_ChunkMesh [label="{ChunkMesh}"];
+            Client_Map_ChunkRenderer [label="{ChunkRenderer}"];
+            Client_Map_Map [label="{Map}"];
+        }
+
+        subgraph cluster_Client_Menu {
+            label="Menu";
+            Client_Menu_DisconnectedScreen [label="{DisconnectedScreen}"];
+            Client_Menu_DisconnectedScreen [label="{DisconnectedScreen}"];
+            Client_Menu_LoadingScreen [label="{LoadingScreen}"];
+            Client_Menu_LoadingScreen [label="{LoadingScreen}"];
+            Client_Menu_MainMenu [label="{MainMenu}"];
+            Client_Menu_MainMenu [label="{MainMenu}"];
+            Client_Menu_Menu [label="{Menu}"];
+            Client_Menu_Menu [label="{Menu}"];
+
+            subgraph cluster_Client_Menu_Widget {
+                label="Widget";
+                Client_Menu_Widget_Button [label="{Button}"];
+                Client_Menu_Widget_DebugPanel [label="{DebugPanel}"];
+            }
+        }
+
+        subgraph cluster_Client_Game {
+            label="Game";
+            Client_Game_BulletDebugDrawer [label="{BulletDebugDrawer}"];
+            Client_Game_CubeType [label="{CubeType}"];
+            Client_Game_CubeTypeManager [label="{CubeTypeManager}"];
+            Client_Game_Game [label="{Game}"];
+            Client_Game_ModelRenderer [label="{ModelRenderer}"];
+            Client_Game_Player [label="{Player}"];
+            Client_Game_ShapeRenderer [label="{ShapeRenderer}"];
+            Client_Game_TargetedCubeRenderer [label="{TargetedCubeRenderer}"];
+
+            subgraph cluster_Client_Game_Engine {
+                label="Engine";
+                Client_Game_Engine_Body [label="{Body}"];
+                Client_Game_Engine_BodyManager [label="{BodyManager}"];
+                Client_Game_Engine_BodyType [label="{BodyType}"];
+                Client_Game_Engine_Doodad [label="{Doodad}"];
+                Client_Game_Engine_DoodadManager [label="{DoodadManager}"];
+                Client_Game_Engine_DoodadType [label="{DoodadType}"];
+                Client_Game_Engine_Engine [label="{Engine}"];
+                Client_Game_Engine_Entity [label="{Entity}"];
+                Client_Game_Engine_Model [label="{Model}"];
+                Client_Game_Engine_ModelManager [label="{ModelManager}"];
+                Client_Game_Engine_ModelType [label="{ModelType}"];
+                Client_Game_Engine_PhysicsManager [label="{PhysicsManager}"];
+            }
+        }
+    }
+
+    subgraph cluster_Server {
+        label="Server";
+        Server_Server [label="{Server}"];
+        Server_Settings [label="{Settings}"];
+
+        subgraph cluster_Server_ClientManagement {
+            label="ClientManagement";
+            Server_ClientManagement_Client [label="{Client}"];
+            Server_ClientManagement_ClientManager [label="{ClientManager}"];
+        }
+
+        subgraph cluster_Server_Database {
+            label="Database";
+            Server_Database_ResourceManager [label="{ResourceManager}"];
+            Server_Database_WorldLoader2 [label="{WorldLoader2}"];
+        }
+
+        subgraph cluster_Server_Game {
+            label="Game";
+            Server_Game_Game [label="{Game}"];
+            Server_Game_Player [label="{Player}"];
+            Server_Game_World [label="{World}"];
+            Server_Game_PluginManager [label="{PluginManager}"];
+
+            subgraph cluster_Server_Game_Map {
+                label="Map";
+                Server_Game_Map_Map [label="{Map}"];
+                Server_Game_Map_ChunkManager [label="{ChunkManager}"];
+                Server_Game_Map_Chunk [label="{Chunk}"];
+                Server_Game_Map_Conf [label="{Conf}"];
+                Server_Game_Map_CubeType [label="{CubeType}"];
+
+                subgraph cluster_Server_Game_Map_Gen {
+                    label="Gen";
+                    Server_Game_Map_Gen_ChunkGenerator [label="{ChunkGenerator}"];
+                    /*
+                    Server_Game_Map_Gen_CubeSpawnInfo [label="{CubeSpawnInfo}"];
+                    Server_Game_Map_Gen_IEquation [label="{IEquation}"];
+                    Server_Game_Map_Gen_IRand [label="{IRand}"];
+                    Server_Game_Map_Gen_IValidator [label="{IValidator}"];
+                    Server_Game_Map_Gen_Perlin [label="{Perlin}"];
+                    Server_Game_Map_Gen_RandMersenneTwister [label="{RandMersenneTwister}"];
+                    */
+                }
+            }
+
+            subgraph cluster_Server_Game_Engine {
+                label="Engine";
+                Server_Game_Engine_Body [label="{Body}"];
+                Server_Game_Engine_BodyManager [label="{BodyManager}"];
+                Server_Game_Engine_BodyType [label="{BodyType}"];
+                Server_Game_Engine_CallbackManager [label="{CallbackManager}"];
+                Server_Game_Engine_Doodad [label="{Doodad}"];
+                Server_Game_Engine_DoodadManager [label="{DoodadManager}"];
+                Server_Game_Engine_Engine [label="{Engine}"];
+                Server_Game_Engine_Entity [label="{Entity}"];
+                Server_Game_Engine_EntityManager [label="{EntityManager}"];
+                Server_Game_Engine_EntityType [label="{EntityType}"];
+                Server_Game_Engine_MessageManager [label="{MessageManager}"];
+                Server_Game_Engine_PhysicsManager [label="{PhysicsManager}"];
+                Server_Game_Engine_PositionalEntity [label="{PositionalEntity}"];
+            }
+        }
+
+        subgraph cluster_Server_Network {
+            label="Network";
+            Server_Network_ClientConnection [label="{ClientConnection}"];
+            Server_Network_Network [label="{Network}"];
+            Server_Network_PacketCreator [label="{PacketCreator}"];
+            Server_Network_PacketExtractor [label="{PacketExtractor}"];
+            Server_Network_UdpPacket [label="{UdpPacket}"];
+        }
+
+        subgraph cluster_Server_Rcon {
+            label="Rcon";
+            Server_Rcon_EntityManager [label="{EntityManager}"];
+            Server_Rcon_Rcon [label="{Rcon}"];
+            Server_Rcon_Request [label="{Request}"];
+            Server_Rcon_SessionManager [label="{SessionManager}"];
+        }
+    }
+
+    subgraph cluster_Tools {
+        label="Tools";
+        /*
+        Tools_AbstractCollider [label="{AbstractCollider}"];
+        Tools_AlignedBox [label="{AlignedBox}"];
+        Tools_AlignedCube [label="{AlignedCube}"];
+        Tools_Frustum [label="{Frustum}"];
+        Tools_Octree [label="{Octree}"];
+        Tools_Plane [label="{Plane}"];
+        Tools_Ray [label="{Ray}"];
+        Tools_Rectangle [label="{Rectangle}"];
+        Tools_Vector2 [label="{Vector2}"];
+        Tools_Vector3 [label="{Vector3}"];
+        */
+        Tools_ByteArray [label="{ByteArray}"];
+        Tools_SimpleMessageQueue [label="{SimpleMessageQueue}"];
+        Tools_Timer [label="{Timer}"];
+
+        subgraph cluster_Tools_Gfx {
+            label="Gfx";
+            Tools_Gfx_IRenderer [label="{IRenderer}"];
+        }
+
+        subgraph cluster_Tools_Database {
+            label="Database";
+            Tools_Database_IConnection [label="{IConnection}"];
+            Tools_Database_IQuery [label="{IQuery}"];
+            Tools_Database_IRow [label="{IRow}"];
+
+            subgraph cluster_Tools_Database_Sqlite {
+                label="Sqlite";
+                Tools_Database_Sqlite_Connection [label="{Connection}"]
+                Tools_Database_Sqlite_Query [label="{Query}"]
+                Tools_Database_Sqlite_Row [label="{Row}"]
+            }
+        }
+
+        subgraph cluster_Tools_Models {
+            label="Models";
+            Tools_Models_MqmModel [label="{MqmModel}"]
+        }
+
+        subgraph cluster_Tools_Lua {
+            label="Lua";
+            Tools_Lua_CallHelper [label="{CallHelper}"];
+            Tools_Lua_Interpreter [label="{Interpreter}"];
+            Tools_Lua_Iterator [label="{Iterator}"];
+            Tools_Lua_MetaTable [label="{MetaTable}"];
+            Tools_Lua_Ref [label="{Ref}"];
+            Tools_Lua_Serializer [label="{Serializer}"];
+            Tools_Lua_State [label="{State}"];
+            Tools_Lua_WeakRef [label="{WeakRef}"];
+            Tools_Lua_WeakResourceRefManager [label="{WeakResourceRefManager}"];
+        }
+
+        subgraph cluster_Tools_Window {
+            label="Window";
+            Tools_Window_ActionBinder [label="{ActionBinder}"];
+            Tools_Window_InputBinder [label="{InputBinder}"];
+            Tools_Window_InputManager [label="{InputManager}"];
+            Tools_Window_Window [label="{Window}"];
+
+            subgraph cluster_Tools_Window_Sdl {
+                label="Sdl";
+                Tools_Window_Sdl_InputBinder [label="{InputBinder}"];
+                Tools_Window_Sdl_InputManager [label="{InputManager}"];
+                Tools_Window_Sdl_Window [label="{Window}"];
+            }
+        }
+    }
+
+    subgraph cluster_Common {
+        label="Common";
+        Common_BaseChunk [label="{BaseChunk}"];
+        Common_Camera [label="{Camera}"];
+        Common_MovingOrientedPosition [label="{MovingOrientedPosition}"];
+        Common_NChunk [label="{NChunk}"];
+        Common_NChunkContainer [label="{NChunkContainer}"];
+        Common_OrientedPosition [label="{OrientedPosition}"];
+        Common_Packet [label="{Packet}"];
+        Common_RayCast [label="{RayCast}"];
+        Common_Resource [label="{Resource}"];
+        Common_Position [label="{Position}"];
+        Common_CubeType [label="{CubeType}"];
+
+        subgraph cluster_Common_Physics {
+            label="Physics";
+            Common_Physics_Body [label="{Body}"];
+            Common_Physics_BodyCluster [label="{BodyCluster}"];
+            Common_Physics_BodyType [label="{BodyType}"];
+            Common_Physics_Chunk [label="{Chunk}"];
+            Common_Physics_IShapeDesc [label="{IShapeDesc}"];
+            Common_Physics_Node [label="{Node}"];
+            Common_Physics_ShapeDescBox [label="{ShapeDescBox}"];
+            Common_Physics_ShapeDescEmpty [label="{ShapeDescEmpty}"];
+            Common_Physics_ShapeDescSphere [label="{ShapeDescSphere}"];
+            Common_Physics_World [label="{World}"];
+        }
+    }
+
+    /*
+       Tools::Database::Sqlite
+    */
+    Tools_Database_Sqlite_Connection -> Tools_Database_Sqlite_Row [arrowhead=odiamond];
+    Tools_Database_Sqlite_Connection -> Tools_Database_Sqlite_Query [arrowhead=odiamond];
+    Tools_Database_Sqlite_Connection -> Tools_Database_IConnection;
+    Tools_Database_Sqlite_Query -> Tools_Database_IQuery;
+    Tools_Database_Sqlite_Row -> Tools_Database_IRow;
+
+    /*
+       Tools::Database
+       #ff6d0080 - IConnection
+    */
+    Tools_Database_IConnection -> Client_Resources_CacheDatabaseProxy [arrowhead=odiamond, color="#ff6d0080"];
+    Tools_Database_IConnection -> Server_Database_ResourceManager [arrowhead=odiamond, color="#ff6d0080"];
+    Tools_Database_IConnection -> Server_Database_WorldLoader2 [arrowhead=odiamond, color="#ff6d0080"];
+
+    /*
+       Tools::Window::Sdl
+    */
+    Tools_Window_Sdl_InputBinder -> Tools_Window_InputBinder;
+    Tools_Window_Sdl_InputManager -> Tools_Window_InputManager;
+    Tools_Window_Sdl_Window -> Tools_Window_Window;
+
+    /*
+       Tools::Window
+       #804cffcf - Window, ActionBinder
+    */
+    Tools_Window_InputManager -> Tools_Window_Window [arrowhead=odiamond];
+    Tools_Window_Window -> Tools_Window_InputManager [arrowhead=odiamond];
+    Tools_Window_InputBinder -> Tools_Window_InputManager [arrowhead=odiamond];
+    Tools_Window_Sdl_InputBinder -> Tools_Window_Sdl_InputManager [arrowhead=odiamond];
+    Tools_Window_Window -> Client_Client [arrowhead=odiamond, color="#804cffcf"];
+    Tools_Window_ActionBinder -> Client_Menu_MainMenu [arrowhead=odiamond, color="#804cffcf"];
+    Tools_Window_ActionBinder -> Client_Menu_DisconnectedScreen [arrowhead=odiamond, color="#804cffcf"];
+    Tools_Window_ActionBinder -> Client_Game_Player [arrowhead=diamond, color="#804cffcf"];
+
+    /*
+       Tools::Models
+    */
+    Tools_Models_MqmModel -> Client_Game_Engine_Model [arrowhead=odiamond];
+
+    /*
+       Tools::Lua
+       #00750090 - Ref
+       #89B600cf - Interpreter
+       #285700cb - WeakResourceRefManager
+    */
+    Tools_Lua_Interpreter -> Tools_Lua_MetaTable [arrowhead=odiamond];
+    Tools_Lua_Interpreter -> Tools_Lua_Serializer [arrowhead=odiamond];
+    Tools_Lua_Interpreter -> Tools_Lua_State [arrowhead=odiamond];
+    Tools_Lua_Interpreter -> Tools_Lua_WeakResourceRefManager [arrowhead=odiamond];
+    Tools_Lua_Interpreter -> Tools_Lua_CallHelper [arrowhead=odiamond];
+    Tools_Lua_Ref -> Tools_Lua_MetaTable [arrowhead=diamond];
+    Tools_Lua_Ref -> Tools_Lua_State [arrowhead=odiamond];
+    Tools_Lua_Ref -> Tools_Lua_Iterator [arrowhead=diamond];
+    Tools_Lua_Ref -> Tools_Lua_CallHelper [arrowhead=diamond];
+    Tools_Lua_Ref -> Tools_Lua_WeakResourceRefManager [arrowhead=odiamond];
+    Tools_Lua_MetaTable -> Tools_Lua_WeakResourceRefManager [arrowhead=odiamond];
+    Tools_Lua_State -> Tools_Lua_Ref [arrowhead=odiamond];
+    Tools_Lua_State -> Tools_Lua_WeakRef [arrowhead=odiamond];
+    Tools_Lua_State -> Tools_Lua_Interpreter [arrowhead=odiamond];
+    Tools_Lua_Interpreter -> Client_Game_Engine_Engine [arrowhead=odiamond, color="#89B600cf"];
+    Tools_Lua_Interpreter -> Server_Database_WorldLoader2 [arrowhead=odiamond, color="#89B600cf"];
+    Tools_Lua_Interpreter -> Server_Game_Engine_Engine [arrowhead=odiamond, color="#89B600cf"];
+    Tools_Lua_Ref -> Client_Game_Engine_Engine [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Client_Game_Engine_DoodadType [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Client_Game_Engine_Doodad [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Client_Game_CubeTypeManager [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Server_Database_WorldLoader2 [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Server_Game_Engine_Entity [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Server_Game_Engine_EntityType [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_Ref -> Server_Game_Engine_Doodad [arrowhead=diamond, color="#00750090"];
+    Tools_Lua_WeakResourceRefManager -> Server_Game_Engine_EntityManager [arrowhead=odiamond, color="#285700cb"];
+    Tools_Lua_WeakResourceRefManager -> Server_Game_Engine_DoodadManager [arrowhead=odiamond, color="#285700cb"];
+
+    /*
+       Tools
+       #6968ff99 - Timer
+       #001bffcb - SimpleMessageQueue
+    */
+    Tools_Timer -> Client_Game_Game [arrowhead=diamond, color="#6968ff99"];
+    Tools_Timer -> Client_Game_BulletDebugDrawer [arrowhead=diamond, color="#6968ff99"];
+    Tools_SimpleMessageQueue -> Server_Server [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_ClientManagement_ClientManager [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_Game_Game [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_Game_World [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_Game_Map_Map [arrowhead=odiamond, color="#001bffcb"];
+    Tools_SimpleMessageQueue -> Server_Game_Map_Gen_ChunkGenerator [arrowhead=odiamond, color="#001bffcb"];
+
+    /*
+       Tools::Gfx
+       #12121260 - IRenderer
+    */
+    Tools_Gfx_IRenderer -> Tools_Window_Sdl_Window [arrowhead=diamond];
+    Tools_Gfx_IRenderer -> Client_Resources_ResourceManager [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Resources_LocalResourceManager [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Graphics_LightManager [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Map_ChunkRenderer [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Game_Game [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Menu_MainMenu [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Menu_LoadingScreen [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Menu_DisconnectedScreen [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Game_BulletDebugDrawer [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Game_ModelRenderer [arrowhead=odiamond, color="#12121260"];
+    Tools_Gfx_IRenderer -> Client_Game_ShapeRenderer [arrowhead=odiamond, color="#12121260"];
+
+    /*
+       Client::Resources
+    */
+    Client_Resources_CacheDatabaseProxy -> Client_Resources_ResourceDownloader [arrowhead=odiamond];
+    Client_Resources_CacheDatabaseProxy -> Client_Resources_ResourceManager [arrowhead=diamond];
+    Client_Resources_ResourceDownloader -> Client_Resources_ResourceManager [arrowhead=diamond];
+    Client_Resources_LocalResourceManager -> Client_Client [arrowhead=odiamond];
+    Client_Resources_ResourceManager -> Client_Game_Game [arrowhead=odiamond];
+
+    /*
+       Client::Game
+    */
+    Client_Game_Game -> Client_Resources_ResourceManager [arrowhead=odiamond];
+    Client_Game_Game -> Client_Graphics_LightManager [arrowhead=odiamond];
+    Client_Game_Game -> Client_Map_Map [arrowhead=odiamond];
+    Client_Game_Game -> Client_Map_ChunkRenderer [arrowhead=odiamond];
+    Client_Game_Game -> Client_Map_ChunkManager [arrowhead=odiamond];
+    Client_Game_Game -> Client_Client [arrowhead=odiamond];
+    Client_Game_Game -> Client_Game_ModelRenderer [arrowhead=odiamond];
+    Client_Game_Game -> Client_Game_ShapeRenderer [arrowhead=odiamond];
+    Client_Game_Game -> Client_Game_Player [arrowhead=odiamond];
+    Client_Game_CubeTypeManager -> Client_Game_Game [arrowhead=odiamond];
+    Client_Game_Player -> Client_Game_Game [arrowhead=odiamond];
+    Client_Game_ModelRenderer -> Client_Game_Engine_ModelManager [arrowhead=odiamond];
+    Client_Game_ShapeRenderer -> Client_Game_Engine_DoodadManager [arrowhead=odiamond];
+    Client_Game_CubeType -> Client_Game_CubeTypeManager [arrowhead=diamond];
+    Client_Game_CubeType -> Common_CubeType;
+    Client_Game_TargetedCubeRenderer -> Client_Game_Player [arrowhead=odiamond];
+
+    /*
+       Client::Game::Engine
+    */
+    Client_Game_Engine_Engine -> Client_Game_Game [arrowhead=odiamond];
+    Client_Game_Engine_Engine -> Client_Game_Engine_DoodadManager [arrowhead=odiamond];
+    Client_Game_Engine_Engine -> Client_Game_Engine_PhysicsManager [arrowhead=odiamond];
+    Client_Game_Engine_Engine -> Client_Game_Engine_ModelManager [arrowhead=odiamond];
+    Client_Game_Engine_Engine -> Client_Game_Engine_BodyManager [arrowhead=odiamond];
+    Client_Game_Engine_Doodad -> Client_Game_Engine_PhysicsManager [arrowhead=odiamond];
+    Client_Game_Engine_ModelType -> Client_Game_Engine_ModelManager [arrowhead=odiamond];
+    Client_Game_Engine_Model -> Client_Game_Engine_ModelManager [arrowhead=odiamond];
+    Client_Game_Engine_Doodad -> Client_Game_Engine_Model [arrowhead=odiamond];
+    Client_Game_Engine_Doodad -> Client_Game_Engine_DoodadManager [arrowhead=odiamond];
+    Client_Game_Engine_DoodadType -> Client_Game_Engine_DoodadManager [arrowhead=odiamond];
+    Client_Game_Engine_DoodadType -> Client_Game_Engine_Doodad [arrowhead=odiamond];
+    Client_Game_Engine_Entity -> Client_Game_Engine_DoodadManager [arrowhead=odiamond];
+    Client_Game_Engine_Entity -> Client_Game_Engine_Doodad [arrowhead=odiamond];
+    Client_Game_Engine_Body -> Client_Game_Engine_Doodad [arrowhead=odiamond];
+    Client_Game_Engine_ModelType -> Client_Game_Engine_Model [arrowhead=odiamond];
+    Client_Game_Engine_BodyType -> Client_Game_Engine_BodyManager [arrowhead=odiamond];
+    Client_Game_Engine_DoodadManager -> Client_Game_Engine_Engine [arrowhead=odiamond];
+    Client_Game_Engine_ModelManager -> Client_Game_Engine_Engine [arrowhead=odiamond];
+    Client_Game_Engine_BodyManager -> Client_Game_Engine_Engine [arrowhead=odiamond];
+    Client_Game_Engine_PhysicsManager -> Client_Game_Engine_Engine [arrowhead=odiamond];
+
+    /*
+       Client::Network
+    */
+    Client_Network_Network -> Client_Resources_ResourceDownloader [arrowhead=odiamond];
+    Client_Network_UdpPacket -> Common_Packet;
+    Client_Network_UdpPacket -> Client_Network_Network [arrowhead=odiamond];
+    Client_Network_Network -> Client_Client [arrowhead=diamond];
+    Client_Network_PacketDispatcher -> Client_Client [arrowhead=odiamond];
+
+    /*
+       Client::Map
+    */
+    Client_Map_ChunkManager -> Client_Map_Map [arrowhead=diamond];
+    Client_Map_Chunk -> Client_Map_ChunkMesh [arrowhead=odiamond];
+    Client_Map_ChunkMesh -> Client_Map_Chunk [arrowhead=odiamond];
+    Client_Map_ChunkRenderer -> Client_Map_ChunkManager [arrowhead=diamond];
+    Client_Map_Map -> Client_Game_Game [arrowhead=odiamond];
+
+    /*
+       Client::Menu
+    */
+    Client_Menu_Menu -> Client_Client [arrowhead=odiamond];
+    Client_Menu_Menu -> Client_Menu_MainMenu [arrowhead=odiamond];
+    Client_Menu_Menu -> Client_Menu_LoadingScreen [arrowhead=odiamond];
+    Client_Menu_Menu -> Client_Menu_DisconnectedScreen [arrowhead=odiamond];
+    Client_Menu_LoadingScreen -> Client_Menu_Menu [arrowhead=odiamond];
+    Client_Menu_DisconnectedScreen -> Client_Menu_Menu [arrowhead=odiamond];
+    Client_Menu_MainMenu -> Client_Menu_Menu [arrowhead=odiamond];
+
+    /*
+       Client::Menu::Widget
+    */
+    Client_Menu_Widget_Button -> Client_Menu_MainMenu [arrowhead=odiamond];
+    Client_Menu_Widget_DebugPanel -> Client_Menu_MainMenu [arrowhead=odiamond];
+
+    /*
+       Client
+    */
+    Client_Client -> Client_Resources_LocalResourceManager [arrowhead=odiamond];
+    Client_Client -> Client_Network_PacketDispatcher [arrowhead=odiamond];
+    Client_Settings -> Client_Client [arrowhead=odiamond];
+    Client_Client -> Client_Game_Game [arrowhead=odiamond];
+    Client_Client -> Client_Menu_Menu [arrowhead=odiamond];
+    Client_Client -> Client_Menu_MainMenu [arrowhead=odiamond];
+    Client_Client -> Client_Menu_LoadingScreen [arrowhead=odiamond];
+    Client_Client -> Client_Menu_DisconnectedScreen [arrowhead=odiamond];
+    Client_Client -> Client_Game_CubeTypeManager [arrowhead=odiamond];
+
+    /*
+       Common
+       #a4000aee - Packet, Position, MovingOrientedPosition, Camera, Resource
+    */
+    Common_Position -> Common_Physics_Node [arrowhead=diamond];
+    Common_Position -> Common_OrientedPosition [arrowhead=diamond];
+    Common_Camera -> Common_OrientedPosition;
+    Common_OrientedPosition -> Common_MovingOrientedPosition [arrowhead=diamond];
+    Common_BaseChunk -> Common_NChunk;
+    Common_NChunkContainer -> Common_NChunk;
+    Common_Packet -> Tools_ByteArray;
+    Common_Camera -> Client_Game_Player [arrowhead=odiamond, color="#a4000aee"];
+    Common_MovingOrientedPosition -> Server_Game_Player [arrowhead=diamond, color="#a4000aee"];
+    Common_Position -> Server_Game_Map_Map [arrowhead=diamond, color="#a4000aee"];
+    Common_Packet -> Client_Network_Network [arrowhead=odiamond, color="#a4000aee"];
+    Common_Packet -> Server_Network_ClientConnection [arrowhead=odiamond, color="#a4000aee"];
+    Common_Resource -> Server_Database_ResourceManager [arrowhead=odiamond, color="#a4000aee"];
+
+    /*
+       Common::Physics
+    */
+    Common_Physics_Chunk -> Client_Map_Chunk [arrowhead=odiamond];
+    Common_Physics_ShapeDescBox -> Common_Physics_IShapeDesc;
+    Common_Physics_ShapeDescEmpty -> Common_Physics_IShapeDesc;
+    Common_Physics_ShapeDescSphere -> Common_Physics_IShapeDesc;
+    Common_Physics_World -> Common_Physics_Chunk [arrowhead=odiamond];
+    Common_Physics_Node -> Common_Physics_BodyType [arrowhead=diamond];
+    Common_Physics_World -> Common_Physics_BodyCluster [arrowhead=odiamond];
+    Common_Physics_BodyCluster -> Common_Physics_Body [arrowhead=odiamond];
+    Common_Physics_BodyType -> Common_Physics_Body [arrowhead=odiamond];
+    Common_Physics_Node -> Common_Physics_Body [arrowhead=diamond];
+    Common_Physics_Node -> Client_Game_Engine_Entity [arrowhead=diamond];
+    Common_Physics_Node -> Client_Game_Engine_Body [arrowhead=diamond];
+    Common_Physics_Node -> Server_Game_Engine_PositionalEntity [arrowhead=diamond];
+    Common_Physics_BodyCluster -> Client_Game_Engine_Entity [arrowhead=odiamond];
+    Common_Physics_BodyCluster -> Server_Game_Engine_PositionalEntity [arrowhead=odiamond];
+    Common_Physics_Body -> Common_Physics_BodyCluster [arrowhead=odiamond];
+    Common_Physics_World -> Client_Game_Engine_PhysicsManager [arrowhead=odiamond];
+    Common_Physics_World -> Server_Game_Engine_PhysicsManager [arrowhead=odiamond];
+    Common_Physics_World -> Server_Game_Engine_Doodad [arrowhead=odiamond];
+
+    /*
+       Server
+    */
+    Server_Settings -> Server_Server [arrowhead=odiamond];
+    Server_Server -> Server_ClientManagement_ClientManager [arrowhead=odiamond];
+    Server_Server -> Server_Database_ResourceManager [arrowhead=odiamond];
+    Server_Server -> Server_Game_Game [arrowhead=odiamond];
+    Server_Server -> Server_Network_Network [arrowhead=odiamond];
+    Server_Server -> Server_Rcon_EntityManager [arrowhead=odiamond];
+    Server_Server -> Server_Rcon_Rcon [arrowhead=odiamond];
+    Server_Server -> Server_Rcon_Request [arrowhead=odiamond];
+    Server_Settings -> Server_Rcon_SessionManager [arrowhead=odiamond];
+
+    /*
+       Server::Rcon
+    */
+    Server_Rcon_Rcon -> Server_Server [arrowhead=odiamond];
+    Server_Rcon_SessionManager -> Server_Rcon_Rcon [arrowhead=odiamond];
+    Server_Rcon_EntityManager -> Server_Rcon_Rcon [arrowhead=odiamond];
+
+    /*
+       Server::Game
+    */
+    Server_Game_Game -> Server_Server [arrowhead=odiamond];
+    Server_Game_Game -> Server_Game_Player [arrowhead=odiamond];
+    Server_Game_Game -> Server_Game_World [arrowhead=odiamond];
+    Server_Game_Game -> Server_Game_Map_Map [arrowhead=odiamond];
+    Server_Game_World -> Server_Database_WorldLoader2 [arrowhead=odiamond];
+    Server_Game_World -> Server_Game_Game [arrowhead=odiamond];
+    Server_Game_World -> Server_Game_Map_Map [arrowhead=odiamond];
+    Server_Game_World -> Server_Game_Engine_Engine [arrowhead=odiamond];
+    Server_Game_Player -> Server_Game_Game [arrowhead=odiamond];
+    Server_Game_Player -> Server_Game_Map_Map [arrowhead=odiamond];
+    Server_Game_PluginManager -> Server_Game_World [arrowhead=odiamond];
+
+    /*
+       Server::Game::Map
+    */
+    Server_Game_Map_Map -> Server_Database_WorldLoader2 [arrowhead=odiamond];
+    Server_Game_Map_Map -> Server_Game_Player [arrowhead=odiamond];
+    Server_Game_Map_Map -> Server_Game_World [arrowhead=odiamond];
+    Server_Game_Map_Map -> Server_Game_Engine_Engine [arrowhead=odiamond];
+    Server_Game_Map_CubeType -> Common_CubeType;
+    Server_Game_Map_Conf -> Server_Game_Map_Map [arrowhead=diamond];
+    Server_Game_Map_ChunkManager -> Server_Game_Map_Map [arrowhead=odiamond];
+
+    /*
+       Server::Game::Engine
+    */
+    Server_Game_Engine_Engine -> Server_Game_Map_Map [arrowhead=odiamond];
+    Server_Game_Engine_Engine -> Server_Game_Engine_Entity [arrowhead=odiamond];
+    Server_Game_Engine_Engine -> Server_Game_Engine_EntityManager [arrowhead=odiamond];
+    Server_Game_Engine_Engine -> Server_Game_Engine_MessageManager [arrowhead=odiamond];
+    Server_Game_Engine_Engine -> Server_Game_Engine_PhysicsManager [arrowhead=odiamond];
+    Server_Game_Engine_Engine -> Server_Game_Engine_DoodadManager [arrowhead=odiamond];
+    Server_Game_Engine_Engine -> Server_Game_Engine_Doodad [arrowhead=odiamond];
+    Server_Game_Engine_Engine -> Server_Game_Engine_CallbackManager [arrowhead=odiamond];
+    Server_Game_Engine_Engine -> Server_Game_Engine_BodyManager [arrowhead=odiamond];
+    Server_Game_Engine_Entity -> Server_Game_Engine_EntityManager [arrowhead=odiamond];
+    Server_Game_Engine_Doodad -> Server_Game_Engine_DoodadManager [arrowhead=odiamond];
+    Server_Game_Engine_Body -> Server_Game_Engine_Doodad [arrowhead=odiamond];
+    Server_Game_Engine_BodyType -> Common_Physics_BodyType;
+    Server_Game_Engine_BodyType -> Server_Game_Engine_BodyManager [arrowhead=odiamond];
+    Server_Game_Engine_EntityType -> Server_Game_Engine_Entity [arrowhead=odiamond];
+    Server_Game_Engine_EntityType -> Server_Game_Engine_EntityManager [arrowhead=odiamond];
+    Server_Game_Engine_PositionalEntity -> Server_Game_Engine_EntityManager [arrowhead=odiamond];
+    Server_Game_Engine_PositionalEntity -> Server_Game_Engine_PhysicsManager [arrowhead=odiamond];
+    Server_Game_Engine_PositionalEntity -> Server_Game_Engine_Doodad [arrowhead=odiamond];
+    Server_Game_Engine_PositionalEntity -> Server_Game_Engine_Entity;
+    Server_Game_Engine_MessageManager -> Server_Game_Engine_Engine [arrowhead=odiamond];
+    Server_Game_Engine_EntityManager -> Server_Game_Engine_Engine [arrowhead=odiamond];
+    Server_Game_Engine_CallbackManager -> Server_Game_Engine_Engine [arrowhead=odiamond];
+    Server_Game_Engine_DoodadManager -> Server_Game_Engine_Engine [arrowhead=odiamond];
+    Server_Game_Engine_PhysicsManager -> Server_Game_Engine_Engine [arrowhead=odiamond];
+    Server_Game_Engine_BodyManager -> Server_Game_Engine_Engine [arrowhead=odiamond];
+
+    /*
+       Server::Game::Map::Gen
+    */
+    Server_Game_Map_Gen_ChunkGenerator -> Server_Game_Map_Map [arrowhead=odiamond];
+
+    /*
+       Server::ClientManagement
+    */
+    Server_ClientManagement_ClientManager -> Server_Server [arrowhead=odiamond];
+    Server_ClientManagement_Client -> Server_ClientManagement_ClientManager [arrowhead=odiamond];
+
+    /*
+       Server::Database
+    */
+    Server_Database_ResourceManager -> Server_Server [arrowhead=odiamond];
+    Server_Database_ResourceManager -> Server_Database_WorldLoader2 [arrowhead=odiamond];
+
+    /*
+       Server::Network
+    */
+    Server_Network_Network -> Server_Server [arrowhead=odiamond];
+    Server_Network_Network -> Server_Network_ClientConnection [arrowhead=odiamond];
+    Server_Network_UdpPacket -> Server_Network_ClientConnection [arrowhead=odiamond];
+    Server_Network_ClientConnection -> Server_ClientManagement_Client [arrowhead=odiamond];
+    Server_Network_ClientConnection -> Server_Network_Network [arrowhead=odiamond];
+
+}

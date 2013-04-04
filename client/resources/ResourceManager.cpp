@@ -9,7 +9,6 @@
 #include "tools/gfx/utils/texture/AnimatedTexture.hpp"
 #include "tools/gfx/utils/texture/Texture.hpp"
 #include "tools/window/Window.hpp"
-#include "tools/lua/Interpreter.hpp"
 
 #include "common/FieldUtils.hpp"
 #include "common/Resource.hpp"
@@ -137,7 +136,7 @@ namespace Client { namespace Resources {
                     {
                         auto description = this->GetScript(id);
 
-                        Tools::Lua::Interpreter i;
+                        Luasel::Interpreter i;
                         i.DoString(description);
                         auto const& globals = i.Globals();
                         bool animated = globals["animated"].ToBoolean();
@@ -381,7 +380,7 @@ namespace Client { namespace Resources {
         //Tools::Gfx::Utils::Material::LuaMaterial::LoadLuaTypes(this->_game.GetInterpreter(), );
     }
 
-    void ResourceManager::_ApiRegisterMaterial(Tools::Lua::CallHelper& helper)
+    void ResourceManager::_ApiRegisterMaterial(Luasel::CallHelper& helper)
     {
         auto const& pluginName = this->_game.GetEngine().GetRunningPluginName();
         if (pluginName == "")

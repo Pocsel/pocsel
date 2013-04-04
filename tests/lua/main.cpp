@@ -1,9 +1,7 @@
 #include "precompiled.hpp"
 
-#include "tools/lua/Interpreter.hpp"
-#include "tools/lua/Ref.hpp"
-#include "tools/lua/Iterator.hpp"
-#include "tools/lua/MetaTable.hpp"
+#include <luasel/Luasel.hpp>
+
 #include "tools/lua/utils/Utils.hpp"
 #include "tools/lua/WeakResourceRefManager.hpp"
 #include "tools/lua/AWeakResourceRef.hpp"
@@ -11,7 +9,7 @@
 
 #define STRINGIFY(...) #__VA_ARGS__
 
-void f(Tools::Lua::CallHelper& call)
+void f(Luasel::CallHelper& call)
 {
     auto const& args = call.GetArgList();
     auto it = args.begin();
@@ -32,16 +30,16 @@ void TestFunction(int test)
     std::cout << test << std::endl;
 }
 
-static void Basic(Interpreter& i)
+static void Basic(Luasel::Interpreter& i)
 {
     i.DoString("test = {} test[4] = 23.34");
 
-    Tools::Lua::Ref bite = i.Bind(&f, std::placeholders::_1);
-    //Tools::Lua::Ref bite = i.MakeFunction(std::bind(&f, std::placeholders::_1));
+    Luasel::Ref bite = i.Bind(&f, std::placeholders::_1);
+    //Luasel::Ref bite = i.MakeFunction(std::bind(&f, std::placeholders::_1));
 
     try
     {
-        Tools::log << bite(1, 2).ToNumber() << " jksdfgjk " << sizeof(Tools::Lua::Ref) << std::endl;
+        Tools::log << bite(1, 2).ToNumber() << " jksdfgjk " << sizeof(Luasel::Ref) << std::endl;
     }
     catch (std::exception& e)
     {
@@ -60,7 +58,7 @@ static void Basic(Interpreter& i)
     }
 
     {
-        Tools::Lua::CallHelper helper(i);
+        Luasel::CallHelper helper(i);
         helper.PushArg(i.Make(true));
         helper.PushArg(i.Make("Hey!!"));
         bite.Call(helper);
@@ -74,28 +72,28 @@ static void Basic(Interpreter& i)
     }
 }
 
-static void Iterators(Interpreter& i)
+static void Iterators(Luasel::Interpreter& i)
 {
     i.DoString("test = \"sjkldg\\nlkéhsdfg\" g = 323.4 jdsk = {} iwer = {} jkd = function() end");
 
-    Tools::Lua::Iterator it = i.Globals().Begin();
-    Tools::Lua::Iterator itEnd = i.Globals().End();
+    Luasel::Iterator it = i.Globals().Begin();
+    Luasel::Iterator itEnd = i.Globals().End();
     for (; it != itEnd; ++it)
     {
         Tools::log << it.GetValue().GetTypeName() << ": " << it.GetValue().ToString() << " (key " << it.GetKey().GetTypeName() << " " << it.GetKey().ToString() << ")" << std::endl;
     }
 }
 
-static void MetaTables(Interpreter& i)
+static void MetaTables(Luasel::Interpreter& i)
 {
     i.DoString("FUCK = function() print \"FUCK\" end");
-    Tools::Lua::Ref meta = i.MakeTable();
+    Luasel::Ref meta = i.MakeTable();
     meta.Set("__index", i.Globals()["FUCK"]);
     meta.Set(1, "test");
     meta.Set(2, "tests2");
     Tools::log << "Type of FUCK: " << meta["__index"].GetTypeName() << std::endl;
     Tools::log << "size of metatable: " << meta.GetLength() << std::endl;
-    Tools::Lua::Ref metaTest = i.MakeTable();
+    Luasel::Ref metaTest = i.MakeTable();
     metaTest.SetMetaTable(meta);
     i.Globals().Set("metaTest", metaTest);
     i.DoString("a = metaTest[12]");
@@ -103,7 +101,7 @@ static void MetaTables(Interpreter& i)
     i.DoString("c = metaTest[15]");
 }
 
-static void Serialization(Interpreter& i)
+static void Serialization(Luasel::Interpreter& i)
 {
     i.DoString("sharedTable = { 213, 23, \"sdfg\" }");
     i.DoString("serializeTest = { bite = { 1, 3, 4, sharedTable }, test = \"HEY\", allo = false }");
@@ -139,14 +137,14 @@ static void Serialization(Interpreter& i)
     }
 }
 
-static void MetaTableCpp(Interpreter& i)
+static void MetaTableCpp(Luasel::Interpreter& i)
 {
     struct A
     {
         void Print(int /* nb */) { Tools::log << "A::Print()\n"; }
     };
 
-    MetaTable::Create(i, A());
+    Luasel::MetaTable::Create(i, A());
 
     try
     {
@@ -171,17 +169,17 @@ static void MetaTableCpp(Interpreter& i)
         static fakeVec2 Normalize(fakeVec2 const& v) { return glm::normalize(glm::dvec2(v.x, v.y)); }
         static double Dot(fakeVec2 const& v1, fakeVec2 const& v2) { return glm::dot(glm::dvec2(v1.x, v1.y), glm::dvec2(v2.x, v2.y)); }
     };
-    auto& mVec2 = MetaTable::Create(i, fakeVec2());
+    auto& mVec2 = Luasel::MetaTable::Create(i, fakeVec2());
     mVec2.SetMethod("Normalize", i.Bind(static_cast<fakeVec2(*)(fakeVec2 const&)>(&fakeVec2::Normalize), std::placeholders::_1));
     mVec2.SetMethod("Dot", i.Bind(static_cast<double(*)(fakeVec2 const&, fakeVec2 const&)>(&fakeVec2::Dot), std::placeholders::_1, std::placeholders::_2));
-    mVec2.SetMetaMethod(MetaTable::Serialize,
-        [&i](CallHelper& helper)
+    mVec2.SetMetaMethod(Luasel::MetaTable::Serialize,
+        [&i](Luasel::CallHelper& helper)
         {
             auto v = helper.PopArg().Check<fakeVec2*>();
             helper.PushRet(i.MakeString("return Vec2.New(" + Tools::ToString(v->x) + ", " + Tools::ToString(v->y) + ")"));
         });
     mVec2.SetMethod("Dump",
-        [](CallHelper& helper)
+        [](Luasel::CallHelper& helper)
         {
             auto v = helper.PopArg().Check<fakeVec2*>();
             Tools::log << "(" << v->x << ";" << v->y << ")\n";
@@ -189,7 +187,7 @@ static void MetaTableCpp(Interpreter& i)
     // Namespace
     auto n = i.Globals().GetTable("Vec2");
     n.Set("New", i.MakeFunction(
-        [&i](CallHelper& helper)
+        [&i](Luasel::CallHelper& helper)
         {
             auto x = helper.PopArg().Check<double>();
             auto y = helper.PopArg().Check<double>();
@@ -215,7 +213,7 @@ static void MetaTableCpp(Interpreter& i)
     Tools::log << "second: " << i.GetSerializer().Serialize(i.GetSerializer().Deserialize(i.GetSerializer().Serialize(i.Globals()["tab"]))) << std::endl;
 }
 
-static void Benchmark(Interpreter& i)
+static void Benchmark(Luasel::Interpreter& i)
 {
     Tools::Timer timer;
     Tools::log << "Benchmark vector 3\n";
@@ -266,7 +264,7 @@ static void Benchmark(Interpreter& i)
     Tools::log << "move: " << timer.GetPreciseElapsedTime() << " us\n";
 }
 
-static void RegisteredTypes(Interpreter& i)
+static void RegisteredTypes(Luasel::Interpreter& i)
 {
     i.DoString(STRINGIFY(
         v = Utils.Vector4(1.5, 2.25, 3.125, 4.06125)
@@ -291,13 +289,13 @@ static void RegisteredTypes(Interpreter& i)
         std::cout << "(" << m[i][0] << " " << m[i][1] << " " << m[i][2] << " " << m[i][3] << ")\n";
 }
 
-static void Resources(Interpreter& i)
+static void Resources(Luasel::Interpreter& i)
 {
     struct MitoResourceManager
     {
-        MitoResourceManager(Interpreter& i) : coucou(1336), coucou2(i.MakeTable()) {}
+        MitoResourceManager(Luasel::Interpreter& i) : coucou(1336), coucou2(i.MakeTable()) {}
         int coucou;
-        Ref coucou2;
+        Luasel::Ref coucou2;
     };
 
     struct ResourceDeTest : Tools::Lua::AWeakResourceRef<MitoResourceManager>
@@ -306,7 +304,7 @@ static void Resources(Interpreter& i)
         ResourceDeTest(int field1, std::string field2) : field1(field1), field2(field2) {}
         virtual bool IsValid(MitoResourceManager const&) const { return this->field1 && !this->field2.empty(); }
         virtual void Invalidate(MitoResourceManager const&) { this->field1 = 0; this->field2.clear(); }
-        virtual Ref GetReference(MitoResourceManager& manager) const { return manager.coucou2; }
+        virtual Luasel::Ref GetReference(MitoResourceManager& manager) const { return manager.coucou2; }
         bool operator <(ResourceDeTest const& rhs) const { return this->field1 < rhs.field1 && this->field2 < rhs.field2; }
         int field1;
         std::string field2;
@@ -317,10 +315,10 @@ static void Resources(Interpreter& i)
 
     auto pair1 = luaManager.NewResource(ResourceDeTest(12, "resource1"));
     Uint32 resource1Id = pair1.first;
-    Ref resource1 = pair1.second;
+    Luasel::Ref resource1 = pair1.second;
     auto pair2 = luaManager.NewResource(ResourceDeTest(24, "resource2"));
     //Uint32 resource2Id = pair2.first;
-    Ref resource2 = pair2.second;
+    Luasel::Ref resource2 = pair2.second;
     i.Globals().Set("maResource1", resource1);
     i.Globals().Set("maResource2", resource2);
     i.DoString(STRINGIFY(
@@ -352,19 +350,19 @@ static void Resources(Interpreter& i)
     }
 }
 
-void ResourcesSerialization(Interpreter& i)
+void ResourcesSerialization(Luasel::Interpreter& i)
 {
     class EntityManager
     {
         public:
-            EntityManager(Interpreter& interpreter) : _interpreter(interpreter)
+            EntityManager(Luasel::Interpreter& interpreter) : _interpreter(interpreter)
             {
                 this->_entities.insert(std::make_pair(1, this->_interpreter.MakeNumber(66.5)));
                 this->_entities.insert(std::make_pair(2, this->_interpreter.MakeString("hello")));
                 this->_entities.insert(std::make_pair(3, this->_interpreter.MakeTable()));
                 this->_entities.insert(std::make_pair(4, this->_interpreter.MakeBoolean(false)));
             }
-            Ref GetEntity(Uint32 id) const
+            Luasel::Ref GetEntity(Uint32 id) const
             {
                 auto it = this->_entities.find(id);
                 if (it == this->_entities.end())
@@ -372,8 +370,8 @@ void ResourcesSerialization(Interpreter& i)
                 return it->second;
             }
         private:
-            Interpreter& _interpreter;
-            std::map<Uint32, Ref> _entities;
+            Luasel::Interpreter& _interpreter;
+            std::map<Uint32, Luasel::Ref> _entities;
     };
 
     struct EntityPtr : Tools::Lua::AWeakResourceRef<EntityManager>
@@ -382,7 +380,7 @@ void ResourcesSerialization(Interpreter& i)
         EntityPtr() : id(0) {}
         virtual bool IsValid(EntityManager const&) const { return this->id; }
         virtual void Invalidate(EntityManager const&) { this->id = 0; }
-        virtual Ref GetReference(EntityManager& manager) const { return manager.GetEntity(id); }
+        virtual Luasel::Ref GetReference(EntityManager& manager) const { return manager.GetEntity(id); }
         bool operator <(EntityPtr const& rhs) const { return this->id < rhs.id; }
         void TryToLoad(EntityManager const& manager) { Tools::log << "EntityPtr::TryToLoad() - " << this->id << std::endl; }
         Uint32 id;
@@ -406,9 +404,9 @@ void ResourcesSerialization(Interpreter& i)
 int main(int, char**)
 {
     {
-        Tools::Lua::Interpreter i;
-        i.RegisterLib(Tools::Lua::Interpreter::Base);
-        i.RegisterLib(Tools::Lua::Interpreter::Math);
+        Luasel::Interpreter i;
+        i.RegisterLib(Luasel::Interpreter::Base);
+        i.RegisterLib(Luasel::Interpreter::Math);
         Utils::RegisterMatrix(i);
         Utils::RegisterVector(i);
 

@@ -4,6 +4,7 @@
 #include "tools/stat/StatManager.hpp"
 #include "tools/window/sdl/Window.hpp"
 #include "tools/window/InputManager.hpp"
+#include "tools/sound/fmod/SoundSystem.hpp"
 
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
@@ -42,6 +43,7 @@ namespace Client {
         this->_window = new Tools::Window::Sdl::Window(actions, this->_settings.useDirect3D9, this->_settings.res, this->_settings.fullscreen);
         this->_effectManager = new Tools::Gfx::Effect::EffectManager(this->_window->GetRenderer());
         this->_threadPool = new Tools::Thread::ThreadPool(2);
+        this->_soundSystem = new Tools::Sound::Fmod::SoundSystem();
         this->_resourceManager = new Resources::LocalResourceManager(*this);
         this->_packetDispatcher = new Network::PacketDispatcher(*this);
         this->_menu = new Menu::Menu(*this);
@@ -54,11 +56,16 @@ namespace Client {
 
     Client::~Client()
     {
+        // destroy game first
         Tools::Delete(this->_game);
-        Tools::Delete(this->_menu);
+        // game resources
         Tools::Delete(this->_packetDispatcher);
-        Tools::Delete(this->_resourceManager);
         Tools::Delete(this->_threadPool);
+        // client resources
+        Tools::Delete(this->_menu);
+        Tools::Delete(this->_resourceManager);
+        // low level systems (sound & gfx)
+        Tools::Delete(this->_soundSystem);
         Tools::Delete(this->_effectManager);
         Tools::Delete(this->_window);
     }
@@ -158,6 +165,7 @@ namespace Client {
                 frameTimer.Sleep(timeLeft);
 
             Tools::Stat::statManager.Update();
+            this->_soundSystem->Update();
         }
 
         if (this->_network.IsRunning())

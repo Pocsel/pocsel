@@ -7,7 +7,9 @@
 #include "tools/window/Window.hpp"
 #include "tools/models/MqmModel.hpp"
 #include "tools/models/ErrorModel.hpp"
-
+#include "tools/sound/ISoundSystem.hpp"
+#include "tools/sound/ISound.hpp"
+#include "tools/sound/fmod/Sound.hpp"
 
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
@@ -17,10 +19,11 @@
 
 namespace Client { namespace Resources {
 
-    LocalResourceManager::LocalResourceManager(Client& client)
-        : _client(client),
+    LocalResourceManager::LocalResourceManager(Client& client) :
+        _client(client),
         _renderer(client.GetWindow().GetRenderer()),
-        _effectManager(client.GetEffectManager())
+        _effectManager(client.GetEffectManager()),
+        _soundSystem(client.GetSoundSystem())
     {
         this->_InitErrorTexture();
         this->_InitErrorModel();
@@ -35,6 +38,8 @@ namespace Client { namespace Resources {
         for (auto it = this->_fonts.begin(), ite = this->_fonts.end(); it != ite; ++it)
             Tools::Delete(it->second);
         for (auto it = this->_models.begin(), ite = this->_models.end(); it != ite; ++it)
+            Tools::Delete(it->second);
+        for (auto it = this->_sounds.begin(), ite = this->_sounds.end(); it != ite; ++it)
             Tools::Delete(it->second);
     }
 
@@ -144,6 +149,20 @@ namespace Client { namespace Resources {
         else if (it->second != 0)
             return *it->second;
         return *this->_models["__error__"];
+    }
+
+    Tools::Sound::ISound const& LocalResourceManager::GetSound(std::string const& path)
+    {
+        auto it = this->_sounds.find(path);
+        if (it == this->_sounds.end())
+        {
+            auto soundPath = (this->_client.GetSettings().confDir / "sounds" / path).string();
+            Tools::Sound::ISound* sound = new Tools::Sound::Fmod::Sound(this->_soundSystem, soundPath);
+            this->_sounds[path] = sound;
+            return *sound;
+        }
+        else
+            return *it->second;
     }
 
     void LocalResourceManager::_InitErrorModel()

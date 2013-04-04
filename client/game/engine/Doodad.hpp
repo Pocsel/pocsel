@@ -1,8 +1,9 @@
 #ifndef __CLIENT_GAME_ENGINE_DOODAD_HPP__
 #define __CLIENT_GAME_ENGINE_DOODAD_HPP__
 
+#include <luasel/Luasel.hpp>
+
 #include "client/game/engine/DoodadType.hpp"
-#include "tools/lua/Ref.hpp"
 
 #include "common/physics/Node.hpp"
 
@@ -23,19 +24,19 @@ namespace Client { namespace Game { namespace Engine {
     {
     private:
         DoodadType const& _type;
-        Tools::Lua::Ref _self;
+        Luasel::Ref _self;
         Entity const& _entity;
         std::unique_ptr<Body> _body;
 
     public:
-        Doodad(Tools::Lua::Interpreter& interpreter,
+        Doodad(Luasel::Interpreter& interpreter,
                 Uint32 id,
                 BodyType const* bodyType,
                 Entity& entity,
                 DoodadType const& type);
         ~Doodad();
         DoodadType const& GetType() const { return this->_type; }
-        Tools::Lua::Ref const& GetSelf() const { return this->_self; }
+        Luasel::Ref const& GetSelf() const { return this->_self; }
 
         Body const* GetBody() const { return this->_body.get(); }
         Body* GetBody() { return this->_body.get(); }

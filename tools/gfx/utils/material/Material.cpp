@@ -1,6 +1,5 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/lua/Interpreter.hpp"
 #include "tools/gfx/utils/material/LuaMaterial.hpp"
 #include "tools/gfx/utils/material/Material.hpp"
 #include "tools/gfx/utils/material/Variable.hpp"
@@ -13,7 +12,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
             this->totalTime->Set((float)totalTime * 0.000001f);
     }
 
-    Material::Material(IRenderer& renderer, Lua::Ref const& type, Lua::Ref& materialSelf, std::function<GfxEffect&(std::string const&)> const& loadShader, std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> loadTexture) :
+    Material::Material(IRenderer& renderer, Luasel::Ref const& type, Luasel::Ref& materialSelf, std::function<GfxEffect&(std::string const&)> const& loadShader, std::function<std::unique_ptr<Texture::ITexture>(std::string const&)> loadTexture) :
         _renderer(renderer),
         _loadTexture(loadTexture),
         _type(type),
@@ -23,7 +22,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
         materialSelf = materialSelf.GetState().MakeTable();
         this->_self = materialSelf;
         if (!materialSelf.IsNoneOrNil() && materialSelf["Update"].Exists())
-            this->_luaUpdate.reset(new Lua::Ref(materialSelf["Update"]));
+            this->_luaUpdate.reset(new Luasel::Ref(materialSelf["Update"]));
 
         auto& geometryShader = loadShader(this->_type["geometryShader"].Check<std::string>());
         this->_geometry.reset(new Effect(geometryShader));
@@ -35,7 +34,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
         materialSelf.SetMetaTable(this->_type);
     }
 
-    Material::Material(Material const& material, Lua::Ref& materialSelf) :
+    Material::Material(Material const& material, Luasel::Ref& materialSelf) :
         _renderer(material._renderer),
         _geometry(new Effect(material._geometry->shader)),
         _loadTexture(material._loadTexture),
@@ -48,7 +47,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
         materialSelf = materialSelf.GetState().MakeTable();
         this->_self = materialSelf;
         if (!materialSelf.IsNoneOrNil() && materialSelf["Update"].Exists())
-            this->_luaUpdate.reset(new Lua::Ref(materialSelf["Update"]));
+            this->_luaUpdate.reset(new Luasel::Ref(materialSelf["Update"]));
         this->_LoadVariables();
 
         materialSelf.SetMetaTable(this->_type);
@@ -60,11 +59,11 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
         this->_shadowMap->totalTime = &this->_shadowMap->shader.GetParameter(name);
     }
 
-    void Material::SetLuaUpdate(Lua::Ref const& update)
+    void Material::SetLuaUpdate(Luasel::Ref const& update)
     {
         this->_luaUpdate.release();
         if (update.Exists())
-            this->_luaUpdate.reset(new Lua::Ref(update));
+            this->_luaUpdate.reset(new Luasel::Ref(update));
     }
 
     void Material::Update(Uint64 totalTime)
@@ -133,7 +132,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
             this->_hasAlpha = this->_type["hasAlpha"].CheckBoolean();
     }
 
-    void Material::SetLuaValue(std::string const& key, Lua::Ref value)
+    void Material::SetLuaValue(std::string const& key, Luasel::Ref value)
     {
         // TODO: d'autres types ou pas ?
         if (value.IsNumber())
@@ -151,20 +150,20 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
     }
 
     void Material::LoadLuaTypes(
-        Lua::Interpreter& interpreter,
+        Luasel::Interpreter& interpreter,
         std::function<std::unique_ptr<Texture::ITexture>(std::string const&)>&& loadTexture,
         std::function<std::unique_ptr<LuaMaterial>(std::string const&)>&& loadMaterial)
     {
         // Register type ITexture
         {
             // La métatable sert juste comme conteneur (du moins pour le moment)
-            Lua::MetaTable::Create<std::shared_ptr<Texture::ITexture>>(interpreter);
+            Luasel::MetaTable::Create<std::shared_ptr<Texture::ITexture>>(interpreter);
 
             // Fonction: Client.Texture("plugin:NomDeTexture")
             auto textureNs = interpreter.Globals().GetTable("Client").GetTable("Texture");
             auto metaTable = interpreter.MakeTable();
             metaTable.Set("__call", interpreter.MakeFunction(
-                [loadTexture, &interpreter](Lua::CallHelper& helper)
+                [loadTexture, &interpreter](Luasel::CallHelper& helper)
                 {
                     helper.PopArg();
                     auto texture = loadTexture(helper.PopArg().CheckString());
@@ -176,9 +175,9 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
         // Register type LuaMaterial
         {
             // MetaTable pour le shader
-            auto& table = Lua::MetaTable::Create<std::unique_ptr<Material>>(interpreter);
-            table.SetMetaMethod(Lua::MetaTable::NewIndex,
-                [](Lua::CallHelper& helper)
+            auto& table = Luasel::MetaTable::Create<std::unique_ptr<Material>>(interpreter);
+            table.SetMetaMethod(Luasel::MetaTable::NewIndex,
+                [](Luasel::CallHelper& helper)
                 {
                     auto material = helper.PopArg().To<std::unique_ptr<Material>*>()->get();
                     auto key = helper.PopArg().Check<std::string>();
@@ -186,8 +185,8 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
 
                     material->SetLuaValue(key, value);
                 });
-            table.SetMetaMethod(Lua::MetaTable::Index,
-                [](Lua::CallHelper& helper)
+            table.SetMetaMethod(Luasel::MetaTable::Index,
+                [](Luasel::CallHelper& helper)
                 {
                     auto material = helper.PopArg().To<std::unique_ptr<Material>*>()->get();
                     auto key = helper.PopArg().Check<std::string>();
@@ -203,7 +202,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Material {
             auto materialNs = interpreter.Globals().GetTable("Client").GetTable("Material");
             auto metaTable = interpreter.MakeTable();
             metaTable.Set("__call", interpreter.MakeFunction(
-                [loadMaterial, &interpreter](Lua::CallHelper& helper)
+                [loadMaterial, &interpreter](Luasel::CallHelper& helper)
                 {
                     helper.PopArg(); // Il y a un argument en plus, je ne sais pas trop quoi, ça print "[base/?]" en lua
                     auto material = loadMaterial(helper.PopArg().CheckString());

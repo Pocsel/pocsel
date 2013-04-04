@@ -11,7 +11,7 @@ namespace Common { namespace Physics {
         public IShapeDesc
     {
     public:
-        ShapeDescEmpty(Tools::Lua::Ref const& lua);
+        ShapeDescEmpty(Luasel::Ref const& lua);
         ShapeDescEmpty(Tools::ByteArray const& byteArray);
         virtual ~ShapeDescEmpty();
 

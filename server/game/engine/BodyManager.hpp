@@ -1,7 +1,8 @@
 #ifndef __SERVER_GAME_ENGINE_BODYMANAGER_HPP__
 #define __SERVER_GAME_ENGINE_BODYMANAGER_HPP__
 
-#include "tools/lua/Ref.hpp"
+#include <luasel/Luasel.hpp>
+
 #include "server/game/engine/CallbackManager.hpp"
 #include "common/Position.hpp"
 
@@ -38,7 +39,7 @@ namespace Server { namespace Game { namespace Engine {
         Uint32 GetNbBodyTypes() const { return (Uint32)this->_bodyTypesVec.size(); }
 
     private:
-        void _ApiRegister(Tools::Lua::CallHelper& helper);
+        void _ApiRegister(Luasel::CallHelper& helper);
     };
 
 }}}

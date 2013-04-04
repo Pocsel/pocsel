@@ -1,7 +1,8 @@
 #ifndef __SERVER_GAME_ENGINE_ENTITYMANAGER_HPP__
 #define __SERVER_GAME_ENGINE_ENTITYMANAGER_HPP__
 
-#include "tools/lua/Ref.hpp"
+#include <luasel/Luasel.hpp>
+
 #include "tools/lua/AWeakResourceRef.hpp"
 #include "tools/lua/WeakResourceRefManager.hpp"
 #include "server/game/engine/CallbackManager.hpp"
@@ -27,25 +28,25 @@ namespace Server { namespace Game { namespace Engine {
     private:
         struct SpawnEvent
         {
-            SpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position()) :
+            SpawnEvent(Uint32 pluginId, std::string const& entityName, Luasel::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position()) :
                 pluginId(pluginId), entityName(entityName), arg(arg), notificationCallbackId(notificationCallbackId), hasPosition(hasPosition), pos(pos)
             {
             }
             Uint32 pluginId;
             std::string entityName;
-            Tools::Lua::Ref arg;
+            Luasel::Ref arg;
             Uint32 notificationCallbackId;
             bool hasPosition;
             Common::Position pos;
         };
         struct KillEvent
         {
-            KillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId) :
+            KillEvent(Uint32 entityId, Luasel::Ref const& arg, Uint32 notificationCallbackId) :
                 entityId(entityId), arg(arg), notificationCallbackId(notificationCallbackId)
             {
             }
             Uint32 entityId;
-            Tools::Lua::Ref arg;
+            Luasel::Ref arg;
             Uint32 notificationCallbackId;
         };
     public:
@@ -55,7 +56,7 @@ namespace Server { namespace Game { namespace Engine {
             WeakEntityRef(Uint32 entityId) : entityId(entityId), disabled(false) {}
             virtual bool IsValid(EntityManager const&) const { return this->entityId && !this->disabled; }
             virtual void Invalidate(EntityManager const&) { this->entityId = 0; this->disabled = true; }
-            virtual Tools::Lua::Ref GetReference(EntityManager& entityManager) const;
+            virtual Luasel::Ref GetReference(EntityManager& entityManager) const;
             virtual std::string Serialize(EntityManager const& entityManager) const;
             bool operator <(WeakEntityRef const& rhs) const;
             Uint32 entityId;
@@ -80,10 +81,10 @@ namespace Server { namespace Game { namespace Engine {
         // peut retourner toutes les valeurs de CallbackManager::Result sauf CallbackNotFound (evidemment)
         // seul entry point Lua avec Engine::RconExecute()
         // si Error est retourné, l'entité a été supprimée
-        CallbackManager::Result CallEntityFunction(Uint32 entityId, std::string const& function, Tools::Lua::Ref const& arg, Tools::Lua::Ref const& bonusArg, Tools::Lua::Ref* ret = 0);
+        CallbackManager::Result CallEntityFunction(Uint32 entityId, std::string const& function, Luasel::Ref const& arg, Luasel::Ref const& bonusArg, Luasel::Ref* ret = 0);
 
-        void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position());
-        void AddKillEvent(Uint32 entityId, Tools::Lua::Ref const& arg, Uint32 notificationCallbackId);
+        void AddSpawnEvent(Uint32 pluginId, std::string const& entityName, Luasel::Ref const& arg, Uint32 notificationCallbackId, bool hasPosition = false, Common::Position const& pos = Common::Position());
+        void AddKillEvent(Uint32 entityId, Luasel::Ref const& arg, Uint32 notificationCallbackId);
         void DispatchSpawnEvents();
         void DispatchKillEvents();
         void Save(Tools::Database::IConnection& conn);
@@ -97,7 +98,7 @@ namespace Server { namespace Game { namespace Engine {
         Entity const& GetEntity(Uint32 entityId) const throw(std::runtime_error);
         PositionalEntity& GetPositionalEntity(Uint32 entityId) throw(std::runtime_error);
         PositionalEntity const& GetPositionalEntity(Uint32 entityId) const throw(std::runtime_error);
-        PositionalEntity const& GetPositionalEntity(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
+        PositionalEntity const& GetPositionalEntity(Luasel::Ref const& ref) const throw(std::runtime_error);
         PositionalEntity& GetDisabledEntity(Uint32 entityId) throw(std::runtime_error);
         PositionalEntity const& GetDisabledEntity(Uint32 entityId) const throw(std::runtime_error);
 
@@ -116,25 +117,25 @@ namespace Server { namespace Game { namespace Engine {
         void RconAddEntityTypes(Rcon::EntityManager& manager) const;
 
     private:
-        Uint32 _RefToEntityId(Tools::Lua::Ref const& ref) const throw(std::runtime_error);
+        Uint32 _RefToEntityId(Luasel::Ref const& ref) const throw(std::runtime_error);
         Entity* _CreateEntity(Uint32 entityId, Uint32 pluginId, std::string entityName, bool hasPosition = false, Common::Position const& pos = Common::Position()) throw(std::runtime_error);
         void _DeleteEntity(Uint32 id, Entity* entity);
-        void _ApiGetEntityById(Tools::Lua::CallHelper& helper);
-        void _ApiSpawn(Tools::Lua::CallHelper& helper);
-        void _ApiSave(Tools::Lua::CallHelper& helper);
-        void _ApiLoad(Tools::Lua::CallHelper& helper);
-        void _ApiKill(Tools::Lua::CallHelper& helper);
-        void _ApiRegister(Tools::Lua::CallHelper& helper);
-        void _ApiGetWeakPointer(Tools::Lua::CallHelper& helper);
+        void _ApiGetEntityById(Luasel::CallHelper& helper);
+        void _ApiSpawn(Luasel::CallHelper& helper);
+        void _ApiSave(Luasel::CallHelper& helper);
+        void _ApiLoad(Luasel::CallHelper& helper);
+        void _ApiKill(Luasel::CallHelper& helper);
+        void _ApiRegister(Luasel::CallHelper& helper);
+        void _ApiGetWeakPointer(Luasel::CallHelper& helper);
 
         // positionnal
-        void _ApiRegisterPositional(Tools::Lua::CallHelper& helper);
-        void _ApiSetPos(Tools::Lua::CallHelper& helper);
-        void _ApiGetPos(Tools::Lua::CallHelper& helper);
-        void _ApiSetAccel(Tools::Lua::CallHelper& helper);
-        void _ApiGetAccel(Tools::Lua::CallHelper& helper);
-        void _ApiSetLocalAccel(Tools::Lua::CallHelper& helper);
-        void _ApiGetLocalAccel(Tools::Lua::CallHelper& helper);
+        void _ApiRegisterPositional(Luasel::CallHelper& helper);
+        void _ApiSetPos(Luasel::CallHelper& helper);
+        void _ApiGetPos(Luasel::CallHelper& helper);
+        void _ApiSetAccel(Luasel::CallHelper& helper);
+        void _ApiGetAccel(Luasel::CallHelper& helper);
+        void _ApiSetLocalAccel(Luasel::CallHelper& helper);
+        void _ApiGetLocalAccel(Luasel::CallHelper& helper);
     };
 
 }}}

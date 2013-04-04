@@ -9,7 +9,6 @@ set(src
     ${tools_base_src}
     ${tools_database_src}
     ${tools_logger_src}
-    ${tools_lua_src}
     ${tools_lua_utils_src}
     ${tools_zlib_src}
     ${tools_plugin_src}
@@ -24,6 +23,7 @@ enable_pch(server src)
 
 target_link_libraries(server
     libbullet
+    luasel
     ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${LUA_LIBRARIES}

@@ -1,14 +1,14 @@
+#include <luasel/Luasel.hpp>
+
 #include "common/physics/ShapeDescSphere.hpp"
 
-#include "tools/lua/Ref.hpp"
-#include "tools/lua/Function.hpp"
 #include "tools/ByteArray.hpp"
 
 namespace Common { namespace Physics {
 
-    ShapeDescSphere::ShapeDescSphere(Tools::Lua::Ref const& lua)
+    ShapeDescSphere::ShapeDescSphere(Luasel::Ref const& lua)
     {
-        Tools::Lua::Ref radiusLua = lua["radius"];
+        Luasel::Ref radiusLua = lua["radius"];
         if (!radiusLua.IsNumber())
             throw std::runtime_error("Field \"radius\" must be of type number");
         _radius = radiusLua.ToNumber();

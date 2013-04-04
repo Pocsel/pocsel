@@ -7,13 +7,13 @@
 #include "tools/gfx/utils/material/LuaMaterial.hpp"
 #include "tools/gfx/utils/texture/ITexture.hpp"
 
+namespace Luasel {
+    class CallHelper;
+}
 namespace Common {
     class Resource;
 }
 namespace Tools {
-    namespace Lua {
-        class CallHelper;
-    }
     namespace Models {
         class MqmModel;
     }
@@ -96,7 +96,7 @@ namespace Client { namespace Resources {
         void _InitErrorModel();
         void _InitErrorShader();
         void _InitErrorMaterial();
-        void _ApiRegisterMaterial(Tools::Lua::CallHelper& helper);
+        void _ApiRegisterMaterial(Luasel::CallHelper& helper);
     };
 
 }}

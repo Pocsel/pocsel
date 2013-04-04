@@ -1,15 +1,15 @@
 #include <boost/program_options.hpp>
 #include <boost/cstdlib.hpp>
+#include <luasel/Luasel.hpp>
 
 #include "client/Settings.hpp"
 #include "ProgramInfo.hpp"
 #include "common/ConfDir.hpp"
-#include "tools/lua/Interpreter.hpp"
 
 namespace {
 
     template <typename T>
-        T _LuaGetGlobal(Tools::Lua::Interpreter const& i, std::string const& name, T const& defaultValue)
+        T _LuaGetGlobal(Luasel::Interpreter const& i, std::string const& name, T const& defaultValue)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace Client {
     {
         try
         {
-            Tools::Lua::Interpreter i;
+            Luasel::Interpreter i;
             i.DoFile(this->settingsFile.string());
 
             this->nickname = _LuaGetGlobal<std::string>(i, "nickname", "Newbie");

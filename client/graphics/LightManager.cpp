@@ -1,6 +1,7 @@
 #include "tools/precompiled.hpp"
 
-#include "tools/lua/Interpreter.hpp"
+#include <luasel/Luasel.hpp>
+
 #include "tools/gfx/utils/light/LightRenderer.hpp"
 
 #include "common/Camera.hpp"
@@ -89,13 +90,13 @@ namespace Client { namespace Graphics {
         this->_points.remove_if([&](std::unique_ptr<PointLight> const& ptr) { return ptr.get() == &light; });
     }
 
-    void LightManager::_RegisterLua(Tools::Lua::Interpreter& interpreter)
+    void LightManager::_RegisterLua(Luasel::Interpreter& interpreter)
     {
         auto ns = interpreter.Globals().GetTable("Client").GetTable("Light");
 
-        auto& mt = Tools::Lua::MetaTable::Create<LightManager::PointLight*>(interpreter);
-        mt.SetMetaMethod(Tools::Lua::MetaTable::Index,
-            [](Tools::Lua::CallHelper& helper)
+        auto& mt = Luasel::MetaTable::Create<LightManager::PointLight*>(interpreter);
+        mt.SetMetaMethod(Luasel::MetaTable::Index,
+            [](Luasel::CallHelper& helper)
             {
                 auto light = *helper.PopArg().Check<LightManager::PointLight**>();
                 auto const& key = helper.PopArg().Check<std::string>();
@@ -108,8 +109,8 @@ namespace Client { namespace Graphics {
                 else if (key == "specularColor")
                     helper.PushRet(light->GetSpecularColor());
             });
-        mt.SetMetaMethod(Tools::Lua::MetaTable::NewIndex,
-            [](Tools::Lua::CallHelper& helper)
+        mt.SetMetaMethod(Luasel::MetaTable::NewIndex,
+            [](Luasel::CallHelper& helper)
             {
                 auto light = *helper.PopArg().Check<LightManager::PointLight**>();
                 auto const& key = helper.PopArg().Check<std::string>();
@@ -123,7 +124,7 @@ namespace Client { namespace Graphics {
                     light->SetSpecularColor(helper.PopArg().Check<glm::vec3>());
             });
         ns.Set("Point", interpreter.MakeFunction(
-            [this](Tools::Lua::CallHelper& helper)
+            [this](Luasel::CallHelper& helper)
             {
                 auto& light = this->CreatePointLight();
                 auto doodad = helper.PopArg();

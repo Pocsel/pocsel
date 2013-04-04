@@ -1,8 +1,9 @@
 #include "client/precompiled.hpp"
 
+#include <luasel/Luasel.hpp>
+
 #include "tools/window/Window.hpp"
 #include "tools/Frustum.hpp"
-#include "tools/lua/Interpreter.hpp"
 
 #include "client/Client.hpp"
 #include "client/game/CubeType.hpp"

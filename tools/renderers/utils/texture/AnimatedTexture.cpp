@@ -1,8 +1,9 @@
 #include "tools/precompiled.hpp"
 
+#include <luasel/Luasel.hpp>
+
 #include "common/Resource.hpp"
 #include "tools/logger/Logger.hpp"
-#include "tools/lua/Interpreter.hpp"
 #include "tools/renderers/utils/texture/AnimatedTexture.hpp"
 
 namespace Tools { namespace Renderers { namespace Utils { namespace Texture {
@@ -10,9 +11,9 @@ namespace Tools { namespace Renderers { namespace Utils { namespace Texture {
     AnimatedTexture::AnimatedTexture(std::vector<ITexture2D*> const& frames, Uint64 timePerFrame, bool animated) :
         _frames(&frames),
         _timePerFrame(timePerFrame),
-        _animated(animated),
         _currentFrame(0),
-        _lastFrame(0)
+        _lastFrame(0),
+        _animated(animated)
     {
     }
 

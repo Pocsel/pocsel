@@ -1,14 +1,14 @@
+#include <luasel/Luasel.hpp>
+
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/Body.hpp"
 #include "client/game/engine/Entity.hpp"
-
-#include "tools/lua/Interpreter.hpp"
 
 #include "bullet/bullet-all.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
-    Doodad::Doodad(Tools::Lua::Interpreter& interpreter,
+    Doodad::Doodad(Luasel::Interpreter& interpreter,
             Uint32 id,
             BodyType const* bodyType,
             Entity& entity,

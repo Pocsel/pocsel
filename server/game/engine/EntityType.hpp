@@ -1,7 +1,7 @@
 #ifndef __SERVER_GAME_ENGINE_ENTITYTYPE_HPP__
 #define __SERVER_GAME_ENGINE_ENTITYTYPE_HPP__
 
-#include "tools/lua/Ref.hpp"
+#include <luasel/Luasel.hpp>
 
 namespace Server { namespace Game { namespace Engine {
 
@@ -11,15 +11,15 @@ namespace Server { namespace Game { namespace Engine {
     private:
         std::string _name;
         Uint32 _pluginId;
-        Tools::Lua::Ref _prototype;
+        Luasel::Ref _prototype;
         bool _isPositional;
 
     public:
-        EntityType(std::string const& name, Uint32 pluginId, Tools::Lua::Ref const& prototype, bool isPositional);
+        EntityType(std::string const& name, Uint32 pluginId, Luasel::Ref const& prototype, bool isPositional);
         std::string const& GetName() const { return this->_name; }
         Uint32 GetPluginId() const { return this->_pluginId; }
-        Tools::Lua::Ref const& GetPrototype() const { return this->_prototype; }
-        void SetPrototype(Tools::Lua::Ref const& prototype) { this->_prototype = prototype; }
+        Luasel::Ref const& GetPrototype() const { return this->_prototype; }
+        void SetPrototype(Luasel::Ref const& prototype) { this->_prototype = prototype; }
         bool IsPositional() const { return this->_isPositional; }
     };
 

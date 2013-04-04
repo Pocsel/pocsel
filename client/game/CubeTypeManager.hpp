@@ -1,9 +1,10 @@
 #ifndef __CLIENT_GAME_CUBETYPEMANAGER_HPP__
 #define __CLIENT_GAME_CUBETYPEMANAGER_HPP__
 
+#include <luasel/Luasel.hpp>
+
 #include "common/BaseChunk.hpp"
 #include "client/game/CubeType.hpp"
-#include "tools/lua/Ref.hpp"
 
 namespace Client {
     class Client;
@@ -17,7 +18,7 @@ namespace Client { namespace Game {
         Common::BaseChunk::CubeType _nbCubeTypes;
         Common::BaseChunk::CubeType _curAskedType;
         std::vector<CubeType> _cubeTypes;
-        std::map<std::string /* name */, Tools::Lua::Ref /* registered table */> _materials;
+        std::map<std::string /* name */, Luasel::Ref /* registered table */> _materials;
         Client& _client;
 
     public:
@@ -31,7 +32,7 @@ namespace Client { namespace Game {
         void RegisterLuaFunctions();
     private:
         void _AskOneType();
-        void _ApiRegister(Tools::Lua::CallHelper& helper);
+        void _ApiRegister(Luasel::CallHelper& helper);
     };
 
 }}

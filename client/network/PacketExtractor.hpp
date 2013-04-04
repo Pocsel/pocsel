@@ -27,6 +27,7 @@ namespace Client { namespace Network {
     class PacketExtractor
     {
     public:
+        // LoggedIn en fait
         static void Login(Tools::ByteArray const& p,
                 bool& status,
                 Protocol::Version& major,

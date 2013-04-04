@@ -1,9 +1,9 @@
 #ifndef __CLIENT_GAME_ENGINE_DOODADMANAGER_HPP__
 #define __CLIENT_GAME_ENGINE_DOODADMANAGER_HPP__
 
-namespace Tools { namespace Lua {
+namespace Luasel {
     class CallHelper;
-}}
+}
 
 namespace Common { namespace Physics {
     struct Node;
@@ -58,7 +58,7 @@ namespace Client { namespace Game { namespace Engine {
 
     private:
         void _CallDoodadFunction(Uint32 doodadId, std::string const& function);
-        void _ApiRegister(Tools::Lua::CallHelper& helper);
+        void _ApiRegister(Luasel::CallHelper& helper);
         void _UpdateEntityPosition(Entity& entity, std::vector<Common::Physics::Node> const& node);
     };
 

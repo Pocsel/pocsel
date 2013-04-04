@@ -10,7 +10,6 @@
 #include "server/game/PluginManager.hpp"
 #include "server/game/map/Map.hpp"
 #include "common/FieldUtils.hpp"
-#include "tools/lua/Interpreter.hpp"
 #include "tools/database/IConnection.hpp"
 
 namespace Server { namespace Game { namespace Engine {
@@ -68,7 +67,7 @@ namespace Server { namespace Game { namespace Engine {
         Tools::Delete(this->_weakDoodadRefManager);
     }
 
-    Tools::Lua::Ref DoodadManager::WeakDoodadRef::GetReference(DoodadManager& doodadManager) const
+    Luasel::Ref DoodadManager::WeakDoodadRef::GetReference(DoodadManager& doodadManager) const
     {
         return doodadManager.GetLuaWrapperForDoodad(this->doodadId);
     }
@@ -158,7 +157,7 @@ namespace Server { namespace Game { namespace Engine {
             Uint32 entityId = row->GetUint32(3);
             try
             {
-                Tools::Lua::Ref storage = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(4));
+                Luasel::Ref storage = this->_engine.GetInterpreter().GetSerializer().Deserialize(row->GetString(4));
                 Tools::debug << "<< Load << " << table << " << Doodad (id: " << doodadId << ", pluginId: " << pluginId << ", doodadName: \"" << name << "\", entityId: " << entityId << ", storage: <lua>)" << std::endl;
                 if (!storage.IsTable())
                     throw std::runtime_error("Storage must be of type table and not " + storage.GetTypeName());
@@ -296,7 +295,7 @@ namespace Server { namespace Game { namespace Engine {
     //            (*it)->PositionIsDirty();
     //}
 
-    Tools::Lua::Ref DoodadManager::GetLuaWrapperForDoodad(Uint32 doodadId)
+    Luasel::Ref DoodadManager::GetLuaWrapperForDoodad(Uint32 doodadId)
     {
         auto& i = this->_engine.GetInterpreter();
         auto object = i.MakeTable();
@@ -324,7 +323,7 @@ namespace Server { namespace Game { namespace Engine {
         return *it->second;
     }
 
-    Uint32 DoodadManager::_RefToDoodadId(Tools::Lua::Ref const& ref) throw(std::runtime_error)
+    Uint32 DoodadManager::_RefToDoodadId(Luasel::Ref const& ref) throw(std::runtime_error)
     {
         if (ref.IsNumber()) /* id directement en nombre */
             return ref.To<Uint32>();
@@ -387,7 +386,7 @@ namespace Server { namespace Game { namespace Engine {
         return d;
     }
 
-    void DoodadManager::_ApiSpawn(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiSpawn(Luasel::CallHelper& helper)
     {
         Uint32 entityId = helper.PopArg("Server.Doodad.Spawn: Missing argument \"entityId\"").Check<Uint32>("Server.Doodad.Spawn: Argument \"entityId\" must be a number");
         std::string doodadName = helper.PopArg("Server.Doodad.Spawn: Missing argument \"doodadName\"").CheckString("Server.Doodad.Spawn: Argument \"doodadName\" must be a string");
@@ -418,7 +417,7 @@ namespace Server { namespace Game { namespace Engine {
         //    d->AddPlayer(it->first);
     }
 
-    void DoodadManager::_ApiKill(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiKill(Luasel::CallHelper& helper)
     {
         // trouve le doodad
         Uint32 doodadId = helper.PopArg("Server.Doodad.Kill: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.Kill: Argument \"doodadId\" must be a number");
@@ -441,39 +440,39 @@ namespace Server { namespace Game { namespace Engine {
         this->_doodads.erase(it);
     }
 
-    void DoodadManager::_ApiSet(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiSet(Luasel::CallHelper& helper)
     {
         Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.Set: Missing argument \"doodad\"")));
-        Tools::Lua::Ref key = helper.PopArg("Server.Doodad.Set: Missing argument \"key\"");
-        Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Set: Missing argument \"value\"");
+        Luasel::Ref key = helper.PopArg("Server.Doodad.Set: Missing argument \"key\"");
+        Luasel::Ref value = helper.PopArg("Server.Doodad.Set: Missing argument \"value\"");
         d.Set(key, value);
     }
 
-    void DoodadManager::_ApiCall(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiCall(Luasel::CallHelper& helper)
     {
         Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.Call: Missing argument \"doodad\"")));
         std::string function = helper.PopArg("Server.Doodad.Call: Missing argument \"function\"").CheckString("Server.Doodad.Call: Argument \"function\" must be of type string");
-        Tools::Lua::Ref value = helper.PopArg("Server.Doodad.Call: Missing argument \"value\"");
+        Luasel::Ref value = helper.PopArg("Server.Doodad.Call: Missing argument \"value\"");
         d.Call(function, value);
     }
 
-    void DoodadManager::_ApiSetUdp(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiSetUdp(Luasel::CallHelper& helper)
     {
         Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetUdp: Missing argument \"doodad\"")));
-        Tools::Lua::Ref key = helper.PopArg("Server.Doodad.SetUdp: Missing argument \"key\"");
-        Tools::Lua::Ref value = helper.PopArg("Server.Doodad.SetUdp: Missing argument \"value\"");
+        Luasel::Ref key = helper.PopArg("Server.Doodad.SetUdp: Missing argument \"key\"");
+        Luasel::Ref value = helper.PopArg("Server.Doodad.SetUdp: Missing argument \"value\"");
         d.SetUdp(key, value);
     }
 
-    void DoodadManager::_ApiCallUdp(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiCallUdp(Luasel::CallHelper& helper)
     {
         Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.CallUdp: Missing argument \"doodad\"")));
         std::string function = helper.PopArg("Server.Doodad.CallUdp: Missing argument \"function\"").CheckString("Server.Doodad.CallUdp: Argument \"function\" must be of type string");
-        Tools::Lua::Ref value = helper.PopArg("Server.Doodad.CallUdp: Missing argument \"value\"");
+        Luasel::Ref value = helper.PopArg("Server.Doodad.CallUdp: Missing argument \"value\"");
         d.CallUdp(function, value);
     }
 
-    void DoodadManager::_ApiGetDoodadById(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiGetDoodadById(Luasel::CallHelper& helper)
     {
         try
         {
@@ -487,9 +486,9 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    void DoodadManager::_ApiGetWeakPointer(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiGetWeakPointer(Luasel::CallHelper& helper)
     {
-        Tools::Lua::Ref doodadId = helper.PopArg("Server.Doodad.GetWeakPointer: Missing argument \"doodad\"");
+        Luasel::Ref doodadId = helper.PopArg("Server.Doodad.GetWeakPointer: Missing argument \"doodad\"");
         try
         {
             Doodad const& d = this->_GetDoodad(this->_RefToDoodadId(doodadId));
@@ -507,7 +506,7 @@ namespace Server { namespace Game { namespace Engine {
         }
     }
 
-    void DoodadManager::_ApiSetAccel(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiSetAccel(Luasel::CallHelper& helper)
     {
         Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetAccel: Missing argument \"doodad\"")));
 
@@ -525,7 +524,7 @@ namespace Server { namespace Game { namespace Engine {
         d.SetAccel(node, accel, maxSpeed);
     }
 
-    void DoodadManager::_ApiSetLocalAccel(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiSetLocalAccel(Luasel::CallHelper& helper)
     {
         Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetLocalAccel: Missing argument \"doodad\"")));
 
@@ -543,7 +542,7 @@ namespace Server { namespace Game { namespace Engine {
         d.SetLocalAccel(node, accel, maxSpeed);
     }
 
-    void DoodadManager::_ApiSetInterPositionTarget(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiSetInterPositionTarget(Luasel::CallHelper& helper)
     {
         Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetInterPositionTarget: Missing argument \"doodad\"")));
 
@@ -561,7 +560,7 @@ namespace Server { namespace Game { namespace Engine {
         d.SetInterPositionTarget(node, target, speed);
     }
 
-    void DoodadManager::_ApiSetInterAngleTarget(Tools::Lua::CallHelper& helper)
+    void DoodadManager::_ApiSetInterAngleTarget(Luasel::CallHelper& helper)
     {
         Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetInterAngleTarget: Missing argument \"doodad\"")));
 

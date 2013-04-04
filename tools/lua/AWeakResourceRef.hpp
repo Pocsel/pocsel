@@ -16,7 +16,7 @@ namespace Tools { namespace Lua {
         virtual ~AWeakResourceRef() {}
         virtual bool IsValid(ManagerType const&) const = 0;
         virtual void Invalidate(ManagerType const&) = 0;
-        virtual Ref GetReference(ManagerType&) const = 0;
+        virtual Luasel::Ref GetReference(ManagerType&) const = 0;
         virtual std::string Serialize(ManagerType const&) const { return "return nil"; }
         virtual void TryToLoad(ManagerType const&) {}
 

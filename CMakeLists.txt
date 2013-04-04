@@ -28,6 +28,7 @@ find_package(Cg REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(Sqlite3 REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(FMODEx REQUIRED)
 
 # configuration
 if (UNIX)
@@ -100,11 +101,14 @@ set(ALL_INCLUDES
     ${SQLITE3_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
+    ${FMODEX_INCLUDE_DIRS}
     "${CMAKE_CURRENT_SOURCE_DIR}/luasel/include"
 )
 include_directories(
     ${ALL_INCLUDES}
 )
+
+message(${ALL_INCLUDES})
 
 set(BULLET_DIR "${CMAKE_SOURCE_DIR}/bullet")
 
@@ -116,7 +120,7 @@ file(GLOB_RECURSE   tools_database_src          "tools/database/*.[ch]pp")
 file(GLOB_RECURSE   tools_gfx_src               "tools/gfx/*.[ch]pp")
 file(GLOB_RECURSE   tools_gui_src               "tools/gui/*.[ch]pp")
 file(GLOB_RECURSE   tools_logger_src            "tools/logger/*.[ch]pp")
-file(GLOB_RECURSE   tools_lua_src               "tools/lua/*.[ch]pp")
+file(GLOB_RECURSE   tools_lua_utils_src         "tools/lua/utils/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_install_src    "tools/plugin-install/*.[ch]pp")
 file(GLOB_RECURSE   tools_plugin_create_src     "tools/plugin-create/*.[ch]pp")
 file(GLOB_RECURSE   tools_renderers_src         "tools/renderers/*.[ch]pp")
@@ -126,12 +130,12 @@ file(GLOB_RECURSE   tools_stat_src              "tools/stat/*.[ch]pp")
 file(GLOB_RECURSE   tools_thread_src            "tools/thread/*.[ch]pp")
 file(GLOB_RECURSE   tools_window_src            "tools/window/*.[ch]pp")
 file(GLOB_RECURSE   tools_zlib_src              "tools/zlib/*.[ch]pp")
+file(GLOB_RECURSE   tools_sound_src             "tools/sound/*.[ch]pp")
 # lua resources
-file(GLOB_RECURSE   tools_lua_res         "tools/lua/utils/*.lua")
+file(GLOB_RECURSE   tools_lua_res               "tools/lua/utils/*.lua")
 
 # resources
-CreateResourceProject(tools_lua_res tools_lua_src
-    "${tools_lua_res}")
+CreateResourceProject(tools_lua_res tools_lua_src "${tools_lua_res}")
 
 add_subdirectory(luasel)
 add_subdirectory(buildutils)
