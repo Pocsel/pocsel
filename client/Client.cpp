@@ -55,12 +55,16 @@ namespace Client {
 
     Client::~Client()
     {
+        // destroy game first
         Tools::Delete(this->_game);
-        Tools::Delete(this->_menu);
-        Tools::Delete(this->_soundSystem);
+        // game resources
         Tools::Delete(this->_packetDispatcher);
-        Tools::Delete(this->_resourceManager);
         Tools::Delete(this->_threadPool);
+        // client resources
+        Tools::Delete(this->_menu);
+        Tools::Delete(this->_resourceManager);
+        // low level systems (sound & gfx)
+        Tools::Delete(this->_soundSystem);
         Tools::Delete(this->_window);
     }
 
