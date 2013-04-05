@@ -19,6 +19,7 @@ namespace Client { namespace Game { namespace Engine {
         auto namespaceTable = i.Globals().GetTable("Client").GetTable("Sound");
         namespaceTable.Set("Spawn", i.MakeFunction(std::bind(&SoundManager::_ApiSpawn, this, std::placeholders::_1)));
         namespaceTable.Set("Kill", i.MakeFunction(std::bind(&SoundManager::_ApiKill, this, std::placeholders::_1)));
+        namespaceTable.Set("Play", i.MakeFunction(std::bind(&SoundManager::_ApiPlay, this, std::placeholders::_1)));
     }
 
     SoundManager::~SoundManager()
@@ -39,18 +40,21 @@ namespace Client { namespace Game { namespace Engine {
         return this->soundId < rhs.soundId;
     }
 
-    //void SoundManager::Tick(Uint64 totalTime)
-    //{
-    //}
+    void SoundManager::Tick(Uint64 totalTime)
+    {
+        // TODO ne pas faire cette merde inéficiente
+        auto const& doodads = this->_engine.GetDoodadManager().GetDoodads();
+        for (auto const& it : doodads)
+        {
+        }
+    }
 
     void SoundManager::DeleteSoundsOfDoodad(Uint32 doodadId)
     {
         auto listIt = this->_soundsByDoodad.find(doodadId);
         if (listIt == this->_soundsByDoodad.end())
             return; // le doodad n'a aucun son
-        auto it = listIt->second.begin();
-        auto itEnd = listIt->second.end();
-        for (; it != itEnd; ++it)
+        for (auto& it : listIt->second)
         {
             this->_sounds.erase((*it)->GetId());
             Tools::Delete(*it);
@@ -64,6 +68,7 @@ namespace Client { namespace Game { namespace Engine {
         auto object = i.MakeTable();
         object.Set("id", soundId);
         object.Set("Kill", i.MakeFunction(std::bind(&SoundManager::_ApiKill, this, std::placeholders::_1)));
+        object.Set("Play", i.MakeFunction(std::bind(&SoundManager::_ApiPlay, this, std::placeholders::_1)));
         return object;
     }
 
@@ -166,6 +171,12 @@ namespace Client { namespace Game { namespace Engine {
         // enleve le son de la map générale + delete
         Tools::Delete(it->second);
         this->_sounds.erase(it);
+    }
+
+    void SoundManager::_ApiPlay(Luasel::CallHelper& helper)
+    {
+        Sound const& s = this->_GetSound(this->_RefToSoundId(helper.PopArg("Client.Sound.Play: Missing argument \"sound\"")));
+        s.Play();
     }
 
 }}}

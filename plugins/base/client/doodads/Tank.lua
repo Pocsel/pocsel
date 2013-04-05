@@ -10,6 +10,8 @@ Client.Doodad.Register{
         Client.Model.BindBoneToBodyNode(modelId, "gun", "Gun")
         Client.Model.BindBoneToBodyNode(modelId, "turret", "Turret")
         Client.Model.BindBoneToBodyNode(modelId, "origin", "Hull")
+        toto = Client.Sound.Spawn("base:RJD2_-_GhostWriter.ogg")
+        Client.Sound.Play(toto)
     end,
     Think = function(self)
     end,

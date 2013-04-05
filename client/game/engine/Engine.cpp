@@ -7,6 +7,7 @@
 #include "client/game/Game.hpp"
 #include "client/game/engine/Doodad.hpp"
 #include "client/game/engine/ModelManager.hpp"
+#include "client/game/engine/SoundManager.hpp"
 #include "client/game/engine/BodyManager.hpp"
 #include "client/game/engine/PhysicsManager.hpp"
 #include "tools/lua/utils/Utils.hpp"
@@ -38,6 +39,7 @@ namespace Client { namespace Game { namespace Engine {
         // création des managers
         this->_doodadManager = new DoodadManager(*this);
         this->_modelManager = new ModelManager(*this);
+        this->_soundManager = new SoundManager(*this);
         this->_bodyManager = new BodyManager(*this, nbBodyTypes);
         this->_physicsManager = new PhysicsManager(*this, this->_doodadManager->GetDoodads());
     }
@@ -45,6 +47,7 @@ namespace Client { namespace Game { namespace Engine {
     Engine::~Engine()
     {
         Tools::Delete(this->_modelManager);
+        Tools::Delete(this->_soundManager);
         Tools::Delete(this->_doodadManager);
         Tools::Delete(this->_physicsManager);
         Tools::Delete(this->_bodyManager);
@@ -56,6 +59,7 @@ namespace Client { namespace Game { namespace Engine {
         this->_physicsManager->Tick(totalTime);
         this->_doodadManager->Tick(totalTime);
         this->_modelManager->Tick(totalTime);
+        this->_soundManager->Tick(totalTime);
     }
 
     void Engine::LoadLuaScripts()

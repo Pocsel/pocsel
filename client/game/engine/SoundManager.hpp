@@ -36,7 +36,7 @@ namespace Client { namespace Game { namespace Engine {
     public:
         SoundManager(Engine& engine);
         ~SoundManager();
-        //void Tick(Uint64 totalTime);
+        void Tick(Uint64 totalTime);
         void DeleteSoundsOfDoodad(Uint32 doodadId);
         Luasel::Ref GetLuaWrapperForSound(Uint32 soundId);
     private:
@@ -44,6 +44,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 _RefToSoundId(Luasel::Ref const& ref) const throw(std::runtime_error);
         void _ApiSpawn(Luasel::CallHelper& helper);
         void _ApiKill(Luasel::CallHelper& helper);
+        void _ApiPlay(Luasel::CallHelper& helper);
     };
 
 }}}

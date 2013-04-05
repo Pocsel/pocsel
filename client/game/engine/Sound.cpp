@@ -1,4 +1,6 @@
 #include "client/game/engine/Sound.hpp"
+#include "tools/sound/ISound.hpp"
+#include "tools/sound/AChannel.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -11,6 +13,11 @@ namespace Client { namespace Game { namespace Engine {
 
     Sound::~Sound()
     {
+    }
+
+    void Sound::Play() const
+    {
+        this->_sound->GetChannel()->Play();
     }
 
 }}}
