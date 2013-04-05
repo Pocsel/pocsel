@@ -28,6 +28,7 @@ namespace Client { namespace Game {
         _client(client),
         _renderer(client.GetWindow().GetRenderer()),
         _map(0),
+        _soundSystem(client.GetSoundSystem()),
         _statUpdateTime("Game update"),
         _statRenderTime("Game render"),
         _deferredShading(client.GetWindow().GetRenderer())

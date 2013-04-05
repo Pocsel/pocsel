@@ -111,6 +111,7 @@ namespace Tools { namespace PluginCreate {
             allowedTypes[".png"] = "image";
             allowedTypes[".fx"] = "effect";
             allowedTypes[".mqm"] = "model";
+            allowedTypes[".ogg"] = "sound";
 
             std::list<boost::filesystem::path> files;
             RecursiveFileList(clientRoot, files);

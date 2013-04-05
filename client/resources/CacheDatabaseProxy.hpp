@@ -29,6 +29,7 @@ namespace Client { namespace Resources {
             Tools::Database::IConnection* _connection;
             Uint32 _cacheVersion;
             std::string _worldBuildHash;
+            std::map<std::string, Uint32> _resourceIdCache;
 
         public:
             CacheDatabaseProxy(boost::filesystem::path const& cacheDir,

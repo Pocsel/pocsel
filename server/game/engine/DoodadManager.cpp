@@ -420,6 +420,7 @@ namespace Server { namespace Game { namespace Engine {
     void DoodadManager::_ApiKill(Luasel::CallHelper& helper)
     {
         // trouve le doodad
+        // TODO utilser _GetDoodad() et _RefToDoodadId()
         Uint32 doodadId = helper.PopArg("Server.Doodad.Kill: Missing argument \"doodadId\"").Check<Uint32>("Server.Doodad.Kill: Argument \"doodadId\" must be a number");
         auto it = this->_doodads.find(doodadId);
         if (it == this->_doodads.end())

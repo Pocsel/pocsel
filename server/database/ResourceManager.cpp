@@ -34,7 +34,6 @@ namespace Server { namespace Database {
 
             this->_resources[id] = new Common::Resource(
                 id,
-                plugin_id,
                 type,
                 filename,
                 data.data(),

@@ -14,7 +14,7 @@ namespace Tools { namespace Sound { namespace Fmod {
             Tools::error << "Failed to create FMOD sound system: " << FMOD_ErrorString(result) << std::endl;
             return;
         }
-        if ((result = this->_system->init(32 /* max channels */, FMOD_INIT_NORMAL /* init flags */, nullptr /* extra driver data ptr */)) != FMOD_OK)
+        if ((result = this->_system->init(32 /* max channels */, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED /* init flags */, nullptr /* extra driver data ptr */)) != FMOD_OK)
         {
             this->_system = nullptr;
             Tools::error << "Failed to initialize FMOD sound system: " << FMOD_ErrorString(result) << std::endl;

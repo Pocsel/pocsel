@@ -2,6 +2,7 @@
 
 #include "tools/window/InputManager.hpp"
 #include "tools/window/Window.hpp"
+#include "tools/sound/ISoundSystem.hpp"
 
 #include "common/RayCast.hpp"
 #include "common/MovingOrientedPosition.hpp"
@@ -118,6 +119,7 @@ namespace Client { namespace Game {
     void Player::SetPosition(Common::Position const& pos)
     {
         this->_camera.position = pos;
+        this->_game.GetSoundSystem().SetEars(glm::fvec3(pos));
     }
 
     void Player::MoveForward()

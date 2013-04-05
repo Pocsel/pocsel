@@ -84,7 +84,7 @@ namespace Client {
         Resources::LocalResourceManager& GetLocalResourceManager() { return *this->_resourceManager; }
         Game::Game& GetGame() { return *this->_game; }
         Menu::Menu& GetMenu() { return *this->_menu; }
-        Tools::Sound::Fmod::SoundSystem const& GetSoundSystem() const { return *this->_soundSystem; }
+        Tools::Sound::Fmod::SoundSystem& GetSoundSystem() { return *this->_soundSystem; }
         State GetState() const { return this->_state; }
         Tools::Thread::ThreadPool& GetThreadPool() { return *this->_threadPool; }
         Uint32 GetClientId() const { return this->_clientId; }
