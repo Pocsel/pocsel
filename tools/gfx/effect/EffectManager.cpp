@@ -16,7 +16,7 @@ namespace Tools { namespace Gfx { namespace Effect {
         return CreateEffect(ByteArray(effect));
     }
 
-    std::unique_ptr<Effect> EffectManager::CreateEffect(ByteArray& effect)
+    std::unique_ptr<Effect> EffectManager::CreateEffect(ByteArray&& effect)
     {
         auto shader = CompleteShader(effect);
         return std::unique_ptr<Effect>(new Effect(this->_renderer, shader));

@@ -40,7 +40,7 @@ int main(int ac, char** av)
     boost::filesystem::directory_iterator itEnd;
     for (; it != itEnd; ++it)
     {
-        auto const& filename = it->path().filename().generic_string();
+        auto filename = it->path().filename().generic_string();
         if (filename == "compiler-shader" || filename == "compiler-shader.exe")
             compilerExe = it->path().generic_string();
     }

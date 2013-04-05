@@ -123,7 +123,7 @@ namespace Tools { namespace PluginCreate {
             for (auto const& res: resources)
             {
                 auto const& data = ReadFile(res.dstFile);
-                std::string const& name = MakeRelative(clientRoot, res.srcFile).generic_string();
+                std::string name = MakeRelative(clientRoot, res.srcFile).generic_string();
                 std::string const& type = res.type;
                 std::string const& hash = HashFile(data);
 

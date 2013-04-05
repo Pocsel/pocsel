@@ -16,6 +16,10 @@
 # define GLCHECK(Func) (Func)
 #endif
 
+#ifdef None
+# undef None
+#endif
+
 #include "tools/gfx/IRenderer.hpp"
 
 namespace Tools { namespace Gfx { namespace OpenGL {
