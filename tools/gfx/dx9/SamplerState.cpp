@@ -31,11 +31,17 @@ namespace Tools { namespace Gfx { namespace DX9 {
         this->_mipFilter = filter;
     }
 
+    void SamplerState::SetMaxAnisotropy(int value)
+    {
+        this->_maxAnisotropy = value;
+    }
+
     void SamplerState::Bind(Uint32 unit)
     {
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MINFILTER, GetTextureFilter(this->_minFilter));
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MAGFILTER, GetTextureFilter(this->_magFilter));
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MIPFILTER, GetTextureFilter(this->_mipFilter));
+        this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MAXANISOTROPY, this->_maxAnisotropy);
     }
 
 }}}

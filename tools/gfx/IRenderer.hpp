@@ -188,6 +188,7 @@ namespace Tools { namespace Gfx {
             None,
             Point,
             Linear,
+            Anisotropic,
         };
     }
 
@@ -211,6 +212,7 @@ namespace Tools { namespace Gfx {
         virtual void SetMinFilter(TextureFilter::Type filter) = 0;
         virtual void SetMagFilter(TextureFilter::Type filter) = 0;
         virtual void SetMipFilter(TextureFilter::Type filter) = 0;
+        virtual void SetMaxAnisotropy(int value) = 0;
         virtual void Bind(Uint32 unit) = 0;
     };
 

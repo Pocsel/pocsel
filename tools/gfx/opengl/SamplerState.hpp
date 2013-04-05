@@ -23,6 +23,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         virtual void SetMinFilter(TextureFilter::Type filter);
         virtual void SetMagFilter(TextureFilter::Type filter);
         virtual void SetMipFilter(TextureFilter::Type filter);
+        virtual void SetMaxAnisotropy(int value);
 
         virtual void Bind(Uint32 unit);
     };

@@ -151,7 +151,7 @@ namespace Hlsl {
 
         DeviceStateParser() : DeviceStateParser::base_type(start)
         {
-            start %= base.identifier >> base.equal >> base.identifier;
+            start %= base.identifier >> base.equal >> +char_("_A-Za-z0-9");
         }
     };
 

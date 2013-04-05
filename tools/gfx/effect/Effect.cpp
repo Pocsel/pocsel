@@ -78,14 +78,19 @@ namespace Tools { namespace Gfx { namespace Effect {
                             ++pos;
                         return str.substr(startPos, pos - startPos);
                     };
-                    auto parseValue = [](std::string const& value) {
+                    auto parseFilterValue = [](std::string const& value) {
                         if (value == "none")
                             return TextureFilter::None;
                         if (value == "nearest" || value == "point")
                             return TextureFilter::Point;
                         if (value == "linear")
                             return TextureFilter::Linear;
+                        if (value == "anisotropic")
+                            return TextureFilter::Anisotropic;
                         return TextureFilter::Linear;
+                    };
+                    auto parseNumberValue = [](std::string const& value) {
+                        return boost::lexical_cast<int>(value);
                     };
 
                     std::string key = readIdentifier();
@@ -94,11 +99,13 @@ namespace Tools { namespace Gfx { namespace Effect {
                     pos++;
 
                     if (boost::algorithm::to_lower_copy(key) == "minfilter")
-                        sampler->SetMinFilter(parseValue(boost::algorithm::to_lower_copy(value)));
+                        sampler->SetMinFilter(parseFilterValue(boost::algorithm::to_lower_copy(value)));
                     else if (boost::algorithm::to_lower_copy(key) == "magfilter")
-                        sampler->SetMagFilter(parseValue(boost::algorithm::to_lower_copy(value)));
+                        sampler->SetMagFilter(parseFilterValue(boost::algorithm::to_lower_copy(value)));
                     else if (boost::algorithm::to_lower_copy(key) == "mipfilter")
-                        sampler->SetMipFilter(parseValue(boost::algorithm::to_lower_copy(value)));
+                        sampler->SetMipFilter(parseFilterValue(boost::algorithm::to_lower_copy(value)));
+                    else if (boost::algorithm::to_lower_copy(key) == "maxanisotropy")
+                        sampler->SetMaxAnisotropy(parseNumberValue(value));
 
                     std::cout << key << " => " << value << std::endl;
                 }

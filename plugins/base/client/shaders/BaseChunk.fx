@@ -4,9 +4,10 @@ float4x4 worldViewInverseTranspose : WorldViewInverseTranspose;
 
 sampler2D cubeTexture = sampler_state
 {
-    MinFilter = Linear;
+    MinFilter = Anisotropic;
     MagFilter = Point;
     MipFilter = Linear;
+    MaxAnisotropy = 8;
 };
 
 struct VSout

@@ -11,6 +11,7 @@ namespace Tools { namespace Gfx { namespace DX9 {
         TextureFilter::Type _minFilter;
         TextureFilter::Type _magFilter;
         TextureFilter::Type _mipFilter;
+        int _maxAnisotropy;
 
     public:
         SamplerState(DX9Renderer& renderer);
@@ -22,6 +23,7 @@ namespace Tools { namespace Gfx { namespace DX9 {
         virtual void SetMinFilter(TextureFilter::Type filter);
         virtual void SetMagFilter(TextureFilter::Type filter);
         virtual void SetMipFilter(TextureFilter::Type filter);
+        virtual void SetMaxAnisotropy(int value);
 
         virtual void Bind(Uint32 unit);
     };

@@ -35,6 +35,11 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         GLCHECK(glSamplerParameteri(this->_id, GL_TEXTURE_MIN_FILTER, GetTextureFilter(this->_minFilter, this->_mipFilter)));
     }
 
+    void SamplerState::SetMaxAnisotropy(int value)
+    {
+        GLCHECK(glSamplerParameterf(this->_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, (float)value));
+    }
+
     void SamplerState::Bind(Uint32 unit)
     {
         GLCHECK(glBindSampler(unit, this->_id));

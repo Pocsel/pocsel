@@ -100,6 +100,8 @@ namespace Client { namespace Resources {
             for (unsigned int i = 0; i < it.second.size(); ++i)
                 if (it.second[i] != errTex)
                     Tools::Delete(it.second[i]);
+        for (auto& it: this->_textures)
+            Tools::Delete(it.second);
         Tools::Delete(errTex);
 
         // Models
