@@ -1,6 +1,7 @@
 #pragma once
 
 #include <luasel/Luasel.hpp>
+#include <luasel/WeakRef.hpp>
 
 #include "tools/gfx/effect/Effect.hpp"
 #include "tools/gfx/utils/texture/ITexture.hpp"

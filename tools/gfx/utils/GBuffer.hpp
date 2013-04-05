@@ -35,6 +35,8 @@ namespace Tools { namespace Gfx { namespace Utils {
         GBuffer(IRenderer& renderer, glm::uvec2 const& size, Effect::Effect& combineShader);
 
         void Resize(glm::uvec2 const& size);
+        glm::uvec2 GetSize() { return this->_size; }
+        IVertexBuffer& GetQuad() { return *this->_quad; }
 
         void Bind();
         void Unbind();

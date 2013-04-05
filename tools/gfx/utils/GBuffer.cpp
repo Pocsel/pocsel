@@ -46,7 +46,7 @@ namespace Tools { namespace Gfx { namespace Utils {
 
         glm::vec2 delta(0.0f);
         if (this->_renderer.GetRendererName() == "DirectX 9 Renderer")
-            delta = -1.0f / glm::vec2(this->_size);
+            delta = 0.5f / glm::vec2(this->_size);
         float vertices[] = {
             0, 0, 0,  delta.x + 0, delta.y + 0,
             0, 1, 0,  delta.x + 0, delta.y + 2,

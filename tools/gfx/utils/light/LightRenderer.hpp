@@ -37,7 +37,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
 
             glm::mat4 modelViewProjection;
             IShaderParameter* screenModelViewProjection;
-            std::unique_ptr<Image> screen;
+            std::unique_ptr<IVertexBuffer> quad;
         } _directionnal;
         struct
         {

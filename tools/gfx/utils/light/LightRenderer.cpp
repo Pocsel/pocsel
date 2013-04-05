@@ -110,6 +110,19 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
         {
             return LightIterator<TIter>(it, ite);
         }
+
+        void UpdateQuad(IRenderer& renderer, glm::uvec2 screenSize, IVertexBuffer& quad)
+        {
+            glm::vec2 delta(0.0f, 0.0f);
+            if (renderer.GetRendererName() == "DirectX 9 Renderer")
+                delta = 0.5f / glm::vec2(screenSize);
+            static float vertices[] = {
+                0, 0, 0,  delta.x + 0, delta.y + 0,
+                0, 1, 0,  delta.x + 0, delta.y + 2,
+                1, 0, 0,  delta.x + 2, delta.y + 0,
+            };
+            quad.SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
+        }
     }
 
     LightRenderer::LightRenderer(IRenderer& renderer, Effect::Effect& directionnalShader, Effect::Effect& pointShader) :
@@ -127,8 +140,11 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
         this->_directionnal.shadowMap = &this->_directionnal.shader->GetParameter("lightShadowMap");
         this->_directionnal.lightViewProjection = &this->_directionnal.shader->GetParameter("lightViewProjection");
 
-        this->_directionnal.screen.reset(new Image(renderer));
-        this->_directionnal.modelViewProjection = glm::ortho(-0.5f, 0.5f, 0.5f, -0.5f) * glm::translate(0.0f, 0.0f, 1.0f);
+        this->_directionnal.quad = this->_renderer.CreateVertexBuffer();
+        this->_directionnal.quad->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3);
+        this->_directionnal.quad->PushVertexAttribute(DataType::Float, VertexAttributeUsage::TexCoord0, 2);
+
+        this->_directionnal.modelViewProjection = glm::ortho(0.0f, 0.5f, 0.5f, 0.0f) * glm::translate(0.0f, 0.0f, 1.0f);
         for (int i = 0; i < nbDirectionnalShadowMap; ++i)
         {
             auto ptr = renderer.CreateRenderTarget(glm::uvec2(512, 512));
@@ -270,6 +286,7 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
         {
             this->_directionnal.shader->BeginPass();
             unsigned int i = 0;
+            gbuffer.GetNormalsDepth().Bind();
             for (; !lights.IsEnd(); ++lights, ++i)
             {
                 (*lights).SetParameters();
@@ -278,8 +295,13 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
                     this->_directionnal.lightViewProjection->Set(this->_directionnal.shadowMaps[i].first);
                     this->_directionnal.shadowMap->Set(this->_directionnal.shadowMaps[i].second->GetTexture(0));
                 }
-                this->_directionnal.screen->Render(*this->_directionnal.normalDepth, gbuffer.GetNormalsDepth());
+                //this->_directionnal.screen->Render(*this->_directionnal.normalDepth, gbuffer.GetNormalsDepth());
+                this->_directionnal.normalDepth->Set(gbuffer.GetNormalsDepth());
+                gbuffer.GetQuad().Bind();
+                this->_renderer.DrawVertexBuffer(0, 3);
+                gbuffer.GetQuad().Unbind();
             }
+            gbuffer.GetNormalsDepth().Unbind();
         } while (this->_directionnal.shader->EndPass());
     }
 
