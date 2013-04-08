@@ -2,6 +2,9 @@
 #include "client/game/engine/Sound.hpp"
 #include "client/game/engine/Engine.hpp"
 #include "client/game/Game.hpp"
+#include "client/game/Player.hpp"
+#include "tools/sound/ISoundSystem.hpp"
+#include "common/Camera.hpp"
 
 namespace Client { namespace Game { namespace Engine {
 
@@ -24,10 +27,8 @@ namespace Client { namespace Game { namespace Engine {
 
     SoundManager::~SoundManager()
     {
-        auto itSound = this->_sounds.begin();
-        auto itSoundEnd = this->_sounds.end();
-        for (; itSound != itSoundEnd; ++itSound)
-            Tools::Delete(itSound->second);
+        for (auto& it : this->_sounds)
+            Tools::Delete(it.second);
     }
 
     Luasel::Ref SoundManager::WeakSoundRef::GetReference(SoundManager& soundManager) const
@@ -40,24 +41,15 @@ namespace Client { namespace Game { namespace Engine {
         return this->soundId < rhs.soundId;
     }
 
-    void SoundManager::Tick(Uint64 totalTime)
-    {
-        // TODO ne pas faire cette merde inéficiente
-        auto const& doodads = this->_engine.GetDoodadManager().GetDoodads();
-        for (auto const& it : doodads)
-        {
-        }
-    }
-
     void SoundManager::DeleteSoundsOfDoodad(Uint32 doodadId)
     {
         auto listIt = this->_soundsByDoodad.find(doodadId);
         if (listIt == this->_soundsByDoodad.end())
             return; // le doodad n'a aucun son
-        for (auto& it : listIt->second)
+        for (auto it : listIt->second)
         {
-            this->_sounds.erase((*it)->GetId());
-            Tools::Delete(*it);
+            this->_sounds.erase(it->GetId());
+            Tools::Delete(it);
         }
         this->_soundsByDoodad.erase(listIt);
     }
@@ -70,6 +62,13 @@ namespace Client { namespace Game { namespace Engine {
         object.Set("Kill", i.MakeFunction(std::bind(&SoundManager::_ApiKill, this, std::placeholders::_1)));
         object.Set("Play", i.MakeFunction(std::bind(&SoundManager::_ApiPlay, this, std::placeholders::_1)));
         return object;
+    }
+
+    void SoundManager::SetCamera(Common::Camera const& cam)
+    {
+        this->_engine.GetGame().GetSoundSystem().SetEarsOrientation(cam.direction, glm::fvec3(0.0, 1.0, 0.0) /* TODO camera pitch/yaw/roll */);
+        for (auto& it : this->_sounds)
+            it.second->CameraMovement(cam);
     }
 
     Sound const& SoundManager::_GetSound(Uint32 soundId) const throw(std::runtime_error)
@@ -144,7 +143,7 @@ namespace Client { namespace Game { namespace Engine {
             ++this->_nextSoundId;
         Uint32 newId = this->_nextSoundId++;
 
-        Sound* s = new Sound(newId, doodadId, soundResource);
+        Sound* s = new Sound(newId, doodadId, soundResource, this->_engine.GetGame().GetPlayer().GetCamera().position /* TODO doodad position */);
         this->_sounds[newId] = s;
         this->_soundsByDoodad[doodadId].push_back(s);
         helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));

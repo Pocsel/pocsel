@@ -15,6 +15,7 @@ namespace Tools { namespace Sound {
         virtual void SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel /* units per second */, glm::fvec3 const& forward) = 0;
         virtual void SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel /* units per second */) = 0;
         virtual void SetEars(glm::fvec3 const& pos) = 0;
+        virtual void SetEarsOrientation(glm::fvec3 const& forward, glm::fvec3 const& up) = 0;
     };
 
 }}

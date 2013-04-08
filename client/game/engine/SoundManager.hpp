@@ -6,6 +6,10 @@
 #include "tools/lua/AWeakResourceRef.hpp"
 #include "tools/lua/WeakResourceRefManager.hpp"
 
+namespace Common {
+    struct Camera;
+}
+
 namespace Client { namespace Game { namespace Engine {
 
     class Engine;
@@ -36,9 +40,9 @@ namespace Client { namespace Game { namespace Engine {
     public:
         SoundManager(Engine& engine);
         ~SoundManager();
-        void Tick(Uint64 totalTime);
         void DeleteSoundsOfDoodad(Uint32 doodadId);
         Luasel::Ref GetLuaWrapperForSound(Uint32 soundId);
+        void SetCamera(Common::Camera const& cam);
     private:
         Sound const& _GetSound(Uint32 soundId) const throw(std::runtime_error);
         Uint32 _RefToSoundId(Luasel::Ref const& ref) const throw(std::runtime_error);

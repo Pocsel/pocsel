@@ -2,7 +2,6 @@
 
 #include "tools/window/InputManager.hpp"
 #include "tools/window/Window.hpp"
-#include "tools/sound/ISoundSystem.hpp"
 
 #include "common/RayCast.hpp"
 #include "common/MovingOrientedPosition.hpp"
@@ -10,6 +9,7 @@
 #include "client/game/Game.hpp"
 #include "client/game/Player.hpp"
 #include "client/game/TargetedCubeRenderer.hpp"
+#include "client/game/engine/SoundManager.hpp"
 #include "client/map/Chunk.hpp"
 #include "client/map/Map.hpp"
 #include "client/network/Network.hpp"
@@ -74,6 +74,7 @@ namespace Client { namespace Game {
             if (delta.x != 0.0f || delta.y != 0.0f)
             {
                 this->_camera.Rotate(delta);
+                this->_game.GetEngine().GetSoundManager().SetCamera(this->_camera);
                 this->_moved = true;
             }
             w.GetInputManager().WarpMouse(glm::ivec2(w.GetSize() / (std::remove_reference<decltype(w.GetSize())>::type::value_type)2));
@@ -119,7 +120,7 @@ namespace Client { namespace Game {
     void Player::SetPosition(Common::Position const& pos)
     {
         this->_camera.position = pos;
-        this->_game.GetSoundSystem().SetEars(glm::fvec3(pos));
+        this->_game.GetEngine().GetSoundManager().SetCamera(this->_camera);
     }
 
     void Player::MoveForward()

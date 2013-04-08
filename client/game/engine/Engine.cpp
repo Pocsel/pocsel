@@ -59,7 +59,6 @@ namespace Client { namespace Game { namespace Engine {
         this->_physicsManager->Tick(totalTime);
         this->_doodadManager->Tick(totalTime);
         this->_modelManager->Tick(totalTime);
-        this->_soundManager->Tick(totalTime);
     }
 
     void Engine::LoadLuaScripts()

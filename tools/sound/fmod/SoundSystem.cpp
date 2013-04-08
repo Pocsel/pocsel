@@ -89,4 +89,15 @@ namespace Tools { namespace Sound { namespace Fmod {
         this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, nullptr, nullptr, nullptr);
     }
 
+    void SoundSystem::SetEarsOrientation(glm::fvec3 const& forward, glm::fvec3 const& up)
+    {
+        this->_earsForward.x = forward.x;
+        this->_earsForward.y = forward.y;
+        this->_earsForward.z = forward.z;
+        this->_earsUp.x = up.x;
+        this->_earsUp.y = up.y;
+        this->_earsUp.z = up.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, nullptr, nullptr, &this->_earsForward, &this->_earsUp);
+    }
+
 }}}
