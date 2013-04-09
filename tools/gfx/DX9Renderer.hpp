@@ -92,6 +92,29 @@ namespace Tools { namespace Gfx {
         virtual void SetRasterizationMode(RasterizationMode::Type rasterizationMode);
         virtual bool IsYTexCoordInverted() const { return false; }
 
+        virtual void SetAlphaBlendEnable(bool enabled);
+        virtual void SetAlphaFunc(AlphaFunc::Type func);
+        virtual void SetAlphaRef(float value);
+        virtual void SetAlphaTestEnable(bool enabled);
+
+        virtual void SetSrcBlend(Blend::Type blend);
+        virtual void SetDestBlend(Blend::Type blend);
+        virtual void SetBlendOp(BlendOp::Type op);
+        virtual void SetSrcBlendAlpha(Blend::Type blend);
+        virtual void SetDestBlendAlpha(Blend::Type blend);
+        virtual void SetBlendOpAlpha(BlendOp::Type op);
+
+        //virtual void SetColorWriteEnale(int colors);
+        //virtual void SetDepthBias(float bias);
+
+        virtual void SetDitherEnable(bool enabled);
+        virtual void SetFillMode(FillMode::Type mode);
+
+        virtual void SetZEnable(bool enabled);
+        virtual void SetZFunc(ZFunc::Type func);
+        virtual void SetZWriteEnable(bool enabled);
+
+
         void SetVertexBuffer(DX9::VertexBuffer& vb) { this->_vertexBuffer = &vb; }
         DX9::VertexBuffer* GetVertexBuffer() const { return this->_vertexBuffer; }
         LPDIRECT3DDEVICE9 GetDevice() const { return this->_device; }

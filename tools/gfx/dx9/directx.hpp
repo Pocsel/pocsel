@@ -208,4 +208,74 @@ namespace Tools { namespace Gfx { namespace DX9 {
         };
     }
 
+    inline D3DCMPFUNC GetAlphaFunc(AlphaFunc::Type func)
+    {
+        switch (func)
+        {
+        case AlphaFunc::Never: return D3DCMP_NEVER;
+        case AlphaFunc::Always: return D3DCMP_ALWAYS;
+        case AlphaFunc::Equal: return D3DCMP_EQUAL;
+        case AlphaFunc::Greater: return D3DCMP_GREATER;
+        case AlphaFunc::GreaterEqual: return D3DCMP_GREATEREQUAL;
+        case AlphaFunc::Less: return D3DCMP_LESS;
+        case AlphaFunc::LessEqual: return D3DCMP_LESSEQUAL;
+        case AlphaFunc::NotEqual: return D3DCMP_NOTEQUAL;
+        default:
+            throw std::runtime_error("Bad AlphaFunc");
+        }
+    }
+
+    inline D3DBLEND GetBlend(Blend::Type blend)
+    {
+        switch (blend)
+        {
+        case Blend::Zero: return D3DBLEND_ZERO;
+        case Blend::One: return D3DBLEND_ONE;
+        case Blend::SrcColor: return D3DBLEND_SRCCOLOR;
+        case Blend::InvSrcColor: return D3DBLEND_INVSRCCOLOR;
+        case Blend::SrcAlpha: return D3DBLEND_SRCALPHA;
+        case Blend::InvSrcAlpha: return D3DBLEND_INVSRCALPHA;
+        case Blend::DestAlpha: return D3DBLEND_DESTALPHA;
+        case Blend::InvDestAlpha: return D3DBLEND_INVDESTALPHA;
+        case Blend::DestColor: return D3DBLEND_DESTCOLOR;
+        case Blend::InvDestColor: return D3DBLEND_INVDESTCOLOR;
+        case Blend::SrcAlphaSat: return D3DBLEND_SRCALPHASAT;
+        case Blend::SrcColor2: return D3DBLEND_SRCCOLOR2;
+        case Blend::InvSrcColor2: return D3DBLEND_INVSRCCOLOR2;
+        default:
+            throw std::runtime_error("Bad blend value");
+        }
+    }
+
+    inline D3DBLENDOP GetBlendOp(BlendOp::Type op)
+    {
+        switch (op)
+        {
+        case BlendOp::Add: return D3DBLENDOP_ADD;
+        case BlendOp::Subtract: return D3DBLENDOP_SUBTRACT;
+        case BlendOp::RevSubtract: return D3DBLENDOP_REVSUBTRACT;
+        case BlendOp::Min: return D3DBLENDOP_MIN;
+        case BlendOp::Max: return D3DBLENDOP_MAX;
+        default:
+            throw std::runtime_error("Bad BlendOp");
+        }
+    }
+
+    inline D3DCMPFUNC GetZFunc(ZFunc::Type func)
+    {
+        switch (func)
+        {
+        case ZFunc::Never: return D3DCMP_NEVER;
+        case ZFunc::Always: return D3DCMP_ALWAYS;
+        case ZFunc::Equal: return D3DCMP_EQUAL;
+        case ZFunc::Greater: return D3DCMP_GREATER;
+        case ZFunc::GreaterEqual: return D3DCMP_GREATEREQUAL;
+        case ZFunc::Less: return D3DCMP_LESS;
+        case ZFunc::LessEqual: return D3DCMP_LESSEQUAL;
+        case ZFunc::NotEqual: return D3DCMP_NOTEQUAL;
+        default:
+            throw std::runtime_error("Bad ZFunc");
+        }
+    }
+
 }}}

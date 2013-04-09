@@ -12,6 +12,10 @@ namespace Tools { namespace Gfx { namespace DX9 {
         TextureFilter::Type _magFilter;
         TextureFilter::Type _mipFilter;
         int _maxAnisotropy;
+        int _maxLOD;
+        TextureAddress::Type _addressU;
+        TextureAddress::Type _addressV;
+        TextureAddress::Type _addressW;
 
     public:
         SamplerState(DX9Renderer& renderer);
@@ -24,6 +28,10 @@ namespace Tools { namespace Gfx { namespace DX9 {
         virtual void SetMagFilter(TextureFilter::Type filter);
         virtual void SetMipFilter(TextureFilter::Type filter);
         virtual void SetMaxAnisotropy(int value);
+        virtual void SetMaxLOD(int value);
+        virtual void SetAddressU(TextureAddress::Type mode);
+        virtual void SetAddressV(TextureAddress::Type mode);
+        virtual void SetAddressW(TextureAddress::Type mode);
 
         virtual void Bind(Uint32 unit);
     };

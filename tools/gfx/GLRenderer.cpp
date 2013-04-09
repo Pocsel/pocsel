@@ -39,6 +39,14 @@ namespace Tools { namespace Gfx {
                 initialized = true;
             }
         }
+
+        void _GLStateEnable(GLenum state, bool enabled)
+        {
+            if (enabled)
+                GLCHECK(glEnable(state));
+            else
+                GLCHECK(glDisable(state));
+        }
     }
 
     void GLRenderer::Initialise()
@@ -234,6 +242,101 @@ namespace Tools { namespace Gfx {
             GLCHECK(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
             break;
         }
+    }
+
+    void GLRenderer::SetAlphaBlendEnable(bool enabled)
+    {
+        _GLStateEnable(GL_BLEND, enabled);
+    }
+
+    void GLRenderer::SetAlphaFunc(AlphaFunc::Type func)
+    {
+        this->_alphaFunc = OpenGL::GetAlphaFunc(func);
+        GLCHECK(glAlphaFunc(this->_alphaFunc, this->_alphaRef));
+    }
+
+    void GLRenderer::SetAlphaRef(float value)
+    {
+        this->_alphaRef = value;
+        GLCHECK(glAlphaFunc(this->_alphaFunc, this->_alphaRef));
+    }
+
+    void GLRenderer::SetAlphaTestEnable(bool enabled)
+    {
+        _GLStateEnable(GL_ALPHA_TEST, enabled);
+    }
+
+    void GLRenderer::SetSrcBlend(Blend::Type blend)
+    {
+        this->_srcBlend = OpenGL::GetBlend(blend);
+        glBlendFunc(this->_srcBlend, this->_dstBlend);
+    }
+
+    void GLRenderer::SetDestBlend(Blend::Type blend)
+    {
+        this->_dstBlend = OpenGL::GetBlend(blend);
+        glBlendFunc(this->_srcBlend, this->_dstBlend);
+    }
+
+    void GLRenderer::SetBlendOp(BlendOp::Type op)
+    {
+        glBlendEquation(OpenGL::GetBlendOp(op));
+    }
+
+    void GLRenderer::SetSrcBlendAlpha(Blend::Type blend)
+    {
+        // TODO
+        throw std::runtime_error("not implemented");
+    }
+
+    void GLRenderer::SetDestBlendAlpha(Blend::Type blend)
+    {
+        // TODO
+        throw std::runtime_error("not implemented");
+    }
+
+    void GLRenderer::SetBlendOpAlpha(BlendOp::Type op)
+    {
+        // TODO
+        throw std::runtime_error("not implemented");
+    }
+
+    void GLRenderer::SetDitherEnable(bool enabled)
+    {
+        _GLStateEnable(GL_DITHER, enabled);
+    }
+
+    void GLRenderer::SetFillMode(FillMode::Type mode)
+    {
+        switch (mode)
+        {
+        case FillMode::Point:
+            GLCHECK(glPolygonMode(GL_FRONT_AND_BACK, GL_POINT));
+            break;
+
+        case FillMode::Line:
+            GLCHECK(glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+            break;
+
+        case FillMode::Fill:
+            GLCHECK(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+            break;
+        }
+    }
+
+    void GLRenderer::SetZEnable(bool enabled)
+    {
+        _GLStateEnable(GL_DEPTH_TEST, enabled);
+    }
+
+    void GLRenderer::SetZFunc(ZFunc::Type func)
+    {
+        GLCHECK(glDepthFunc(OpenGL::GetZFunc(func)));
+    }
+
+    void GLRenderer::SetZWriteEnable(bool enabled)
+    {
+        GLCHECK(glDepthMask(enabled ? GL_TRUE : GL_FALSE));
     }
 
     void GLRenderer::_PushState(ARenderer::RenderState const& state)

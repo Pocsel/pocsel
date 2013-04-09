@@ -36,12 +36,36 @@ namespace Tools { namespace Gfx { namespace DX9 {
         this->_maxAnisotropy = value;
     }
 
+    void SamplerState::SetMaxLOD(int value)
+    {
+        this->_maxLOD = value;
+    }
+
+    void SamplerState::SetAddressU(TextureAddress::Type mode)
+    {
+        this->_addressU = mode;
+    }
+
+    void SamplerState::SetAddressV(TextureAddress::Type mode)
+    {
+        this->_addressV = mode;
+    }
+
+    void SamplerState::SetAddressW(TextureAddress::Type mode)
+    {
+        this->_addressW = mode;
+    }
+
     void SamplerState::Bind(Uint32 unit)
     {
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MINFILTER, GetTextureFilter(this->_minFilter));
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MAGFILTER, GetTextureFilter(this->_magFilter));
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MIPFILTER, GetTextureFilter(this->_mipFilter));
         this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MAXANISOTROPY, this->_maxAnisotropy);
+        this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_MAXMIPLEVEL, this->_maxLOD);
+        this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_ADDRESSU, this->_addressU);
+        this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_ADDRESSV, this->_addressV);
+        this->_renderer.GetDevice()->SetSamplerState(unit, D3DSAMP_ADDRESSW, this->_addressW);
     }
 
 }}}

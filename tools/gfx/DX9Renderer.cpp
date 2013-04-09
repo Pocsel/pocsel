@@ -281,6 +281,92 @@ namespace Tools { namespace Gfx {
         }
     }
 
+    void DX9Renderer::SetAlphaBlendEnable(bool enabled)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHABLENDENABLE, enabled ? TRUE : FALSE));
+    }
+
+    void DX9Renderer::SetAlphaFunc(AlphaFunc::Type func)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHAFUNC, DX9::GetAlphaFunc(func)));
+    }
+
+    void DX9Renderer::SetAlphaRef(float value)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHAREF, (int)(value * 255)));
+    }
+
+    void DX9Renderer::SetAlphaTestEnable(bool enabled)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ALPHATESTENABLE, enabled ? TRUE : FALSE));
+    }
+
+    void DX9Renderer::SetSrcBlend(Blend::Type blend)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLEND, DX9::GetBlend(blend)));
+    }
+
+    void DX9Renderer::SetDestBlend(Blend::Type blend)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLEND, DX9::GetBlend(blend)));
+    }
+
+    void DX9Renderer::SetBlendOp(BlendOp::Type op)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOP, DX9::GetBlendOp(op)));
+    }
+
+    void DX9Renderer::SetSrcBlendAlpha(Blend::Type blend)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_SRCBLENDALPHA, DX9::GetBlend(blend)));
+    }
+    void DX9Renderer::SetDestBlendAlpha(Blend::Type blend)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_DESTBLENDALPHA, DX9::GetBlend(blend)));
+    }
+    void DX9Renderer::SetBlendOpAlpha(BlendOp::Type op)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_BLENDOPALPHA, DX9::GetBlendOp(op)));
+    }
+
+    void DX9Renderer::SetDitherEnable(bool enabled)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_DITHERENABLE, enabled ? TRUE : FALSE));
+    }
+
+    void DX9Renderer::SetFillMode(FillMode::Type mode)
+    {
+        switch (mode)
+        {
+        case FillMode::Point:
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_POINT));
+            break;
+
+        case FillMode::Line:
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME));
+            break;
+
+        case FillMode::Fill:
+            DXCHECKERROR(this->_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID));
+            break;
+        }
+    }
+
+    void DX9Renderer::SetZEnable(bool enabled)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
+    }
+
+    void DX9Renderer::SetZFunc(ZFunc::Type func)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZFUNC, DX9::GetZFunc(func)));
+    }
+
+    void DX9Renderer::SetZWriteEnable(bool enabled)
+    {
+        DXCHECKERROR(this->_device->SetRenderState(D3DRS_ZWRITEENABLE, enabled ? D3DZB_TRUE : D3DZB_FALSE));
+    }
+
     void DX9Renderer::Present()
     {
         HRESULT hr = this->_device->Present(0, 0, 0, 0);

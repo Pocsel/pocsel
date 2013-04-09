@@ -23,6 +23,11 @@ namespace Tools { namespace Gfx {
     public:
         OpenGL::VertexBuffer* bindedVertexBuffer;
         OpenGL::IndexBuffer* bindedIndexBuffer;
+    private:
+        GLenum _alphaFunc;
+        GLclampf _alphaRef;
+        GLenum _srcBlend;
+        GLenum _dstBlend;
 
     public:
         GLRenderer(glm::uvec2 const& screenSize, bool fullscreen) : ARenderer(screenSize, fullscreen), bindedVertexBuffer(0), bindedIndexBuffer(0) {}
@@ -66,7 +71,28 @@ namespace Tools { namespace Gfx {
         virtual void SetDepthWrite(bool enabled);
         virtual void SetCullMode(CullMode::Type type);
         virtual void SetRasterizationMode(RasterizationMode::Type rasterizationMode);
-        void SetMatrixMode(unsigned int mode);
+
+        virtual void SetAlphaBlendEnable(bool enabled);
+        virtual void SetAlphaFunc(AlphaFunc::Type func);
+        virtual void SetAlphaRef(float value);
+        virtual void SetAlphaTestEnable(bool enabled);
+
+        virtual void SetSrcBlend(Blend::Type blend);
+        virtual void SetDestBlend(Blend::Type blend);
+        virtual void SetBlendOp(BlendOp::Type op);
+        virtual void SetSrcBlendAlpha(Blend::Type blend);
+        virtual void SetDestBlendAlpha(Blend::Type blend);
+        virtual void SetBlendOpAlpha(BlendOp::Type op);
+
+        //virtual void SetColorWriteEnale(int colors);
+        //virtual void SetDepthBias(float bias);
+
+        virtual void SetDitherEnable(bool enabled);
+        virtual void SetFillMode(FillMode::Type mode);
+
+        virtual void SetZEnable(bool enabled);
+        virtual void SetZFunc(ZFunc::Type func);
+        virtual void SetZWriteEnable(bool enabled);
 
         // Misc
         virtual bool IsYTexCoordInverted() const { return false; } //this->_currentState->renderToTexture; }

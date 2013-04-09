@@ -143,6 +143,7 @@ namespace Tools { namespace Gfx { namespace OpenGL {
     {
         switch (min)
         {
+        case TextureFilter::None:
         case TextureFilter::Point:
             switch (mip)
             {
@@ -164,6 +165,19 @@ namespace Tools { namespace Gfx { namespace OpenGL {
             }
         default:
             throw std::runtime_error("Bad TextureFilter ?!");
+        }
+    }
+
+    inline GLint GetTextureAddress(TextureAddress::Type mode)
+    {
+        switch (mode)
+        {
+        case TextureAddress::Border: return GL_CLAMP_TO_BORDER;
+        case TextureAddress::Clamp: return GL_CLAMP_TO_EDGE;
+        case TextureAddress::Mirror: return GL_MIRRORED_REPEAT;
+        case TextureAddress::Wrap: return GL_REPEAT;
+        default:
+            throw std::runtime_error("Bad TextureAddress");
         }
     }
 
@@ -198,6 +212,76 @@ namespace Tools { namespace Gfx { namespace OpenGL {
             case VertexAttributeUsage::TexCoord4: return "TEXCOORD4";
             default:
                 throw std::runtime_error("Bad VertexAttributeUsage ?!");
+        }
+    }
+
+    inline GLenum GetAlphaFunc(AlphaFunc::Type func)
+    {
+        switch (func)
+        {
+            case AlphaFunc::Never: return GL_NEVER;
+            case AlphaFunc::Less: return GL_LESS;
+            case AlphaFunc::LessEqual: return GL_LEQUAL;
+            case AlphaFunc::Equal: return GL_EQUAL;
+            case AlphaFunc::Greater: return GL_GREATER;
+            case AlphaFunc::GreaterEqual: return GL_GEQUAL;
+            case AlphaFunc::NotEqual: return GL_NOTEQUAL;
+            case AlphaFunc::Always: return GL_ALWAYS;
+            default:
+                throw std::runtime_error("Bad AlphaFunc");
+        }
+    }
+
+    inline GLenum GetBlend(Blend::Type blend)
+    {
+        switch (blend)
+        {
+        case Blend::Zero: return GL_ZERO;
+        case Blend::One: return GL_ONE;
+        case Blend::SrcColor: return GL_SRC_COLOR;
+        case Blend::InvSrcColor: return GL_ONE_MINUS_SRC_COLOR;
+        case Blend::SrcAlpha: return GL_SRC_ALPHA;
+        case Blend::InvSrcAlpha: return GL_ONE_MINUS_SRC_ALPHA;
+        case Blend::DestAlpha: return GL_DST_ALPHA;
+        case Blend::InvDestAlpha: return GL_ONE_MINUS_DST_ALPHA;
+        case Blend::DestColor: return GL_DST_COLOR;
+        case Blend::InvDestColor: return GL_ONE_MINUS_DST_COLOR;
+        case Blend::SrcAlphaSat: return GL_SRC_ALPHA_SATURATE;
+        case Blend::SrcColor2: return GL_SRC1_COLOR;
+        case Blend::InvSrcColor2: return GL_ONE_MINUS_SRC1_COLOR;
+        default:
+            throw std::runtime_error("Bad blend value");
+        }
+    }
+
+    inline GLenum GetBlendOp(BlendOp::Type op)
+    {
+        switch (op)
+        {
+        case BlendOp::Add: return GL_FUNC_ADD;
+        case BlendOp::Subtract: return GL_FUNC_SUBTRACT;
+        case BlendOp::RevSubtract: return GL_FUNC_REVERSE_SUBTRACT;
+        case BlendOp::Min: return GL_MIN;
+        case BlendOp::Max: return GL_MAX;
+        default:
+            throw std::runtime_error("Bad BlendOp");
+        }
+    }
+
+    inline GLenum GetZFunc(ZFunc::Type func)
+    {
+        switch (func)
+        {
+            case AlphaFunc::Never: return GL_NEVER;
+            case AlphaFunc::Less: return GL_LESS;
+            case AlphaFunc::LessEqual: return GL_LEQUAL;
+            case AlphaFunc::Equal: return GL_EQUAL;
+            case AlphaFunc::Greater: return GL_GREATER;
+            case AlphaFunc::GreaterEqual: return GL_GEQUAL;
+            case AlphaFunc::NotEqual: return GL_NOTEQUAL;
+            case AlphaFunc::Always: return GL_ALWAYS;
+            default:
+                throw std::runtime_error("Bad ZFunc");
         }
     }
 

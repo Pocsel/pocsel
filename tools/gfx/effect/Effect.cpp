@@ -89,6 +89,17 @@ namespace Tools { namespace Gfx { namespace Effect {
                             return TextureFilter::Anisotropic;
                         return TextureFilter::Linear;
                     };
+                    auto parseAddressMode = [](std::string const& mode) {
+                        if (mode == "wrap" || mode == "repeat")
+                            return TextureAddress::Wrap;
+                        if (mode == "mirror")
+                            return TextureAddress::Mirror;
+                        if (mode == "clamp")
+                            return TextureAddress::Clamp;
+                        if (mode == "border")
+                            return TextureAddress::Border;
+                        return TextureAddress::Wrap;
+                    };
                     auto parseNumberValue = [](std::string const& value) {
                         return boost::lexical_cast<int>(value);
                     };
@@ -98,14 +109,24 @@ namespace Tools { namespace Gfx { namespace Effect {
                     std::string value = readIdentifier();
                     pos++;
 
-                    if (boost::algorithm::to_lower_copy(key) == "minfilter")
-                        sampler->SetMinFilter(parseFilterValue(boost::algorithm::to_lower_copy(value)));
-                    else if (boost::algorithm::to_lower_copy(key) == "magfilter")
-                        sampler->SetMagFilter(parseFilterValue(boost::algorithm::to_lower_copy(value)));
-                    else if (boost::algorithm::to_lower_copy(key) == "mipfilter")
-                        sampler->SetMipFilter(parseFilterValue(boost::algorithm::to_lower_copy(value)));
-                    else if (boost::algorithm::to_lower_copy(key) == "maxanisotropy")
+                    std::string lowerKey = boost::algorithm::to_lower_copy(key);
+                    std::string lowerValue = boost::algorithm::to_lower_copy(value);
+                    if (lowerKey == "minfilter")
+                        sampler->SetMinFilter(parseFilterValue(lowerValue));
+                    else if (lowerKey == "magfilter")
+                        sampler->SetMagFilter(parseFilterValue(lowerValue));
+                    else if (lowerKey == "mipfilter")
+                        sampler->SetMipFilter(parseFilterValue(lowerValue));
+                    else if (lowerKey == "maxanisotropy")
                         sampler->SetMaxAnisotropy(parseNumberValue(value));
+                    else if (lowerKey == "maxlod")
+                        sampler->SetMaxLOD(parseNumberValue(value));
+                    else if (lowerKey == "addressu")
+                        sampler->SetAddressU(parseAddressMode(lowerValue));
+                    else if (lowerKey == "addressv")
+                        sampler->SetAddressV(parseAddressMode(lowerValue));
+                    else if (lowerKey == "addressw")
+                        sampler->SetAddressW(parseAddressMode(lowerValue));
 
                     std::cout << key << " => " << value << std::endl;
                 }

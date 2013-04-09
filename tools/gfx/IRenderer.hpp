@@ -192,7 +192,91 @@ namespace Tools { namespace Gfx {
         };
     }
 
+    namespace TextureAddress
+    {
+        enum Type
+        {
+            Wrap         = 1,
+            Mirror       = 2,
+            Clamp        = 3,
+            Border       = 4,
+            //MirrorOnce   = 5, // supporté seulement avec une extension pour OpenGL
+        };
+    }
+
     namespace RasterizationMode
+    {
+        enum Type
+        {
+            Point,
+            Line,
+            Fill
+        };
+    }
+
+    namespace AlphaFunc
+    {
+        enum Type
+        {
+            Never,
+            Less,
+            LessEqual,
+            Equal,
+            Greater,
+            NotEqual,
+            GreaterEqual,
+            Always,
+        };
+    }
+
+    namespace BlendOp
+    {
+        enum Type
+        {
+            Add,
+            Subtract,
+            RevSubtract,
+            Min,
+            Max,
+        };
+    }
+
+    namespace Blend
+    {
+        enum Type
+        {
+            Zero,
+            One,
+            SrcColor,
+            InvSrcColor,
+            SrcAlpha,
+            InvSrcAlpha,
+            DestAlpha,
+            InvDestAlpha,
+            DestColor,
+            InvDestColor,
+            SrcAlphaSat,
+            SrcColor2,
+            InvSrcColor2,
+        };
+    }
+
+    namespace ZFunc
+    {
+        enum Type
+        {
+            Never,
+            Less,
+            LessEqual,
+            Equal,
+            Greater,
+            NotEqual,
+            GreaterEqual,
+            Always,
+        };
+    }
+
+    namespace FillMode
     {
         enum Type
         {
@@ -213,6 +297,10 @@ namespace Tools { namespace Gfx {
         virtual void SetMagFilter(TextureFilter::Type filter) = 0;
         virtual void SetMipFilter(TextureFilter::Type filter) = 0;
         virtual void SetMaxAnisotropy(int value) = 0;
+        virtual void SetMaxLOD(int value) = 0;
+        virtual void SetAddressU(TextureAddress::Type mode) = 0;
+        virtual void SetAddressV(TextureAddress::Type mode) = 0;
+        virtual void SetAddressW(TextureAddress::Type mode) = 0;
         virtual void Bind(Uint32 unit) = 0;
     };
 
@@ -319,25 +407,6 @@ namespace Tools { namespace Gfx {
         IBaseProgram& operator =(IBaseProgram const&);
     };
 
-    //class IShaderProgram : public IBaseProgram
-    //{
-    //public:
-    //    virtual ~IShaderProgram() {}
-
-    //    virtual IShaderParameter& GetParameterFromSemantic(std::string const& semantic) = 0;
-    //    virtual void UpdateCurrentPass() = 0;
-    //    virtual void BeginPass() = 0;
-    //    virtual bool EndPass() = 0; // Retourne true s'il n'y a plus de pass a faire sinon false.
-
-    //    virtual void Update() { this->UpdateCurrentPass(); }
-
-    //protected:
-    //    IShaderProgram() {}
-    //private:
-    //    IShaderProgram(IShaderProgram const&);
-    //    IShaderProgram& operator =(IShaderProgram const&);
-    //};
-
     class IProgram : public IBaseProgram
     {
     public:
@@ -427,6 +496,29 @@ namespace Tools { namespace Gfx {
         virtual void SetCullMode(CullMode::Type type) = 0;
         virtual void SetRasterizationMode(RasterizationMode::Type rasterizationMode) = 0;
 
+        // New
+        virtual void SetAlphaBlendEnable(bool enabled) = 0;
+        virtual void SetAlphaFunc(AlphaFunc::Type func) = 0;
+        virtual void SetAlphaRef(float value) = 0;
+        virtual void SetAlphaTestEnable(bool enabled) = 0;
+
+        virtual void SetSrcBlend(Blend::Type blend) = 0;
+        virtual void SetDestBlend(Blend::Type blend) = 0;
+        virtual void SetBlendOp(BlendOp::Type op) = 0;
+        virtual void SetSrcBlendAlpha(Blend::Type blend) = 0;
+        virtual void SetDestBlendAlpha(Blend::Type blend) = 0;
+        virtual void SetBlendOpAlpha(BlendOp::Type op) = 0;
+
+        //virtual void SetColorWriteEnale(int colors) = 0;
+        //virtual void SetDepthBias(float bias) = 0;
+
+        virtual void SetDitherEnable(bool enabled) = 0;
+        virtual void SetFillMode(FillMode::Type mode) = 0;
+
+        virtual void SetZEnable(bool enabled) = 0;
+        virtual void SetZFunc(ZFunc::Type func) = 0;
+        virtual void SetZWriteEnable(bool enabled) = 0;
+        
         // Misc
         virtual bool IsYTexCoordInverted() const = 0;
 

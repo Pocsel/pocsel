@@ -40,6 +40,25 @@ namespace Tools { namespace Gfx { namespace OpenGL {
         GLCHECK(glSamplerParameterf(this->_id, GL_TEXTURE_MAX_ANISOTROPY_EXT, (float)value));
     }
 
+    void SamplerState::SetMaxLOD(int value)
+    {
+        GLCHECK(glSamplerParameterf(this->_id, GL_TEXTURE_MAX_LOD, value == 0 ? 1000.0f : (float)value));
+    }
+
+    void SamplerState::SetAddressU(TextureAddress::Type mode)
+    {
+        GLCHECK(glSamplerParameteri(this->_id, GL_TEXTURE_WRAP_S, GetTextureAddress(mode)));
+    }
+
+    void SamplerState::SetAddressV(TextureAddress::Type mode)
+    {
+        GLCHECK(glSamplerParameteri(this->_id, GL_TEXTURE_WRAP_T, GetTextureAddress(mode)));
+    }
+    void SamplerState::SetAddressW(TextureAddress::Type mode)
+    {
+        GLCHECK(glSamplerParameteri(this->_id, GL_TEXTURE_WRAP_R, GetTextureAddress(mode)));
+    }
+
     void SamplerState::Bind(Uint32 unit)
     {
         GLCHECK(glBindSampler(unit, this->_id));
