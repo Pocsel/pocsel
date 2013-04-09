@@ -6,7 +6,8 @@
 //#include "tools/renderers/utils/texture/TextureAtlas.hpp"
 #include "tools/models/ErrorModel.hpp"
 #include "tools/models/MqmModel.hpp"
-#include "tools/sound/fmod/Sound.hpp"
+#include "tools/sound/fmod/SoundSystem.hpp"
+#include "tools/sound/ISound.hpp"
 #include "tools/renderers/utils/material/LuaMaterial.hpp"
 #include "tools/renderers/utils/texture/ITexture.hpp"
 #include "tools/renderers/utils/texture/AnimatedTexture.hpp"
@@ -223,11 +224,11 @@ namespace Client { namespace Resources {
             auto res = this->_database.GetResource(id);
             if (res != 0)
             {
-                if (res->size > 500000)
-                    return std::shared_ptr<Tools::Sound::ISound>(new Tools::Sound::Fmod::Sound(this->_soundSystem, std::move(res))); // 500ko sounds and bigger - transfer of ownership
+                if (res->size > 500 * 1000) // 500ko
+                    return std::shared_ptr<Tools::Sound::ISound>(this->_soundSystem.CreateSound(std::move(res))); // 500ko sounds and bigger - transfer of ownership, streaming
                 else
                 {
-                    std::shared_ptr<Tools::Sound::ISound> ret(new Tools::Sound::Fmod::Sound(this->_soundSystem, *(res.get()))); // smaller than 500ko sounds - copy
+                    std::shared_ptr<Tools::Sound::ISound> ret(this->_soundSystem.CreateSound(*res.get())); // smaller than 500ko sounds - copy
                     this->_sounds[id] = ret;
                     return ret;
                 }

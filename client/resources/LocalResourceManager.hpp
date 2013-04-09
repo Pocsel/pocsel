@@ -18,9 +18,6 @@ namespace Tools {
     namespace Sound {
         class ISoundSystem;
         class ISound;
-        namespace Fmod {
-            class SoundSystem;
-        }
     }
 }
 namespace Client {
@@ -35,7 +32,7 @@ namespace Client { namespace Resources {
         private:
             Client& _client;
             Tools::IRenderer& _renderer;
-            Tools::Sound::Fmod::SoundSystem const& _soundSystem;
+            Tools::Sound::ISoundSystem const& _soundSystem;
             std::map<std::string, Tools::Renderers::Utils::Font*> _fonts;
             std::map<std::string, Tools::Renderers::IShaderProgram*> _shaders;
             std::map<std::string, Tools::Renderers::ITexture2D*> _textures;

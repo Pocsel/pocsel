@@ -30,6 +30,9 @@ namespace Tools { namespace Sound { namespace Fmod {
         virtual void SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel);
         virtual void SetEars(glm::fvec3 const& pos);
         virtual void SetEarsOrientation(glm::fvec3 const& forward, glm::fvec3 const& up);
+        virtual ISound* CreateSound(std::string const& path) const; // decompress entire file from disk to memory
+        virtual ISound* CreateSound(Common::Resource const& data) const; // decompress entire data to memory (no ownership needed)
+        virtual ISound* CreateSound(std::unique_ptr<Common::Resource> data) const; // streaming from compressed & owned data (for big sounds/music)
     };
 
 }}}

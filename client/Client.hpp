@@ -10,9 +10,9 @@ namespace Tools {
     namespace Window {
         class Window;
     }
-    namespace Sound { namespace Fmod {
-        class SoundSystem;
-    }}
+    namespace Sound {
+        class ISoundSystem;
+    }
 }
 
 namespace Client {
@@ -58,7 +58,7 @@ namespace Client {
         State _state;
         Game::Game* _game;
         Menu::Menu* _menu;
-        Tools::Sound::Fmod::SoundSystem* _soundSystem;
+        Tools::Sound::ISoundSystem* _soundSystem;
         Tools::Thread::ThreadPool* _threadPool;
         Uint32 _clientId;
 
@@ -84,7 +84,7 @@ namespace Client {
         Resources::LocalResourceManager& GetLocalResourceManager() { return *this->_resourceManager; }
         Game::Game& GetGame() { return *this->_game; }
         Menu::Menu& GetMenu() { return *this->_menu; }
-        Tools::Sound::Fmod::SoundSystem& GetSoundSystem() { return *this->_soundSystem; }
+        Tools::Sound::ISoundSystem& GetSoundSystem() { return *this->_soundSystem; }
         State GetState() const { return this->_state; }
         Tools::Thread::ThreadPool& GetThreadPool() { return *this->_threadPool; }
         Uint32 GetClientId() const { return this->_clientId; }

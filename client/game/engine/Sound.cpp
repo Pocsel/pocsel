@@ -37,7 +37,6 @@ namespace Client { namespace Game { namespace Engine {
     void Sound::_UpdatePos(Common::Camera const& cam)
     {
         this->_channel->SetPosition(glm::fvec3(this->_pos - cam.position));
-        glm::fvec3 toto(this->_pos - cam.position);
     }
 
 }}}

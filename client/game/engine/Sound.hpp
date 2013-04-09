@@ -30,7 +30,7 @@ namespace Client { namespace Game { namespace Engine {
         Uint32 GetDoodadId() const { return this->_doodadId; }
         void Play() const;
         void SetPosition(glm::fvec3 const& pos, Common::Camera const& cam);
-        void CameraMovement(Common::Camera const& cam);
+        void CameraMovement(Common::Camera const& cam); // notification du movement de la camera du joueur
     private:
         void _UpdatePos(Common::Camera const& cam);
     };

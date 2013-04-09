@@ -2,6 +2,7 @@
 
 #include "tools/sound/fmod/SoundSystem.hpp"
 #include "tools/sound/fmod/Sound.hpp"
+#include "common/Resource.hpp"
 
 namespace Tools { namespace Sound { namespace Fmod {
 
@@ -98,6 +99,21 @@ namespace Tools { namespace Sound { namespace Fmod {
         this->_earsUp.y = up.y;
         this->_earsUp.z = up.z;
         this->_system->set3DListenerAttributes(0 /* listener id */, nullptr, nullptr, &this->_earsForward, &this->_earsUp);
+    }
+
+    ISound* SoundSystem::CreateSound(std::string const& path) const
+    {
+        return new Sound(*this, path);
+    }
+
+    ISound* SoundSystem::CreateSound(Common::Resource const& data) const
+    {
+        return new Sound(*this, data);
+    }
+
+    ISound* SoundSystem::CreateSound(std::unique_ptr<Common::Resource> data) const
+    {
+        return new Sound(*this, std::move(data));
     }
 
 }}}

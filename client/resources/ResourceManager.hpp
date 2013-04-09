@@ -31,9 +31,7 @@ namespace Tools {
     }
     namespace Sound {
         class ISound;
-        namespace Fmod {
-            class SoundSystem;
-        }
+        class ISoundSystem;
     }
 }
 
@@ -54,7 +52,7 @@ namespace Client { namespace Resources {
         CacheDatabaseProxy _database;
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
-        Tools::Sound::Fmod::SoundSystem const& _soundSystem;
+        Tools::Sound::ISoundSystem const& _soundSystem;
 
         // resource name => resource Id
         std::map<std::string, Uint32> _resourceIds;
