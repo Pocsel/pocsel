@@ -58,7 +58,7 @@ namespace Tools { namespace Gfx { namespace Effect {
 
         IShaderParameter& GetParameter(std::string const& identifier);
         //IShaderParameter& GetParameterFromSemantic(std::string const& identifier) { return this->_program->GetParameterFromSemantic(identifier); }
-        void BeginPass() { this->_program->Begin(); }
+        void BeginPass() { this->_shader.renderState.Set(this->_renderer); this->_program->Begin(); }
         bool EndPass() { this->_program->End(); return false; }
     };
 

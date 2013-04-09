@@ -8,6 +8,8 @@
 # define new DEBUG_NEW
 #endif
 
+#include "tools/gfx/effect/RenderState.hpp"
+
 namespace Tools { namespace Gfx { namespace Effect {
 
     namespace Type {
@@ -102,6 +104,7 @@ namespace Tools { namespace Gfx { namespace Effect {
         std::map<std::string, std::string> deviceStates;
         std::string vertex;
         std::string pixel;
+        RenderState renderState;
     };
 
 

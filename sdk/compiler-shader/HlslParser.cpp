@@ -163,7 +163,7 @@ namespace Hlsl {
 
         PassStatementParser() : PassStatementParser::base_type(start)
         {
-            start %= base.identifier > base.equal > qi::no_skip[*(char_ - ';')] > base.semicolon;
+            start %= base.identifier > base.equal > +char_("()[]_A-Za-z0-9") > base.semicolon;
         }
     };
 

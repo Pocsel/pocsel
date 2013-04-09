@@ -8,62 +8,31 @@ namespace Tools {
 
 namespace Tools { namespace Gfx { namespace Effect {
 
-    namespace ZFunc
-    {
-        enum Type
-        {
-            Never,
-            Less,
-            LessEqual,
-            Equal,
-            NotEqual,
-            Greater,
-            GreaterEqual,
-            Always
-        };
-    }
-
-    namespace Blend
-    {
-        enum Type
-        {
-            Zero,
-            One,
-            DestColor,
-            OneMinusDestColor,
-            InvDestColor,
-            SrcAlpha,
-            OneMinusSrcAlpha,
-            InvSrcAlpha,
-            DstAlpha,
-            OneMinusDstAlpha,
-            InvDestAlpha,
-            SrcAlphaSaturate,
-            SrcAlphaSat,
-            SrcColor,
-            OneMinusSrcColor,
-            InvSrcColor,
-            ConstantColor,
-            BlendFactor,
-            OneMinusConstantColor,
-            InvBlendFactor,
-            ConstantAlpha,
-            OneMinusConstantAlpha
-        };
-    }
+    struct Shader;
 
     struct RenderState
     {
-        bool zEnabled;
-        bool zWriteEnabled;
-        ZFunc::Type zFunc;
-        RasterizationMode::Type fillMode;
-        bool alphaTestEnable;
-        Blend::Type blendSrc;
-        Blend::Type blendDest;
         CullMode::Type cullMode;
+        bool alphaBlendEnable;
+        AlphaFunc::Type alphaFunc;
+        float alphaRef;
+        bool alphaTestEnable;
+        Blend::Type srcBlend;
+        Blend::Type destBlend;
+        BlendOp::Type blendOp;
+        Blend::Type srcBlendAlpha;
+        Blend::Type destBlendAlpha;
+        BlendOp::Type blendOpAlpha;
+        bool ditherEnable;
+        FillMode::Type fillMode;
+        bool zEnable;
+        ZFunc::Type zFunc;
+        bool zWriteEnable;
 
         RenderState();
+
+        void Load(Shader& shader);
+        void Set(IRenderer& renderer);
     };
 
 }}}
