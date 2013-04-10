@@ -136,7 +136,7 @@ namespace Tools { namespace Gfx { namespace Effect {
     }
 
     RenderState::RenderState() :
-        cullMode(CullMode::CounterClockwise),
+        cullMode(CullMode::None),
         alphaBlendEnable(true),
         alphaFunc(AlphaFunc::Always),
         alphaRef(0.0f),
@@ -149,7 +149,7 @@ namespace Tools { namespace Gfx { namespace Effect {
         blendOpAlpha(BlendOp::Add),
         ditherEnable(false),
         fillMode(FillMode::Fill),
-        zEnable(true),
+        zEnable(false),
         zWriteEnable(true),
         zFunc(ZFunc::Less)
     {
@@ -202,6 +202,7 @@ namespace Tools { namespace Gfx { namespace Effect {
         renderer.SetDestBlendAlpha(this->destBlendAlpha);
         renderer.SetBlendOpAlpha(this->blendOpAlpha);
         renderer.SetDitherEnable(this->ditherEnable);
+
         renderer.SetFillMode(this->fillMode);
         renderer.SetZEnable(this->zEnable);
         renderer.SetZFunc(this->zFunc);

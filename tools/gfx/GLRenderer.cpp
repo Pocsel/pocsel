@@ -51,6 +51,10 @@ namespace Tools { namespace Gfx {
 
     void GLRenderer::Initialise()
     {
+        this->_alphaFunc = AlphaFunc::Always;
+        this->_alphaRef = 0.0f;
+        this->_srcBlend = Blend::Zero;
+        this->_dstBlend = Blend::One;
         RenderState rs;
         rs.state = RenderState::None;
         rs.target = 0;
@@ -269,41 +273,39 @@ namespace Tools { namespace Gfx {
     void GLRenderer::SetSrcBlend(Blend::Type blend)
     {
         this->_srcBlend = OpenGL::GetBlend(blend);
-        glBlendFunc(this->_srcBlend, this->_dstBlend);
+        GLCHECK(glBlendFunc(this->_srcBlend, this->_dstBlend));
     }
 
     void GLRenderer::SetDestBlend(Blend::Type blend)
     {
         this->_dstBlend = OpenGL::GetBlend(blend);
-        glBlendFunc(this->_srcBlend, this->_dstBlend);
+        GLCHECK(glBlendFunc(this->_srcBlend, this->_dstBlend));
     }
 
     void GLRenderer::SetBlendOp(BlendOp::Type op)
     {
-        glBlendEquation(OpenGL::GetBlendOp(op));
+        GLCHECK(glBlendEquation(OpenGL::GetBlendOp(op)));
     }
 
     void GLRenderer::SetSrcBlendAlpha(Blend::Type blend)
     {
         // TODO
-        throw std::runtime_error("not implemented");
     }
 
     void GLRenderer::SetDestBlendAlpha(Blend::Type blend)
     {
         // TODO
-        throw std::runtime_error("not implemented");
     }
 
     void GLRenderer::SetBlendOpAlpha(BlendOp::Type op)
     {
         // TODO
-        throw std::runtime_error("not implemented");
     }
 
     void GLRenderer::SetDitherEnable(bool enabled)
     {
-        _GLStateEnable(GL_DITHER, enabled);
+        // TODO
+        //_GLStateEnable(GL_DITHER, enabled);
     }
 
     void GLRenderer::SetFillMode(FillMode::Type mode)
