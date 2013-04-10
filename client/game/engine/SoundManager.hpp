@@ -43,6 +43,7 @@ namespace Client { namespace Game { namespace Engine {
         void DeleteSoundsOfDoodad(Uint32 doodadId);
         Luasel::Ref GetLuaWrapperForSound(Uint32 soundId);
         void SetCamera(Common::Camera const& cam);
+        Tools::Lua::WeakResourceRefManager<WeakSoundRef, SoundManager>& GetWeakSoundRefManager() { return *this->_weakSoundRefManager; }
     private:
         Sound const& _GetSound(Uint32 soundId) const throw(std::runtime_error);
         Uint32 _RefToSoundId(Luasel::Ref const& ref) const throw(std::runtime_error);

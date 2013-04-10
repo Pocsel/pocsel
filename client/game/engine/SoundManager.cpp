@@ -29,6 +29,7 @@ namespace Client { namespace Game { namespace Engine {
     {
         for (auto& it : this->_sounds)
             Tools::Delete(it.second);
+        Tools::Delete(this->_weakSoundRefManager);
     }
 
     Luasel::Ref SoundManager::WeakSoundRef::GetReference(SoundManager& soundManager) const
@@ -143,10 +144,10 @@ namespace Client { namespace Game { namespace Engine {
             ++this->_nextSoundId;
         Uint32 newId = this->_nextSoundId++;
 
-        Sound* s = new Sound(newId, doodadId, soundResource, this->_engine.GetGame().GetPlayer().GetCamera().position /* TODO doodad position */);
+        Sound* s = new Sound(this->_engine, newId, doodadId, soundResource, this->_engine.GetGame().GetPlayer().GetCamera().position /* TODO doodad position */);
         this->_sounds[newId] = s;
         this->_soundsByDoodad[doodadId].push_back(s);
-        helper.PushRet(this->_engine.GetInterpreter().MakeNumber(newId));
+        helper.PushRet(this->_weakSoundRefManager->GetWeakReference(s->GetWeakReferenceId()));
     }
 
     void SoundManager::_ApiKill(Luasel::CallHelper& helper)
