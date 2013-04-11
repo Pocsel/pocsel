@@ -8,7 +8,14 @@ namespace Tools { namespace Gfx { namespace DX9 {
 
     SamplerState::SamplerState(DX9Renderer& renderer) :
         _renderer(renderer),
-        _mipFilter(TextureFilter::None)
+        _mipFilter(TextureFilter::None),
+        _minFilter(TextureFilter::Point),
+        _magFilter(TextureFilter::Point),
+        _maxAnisotropy(4),
+        _maxLOD(0),
+        _addressU(TextureAddress::Wrap),
+        _addressV(TextureAddress::Wrap),
+        _addressW(TextureAddress::Wrap)
     {
     }
 

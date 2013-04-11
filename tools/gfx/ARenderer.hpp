@@ -103,6 +103,8 @@ namespace Tools { namespace Gfx {
         glm::detail::tmat4x4<float> const& GetViewMatrix() const { return this->_currentState->view; }
         glm::detail::tmat4x4<float> const& GetProjectionMatrix() const { return this->_currentState->projection; }
 
+        virtual glm::uvec2 const& GetScreenSize() const { return this->_screenSize; }
+
         IProgram* GetCurrentProgram() { return this->_currentProgram; }
         void SetCurrentProgram(IProgram& program) { this->_currentProgram = &program; }
 

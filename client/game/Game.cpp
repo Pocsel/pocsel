@@ -60,7 +60,7 @@ namespace Client { namespace Game {
                 this->_client.GetLocalResourceManager().GetShader("PointLight.fxc")));
         this->_directionnalLights.push_back(this->_lightRenderer->CreateDirectionnalLight());
         this->_directionnalLights.back().direction = glm::normalize(glm::vec3(0.5, -1, 0.5));
-        this->_directionnalLights.back().ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);
+        this->_directionnalLights.back().ambientColor = glm::vec4(0.1f, 0.1f, 0.1f, 0.1f);
         this->_directionnalLights.back().diffuseColor =  glm::vec3(1.0f, 1.0f, 1.0f);
         this->_directionnalLights.back().specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
 

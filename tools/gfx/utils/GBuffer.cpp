@@ -48,9 +48,9 @@ namespace Tools { namespace Gfx { namespace Utils {
         if (this->_renderer.GetRendererName() == "DirectX 9 Renderer")
             delta = 0.5f / glm::vec2(this->_size);
         float vertices[] = {
-            0, 0, 0,  delta.x + 0, delta.y + 0,
-            0, 1, 0,  delta.x + 0, delta.y + 2,
-            1, 0, 0,  delta.x + 2, delta.y + 0,
+            0, 0, 0,  delta.x + 0, 1 - (delta.y + 0),
+            0, 1, 0,  delta.x + 0, 1 - (delta.y + 2),
+            1, 0, 0,  delta.x + 2, 1 - (delta.y + 0),
         };
         this->_quad->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
         this->_quad->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3);

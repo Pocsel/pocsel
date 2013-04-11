@@ -149,7 +149,7 @@ namespace Tools { namespace Gfx { namespace Effect {
         blendOpAlpha(BlendOp::Add),
         ditherEnable(false),
         fillMode(FillMode::Fill),
-        zEnable(false),
+        zEnable(true),
         zWriteEnable(true),
         zFunc(ZFunc::Less)
     {

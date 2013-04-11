@@ -41,11 +41,11 @@ namespace Client { namespace Graphics {
             DirectionnalLight(LightManager& _lightManager);
             ~DirectionnalLight() { this->_lightManager._Unregister(*this); }
 
-            glm::vec3 const& GetAmbientColor() const { return this->_internal.ambientColor; }
+            glm::vec4 const& GetAmbientColor() const { return this->_internal.ambientColor; }
             glm::vec3 const& GetDiffuseColor() const { return this->_internal.diffuseColor; }
             glm::vec3 const& GetSpecularColor() const { return this->_internal.specularColor; }
             glm::vec3 const& GetDirection() const { return this->_internal.direction; }
-            void SetAmbientColor(glm::vec3 color) { this->_internal.ambientColor = color; }
+            void SetAmbientColor(glm::vec4 color) { this->_internal.ambientColor = color; }
             void SetDiffuseColor(glm::vec3 color) { this->_internal.diffuseColor = color; }
             void SetSpecularColor(glm::vec3 color) { this->_internal.specularColor = color; }
             void SetDirection(glm::vec3 direction) { this->_internal.direction = direction; }

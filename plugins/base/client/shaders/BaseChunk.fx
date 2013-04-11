@@ -25,8 +25,8 @@ struct FSout
 };
 
 VSout vs(
-	in float4 position : POSITION,
-	in float normalTexCoord : TEXCOORD0)
+    in float4 position : POSITION,
+    in float normalTexCoord : TEXCOORD0)
 {
     normalTexCoord /= 256.0;
     float3 normal = floor(frac(float3(normalTexCoord * 4, normalTexCoord * 16, normalTexCoord * 64)) * 4);
@@ -36,8 +36,8 @@ VSout vs(
 
     VSout v;
 
-    v.texCoord = texCoord;
     v.position = mul(worldViewProjection, position);
+    v.texCoord = texCoord;
     v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
     v.pos = v.position;
 
@@ -55,7 +55,7 @@ FSout fs(in VSout v)
 {
     float4 diffuse = tex2D(cubeTexture, v.texCoord);
     float specularPower = diffuse.r * 0.299 + diffuse.g * 0.587 + diffuse.b * 0.114;
-    specularPower = specularPower*specularPower;
+    specularPower = specularPower * specularPower;
 
     FSout f;
 

@@ -1,4 +1,5 @@
 require "base:materials/BaseChunk.lua"
+require "base:cubes/water/effect.lua"
 local nombreBonus = require "base:materials/BaseChunk.lua"
 
 local function RegisterSimpleCubeType(name, textureName)
@@ -31,6 +32,22 @@ local function RegisterCubeType(name, topTexture, sideTexture, bottomTexture)
     }
 end
 
+local function RegisterSimpleCubeTypeWithMaterial(name, textureName, materialName)
+    local material = Client.Material(materialName, { cubeTexture = Client.Texture(textureName) })
+    Client.CubeMaterial.Register{
+        cubeMaterialName = name,
+        materials = {
+            top = material,
+            bottom = material,
+            left = material,
+            right = material,
+            front = material,
+            back = material
+        }
+    }
+end
+
+
 -- Dirt
 RegisterSimpleCubeType("Dirt", "base:cubes/dirt/texture.png")
 -- Grass
@@ -40,4 +57,4 @@ RegisterSimpleCubeType("Iron", "base:cubes/iron/texture.png")
 -- Rock
 RegisterSimpleCubeType("Rock", "base:cubes/rock/texture.png")
 -- Water
-RegisterSimpleCubeType("Water", "base:cubes/water/texture.lua")
+RegisterSimpleCubeTypeWithMaterial("Water", "base:cubes/water/texture.lua", "base:Water")

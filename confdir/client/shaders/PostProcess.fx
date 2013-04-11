@@ -43,24 +43,52 @@ VSout vs(in float4 position : POSITION, in float2 texCoord : TEXCOORD0)
     return vout;
 }
 
+float3 decodeNormals(float4 enc)
+{
+    float4 nn = enc*float4(2,2,0,0) + float4(-1,-1,1,-1);
+    float l = dot(nn.xyz,-nn.xyw);
+    nn.z = l;
+    nn.xy *= sqrt(l);
+    return nn.xyz * 2 + float3(0,0,-1);
+}
+
+float3 decodePosition(float4 enc, float2 coords)
+{
+    float z = 1-enc.z;
+    float x = coords.x * 2 - 1;
+    float y = (1 - coords.y) * 2 - 1;
+    float4 projPos = float4(x, y, z, 1.0);
+    float4 pos = mul(projectionInverse, projPos);
+    return pos.xyz / pos.w;
+}
+
 float4 fs(in VSout v) : COLOR
 {
-    if (v.texCoord.y < 1.0/5.0)
+    if (v.texCoord.y > 4.0/5.0)
     {
-        float2 coord = v.texCoord * 5;
+        float2 coord = (v.texCoord * 5) - float2(0, 4);
         if (coord.x < 1)
-            return float4(tex2D(lighting, coord).rgb, 1);
+            return float4(tex2D(lighting, float2(coord.x, 1 - coord.y)).rgb, 1);
         if (coord.x < 2)
-            return float4(tex2D(specular, coord + float2(-1, 0)).rgb, 1);
+            return float4(tex2D(specular, float2(coord.x, 1 - coord.y) + float2(-1, 0)).rgb, 1);
         if (coord.x < 3)
             return float4(tex2D(diffuse, coord + float2(-2, 0)).rgb, 1);
         if (coord.x < 4)
-            return float4(tex2D(normalsDepth, coord + float2(-3, 0)).rgb, 1);
+        {
+            float3 normal = decodeNormals(tex2D(normalsDepth, coord + float2(-3, 0)));
+            return float4(normal * 0.5 + 0.5, 1);
+        }
+        if (coord.x < 5)
+        {
+            float2 screen = coord + float2(-4, 0);
+            float3 pos = decodePosition(tex2D(normalsDepth, coord + float2(-4, 0)), screen);
+            return float4(pos, 1);
+        }
     }
 
     float4 diff = tex2D(diffuse, v.texCoord);
-    float4 spec = tex2D(specular, v.texCoord) * diff.a;
-    float3 light = tex2D(lighting, v.texCoord).rgb * diff.a;
+    float4 spec = tex2D(specular, float2(v.texCoord.x, 1 - v.texCoord.y)) * diff.a;
+    float3 light = tex2D(lighting, float2(v.texCoord.x, 1 - v.texCoord.y)).rgb * diff.a;
 
     float3 color = light * diff.rgb + diff.rgb * (1 - diff.a);
     color += spec.rgb;
@@ -76,6 +104,7 @@ technique tech
    pass p0
    {
        AlphaBlendEnable = false;
+       ZEnable = false;
        VertexShader = compile vs_3_0 vs();
        PixelShader = compile ps_3_0 fs();
    }

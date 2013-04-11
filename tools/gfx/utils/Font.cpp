@@ -198,11 +198,11 @@ namespace Tools { namespace Gfx { namespace Utils {
 
     void Font::Render(IShaderParameter& textureParameter, std::string const& text, bool invert)
     {
-        float* vertices = new float[text.length() * 5 * 4];
-        unsigned short* indices = new unsigned short[text.length() * 6];
-        unsigned short* invertedIndices = 0;
+        std::unique_ptr<float[]> vertices(new float[text.length() * 5 * 4]);
+        std::unique_ptr<unsigned short[]> indices(new unsigned short[text.length() * 6]);
+        std::unique_ptr<unsigned short[]> invertedIndices;
         if (invert)
-            invertedIndices = new unsigned short[text.length() * 6];
+            invertedIndices.reset(new unsigned short[text.length() * 6]);
         int vi = 0;
         int ii = 0;
         int iiv = 0;
@@ -224,25 +224,25 @@ namespace Tools { namespace Gfx { namespace Utils {
             vertices[vi++] = info.offset.y; // Y
             vertices[vi++] = (i)*0.01f; // Z
             vertices[vi++] = info.texUVmin.x / this->_texture->GetSize().x; // U
-            vertices[vi++] = info.texUVmin.y / this->_texture->GetSize().y; // V
+            vertices[vi++] = 1 - info.texUVmin.y / this->_texture->GetSize().y; // V
 
             vertices[vi++] = offsetX + info.offset.x;
             vertices[vi++] = info.offset.y + info.size.y; // Y
             vertices[vi++] = (i)*0.01f; // Z
             vertices[vi++] = info.texUVmin.x / this->_texture->GetSize().x; // U
-            vertices[vi++] = info.texUVmax.y / this->_texture->GetSize().y; // V
+            vertices[vi++] = 1 - info.texUVmax.y / this->_texture->GetSize().y; // V
 
             vertices[vi++] = offsetX + info.offset.x + info.size.x; // X
             vertices[vi++] = info.offset.y; // Y
             vertices[vi++] = (i)*0.01f; // Z
             vertices[vi++] = info.texUVmax.x / this->_texture->GetSize().x; // U
-            vertices[vi++] = info.texUVmin.y / this->_texture->GetSize().y; // V
+            vertices[vi++] = 1 - info.texUVmin.y / this->_texture->GetSize().y; // V
 
             vertices[vi++] = offsetX + info.offset.x + info.size.x; // X
             vertices[vi++] = info.offset.y + info.size.y; // Y
             vertices[vi++] = (i)*0.01f; // Z
             vertices[vi++] = info.texUVmax.x / this->_texture->GetSize().x; // U
-            vertices[vi++] = info.texUVmax.y / this->_texture->GetSize().y; // V
+            vertices[vi++] = 1 - info.texUVmax.y / this->_texture->GetSize().y; // V
 
             if (invert)
             {
@@ -273,24 +273,20 @@ namespace Tools { namespace Gfx { namespace Utils {
             offsetX += info.advance.x + info.offset.x;
         }
 
-        this->_vertexBuffer->SetData(text.length() * 4 * 5 * sizeof(float), vertices, VertexBufferUsage::Stream);
+        this->_vertexBuffer->SetData(text.length() * 4 * 5 * sizeof(float), vertices.get(), VertexBufferUsage::Stream);
         this->_texture->Bind();
         this->_vertexBuffer->Bind();
 
         textureParameter.Set(*this->_texture);
 
-        this->_renderer.DrawElements(indiceValue * 6 / 4, DataType::UnsignedShort, indices);
+        this->_renderer.DrawElements(indiceValue * 6 / 4, DataType::UnsignedShort, indices.get());
         if (invert)
         {
-            _InvertIndices(indiceValue * 6 / 4, invertedIndices);
-            this->_renderer.DrawElements(indiceValue * 6 / 4, DataType::UnsignedShort, invertedIndices);
+            _InvertIndices(indiceValue * 6 / 4, invertedIndices.get());
+            this->_renderer.DrawElements(indiceValue * 6 / 4, DataType::UnsignedShort, invertedIndices.get());
         }
         this->_vertexBuffer->Unbind();
         this->_texture->Unbind();
-
-        delete [] vertices;
-        delete [] indices;
-        delete [] invertedIndices;
     }
 
 }}}

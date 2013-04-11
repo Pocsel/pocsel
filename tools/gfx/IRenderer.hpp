@@ -487,6 +487,7 @@ namespace Tools { namespace Gfx {
 
         // States
         virtual void SetScreenSize(glm::uvec2 const& size) = 0;
+        virtual glm::uvec2 const& GetScreenSize() const = 0;
         virtual void SetViewport(glm::uvec2 const& offset, glm::uvec2 const& size) = 0;
         virtual void SetClearColor(glm::vec4 const& color) = 0;
         virtual void SetClearDepth(float value) = 0;

@@ -53,8 +53,10 @@ technique tech
 {
    pass p0
    {
-       AlphaBlendEnable = true;
-       VertexShader = compile vs_2_0 vs();
-       PixelShader = compile ps_2_0 fs();
+        AlphaBlendEnable = true;
+        SrcBlend = SrcAlpha;
+        DestBlend = InvSrcAlpha;
+        VertexShader = compile vs_2_0 vs();
+        PixelShader = compile ps_2_0 fs();
    }
 }

@@ -10,19 +10,19 @@ sampler2D fontTex = sampler_state
 
 struct VSout
 {
-	float4 pos : POSITION;
-	float2 texCoord : TEXCOORD0;
+    float4 pos : POSITION;
+    float2 texCoord : TEXCOORD0;
 };
 
 VSout vs(
-	in float4 pos : POSITION,
+    in float4 pos : POSITION,
     in float2 texCoord : TEXCOORD0)
 {
     VSout vout;
     vout.texCoord = texCoord;
-	pos.z = pos.z * multZ;
-	vout.pos = mul(modelViewProjectionMatrix, pos);
-	return vout;
+    pos.z = pos.z * multZ;
+    vout.pos = mul(modelViewProjectionMatrix, pos);
+    return vout;
 }
 
 float4 fs(in VSout vin) : COLOR
@@ -37,8 +37,12 @@ technique tech
 {
    pass p0
    {
-       AlphaBlendEnable = true;
-       VertexShader = compile vs_2_0 vs();
-       PixelShader = compile ps_2_0 fs();
+        AlphaBlendEnable = true;
+        ZEnable = false;
+        CullMode = None;
+        SrcBlend = SrcAlpha;
+        DestBlend = InvSrcAlpha;
+        VertexShader = compile vs_2_0 vs();
+        PixelShader = compile ps_2_0 fs();
    }
 }

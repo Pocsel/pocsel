@@ -203,6 +203,7 @@ namespace Tools { namespace Gfx { namespace DX9 {
         case TextureFilter::None: return D3DTEXF_NONE;
         case TextureFilter::Point: return D3DTEXF_POINT;
         case TextureFilter::Linear: return D3DTEXF_LINEAR;
+        case TextureFilter::Anisotropic: return D3DTEXF_ANISOTROPIC;
         default:
             throw std::runtime_error("Bad TextureFilter");
         };

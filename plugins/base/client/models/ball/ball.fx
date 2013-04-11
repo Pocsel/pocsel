@@ -3,7 +3,7 @@
 #endif
 
 float4x4 worldViewProjection : WorldViewProjection;
-float4x4 worldViewInverseTranspose;
+float4x4 worldViewInverseTranspose : WorldViewInverseTranspose;
 
 sampler2D diffuseTexture = sampler_state
 {
@@ -65,8 +65,8 @@ FSout fs(in VSout v)
     FSout f;
 
     f.diffuse = float4(diffuse.rgb, 1);
-    f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, specularPower);
-    f.diffuse.rgb = f.diffuse.rgb + float3(updateFlag, updateFlag, updateFlag);
+    f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, specularPower);
+    f.diffuse.rgb = f.diffuse.rgb + updateFlag * 0.1;
 
     return f;
 }

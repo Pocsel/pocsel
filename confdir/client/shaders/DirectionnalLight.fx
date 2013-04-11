@@ -7,7 +7,7 @@ float4x4 viewProjectionInverse : ViewProjectionInverse;
 float4x4 worldView : WorldView;
 float4x4 screenWorldViewProjection;
 
-float3   lightAmbientColor = float3(0.2f, 0.2f, 0.2f);
+float4   lightAmbientColor = float4(0.2f, 0.2f, 0.2f, 0.2f);
 float3   lightDirection = float3(0.0, 0.0, 0.0);
 float3   lightDiffuseColor = float3(1.0, 1.0, 1.0);
 float3   lightSpecularColor = float3(0.9, 1.0, 0.8);
@@ -61,7 +61,7 @@ float3 decodePosition(float4 enc, float2 coords)
 {
     float z = 1-enc.z;
     float x = coords.x * 2 - 1;
-    float y = (1 - coords.y) * 2 - 1;
+    float y = coords.y * 2 - 1;
     float4 projPos = float4(x, y, z, 1.0);
     float4 pos = mul(projectionInverse, projPos);
     return pos.xyz / pos.w;
@@ -79,10 +79,10 @@ float screenSpaceAmbientOcclusion(float2 texCoord, float3 viewPosition, float3 v
 {
     // SSAO
     float2 vec[4];// = {float2(1,0),float2(-1,0),float2(0,1),float2(0,-1)};
-	vec[0] = float2(1, 0);
-	vec[1] = float2(-1, 0);
-	vec[2] = float2(0, 1);
-	vec[3] = float2(0, -1);
+    vec[0] = float2(1, 0);
+    vec[1] = float2(-1, 0);
+    vec[2] = float2(0, 1);
+    vec[3] = float2(0, -1);
 
     float ao = 0.0f;
     float rad = 1.5f / viewPosition.z;
@@ -118,12 +118,12 @@ float calculateShadowMap(float3 viewPosition)
 
 FSout fs(in VSout v)
 {
-    float3 viewLightDirection = normalize(mul((float3x3)worldView, -lightDirection));
+    float3 viewLightDirection = normalize(mul((float3x3)view, -lightDirection));
 
     float4 encNormalDepth = tex2D(normalDepth, v.texCoord);
     float3 viewNormal = decodeNormals(encNormalDepth);// * 2 - 1;
     float3 viewPosition = decodePosition(encNormalDepth, v.texCoord);
-    float specularPower = 0.0; //encNormalDepth.w;
+    float specularPower = encNormalDepth.w;
 
     float NdL = max(0, dot(viewNormal, viewLightDirection));
 
@@ -136,11 +136,11 @@ FSout fs(in VSout v)
     float shadowMap = 1.0; //calculateShadowMap(viewPosition);
 
     FSout f;
-    f.diffuse.rgb = (NdL * lightDiffuseColor - ao) * shadowMap;
-    f.diffuse.rgb += lightAmbientColor;
-    f.specular.rgb = (specular * lightSpecularColor) * shadowMap * specularPower;
-    f.diffuse.a = 1.0;
-    f.specular.a = 1.0;
+    f.diffuse.rgb = lightDiffuseColor;
+    f.diffuse.rgb += lightAmbientColor.rgb;
+    f.specular.rgb = lightSpecularColor;
+    f.diffuse.a = NdL * shadowMap + lightAmbientColor.a;
+    f.specular.a = specular * shadowMap * specularPower;
     return f;
 }
 
@@ -149,10 +149,10 @@ technique tech
    pass p0
    {
         AlphaBlendEnable = true;
-        AlphaTestEnable = true;
+        AlphaTestEnable = false;
         AlphaRef = 0;
-        SrcBlend = One;
-        DestBlend = One;
+        SrcBlend = SrcAlpha;
+        DestBlend = InvSrcAlpha;
         ZEnable = false;
         VertexShader = compile vs_3_0 vs();
         PixelShader = compile ps_3_0 fs();

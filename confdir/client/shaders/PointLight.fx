@@ -50,7 +50,7 @@ float3 decodePosition(float4 enc, float2 coords)
 {
     float z = 1-enc.z;
     float x = coords.x * 2 - 1;
-    float y = (1 - coords.y) * 2 - 1;
+    float y = coords.y * 2 - 1;
     float4 projPos = float4(x, y, z, 1.0);
     float4 pos = mul(projectionInverse, projPos);
     return pos.xyz / pos.w;
@@ -92,8 +92,8 @@ technique tech
         AlphaBlendEnable = true;
         //AlphaTestEnable = true;
         //AlphaRef = 0;
-        //SrcBlend = One;
-        //DestBlend = One;
+        SrcBlend = SrcAlpha;
+        DestBlend = InvSrcAlpha;
         ZWriteEnable = false;
         //ZEnable = false;
         //CullMode = CCW;

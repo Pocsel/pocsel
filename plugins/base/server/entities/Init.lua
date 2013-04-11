@@ -11,8 +11,8 @@ Server.Entity.Register{
         else
             print("Test Module nil")
         end
-        --Server.Message.Later(12, self.id, "SpawnBlob")
-        --Server.Message.Later(22, self.id, "SpawnBlob")
+        Server.Message.Later(12, self.id, "SpawnBlob")
+        Server.Message.Later(22, self.id, "SpawnBlob")
         Server.Message.Later(17, self.id, "SpawnTank")
         Server.Entity.Spawn("base:TestWeakPtr")
     end,
@@ -35,7 +35,7 @@ Server.Entity.Register{
     SpawnBlob = function(self)
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 10, 67108864), "base:Blob")
         Server.Entity.Spawn(Utils.Vector3(67108864, 16777216 + 23, 67108864), "base:Ball")
-        Server.Message.Later(6, self.id, "SpawnBlob")
+        -- Server.Message.Later(6, self.id, "SpawnBlob")
     end,
 
     SpawnTank = function(self)

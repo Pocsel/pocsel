@@ -29,11 +29,11 @@ struct FSout
 };
 
 VSout vs(
-	in float4 position    : POSITION,
-	in float3 normal      : NORMAL,
-	in float2 texCoord    : TEXCOORD0,
-	in float4 weight      : TEXCOORD1,
-	in float4 matrixIndex : TEXCOORD2)
+    in float4 position    : POSITION,
+    in float3 normal      : NORMAL,
+    in float2 texCoord    : TEXCOORD0,
+    in float4 weight      : TEXCOORD1,
+    in float4 matrixIndex : TEXCOORD2)
 {
     float4x4 matTransform = boneMatrices[matrixIndex.x] * weight.x;
     matTransform += boneMatrices[matrixIndex.y] * weight.y;
@@ -43,9 +43,8 @@ VSout vs(
 
     VSout v;
     v.position = mul(worldViewProjection, mul(matTransform, position));
-	//v.position = mul(worldViewProjection, position);
     v.texCoord = texCoord;
-    normal = mul((float3x3)matTransform, normal);
+    normal = mul((float3x3)matTransform, normalize(normal));
     v.normal = normalize(mul((float3x3)worldViewInverseTranspose, normal));
     v.pos = v.position;
     return v;
@@ -55,19 +54,19 @@ float2 encodeNormals(float3 n)
 {
     float2 enc = normalize(n.xy) * (sqrt(n.z*-0.5+0.5));
     enc = enc*0.5+0.5;
-    return float4(enc, 0, 1.0);
+    return enc;
 }
 
 FSout fs(in VSout v)
 {
     float4 diffuse = tex2D(diffuseTexture, v.texCoord);
     float specularPower = diffuse.r * 0.299 + diffuse.g * 0.587 + diffuse.b * 0.114;
-    specularPower = 1.0;//specularPower*specularPower;
+    specularPower = specularPower*specularPower;
 
     FSout f;
 
     f.diffuse = float4(diffuse.rgb, 1);
-    f.normalDepth = float4(encodeNormals(v.normal), v.pos.z / v.pos.w, specularPower);
+    f.normalDepth = float4(encodeNormals(v.normal), 1 - v.pos.z / v.pos.w, specularPower);
     f.diffuse.rgb = f.diffuse.rgb + float3(updateFlag, updateFlag, updateFlag);
 
     return f;

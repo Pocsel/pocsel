@@ -140,9 +140,18 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
         this->_directionnal.shadowMap = &this->_directionnal.shader->GetParameter("lightShadowMap");
         this->_directionnal.lightViewProjection = &this->_directionnal.shader->GetParameter("lightViewProjection");
 
+        glm::vec2 delta(0.0f);
+        if (this->_renderer.GetRendererName() == "DirectX 9 Renderer")
+            delta = 0.5f / glm::vec2(this->_renderer.GetScreenSize());
+        float vertices[] = {
+            0, 0, 0,  delta.x + 0, delta.y + 0,
+            0, 1, 0,  delta.x + 0, delta.y + 2,
+            1, 0, 0,  delta.x + 2, delta.y + 0,
+        };
         this->_directionnal.quad = this->_renderer.CreateVertexBuffer();
         this->_directionnal.quad->PushVertexAttribute(DataType::Float, VertexAttributeUsage::Position, 3);
         this->_directionnal.quad->PushVertexAttribute(DataType::Float, VertexAttributeUsage::TexCoord0, 2);
+        this->_directionnal.quad->SetData(sizeof(vertices), vertices, VertexBufferUsage::Static);
 
         this->_directionnal.modelViewProjection = glm::ortho(0.0f, 0.5f, 0.5f, 0.0f) * glm::translate(0.0f, 0.0f, 1.0f);
         for (int i = 0; i < nbDirectionnalShadowMap; ++i)
@@ -297,9 +306,9 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
                 }
                 //this->_directionnal.screen->Render(*this->_directionnal.normalDepth, gbuffer.GetNormalsDepth());
                 this->_directionnal.normalDepth->Set(gbuffer.GetNormalsDepth());
-                gbuffer.GetQuad().Bind();
+                this->_directionnal.quad->Bind();
                 this->_renderer.DrawVertexBuffer(0, 3);
-                gbuffer.GetQuad().Unbind();
+                this->_directionnal.quad->Unbind();
             }
             gbuffer.GetNormalsDepth().Unbind();
         } while (this->_directionnal.shader->EndPass());
@@ -321,12 +330,11 @@ namespace Tools { namespace Gfx { namespace Utils { namespace Light {
                 PointLight const& light = *lights;
 
                 bool inside = glm::lengthSquared(light.position) <= light.range*light.range;
-                if (inside && cullMode != CullMode::CounterClockwise)
+                if (!inside && cullMode != CullMode::CounterClockwise)
                     this->_renderer.SetCullMode(cullMode = CullMode::CounterClockwise);
-                else if (!inside && cullMode != CullMode::Clockwise)
+                else if (inside && cullMode != CullMode::Clockwise)
                     this->_renderer.SetCullMode(cullMode = CullMode::Clockwise);
                 light.SetParameters();
-
                 this->_renderer.SetModelMatrix(glm::translate(light.position) * glm::scale(glm::vec3(light.range)));
                 this->_point.sphere->Render();
             }
