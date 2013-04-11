@@ -151,20 +151,30 @@ namespace Client { namespace Resources {
 
     Uint32 CacheDatabaseProxy::GetResourceId(std::string const& name)
     {
-        try
+        auto it = this->_resourceIdCache.find(name);
+        if (it == this->_resourceIdCache.end())
         {
-            auto query = this->_connection->CreateQuery("SELECT id FROM resource WHERE name = ?;");
-            query->Bind(name);
-            if (auto row = query->Fetch())
-                return row->GetUint32(0);
-            else
+            try
+            {
+                auto query = this->_connection->CreateQuery("SELECT id FROM resource WHERE name = ?;");
+                query->Bind(name);
+                if (auto row = query->Fetch())
+                {
+                    Uint32 id = row->GetUint32(0);
+                    this->_resourceIdCache[name] = id;
+                    return id;
+                }
+                else
+                    return 0;
+            }
+            catch (std::exception& e)
+            {
+                Tools::error << "Cache error : " << e.what() << "\n";
                 return 0;
+            }
         }
-        catch (std::exception& e)
-        {
-            Tools::error << "Cache error : " << e.what() << "\n";
-            return 0;
-        }
+        else
+            return it->second;
     }
 
     void CacheDatabaseProxy::ValidateUpdate()

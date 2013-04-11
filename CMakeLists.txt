@@ -101,7 +101,7 @@ set(ALL_INCLUDES
     ${SQLITE3_INCLUDE_DIR}
     ${LUA_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIR}
-    ${FMODEX_INCLUDE_DIRS}
+    ${FMODEX_INCLUDE_DIR}
     "${CMAKE_CURRENT_SOURCE_DIR}/luasel/include"
 )
 include_directories(

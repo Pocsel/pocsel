@@ -3,12 +3,14 @@
 
 namespace Tools { namespace Sound {
 
+    class AChannel;
+
     class ISound :
         private boost::noncopyable
     {
     public:
         virtual ~ISound() {};
-        virtual void Play() const = 0;
+        virtual std::unique_ptr<AChannel> GetChannel() const = 0;
     };
 
 }}

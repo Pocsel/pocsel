@@ -59,7 +59,7 @@ namespace Tools { namespace PluginInstall {
             }
         }
 
-        void UpdateTableResource(Uint32 pluginId, Uint32 newWorldVersion, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
+        void UpdateTableResource(Uint32 pluginId, std::string const& pluginIdentifier, Uint32 newWorldVersion, Tools::Database::IConnection& wconn, Tools::Database::IConnection& pconn)
         {
             // liste des id de resource avant toute modif
             std::list<Uint32> previousIds;
@@ -73,7 +73,7 @@ namespace Tools { namespace PluginInstall {
             auto pluginQuery = pconn.CreateQuery("SELECT name, type, data_hash, data FROM resource;");
             while (auto pluginRow = pluginQuery->Fetch())
             {
-                std::string name = pluginRow->GetString(0);
+                std::string name = Common::FieldUtils::GetResourceName(pluginIdentifier, pluginRow->GetString(0));
                 std::string type = pluginRow->GetString(1);
                 std::string hashPlugin = pluginRow->GetString(2);
                 std::vector<char> data = pluginRow->GetArray(3);
@@ -273,7 +273,7 @@ namespace Tools { namespace PluginInstall {
 
             Uint32 pluginId = UpdateTablePlugin(pluginBuildHash, pluginIdentifier, pluginFullname, *wconn);
             UpdateTableServerFile(pluginId, *wconn, *pconn);
-            UpdateTableResource(pluginId, newWorldVersion, *wconn, *pconn);
+            UpdateTableResource(pluginId, pluginIdentifier, newWorldVersion, *wconn, *pconn);
             UpdateTableMap(pluginId, pluginIdentifier, *wconn, *pconn);
             UpdateTableWorld(newWorldVersion, *wconn, *pconn);
 

@@ -15,6 +15,7 @@ namespace Client { namespace Game {
 namespace Client { namespace Game { namespace Engine {
 
     class ModelManager;
+    class SoundManager;
     class BodyManager;
     class BodyType;
     class PhysicsManager;
@@ -27,6 +28,7 @@ namespace Client { namespace Game { namespace Engine {
         Luasel::Interpreter* _interpreter;
         DoodadManager* _doodadManager;
         ModelManager* _modelManager;
+        SoundManager* _soundManager;
         BodyManager* _bodyManager;
         PhysicsManager* _physicsManager;
         std::string _runningPluginName;
@@ -44,6 +46,8 @@ namespace Client { namespace Game { namespace Engine {
         DoodadManager const& GetDoodadManager() const { return *this->_doodadManager; }
         ModelManager& GetModelManager() { return *this->_modelManager; }
         ModelManager const& GetModelManager() const { return *this->_modelManager; }
+        SoundManager& GetSoundManager() { return *this->_soundManager; }
+        SoundManager const& GetSoundManager() const { return *this->_soundManager; }
         BodyManager& GetBodyManager() { return *this->_bodyManager; }
         BodyManager const& GetBodyManager() const { return *this->_bodyManager; }
         PhysicsManager& GetPhysicsManager() { return *this->_physicsManager; }

@@ -21,11 +21,8 @@ namespace Tools {
     namespace Sound {
         class ISoundSystem;
         class ISound;
-        namespace Fmod {
-            class SoundSystem;
         }
     }
-}
 namespace Client {
     class Client;
 }
@@ -39,7 +36,7 @@ namespace Client { namespace Resources {
             Client& _client;
             Tools::Gfx::IRenderer& _renderer;
             Tools::Gfx::Effect::EffectManager& _effectManager;
-            Tools::Sound::Fmod::SoundSystem const& _soundSystem;
+            Tools::Sound::ISoundSystem const& _soundSystem;
             std::map<std::string, Tools::Gfx::Utils::Font*> _fonts;
             std::map<std::string, Tools::Gfx::Effect::Effect*> _shaders;
             std::map<std::string, Tools::Gfx::ITexture2D*> _textures;

@@ -126,6 +126,7 @@ namespace Tools { namespace PluginCreate {
                 std::string name = MakeRelative(clientRoot, res.srcFile).generic_string();
                 std::string const& type = res.type;
                 std::string const& hash = HashFile(data);
+            
 
                 query->Bind(name).Bind(type).Bind(hash).Bind(data.data(), data.size()).ExecuteNonSelect().Reset();
                 Tools::log << "Added client file \"" << name << "\" (size: " << data.size() << " bytes, hash: \"" << hash << "\", type: \"" << type << "\")." << std::endl;
@@ -258,6 +259,7 @@ namespace Tools { namespace PluginCreate {
         converters[".png"] = func("image");
         converters[".fxc"] = func("effect");
         converters[".mqm"] = func("model");
+        converters[".ogg"] = func("sound");
         return converters;
     }
 

@@ -8,6 +8,8 @@
 #include "tools/gfx/utils/texture/ITexture.hpp"
 #include "tools/gfx/utils/texture/AnimatedTexture.hpp"
 #include "tools/gfx/utils/texture/Texture.hpp"
+#include "tools/sound/fmod/SoundSystem.hpp"
+#include "tools/sound/ISound.hpp"
 #include "tools/window/Window.hpp"
 
 #include "common/FieldUtils.hpp"
@@ -81,7 +83,7 @@ namespace Client { namespace Resources {
         _database(game.GetClient().GetSettings().cacheDir, host, worldIdentifier, worldName, worldVersion, worldBuildHash),
         _downloader(_database, game.GetClient().GetNetwork()),
         _renderer(game.GetClient().GetWindow().GetRenderer()),
-        _effectManager(game.GetEffectManager())
+        _effectManager(game.GetEffectManager()),        _soundSystem(game.GetClient().GetSoundSystem())
     {
         Tools::log << "Cache version " << this->_database.GetCacheVersion() << ", asking for resources...\n";
         game.GetClient().GetNetwork().SendPacket(Network::PacketCreator::GetNeededResourceIds(this->_database.GetCacheVersion()));
@@ -163,7 +165,7 @@ namespace Client { namespace Resources {
                     texture.reset(new Tools::Gfx::Utils::Texture::Texture(*img));
                 }
                 else
-                    throw std::runtime_error("Bad resource type (remove your cache)");
+                    throw std::runtime_error("ResourceManager::GetTexture: Bad resource type (remove your cache)");
 
                 this->_textures[id] = texture.release();
                 return std::unique_ptr<Tools::Gfx::Utils::Texture::ITexture>(this->_textures[id]->Clone());
@@ -218,6 +220,28 @@ namespace Client { namespace Resources {
         return *it->second;
     }
 
+    std::shared_ptr<Tools::Sound::ISound> ResourceManager::GetSound(Uint32 id)
+    {
+        auto it = this->_sounds.find(id);
+        if (it == this->_sounds.end())
+        {
+            auto res = this->_database.GetResource(id);
+            if (res != 0)
+            {
+                if (res->size > 500 * 1000) // 500ko
+                    return std::shared_ptr<Tools::Sound::ISound>(this->_soundSystem.CreateSound(std::move(res))); // 500ko sounds and bigger - transfer of ownership, streaming
+                else
+                {
+                    std::shared_ptr<Tools::Sound::ISound> ret(this->_soundSystem.CreateSound(*res.get())); // smaller than 500ko sounds - copy
+                    this->_sounds[id] = ret;
+                    return ret;
+                }
+            }
+            else
+                throw std::runtime_error("ResourceManager::GetSound: Bad id (remove your cache)");
+        }
+        return it->second;
+    }
     Tools::Gfx::Effect::Effect& ResourceManager::GetShader(Uint32 id)
     {
         auto it = this->_shaders.find(id);
@@ -256,7 +280,7 @@ namespace Client { namespace Resources {
                 return str;
             }
             else
-                throw std::runtime_error("Bad id (remove your cache)");
+                throw std::runtime_error("ResourceManager::GetScript: Bad id (remove your cache)");
         }
         else
             return it->second;
@@ -275,6 +299,11 @@ namespace Client { namespace Resources {
     Tools::Models::MqmModel const& ResourceManager::GetMqmModel(std::string const& name)
     {
         return this->GetMqmModel(this->_database.GetResourceId(name));
+    }
+
+    std::shared_ptr<Tools::Sound::ISound> ResourceManager::GetSound(std::string const& name)
+    {
+        return this->GetSound(this->_database.GetResourceId(name));
     }
 
     Tools::Gfx::Effect::Effect& ResourceManager::GetShader(std::string const& name)

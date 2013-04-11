@@ -4,6 +4,7 @@
 #include "tools/window/ActionBinder.hpp"
 #include "tools/window/InputManager.hpp"
 #include "tools/sound/ISound.hpp"
+#include "tools/sound/AChannel.hpp"
 
 #include "client/menu/widget/Button.hpp"
 #include "client/menu/Menu.hpp"
@@ -90,7 +91,7 @@ namespace Client { namespace Menu { namespace Widget {
         if (this->_MouseIsHovering())
         {
             this->_pressed = true;
-            this->_localResourceManager.GetSound("button_click_pressed.wav").Play();
+            this->_localResourceManager.GetSound("button_click_pressed.wav").GetChannel()->Play();
             this->_Update();
         }
     }
@@ -101,7 +102,7 @@ namespace Client { namespace Menu { namespace Widget {
         this->_Update();
         if (this->_MouseIsHovering())
         {
-            this->_localResourceManager.GetSound("button_click_released.aif").Play();
+            this->_localResourceManager.GetSound("button_click_released.aif").GetChannel()->Play();
             this->_callback();
         }
     }

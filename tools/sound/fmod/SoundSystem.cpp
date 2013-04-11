@@ -2,6 +2,7 @@
 
 #include "tools/sound/fmod/SoundSystem.hpp"
 #include "tools/sound/fmod/Sound.hpp"
+#include "common/Resource.hpp"
 
 namespace Tools { namespace Sound { namespace Fmod {
 
@@ -14,7 +15,7 @@ namespace Tools { namespace Sound { namespace Fmod {
             Tools::error << "Failed to create FMOD sound system: " << FMOD_ErrorString(result) << std::endl;
             return;
         }
-        if ((result = this->_system->init(32 /* max channels */, FMOD_INIT_NORMAL /* init flags */, nullptr /* extra driver data ptr */)) != FMOD_OK)
+        if ((result = this->_system->init(32 /* max channels */, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED /* init flags */, nullptr /* extra driver data ptr */)) != FMOD_OK)
         {
             this->_system = nullptr;
             Tools::error << "Failed to initialize FMOD sound system: " << FMOD_ErrorString(result) << std::endl;
@@ -34,9 +35,85 @@ namespace Tools { namespace Sound { namespace Fmod {
             Tools::log << "FMOD sound system successfully released." << std::endl;
     }
 
-    void SoundSystem::Update() const
+    void SoundSystem::Update()
     {
         this->_system->update();
+    }
+
+    void SoundSystem::SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel, glm::fvec3 const& forward, glm::fvec3 const& up)
+    {
+        this->_earsPos.x = pos.x;
+        this->_earsPos.y = pos.y;
+        this->_earsPos.z = pos.z;
+        this->_earsVel.x = vel.x;
+        this->_earsVel.y = vel.y;
+        this->_earsVel.z = vel.z;
+        this->_earsForward.x = forward.x;
+        this->_earsForward.y = forward.y;
+        this->_earsForward.z = forward.z;
+        this->_earsUp.x = up.x;
+        this->_earsUp.y = up.y;
+        this->_earsUp.z = up.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, &this->_earsVel, &this->_earsForward, &this->_earsUp);
+    }
+
+    void SoundSystem::SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel, glm::fvec3 const& forward)
+    {
+        this->_earsPos.x = pos.x;
+        this->_earsPos.y = pos.y;
+        this->_earsPos.z = pos.z;
+        this->_earsVel.x = vel.x;
+        this->_earsVel.y = vel.y;
+        this->_earsVel.z = vel.z;
+        this->_earsForward.x = forward.x;
+        this->_earsForward.y = forward.y;
+        this->_earsForward.z = forward.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, &this->_earsVel, &this->_earsForward, nullptr);
+    }
+
+    void SoundSystem::SetEars(glm::fvec3 const& pos, glm::fvec3 const& vel)
+    {
+        this->_earsPos.x = pos.x;
+        this->_earsPos.y = pos.y;
+        this->_earsPos.z = pos.z;
+        this->_earsVel.x = vel.x;
+        this->_earsVel.y = vel.y;
+        this->_earsVel.z = vel.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, &this->_earsVel, nullptr, nullptr);
+    }
+
+    void SoundSystem::SetEars(glm::fvec3 const& pos)
+    {
+        this->_earsPos.x = pos.x;
+        this->_earsPos.y = pos.y;
+        this->_earsPos.z = pos.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, &this->_earsPos, nullptr, nullptr, nullptr);
+    }
+
+    void SoundSystem::SetEarsOrientation(glm::fvec3 const& forward, glm::fvec3 const& up)
+    {
+        this->_earsForward.x = forward.x;
+        this->_earsForward.y = forward.y;
+        this->_earsForward.z = forward.z;
+        this->_earsUp.x = up.x;
+        this->_earsUp.y = up.y;
+        this->_earsUp.z = up.z;
+        this->_system->set3DListenerAttributes(0 /* listener id */, nullptr, nullptr, &this->_earsForward, &this->_earsUp);
+    }
+
+    ISound* SoundSystem::CreateSound(std::string const& path) const
+    {
+        return new Sound(*this, path);
+    }
+
+    ISound* SoundSystem::CreateSound(Common::Resource const& data) const
+    {
+        return new Sound(*this, data);
+    }
+
+    ISound* SoundSystem::CreateSound(std::unique_ptr<Common::Resource> data) const
+    {
+        return new Sound(*this, std::move(data));
     }
 
 }}}

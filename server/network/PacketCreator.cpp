@@ -120,9 +120,7 @@ namespace Server { namespace Network {
         if (offset == 0)
         {
             ptr->Write(resource.type);
-            // TODO: packager qui met bien les noms de resources "pluginName:resourceName", virer le pluginManager de cette fonction !
-            auto pluginName = pluginManager.GetPluginIdentifier(resource.pluginId);
-            ptr->Write(Common::FieldUtils::GetResourceName(pluginName, resource.name));
+            ptr->Write(resource.name);
             ptr->Write(resource.size);
             if (ptr->GetSize() >= Common::Packet::MaxSize)
                 throw std::runtime_error("overflow");

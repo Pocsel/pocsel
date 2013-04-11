@@ -9,7 +9,6 @@
 #include "tools/models/ErrorModel.hpp"
 #include "tools/sound/ISoundSystem.hpp"
 #include "tools/sound/ISound.hpp"
-#include "tools/sound/fmod/Sound.hpp"
 
 #include "client/Client.hpp"
 #include "client/Settings.hpp"
@@ -157,7 +156,7 @@ namespace Client { namespace Resources {
         if (it == this->_sounds.end())
         {
             auto soundPath = (this->_client.GetSettings().confDir / "sounds" / path).string();
-            Tools::Sound::ISound* sound = new Tools::Sound::Fmod::Sound(this->_soundSystem, soundPath);
+            Tools::Sound::ISound* sound = this->_soundSystem.CreateSound(soundPath);
             this->_sounds[path] = sound;
             return *sound;
         }
