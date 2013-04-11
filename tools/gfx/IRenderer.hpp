@@ -12,6 +12,10 @@
 # undef None
 #endif
 
+#ifdef Always
+# undef Always
+#endif
+
 namespace Tools {
     class ByteArray;
 }

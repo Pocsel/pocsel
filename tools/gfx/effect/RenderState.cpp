@@ -179,7 +179,7 @@ namespace Tools { namespace Gfx { namespace Effect {
         {
             std::string key = boost::algorithm::to_lower_copy(pair.first);
             std::string value = boost::algorithm::to_lower_copy(pair.second);
-            auto& it = tokens.find(key);
+            auto it = tokens.find(key);
             if (it != tokens.end())
                 it->second(value);
             else

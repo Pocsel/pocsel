@@ -36,7 +36,7 @@ namespace Sdk { namespace PackagerQt { namespace Qt {
                 QMessageBox::question(this, "Replace", "The destination file already exists. Do you want to replace it?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
             return;
         this->_Log("--------------------------------\n");
-        Tools::PluginCreate::Create(boost::filesystem::path(this->pluginRootLineEdit->text().toStdString()), boost::filesystem::path(this->destFileLineEdit->text().toStdString()));
+        //Tools::PluginCreate::Create(boost::filesystem::path(this->pluginRootLineEdit->text().toStdString()), boost::filesystem::path(this->destFileLineEdit->text().toStdString()));
     }
 
     void MainWindow::on_replaceCheckBox_stateChanged(int state)

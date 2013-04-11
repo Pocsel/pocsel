@@ -178,7 +178,7 @@ namespace Tools { namespace Gfx { namespace Effect {
         }
         if (it->second.type == Type::Sampler2D)
         {
-            auto& texIt = this->_textureParameters.find(identifier);
+            auto texIt = this->_textureParameters.find(identifier);
             if (texIt == this->_textureParameters.end())
             {
                 auto tsp = new TextureShaderParameter(this->_program->GetParameter(it->second.name), _CreateSamplerState(this->_renderer, it->second));

@@ -20,6 +20,10 @@
 # undef None
 #endif
 
+#ifdef Always
+# undef Always
+#endif
+
 #include "tools/gfx/IRenderer.hpp"
 
 namespace Tools { namespace Gfx { namespace OpenGL {
