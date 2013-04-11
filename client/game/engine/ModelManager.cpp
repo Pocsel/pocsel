@@ -110,7 +110,7 @@ namespace Client { namespace Game { namespace Engine {
     {
         auto it = this->_models.find(modelId);
         if (it == this->_models.end())
-            throw std::runtime_error("ModelManager::_GetModel: Mode " + Tools::ToString(modelId) + " not found.");
+            throw std::runtime_error("ModelManager::_GetModel: Model " + Tools::ToString(modelId) + " not found.");
         return *it->second;
     }
 

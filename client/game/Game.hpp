@@ -37,6 +37,9 @@ namespace Tools {
             }
         }
     }
+    namespace Sound {
+        class ISoundSystem;
+    }
 }
 
 namespace Client { namespace Game {
@@ -52,6 +55,7 @@ namespace Client { namespace Game {
         Map::Map* _map;
         Player* _player;
         Engine::Engine* _engine;
+        Tools::Sound::ISoundSystem& _soundSystem;
         int _callbackId;
         Tools::Timer _updateTimer;
         Tools::Timer _gameTimer;
@@ -88,6 +92,7 @@ namespace Client { namespace Game {
 
         Client& GetClient() { return this->_client; }
         Tools::IRenderer& GetRenderer() { return this->_renderer; }
+        Tools::Sound::ISoundSystem& GetSoundSystem() { return this->_soundSystem; }
         Player& GetPlayer() { return *this->_player; }
         CubeTypeManager& GetCubeTypeManager() { return *this->_cubeTypeManager; }
         Resources::ResourceManager& GetResourceManager() { return *this->_resourceManager; }

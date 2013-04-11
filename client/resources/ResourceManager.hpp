@@ -29,6 +29,10 @@ namespace Tools {
     namespace Models {
         class MqmModel;
     }
+    namespace Sound {
+        class ISound;
+        class ISoundSystem;
+    }
 }
 
 namespace Client {
@@ -48,8 +52,9 @@ namespace Client { namespace Resources {
         CacheDatabaseProxy _database;
         ResourceDownloader _downloader;
         Tools::IRenderer& _renderer;
+        Tools::Sound::ISoundSystem const& _soundSystem;
 
-        // plugin Id => resource name => resource Id
+        // resource name => resource Id
         std::map<std::string, Uint32> _resourceIds;
 
         // Resources (resource id => specific resource)
@@ -57,6 +62,7 @@ namespace Client { namespace Resources {
         std::map<Uint32, Tools::Models::MqmModel*> _models;
         std::map<Uint32, Tools::Renderers::IShaderProgram*> _shaders;
         std::map<Uint32, std::string> _scripts;
+        std::map<Uint32, std::shared_ptr<Tools::Sound::ISound>> _sounds;
 
         // effect c'est pas une resource mais un registrabrle
         std::map<std::string, std::unique_ptr<Tools::Renderers::Utils::Material::LuaMaterial>> _materials;
@@ -76,11 +82,13 @@ namespace Client { namespace Resources {
 
         std::unique_ptr<Tools::Renderers::Utils::Texture::ITexture> GetTexture(Uint32 id);
         Tools::Models::MqmModel const& GetMqmModel(Uint32 id);
+        std::shared_ptr<Tools::Sound::ISound> GetSound(Uint32 id);
         Tools::Renderers::IShaderProgram& GetShader(Uint32 id);
         std::string GetScript(Uint32 id);
         std::unique_ptr<Common::Resource> GetResource(Uint32 id);
 
         Tools::Models::MqmModel const& GetMqmModel(std::string const& name);
+        std::shared_ptr<Tools::Sound::ISound> GetSound(std::string const& name);
         Tools::Renderers::IShaderProgram& GetShader(std::string const& name);
         std::string GetScript(std::string const& name);
         std::unique_ptr<Common::Resource> GetResource(std::string const& name);

@@ -36,11 +36,11 @@ namespace Server { namespace Game { namespace Engine {
         _storage(engine.GetInterpreter().MakeTable()),
         _body(body),
         _positionDirty(false),
-        _isNew(true)
+        _isNew(true),
+        _weakReferenceId(engine.GetDoodadManager().GetWeakDoodadRefManager().NewResource(DoodadManager::WeakDoodadRef(id)).first)
     {
         Tools::debug << "Doodad::Doodad: Doodad created (id " << this->_id << ", name \"" << this->_name << "\", pluginId " << this->_pluginId << ", entityId " << this->_entityId << ")." << std::endl;
         this->_engine.GetDoodadManager().DoodadIsDirty(this);
-        this->_weakReferenceId = this->_engine.GetDoodadManager().GetWeakDoodadRefManager().NewResource(DoodadManager::WeakDoodadRef(id)).first;
     }
 
     Doodad::~Doodad()
@@ -61,6 +61,8 @@ namespace Server { namespace Game { namespace Engine {
 
         // sécurité en plus, je pense que ça sert a rien
         this->_engine.GetDoodadManager().DoodadIsClean(this);
+
+        this->_engine.GetDoodadManager().GetWeakDoodadRefManager().InvalidateResource(this->_weakReferenceId);
     }
 
     void Doodad::Disable()

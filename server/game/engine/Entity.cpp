@@ -7,10 +7,13 @@
 namespace Server { namespace Game { namespace Engine {
 
     Entity::Entity(Engine& engine, Uint32 id, EntityType const& type) :
-        _engine(engine), _id(id), _type(type), _self(engine.GetInterpreter().MakeTable())
+        _engine(engine),
+        _id(id),
+        _type(type),
+        _self(engine.GetInterpreter().MakeTable()),
+        _weakReferenceId(engine.GetEntityManager().GetWeakEntityRefManager().NewResource(EntityManager::WeakEntityRef(id)).first)
     {
         this->_self.Set("storage", this->_engine.GetInterpreter().MakeTable());
-        this->_weakReferenceId = this->_engine.GetEntityManager().GetWeakEntityRefManager().NewResource(EntityManager::WeakEntityRef(id)).first;
         this->Enable();
     }
 
