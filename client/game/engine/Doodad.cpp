@@ -46,4 +46,9 @@ namespace Client { namespace Game { namespace Engine {
         return this->_entity.GetUpdateFlag();
     }
 
+    bool Doodad::HasMoved() const
+    {
+        return this->_entity.HasMoved();
+    }
+
 }}}

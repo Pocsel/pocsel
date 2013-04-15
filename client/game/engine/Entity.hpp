@@ -32,12 +32,13 @@ namespace Client { namespace Game { namespace Engine {
         std::vector<Uint32> const& GetDoodads() const { return this->_doodads; }
         Common::Physics::BodyCluster& GetBodyCluster() { return *this->_bodyCluster; }
 
-
         void DeprecatePhysics() { this->_updatedPhysics = false; }
         Common::Physics::Node const& GetPhysics() const;
 
         void SetUpdateFlag(float value) { this->_updateFlag = value; }
         float GetUpdateFlag() const { return this->_updateFlag; }
+
+        bool HasMoved() const { return true; } // TODO
     };
 
 }}}

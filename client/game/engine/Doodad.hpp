@@ -45,6 +45,8 @@ namespace Client { namespace Game { namespace Engine {
         Common::Physics::Node const& GetPhysics() const;
         float GetUpdateFlag() const;
 
+        bool HasMoved() const;
+
         //Common::Position const& GetPosition() const { return this->_physics.position; }
         //void SetPosition(Common::Position const& pos) { this->_physics.position = pos; }
         //glm::dvec3 const& GetSpeed() const { return this->_physics.velocity; }
