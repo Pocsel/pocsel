@@ -25,6 +25,7 @@ namespace Common { namespace Physics {
         double interPositionTargetSpeed;
         glm::dvec3 interAngleTarget;
         double interAngleTargetSpeed;
+        glm::dvec3 interAngleLimits;
 
         Node() : accelerationIsLocal(false) {}
     };

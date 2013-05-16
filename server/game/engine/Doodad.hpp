@@ -78,6 +78,7 @@ namespace Server { namespace Game { namespace Engine {
         void SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
         void SetInterPositionTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
         void SetInterAngleTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
+        void SetInterAngleLimits(std::string const& node, glm::dvec3 const& limits);
     private:
         void _SpawnForNewPlayers();
     };

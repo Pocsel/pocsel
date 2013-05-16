@@ -141,42 +141,7 @@ namespace Client { namespace Game { namespace Engine {
                 Tools::Models::MqmModel::FrameJoint& animatedJoint = parents[i];
                 animatedJoint = Tools::Models::MqmModel::FrameJoint(joints[i].position, joints[i].orientation, joints[i].size);
 
-                if (joints[i].parent >= 0) // Has a parent joint
-                {
-                    Tools::Models::MqmModel::FrameJoint const& parentJoint = parents[joints[i].parent];
-                    animatedJoint.position = parentJoint.position + parentJoint.orientation * (animatedJoint.position/* - joints[joints[i].parent].position*/);
-                    animatedJoint.orientation = glm::normalize(parentJoint.orientation * animatedJoint.orientation);
-                    //animatedJoint.size = parentJoint.size * animatedJoint.size;
-                }
-
-                //if (
-                //        joints[i].name == "Bone"
-                //   )
-                //{
-                //    animatedJoint.orientation =
-                //        glm::normalize(
-                //                glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f), 0.0f, 1.0f, 0.0f)
-                //                *
-                //                animatedJoint.orientation
-                //                );
-                //}
-                //if (
-                //        joints[i].name == "pelvis"
-                //        ||
-                //        joints[i].name == "neck"
-                //        ||
-                //        joints[i].name == "head"
-                //        ||
-                //        joints[i].name == "spine"
-                //   )
-                //{
-                //    animatedJoint.orientation =
-                //        glm::normalize(
-                //                glm::angleAxis(glm::degrees(phi - Tools::Math::PiFloat/2.0f)/4.0f, 0.0f, 1.0f, 0.0f)
-                //                *
-                //                animatedJoint.orientation
-                //                );
-                //}
+                // glm::mat4x4 toto(1);
 
                 if (this->_boundBones[i])
                 {
@@ -187,17 +152,30 @@ namespace Client { namespace Game { namespace Engine {
                             this->_boundBones[i]->orientation.y,
                             this->_boundBones[i]->orientation.z
                             );
+                    // toto = glm::translate(p) * glm::toMat4(r);
+
+                    //p = (this->_model.GetBindPose()[i] * glm::translate(p));
+                    r = glm::toQuat(this->_model.GetBindPose()[i]) * glm::normalize(r);
                     animatedJoint.position =
                         animatedJoint.position + animatedJoint.orientation * p;
+
+                    // XXX chelouxe
                     animatedJoint.orientation =
                         glm::normalize(
-                                animatedJoint.orientation
+                                glm::toQuat(this->_model.GetInverseBindPose()[i])
                                 *
                                 glm::normalize(r)
+                                *
+                                animatedJoint.orientation
                                 );
-                    //animatedJoint.orientation = glm::normalize(
-                    //        this->_boundBones[i] * animatedJoint.orientation
-                    //        );
+                }
+
+                if (joints[i].parent >= 0) // Has a parent joint
+                {
+                    Tools::Models::MqmModel::FrameJoint const& parentJoint = parents[joints[i].parent];
+                    animatedJoint.position = parentJoint.position + parentJoint.orientation * (animatedJoint.position/* - joints[joints[i].parent].position*/);
+                    animatedJoint.orientation = glm::normalize(parentJoint.orientation * animatedJoint.orientation);
+                    //animatedJoint.size = parentJoint.size * animatedJoint.size;
                 }
 
                 this->_animatedBones[i] =
@@ -210,6 +188,8 @@ namespace Client { namespace Game { namespace Engine {
                     )
                     *
                     this->_model.GetInverseBindPose()[i]
+                    //*
+                    //toto
                     ;
 
               //  if (this->_boundBones[i])

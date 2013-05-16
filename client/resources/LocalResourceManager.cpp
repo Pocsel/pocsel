@@ -180,7 +180,7 @@ namespace Client { namespace Resources {
             255, 0, 255, 255,
             0, 0, 0, 255
         };
-        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Gfx::PixelFormat::Rgba8, 16, toto, glm::uvec2(2, 2)).release();
+        this->_textures["__error__"] = this->_renderer.CreateTexture2D(Tools::Gfx::PixelFormat::Rgba8, 4, toto, glm::uvec2(2, 2)).release();
     }
 
     Tools::Gfx::ITexture2D& LocalResourceManager::_GetTexture2D(std::string const& path0, std::string const& path)

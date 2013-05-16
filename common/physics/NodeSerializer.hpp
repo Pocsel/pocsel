@@ -29,6 +29,7 @@ namespace Tools {
             p.Read(v.interPositionTargetSpeed);
             p.Read(v.interAngleTarget);
             p.Read(v.interAngleTargetSpeed);
+            p.Read(v.interAngleLimits);
         }
 
         static void Write(Common::Physics::Node const& v, ByteArray& p) // Used by Packet::Write<T>(T const&)
@@ -49,6 +50,7 @@ namespace Tools {
             p.Write(v.interPositionTargetSpeed);
             p.Write(v.interAngleTarget);
             p.Write(v.interAngleTargetSpeed);
+            p.Write(v.interAngleLimits);
         }
 
         static std::unique_ptr<Common::Physics::Node> Read(ByteArray const& p) // Used by Packet::Read<T>()
@@ -71,6 +73,7 @@ namespace Tools {
             p.Read(v->interPositionTargetSpeed);
             p.Read(v->interAngleTarget);
             p.Read(v->interAngleTargetSpeed);
+            p.Read(v->interAngleLimits);
 
             return v;
         }

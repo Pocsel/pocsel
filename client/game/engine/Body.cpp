@@ -43,13 +43,49 @@ namespace Client { namespace Game { namespace Engine {
             btTransform thisTr;
             node.motionState->getWorldTransform(thisTr);
 
-            btTransform finalTr = node.interBaseTransform.inverseTimes(parentTr.inverseTimes(thisTr));
+            // chelou mais qui marche
+            //btTransform finalTr = node.interBaseTransform.inverseTimes(parentTr.inverseTimes(thisTr));
+
+            btTransform finalTr =
+                node.interBaseTransform.inverse()
+                *
+                parentTr.inverse()
+                *
+                thisTr
+                ;
+
                 //node.constraint->getFrameOffsetA().inverseTimes(parentTr.inverseTimes(thisTr));
             btVector3 finalPos = finalTr.getOrigin();
             btQuaternion finalRot = finalTr.getRotation();
 
-            boundNode->position = glm::dvec3(-finalPos.x(), finalPos.y(), -finalPos.z());
-            boundNode->orientation = glm::dquat(-finalRot.w(), finalRot.x(), -finalRot.y(), finalRot.z());
+            boundNode->position = glm::dvec3(finalPos.x(), finalPos.y(), finalPos.z());
+            boundNode->orientation = glm::dquat(finalRot.w(), finalRot.x(), finalRot.y(), finalRot.z());
+
+            // chelou mais qui marche
+            //boundNode->position = glm::dvec3(-finalPos.x(), finalPos.y(), -finalPos.z());
+            //boundNode->orientation = glm::dquat(-finalRot.w(), finalRot.x(), -finalRot.y(), finalRot.z());
+
+            //std::cout << "SPAM\n" <<
+            //    Tools::ToString(boundNode->position) << "\n" <<
+            //    Tools::ToString(boundNode->orientation * glm::dvec3(1, 1, 1)) << "\n";
+
+
+
+
+            //    node.constraint->calculateTransforms();
+            //    btTransform tr = node.constraint->getCalculatedTransformB();
+
+            //    btTransform finalTr =
+            //        node.interBaseTransform.trans()
+            //        *
+            //        tr
+            //        ;
+
+            //    btVector3 finalPos = finalTr.getOrigin();
+            //    btQuaternion finalRot = finalTr.getRotation();
+
+            //    boundNode->position = glm::dvec3(finalPos.x(), finalPos.y(), finalPos.z());
+            //    boundNode->orientation = glm::dquat(finalRot.w(), finalRot.x(), finalRot.y(), finalRot.z());
         }
     }
 

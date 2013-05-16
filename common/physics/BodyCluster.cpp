@@ -183,6 +183,11 @@ namespace Common { namespace Physics {
                             physicsIt->interAngle.x,
                             physicsIt->interAngle.y,
                             physicsIt->interAngle.z);
+                const_cast<btVector3&>(bodyNode.interAngleLimits) =
+                    btVector3(
+                            physicsIt->interAngleLimits.x,
+                            physicsIt->interAngleLimits.y,
+                            physicsIt->interAngleLimits.z);
 
                 //bodyNode.constraint->setLinearLowerLimit(
                 //    btVector3(
@@ -294,6 +299,12 @@ namespace Common { namespace Physics {
                                 bodyNode.interAngleTarget.z()
                                 );
                     node.interAngleTargetSpeed = bodyNode.interAngleTargetSpeed;
+                    node.interAngleLimits = 
+                        glm::dvec3(
+                                bodyNode.interAngleLimits.x(),
+                                bodyNode.interAngleLimits.y(),
+                                bodyNode.interAngleLimits.z()
+                                );
                 }
             }
         }

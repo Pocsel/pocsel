@@ -17,8 +17,8 @@ Server.Entity.RegisterPositional{
             if d then
                 --Server.Doodad.SetLocalAccel(self.doodadPtr, "Hull", Utils.Vector3(500, 0, 0), 10)
                 --Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Gun", Utils.Vector3(10, 0, 0), 10)
-                Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 3)
-                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(-3, 0, 0), 3)
+                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 0, 0), 1.5)
+                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Gun", Utils.Vector3(0, 0, 0), 1.5)
                 --d:SetInterAngleTarget("Turret", Utils.Vector3(0, 2.3, 0), 10) -- roll yaw pitch ??
                 -- d:SetInterAngleTarget("Gun", Utils.Vector3(0, 0, 0.8), 10) -- roll yaw pitch ??
             end
@@ -31,7 +31,10 @@ Server.Entity.RegisterPositional{
 
             d = self.doodadPtr:Lock()
             if d then
-                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(3, 0, 0), 3)
+                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Turret", Utils.Vector3(1, 2, 3), 1)
+                Server.Doodad.SetInterAngleTarget(self.doodadPtr, "Gun", Utils.Vector3(2, 2, 2), 2)
+                -- Server.Doodad.SetInterAngleLimits(self.doodadPtr, "Gun", Utils.Vector3(0, 0, 1))
+                --   Server.Doodad.SetInterAngleLimits(self.doodadPtr, "Gun", Utils.Vector3(1, 0, 0))
                 --d:SetAccel("Hull", Utils.Vector3(0, 0, 0), 10)
                 --Server.Doodad.SetInterPositionTarget(self.doodadPtr, "Turret", Utils.Vector3(0, 10, 0), 1)
                 --d:SetInterAngleTarget("Turret", Utils.Vector3(0, 0, 1.5), 10)
@@ -102,14 +105,19 @@ Server.Body.Register{
                     children = {
                         {
                             name = "Gun",
-                            position = { 2.66, 0.75, 0 }, -- par rapport au parent (noeud Turret)
-                            orientation = { 0, 0, 0 }, -- idem, yawpitchroll
+                            position = { 2.66, 10.75, 0 }, -- par rapport au parent (noeud Turret)
+                            orientation = { 0, 0, -3.14/2 }, -- idem, yawpitchroll
+                            --orientation = { 3.14, -3.14, 3.14/2 }, -- idem, yawpitchroll
                             shape = {
                                 shapeType = "box",
-                                halfExtents = {3.34, 0.51, 0.51}
+                                halfExtents = {0.5, 3, 1.2}
+                                --halfExtents = {3, 1, 2}
+
+                                --halfExtents = {3.34, 0.51, 0.51}
+                                --halfExtents = {0.51, 3.34, 0.51}
                             },
                             friction = 0.01,
-                            restitution = 9.99,
+                            restitution = 0.99,
                             mass = 100,
                         },
                     }

@@ -75,12 +75,12 @@ namespace Common { namespace Physics {
         }
 
         {
-            btVector3 anglLimit(0, 0, 0);
-            newConstraint->setAngularLowerLimit(anglLimit);
+            //btVector3 anglLimit(0, 0, 0);
+            newConstraint->setAngularLowerLimit(-node.interAngleLimits);
         }
         {
-            btVector3 anglLimit(0, 0, 0);
-            newConstraint->setAngularUpperLimit(anglLimit);
+            //btVector3 anglLimit(0, 0, 0);
+            newConstraint->setAngularUpperLimit(node.interAngleLimits);
         }
 
 
@@ -164,6 +164,17 @@ namespace Common { namespace Physics {
                 );
 
         bodyNode.interAngleTargetSpeed = maxSpeed;
+    }
+
+    void Body::SetInterAngleLimits(std::string const& node, glm::dvec3 const& limits)
+    {
+        auto& bodyNode = this->_GetNode(node);
+
+        bodyNode.interAngleLimits = btVector3(
+                btNormalizeAngle(limits.x),
+                btNormalizeAngle(limits.y),
+                btNormalizeAngle(limits.z)
+                );
     }
 
     Body::BodyNode& Body::_GetNode(std::string const& nodeName)
@@ -296,6 +307,13 @@ namespace Common { namespace Physics {
                     for (unsigned int i = 0; i < 3; ++i)
                         btNormalizeAngle(node.interAngleCurrent[i]);
                 }
+            }
+
+            if (node.interAngleLimits != node.interAngleLimitsCurrent)
+            {
+                node.constraint->setAngularLowerLimit(-node.interAngleLimits);
+                node.constraint->setAngularUpperLimit(node.interAngleLimits);
+                node.interAngleLimitsCurrent = node.interAngleLimits;
             }
 
             if (change)

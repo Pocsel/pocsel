@@ -25,7 +25,9 @@ namespace Common { namespace Physics {
                 interPositionTarget(0, 0, 0),
                 interAngleTarget(0, 0, 0),
                 interPositionCurrent(0, 0, 0),
-                interAngleCurrent(0, 0, 0)
+                interAngleCurrent(0, 0, 0),
+                interAngleLimits(0, 0, 0),
+                interAngleLimitsCurrent(0, 0, 0)
             {}
 
             Common::Physics::Node node;
@@ -46,6 +48,8 @@ namespace Common { namespace Physics {
             btScalar interAngleTargetSpeed;
             btVector3 interPositionCurrent;
             btVector3 interAngleCurrent;
+            btVector3 interAngleLimits;
+            btVector3 interAngleLimitsCurrent;
 
             btTransform interBaseTransform;
         };
@@ -67,6 +71,7 @@ namespace Common { namespace Physics {
         void SetLocalAccel(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
         void SetInterPositionTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
         void SetInterAngleTarget(std::string const& node, glm::dvec3 const& accel, double maxSpeed);
+        void SetInterAngleLimits(std::string const& node, glm::dvec3 const& limits);
 
         void Dump() const;
 

@@ -248,4 +248,12 @@ namespace Server { namespace Game { namespace Engine {
             throw std::runtime_error("Doodad.SetInterAngleTarget: This doodad does not have a body");
     }
 
+    void Doodad::SetInterAngleLimits(std::string const& node, glm::dvec3 const& limits)
+    {
+        if (this->_body)
+            this->_body->SetInterAngleLimits(node, limits);
+        else
+            throw std::runtime_error("Doodad.SetInterAngleLimits: This doodad does not have a body");
+    }
+
 }}}

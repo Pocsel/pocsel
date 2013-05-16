@@ -43,6 +43,7 @@ namespace Server { namespace Game { namespace Engine {
         namespaceTable.Set("SetLocalAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
         namespaceTable.Set("SetInterPositionTarget", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterPositionTarget, this, std::placeholders::_1)));
         namespaceTable.Set("SetInterAngleTarget", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterAngleTarget, this, std::placeholders::_1)));
+        namespaceTable.Set("SetInterAngleLimits", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterAngleLimits, this, std::placeholders::_1)));
     }
 
     DoodadManager::~DoodadManager()
@@ -312,6 +313,7 @@ namespace Server { namespace Game { namespace Engine {
         object.Set("SetLocalAcceleration", i.MakeFunction(std::bind(&DoodadManager::_ApiSetLocalAccel, this, std::placeholders::_1)));
         object.Set("SetInterPositionTarget", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterPositionTarget, this, std::placeholders::_1)));
         object.Set("SetInterAngleTarget", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterAngleTarget, this, std::placeholders::_1)));
+        object.Set("SetInterAngleLimits", i.MakeFunction(std::bind(&DoodadManager::_ApiSetInterAngleLimits, this, std::placeholders::_1)));
         return object;
     }
 
@@ -577,6 +579,16 @@ namespace Server { namespace Game { namespace Engine {
         }
 
         d.SetInterAngleTarget(node, target, speed);
+    }
+
+    void DoodadManager::_ApiSetInterAngleLimits(Luasel::CallHelper& helper)
+    {
+        Doodad& d = this->_GetDoodad(this->_RefToDoodadId(helper.PopArg("Server.Doodad.SetInterAngleLimits: Missing argument \"doodad\"")));
+
+        std::string node = helper.PopArg("Server.Doodad.SetInterAngleLimits: Missing argument \"node\"").Check<std::string>("Server.Doodad.SetInterAngleLimits: Argument \"node\" must be a string");
+        glm::dvec3 limits = helper.PopArg("Server.Doodad.SetInterAngleLimits: Missing argument \"limits\"").Check<glm::dvec3>("Server.Doodad.SetInterAngleLimits: Argument \"limits\" must be a vector3");
+
+        d.SetInterAngleLimits(node, limits);
     }
 
 }}}

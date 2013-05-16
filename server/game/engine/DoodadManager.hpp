@@ -81,6 +81,7 @@ namespace Server { namespace Game { namespace Engine {
         void _ApiSetLocalAccel(Luasel::CallHelper& helper);
         void _ApiSetInterPositionTarget(Luasel::CallHelper& helper);
         void _ApiSetInterAngleTarget(Luasel::CallHelper& helper);
+        void _ApiSetInterAngleLimits(Luasel::CallHelper& helper);
     };
 
 }}}
