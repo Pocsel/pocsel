@@ -11,6 +11,7 @@ namespace Tools {
     }
 
     ByteArray::ByteArray(ByteArray const& ByteArray) :
+        _data(nullptr),
         _size(ByteArray._size),
         _allocSize(ByteArray._allocSize),
         _offset(ByteArray._offset)
@@ -20,20 +21,20 @@ namespace Tools {
     }
 
     ByteArray::ByteArray(std::vector<char> const& vector) :
+        _data(nullptr),
         _size((Uint32)vector.size()),
         _allocSize(0),
-        _offset(0),
-        _data(nullptr)
+        _offset(0)
     {
         this->_Resize(this->_size);
         ::memcpy(this->_data, vector.data(), this->_size);
     }
 
     ByteArray::ByteArray(char const* data, Uint32 size) :
+        _data(nullptr),
         _size(size),
         _allocSize(0),
-        _offset(0),
-        _data(nullptr)
+        _offset(0)
     {
         this->_Resize(this->_size);
         ::memcpy(this->_data, data, this->_size);
